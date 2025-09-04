@@ -5,10 +5,15 @@ import {
 	getAiAssistantFilterContactsPrompt,
 	getAiAssistantToolsDescription
 } from '$lib/constants/ai-assistant.constants';
+import {
+	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
+} from '$lib/constants/analytics.contants';
 import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
+import { trackEvent } from '$lib/services/analytics.services';
 import {
 	ToolResultType,
 	type ChatMessageContent,
@@ -18,6 +23,7 @@ import {
 	type ToolResult
 } from '$lib/types/ai-assistant';
 import {
+	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments
 } from '$lib/utils/ai-assistant.utils';
@@ -41,6 +47,8 @@ export const askLlm = async ({
 	messages: chat_message_v1[];
 	identity: Identity;
 }): Promise<ChatMessageContent> => {
+	const requestStartTimestamp = Date.now();
+
 	const {
 		message: { content, tool_calls }
 	} = await llmChat({
@@ -60,10 +68,15 @@ export const askLlm = async ({
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = await executeTool({ toolCall, identity });
+			const result = await executeTool({ toolCall, identity, requestStartTimestamp });
 
 			nonNullish(result) && toolResults.push(result);
 		}
+	} else {
+		trackEvent({
+			name: AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
+			metadata: generateAiAssistantResponseEventMetadata({ requestStartTimestamp })
+		});
 	}
 
 	return {
@@ -137,10 +150,12 @@ export const askLlmToFilterContacts = async ({
  */
 export const executeTool = async ({
 	toolCall,
-	identity
+	identity,
+	requestStartTimestamp
 }: {
 	toolCall: ToolCall;
 	identity: Identity;
+	requestStartTimestamp: number;
 }): Promise<ToolResult | undefined> => {
 	const {
 		function: { name, arguments: filterParams }
@@ -160,6 +175,11 @@ export const executeTool = async ({
 			tokens: get(enabledTokens)
 		});
 	}
+
+	trackEvent({
+		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
+		metadata: generateAiAssistantResponseEventMetadata({ toolName: name, requestStartTimestamp })
+	});
 
 	return { type: name as ToolResult['type'], result };
 };

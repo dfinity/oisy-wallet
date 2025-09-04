@@ -2,6 +2,7 @@ import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS,
+	COMPUTE_BUDGET_PROGRAM_ADDRESS,
 	SYSTEM_PROGRAM_ADDRESS,
 	TOKEN_2022_PROGRAM_ADDRESS,
 	TOKEN_PROGRAM_ADDRESS
@@ -10,9 +11,20 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import * as solInstructionsComputeBudgetUtils from '$sol/utils/sol-instructions-compute-budget.utils';
+import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
+import * as solInstructionsSystemUtils from '$sol/utils/sol-instructions-system.utils';
+import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
+import * as solInstructionsToken2022Utils from '$sol/utils/sol-instructions-token-2022.utils';
+import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
+import * as solInstructionsTokenUtils from '$sol/utils/sol-instructions-token.utils';
+import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
+import { mapSolInstruction, mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
+import { assertNonNullish } from '@dfinity/utils';
+import { TokenInstruction } from '@solana-program/token';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
@@ -22,30 +34,34 @@ vi.mock('$sol/providers/sol-rpc.providers', () => ({
 }));
 
 describe('sol-instructions.utils', () => {
-	const network: SolanaNetworkType = 'mainnet';
-
-	const mockInstruction: SolRpcInstruction = {
-		parsed: { type: 'mock-type', info: {} },
-		program: 'mock-program',
-		programId: address(mockSolAddress),
-		programAddress: address(mockSolAddress)
-	};
-
-	let originalMapGet = Map.prototype.get;
-
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		originalMapGet = Map.prototype.get;
-
-		vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
-	});
-
-	afterEach(() => {
-		Map.prototype.get = originalMapGet;
 	});
 
 	describe('mapSolParsedInstruction', () => {
+		const network: SolanaNetworkType = 'mainnet';
+
+		const mockInstruction: SolRpcInstruction = {
+			parsed: { type: 'mock-type', info: {} },
+			program: 'mock-program',
+			programId: address(mockSolAddress),
+			programAddress: address(mockSolAddress)
+		};
+
+		let originalMapGet = Map.prototype.get;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			originalMapGet = Map.prototype.get;
+
+			vi.spyOn(Map.prototype, 'get').mockReturnValue(undefined);
+		});
+
+		afterEach(() => {
+			Map.prototype.get = originalMapGet;
+		});
+
 		it('should return undefined if instruction does not have parsed data', async () => {
 			const instruction: SolRpcInstruction = {
 				data: 'mock-data' as Base58EncodedBytes,
@@ -828,6 +844,127 @@ describe('sol-instructions.utils', () => {
 
 				expect(result).toBeUndefined();
 			});
+		});
+	});
+
+	describe('mapSolInstruction', () => {
+		const { instructions: mockInstructions } = mockSolParsedTransactionMessage;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(solInstructionsComputeBudgetUtils, 'parseSolComputeBudgetInstruction');
+			vi.spyOn(solInstructionsSystemUtils, 'parseSolSystemInstruction');
+			vi.spyOn(solInstructionsTokenUtils, 'parseSolTokenInstruction');
+			vi.spyOn(solInstructionsToken2022Utils, 'parseSolToken2022Instruction');
+		});
+
+		it('should map a valid Compute Budget instruction', () => {
+			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
+				({ programAddress }) => programAddress === COMPUTE_BUDGET_PROGRAM_ADDRESS
+			);
+
+			assertNonNullish(mockInstruction1, 'Compute Budget instruction 1 not found');
+			assertNonNullish(mockInstruction2, 'Compute Budget instruction 2 not found');
+
+			expect(mockInstruction3).toBeUndefined();
+
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolComputeBudgetInstruction).toHaveBeenCalledTimes(2);
+			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
+			expect(parseSolComputeBudgetInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
+			);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				2,
+				`Could not map Solana instruction for program ${COMPUTE_BUDGET_PROGRAM_ADDRESS}`
+			);
+		});
+
+		it('should map a valid System instruction', () => {
+			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
+				({ programAddress }) => programAddress === SYSTEM_PROGRAM_ADDRESS
+			);
+
+			assertNonNullish(mockInstruction1, 'System instruction 1 not found');
+			assertNonNullish(mockInstruction2, 'System instruction 2 not found');
+
+			expect(mockInstruction3).toBeUndefined();
+
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({
+				amount: 5100n,
+				destination: 'ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49',
+				source: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+			});
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({
+				amount: 2039280n,
+				payer: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'
+			});
+
+			expect(parseSolSystemInstruction).toHaveBeenCalledTimes(2);
+			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
+			expect(parseSolSystemInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should map a valid Token instruction', () => {
+			const [mockInstruction1, mockInstruction2, mockInstruction3] = mockInstructions.filter(
+				({ programAddress }) => programAddress === TOKEN_PROGRAM_ADDRESS
+			);
+
+			assertNonNullish(mockInstruction1, 'Token instruction 1 not found');
+			assertNonNullish(mockInstruction2, 'Token instruction 2 not found');
+
+			expect(mockInstruction3).toBeUndefined();
+
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+			expect(mapSolInstruction(mockInstruction2)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolTokenInstruction).toHaveBeenCalledTimes(2);
+			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(1, mockInstruction1);
+			expect(parseSolTokenInstruction).toHaveBeenNthCalledWith(2, mockInstruction2);
+
+			expect(console.warn).toHaveBeenCalledTimes(2);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				1,
+				`Could not map Solana Token instruction of type ${TokenInstruction.InitializeAccount}`
+			);
+			expect(console.warn).toHaveBeenNthCalledWith(
+				2,
+				`Could not map Solana Token instruction of type ${TokenInstruction.CloseAccount}`
+			);
+		});
+
+		it('should return undefined for unrecognized instruction', () => {
+			const [mockInstruction1, mockInstruction2] = mockInstructions.filter(
+				({ programAddress }) =>
+					![
+						COMPUTE_BUDGET_PROGRAM_ADDRESS,
+						SYSTEM_PROGRAM_ADDRESS,
+						TOKEN_PROGRAM_ADDRESS,
+						TOKEN_2022_PROGRAM_ADDRESS
+					].includes(programAddress)
+			);
+
+			assertNonNullish(mockInstruction1, 'Unrecognized instruction 1 not found');
+
+			expect(mockInstruction2).toBeUndefined();
+
+			expect(mapSolInstruction(mockInstruction1)).toStrictEqual({ amount: undefined });
+
+			expect(parseSolComputeBudgetInstruction).not.toHaveBeenCalled();
+			expect(parseSolSystemInstruction).not.toHaveBeenCalled();
+			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
+			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
+
+			expect(console.warn).not.toHaveBeenCalled();
 		});
 	});
 });

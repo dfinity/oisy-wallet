@@ -8,14 +8,10 @@ import {
 } from '$lib/api/idb-addresses.api';
 import { clearIdbBalances, deleteIdbBalances } from '$lib/api/idb-balances.api';
 import {
-	clearIdbEthTokens,
+	clearIdbAllCustomTokens,
 	clearIdbEthTokensDeprecated,
-	clearIdbIcTokens,
-	clearIdbSolTokens,
-	deleteIdbEthTokens,
-	deleteIdbEthTokensDeprecated,
-	deleteIdbIcTokens,
-	deleteIdbSolTokens
+	deleteIdbAllCustomTokens,
+	deleteIdbEthTokensDeprecated
 } from '$lib/api/idb-tokens.api';
 import {
 	clearIdbBtcTransactions,
@@ -31,6 +27,7 @@ import {
 	TRACK_COUNT_SIGN_IN_SUCCESS,
 	TRACK_SIGN_IN_CANCELLED_COUNT,
 	TRACK_SIGN_IN_ERROR_COUNT,
+	TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR,
 	TRACK_SIGN_OUT_ERROR,
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
@@ -40,6 +37,7 @@ import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
+import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
@@ -70,8 +68,20 @@ export const signIn = async (
 				name: TRACK_SIGN_IN_CANCELLED_COUNT
 			});
 
-			// We do not display an error if user explicitly cancelled the process of sign-in
+			// We do not display an error if the user explicitly cancelled the process of sign-in
 			return { success: 'cancelled' };
+		}
+
+		if (err instanceof AuthClientNotInitializedError) {
+			trackEvent({
+				name: TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR
+			});
+
+			toastsError({
+				msg: { text: get(i18n).auth.warning.reload_and_retry }
+			});
+
+			return { success: 'error', err };
 		}
 
 		trackEvent({
@@ -187,11 +197,9 @@ const deleteIdbStoreList = [
 	deleteIdbEthAddress,
 	deleteIdbSolAddressMainnet,
 	// Tokens
-	deleteIdbIcTokens,
+	deleteIdbAllCustomTokens,
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 	deleteIdbEthTokensDeprecated,
-	deleteIdbEthTokens,
-	deleteIdbSolTokens,
 	// Transactions
 	deleteIdbBtcTransactions,
 	deleteIdbEthTransactions,
@@ -207,11 +215,9 @@ const clearIdbStoreList = [
 	clearIdbEthAddress,
 	clearIdbSolAddressMainnet,
 	// Tokens
-	clearIdbIcTokens,
+	clearIdbAllCustomTokens,
 	// TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 	clearIdbEthTokensDeprecated,
-	clearIdbEthTokens,
-	clearIdbSolTokens,
 	// Transactions
 	clearIdbBtcTransactions,
 	clearIdbEthTransactions,

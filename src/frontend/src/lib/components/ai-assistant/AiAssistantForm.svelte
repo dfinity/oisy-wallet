@@ -3,6 +3,7 @@
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { AI_ASSISTANT_SEND_MESSAGE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		value: string;
@@ -23,6 +24,7 @@
 	<form method="POST" onsubmit={onSubmit}>
 		<InputText
 			name="message"
+			autofocus={isDesktop()}
 			placeholder={$i18n.ai_assistant.text.send_message_input_placeholder}
 			bind:value
 		>

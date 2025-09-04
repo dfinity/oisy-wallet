@@ -14,14 +14,17 @@ import { get } from 'svelte/store';
  *
  * @param balance - The confirmed balance from the Bitcoin canister
  * @param tokenId - The token identifier to determine network and retrieve transactions
+ * @param loadPendingTransactions - Whether to load pending transactions from the store
  * @returns Promise resolving to the structured wallet balance object
  */
 export const calculateBtcWalletBalance = async ({
 	balance,
-	tokenId
+	tokenId,
+	loadPendingTransactions = true
 }: {
 	balance: bigint;
 	tokenId: TokenId;
+	loadPendingTransactions: boolean;
 }) => {
 	const identity = get(authIdentity);
 
@@ -32,11 +35,13 @@ export const calculateBtcWalletBalance = async ({
 	const sourceAddress = getBtcSourceAddress(networkId);
 
 	// Wait for pending transactions to be loaded before calculating balance
-	await loadBtcPendingSentTransactions({
-		identity,
-		networkId,
-		address: sourceAddress
-	});
+	if (loadPendingTransactions) {
+		await loadBtcPendingSentTransactions({
+			identity,
+			networkId,
+			address: sourceAddress
+		});
+	}
 
 	// Get transactions directly from the store instead of using parsed worker data
 	const storeData = get(btcTransactionsStore);
