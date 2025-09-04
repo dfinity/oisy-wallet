@@ -79,7 +79,7 @@ export const initBtcWalletWorker = async ({
 		),
 		bitcoinNetwork: isTestnetNetwork ? 'testnet' : isRegtestNetwork ? 'regtest' : 'mainnet',
 		// only mainnet transactions can be fetched via Blockchain API
-		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId),
+		shouldFetchTransactions: isNetworkIdBTCMainnet(networkId) || isNetworkIdBTCTestnet(networkId),
 		minterCanisterId
 	};
 
