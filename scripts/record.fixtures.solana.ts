@@ -1,8 +1,3 @@
-import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
-import { JUP_TOKEN } from '$env/tokens/tokens-spl/tokens.jup.env';
-import { NVDAX_TOKEN } from '$env/tokens/tokens-spl/tokens.nvdax.env';
-import { POPCAT_TOKEN } from '$env/tokens/tokens-spl/tokens.popcat.env';
-import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { randomWait } from '$lib/utils/time.utils';
@@ -11,45 +6,14 @@ import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import { SolanaNetworks } from '$sol/types/network';
 import type { GetSolTransactionsParams } from '$sol/types/sol-api';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import {
+	fixtureSolAddresses,
+	fixtureSolAtaAddresses
+} from '$tests/fixtures/solana/addresses.fixture';
 import { jsonReplacer } from '@dfinity/utils';
 import { signature, address as solAddress, type Signature } from '@solana/kit';
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-const addresses = [
-	'7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
-	'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f',
-	'EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt',
-	'FLAevxSbe182oYzjNqDB53g11rbvhWMF1iUCoCHFfHV4'
-];
-
-const ataAddresses = [
-	{
-		address: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
-		ataAddress: '7xSNhASWK77oZtPyVQf1HFUXU1xxXjqkpkxVTULBmcMD',
-		token: USDC_TOKEN
-	},
-	{
-		address: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
-		ataAddress: 'CTZFRs7fNtgEastyD6XoBsc9ySDuZTtuRvaFbH86WRb',
-		token: BONK_TOKEN
-	},
-	{
-		address: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
-		ataAddress: '8E2dYm7NXBSb7qS3zRtxKDw7mjzPCqVKQCy2EDeujUC2',
-		token: POPCAT_TOKEN
-	},
-	{
-		address: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
-		ataAddress: '7t8FwZRQTRaqtaeGLGij4FBsH9t9Cf918inTz3BYpuA7',
-		token: JUP_TOKEN
-	},
-	{
-		address: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
-		ataAddress: 'EF7heUqwgeSQ153PAdH9fR3tXn8QzbnMCdbshdpraFnA',
-		token: NVDAX_TOKEN
-	}
-];
 
 const out = ({ parts }: { parts: string[] }): string => {
 	const dir = join(
@@ -222,7 +186,7 @@ const recordSplBalance = async ({ ataAddress }: { ataAddress: string }): Promise
 };
 
 const main = async () => {
-	for (const addr of addresses) {
+	for (const addr of fixtureSolAddresses) {
 		console.log(`Recording fixtures for ${addr}`);
 		await recordSignatures({ addr });
 		await recordTransactions({ addr });
@@ -233,7 +197,7 @@ const main = async () => {
 		address,
 		ataAddress,
 		token: { address: tokenAddress, owner: tokenOwnerAddress }
-	} of ataAddresses) {
+	} of fixtureSolAtaAddresses) {
 		console.log(`Recording fixtures for ${ataAddress}`);
 		await recordTokenTransactions({ addr: address, tokenAddress, tokenOwnerAddress });
 		await recordSplBalance({ ataAddress });
