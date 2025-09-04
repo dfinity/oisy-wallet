@@ -89,34 +89,28 @@ describe('sol-signatures.services integration', () => {
 				// fetchSignatures → fixtures
 				vi.spyOn(solApi, 'fetchSignatures').mockImplementation(
 					// eslint-disable-next-line require-await
-					async ({ wallet, before, limit }) => {
+					async ({ wallet, before }) => {
 						const addr = wallet.toString();
+
 						const file = `${sigSlug(before?.toString())}.json`;
-						const page = loadJsonFixture<ReadonlyArray<SolSignature>>(
-							'solana',
-							addr,
-							'signatures',
-							file
-						);
-						return page.slice(0, limit ?? page.length);
+
+						return loadJsonFixture<SolSignature[]>('solana', addr, 'signatures', file);
 					}
 				);
 
 				// getSolTransactions → fixtures
 				// eslint-disable-next-line require-await
-				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(async (args) => {
-					const { address, before, limit, tokenAddress } = args;
+				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(
+					async ({ address, before, tokenAddress }) => {
+						const baseParts = nonNullish(tokenAddress)
+							? ['solana', address, 'tokens', tokenAddress, 'transactions']
+							: ['solana', address, 'transactions'];
 
-					const baseParts = nonNullish(tokenAddress)
-						? ['solana', address, 'tokens', tokenAddress, 'transactions']
-						: ['solana', address, 'transactions'];
+						const file = `${sigSlug(before)}.json`;
 
-					const file = `${sigSlug(before)}.json`;
-
-					const page = loadJsonFixture<ReadonlyArray<SolTransactionUi>>(...baseParts, file);
-
-					return page.slice(0, limit ?? page.length);
-				});
+						return loadJsonFixture<SolTransactionUi[]>(...baseParts, file);
+					}
+				);
 
 				// SOL (lamports) balance -> fixtures
 				vi.spyOn(solApi, 'loadSolLamportsBalance').mockImplementation(
