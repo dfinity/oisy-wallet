@@ -56,6 +56,7 @@ import type { SplToken } from '$sol/types/spl';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockSplCustomToken, mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 describe('exchange.derived', () => {
@@ -432,6 +433,111 @@ describe('exchange.derived', () => {
 				...expectedNullishExchangesNative,
 				[mockCkBtcToken.id]: undefined,
 				[mockCkEthToken.id]: mockIcrcTokenPrice2,
+				...expectedNullishExchangesIcrc
+			});
+		});
+
+		it('should not fallback to twin tokens for ICRC tokens when possible', () => {
+			exchangeStore.set([
+				{ ethereum: ethPrice },
+				{ bitcoin: btcPrice },
+				{ 'internet-computer': icpPrice },
+				{ solana: solPrice },
+				{ binancecoin: bnbPrice },
+				{ 'polygon-ecosystem-token': polPrice }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedExchanges,
+				[mockCkEthToken.id]: undefined,
+				...expectedNullishExchangesIcrc
+			});
+		});
+
+		it('should fallback to twin tokens for ICRC tokens when possible', () => {
+			icrcDefaultTokensStore.set({
+				data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin' },
+				certified: false
+			});
+			icrcCustomTokensStore.set({
+				data: { ...mockCkBtcToken, exchangeCoinId: 'bitcoin', enabled: true },
+				certified: false
+			});
+			icrcDefaultTokensStore.set({
+				data: { ...mockCkEthToken, exchangeCoinId: 'ethereum' },
+				certified: false
+			});
+			icrcCustomTokensStore.set({
+				data: { ...mockCkEthToken, exchangeCoinId: 'ethereum', enabled: true },
+				certified: false
+			});
+
+			exchangeStore.set([
+				{ ethereum: ethPrice },
+				{ bitcoin: btcPrice },
+				{ 'internet-computer': icpPrice },
+				{ solana: solPrice },
+				{ binancecoin: bnbPrice },
+				{ 'polygon-ecosystem-token': polPrice }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedExchanges,
+				[mockCkBtcToken.id]: btcPrice,
+				[mockCkEthToken.id]: ethPrice,
+				...expectedNullishExchangesIcrc
+			});
+
+			const mockErc20Token = {
+				...mockCkEthToken,
+				exchangeCoinId: 'ethereum',
+				twinToken: USDC_TOKEN
+			} as IcCkToken;
+
+			icrcDefaultTokensStore.set({
+				data: mockErc20Token,
+				certified: false
+			});
+			icrcCustomTokensStore.set({
+				data: { ...mockErc20Token, enabled: true },
+				certified: false
+			});
+
+			const mockTwinTokenAddress = (mockErc20Token.twinToken as Partial<Erc20Token>).address;
+
+			assertNonNullish(mockTwinTokenAddress);
+
+			exchangeStore.set([
+				{ ethereum: ethPrice },
+				{ bitcoin: btcPrice },
+				{ 'internet-computer': icpPrice },
+				{ solana: solPrice },
+				{ binancecoin: bnbPrice },
+				{ 'polygon-ecosystem-token': polPrice },
+				{ [mockTwinTokenAddress]: mockErc20TokenPrice1 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedExchanges,
+				[mockCkBtcToken.id]: btcPrice,
+				[mockCkEthToken.id]: undefined,
+				...expectedNullishExchangesIcrc
+			});
+
+			exchangeStore.set([
+				{ ethereum: ethPrice },
+				{ bitcoin: btcPrice },
+				{ 'internet-computer': icpPrice },
+				{ solana: solPrice },
+				{ binancecoin: bnbPrice },
+				{ 'polygon-ecosystem-token': polPrice },
+				{ [mockTwinTokenAddress.toLowerCase()]: mockErc20TokenPrice1 }
+			]);
+
+			expect(get(exchanges)).toStrictEqual({
+				...expectedExchanges,
+				[mockCkBtcToken.id]: btcPrice,
+				[mockCkEthToken.id]: mockErc20TokenPrice1,
 				...expectedNullishExchangesIcrc
 			});
 		});
