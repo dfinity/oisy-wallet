@@ -80,7 +80,7 @@ describe('ai-assistant.services', () => {
 					calls: [noAgumentsToolCall],
 					results: [
 						{
-							result: [],
+							result: { contacts: [] },
 							type: 'show_contacts'
 						}
 					]
@@ -135,7 +135,7 @@ describe('ai-assistant.services', () => {
 				filterParams: [{ value: 'Btc', name: 'addressType' }]
 			});
 
-			expect(result).toStrictEqual([...contacts]);
+			expect(result).toStrictEqual({ contacts: Object.values(storeData), message: undefined });
 		});
 	});
 
@@ -156,24 +156,30 @@ describe('ai-assistant.services', () => {
 		it('parses show_contacts tool and returns all contacts if no filter params provided', async () => {
 			const result = await executeTool({
 				identity: mockIdentity,
-				toolCall: noAgumentsToolCall
+				toolCall: noAgumentsToolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({
 				type: 'show_contacts',
-				result: contacts
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 
 		it('parses show_contacts tool and returns contacts if filter params provided', async () => {
 			const result = await executeTool({
 				identity: mockIdentity,
-				toolCall
+				toolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({
 				type: 'show_contacts',
-				result: contacts
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 	});

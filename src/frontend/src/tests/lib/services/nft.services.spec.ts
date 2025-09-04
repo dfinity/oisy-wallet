@@ -10,6 +10,8 @@ import {
 } from '$eth/providers/infura-erc721.providers';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNfts } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -40,6 +42,10 @@ vi.mock('$eth/providers/infura-erc721.providers', () => ({
 vi.mock('$eth/providers/infura-erc1155.providers', () => ({
 	infuraErc1155Providers: vi.fn(),
 	InfuraErc1155Provider: vi.fn()
+}));
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
 }));
 
 describe('nft.services', () => {
@@ -89,6 +95,21 @@ describe('nft.services', () => {
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
 			vi.mocked(infuraErc721Providers).mockReturnValue(mockInfuraErc721Provider);
 			vi.mocked(infuraErc1155Providers).mockReturnValue(mockInfuraErc1155Provider);
+
+			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+				Promise.resolve({
+					id: tokenId,
+					name: `Test NFT ERC721 #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`
+				})
+			);
+			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
+				Promise.resolve({
+					id: tokenId,
+					name: `Test NFT ERC1155 #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`
+				})
+			);
 		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
@@ -111,20 +132,6 @@ describe('nft.services', () => {
 			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
 				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
 			);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
-			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
 			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockResolvedValue(2);
 
 			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
@@ -132,13 +139,13 @@ describe('nft.services', () => {
 			const expectedNfts = [
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					name: `Test NFT #${tokenId}`,
+					name: `Test NFT ERC721 #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
 					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...tokenIds.map((tokenId) => ({
 					id: tokenId,
-					name: `Test NFT #${tokenId}`,
+					name: `Test NFT ERC1155 #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
 					collection: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
@@ -199,20 +206,6 @@ describe('nft.services', () => {
 			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
 				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
 			);
-			vi.mocked(mockInfuraErc721Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
-			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
 			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockResolvedValue(2);
 
 			await loadNfts({ tokens, loadedNfts, walletAddress: mockWalletAddress });
@@ -220,13 +213,13 @@ describe('nft.services', () => {
 			const expectedNfts = [
 				...notLoadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					name: `Test NFT #${tokenId}`,
+					name: `Test NFT ERC721 #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
 					collection: mapTokenToCollection(erc721AzukiToken)
 				})),
 				...notLoadedTokenIds.map((tokenId) => ({
 					id: tokenId,
-					name: `Test NFT #${tokenId}`,
+					name: `Test NFT ERC1155 #${tokenId}`,
 					imageUrl: `https://test.com/image-${tokenId}.png`,
 					collection: mapTokenToCollection(erc1155NyanCatToken),
 					balance: 2
@@ -386,13 +379,6 @@ describe('nft.services', () => {
 			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
 				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
 			);
-			vi.mocked(mockInfuraErc1155Provider.getNftMetadata).mockImplementation(({ tokenId }) =>
-				Promise.resolve({
-					id: tokenId,
-					name: `Test NFT #${tokenId}`,
-					imageUrl: `https://test.com/image-${tokenId}.png`
-				})
-			);
 			vi.mocked(mockInfuraErc1155Provider.balanceOf).mockRejectedValue(
 				new Error('BalanceOf Error')
 			);
@@ -401,7 +387,7 @@ describe('nft.services', () => {
 
 			const expectedNfts = tokenIds.map((tokenId) => ({
 				id: tokenId,
-				name: `Test NFT #${tokenId}`,
+				name: `Test NFT ERC1155 #${tokenId}`,
 				imageUrl: `https://test.com/image-${tokenId}.png`,
 				collection: mapTokenToCollection(erc1155NyanCatToken)
 			}));
@@ -426,6 +412,82 @@ describe('nft.services', () => {
 
 				expect(get(nftStore)?.length).toEqual(expectedNfts.length);
 				expect(get(nftStore)).toEqual(expect.arrayContaining(expectedNfts));
+			});
+		}, 10000);
+
+		it('should not raise if Etherscan providers raise', async () => {
+			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
+			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
+
+			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockImplementation(() => {
+				throw new Error('Etherscan Provider Error');
+			});
+
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockResolvedValueOnce(
+				tokenIds.map((tokenId) => ({ id: tokenId, balance: 1 }))
+			);
+
+			const expectedNfts = [
+				...tokenIds.map((tokenId) => ({
+					id: tokenId,
+					name: `Test NFT ERC1155 #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`,
+					collection: mapTokenToCollection(erc1155NyanCatToken)
+				}))
+			];
+
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+
+			expect(etherscanProviders).toHaveBeenCalled();
+
+			expect(get(nftStore)).toStrictEqual(expectedNfts);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_ETH_LOADING_NFT_IDS_ERROR,
+				metadata: {
+					tokenId: `${erc721AzukiToken.id.description}`,
+					networkId: `${erc721AzukiToken.network.id.description}`,
+					standard: erc721AzukiToken.standard,
+					error: 'Error: Etherscan Provider Error'
+				},
+				warning: 'Failed to load NFT IDs: Error: Etherscan Provider Error'
+			});
+		}, 10000);
+
+		it('should not raise if Alchemy providers raise', async () => {
+			const tokens: NonFungibleToken[] = [erc721AzukiToken, erc1155NyanCatToken];
+			const tokenIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(parseNftId);
+
+			vi.mocked(mockAlchemyProvider.getNftIdsForOwner).mockImplementation(() => {
+				throw new Error('Alchemy Provider Error');
+			});
+
+			vi.mocked(mockEtherscanProvider.erc721TokenInventory).mockResolvedValueOnce(tokenIds);
+
+			const expectedNfts = [
+				...tokenIds.map((tokenId) => ({
+					id: tokenId,
+					name: `Test NFT ERC721 #${tokenId}`,
+					imageUrl: `https://test.com/image-${tokenId}.png`,
+					collection: mapTokenToCollection(erc721AzukiToken)
+				}))
+			];
+
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+
+			expect(alchemyProviders).toHaveBeenCalled();
+
+			expect(get(nftStore)).toStrictEqual(expectedNfts);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_ETH_LOADING_NFT_IDS_ERROR,
+				metadata: {
+					tokenId: `${erc1155NyanCatToken.id.description}`,
+					networkId: `${erc1155NyanCatToken.network.id.description}`,
+					standard: erc1155NyanCatToken.standard,
+					error: 'Error: Alchemy Provider Error'
+				},
+				warning: 'Failed to load NFT IDs: Error: Alchemy Provider Error'
 			});
 		}, 10000);
 	});

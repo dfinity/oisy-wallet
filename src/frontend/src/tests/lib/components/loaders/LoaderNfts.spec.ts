@@ -64,6 +64,7 @@ describe('LoaderNfts', () => {
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 
 		loadNftIdsOfTokenSpy = vi.spyOn(nftServicesModule, 'loadNftIdsOfToken');
+		loadNftIdsOfTokenSpy.mockResolvedValue(undefined);
 	});
 
 	describe('handleNewNfts', () => {
@@ -145,6 +146,9 @@ describe('LoaderNfts', () => {
 	describe('handleRemovedNfts', () => {
 		beforeEach(() => {
 			nftStore.resetAll();
+
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
 		});
 
 		it('should remove ERC721 nfts from nft store', async () => {
@@ -278,6 +282,7 @@ describe('LoaderNfts', () => {
 			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
 
 			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
 
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },

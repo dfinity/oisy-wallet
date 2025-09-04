@@ -1,6 +1,7 @@
 // Authentication
 export const TRACK_COUNT_SIGN_IN_SUCCESS = 'sign_in_success';
 export const TRACK_SIGN_IN_CANCELLED_COUNT = 'sign_in_cancelled';
+export const TRACK_SIGN_IN_UNDEFINED_AUTH_CLIENT_ERROR = 'sign_in_undefined_auth_client_error';
 export const TRACK_SIGN_IN_ERROR_COUNT = 'sign_in_error';
 export const TRACK_SYNC_AUTH_AUTHENTICATED_COUNT = 'sync_auth_authenticated';
 export const TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT = 'sync_auth_not_authenticated';
@@ -30,6 +31,7 @@ export const TRACK_COUNT_ETH_LOADING_BALANCE_ERROR = 'eth_loading_balance_error'
 export const TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR = 'eth_loading_transactions_error';
 export const TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR = 'eth_pending_transactions_error';
 export const TRACK_ETH_ESTIMATE_GAS_ERROR = 'eth_estimate_gas_error';
+export const TRACK_ETH_LOADING_NFT_IDS_ERROR = 'eth_loading_nft_ids_error';
 
 // Internet Computer
 export const TRACK_COUNT_CONVERT_CKBTC_TO_BTC_SUCCESS = 'ic_ckbtc_to_btc_success';
@@ -146,6 +148,19 @@ export const TRACK_LOCK_MODE_DEACTIVATED = 'lock_mode_deactivated';
 // TODO: Remove these events once the issue is resolved.
 export const TRACK_INFURA_GET_LOGS_CALL = 'infura_get_logs_call';
 
-//Links
+// Links
 export const TRACK_OPEN_DOCUMENTATION = 'open_documentation';
 export const TRACK_OPEN_EXTERNAL_LINK = 'open_external_link';
+
+// Agreements
+export const TRACK_OPEN_AGREEMENT = 'open_agreement';
+
+// AI Assistant
+export const AI_ASSISTANT_SEND_TOKEN_SOURCE = 'ai-assistant';
+export const AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION =
+	'ai_assistant_review_send_tool_confirmation';
+export const AI_ASSISTANT_OPEN_CONSOLE = 'ai_assistant_open_console';
+export const AI_ASSISTANT_MESSAGE_SENT = 'ai_assistant_message_sent';
+export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_failed_to_be_parsed';
+export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
+export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';

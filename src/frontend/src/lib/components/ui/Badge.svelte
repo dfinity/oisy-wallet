@@ -24,9 +24,10 @@
 		error: 'bg-error-subtle-20 text-error-primary',
 		warning: 'bg-warning-subtle-20 text-warning-primary',
 		success: 'bg-success-subtle-20 text-success-primary',
-		outline: 'border border-tertiary bg-off-white',
+		outline: 'border border-tertiary bg-primary',
 		disabled: 'bg-tertiary-inverted text-white',
-		'nft-trait': 'border border-secondary bg-primary'
+		'nft-trait': 'border border-secondary bg-primary',
+		'nft-spam': 'bg-warning-primary text-white'
 	};
 </script>
 
