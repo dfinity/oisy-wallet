@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { readable } from 'svelte/store';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { etherscanProviders } from '$eth/providers/etherscan.providers';
 	import {
@@ -16,13 +15,12 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftIdsOfToken } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';
 	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-
-	const ethAddress = readable('0xffce06ddc814537ff78076df32bf4bce108ec66f');
 
 	interface Props {
 		children?: Snippet;
