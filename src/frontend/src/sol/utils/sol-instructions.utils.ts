@@ -365,6 +365,8 @@ const parseSolInstruction = (
 		return parseSolToken2022Instruction(instruction);
 	}
 
+	console.warn(`Could not parse Solana instruction for program ${programAddress}`);
+
 	return instruction;
 };
 
