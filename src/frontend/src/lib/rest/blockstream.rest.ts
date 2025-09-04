@@ -4,7 +4,12 @@ import {
 	BLOCKSTREAM_REGTEST_API_URL,
 	BLOCKSTREAM_TESTNET_API_URL
 } from '$env/rest/blockstream.env';
+import type {
+	BlockstreamBtcAddressTxsParams,
+	BlockstreamTransaction
+} from '$lib/types/blockstream';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+
 /**
  * Get latest mined BTC block height. Used for calculating the number of confirmations for a BTC transaction.
  *
@@ -19,6 +24,22 @@ export const btcLatestBlockHeight = ({
 }): Promise<number> =>
 	fetchBlockstreamApi<number>({
 		endpointPath: `blocks/tip/height`,
+		bitcoinNetwork
+	});
+
+/**
+ * Get BTC address transactions.
+ *
+ * Documentation:
+ * - https://github.com/Blockstream/esplora/blob/master/API.md#get-addressaddresstxs
+ *
+ */
+export const btcAddressTransactions = ({
+	btcAddress,
+	bitcoinNetwork
+}: BlockstreamBtcAddressTxsParams): Promise<BlockstreamTransaction[]> =>
+	fetchBlockstreamApi<BlockstreamTransaction[]>({
+		endpointPath: `address/${btcAddress}/txs`,
 		bitcoinNetwork
 	});
 
