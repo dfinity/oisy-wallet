@@ -2,6 +2,7 @@
 	import { Modal, themeStore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { readable } from 'svelte/store';
 	import { fade } from 'svelte/transition';
 	import {
 		loadBtcAddressMainnet,
@@ -59,7 +60,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { readable } from 'svelte/store';
 
 	interface Props {
 		children: Snippet;
