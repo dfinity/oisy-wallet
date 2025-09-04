@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import avgox from '$sol/assets/avgox.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSpl2022Token, RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token } from '$sol/types/spl';
 
 export const AVGOX_DECIMALS = 8;
 
