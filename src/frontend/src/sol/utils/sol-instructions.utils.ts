@@ -23,6 +23,8 @@ import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-
 import { parseSolTokenInstruction } from '$sol/utils/sol-instructions-token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { SystemInstruction } from '@solana-program/system';
+import { TokenInstruction } from '@solana-program/token';
+import { Token2022Instruction } from '@solana-program/token-2022';
 
 const mapSystemParsedInstruction = ({
 	type,
@@ -404,6 +406,146 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 	return { amount: undefined };
 };
 
+const mapSolTokenInstruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	if (instructionType === TokenInstruction.Transfer) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	if (instructionType === TokenInstruction.Approve) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source
+		};
+	}
+
+	if (instructionType === TokenInstruction.TransferChecked) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	if (instructionType === TokenInstruction.ApproveChecked) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source
+		};
+	}
+
+	console.warn(`Could not map Solana Token instruction of type ${instructionType}`);
+
+	return { amount: undefined };
+};
+
+const mapSolToken2022Instruction = (instruction: SolParsedInstruction): MappedSolTransaction => {
+	const { instructionType } = instruction;
+
+	if (instructionType === Token2022Instruction.Transfer) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	if (instructionType === Token2022Instruction.Approve) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				delegate: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	if (instructionType === Token2022Instruction.TransferChecked) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				destination: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	if (instructionType === Token2022Instruction.ApproveChecked) {
+		const {
+			data: { amount },
+			accounts: {
+				source: { address: source },
+				delegate: { address: destination }
+			}
+		} = instruction;
+
+		return {
+			amount,
+			source,
+			destination
+		};
+	}
+
+	console.warn(`Could not map Solana Token 2022 instruction of type ${instructionType}`);
+
+	return { amount: undefined };
+};
+
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
@@ -415,6 +557,14 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction(parsedInstruction);
+	}
+
+	if (programAddress === TOKEN_PROGRAM_ADDRESS) {
+		return mapSolTokenInstruction(parsedInstruction);
+	}
+
+	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
+		return mapSolToken2022Instruction(parsedInstruction);
 	}
 
 	console.warn(`Could not map Solana instruction for program ${programAddress}`);
