@@ -964,7 +964,9 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
 
-			expect(console.warn).not.toHaveBeenCalled();
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
+			);
 		});
 	});
 });
