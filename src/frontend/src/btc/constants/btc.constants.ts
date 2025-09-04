@@ -20,3 +20,5 @@ export const BTC_MINIMUM_AMOUNT = 700n;
 // Percentage of tolerated increase in transaction fees compared to the confirmed fee.
 export const BTC_SEND_FEE_TOLERANCE_PERCENTAGE = 10n;
 export const BTC_UTXOS_FEE_UPDATE_INTERVAL = 10000;
+// TODO enable the UTXOS fee update once the btc_get_pending_transactions rate limit issue is fixed
+export const BTC_UTXOS_FEE_UPDATE_ENABLED = false;
