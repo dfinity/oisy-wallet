@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet, ComponentProps } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -12,16 +13,19 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
+
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+
 	import { getContactForAddress, filterAddressFromContact } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
@@ -87,24 +91,29 @@
 		nonNullish(address) ? filterAddressFromContact({ contact, address })?.label : undefined
 	);
 
-	interface WithNetwork { network: Network }
-	interface WithCollectionNetwork { collection?: { network?: Network } }
+	const hasNetwork = (t: unknown): t is { network?: Network } =>
+		typeof t === 'object' && t !== null && 'network' in (t as Record<string, unknown>);
+
+	const hasCollectionNetwork = (t: unknown): t is { collection: { network?: Network } } => {
+		if (typeof t !== 'object' || t === null) return false;
+		const maybe = (t as { collection?: unknown }).collection;
+		return typeof maybe === 'object' && maybe !== null && 'network' in (maybe as Record<string, unknown>);
+	};
 
 	const network: Network | undefined = $derived(
 		isTokenNonFungible(token)
-			? ((token as unknown as Network & WithCollectionNetwork).collection?.network ??
-					(token as unknown as WithNetwork).network)
-			: (token as unknown as WithNetwork).network
+			? (hasCollectionNetwork(token) ? token.collection.network : hasNetwork(token) ? token.network : undefined)
+			: (hasNetwork(token) ? token.network : undefined)
 	);
 
 	const networkLogoColor: NetworkLogoProps['color'] = $derived('transparent');
 
 	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
 		const id = net?.id;
-		if (isNetworkIdBitcoin(id)) {return 'Btc';}
-		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {return 'Eth';}
-		if (isNetworkIdSolana(id)) {return 'Sol';}
-		if (isNetworkIdICP(id)) {return 'Icrcv2';}
+		if (isNetworkIdBitcoin(id)) return 'Btc';
+		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) return 'Eth';
+		if (isNetworkIdSolana(id)) return 'Sol';
+		if (isNetworkIdICP(id)) return 'Icrcv2';
 		return undefined;
 	};
 	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
@@ -133,9 +142,9 @@
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo
-							addressType={networkAddressType}
-							color={networkLogoColor}
 							{network}
+							color={networkLogoColor}
+							addressType={networkAddressType}
 							testId="network-tx"
 						/>
 					</div>
