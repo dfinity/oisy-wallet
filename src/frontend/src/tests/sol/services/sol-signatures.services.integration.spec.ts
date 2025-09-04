@@ -99,8 +99,8 @@ describe('sol-signatures.services integration', () => {
 				);
 
 				// getSolTransactions → fixtures
-				// eslint-disable-next-line require-await
 				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(
+					// eslint-disable-next-line require-await
 					async ({ address, before, tokenAddress }) => {
 						const baseParts = nonNullish(tokenAddress)
 							? ['solana', address, 'tokens', tokenAddress, 'transactions']
