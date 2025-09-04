@@ -9,6 +9,7 @@
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -27,7 +28,9 @@
 		modalRewardDetails,
 		modalRewardDetailsData,
 		modalNftImageConsent,
-		modalNftImageConsentData
+		modalNftImageConsentData,
+		modalNftFullscreenDisplayData,
+		modalNftFullscreenDisplayOpen
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
@@ -59,5 +62,7 @@
 		</RewardsEligibilityContext>
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
+	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
+		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
 	{/if}
 {/if}

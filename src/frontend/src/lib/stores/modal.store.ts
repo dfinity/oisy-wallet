@@ -7,7 +7,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
-import type { NftCollection } from '$lib/types/nft';
+import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
 import type { AnyTransactionUi } from '$lib/types/transaction';
@@ -63,7 +63,8 @@ export interface Modal<T> {
 		| 'welcome'
 		| 'settings'
 		| 'auth-help'
-		| 'nft-image-consent';
+		| 'nft-image-consent'
+		| 'nft-fullscreen-display';
 	data?: T;
 	id?: symbol;
 }
@@ -129,6 +130,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
+	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	close: () => void;
 }
 
@@ -228,6 +230,9 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openAuthHelp: <(params: SetWithDataParams<boolean>) => void>setTypeWithData('auth-help'),
 		openNftImageConsent: <(params: SetWithDataParams<NftCollection>) => void>(
 			setTypeWithData('nft-image-consent')
+		),
+		openNftFullscreenDisplay: <(params: SetWithDataParams<Nft>) => void>(
+			setTypeWithData('nft-fullscreen-display')
 		),
 		close: () => set(null),
 		subscribe
