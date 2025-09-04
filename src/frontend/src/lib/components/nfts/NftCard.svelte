@@ -3,6 +3,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -32,13 +33,17 @@
 		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<BgImg
-			imageUrl={nft?.imageUrl}
-			shadow="inset"
-			size="cover"
-			styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
-			testId={`${testId}-image`}
-		/>
+		<NftImageConsent {nft} type="card">
+			<div class="h-full w-full">
+				<BgImg
+					imageUrl={nft?.imageUrl}
+					shadow="inset"
+					size="cover"
+					styleClass="group-hover:scale-110 transition-transform duration-300 ease-out"
+					testId={`${testId}-image`}
+				/>
+			</div>
+		</NftImageConsent>
 
 		{#if hidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">

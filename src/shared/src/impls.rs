@@ -409,9 +409,11 @@ impl StoredUserProfile {
         }
 
         let mut new_profile = self.with_incremented_version();
-        new_profile.agreements = Some(Agreements {
-            agreements: new_agreements,
-        });
+        new_profile.agreements = {
+            let mut agreements = new_profile.agreements.unwrap_or_default();
+            agreements.agreements = new_agreements;
+            Some(agreements)
+        };
         new_profile.updated_timestamp = now;
 
         Ok(new_profile)

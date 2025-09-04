@@ -7,6 +7,8 @@
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -52,12 +54,18 @@
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
-		<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass="absolute blur" />
+		<div class="absolute h-full w-full">
+			<NftImageConsent {nft} showMessage={false} type="hero-banner">
+				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
+			</NftImageConsent>
+		</div>
 
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
-					<Img src={nft?.imageUrl} />
+					<NftImageConsent {nft} type="nft-display">
+						<Img src={nft?.imageUrl} />
+					</NftImageConsent>
 					<span class="absolute bottom-0 right-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
@@ -109,6 +117,16 @@
 							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 						/>
 					</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.display_preference}</span>
+				{#if nonNullish(nft)}
+					<NftImageConsentPreference {nft} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
