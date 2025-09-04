@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
-	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
