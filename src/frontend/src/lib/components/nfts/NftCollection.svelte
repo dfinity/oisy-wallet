@@ -65,8 +65,6 @@
 			/>
 		{/each}
 	{:else}
-		<NftCardSkeleton />
-		<NftCardSkeleton />
-		<NftCardSkeleton />
+		<NftCardSkeleton times={3} />
 	{/if}
 </div>
