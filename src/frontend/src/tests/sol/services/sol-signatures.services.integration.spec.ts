@@ -22,7 +22,12 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { loadJsonFixture, sigSlug } from '$tests/utils/fixture.test-utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import * as solProgramToken from '@solana-program/token';
-import { signature, address as solAddress, type ProgramDerivedAddressBump } from '@solana/kit';
+import {
+	lamports,
+	signature,
+	address as solAddress,
+	type ProgramDerivedAddressBump
+} from '@solana/kit';
 
 const USE_FIXTURES = true;
 
@@ -100,16 +105,50 @@ describe('sol-signatures.services integration', () => {
 				// getSolTransactions → fixtures
 				// eslint-disable-next-line require-await
 				vi.spyOn(solSigSvc, 'getSolTransactions').mockImplementation(async (args) => {
-					const { address, before, limit } = args;
+					const { address, before, limit, tokenAddress } = args;
+
+					const baseParts = nonNullish(tokenAddress)
+						? ['solana', address, 'tokens', tokenAddress, 'transactions']
+						: ['solana', address, 'transactions'];
+
 					const file = `${sigSlug(before)}.json`;
-					const page = loadJsonFixture<ReadonlyArray<SolTransactionUi>>(
-						'solana',
-						address,
-						'transactions',
-						file
-					);
+
+					const page = loadJsonFixture<ReadonlyArray<SolTransactionUi>>(...baseParts, file);
+
 					return page.slice(0, limit ?? page.length);
 				});
+
+				// SOL (lamports) balance -> fixtures
+				vi.spyOn(solApi, 'loadSolLamportsBalance').mockImplementation(
+					// eslint-disable-next-line require-await
+					async ({ address, network: _ }) => {
+						const data = loadJsonFixture<Readonly<{ lamports: string }>>(
+							'solana',
+							address,
+							'balances',
+							'lamports',
+							'current.json'
+						);
+
+						return lamports(BigInt(data.lamports));
+					}
+				);
+
+				// SPL token balance -> fixtures (keyed by ATA address)
+				vi.spyOn(solApi, 'loadTokenBalance').mockImplementation(
+					// eslint-disable-next-line require-await
+					async ({ ataAddress }) => {
+						const data = loadJsonFixture<Readonly<{ balance: string }>>(
+							'solana',
+							ataAddress,
+							'balances',
+							'spl',
+							'current.json'
+						);
+
+						return BigInt(data.balance);
+					}
+				);
 			}
 		});
 
