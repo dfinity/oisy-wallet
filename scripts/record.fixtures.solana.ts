@@ -27,8 +27,6 @@ const out = ({ parts }: { parts: string[] }): string => {
 		...parts.slice(0, -1)
 	);
 
-	rmSync(dir, { recursive: true, force: true });
-
 	mkdirSync(dir, { recursive: true });
 
 	return join(dir, parts[parts.length - 1] ?? 'unknown.json');
@@ -41,6 +39,8 @@ const recordSignatures = async ({
 	addr: SolAddress;
 	pageLimit?: number;
 }): Promise<void> => {
+	rmSync(out({ parts: ['solana', addr, 'signatures'] }), { recursive: true, force: true });
+
 	let before: string | undefined = undefined;
 
 	for (let i = 0; i < 500; i += 1) {
@@ -55,7 +55,7 @@ const recordSignatures = async ({
 
 		writeFileSync(
 			out({ parts: ['solana', addr, 'signatures', name] }),
-			JSON.stringify(page, jsonReplacer, 2),
+			JSON.stringify(page, jsonReplacer),
 			'utf8'
 		);
 
@@ -76,6 +76,8 @@ const recordTransactions = async ({
 	addr: SolAddress;
 	pageLimit?: number;
 }): Promise<void> => {
+	rmSync(out({ parts: ['solana', addr, 'transactions'] }), { recursive: true, force: true });
+
 	let before: string | undefined = undefined;
 
 	for (let i = 0; i < 500; i += 1) {
@@ -91,7 +93,7 @@ const recordTransactions = async ({
 
 		writeFileSync(
 			out({ parts: ['solana', addr, 'transactions', name] }),
-			JSON.stringify(page, jsonReplacer, 2),
+			JSON.stringify(page, jsonReplacer),
 			'utf8'
 		);
 
