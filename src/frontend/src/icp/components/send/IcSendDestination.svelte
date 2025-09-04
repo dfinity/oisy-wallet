@@ -32,7 +32,7 @@
 
 	const debounceValidateInit = debounce(init);
 
-	$: destination, tokenStandard, networkId, debounceValidateInit();
+	$: (destination, tokenStandard, networkId, debounceValidateInit());
 
 	let inputPlaceholder: string;
 	$: inputPlaceholder = isNetworkIdEthereum(networkId)
@@ -43,12 +43,12 @@
 </script>
 
 <SendInputDestination
-	bind:destination
-	bind:invalidDestination
+	{inputPlaceholder}
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	{inputPlaceholder}
-	on:icQRCodeScan
 	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	bind:destination
+	bind:invalidDestination
+	on:icQRCodeScan
 />

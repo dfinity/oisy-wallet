@@ -1,18 +1,15 @@
-import { currentCurrency, currentCurrencyExchangeRate } from '$lib/derived/currency.derived';
+import {
+	currentCurrency,
+	currentCurrencyDecimals,
+	currentCurrencyExchangeRate,
+	currentCurrencySymbol
+} from '$lib/derived/currency.derived';
 import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
+import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 describe('currency.derived', () => {
 	describe('currentCurrency', () => {
@@ -83,5 +80,69 @@ describe('currency.derived', () => {
 
 			expect(get(currentCurrencyExchangeRate)).toBeNull();
 		});
+	});
+
+	describe('currentCurrencySymbol', () => {
+		const testCases = [
+			{ currency: Currency.USD, language: Languages.ENGLISH, expected: '$' },
+			{ currency: Currency.EUR, language: Languages.ENGLISH, expected: '€' },
+			{ currency: Currency.CHF, language: Languages.ENGLISH, expected: 'CHF' },
+			{ currency: Currency.JPY, language: Languages.ENGLISH, expected: '¥' },
+			{ currency: Currency.CNY, language: Languages.ENGLISH, expected: 'CN¥' },
+			{ currency: Currency.USD, language: Languages.GERMAN, expected: '$' },
+			{ currency: Currency.EUR, language: Languages.GERMAN, expected: '€' },
+			{ currency: Currency.CHF, language: Languages.GERMAN, expected: 'CHF' },
+			{ currency: Currency.JPY, language: Languages.GERMAN, expected: '¥' },
+			{ currency: Currency.CNY, language: Languages.GERMAN, expected: 'CN¥' },
+			{ currency: Currency.USD, language: Languages.CHINESE_SIMPLIFIED, expected: 'US$' },
+			{ currency: Currency.EUR, language: Languages.CHINESE_SIMPLIFIED, expected: '€' },
+			{ currency: Currency.CHF, language: Languages.CHINESE_SIMPLIFIED, expected: 'CHF' },
+			{ currency: Currency.JPY, language: Languages.CHINESE_SIMPLIFIED, expected: 'JP¥' },
+			{ currency: Currency.CNY, language: Languages.CHINESE_SIMPLIFIED, expected: '¥' }
+		];
+
+		beforeEach(() => {
+			currencyStore.switchCurrency(Currency.USD);
+			i18n.switchLang(Languages.ENGLISH);
+		});
+
+		it.each(testCases)(
+			`should return $expected for $currency in $language`,
+			({ currency, language, expected }) => {
+				currencyStore.switchCurrency(currency);
+				i18n.switchLang(language);
+
+				expect(get(currentCurrencySymbol)).toEqual(expected);
+			}
+		);
+	});
+
+	describe('currentCurrencyDecimals', () => {
+		const testCases = [
+			{ currency: Currency.USD, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ENGLISH, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ENGLISH, expected: 0 },
+			{ currency: Currency.USD, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.ITALIAN, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.ITALIAN, expected: 0 },
+			{ currency: Currency.USD, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.EUR, language: Languages.CHINESE_SIMPLIFIED, expected: 2 },
+			{ currency: Currency.JPY, language: Languages.CHINESE_SIMPLIFIED, expected: 0 }
+		];
+
+		beforeEach(() => {
+			currencyStore.switchCurrency(Currency.USD);
+			i18n.switchLang(Languages.ENGLISH);
+		});
+
+		it.each(testCases)(
+			`should return $expected for $currency in $language`,
+			({ currency, language, expected }) => {
+				currencyStore.switchCurrency(currency);
+				i18n.switchLang(language);
+
+				expect(get(currentCurrencyDecimals)).toEqual(expected);
+			}
+		);
 	});
 });

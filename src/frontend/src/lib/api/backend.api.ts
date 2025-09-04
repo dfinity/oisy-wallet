@@ -26,6 +26,7 @@ import type {
 	DeleteContactParams,
 	GetContactParams,
 	GetUserProfileResponse,
+	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams,
 	UpdateContactParams
@@ -225,6 +226,15 @@ export const updateUserNetworkSettings = async ({
 	const { updateUserNetworkSettings } = await backendCanister({ identity });
 
 	return updateUserNetworkSettings(params);
+};
+
+export const updateUserAgreements = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserAgreements>): Promise<void> => {
+	const { updateUserAgreements } = await backendCanister({ identity });
+
+	return updateUserAgreements(params);
 };
 
 export const getContact = async ({

@@ -1,6 +1,6 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcCertifiedTransactionsData } from '$btc/stores/btc-transactions.store';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
-import type { EthTransactionsData } from '$eth/stores/eth-transactions.store';
+import type { EthCertifiedTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
@@ -8,7 +8,7 @@ import type { BtcStatusesData } from '$icp/stores/btc.store';
 import type { CkBtcPendingUtxosData } from '$icp/stores/ckbtc-utxos.store';
 import type { CkBtcMinterInfoData } from '$icp/stores/ckbtc.store';
 import type { IcPendingTransactionsData } from '$icp/stores/ic-pending-transactions.store';
-import type { IcTransactionsData } from '$icp/stores/ic-transactions.store';
+import type { IcCertifiedTransactionsData } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { getCkBtcPendingUtxoTransactions } from '$icp/utils/ckbtc-transactions.utils';
 import { getCkEthPendingTransactions } from '$icp/utils/cketh-transactions.utils';
@@ -20,7 +20,6 @@ import {
 } from '$icp/utils/ic-transactions.utils';
 import { MICRO_TRANSACTION_USD_THRESHOLD, ZERO } from '$lib/constants/app.constants';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
-import type { TransactionsData } from '$lib/stores/transactions.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Token } from '$lib/types/token';
@@ -39,6 +38,7 @@ import {
 	isNetworkIdSepolia,
 	isNetworkIdSolana
 } from '$lib/utils/network.utils';
+import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -69,14 +69,14 @@ export const mapAllTransactionsUi = ({
 	$icPendingTransactionsStore
 }: {
 	tokens: Token[];
-	$btcTransactions: CertifiedStoreData<TransactionsData<BtcTransactionUi>>;
-	$ethTransactions: EthTransactionsData;
+	$btcTransactions: BtcCertifiedTransactionsData;
+	$ethTransactions: EthCertifiedTransactionsData;
 	$ckEthMinterInfo: CertifiedStoreData<CkEthMinterInfoData>;
 	$ckBtcMinterInfoStore: CertifiedStoreData<CkBtcMinterInfoData>;
 	$ethAddress: OptionEthAddress;
-	$solTransactions: CertifiedStoreData<TransactionsData<SolTransactionUi>>;
+	$solTransactions: SolCertifiedTransactionsData;
 	$btcStatuses: CertifiedStoreData<BtcStatusesData>;
-	$icTransactionsStore: CertifiedStoreData<IcTransactionsData>;
+	$icTransactionsStore: IcCertifiedTransactionsData;
 	$ckBtcPendingUtxosStore: CertifiedStoreData<CkBtcPendingUtxosData>;
 	$icPendingTransactionsStore: CertifiedStoreData<IcPendingTransactionsData>;
 }): AllTransactionUiWithCmp[] => {

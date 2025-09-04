@@ -24,7 +24,7 @@ export type CoingeckoPlatformId =
 
 // Please, cross-reference the OISY supported currencies with the Coingecko API for supported currencies.
 // *refers to curl -l https://api.coingecko.com/api/v3/simple/supported_vs_currencies
-export type CoingeckoCurrency = `${Currency}`;
+export type CoingeckoCurrency = Currency;
 
 export interface CoingeckoSimpleParams {
 	// vs_currency of coins, comma-separated if querying more than 1 vs_currency

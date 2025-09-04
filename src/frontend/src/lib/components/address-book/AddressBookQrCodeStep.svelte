@@ -15,7 +15,7 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<QrCodeScanner {onScan} onBack={onCancel} />
+	<QrCodeScanner onBack={onCancel} {onScan} />
 
 	{#snippet toolbar()}
 		<ButtonGroup>

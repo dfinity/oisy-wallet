@@ -335,6 +335,13 @@ div.step {
 		}
 	}
 
+	&.failed {
+		.state {
+			color: var(--negative-emphasis) !important;
+			background: var(--color-background-error-light) !important;
+		}
+	}
+
 	&.next {
 		.text {
 			color: var(--color-foreground-primary);
@@ -396,8 +403,8 @@ div.select {
 	--toast-error-background: var(--color-background-error-light);
 	--toast-error-color: var(--color-foreground-error-secondary);
 
-	--toast-warn-background: var(--color-background-error-light);
-	--toast-warn-color: var(--color-foreground-error-secondary);
+	--toast-warn-background: var(--color-background-warning-light);
+	--toast-warn-color: var(--color-foreground-warning-secondary);
 }
 
 // Tooltip

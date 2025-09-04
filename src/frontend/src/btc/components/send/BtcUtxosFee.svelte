@@ -1,6 +1,10 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { isNullish, nonNullish, debounce } from '@dfinity/utils';
+	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
+	import {
+		BTC_UTXOS_FEE_UPDATE_ENABLED,
+		BTC_UTXOS_FEE_UPDATE_INTERVAL
+	} from '$btc/constants/btc.constants';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
@@ -31,7 +35,10 @@
 
 	const dispatch = createEventDispatcher();
 
-	const selectUtxosFee = async () => {
+	let schedulerTimer: NodeJS.Timeout | undefined;
+	let isActive = true;
+
+	const updatePrepareBtcSend = async () => {
 		try {
 			// all required params should be already defined at this stage
 			if (isNullish(amount) || isNullish(networkId) || isNullish($authIdentity)) {
@@ -57,18 +64,59 @@
 		}
 	};
 
-	onMount(async () => {
+	const debouncedPrepareBtcSend = debounce(updatePrepareBtcSend);
+	const startScheduler = () => {
+		// Stop existing scheduler if it exists
+		stopScheduler();
+		isActive = true;
+
+		// Start the recurring scheduler
+		const scheduleNext = () => {
+			schedulerTimer = setTimeout(() => {
+				// only execute next update if still active
+				if (isActive) {
+					debouncedPrepareBtcSend();
+					scheduleNext();
+				}
+			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
+		};
+
+		scheduleNext();
+	};
+
+	const stopScheduler = () => {
+		isActive = false;
+
+		if (schedulerTimer) {
+			// Clear existing timer
+			clearTimeout(schedulerTimer);
+			schedulerTimer = undefined;
+		}
+	};
+
+	onMount(() => {
 		if (isNullish(utxosFee)) {
-			await selectUtxosFee();
+			debouncedPrepareBtcSend();
+		}
+
+		// Start the scheduler after initial load
+		if (BTC_UTXOS_FEE_UPDATE_ENABLED) {
+			startScheduler();
+		}
+	});
+
+	onDestroy(() => {
+		if (BTC_UTXOS_FEE_UPDATE_ENABLED) {
+			stopScheduler();
 		}
 	});
 </script>
 
 <FeeDisplay
-	feeAmount={utxosFee?.feeSatoshis}
 	decimals={$sendTokenDecimals}
-	symbol={$sendTokenSymbol}
 	exchangeRate={$sendTokenExchangeRate}
+	feeAmount={utxosFee?.feeSatoshis}
+	symbol={$sendTokenSymbol}
 >
-	<svelte:fragment slot="label">{$i18n.fee.text.fee}</svelte:fragment>
+	{#snippet label()}{$i18n.fee.text.fee}{/snippet}
 </FeeDisplay>

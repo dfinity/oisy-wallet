@@ -55,6 +55,7 @@
 	@include meta.load-css('global/layout');
 	@include meta.load-css('global/body');
 	@include meta.load-css('global/button');
+	@include meta.load-css('global/input');
 	@include meta.load-css('global/text');
 	@include meta.load-css('global/gix');
 	@include meta.load-css('global/position');

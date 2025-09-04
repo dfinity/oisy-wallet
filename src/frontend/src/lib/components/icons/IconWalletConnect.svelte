@@ -1,6 +1,10 @@
 <!-- source: https://walletconnect.com/brand -->
 <script lang="ts">
-	export let size = '20';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '20' }: Props = $props();
 </script>
 
 <svg

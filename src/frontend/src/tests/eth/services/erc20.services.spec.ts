@@ -21,23 +21,13 @@ import { listCustomTokens, listUserTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	listUserTokens: vi.fn(),
@@ -82,36 +72,36 @@ describe('erc20.services', () => {
 			enabled: true,
 			token: {
 				Erc20: {
-					decimals: toNullable(18),
 					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress,
-					symbol: toNullable('TTK')
+					token_address: mockEthAddress
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(2n),
 			enabled: true,
 			token: {
 				Erc20: {
-					decimals: toNullable(18),
 					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase(),
-					symbol: toNullable('TTK2')
+					token_address: mockEthAddress2.toUpperCase()
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		},
 		{
 			version: toNullable(),
 			enabled: false,
 			token: {
 				Erc20: {
-					decimals: toNullable(18),
 					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3,
-					symbol: toNullable('TTK3')
+					token_address: mockEthAddress3
 				}
-			}
+			},
+			section: toNullable(),
+			allow_external_content_source: toNullable()
 		}
 	];
 
@@ -672,12 +662,12 @@ describe('erc20.services', () => {
 				enabled: true,
 				token: {
 					Erc20: {
-						decimals: toNullable(3),
 						chain_id: ETHEREUM_NETWORK.chainId,
-						token_address: EURC_TOKEN.address,
-						symbol: toNullable(EURC_TOKEN.symbol)
+						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
@@ -749,12 +739,12 @@ describe('erc20.services', () => {
 				enabled: true,
 				token: {
 					Erc20: {
-						decimals: toNullable(3),
 						chain_id: ETHEREUM_NETWORK.chainId,
-						token_address: EURC_TOKEN.address,
-						symbol: toNullable('Not-EURC')
+						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 
 			vi.mocked(listCustomTokens).mockResolvedValue([...mockCustomTokens, additionalCustomToken]);

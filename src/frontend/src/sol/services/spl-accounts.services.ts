@@ -42,8 +42,8 @@ export const createAtaInstruction = async ({
 }): Promise<SolInstruction> =>
 	await getCreateAssociatedTokenInstructionAsync({
 		payer: signer,
-		mint: solAddress(tokenAddress),
 		owner: solAddress(destination),
+		mint: solAddress(tokenAddress),
 		tokenProgram: solAddress(tokenOwnerAddress)
 	});
 

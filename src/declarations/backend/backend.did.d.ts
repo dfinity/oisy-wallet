@@ -24,6 +24,9 @@ export interface AddUserCredentialRequest {
 }
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
+export interface Agreements {
+	agreements: UserAgreements;
+}
 export type AllowSigningError =
 	| { ApproveError: ApproveError }
 	| { PowChallenge: ChallengeCompletionError }
@@ -142,9 +145,11 @@ export interface ContactAddressData {
 export type ContactError =
 	| { InvalidContactData: null }
 	| { CanisterMemoryNearCapacity: null }
+	| { InvalidImageFormat: null }
 	| { ContactNotFound: null }
 	| { ImageTooLarge: null }
 	| { RandomnessError: null }
+	| { ImageExceedsMaxSize: null }
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
@@ -176,6 +181,8 @@ export interface CredentialSpec {
 export type CredentialType = { ProofOfUniqueness: null };
 export interface CustomToken {
 	token: Token;
+	allow_external_content_source: [] | [boolean];
+	section: [] | [TokenSection];
 	version: [] | [bigint];
 	enabled: boolean;
 }
@@ -193,13 +200,7 @@ export interface DefiniteCanisterSettingsArgs {
 	compute_allocation: bigint;
 }
 export type DeleteContactResult = { Ok: bigint } | { Err: ContactError };
-export interface Erc20Token {
-	decimals: [] | [number];
-	token_address: string;
-	chain_id: bigint;
-	symbol: [] | [string];
-}
-export interface Erc721Token {
+export interface ErcToken {
 	token_address: string;
 	chain_id: bigint;
 }
@@ -292,7 +293,6 @@ export interface SaveNetworksSettingsRequest {
 	networks: Array<[NetworkSettingsFor, NetworkSettings]>;
 	current_user_version: [] | [bigint];
 }
-export type SaveTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
 export type SelectedUtxosFeeError =
 	| { PendingTransactions: null }
 	| { InternalError: { msg: string } };
@@ -309,7 +309,8 @@ export interface SetShowTestnetsRequest {
 	current_user_version: [] | [bigint];
 	show_testnets: boolean;
 }
-export type SetUserShowTestnetsResult = { Ok: null } | { Err: SaveTestnetsSettingsError };
+export type SetTestnetsSettingsError = { VersionMismatch: null } | { UserNotFound: null };
+export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsError };
 export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
@@ -336,16 +337,18 @@ export interface TestnetsSettings {
 	show_testnets: boolean;
 }
 export type Token =
-	| { Erc20: Erc20Token }
+	| { Erc20: ErcToken }
 	| { Icrc: IcrcToken }
-	| { Erc721: Erc721Token }
+	| { Erc721: ErcToken }
 	| { SplDevnet: SplToken }
-	| { SplMainnet: SplToken };
+	| { SplMainnet: SplToken }
+	| { Erc1155: ErcToken };
 export type TokenAccountId =
 	| { Btc: BtcAddress }
 	| { Eth: EthAddress }
 	| { Sol: string }
 	| { Icrcv2: Icrcv2AccountId };
+export type TokenSection = { Spam: null } | { Hidden: null };
 export type TopUpCyclesLedgerError =
 	| {
 			InvalidArgPercentageOutOfRange: {
@@ -373,12 +376,28 @@ export interface TopUpCyclesLedgerResponse {
 export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
+export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export interface UpdateUserAgreementsRequest {
+	agreements: UserAgreements;
+	current_user_version: [] | [bigint];
+}
+export interface UserAgreement {
+	last_accepted_at_ns: [] | [bigint];
+	accepted: [] | [boolean];
+	last_updated_at_ms: [] | [bigint];
+}
+export interface UserAgreements {
+	license_agreement: UserAgreement;
+	privacy_policy: UserAgreement;
+	terms_of_use: UserAgreement;
+}
 export interface UserCredential {
 	issuer: string;
 	verified_date_timestamp: [] | [bigint];
 	credential_type: CredentialType;
 }
 export interface UserProfile {
+	agreements: [] | [Agreements];
 	credentials: Array<UserCredential>;
 	version: [] | [bigint];
 	settings: [] | [Settings];
@@ -444,6 +463,7 @@ export interface _SERVICE {
 	stats: ActorMethod<[], Stats>;
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[Contact], GetContactResult>;
+	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
 	update_user_network_settings: ActorMethod<
 		[SaveNetworksSettingsRequest],
 		SetUserShowTestnetsResult

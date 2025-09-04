@@ -8,6 +8,7 @@
 		TOKEN_INPUT_AMOUNT_EXCHANGE_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -29,7 +30,8 @@
 	$: formattedUSDAmount = formatCurrency({
 		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
 		currency: $currentCurrency,
-		exchangeRate: $currencyExchangeStore
+		exchangeRate: $currencyExchangeStore,
+		language: $currentLanguage
 	});
 
 	let formattedTokenAmount: string | undefined;
@@ -42,9 +44,9 @@
 	{#if nonNullish(exchangeRate)}
 		<button
 			class:hover:cursor-default={disabled}
+			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
 			on:click|preventDefault={handleUnitSwitch}
-			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 		>
 			<IconArrowUpDown size="14" />
 		</button>

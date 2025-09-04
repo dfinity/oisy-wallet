@@ -36,7 +36,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';

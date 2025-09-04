@@ -1,28 +1,21 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
+import { Erc165Identifier } from '$eth/constants/erc.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
+import { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
+import { fetchMetadataFromUri } from '$eth/services/erc.services';
 import type { Erc721ContractAddress, Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
-import { InvalidMetadataImageUrl, InvalidTokenUri } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type { NftMetadata } from '$lib/types/nft';
+import type { NftId, NftMetadata } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { parseNftId } from '$lib/validation/nft.validation';
-import { UrlSchema } from '$lib/validation/url.validation';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import { Contract } from 'ethers/contract';
-import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
-const ERC721_INTERFACE_ID = '0x80ac58cd';
-
-export class InfuraErc721Provider {
-	private readonly provider: InfuraProvider;
-
-	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProvider(this.network, INFURA_API_KEY);
-	}
+export class InfuraErc721Provider extends InfuraErc165Provider {
+	isInterfaceErc721 = (contract: Erc721ContractAddress): Promise<boolean> =>
+		this.isSupportedInterface({ contract, interfaceId: Erc165Identifier.ERC721 });
 
 	metadata = async ({
 		address
@@ -38,70 +31,41 @@ export class InfuraErc721Provider {
 		};
 	};
 
-	isErc721 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
-		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
-
-		try {
-			return await erc721Contract.supportsInterface(ERC721_INTERFACE_ID);
-		} catch (_: unknown) {
-			return false;
-		}
-	};
-
 	getNftMetadata = async ({
 		contractAddress,
 		tokenId
 	}: {
-		contractAddress: string;
-		tokenId: number;
+		contractAddress: Erc721ContractAddress['address'];
+		tokenId: NftId;
 	}): Promise<NftMetadata> => {
 		const erc721Contract = new Contract(contractAddress, ERC721_ABI, this.provider);
 
-		const resolveResourceUrl = (url: URL): URL => {
-			const IPFS_PREFIX = 'ipfs://';
-			if (url.href.startsWith(IPFS_PREFIX)) {
-				return new URL(url.href.replace(IPFS_PREFIX, 'https://ipfs.io/ipfs/'));
-			}
+		const tokenUri = await erc721Contract.tokenURI(tokenId);
 
-			return url;
-		};
+		const { metadata, imageUrl } = await fetchMetadataFromUri({
+			metadataUrl: tokenUri,
+			contractAddress,
+			tokenId
+		});
 
-		const extractImageUrl = (imageUrl: string | undefined): URL | undefined => {
-			if (isNullish(imageUrl)) {
-				return undefined;
-			}
-
-			const parsedMetadataUrl = UrlSchema.safeParse(imageUrl);
-			if (!parsedMetadataUrl.success) {
-				throw new InvalidMetadataImageUrl(tokenId, contractAddress);
-			}
-
-			return resolveResourceUrl(new URL(parsedMetadataUrl.data));
-		};
-
-		const parsedTokenUri = UrlSchema.safeParse(await erc721Contract.tokenURI(tokenId));
-		if (!parsedTokenUri.success) {
-			throw new InvalidTokenUri(tokenId, contractAddress);
+		if (isNullish(metadata)) {
+			return { id: tokenId, ...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }) };
 		}
 
-		const metadataUrl = resolveResourceUrl(new URL(parsedTokenUri.data));
-
-		const response = await fetch(metadataUrl);
-		const metadata = await response.json();
-
-		const imageUrl = extractImageUrl(metadata.image);
-
-		const mappedAttributes = (metadata?.attributes ?? []).map(
-			(attr: { trait_type: string; value: string | number }) => ({
-				traitType: attr.trait_type,
-				value: attr.value.toString()
-			})
-		);
+		const mappedAttributes =
+			'attributes' in metadata
+				? (metadata.attributes ?? []).map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
 
 		return {
-			id: parseNftId(tokenId),
+			id: tokenId,
 			...(nonNullish(imageUrl) && { imageUrl: imageUrl.href }),
 			...(nonNullish(metadata.name) && { name: metadata.name }),
+			...(nonNullish(metadata.description) &&
+				notEmptyString(metadata.description) && { description: metadata.description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes })
 		};
 	};
