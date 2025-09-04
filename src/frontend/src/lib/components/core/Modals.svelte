@@ -27,9 +27,13 @@
 		modalRewardDetails,
 		modalRewardDetailsData,
 		modalNftImageConsent,
-		modalNftImageConsentData
+		modalNftImageConsentData,
+		modalNftFullscreenDisplayData,
+		modalNftFullscreenDisplayOpen
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
+	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -59,5 +63,11 @@
 		</RewardsEligibilityContext>
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
+	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
+		<FullscreenImgModal>
+			<div class="overflow-hidden rounded-lg">
+				<Img src={$modalNftFullscreenDisplayData.imageUrl} />
+			</div>
+		</FullscreenImgModal>
 	{/if}
 {/if}

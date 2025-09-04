@@ -22,7 +22,8 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import FullscreenModal from '$lib/components/ui/FullscreenModal.svelte';
+	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
+	import { modalStore } from '$lib/stores/modal.store.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -51,8 +52,6 @@
 			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
 		}
 	});
-
-	let fullscreen = $state(false);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
@@ -68,7 +67,11 @@
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftImageConsent {nft} type="nft-display">
 						<button
-							onclick={() => (fullscreen = true)}
+							onclick={() =>
+								modalStore.openNftFullscreenDisplay({
+									id: Symbol('nft-fullscreen-display'),
+									data: nft
+								})}
 							class="block h-auto max-h-full w-auto max-w-full border-0"
 						>
 							<Img
@@ -187,9 +190,3 @@
 		</List>
 	</div>
 </div>
-
-<FullscreenModal bind:open={fullscreen}>
-	{#if nonNullish(nft?.imageUrl)}
-		<Img src={nft.imageUrl} />
-	{/if}
-</FullscreenModal>
