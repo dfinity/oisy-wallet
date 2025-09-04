@@ -3,8 +3,8 @@
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
-	import { modalStore } from '$lib/stores/modal.store';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		imageSrc: string;
