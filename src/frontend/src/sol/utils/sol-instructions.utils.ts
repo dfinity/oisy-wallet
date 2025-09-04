@@ -342,7 +342,7 @@ export const mapSolParsedInstruction = async ({
  * @param instruction - The Solana instruction to parse.
  * @returns The parsed instruction or the original instruction if it could not be parsed.
  */
-export const parseSolInstruction = (
+const parseSolInstruction = (
 	instruction: SolInstruction
 ): SolInstruction | SolParsedInstruction => {
 	const { programAddress } = instruction;
@@ -399,11 +399,11 @@ const mapSolSystemInstruction = (instruction: SolParsedInstruction): MappedSolTr
 		};
 	}
 
+	console.warn(`Could not map Solana System instruction of type ${instructionType}`);
+
 	return { amount: undefined };
 };
 
-// TODO: find a way to map correctly all the transaction message instructions
-// TODO: create tests
 export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransaction => {
 	const parsedInstruction = parseSolInstruction(instruction);
 
@@ -416,6 +416,8 @@ export const mapSolInstruction = (instruction: SolInstruction): MappedSolTransac
 	if (programAddress === SYSTEM_PROGRAM_ADDRESS) {
 		return mapSolSystemInstruction(parsedInstruction);
 	}
+
+	console.warn(`Could not map Solana instruction for program ${programAddress}`);
 
 	return { amount: undefined };
 };
