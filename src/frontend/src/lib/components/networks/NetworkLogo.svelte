@@ -7,13 +7,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Network } from '$lib/types/network';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		network: Network;
 		size?: LogoSize;
 		color?: 'off-white' | 'white' | 'transparent';
-		addressType?: 'Icrcv2' | 'Btc' | 'Eth' | 'Sol';
+		addressType?: TokenAccountIdTypes;
 		testId?: string;
 	}
 

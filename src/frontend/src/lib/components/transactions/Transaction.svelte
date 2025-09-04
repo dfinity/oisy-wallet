@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet, ComponentProps } from 'svelte';
-
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
+	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -12,20 +12,26 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import Card from '$lib/components/ui/Card.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
-
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
-
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-
-	import { getContactForAddress } from '$lib/utils/contact.utils';
+	import { getContactForAddress, filterAddressFromContact } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import {
+		isNetworkIdBitcoin,
+		isNetworkIdEvm,
+		isNetworkIdEthereum,
+		isNetworkIdICP,
+		isNetworkIdSolana
+	} from '$lib/utils/network.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -33,9 +39,6 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>;
-	type Network = NetworkLogoProps['network'];
-	type LogoColor = NetworkLogoProps['color'];
-	type AddressType = NetworkLogoProps['addressType'];
 
 	interface Props {
 		amount?: bigint;
@@ -76,34 +79,37 @@
 
 	const contact: ContactUi | undefined = $derived(
 		nonNullish(address)
-			? getContactForAddress({
-					contactList: $contacts,
-					addressString: address
-				})
+			? getContactForAddress({ contactList: $contacts, addressString: address })
 			: undefined
 	);
 
-	const network: Network | undefined = $derived(
-		isTokenNonFungible(token)
-			? ((token as any)?.collection?.network ?? (token as any)?.network)
-			: (token as any)?.network
+	const addressAlias: string | undefined = $derived(
+		nonNullish(address) ? filterAddressFromContact({ contact, address })?.label : undefined
 	);
 
-	const networkLogoColor: LogoColor = $derived('transparent');
+	interface WithNetwork { network: Network }
+	interface WithCollectionNetwork { collection?: { network?: Network } }
 
-	const mapNetworkToAddressType = (net: Network | undefined): AddressType => {
-		const raw = String(
-			net?.addressType ?? net?.type ?? net?.id ?? net?.symbol ?? net?.name ?? ''
-		).toLowerCase();
+	const network: Network | undefined = $derived(
+		isTokenNonFungible(token)
+			? ((token as unknown as Network & WithCollectionNetwork).collection?.network ??
+					(token as unknown as WithNetwork).network)
+			: (token as unknown as WithNetwork).network
+	);
 
-		if (raw.includes('btc') || raw.includes('bitcoin')) return 'Btc';
-		if (raw.includes('eth') || raw.includes('ethereum')) return 'Eth';
-		if (raw.includes('sol') || raw.includes('solana')) return 'Sol';
-		if (raw.includes('icrc') || raw.includes('icp') || raw.includes('internet computer')) return 'Icrcv2';
+	const networkLogoColor: NetworkLogoProps['color'] = $derived('transparent');
+
+	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
+		const id = net?.id;
+		if (isNetworkIdBitcoin(id)) {return 'Btc';}
+		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {return 'Eth';}
+		if (isNetworkIdSolana(id)) {return 'Sol';}
+		if (isNetworkIdICP(id)) {return 'Icrcv2';}
 		return undefined;
 	};
-
-	const networkAddressType: AddressType = $derived(mapNetworkToAddressType(network));
+	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
+		mapNetworkToAccountType(network)
+	);
 
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
@@ -199,6 +205,11 @@
 								{shortenWithMiddleEllipsis({ text: address })}
 							{/if}
 						</span>
+						{#if nonNullish(addressAlias) && addressAlias !== ''}
+						<span class="inline-flex items-center gap-1 text-tertiary">
+							<Divider />{addressAlias}
+						</span>
+					{/if}
 					</span>
 
 					<TransactionStatusComponent {status} />
