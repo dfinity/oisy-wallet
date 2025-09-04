@@ -15,6 +15,7 @@ describe('FullscreenImgModal', () => {
 		});
 
 		const child = getByTestId(TEST_ID);
+
 		expect(child).toBeInTheDocument();
 	});
 
@@ -27,6 +28,7 @@ describe('FullscreenImgModal', () => {
 
 		// Adjust if IconClose doesn’t expose testId
 		const icon = document.querySelector('svg');
+
 		expect(icon).toBeInTheDocument();
 	});
 
@@ -40,7 +42,7 @@ describe('FullscreenImgModal', () => {
 		const backdrop = getByTestId('backdrop');
 		await fireEvent.click(backdrop);
 
-		expect(closeSpy).toHaveBeenCalledTimes(1);
+		expect(closeSpy).toHaveBeenCalledOnce();
 	});
 
 	it('applies max size constraints to the fullscreen-modal container', () => {
@@ -51,6 +53,7 @@ describe('FullscreenImgModal', () => {
 		});
 
 		const container = document.querySelector('.fullscreen-modal');
+
 		expect(container).toBeInTheDocument();
 		expect(container).toHaveClass('max-h-[90vh]', 'max-w-[90vw]');
 	});

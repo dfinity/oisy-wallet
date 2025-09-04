@@ -13,17 +13,17 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
-	import { modalStore } from '$lib/stores/modal.store.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -67,12 +67,12 @@
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftImageConsent {nft} type="nft-display">
 						<button
+							class="block h-auto max-h-full w-auto max-w-full border-0"
 							onclick={() =>
 								modalStore.openNftFullscreenDisplay({
 									id: Symbol('nft-fullscreen-display'),
 									data: nft
 								})}
-							class="block h-auto max-h-full w-auto max-w-full border-0"
 						>
 							<Img
 								src={nft?.imageUrl}
