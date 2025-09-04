@@ -49,7 +49,8 @@ export const syncWallet = async ({
 		 */
 		const btcWalletBalance = await calculateBtcWalletBalance({
 			balance,
-			tokenId
+			tokenId,
+			loadPendingTransactions: !certified
 		});
 
 		balancesStore.set({
