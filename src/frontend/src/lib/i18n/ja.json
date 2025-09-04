@@ -1047,9 +1047,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "何をしたいですか？",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
-			"loading": "考え中..."
+			"loading": "考え中...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",

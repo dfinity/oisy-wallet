@@ -80,7 +80,7 @@ const injectLinkPreloader = (indexHtml) => {
           preloadLink.href = link;
           preloadLink.rel = "preload";
           preloadLink.as = "script";
-          document.head.appendChild(loader);
+          document.head.appendChild(preloadLink);
       }
     </script>`;
 
@@ -211,7 +211,7 @@ const updateCSP = (indexHtml) => {
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' ${NFTS_ENABLED ? 'https:' : allConnectSrc};
+        connect-src 'self' ${NFTS_ENABLED ? 'https: wss:' : allConnectSrc};
         img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';

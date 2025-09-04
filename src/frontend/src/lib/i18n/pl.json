@@ -1047,9 +1047,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "Otwórz ten kontrakt w eksploratorze blockchain",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "Co chcesz zrobić?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
-			"loading": "Myślenie..."
+			"loading": "Myślenie...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",

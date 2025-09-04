@@ -1047,9 +1047,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1625,8 @@
 			"send_message_input_placeholder": "Co chcete dělat?",
 			"send_token_succeeded": "Transakce dokončena!",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
-			"loading": "Přemýšlím..."
+			"loading": "Přemýšlím...",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
