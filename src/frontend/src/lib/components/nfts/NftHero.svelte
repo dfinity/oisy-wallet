@@ -66,17 +66,14 @@
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftImageConsent {nft} type="nft-display">
 						<button
-							class="block h-auto max-h-full w-auto max-w-full border-0"
+							class="block h-auto w-auto border-0"
 							onclick={() =>
 								modalStore.openNftFullscreenDisplay({
 									id: Symbol('nft-fullscreen-display'),
 									data: nft
 								})}
 						>
-							<Img
-								src={nft.imageUrl}
-								styleClass="block h-auto w-auto max-h-full max-w-full object-contain"
-							/>
+							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
 						</button>
 					</NftImageConsent>
 					<span class="absolute bottom-0 right-0 m-2.5">
