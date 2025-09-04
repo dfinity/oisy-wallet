@@ -2,12 +2,17 @@ import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('NftHero', () => {
+	beforeAll(() => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
+
 	it('should render the nft data', () => {
 		const { getByText } = render(NftHero, {
 			props: {
