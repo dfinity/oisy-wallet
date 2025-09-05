@@ -4,13 +4,17 @@ import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 import { render } from '@testing-library/svelte';
 
 describe('BtcTransaction', () => {
+	
+	const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
+
 	const mockTransaction: BtcTransactionUi = {
 		id: 'test',
 		type: 'send',
 		status: 'confirmed',
 		value: 40827n,
 		confirmations: 88822,
-		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49'
+		from: '0xD379F3d4578DE7aC47a5928811B3407Ef03F7C49',
+		timestamp: currentTimestamp
 	};
 
 	it('should calculate amount for send transaction correctly', () => {
@@ -26,7 +30,10 @@ describe('BtcTransaction', () => {
 	});
 
 	it('should calculate amount for receive transaction correctly', () => {
-		const btcTransaction: BtcTransactionUi = { ...mockTransaction, type: 'receive' };
+		const btcTransaction: BtcTransactionUi = {
+			...mockTransaction,
+			type: 'receive'
+		};
 
 		const props = {
 			transaction: btcTransaction,
