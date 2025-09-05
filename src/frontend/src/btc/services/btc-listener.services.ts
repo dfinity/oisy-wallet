@@ -40,12 +40,6 @@ export const syncWallet = ({
 		});
 	}
 	if (nonNullish(btcWalletBalance)) {
-		/*
-		 * The balance calculation is now performed in the worker (btc-wallet.scheduler.ts)
-		 * which has access to the transaction data needed to calculate the structured
-		 * balance (confirmed, unconfirmed, total) based on confirmation states.
-		 */
-
 		balancesStore.set({
 			id: tokenId,
 			data: {
