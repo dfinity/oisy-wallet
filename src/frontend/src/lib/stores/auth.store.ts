@@ -1,3 +1,4 @@
+import { createAuthClient, safeCreateAuthClient } from '$lib/api/auth-client.api';
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -8,11 +9,7 @@ import {
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
-import {
-	createAuthClient,
-	getOptionalDerivationOrigin,
-	safeCreateAuthClient
-} from '$lib/utils/auth.utils';
+import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
