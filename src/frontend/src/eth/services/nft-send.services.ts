@@ -124,13 +124,12 @@ const prepareErc721Transfer = async ({
 	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
+	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(tokenId));
 	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
 		fromAddr,
 		to,
 		BigInt(tokenId)
 	]);
-
-	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(tokenId), data);
 
 	return buildSignRequest({
 		to: contractAddress as EthAddress,
@@ -159,6 +158,8 @@ const prepareErc1155Transfer = async ({
 	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
+	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(id), BigInt(amount), data);
+
 	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [
 		fromAddr,
 		to,
@@ -166,8 +167,6 @@ const prepareErc1155Transfer = async ({
 		BigInt(amount),
 		data
 	]);
-
-	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(id), BigInt(amount), data);
 
 	return buildSignRequest({
 		to: contractAddress as EthAddress,
