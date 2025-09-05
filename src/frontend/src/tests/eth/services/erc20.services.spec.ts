@@ -24,6 +24,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -39,33 +40,6 @@ vi.mock('$eth/providers/infura-erc20.providers', () => ({
 }));
 
 describe('erc20.services', () => {
-	const mockUserTokens: UserToken[] = [
-		{
-			decimals: toNullable(18),
-			version: toNullable(1n),
-			enabled: toNullable(true),
-			chain_id: ETHEREUM_NETWORK.chainId,
-			contract_address: mockEthAddress,
-			symbol: toNullable('TTK')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(2n),
-			enabled: toNullable(),
-			chain_id: BASE_NETWORK.chainId,
-			contract_address: mockEthAddress2.toUpperCase(),
-			symbol: toNullable('TTK2')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(),
-			enabled: toNullable(false),
-			chain_id: POLYGON_AMOY_NETWORK.chainId,
-			contract_address: mockEthAddress3,
-			symbol: toNullable('TTK3')
-		}
-	];
-
 	const mockCustomTokens: CustomToken[] = [
 		{
 			version: toNullable(1n),
