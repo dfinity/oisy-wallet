@@ -1,4 +1,5 @@
 import type {
+	AddUserCredentialResult,
 	CustomToken,
 	PendingTransaction,
 	UserToken,
@@ -25,7 +26,8 @@ import { POUH_CREDENTIAL_TYPE } from '$lib/constants/credentials.constants';
 import type {
 	AddUserCredentialParams,
 	BtcAddPendingTransactionParams,
-	BtcGetPendingTransactionParams
+	BtcGetPendingTransactionParams,
+	GetUserProfileResponse
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { mockUtxo } from '$tests/mocks/btc.mock';
@@ -75,7 +77,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if listUserTokens throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.listUserTokens.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -105,7 +107,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if listCustomTokens throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.listCustomTokens.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -126,9 +128,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call setManyCustomTokens endpoint', async () => {
-			const result = await setManyCustomTokens(mockParams);
+			await setManyCustomTokens(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.setManyCustomTokens).toHaveBeenCalledExactlyOnceWith({
 				tokens: mockCustomTokens
 			});
@@ -139,7 +140,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if setManyCustomTokens throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.setManyCustomTokens.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -162,9 +163,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call setCustomToken endpoint', async () => {
-			const result = await setCustomToken(mockParams);
+			await setCustomToken(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.setCustomToken).toHaveBeenCalledExactlyOnceWith({
 				token: mockCustomToken
 			});
@@ -175,7 +175,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if setCustomToken throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.setCustomToken.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -197,9 +197,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call removeUserToken endpoint', async () => {
-			const result = await removeUserToken(mockParams);
+			await removeUserToken(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.removeUserToken).toHaveBeenCalledExactlyOnceWith({
 				chain_id: mockUserToken.chain_id,
 				contract_address: mockUserToken.contract_address
@@ -211,7 +210,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if removeUserToken throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.removeUserToken.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -232,9 +231,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call removeCustomToken endpoint', async () => {
-			const result = await removeCustomToken(mockParams);
+			await removeCustomToken(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.removeCustomToken).toHaveBeenCalledExactlyOnceWith({
 				token: mockCustomToken
 			});
@@ -245,7 +243,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if removeCustomToken throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.removeCustomToken.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -264,9 +262,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call setManyUserTokens endpoint', async () => {
-			const result = await setManyUserTokens(mockParams);
+			await setManyUserTokens(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.setManyUserTokens).toHaveBeenCalledExactlyOnceWith({
 				tokens: mockUserTokens
 			});
@@ -277,7 +274,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if setManyUserTokens throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.setManyUserTokens.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -300,9 +297,8 @@ describe('backend.api', () => {
 		});
 
 		it('should successfully call setUserToken endpoint', async () => {
-			const result = await setUserToken(mockParams);
+			await setUserToken(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
 			expect(backendCanisterMock.setUserToken).toHaveBeenCalledExactlyOnceWith({
 				token: mockUserToken
 			});
@@ -313,7 +309,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if setUserToken throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.setUserToken.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -342,7 +338,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if createUserProfile throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.createUserProfile.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -356,23 +352,27 @@ describe('backend.api', () => {
 			certified
 		};
 
+		const mockResponse: GetUserProfileResponse = { Ok: mockUserProfile };
+
 		beforeEach(() => {
-			backendCanisterMock.getUserProfile.mockResolvedValue({ Ok: mockUserProfile });
+			backendCanisterMock.getUserProfile.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call getUserProfile endpoint', async () => {
 			const result = await getUserProfile(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.getUserProfile).toHaveBeenCalledExactlyOnceWith({ certified });
 		});
 
 		it('should return the backend error', async () => {
-			backendCanisterMock.getUserProfile.mockResolvedValue({ Err: { NotFound: null } });
+			const mockErrResponse: GetUserProfileResponse = { Err: { NotFound: null } };
+
+			backendCanisterMock.getUserProfile.mockResolvedValue(mockErrResponse);
 
 			const result = await getUserProfile(mockParams);
 
-			expect(result).toEqual({ Err: { NotFound: null } });
+			expect(result).toEqual(mockErrResponse);
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -380,7 +380,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if getUserProfile throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.getUserProfile.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -402,23 +402,34 @@ describe('backend.api', () => {
 			issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID)
 		};
 
+		const mockResponse: AddUserCredentialResult = { Ok: null };
+
 		beforeEach(() => {
-			backendCanisterMock.addUserCredential.mockResolvedValue({ Ok: null });
+			backendCanisterMock.addUserCredential.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call addUserCredential endpoint', async () => {
 			const result = await addUserCredential(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
-			expect(backendCanisterMock.addUserCredential).toHaveBeenCalledExactlyOnceWith({ certified });
+			expect(result).toEqual(mockResponse);
+			expect(backendCanisterMock.addUserCredential).toHaveBeenCalledExactlyOnceWith({
+				credentialJwt: successfulCredentialJWT,
+				credentialSpec: {
+					credential_type: POUH_CREDENTIAL_TYPE,
+					arguments: []
+				},
+				issuerCanisterId: Principal.fromText(POUH_ISSUER_CANISTER_ID)
+			});
 		});
 
 		it('should return the backend error', async () => {
-			backendCanisterMock.addUserCredential.mockResolvedValue({ Err: { InvalidCredential: null } });
+			const mockErrResponse: AddUserCredentialResult = { Err: { InvalidCredential: null } };
+
+			backendCanisterMock.addUserCredential.mockResolvedValue(mockErrResponse);
 
 			const result = await addUserCredential(mockParams);
 
-			expect(result).toEqual({ Err: { InvalidCredential: null } });
+			expect(result).toEqual(mockErrResponse);
 		});
 
 		it('should throw an error if identity is undefined', async () => {
@@ -426,7 +437,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if addUserCredential throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.addUserCredential.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -443,16 +454,21 @@ describe('backend.api', () => {
 			address: 'address'
 		};
 
+		const mockResponse = true;
+
 		beforeEach(() => {
-			backendCanisterMock.btcAddPendingTransaction.mockResolvedValue(true);
+			backendCanisterMock.btcAddPendingTransaction.mockResolvedValue(mockResponse);
 		});
 
 		it('should successfully call btcAddPendingTransaction endpoint', async () => {
 			const result = await addPendingBtcTransaction(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.btcAddPendingTransaction).toHaveBeenCalledExactlyOnceWith({
-				certified
+				txId: new Uint8Array([1, 2, 3]),
+				utxos: [mockUtxo],
+				network: { mainnet: null },
+				address: 'address'
 			});
 		});
 
@@ -463,7 +479,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if addPendingBtcTransaction throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.btcAddPendingTransaction.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
@@ -480,7 +496,7 @@ describe('backend.api', () => {
 
 		const mockResponse: PendingTransaction[] = [
 			{
-				txId: new Uint8Array([1, 2, 3]),
+				txid: new Uint8Array([1, 2, 3]),
 				utxos: [mockUtxo]
 			}
 		];
@@ -492,9 +508,10 @@ describe('backend.api', () => {
 		it('should successfully call btcGetPendingTransaction endpoint', async () => {
 			const result = await getPendingBtcTransactions(mockParams);
 
-			expect(result).toEqual(mockUserTokens);
+			expect(result).toEqual(mockResponse);
 			expect(backendCanisterMock.btcGetPendingTransaction).toHaveBeenCalledExactlyOnceWith({
-				certified
+				network: { mainnet: null },
+				address: 'address'
 			});
 		});
 
@@ -505,7 +522,7 @@ describe('backend.api', () => {
 		});
 
 		it('should throw an error if getPendingBtcTransactions throws', async () => {
-			vi.spyOn(BackendCanister, 'create').mockImplementation(() => {
+			backendCanisterMock.btcGetPendingTransaction.mockImplementation(() => {
 				throw new Error('mock-error');
 			});
 
