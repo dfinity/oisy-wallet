@@ -11,14 +11,13 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Identity } from '@dfinity/agent';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
-import { assertNonNullish } from '@dfinity/utils';
 import { Interface } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
 export interface CommonNftTransferParams {
-	sourceNetwork: EthereumNetwork; // must include { id: NetworkId; chainId: number }
-	identity: Identity; // your IC identity (passkey)
-	from?: EthAddress; // optional; derived from identity if absent
+	sourceNetwork: EthereumNetwork;
+	identity: Identity;
+	from?: EthAddress;
 	gas?: bigint;
 	maxFeePerGas?: bigint;
 	maxPriorityFeePerGas?: bigint;
@@ -35,7 +34,7 @@ export interface TransferErc1155Params extends CommonNftTransferParams {
 	id: bigint | number | string;
 	amount: bigint | number | string;
 	to: EthAddress;
-	data?: `0x${string}` | string; // defaults to "0x"
+	data?: `0x${string}` | string;
 }
 
 interface PrepareErc721Params extends TransferErc721Params {}
@@ -100,20 +99,16 @@ export const transferErc1155 = async ({
 	return await sendRaw({ networkId: sourceNetwork.id, raw });
 };
 
-const prepareErc721Transfer = async (
-	params: PrepareErc721Params
-): Promise<EthSignTransactionRequest> => {
-	const {
-		contractAddress,
-		tokenId,
-		to,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	} = params;
-
+const prepareErc721Transfer = async ({
+	contractAddress,
+	tokenId,
+	to,
+	sourceNetwork,
+	identity,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
+}: PrepareErc721Params): Promise<EthSignTransactionRequest> => {
 	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
@@ -135,22 +130,18 @@ const prepareErc721Transfer = async (
 	});
 };
 
-const prepareErc1155Transfer = async (
-	params: PrepareErc1155Params
-): Promise<EthSignTransactionRequest> => {
-	const {
-		contractAddress,
-		id,
-		amount,
-		to,
-		data = '0x',
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	} = params;
-
+const prepareErc1155Transfer = async ({
+	contractAddress,
+	id,
+	amount,
+	to,
+	data = '0x',
+	sourceNetwork,
+	identity,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
+}: PrepareErc1155Params): Promise<EthSignTransactionRequest> => {
 	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
@@ -174,22 +165,33 @@ const prepareErc1155Transfer = async (
 	});
 };
 
-const buildSignRequest = (params: BuildSignRequestParams): EthSignTransactionRequest => ({
-	to: params.to,
-	chain_id: params.chainId,
-	nonce: BigInt(params.nonce),
-	gas: params.gas ?? ETH_BASE_FEE,
-	max_fee_per_gas: params.maxFeePerGas ?? ETH_BASE_FEE,
-	max_priority_fee_per_gas: params.maxPriorityFeePerGas ?? ETH_BASE_FEE,
-	value: params.value,
-	data: [params.data]
+const buildSignRequest = ({
+	to,
+	chainId,
+	nonce,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	value,
+	data
+}: BuildSignRequestParams): EthSignTransactionRequest => ({
+	to: to,
+	chain_id: chainId,
+	nonce: BigInt(nonce),
+	gas: gas ?? ETH_BASE_FEE,
+	max_fee_per_gas: maxFeePerGas ?? ETH_BASE_FEE,
+	max_priority_fee_per_gas: maxPriorityFeePerGas ?? ETH_BASE_FEE,
+	value: value,
+	data: [data]
 });
 
-const signWithIdentity = async (params: SignWithIdentityParams): Promise<string> => {
-	assertNonNullish(params.identity, 'No Internet Identity to sign NFT transfer');
-	return await signTransaction({ identity: params.identity, transaction: params.transaction });
+const signWithIdentity = async ({
+	identity,
+	transaction
+}: SignWithIdentityParams): Promise<string> => {
+	return await signTransaction({ identity, transaction: transaction });
 };
 
-const sendRaw = async (params: SendRawParams): Promise<TransactionResponse> => {
-	return await infuraProviders(params.networkId).sendTransaction(params.raw);
+const sendRaw = async ({ networkId, raw }: SendRawParams): Promise<TransactionResponse> => {
+	return await infuraProviders(networkId).sendTransaction(raw);
 };
