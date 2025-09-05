@@ -144,7 +144,6 @@ describe('wallet-connect.services', () => {
 
 	describe('reject', () => {
 		let spyToastsShow: MockInstance;
-		let spyToastsError: MockInstance;
 
 		let spyBusyStart: MockInstance;
 		let spyBusyStop: MockInstance;
