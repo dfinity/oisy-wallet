@@ -5,8 +5,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 
 	export let isTransactionsPage: boolean;
+	export let isNftsPage: boolean;
 </script>
 
 <SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
-	<SendModal slot="modal" {isTransactionsPage} on:nnsClose />
+	<SendModal slot="modal" {isTransactionsPage} {isNftsPage} on:nnsClose />
 </SendButtonWithModal>

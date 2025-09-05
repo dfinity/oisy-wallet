@@ -10,7 +10,11 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
-	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import {
+		allSendWizardSteps,
+		sendNftsWizardSteps,
+		sendWizardStepsWithQrCodeScan
+	} from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnetNotLoaded,
@@ -22,7 +26,7 @@
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -33,7 +37,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { token } from '$lib/stores/token.store';
+	import { token as tokenStore, token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -51,8 +55,13 @@
 	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
 
 	export let isTransactionsPage: boolean;
+	export let isNftsPage: boolean;
 
 	let destination = '';
 	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
@@ -63,10 +72,13 @@
 	let steps: WizardSteps<WizardStepsSend>;
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
-		: allSendWizardSteps({ i18n: $i18n });
+		: isNftsPage
+			? sendNftsWizardSteps({ i18n: $i18n })
+			: allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
 	let modal: WizardModal<WizardStepsSend>;
+	let selectedNft: Nft | undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -161,6 +173,8 @@
 				})
 			: decodeQrCode(params);
 	};
+
+	console.log($nonFungibleTokens);
 </script>
 
 <SendTokenContext token={$token}>
@@ -179,6 +193,23 @@
 			<SendTokensList
 				on:icSendToken={onIcSendToken}
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
+			<SendNftsList
+				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				onSelect={(nft) => {
+					selectedNft = nft;
+					loadTokenAndRun({
+						token: findNonFungibleToken({
+							tokens: $nonFungibleTokens,
+							networkId: nft.collection.network.id,
+							address: nft.collection.address
+						}) as Token,
+						callback: async () => {
+							goToStep(WizardStepsSend.DESTINATION);
+						}
+					});
+				}}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
@@ -203,6 +234,7 @@
 			/>
 		{:else}
 			<SendWizard
+				nft={selectedNft}
 				{currentStep}
 				{destination}
 				{selectedContact}

@@ -9,12 +9,15 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
+import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { getNftsByNetworks, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
@@ -349,4 +352,58 @@ const getLoadedNfts = ({
 	}
 
 	return [];
+};
+
+export const sendNft = async ({
+	token,
+	tokenId,
+	destination,
+	fromAddress,
+	identity,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
+}: {
+	token: NonFungibleToken;
+	tokenId: NftId;
+	destination: string;
+	fromAddress: string;
+	identity: OptionIdentity;
+	gas: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
+}) => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+	} else {
+		let tx;
+		if (isTokenErc721(token)) {
+			tx = await transferErc721({
+				contractAddress: token.address,
+				tokenId,
+				sourceNetwork: token.network,
+				from: fromAddress,
+				to: destination,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+		} else if (isTokenErc1155(token)) {
+			tx = await transferErc1155({
+				contractAddress: token.address,
+				id: tokenId,
+				sourceNetwork: token.network,
+				from: fromAddress,
+				to: destination,
+				identity,
+				amount: 1, // currently fixed at 1
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
+			});
+		}
+
+		console.log('tx', tx);
+	}
 };

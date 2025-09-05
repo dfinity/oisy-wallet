@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -12,7 +12,9 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { Nft } from '$lib/types/nft';
 
+	export let nft: Nft | undefined;
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
@@ -25,7 +27,7 @@
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		!isEthAddress(destination) ||
-		invalidAmount(amount) ||
+		(isNullish(nft) && invalidAmount(amount)) ||
 		isNullish($storeFeeData);
 </script>
 
