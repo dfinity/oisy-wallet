@@ -113,9 +113,7 @@ describe('sol-signatures.services integration', () => {
 		it.each(fixtureSolAddresses)(
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
-				const loadTransactions = async (
-					lastSignature?: string
-				): Promise<SolTransactionUi[]> => {
+				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
 					const transactions = await getSolTransactions({
 						identity: mockIdentity,
 						address,
@@ -135,9 +133,7 @@ describe('sol-signatures.services integration', () => {
 					return [...transactions, ...nextTransactions];
 				};
 
-				const loadSignatures = async (
-					lastSignature?: string
-				): Promise<SolSignature[]> => {
+				const loadSignatures = async (lastSignature?: string): Promise<SolSignature[]> => {
 					const wallet = solAddress(address);
 
 					const beforeSignature = nonNullish(lastSignature) ? signature(lastSignature) : undefined;
@@ -224,9 +220,7 @@ describe('sol-signatures.services integration', () => {
 					123 as ProgramDerivedAddressBump
 				]);
 
-				const loadTransactions = async (
-					lastSignature?: string
-				): Promise<SolTransactionUi[]> => {
+				const loadTransactions = async (lastSignature?: string): Promise<SolTransactionUi[]> => {
 					const transactions = await getSolTransactions({
 						identity: mockIdentity,
 						address,
