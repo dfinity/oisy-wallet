@@ -88,7 +88,11 @@
 	const network: Network | undefined = $derived(token.network);
 
 	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
-		const id = net?.id;
+if (isNullish(net)) {
+return
+}
+
+		const {id} = net;
 		if (isNetworkIdBitcoin(id)) {
 			return 'Btc';
 		}
