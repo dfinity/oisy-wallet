@@ -234,7 +234,6 @@
 	{sourceNetwork}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		kaka
 		<EthSendReview {amount} {destination} {selectedContact} on:icBack on:icSend={send} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -242,7 +241,6 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		kakka
 		<EthSendForm
 			{nativeEthereumToken}
 			{selectedContact}
