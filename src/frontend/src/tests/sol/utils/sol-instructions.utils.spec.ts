@@ -371,7 +371,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO,
+					value: -100n,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -683,7 +683,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO,
+					value: -100n,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
