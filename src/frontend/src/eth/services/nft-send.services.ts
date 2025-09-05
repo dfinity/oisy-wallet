@@ -130,6 +130,8 @@ const prepareErc721Transfer = async ({
 		BigInt(tokenId)
 	]);
 
+	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(tokenId), data);
+
 	return buildSignRequest({
 		to: contractAddress as EthAddress,
 		value: ZERO,
@@ -164,6 +166,8 @@ const prepareErc1155Transfer = async ({
 		BigInt(amount),
 		data
 	]);
+
+	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(id), BigInt(amount), data);
 
 	return buildSignRequest({
 		to: contractAddress as EthAddress,
