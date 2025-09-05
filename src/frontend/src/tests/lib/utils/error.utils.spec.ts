@@ -341,6 +341,69 @@ describe('error.utils', () => {
 			expect(result).toEqual(expected);
 		});
 
+		it('should return a parsed object if the input is an error object with HTTP details', () => {
+			const errorMsg = `Error while loading the transactions.: Error: The replica returned a rejection error:
+  Request ID: 5ccaf5e3b315a16f3b1721226387040edd2660a049cbdcedc4c82a735d1b6c1a
+  Reject code: 2
+  Reject text: Canister 72uqs-pqaaa-aaaak-aes7a-cai is out of cycles
+  Error code: IC0207
+
+Call context:
+  Canister ID: 72uqs-pqaaa-aaaak-aes7a-cai
+  Method name: get_account_transactions
+  HTTP details: {
+  "ok": true,
+  "status": 200,
+  "statusText": "",
+  "headers": [
+    [
+      "content-length",
+      "1478"
+    ],
+    [
+      "content-type",
+      "application/cbor"
+    ],
+    [
+      "x-ic-canister-id",
+      "72uqs-pqaaa-aaaak-aes7a-cai"
+    ],
+    [
+      "x-request-id",
+      "01991913-6214-7802-8631-835a07b33703"
+    ]
+  ],
+  "body": {
+    "status": "replied",
+    "certificate": {
+      "0": 217,
+      "1": 217,
+      "2": 247,
+      "3": 163,
+      "4": 100,
+      "5": 116,
+      "6": 114,
+      "7": 101,
+      "8": 101,
+      "9": 131,
+      "10": 1
+    }
+  }
+}`;
+			const expected = {
+				'Canister ID': '72uqs-pqaaa-aaaak-aes7a-cai',
+				'Error code': 'IC0207',
+				'Method name': 'get_account_transactions',
+				'Reject code': '2',
+				'Reject text': 'Canister 72uqs-pqaaa-aaaak-aes7a-cai is out of cycles'
+			};
+			const error = new Error(JSON.stringify(errorMsg));
+
+			const result = parseIcErrorMessage(error);
+
+			expect(result).toEqual(expected);
+		});
+
 		it('removes keys from object error', () => {
 			const result = replaceIcErrorFields({
 				message: 'fail',
