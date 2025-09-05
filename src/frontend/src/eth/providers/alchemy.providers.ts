@@ -13,17 +13,20 @@ import type { OwnedContract, OwnedNft } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import type { Listener, TransactionResponse } from '@ethersproject/abstract-provider';
+import { parseNftId } from '$lib/validation/nft.validation';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import type { Listener } from '@ethersproject/abstract-provider';
 import {
 	AlchemyProvider as AlchemyProviderLib,
 	AlchemyWebSocketProvider
 } from '@ethersproject/providers';
 import {
 	AlchemySubscription,
+	type AlchemyEventType,
 	type AlchemyMinedTransactionsAddress,
 	type AlchemyMinedTransactionsEventFilter,
 	type AlchemyPendingTransactionsEventFilter,
+	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
 import { get } from 'svelte/store';
@@ -43,17 +46,6 @@ const configs: Record<NetworkId, AlchemySettings> = {
 		network: ALCHEMY_NETWORK_SEPOLIA
 	}
 };
-import { parseNftId } from '$lib/validation/nft.validation';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
-import {
-	Alchemy,
-	AlchemySubscription,
-	type AlchemyEventType,
-	type AlchemySettings,
-	type Network
-} from 'alchemy-sdk';
-import type { Listener } from 'ethers/utils';
-import { get } from 'svelte/store';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -139,8 +131,8 @@ export const initMinedTransactionsListener = ({
 	toAddress?: EthAddress;
 }): WebSocketListener => {
 	const { apiKey, network } = alchemyConfig(networkId);
-  
-  	const event: AlchemyEventType = {
+
+	const event: AlchemyEventType = {
 		method: AlchemySubscription.MINED_TRANSACTIONS,
 		hashesOnly: true,
 		addresses: nonNullish(toAddress) ? [{ to: toAddress }] : undefined
@@ -148,10 +140,7 @@ export const initMinedTransactionsListener = ({
 
 	let provider: AlchemyWebSocketProvider | null = new AlchemyWebSocketProvider(network, apiKey);
 
-	provider.on(
-		serializeMinedTransactionsEvent(event),
-		listener
-	);
+	provider.on(serializeMinedTransactionsEvent(event), listener);
 
 	return {
 		// eslint-disable-next-line require-await
@@ -176,20 +165,16 @@ export const initPendingTransactionsListener = ({
 	hashesOnly?: boolean;
 }): WebSocketListener => {
 	const { apiKey, network } = alchemyConfig(networkId);
-  
-  const event: AlchemyEventType = {
+
+	const event: AlchemyEventType = {
 		method: AlchemySubscription.PENDING_TRANSACTIONS,
 		toAddress,
 		hashesOnly
 	};
 
 	let provider: AlchemyWebSocketProvider | null = new AlchemyWebSocketProvider(network, apiKey);
-  
 
-	provider.on(
-		serializePendingTransactionsEvent(event),
-		listener
-	);
+	provider.on(serializePendingTransactionsEvent(event), listener);
 
 	return {
 		// eslint-disable-next-line require-await
