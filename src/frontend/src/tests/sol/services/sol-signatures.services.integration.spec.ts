@@ -136,7 +136,7 @@ describe('sol-signatures.services integration', () => {
 				};
 
 				const loadSignatures = async (
-					lastSignature?: string | undefined
+					lastSignature?: string
 				): Promise<SolSignature[]> => {
 					const wallet = solAddress(address);
 
