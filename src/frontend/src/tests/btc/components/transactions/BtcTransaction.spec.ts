@@ -4,7 +4,6 @@ import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 import { render } from '@testing-library/svelte';
 
 describe('BtcTransaction', () => {
-	
 	const currentTimestamp = BigInt(Math.floor(Date.now() / 1000));
 
 	const mockTransaction: BtcTransactionUi = {
