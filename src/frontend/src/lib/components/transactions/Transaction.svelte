@@ -22,7 +22,6 @@
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -87,7 +86,9 @@
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize">
+			<span
+				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
+			>
 				{#if nonNullish(contact)}
 					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
 				{:else}
@@ -126,21 +127,20 @@
 			{#snippet amountDescription()}
 				{#if nonNullish(timestamp)}
 					<span data-tid="receive-tokens-modal-transaction-timestamp">
-						{new Intl.DateTimeFormat($currentLanguage, {
-							hour: '2-digit',
-							minute: '2-digit',
-							hour12: false
-						}).format(new Date(Number(timestamp) * 1000))}
+						{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage,
+							formatOptions: {
+								hour: '2-digit',
+								minute: '2-digit',
+								hour12: false
+							}
+						})}
 					</span>
 				{/if}
 			{/snippet}
 
 			{#snippet description()}
-				<!-- <span data-tid="receive-tokens-modal-transaction-timestamp">
-					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
-					{/if}
-				</span> -->
 				<span class="inline-flex min-w-0 items-center gap-2 text-primary">
 					{#if type === 'send'}
 						<span class="shrink-0">{$i18n.transaction.text.to}</span>
@@ -171,7 +171,6 @@
 
 					<TransactionStatusComponent {status} />
 				</span>
-				<TransactionStatusComponent {status} />
 			{/snippet}
 		</Card>
 	</span>
