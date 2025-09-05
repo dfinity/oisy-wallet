@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -56,13 +57,14 @@
 			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if badge?.type === 'icon'}
-		<!-- TODO: use new mapping color when merged -->
-		<div
-			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
-			aria-label={badge.ariaLabel}
-			data-tid={`icon-${badgeTestId}`}
-		>
-			<svelte:component this={badge.icon} size="16" />
-		</div>
+		<RoundedIcon
+			ariaLabel={badge.ariaLabel}
+			icon={badge.icon}
+			paddingClass="p-1"
+			positionClass="absolute"
+			size="16"
+			styleClass="-bottom-1 -right-1"
+			testId="icon-badge"
+		/>
 	{/if}
 </div>
