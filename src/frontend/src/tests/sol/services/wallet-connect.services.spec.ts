@@ -472,11 +472,11 @@ describe('wallet-connect.services', () => {
 
 				expect(mockParams.progress).toHaveBeenCalledTimes(3);
 				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(2, ProgressStepsSendSol.SEND);
 				expect(mockParams.progress).toHaveBeenNthCalledWith(
-					3,
+					2,
 					ProgressStepsSign.APPROVE_WALLET_CONNECT
 				);
+				expect(mockParams.progress).toHaveBeenNthCalledWith(3, ProgressStepsSendSol.DONE);
 			});
 
 			it('should not wait for errors when sending', async () => {
