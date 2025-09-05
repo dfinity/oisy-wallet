@@ -155,7 +155,7 @@
 				token: $sendToken as NonFungibleToken,
 				tokenId: parseNftId(1),
 				destination,
-				fromAddress: $ethAddress ?? '',
+				fromAddress: $ethAddress,
 				identity: $authIdentity,
 				gas,
 				maxFeePerGas,
@@ -292,7 +292,14 @@
 	{sourceNetwork}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview {nft} {amount} {destination} {selectedContact} on:icBack on:icSend={nonNullish(nft) ? nftSend : send} />
+		<EthSendReview
+			{nft}
+			{amount}
+			{destination}
+			{selectedContact}
+			on:icBack
+			on:icSend={nonNullish(nft) ? nftSend : send}
+		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
 			progressStep={sendProgressStep}

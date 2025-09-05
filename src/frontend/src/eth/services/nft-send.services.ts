@@ -10,14 +10,13 @@ import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Identity } from '@dfinity/agent';
-import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { Interface } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
 export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork;
 	identity: Identity;
-	from?: EthAddress;
+	from: EthAddress;
 	gas: bigint;
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
@@ -65,6 +64,7 @@ export const transferErc721 = async ({
 	identity,
 	sourceNetwork,
 	to,
+	from,
 	tokenId,
 	contractAddress,
 	gas,
@@ -75,6 +75,7 @@ export const transferErc721 = async ({
 		identity,
 		sourceNetwork,
 		to,
+		from,
 		tokenId,
 		contractAddress,
 		gas,
@@ -89,6 +90,7 @@ export const transferErc1155 = async ({
 	identity,
 	sourceNetwork,
 	to,
+	from,
 	id,
 	amount,
 	contractAddress,
@@ -100,6 +102,7 @@ export const transferErc1155 = async ({
 		identity,
 		sourceNetwork,
 		to,
+		from,
 		id,
 		amount,
 		contractAddress,
@@ -115,18 +118,16 @@ const prepareErc721Transfer = async ({
 	contractAddress,
 	tokenId,
 	to,
+	from,
 	sourceNetwork,
-	identity,
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas
 }: PrepareErc721Params): Promise<EthSignTransactionRequest> => {
-	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
-	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
+	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(from);
 
-	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(tokenId));
 	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
-		fromAddr,
+		from,
 		to,
 		BigInt(tokenId)
 	]);
@@ -148,20 +149,17 @@ const prepareErc1155Transfer = async ({
 	id,
 	amount,
 	to,
+	from,
 	data = '0x',
 	sourceNetwork,
-	identity,
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas
 }: PrepareErc1155Params): Promise<EthSignTransactionRequest> => {
-	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
-	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
-
-	console.log('TX DATA NFT SEND', fromAddr, to, BigInt(id), BigInt(amount), data);
+	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(from);
 
 	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [
-		fromAddr,
+		from,
 		to,
 		BigInt(id),
 		BigInt(amount),
