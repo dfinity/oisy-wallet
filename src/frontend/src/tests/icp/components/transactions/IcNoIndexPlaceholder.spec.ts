@@ -58,7 +58,6 @@ describe('IcNoIndexPlaceholder', () => {
 				placeholderType: 'not-working'
 			});
 
-			// Use iconClass instead of styleClass and expect the default size of 16
 			const { container: iconContainer } = render(IconAlertTriangle, {
 				size: '16'
 			});
