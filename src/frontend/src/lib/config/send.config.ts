@@ -55,7 +55,7 @@ export const sendNftsWizardSteps = (
 ): WizardSteps<WizardStepsSend> => [
 	{
 		name: WizardStepsSend.NFTS_LIST,
-		title: params.i18n.send.text.select_nft
+		title: params.i18n.send.text.select_token
 	},
 	{
 		name: WizardStepsSend.FILTER_NETWORKS,
