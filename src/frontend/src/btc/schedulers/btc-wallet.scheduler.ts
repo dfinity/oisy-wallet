@@ -239,16 +239,13 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		minterCanisterId,
 		shouldFetchTransactions
 	}: LoadBtcWalletParams) => {
-		assertNonNullish(identity, 'Identity is required for loading BTC wallet data');
-
-		// TODO: investigate and implement "update" call for BTC transactions
 		const transactionData =
 			shouldFetchTransactions && !certified
 				? await this.loadBtcTransactionsData({ btcAddress })
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
 
 		const pendingTransactionData =
-			shouldFetchTransactions && !certified
+			nonNullish(identity) && shouldFetchTransactions && !certified
 				? await this.loadBtcPendingTransactionsData({
 						btcAddress,
 						identity,
