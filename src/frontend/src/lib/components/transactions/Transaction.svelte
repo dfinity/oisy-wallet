@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Component, Snippet, ComponentProps } from 'svelte';
+	import type { Component, Snippet } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
@@ -37,8 +37,6 @@
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-
-	type NetworkLogoProps = ComponentProps<typeof NetworkLogo>;
 
 	interface Props {
 		amount?: bigint;
@@ -87,32 +85,7 @@
 		nonNullish(address) ? filterAddressFromContact({ contact, address })?.label : undefined
 	);
 
-	const hasNetwork = (t: unknown): t is { network?: Network } =>
-		typeof t === 'object' && t !== null && 'network' in (t as Record<string, unknown>);
-
-	const hasCollectionNetwork = (t: unknown): t is { collection: { network?: Network } } => {
-		if (typeof t !== 'object' || t === null) {
-			return false;
-		}
-		const maybe = (t as { collection?: unknown }).collection;
-		return (
-			typeof maybe === 'object' && maybe !== null && 'network' in (maybe as Record<string, unknown>)
-		);
-	};
-
-	const network: Network | undefined = $derived(
-		isTokenNonFungible(token)
-			? hasCollectionNetwork(token)
-				? token.collection.network
-				: hasNetwork(token)
-					? token.network
-					: undefined
-			: hasNetwork(token)
-				? token.network
-				: undefined
-	);
-
-	const networkLogoColor: NetworkLogoProps['color'] = $derived('transparent');
+	const network: Network | undefined = $derived(token.network);
 
 	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
 		const id = net?.id;
@@ -130,6 +103,7 @@
 		}
 		return undefined;
 	};
+
 	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
 		mapNetworkToAccountType(network)
 	);
@@ -157,9 +131,9 @@
 					<div class="flex">
 						<NetworkLogo
 							addressType={networkAddressType}
-							color={networkLogoColor}
+							color="transparent"
 							{network}
-							testId="network-tx"
+							testId="transaction-network"
 						/>
 					</div>
 				{/if}
@@ -207,11 +181,11 @@
 			{/snippet}
 
 			{#snippet description()}
-				<span class="inline-flex min-w-0 items-center gap-2">
+				<span class="inline-flex min-w-0 items-center gap-2 text-primary">
 					{#if type === 'send'}
-						<span class="shrink-0 text-tertiary">{$i18n.transaction.text.to}</span>
+						<span class="shrink-0">{$i18n.transaction.text.to}</span>
 					{:else if type === 'receive'}
-						<span class="shrink-0 text-tertiary">{$i18n.transaction.text.from}</span>
+						<span class="shrink-0">{$i18n.transaction.text.from}</span>
 					{/if}
 
 					{#if nonNullish(contact)}
@@ -221,7 +195,7 @@
 					{/if}
 
 					<span class="inline-flex min-w-0 items-center gap-1">
-						<span class="truncate">
+						<span>
 							{#if nonNullish(contact)}
 								{contact.name}
 							{:else if nonNullish(address)}
