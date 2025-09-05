@@ -52,6 +52,7 @@ describe('IcNoIndexPlaceholder', () => {
 				)
 			).toBeInTheDocument();
 		});
+
 		it('should render the correct icon', () => {
 			const { container } = render(IcNoIndexPlaceholder, {
 				placeholderType: 'not-working'
