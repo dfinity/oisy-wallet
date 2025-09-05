@@ -4,18 +4,7 @@ import type { Token as AppToken } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { render, screen } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Keep the real module; only override the clock-dependent formatter
-vi.mock('$lib/utils/format.utils', async (importOriginal) => {
-	const actual = await importOriginal<typeof import('$lib/utils/format.utils')>();
-	return {
-		...actual,
-		formatSecondsToDate: () => '14:23'
-	};
-});
-
-// ---- Minimal local shapes for tests (no `any`) ----
 export interface Token {
 	symbol: string;
 	name: string;
@@ -83,7 +72,7 @@ describe('Transaction (single)', () => {
 			type: 'receive',
 			status: 'confirmed',
 			timestamp: 1_690_000_000,
-			token: ICP_TOKEN, // full app token
+			token: ICP_TOKEN,
 			iconType: 'transaction',
 			from: fromAddress
 		});
@@ -131,12 +120,11 @@ describe('Transaction (single)', () => {
 			amount: 999n,
 			type: 'send',
 			status: 'confirmed',
-			token: NFT_TEST_TOKEN as unknown as AppToken, // cast minimal -> app token
+			token: NFT_TEST_TOKEN as unknown as AppToken,
 			iconType: 'transaction',
 			to: '0xaddr'
 		});
 
-		// No formatted amount with symbol for NFTs
 		expect(screen.queryByText(/COOLNFT/)).toBeNull();
 	});
 
@@ -146,7 +134,7 @@ describe('Transaction (single)', () => {
 		const { container } = render(Transaction, {
 			type: 'receive',
 			status: 'unconfirmed',
-			token: NFT_TEST_TOKEN as unknown as AppToken, // cast minimal -> app token
+			token: NFT_TEST_TOKEN as unknown as AppToken,
 			iconType: 'token',
 			from: '0xaddr',
 			tokenId: 1
