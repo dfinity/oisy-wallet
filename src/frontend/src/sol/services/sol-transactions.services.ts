@@ -29,13 +29,41 @@ import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/kit';
+import { lamports, address as solAddress } from '@solana/kit';
+import type { Lamports } from '@solana/rpc-types';
 import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
 const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
+
+const extractBalances = ({
+	address,
+	accountKeys,
+	preBalances,
+	postBalances
+}: {
+	address: SolAddress;
+	accountKeys: ParsedAccount[];
+	preBalances: Lamports[];
+	postBalances: Lamports[];
+}): {
+	preBalance: Lamports;
+	postBalance: Lamports;
+} => {
+	const accountIndex =
+		accountKeys.length > 0 ? accountKeys.findIndex(({ pubkey }) => pubkey === address) : undefined;
+
+	if (isNullish(accountIndex) || accountIndex < 0) {
+		return { preBalance: lamports(ZERO), postBalance: lamports(ZERO) };
+	}
+
+	return {
+		preBalance: accountIndex < preBalances.length ? preBalances[accountIndex] : lamports(ZERO),
+		postBalance: accountIndex < postBalances.length ? postBalances[accountIndex] : lamports(ZERO)
+	};
+};
 
 export const fetchSolTransactionsForSignature = async ({
 	identity,
@@ -70,14 +98,20 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	const { fee } = meta ?? {};
+	const { fee, preBalances, postBalances } = meta ?? {};
 	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
+	const { preBalance, postBalance } = extractBalances({
+		address,
+		accountKeys: [...(accountKeys ?? [])],
+		preBalances: [...(preBalances ?? [])],
+		postBalances: [...(postBalances ?? [])]
+	});
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// Inside the instructions, there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
-	// They are inserted in the instructions array in the order they refer to the main instruction.
+	// They are inserted in the instructions' array in the order they refer to the main instruction.
 	const { allInstructions } = [...putativeInnerInstructions]
 		.sort((a, b) => a.index - b.index)
 		.reduce(
@@ -97,6 +131,8 @@ export const fetchSolTransactionsForSignature = async ({
 					mint: solAddress(tokenAddress)
 				})
 			: [undefined];
+
+	const initialCumulativeBalances = { [address]: preBalance - postBalance };
 
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
@@ -142,11 +178,11 @@ export const fetchSolTransactionsForSignature = async ({
 
 			// The cumulative balances are updated for every instruction, so we can keep track of the
 			// SOL balance of the address and its associated token account at any given time.
-			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// It is useful when mapping, for example, a `closeAccount` instruction, where the redeemed value
 			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
 			const cumulativeBalances = {
 				...accCumulativeBalances,
-				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
+				// We include WSOL in the calculation because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
 					[from]: (accCumulativeBalances[from] ?? ZERO) - value,
 					[to]: (accCumulativeBalances[to] ?? ZERO) + value
@@ -159,7 +195,7 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In case of Solana native tokens, the token address is undefined.
+			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
@@ -208,7 +244,11 @@ export const fetchSolTransactionsForSignature = async ({
 				addressToToken
 			};
 		},
-		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {}, addressToToken: {} })
+		Promise.resolve({
+			parsedTransactions: [],
+			cumulativeBalances: initialCumulativeBalances,
+			addressToToken: {}
+		})
 	);
 
 	// The instructions are received in the order they were executed, meaning the first instruction
