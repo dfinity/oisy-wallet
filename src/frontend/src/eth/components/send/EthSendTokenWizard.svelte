@@ -150,6 +150,8 @@
 			return;
 		}
 
+		dispatch('icNext');
+
 		try {
 			await sendNft({
 				token: $sendToken as NonFungibleToken,

@@ -1,4 +1,3 @@
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
@@ -382,7 +381,7 @@ export const sendNft = async ({
 			tx = await transferErc721({
 				contractAddress: token.address,
 				tokenId,
-				sourceNetwork: ETHEREUM_NETWORK,
+				sourceNetwork: token.network,
 				from: fromAddress,
 				to: destination,
 				identity,
@@ -394,7 +393,7 @@ export const sendNft = async ({
 			tx = await transferErc1155({
 				contractAddress: token.address,
 				id: tokenId,
-				sourceNetwork: ETHEREUM_NETWORK,
+				sourceNetwork: token.network,
 				from: fromAddress,
 				to: destination,
 				identity,
