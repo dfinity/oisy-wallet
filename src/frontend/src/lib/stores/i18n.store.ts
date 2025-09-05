@@ -1,6 +1,7 @@
 import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import { Languages } from '$lib/enums/languages';
+import ar from '$lib/i18n/ar.json';
 import cs from '$lib/i18n/cs.json';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
@@ -8,7 +9,9 @@ import fr from '$lib/i18n/fr.json';
 import hi from '$lib/i18n/hi.json';
 import it from '$lib/i18n/it.json';
 import ja from '$lib/i18n/ja.json';
+import pl from '$lib/i18n/pl.json';
 import pt from '$lib/i18n/pt.json';
+import ru from '$lib/i18n/ru.json';
 import vi from '$lib/i18n/vi.json';
 import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -19,6 +22,11 @@ import { get as getStore, writable, type Readable } from 'svelte/store';
 export const enI18n = (): I18n => ({
 	...en,
 	lang: Languages.ENGLISH
+});
+
+const arI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: ar as I18n }),
+	lang: Languages.ARABIC
 });
 
 const csI18n = (): I18n => ({
@@ -51,9 +59,19 @@ const jaI18n = (): I18n => ({
 	lang: Languages.JAPANESE
 });
 
+const plI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: pl as I18n }),
+	lang: Languages.POLISH
+});
+
 const ptI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: pt as I18n }),
 	lang: Languages.PORTUGUESE
+});
+
+const ruI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: ru as I18n }),
+	lang: Languages.RUSSIAN
 });
 
 const viI18n = (): I18n => ({
@@ -68,6 +86,8 @@ const zhcnI18n = (): I18n => ({
 
 const loadLang = (lang: Languages): I18n => {
 	switch (lang) {
+		case Languages.ARABIC:
+			return arI18n();
 		case Languages.CHINESE_SIMPLIFIED:
 			return zhcnI18n();
 		case Languages.CZECH:
@@ -82,8 +102,12 @@ const loadLang = (lang: Languages): I18n => {
 			return itI18n();
 		case Languages.JAPANESE:
 			return jaI18n();
+		case Languages.POLISH:
+			return plI18n();
 		case Languages.PORTUGUESE:
 			return ptI18n();
+		case Languages.RUSSIAN:
+			return ruI18n();
 		case Languages.VIETNAMESE:
 			return viI18n();
 		default:
