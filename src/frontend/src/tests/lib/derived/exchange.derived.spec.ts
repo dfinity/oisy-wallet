@@ -153,14 +153,8 @@ describe('exchange.derived', () => {
 			twinToken: ETHEREUM_TOKEN
 		} as IcCkToken;
 
-		const mockCkUsdcToken = {
-			...mockValidIcCkToken,
-			id: parseTokenId('CkUsdcTokenId'),
-			name: 'ckUSDC',
-			symbol: USDC_TOKEN.twinTokenSymbol,
-			ledgerCanisterId: CKERC20_LEDGER_CANISTER_IDS[0],
-			twinToken: USDC_TOKEN
-		} as IcCkToken;
+
+
 
 		const mockSplDefaultToken: SplToken = {
 			...mockValidSplToken,
