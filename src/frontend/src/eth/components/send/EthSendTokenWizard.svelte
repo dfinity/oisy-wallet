@@ -41,6 +41,8 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { sendNft } from '$lib/services/nft.services';
+	import { parseNftId } from '$lib/validation/nft.validation';
 
 	export let currentStep: WizardStep | undefined;
 
@@ -118,6 +120,15 @@
 			});
 			return;
 		}
+		console.log('call');
+		await sendNft({
+			token: $sendToken,
+			tokenId: parseNftId(1),
+			destination,
+			fromAddress: $ethAddress ?? '',
+			identity: $authIdentity
+		});
+		return;
 
 		if (invalidAmount(amount) || isNullish(amount)) {
 			toastsError({
@@ -223,6 +234,7 @@
 	{sourceNetwork}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		kaka
 		<EthSendReview {amount} {destination} {selectedContact} on:icBack on:icSend={send} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -230,6 +242,7 @@
 			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SEND}
+		kakka
 		<EthSendForm
 			{nativeEthereumToken}
 			{selectedContact}

@@ -1,3 +1,4 @@
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
@@ -9,12 +10,17 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
+import {
+	transferErc1155ViaIdentity,
+	transferErc721ViaIdentity
+} from '$eth/services/nft-send.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { getNftsByNetworks, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
@@ -349,4 +355,42 @@ const getLoadedNfts = ({
 	}
 
 	return [];
+};
+
+export const sendNft = async ({
+	token,
+	tokenId,
+	destination,
+	fromAddress,
+	identity
+}: {
+	token: NonFungibleToken;
+	tokenId: NftId;
+	destination: string;
+	fromAddress: string;
+	identity: OptionIdentity;
+}) => {
+	let tx;
+	if (isTokenErc721(token)) {
+		tx = await transferErc721ViaIdentity({
+			contractAddress: token.address,
+			tokenId,
+			sourceNetwork: ETHEREUM_NETWORK,
+			from: fromAddress,
+			to: destination,
+			identity
+		});
+	} else if (isTokenErc1155(token)) {
+		tx = await transferErc1155ViaIdentity({
+			contractAddress: token.address,
+			id: tokenId,
+			sourceNetwork: ETHEREUM_NETWORK,
+			from: fromAddress,
+			to: destination,
+			identity,
+			amount: 1
+		});
+	}
+
+	console.log('tx', tx);
 };

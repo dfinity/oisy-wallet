@@ -26,7 +26,7 @@
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { enabledTokens } from '$lib/derived/tokens.derived';
+	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -37,7 +37,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { token } from '$lib/stores/token.store';
+	import { token as tokenStore, token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -56,6 +56,8 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nftStore } from '$lib/stores/nft.store';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
@@ -169,6 +171,8 @@
 				})
 			: decodeQrCode(params);
 	};
+
+	console.log($nonFungibleTokens);
 </script>
 
 <SendTokenContext token={$token}>
@@ -189,7 +193,19 @@
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-			<SendNftsList on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)} onSelect={() => 	goToStep(WizardStepsSend.DESTINATION)} />
+			<SendNftsList
+				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				onSelect={(nft) => {
+					tokenStore.set(
+						findNonFungibleToken({
+							tokens: $nonFungibleTokens,
+							networkId: nft.collection.network.id,
+							address: nft.collection.address
+						})
+					);
+					goToStep(WizardStepsSend.DESTINATION);
+				}}
+			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}

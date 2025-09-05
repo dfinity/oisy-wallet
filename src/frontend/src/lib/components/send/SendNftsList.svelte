@@ -8,9 +8,13 @@
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { createEventDispatcher } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
@@ -20,6 +24,8 @@
 
 	const dispatch = createEventDispatcher();
 
+	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
 	let filter = $state('');
 
 	const filteredByInput: Nft[] = $derived(
@@ -28,8 +34,8 @@
 		)
 	);
 	const filteredByNetwork: Nft[] = $derived(
-		nonNullish($selectedNetwork)
-			? filteredByInput.filter((nft) => nft.collection.network.id === $selectedNetwork.id)
+		nonNullish($filterNetwork)
+			? filteredByInput.filter((nft) => nft.collection.network.id === $filterNetwork.id)
 			: filteredByInput
 	);
 
@@ -49,10 +55,10 @@
 	<div class="flex items-center">
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
-			aria-label={$selectedNetwork?.name ?? $i18n.networks.chain_fusion}
+			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			onclick={() => dispatch('icSelectNetworkFilter')}
 		>
-			<span class="font-medium">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
 		</button>
 	</div>
