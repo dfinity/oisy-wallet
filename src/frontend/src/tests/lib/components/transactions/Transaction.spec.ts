@@ -2,7 +2,6 @@ import Transaction from '$lib/components/transactions/Transaction.svelte';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { render, screen } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('$lib/utils/format.utils', async (importOriginal) => {
 	const actual = await importOriginal<typeof import('$lib/utils/format.utils')>();
@@ -39,9 +38,8 @@ let testContact: any | undefined = undefined;
 let testAliasLabel: string | undefined = 'Work';
 
 vi.mock('$lib/utils/contact.utils', () => ({
-	getContactForAddress: ({ addressString }: { addressString: string }) => {
-		return testContact?.address === addressString ? testContact : undefined;
-	},
+	getContactForAddress: ({ addressString }: { addressString: string }) =>
+		testContact?.address === addressString ? testContact : undefined,
 	filterAddressFromContact: () => (testAliasLabel ? { label: testAliasLabel } : undefined)
 }));
 
@@ -74,7 +72,7 @@ describe('Transaction (single)', () => {
 			from: fromAddress
 		});
 
-		expect(await screen.findByText(/From/i)).toBeInTheDocument();
+		await expect(screen.findByText(/From/i)).resolves.toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: fromAddress }));
 	});
 
@@ -155,7 +153,7 @@ describe('Transaction (single)', () => {
 			amount: 1n
 		});
 
-		expect(await screen.findByText(/ICP/)).toBeInTheDocument();
+		await expect(screen.findByText(/ICP/)).resolves.toBeInTheDocument();
 	});
 
 	it('renders description with shortened "to" address and pending status in transaction icon mode', async () => {
@@ -172,4 +170,5 @@ describe('Transaction (single)', () => {
 		expect(screen.getByText(/Pending\.\.\./i)).toBeInTheDocument();
 	});
 });
-x 
+
+x;
