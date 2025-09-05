@@ -21,7 +21,7 @@
 	let { network, size = 'xxs', color = 'off-white', addressType, testId }: Props = $props();
 </script>
 
-{#if color === 'transparent' && addressType}
+{#if color === 'transparent' && nonNullish(addressType)}
 	<div data-tid={`${testId}-transparent`}>
 		{#if addressType === 'Icrcv2'}
 			<IconAddressTypeIcrc2 size="16" />
