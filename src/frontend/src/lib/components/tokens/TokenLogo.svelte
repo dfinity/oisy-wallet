@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { CardData } from '$lib/types/token-card';
