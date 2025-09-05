@@ -225,7 +225,7 @@ describe('sol-signatures.services integration', () => {
 				]);
 
 				const loadTransactions = async (
-					lastSignature?: string | undefined
+					lastSignature?: string
 				): Promise<SolTransactionUi[]> => {
 					const transactions = await getSolTransactions({
 						identity: mockIdentity,
