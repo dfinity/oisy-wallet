@@ -1,6 +1,5 @@
 import * as exchangeEnv from '$env/exchange.env';
 import {
-	CKERC20_LEDGER_CANISTER_IDS,
 	IC_CKBTC_LEDGER_CANISTER_ID,
 	IC_CKETH_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
@@ -152,9 +151,6 @@ describe('exchange.derived', () => {
 			ledgerCanisterId: IC_CKETH_LEDGER_CANISTER_ID,
 			twinToken: ETHEREUM_TOKEN
 		} as IcCkToken;
-
-
-
 
 		const mockSplDefaultToken: SplToken = {
 			...mockValidSplToken,
