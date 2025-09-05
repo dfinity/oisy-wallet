@@ -357,13 +357,11 @@ describe('wallet-connect.services', () => {
 		});
 
 		it('should not wait for sending to be confirmed', async () => {
-			vi.spyOn(solSendServices, 'sendSignedTransaction').mockImplementationOnce(() => {
-				return new Promise((resolve) => {
+			vi.spyOn(solSendServices, 'sendSignedTransaction').mockImplementationOnce(() => new Promise((resolve) => {
 					setTimeout(() => {
 						resolve();
 					}, 60_000);
-				});
-			});
+				}));
 
 			const result = await sign(mockParams);
 
