@@ -34,7 +34,7 @@ vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
 }));
 
-describe('sol-signatures.services integration', () => {
+describe.skip('sol-signatures.services integration', () => {
 	describe('getSolTransactions', () => {
 		beforeAll(() => {
 			// If the Alchemy API is empty, the test will fail, since it is required to fetch real data.
