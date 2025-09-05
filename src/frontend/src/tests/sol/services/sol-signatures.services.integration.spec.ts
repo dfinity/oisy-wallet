@@ -114,7 +114,7 @@ describe('sol-signatures.services integration', () => {
 			'should match the total SOL balance of an account (for example, %s)',
 			async (address) => {
 				const loadTransactions = async (
-					lastSignature?: string | undefined
+					lastSignature?: string
 				): Promise<SolTransactionUi[]> => {
 					const transactions = await getSolTransactions({
 						identity: mockIdentity,
