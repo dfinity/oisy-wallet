@@ -35,7 +35,7 @@ import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
-const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
+export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
 const extractBalances = ({
