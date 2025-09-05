@@ -3,6 +3,7 @@
 	import type { Component, Snippet } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
@@ -19,6 +20,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { formatSecondsToDate } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -85,14 +87,9 @@
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="inline-block first-letter:capitalize">
+			<span class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize">
 				{#if nonNullish(contact)}
-					{type === 'send'
-						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
-						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
-					{#if nonNullish(addressAlias) && addressAlias !== ''}
-						<span class="text-tertiary"><Divider />{addressAlias}</span>
-					{/if}
+					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
 				{:else}
 					{@render children?.()}
 				{/if}
@@ -126,12 +123,53 @@
 					{/if}
 				{/if}
 			{/snippet}
+			{#snippet amountDescription()}
+				{#if nonNullish(timestamp)}
+					<span data-tid="receive-tokens-modal-transaction-timestamp">
+						{new Intl.DateTimeFormat($currentLanguage, {
+							hour: '2-digit',
+							minute: '2-digit',
+							hour12: false
+						}).format(new Date(Number(timestamp) * 1000))}
+					</span>
+				{/if}
+			{/snippet}
 
 			{#snippet description()}
-				<span data-tid="receive-tokens-modal-transaction-timestamp">
+				<!-- <span data-tid="receive-tokens-modal-transaction-timestamp">
 					{#if nonNullish(timestamp)}
 						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
 					{/if}
+				</span> -->
+				<span class="inline-flex min-w-0 items-center gap-2 text-primary">
+					{#if type === 'send'}
+						<span class="shrink-0">{$i18n.transaction.text.to}</span>
+					{:else if type === 'receive'}
+						<span class="shrink-0">{$i18n.transaction.text.from}</span>
+					{/if}
+
+					{#if nonNullish(contact)}
+						<span class="shrink-0">
+							<Avatar name={contact.name} image={contact.image} />
+						</span>
+					{/if}
+
+					<span class="inline-flex min-w-0 items-center gap-1">
+						<span>
+							{#if nonNullish(contact)}
+								{contact.name}
+							{:else if nonNullish(contactAddress)}
+								{shortenWithMiddleEllipsis({ text: contactAddress })}
+							{/if}
+						</span>
+						{#if nonNullish(addressAlias) && addressAlias !== ''}
+							<span class="inline-flex items-center gap-1 text-tertiary">
+								<Divider />{addressAlias}
+							</span>
+						{/if}
+					</span>
+
+					<TransactionStatusComponent {status} />
 				</span>
 				<TransactionStatusComponent {status} />
 			{/snippet}
