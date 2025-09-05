@@ -153,7 +153,6 @@ describe('wallet-connect.services', () => {
 			vi.clearAllMocks();
 
 			spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
-			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 			spyBusyStart = vi.spyOn(busy, 'start');
 			spyBusyStop = vi.spyOn(busy, 'stop');
