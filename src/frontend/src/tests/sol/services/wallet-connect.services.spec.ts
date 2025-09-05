@@ -458,7 +458,7 @@ describe('wallet-connect.services', () => {
 				}
 			};
 
-			it('should return success with amount and destination when signing is successful', async () => {
+			it('should return success when signing is successful', async () => {
 				const result = await sign(mockParamsOther);
 
 				expect(result).toStrictEqual({ success: true });
