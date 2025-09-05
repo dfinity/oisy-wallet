@@ -148,7 +148,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					return true;
 				}
 
-				// If block height has changed, include the transaction (confirmations may have changed)
+				// If the block height has changed, include the transaction (confirmations may have changed)
 				return blockHeightChanged;
 			});
 
@@ -160,7 +160,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				latestBitcoinBlockHeight
 			};
 		} catch (error) {
-			// We don't want to disrupt user experience if we can't fetch the transactions or latest block height.
+			// We don't want to disrupt the user experience if we can't fetch the transactions or latest block height.
 			console.error('Error fetching BTC transactions data:', error);
 			// TODO: Return an error instead of an empty array.
 			return {
@@ -317,6 +317,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			JSON.stringify(this.store.balance.data) !== JSON.stringify(balance.data) ||
 			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
+
 		const newTransactions = uncertifiedTransactions.length > 0;
 		const blockHeightChanged =
 			nonNullish(latestBitcoinBlockHeight) &&
