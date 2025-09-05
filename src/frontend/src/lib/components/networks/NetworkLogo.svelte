@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import IconAddressTypeBtc from '$lib/components/icons/IconAddressTypeBtc.svelte';
 	import IconAddressTypeEth from '$lib/components/icons/IconAddressTypeEth.svelte';
 	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrcv2.svelte';
@@ -9,7 +10,6 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		network: Network;
