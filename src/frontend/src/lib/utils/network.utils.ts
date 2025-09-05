@@ -13,12 +13,19 @@ import {
 import { SEPOLIA_NETWORK_ID, SUPPORTED_ETHEREUM_NETWORK_IDS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID, ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
+	IC_CKBTC_MINTER_CANISTER_ID,
+	LOCAL_CKBTC_MINTER_CANISTER_ID,
+	STAGING_CKBTC_MINTER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
+import {
 	SOLANA_DEVNET_NETWORK_ID,
 	SOLANA_LOCAL_NETWORK_ID,
 	SOLANA_MAINNET_NETWORK_ID,
 	SUPPORTED_SOLANA_NETWORK_IDS
 } from '$env/networks/networks.sol.env';
 import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
+import { LOCAL } from '$lib/constants/app.constants';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
@@ -91,7 +98,7 @@ const mapper: Record<symbol, BitcoinNetwork> = {
 export const mapNetworkIdToBitcoinNetwork = (networkId: NetworkId): BitcoinNetwork | undefined =>
 	mapper[networkId];
 
-export const mapBitcoinNetworkToNetworkId = (network: BitcoinNetwork): NetworkId | undefined => {
+export const mapBitcoinNetworkToNetworkId = (network: BitcoinNetwork): NetworkId => {
 	const reverseMapper: Record<BitcoinNetwork, NetworkId> = {
 		mainnet: BTC_MAINNET_NETWORK_ID,
 		testnet: BTC_TESTNET_NETWORK_ID,
@@ -151,3 +158,17 @@ export const mapToSignerBitcoinNetwork = ({
 	network: BitcoinNetwork;
 }): SignerBitcoinNetwork =>
 	({ mainnet: { mainnet: null }, testnet: { testnet: null }, regtest: { regtest: null } })[network];
+
+/**
+ * Maps a Bitcoin network ID to the appropriate minter canister ID.
+ *
+ * @param networkId - The Bitcoin network ID
+ * @returns The minter canister ID for the network, fallback to mainnet canister ID if others unavailable
+ */
+export const mapBitcoinNetworkIdToMinterCanisterId = (networkId: NetworkId): CanisterIdText =>
+	isNetworkIdBTCMainnet(networkId)
+		? (IC_CKBTC_MINTER_CANISTER_ID ?? IC_CKBTC_MINTER_CANISTER_ID)
+		: isNetworkIdBTCTestnet(networkId)
+			? ((LOCAL ? LOCAL_CKBTC_MINTER_CANISTER_ID : STAGING_CKBTC_MINTER_CANISTER_ID) ??
+				IC_CKBTC_MINTER_CANISTER_ID)
+			: (LOCAL_CKBTC_MINTER_CANISTER_ID ?? IC_CKBTC_MINTER_CANISTER_ID);
