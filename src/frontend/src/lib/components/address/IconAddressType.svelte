@@ -5,10 +5,18 @@
 	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
-	let { addressType, size }: { addressType: TokenAccountIdTypes; size?: string } = $props();
+	let {
+		addressType,
+		size,
+		color
+	}: {
+		addressType: TokenAccountIdTypes;
+		size?: string;
+		color?: 'off-white' | 'white' | 'transparent';
+	} = $props();
 </script>
 
-<div class="border-1 box-content rounded-full border-primary bg-primary">
+{#snippet icon()}
 	{#if addressType === 'Icrcv2'}
 		<IconAddressTypeIcrc2 {size} />
 	{:else if addressType === 'Btc'}
@@ -18,4 +26,12 @@
 	{:else if addressType === 'Sol'}
 		<IconAddressTypeSol {size} />
 	{/if}
-</div>
+{/snippet}
+
+{#if color === 'transparent'}
+	{@render icon()}
+{:else}
+	<div class="border-1 box-content rounded-full border-primary bg-primary">
+		{@render icon()}
+	</div>
+{/if}
