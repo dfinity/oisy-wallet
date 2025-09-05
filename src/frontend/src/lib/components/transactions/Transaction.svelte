@@ -20,9 +20,8 @@
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { formatSecondsToDate } from '$lib/utils/format.utils';
-	import { isTokenNonFungible } from '$lib/utils/nft.utils';
+	import { shortenWithMiddleEllipsis , formatSecondsToDate } from '$lib/utils/format.utils';
+		import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 	import { mapTransactionIcon } from '$lib/utils/transaction.utils';
