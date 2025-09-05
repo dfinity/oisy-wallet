@@ -149,7 +149,7 @@
 
 					{#if nonNullish(contact)}
 						<span class="shrink-0">
-							<Avatar name={contact.name} image={contact.image} />
+							<Avatar name={contact.name} image={contact.image} variant="xxs" />
 						</span>
 					{/if}
 
