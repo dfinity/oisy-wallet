@@ -43,6 +43,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
+	export let isNft = false;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -56,6 +57,7 @@
 
 	const updateFeeData = async () => {
 		try {
+			console.log('uDATe');
 			if (isNullish($ethAddress)) {
 				return;
 			}
@@ -97,7 +99,7 @@
 				? undefined
 				: await safeEstimateGas({ ...params, data });
 
-			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
+			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId) || isNft) {
 				feeStore.setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
