@@ -101,7 +101,6 @@
 		if (isNetworkIdICP(id)) {
 			return 'Icrcv2';
 		}
-		return undefined;
 	};
 
 	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
