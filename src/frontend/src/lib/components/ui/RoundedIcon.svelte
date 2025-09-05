@@ -33,12 +33,10 @@
 	aria-label={ariaLabel}
 	data-tid={testId}
 >
-	{#if icon}
 		<svelte:component
 			this={icon}
 			style={`width:${size}px;height:${size}px`}
 			class={`${iconClass} ${opacity ? 'opacity-10' : ''}`}
 			{size}
 		/>
-	{/if}
 </div>
