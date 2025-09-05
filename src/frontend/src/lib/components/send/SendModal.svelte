@@ -58,6 +58,7 @@
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
@@ -77,6 +78,7 @@
 
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
 	let modal: WizardModal<WizardStepsSend>;
+	let selectedNft: Nft | undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -196,14 +198,17 @@
 			<SendNftsList
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 				onSelect={(nft) => {
-					tokenStore.set(
-						findNonFungibleToken({
+					selectedNft = nft;
+					loadTokenAndRun({
+						token: findNonFungibleToken({
 							tokens: $nonFungibleTokens,
 							networkId: nft.collection.network.id,
 							address: nft.collection.address
-						})
-					);
-					goToStep(WizardStepsSend.DESTINATION);
+						}) as Token,
+						callback: async () => {
+							goToStep(WizardStepsSend.DESTINATION);
+						}
+					});
 				}}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
@@ -229,6 +234,7 @@
 			/>
 		{:else}
 			<SendWizard
+				nft={selectedNft}
 				{currentStep}
 				{destination}
 				{selectedContact}

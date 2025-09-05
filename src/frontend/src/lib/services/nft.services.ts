@@ -360,13 +360,19 @@ export const sendNft = async ({
 	tokenId,
 	destination,
 	fromAddress,
-	identity
+	identity,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
 }: {
 	token: NonFungibleToken;
 	tokenId: NftId;
 	destination: string;
 	fromAddress: string;
 	identity: OptionIdentity;
+	gas: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
 }) => {
 	if (isNullish(identity)) {
 		await nullishSignOut();
@@ -379,7 +385,10 @@ export const sendNft = async ({
 				sourceNetwork: ETHEREUM_NETWORK,
 				from: fromAddress,
 				to: destination,
-				identity
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
 			});
 		} else if (isTokenErc1155(token)) {
 			tx = await transferErc1155({
@@ -389,7 +398,10 @@ export const sendNft = async ({
 				from: fromAddress,
 				to: destination,
 				identity,
-				amount: 1
+				amount: 1, // currently fixed at 1
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas
 			});
 		}
 

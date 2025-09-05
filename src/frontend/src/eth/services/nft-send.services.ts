@@ -18,9 +18,9 @@ export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork;
 	identity: Identity;
 	from?: EthAddress;
-	gas?: bigint;
-	maxFeePerGas?: bigint;
-	maxPriorityFeePerGas?: bigint;
+	gas: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
 }
 
 export interface TransferErc721Params extends CommonNftTransferParams {
@@ -45,10 +45,10 @@ interface BuildSignRequestParams {
 	value: bigint;
 	data: `0x${string}` | string;
 	nonce: number;
-	gas?: bigint;
+	gas: bigint;
 	chainId: bigint;
-	maxFeePerGas?: bigint;
-	maxPriorityFeePerGas?: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
 }
 
 interface SignWithIdentityParams {
@@ -66,14 +66,20 @@ export const transferErc721 = async ({
 	sourceNetwork,
 	to,
 	tokenId,
-	contractAddress
+	contractAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
 }: TransferErc721Params): Promise<TransactionResponse> => {
 	const txReq = await prepareErc721Transfer({
 		identity,
 		sourceNetwork,
 		to,
 		tokenId,
-		contractAddress
+		contractAddress,
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas
 	});
 	const raw = await signWithIdentity({ identity, transaction: txReq });
 	return await sendRaw({ networkId: sourceNetwork.id, raw });
@@ -85,7 +91,10 @@ export const transferErc1155 = async ({
 	to,
 	id,
 	amount,
-	contractAddress
+	contractAddress,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas
 }: TransferErc1155Params): Promise<TransactionResponse> => {
 	const txReq = await prepareErc1155Transfer({
 		identity,
@@ -93,7 +102,10 @@ export const transferErc1155 = async ({
 		to,
 		id,
 		amount,
-		contractAddress
+		contractAddress,
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas
 	});
 	const raw = await signWithIdentity({ identity, transaction: txReq });
 	return await sendRaw({ networkId: sourceNetwork.id, raw });

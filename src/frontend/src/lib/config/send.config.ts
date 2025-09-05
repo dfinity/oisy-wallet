@@ -66,10 +66,6 @@ export const sendNftsWizardSteps = (
 		title: params.i18n.send.text.send
 	},
 	{
-		name: WizardStepsSend.SEND,
-		title: params.i18n.send.text.send
-	},
-	{
 		name: WizardStepsSend.REVIEW,
 		title: params.i18n.send.text.review
 	},

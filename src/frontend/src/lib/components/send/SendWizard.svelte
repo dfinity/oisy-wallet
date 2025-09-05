@@ -24,12 +24,14 @@
 		isNetworkIdEvm
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
+	import type { Nft } from '$lib/types/nft';
 
 	export let destination: string;
 	export let amount: number | undefined;
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
+	export let nft: Nft | undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -45,6 +47,7 @@
 <SendTokenContext token={$sendToken}>
 	{#if isNetworkIdEthereum($sendToken.network.id)}
 		<EthSendTokenWizard
+			{nft}
 			{currentStep}
 			{destination}
 			nativeEthereumToken={$ethereumToken}
@@ -60,6 +63,7 @@
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
+			{nft}
 			{currentStep}
 			{destination}
 			nativeEthereumToken={evmNativeEthereumToken}
