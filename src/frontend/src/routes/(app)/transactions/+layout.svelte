@@ -1,9 +1,11 @@
 <script lang="ts">
-	import Listener from '$lib/components/core/Listener.svelte';
+	import type { Snippet } from 'svelte';
 
-	import { token } from '$lib/stores/token.store';
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 </script>
 
-<Listener token={$token}>
-	<slot />
-</Listener>
+{@render children()}

@@ -1,12 +1,16 @@
 <script lang="ts">
 	import type { Size } from '$lib/types/components';
 
-	export let spacing: 'none' | Extract<Size, 'lg' | 'md'> = 'none';
+	interface Props {
+		spacing?: 'none' | Extract<Size, 'lg' | 'md'>;
+	}
+
+	let { spacing = 'none' }: Props = $props();
 </script>
 
 <hr
-	class="opacity-10"
-	class:my-6={spacing === 'lg'}
+	style="width: 100%; border: 0px; height: 1px"
+	class="bg-brand-subtle-10"
 	class:my-4={spacing === 'md'}
-	style="width: 100%; border: 0.05rem solid"
+	class:my-6={spacing === 'lg'}
 />

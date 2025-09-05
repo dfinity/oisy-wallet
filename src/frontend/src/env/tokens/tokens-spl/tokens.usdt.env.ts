@@ -1,5 +1,5 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
-import { USDT_TOKEN as ETH_USDT_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdt.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -23,7 +23,7 @@ export const USDT_TOKEN: RequiredSplToken = {
 	icon: usdt,
 	address: 'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB',
 	owner: TOKEN_PROGRAM_ADDRESS,
-	twinToken: ETH_USDT_TOKEN,
+	groupData: USDT_TOKEN_GROUP,
 	buy: {
 		onramperId: 'usdt_solana'
 	}

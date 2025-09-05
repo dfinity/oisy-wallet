@@ -16,6 +16,7 @@ describe('btc-post-message.schema', () => {
 					newTransactions: mockValidTransactions
 				}
 			};
+
 			expect(BtcPostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -25,6 +26,7 @@ describe('btc-post-message.schema', () => {
 					balance: mockValidBalance
 				}
 			};
+
 			expect(() => BtcPostMessageDataResponseWalletSchema.parse(invalidData)).toThrow();
 		});
 
@@ -35,6 +37,7 @@ describe('btc-post-message.schema', () => {
 					newTransactions: mockValidTransactions
 				}
 			};
+
 			expect(BtcPostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -45,6 +48,7 @@ describe('btc-post-message.schema', () => {
 					newTransactions: 'invalid_json'
 				}
 			};
+
 			expect(BtcPostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 	});

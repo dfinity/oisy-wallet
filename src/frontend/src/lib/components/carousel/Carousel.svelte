@@ -180,8 +180,8 @@
 	/**
 	 * Reset the autoplay timer and call goToNextSlide
 	 */
-	const onNext = async () => {
-		await trackEvent({
+	const onNext = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_NEXT
 		});
 
@@ -218,8 +218,8 @@
 	/**
 	 * Reset the autoplay timer and call goToPreviousSlide
 	 */
-	const onPrevious = async () => {
-		await trackEvent({
+	const onPrevious = () => {
+		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_PREVIOUS
 		});
 
@@ -276,13 +276,13 @@
 <svelte:window on:resize={onResize} />
 
 <div
-	data-tid={CAROUSEL_CONTAINER}
-	class={`${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
+	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
 	class:pb-3={nonNullish(slides) && slides.length <= 1}
+	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}
 >
-	<div class="w-full overflow-hidden" bind:this={container}>
-		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame} style="width: 9999px">
+	<div bind:this={container} class="w-full overflow-hidden">
+		<div bind:this={sliderFrame} style="width: 9999px" class="flex" data-tid={CAROUSEL_SLIDE}>
 			<slot />
 		</div>
 	</div>
@@ -291,7 +291,7 @@
 			class={`absolute bottom-2 right-0 flex justify-between px-3 ${controlsWidthStyleClass ?? 'w-full'}`}
 			out:slide={SLIDE_PARAMS}
 		>
-			<Indicators {onIndicatorClick} {totalSlides} {currentSlide} />
+			<Indicators {currentSlide} {onIndicatorClick} {totalSlides} />
 			<Controls {onNext} {onPrevious} />
 		</div>
 	{/if}

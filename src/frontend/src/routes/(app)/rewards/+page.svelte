@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Airdrops from '$lib/components/rewards/Rewards.svelte';
+	// Todo: remove this route completely once earning is permanently enabled
+	import Rewards from '$lib/components/rewards/Rewards.svelte';
 </script>
 
-<Airdrops />
+<Rewards />

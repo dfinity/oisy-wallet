@@ -1,0 +1,125 @@
+name: Update Frontend Test Coverage Thresholds
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  update-test-coverage-thresholds:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Save current thresholds
+        run: cp vitest.config.ts vitest.config.before.ts
+
+      - name: Test
+        run: npm run test:coverage
+
+      # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
+      - name: Reduce coverage thresholds by 0.50%
+        run: |
+          node -e "
+          const fs = require('fs');
+          const file = 'vitest.config.ts';
+          const text = fs.readFileSync(file, 'utf8');
+          const updated = text.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
+            const reduced = (parseFloat(value) - 0.5).toFixed(2);
+            return \`\${key}: \${reduced}\`;
+          });
+          fs.writeFileSync(file, updated);
+          "
+      # The coverage thresholds should never decrease
+      - name: Update thresholds only if increased
+        run: |
+          node -e "
+          const fs = require('fs');
+
+          const file = 'vitest.config.ts';
+          const current = fs.readFileSync(file, 'utf8');
+          const original = fs.readFileSync('vitest.config.before.ts', 'utf8');
+
+          const extractThresholds = (text) => {
+            const map = {};
+            for (const match of text.matchAll(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g)) {
+             map[match[1]] = parseFloat(match[2]);
+            }
+            return map;
+          };
+
+          const originalThresholds = extractThresholds(original);
+          const updatedThresholds = extractThresholds(current);
+
+          const updated = current.replace(/(lines|functions|branches|statements):\s*([0-9]+(?:\.[0-9]+)?)/g, (_, key, value) => {
+            const oldValue = originalThresholds[key];
+            const newValue = updatedThresholds[key];
+            if (newValue > oldValue) {
+             return \`\${key}: \${newValue}\`;
+            } else {
+             return \`\${key}: \${oldValue}\`;
+            }
+          });
+
+          fs.writeFileSync(file, updated);
+          "
+
+      - name: Remove old thresholds file
+        run: rm vitest.config.before.ts
+
+      # To avoid a high frequency of PRs, we remove the decimals from the coverage thresholds
+      - name: Floor coverage thresholds (remove decimals)
+        run: |
+          sed -i -E 's/(lines|functions|branches|statements):[[:space:]]*([0-9]+)\.[0-9]+/\1: \2/g' vitest.config.ts
+
+      - name: Check for Coverage Thresholds Changes
+        id: check_changes
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes_detected=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes_detected=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Format
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: npm run format:file --file=vitest.config.ts
+
+      - name: Stage Changes on main
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        run: git add vitest.config.ts
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.changes_detected == 'true'
+        uses: ./.github/actions/create-pr
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          branch: bot-update-vitest-coverage-thresholds
+          paths: vitest.config.ts
+          title: 'test(frontend): Update Vitest coverage thresholds'
+          body: |
+            The current thresholds for the Vitest coverage report have been updated since they increased. This is an automated PR to keep the thresholds in sync with the latest test coverage results.

@@ -9,6 +9,7 @@ describe('SkeletonCards', () => {
 
 		Array.from({ length: 5 }).forEach((_, i) => {
 			const skeleton = getByTestId(`skeleton-card-${i}`);
+
 			expect(skeleton).toBeInTheDocument();
 		});
 	});

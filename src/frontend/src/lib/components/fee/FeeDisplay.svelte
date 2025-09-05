@@ -1,26 +1,41 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import ConvertAmountDisplay from '$lib/components/convert/ConvertAmountDisplay.svelte';
-	import { formatTokenAmount } from '$lib/utils/format.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 
-	export let feeAmount: bigint | undefined = undefined;
-	export let symbol: string;
-	export let decimals: number;
-	export let exchangeRate: number | undefined = undefined;
-	export let displayExchangeRate = true;
-	export let zeroAmountLabel: string | undefined = undefined;
+	interface Props {
+		feeAmount?: bigint;
+		symbol: string;
+		decimals: number;
+		exchangeRate?: number;
+		displayExchangeRate?: boolean;
+		zeroAmountLabel?: string;
+		label?: Snippet;
+	}
 
-	let formattedFeeAmount: string | undefined;
-	$: formattedFeeAmount = nonNullish(feeAmount)
-		? formatTokenAmount({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
-		: undefined;
+	let {
+		feeAmount,
+		symbol,
+		decimals,
+		exchangeRate,
+		displayExchangeRate = true,
+		zeroAmountLabel,
+		label
+	}: Props = $props();
+
+	let formattedFeeAmount = $derived(
+		nonNullish(feeAmount)
+			? formatToken({ value: feeAmount, unitName: decimals, displayDecimals: decimals })
+			: undefined
+	);
 </script>
 
 <ConvertAmountDisplay
 	amount={formattedFeeAmount}
+	{displayExchangeRate}
 	{exchangeRate}
+	{label}
 	{symbol}
 	{zeroAmountLabel}
-	{displayExchangeRate}
-	><slot slot="label" name="label" />
-</ConvertAmountDisplay>
+/>

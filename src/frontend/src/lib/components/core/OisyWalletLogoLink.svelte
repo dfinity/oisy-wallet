@@ -6,10 +6,10 @@
 </script>
 
 <a
-	href="/"
-	data-tid={NAVIGATION_ITEM_HOMEPAGE}
 	class="flex w-fit items-center gap-0 no-underline"
 	aria-label={replaceOisyPlaceholders($i18n.core.alt.go_to_home)}
+	data-tid={NAVIGATION_ITEM_HOMEPAGE}
+	href="/"
 >
 	<OisyWalletLogo />
 </a>

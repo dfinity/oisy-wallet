@@ -2,16 +2,24 @@
 	import type { Identity } from '@dfinity/agent';
 	import { Principal } from '@dfinity/principal';
 	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
+	import {
+		HIDE_TOKEN_MODAL_ROUTE,
+		TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS
+	} from '$lib/constants/analytics.contants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+
+	export let fromRoute: NavigationTarget | undefined;
 
 	let selectedToken: OptionIcrcCustomToken;
 
@@ -41,11 +49,23 @@
 	const hideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(ledgerCanisterId);
 
+		trackEvent({
+			name: TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
+			metadata: {
+				ledgerCanisterId,
+				indexCanisterId: `${indexCanisterId}`,
+				networkId: 'ICP',
+				source: HIDE_TOKEN_MODAL_ROUTE
+			}
+		});
+
 		await setCustomToken({
 			...params,
 			token: {
 				enabled: false,
 				version: toNullable(version),
+				section: toNullable(),
+				allow_external_content_source: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
@@ -62,4 +82,4 @@
 	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} />
+<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />

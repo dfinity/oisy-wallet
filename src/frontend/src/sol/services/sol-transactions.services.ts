@@ -1,20 +1,21 @@
 import { WSOL_TOKEN } from '$env/tokens/tokens-spl/tokens.wsol.env';
-import {
-	SOLANA_DEVNET_TOKEN_ID,
-	SOLANA_LOCAL_TOKEN_ID,
-	SOLANA_TESTNET_TOKEN_ID,
-	SOLANA_TOKEN_ID
-} from '$env/tokens/tokens.sol.env';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';
+import { ZERO } from '$lib/constants/app.constants';
+import { solAddressDevnet, solAddressLocal, solAddressMainnet } from '$lib/derived/address.derived';
 import type { SolAddress } from '$lib/types/address';
-import { fetchTransactionDetailForSignature } from '$sol/api/solana.api';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { Token } from '$lib/types/token';
+import type { ResultSuccess } from '$lib/types/utils';
+import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
+import { findOldestTransaction } from '$lib/utils/transactions.utils';
+import { fetchTransactionDetailForSignature, getAccountOwner } from '$sol/api/solana.api';
 import { getSolTransactions } from '$sol/services/sol-signatures.services';
 import {
 	solTransactionsStore,
 	type SolCertifiedTransaction
 } from '$sol/stores/sol-transactions.store';
-import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
-import type { GetSolTransactionsParams } from '$sol/types/sol-api';
+import type { SolanaNetworkType } from '$sol/types/network';
+import type { LoadNextSolTransactionsParams, LoadSolTransactionsParams } from '$sol/types/sol-api';
 import type {
 	ParsedAccount,
 	SolMappedTransaction,
@@ -23,27 +24,56 @@ import type {
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
 import { mapSolParsedInstruction } from '$sol/utils/sol-instructions.utils';
+import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { findAssociatedTokenPda } from '@solana-program/token';
-import { address as solAddress } from '@solana/kit';
-
-interface LoadNextSolTransactionsParams extends GetSolTransactionsParams {
-	signalEnd: () => void;
-}
+import { lamports, address as solAddress } from '@solana/kit';
+import type { Lamports } from '@solana/rpc-types';
+import { get } from 'svelte/store';
 
 // The fee payer is always the first signer
 // https://solana.com/docs/core/fees#base-transaction-fee
-const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
+export const extractFeePayer = (accountKeys: ParsedAccount[]): ParsedAccount | undefined =>
 	accountKeys.length > 0 ? accountKeys.filter(({ signer }) => signer)[0] : undefined;
 
+const extractBalances = ({
+	address,
+	accountKeys,
+	preBalances,
+	postBalances
+}: {
+	address: SolAddress;
+	accountKeys: ParsedAccount[];
+	preBalances: Lamports[];
+	postBalances: Lamports[];
+}): {
+	preBalance: Lamports;
+	postBalance: Lamports;
+} => {
+	const accountIndex =
+		accountKeys.length > 0 ? accountKeys.findIndex(({ pubkey }) => pubkey === address) : undefined;
+
+	if (isNullish(accountIndex) || accountIndex < 0) {
+		return { preBalance: lamports(ZERO), postBalance: lamports(ZERO) };
+	}
+
+	return {
+		preBalance: accountIndex < preBalances.length ? preBalances[accountIndex] : lamports(ZERO),
+		postBalance: accountIndex < postBalances.length ? postBalances[accountIndex] : lamports(ZERO)
+	};
+};
+
 export const fetchSolTransactionsForSignature = async ({
+	identity,
 	signature,
 	network,
 	address,
 	tokenAddress,
 	tokenOwnerAddress
 }: {
+	identity: OptionIdentity;
 	signature: SolSignature;
 	network: SolanaNetworkType;
 	address: SolAddress;
@@ -68,14 +98,20 @@ export const fetchSolTransactionsForSignature = async ({
 		meta
 	} = transactionDetail;
 
-	const { fee } = meta ?? {};
+	const { fee, preBalances, postBalances } = meta ?? {};
 	const { pubkey: feePayer } = extractFeePayer([...(accountKeys ?? [])]) ?? {};
+	const { preBalance, postBalance } = extractBalances({
+		address,
+		accountKeys: [...(accountKeys ?? [])],
+		preBalances: [...(preBalances ?? [])],
+		postBalances: [...(postBalances ?? [])]
+	});
 
 	const putativeInnerInstructions = meta?.innerInstructions ?? [];
 
-	// Inside the instructions there could be some that we are unable to decode, but that may have
+	// Inside the instructions, there could be some that we are unable to decode, but that may have
 	// simpler (and decoded) inner instructions. We should try to map those as well.
-	// They are inserted in the instructions array in the order they refer to the main instruction.
+	// They are inserted in the instructions' array in the order they refer to the main instruction.
 	const { allInstructions } = [...putativeInnerInstructions]
 		.sort((a, b) => a.index - b.index)
 		.reduce(
@@ -96,6 +132,8 @@ export const fetchSolTransactionsForSignature = async ({
 				})
 			: [undefined];
 
+	const initialCumulativeBalances = { [address]: preBalance - postBalance };
+
 	const { parsedTransactions } = await allInstructions.reduce<
 		Promise<{
 			parsedTransactions: SolTransactionUi[];
@@ -111,6 +149,7 @@ export const fetchSolTransactionsForSignature = async ({
 			} = await acc;
 
 			const mappedTransaction = await mapSolParsedInstruction({
+				identity,
 				instruction: {
 					...instruction,
 					programAddress: instruction.programId
@@ -139,14 +178,14 @@ export const fetchSolTransactionsForSignature = async ({
 
 			// The cumulative balances are updated for every instruction, so we can keep track of the
 			// SOL balance of the address and its associated token account at any given time.
-			// It is useful when mapping for example a `closeAccount` instruction, where the redeemed value
+			// It is useful when mapping, for example, a `closeAccount` instruction, where the redeemed value
 			// is not provided in the data and must be calculated as the latest total SOL balance of the Associated Token Account.
 			const cumulativeBalances = {
 				...accCumulativeBalances,
-				// We include WSOL in the calculation, because it is used to affect the SOL balance of the ATA.
+				// We include WSOL in the calculation because it is used to affect the SOL balance of the ATA.
 				...((isNullish(mappedTokenAddress) || mappedTokenAddress === WSOL_TOKEN.address) && {
-					[from]: (accCumulativeBalances[from] ?? ZERO_BI) - value,
-					[to]: (accCumulativeBalances[to] ?? ZERO_BI) + value
+					[from]: (accCumulativeBalances[from] ?? ZERO) - value,
+					[to]: (accCumulativeBalances[to] ?? ZERO) + value
 				})
 			};
 
@@ -156,25 +195,35 @@ export const fetchSolTransactionsForSignature = async ({
 			}
 
 			// If the token address is not the one we are looking for, we can skip this instruction.
-			// In case of Solana native tokens, the token address is undefined.
+			// In the case of Solana native tokens, the token address is undefined.
 			if (mappedTokenAddress !== tokenAddress) {
 				return { parsedTransactions, cumulativeBalances, addressToToken };
 			}
 
+			const fromOwner: SolTransactionUi['fromOwner'] = await getAccountOwner({
+				address: from,
+				network
+			});
+
+			const toOwner: SolTransactionUi['toOwner'] = nonNullish(to)
+				? await getAccountOwner({ address: to, network })
+				: undefined;
+
 			const newTransaction: SolTransactionUi = {
 				id: `${signature.signature}-${idx}-${instruction.programId}`,
 				signature: signature.signature,
-				timestamp: blockTime ?? ZERO_BI,
+				timestamp: blockTime ?? ZERO,
 				value,
 				type: address === from || ataAddress === from ? 'send' : 'receive',
 				from,
+				...(nonNullish(fromOwner) && { fromOwner }),
 				to,
+				...(nonNullish(toOwner) && { toOwner }),
 				status,
 				// Since the fee is assigned to a single signature, it is not entirely correct to assign it to each transaction.
 				// Particularly, we are repeating the same fee for each instruction in the transaction.
 				// However, we should have it anyway saved in the transaction, so we can display it in the UI.
-				...(nonNullish(fee) &&
-					nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO_BI })
+				...(nonNullish(fee) && nonNullish(feePayer) && { fee: address === feePayer ? fee : ZERO })
 			};
 
 			return {
@@ -195,7 +244,11 @@ export const fetchSolTransactionsForSignature = async ({
 				addressToToken
 			};
 		},
-		Promise.resolve({ parsedTransactions: [], cumulativeBalances: {}, addressToToken: {} })
+		Promise.resolve({
+			parsedTransactions: [],
+			cumulativeBalances: initialCumulativeBalances,
+			addressToToken: {}
+		})
 	);
 
 	// The instructions are received in the order they were executed, meaning the first instruction
@@ -208,32 +261,49 @@ export const fetchSolTransactionsForSignature = async ({
 };
 
 export const loadNextSolTransactions = async ({
+	token,
 	signalEnd,
 	...rest
-}: LoadNextSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const transactions = await loadSolTransactions(rest);
+}: LoadNextSolTransactionsParams): Promise<void> => {
+	const {
+		network: { id: networkId }
+	} = token;
+
+	const address = isNetworkIdSOLDevnet(networkId)
+		? get(solAddressDevnet)
+		: isNetworkIdSOLLocal(networkId)
+			? get(solAddressLocal)
+			: get(solAddressMainnet);
+
+	const network = mapNetworkIdToNetwork(token.network.id);
+
+	if (isNullish(network) || isNullish(address)) {
+		return;
+	}
+
+	const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
+		? token
+		: { address: undefined, owner: undefined };
+
+	const transactions = await loadSolTransactions({
+		token,
+		network,
+		address,
+		tokenAddress,
+		tokenOwnerAddress,
+		...rest
+	});
 
 	if (transactions.length === 0) {
 		signalEnd();
-		return [];
 	}
-
-	return transactions;
-};
-
-const networkToSolTokenIdMap = {
-	[SolanaNetworks.mainnet]: SOLANA_TOKEN_ID,
-	[SolanaNetworks.testnet]: SOLANA_TESTNET_TOKEN_ID,
-	[SolanaNetworks.devnet]: SOLANA_DEVNET_TOKEN_ID,
-	[SolanaNetworks.local]: SOLANA_LOCAL_TOKEN_ID
 };
 
 const loadSolTransactions = async ({
+	token: { id: tokenId },
 	network,
 	...rest
-}: GetSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
-	const solTokenIdForNetwork = networkToSolTokenIdMap[network];
-
+}: LoadSolTransactionsParams): Promise<SolCertifiedTransaction[]> => {
 	try {
 		const transactions = await getSolTransactions({
 			network,
@@ -246,15 +316,50 @@ const loadSolTransactions = async ({
 		}));
 
 		solTransactionsStore.append({
-			tokenId: solTokenIdForNetwork,
+			tokenId,
 			transactions: certifiedTransactions
 		});
 
 		return certifiedTransactions;
 	} catch (error: unknown) {
-		solTransactionsStore.reset(solTokenIdForNetwork);
+		solTransactionsStore.reset(tokenId);
 
-		console.error(`Failed to load transactions for ${solTokenIdForNetwork.description}:`, error);
+		console.error(`Failed to load transactions for ${tokenId.description}:`, error);
 		return [];
 	}
+};
+
+export const loadNextSolTransactionsByOldest = async ({
+	minTimestamp,
+	transactions,
+	...rest
+}: {
+	identity: OptionIdentity;
+	minTimestamp: number;
+	transactions: SolTransactionUi[];
+	token: Token;
+	signalEnd: () => void;
+}): Promise<ResultSuccess> => {
+	// If there are no transactions, we let the worker load the first ones
+	if (transactions.length === 0) {
+		return { success: false };
+	}
+
+	const lastTransaction = findOldestTransaction(transactions);
+
+	const { timestamp: minIcTimestamp, signature: lastSignature } = lastTransaction ?? {};
+
+	if (
+		nonNullish(minIcTimestamp) &&
+		normalizeTimestampToSeconds(minIcTimestamp) <= normalizeTimestampToSeconds(minTimestamp)
+	) {
+		return { success: false };
+	}
+
+	await loadNextSolTransactions({
+		...rest,
+		before: lastSignature
+	});
+
+	return { success: true };
 };

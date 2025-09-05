@@ -1,4 +1,4 @@
-import { solTransactionTypes } from '$lib/schema/transaction.schema';
+import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { SolAddress } from '$lib/types/address';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import type { getRpcTransaction } from '$sol/api/solana.api';
@@ -23,6 +23,9 @@ export interface SolTransactionUi extends TransactionUiCommon {
 	status: Commitment | null;
 	value?: bigint;
 	fee?: bigint;
+	// For Solana transactions, we want to show the owner instead of the ATA address
+	fromOwner?: SolAddress;
+	toOwner?: SolAddress;
 }
 
 export type SolRpcTransactionRaw = NonNullable<Awaited<ReturnType<typeof getRpcTransaction>>>;

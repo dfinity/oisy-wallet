@@ -5,16 +5,29 @@ on:
     types: [closed]
     branches:
       - main
-  workflow_dispatch:
+  merge_group:
+
+permissions: {}
 
 jobs:
   release:
     if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'chore(release)/v')
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare
@@ -26,10 +39,27 @@ jobs:
           echo "Version from package.json: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
 
+      - name: Set git remote silently and locally
+        shell: bash
+        run: |
+          git config url."https://github-actions:$GITHUB_TOKEN@github.com/".insteadOf "https://github.com/"
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+
       - name: Create Git tag
         run: |
-          git tag "v${{ steps.get_version.outputs.version }}"
-          git push origin "v${{ steps.get_version.outputs.version }}"
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+        env:
+          VERSION: ${{ steps.get_version.outputs.version }}
+
+      - name: Unset local git remote config
+        shell: bash
+        run: |
+          git config --unset-all url."https://github-actions:${GITHUB_TOKEN}@github.com/".insteadOf || true
+          git config --unset-all url."https://github.com/".insteadOf || true
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Publish Release Notes
         uses: ./.github/actions/release-notes
@@ -37,3 +67,59 @@ jobs:
           tag: 'v${{ steps.get_version.outputs.version }}'
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+  call-deploy:
+    needs: release
+    if: needs.release.result == 'success'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy-to-environment.yml
+    with:
+      network: beta
+    secrets:
+      VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
+      VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
+      VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
+      VITE_ALCHEMY_API_KEY_TEST_FE: ${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}
+      VITE_QUICKNODE_API_KEY_STAGING: ${{ secrets.VITE_QUICKNODE_API_KEY_STAGING }}
+      VITE_WALLET_CONNECT_PROJECT_ID_STAGING: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_STAGING }}
+      VITE_COINGECKO_API_KEY_STAGING: ${{ secrets.VITE_COINGECKO_API_KEY_STAGING }}
+      VITE_POUH_ENABLED_STAGING: ${{ secrets.VITE_POUH_ENABLED_STAGING }}
+      VITE_SWAP_ACTION_ENABLED_STAGING: ${{ secrets.VITE_SWAP_ACTION_ENABLED_STAGING }}
+      VITE_POW_FEATURE_ENABLED_STAGING: ${{ secrets.VITE_POW_FEATURE_ENABLED_STAGING }}
+      VITE_PLAUSIBLE_ENABLED_STAGING: ${{ secrets.VITE_PLAUSIBLE_ENABLED_STAGING }}
+      VITE_ICP_SWAP_ENABLED_STAGING: ${{ secrets.VITE_ICP_SWAP_ENABLED_STAGING }}
+      VITE_VELORA_SWAP_ENABLED_STAGING: ${{ secrets.VITE_VELORA_SWAP_ENABLED_STAGING }}
+      VITE_NFTS_ENABLED_STAGING: ${{ secrets.VITE_NFTS_ENABLED_STAGING }}
+      VITE_FRONTEND_DERIVATION_ENABLED_STAGING: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_STAGING }}
+      VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_STAGING: ${{ secrets.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_STAGING }}
+      VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING: ${{ secrets.VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING }}
+      VITE_AVATAR_ENABLED_STAGING: ${{ secrets.VITE_AVATAR_ENABLED_STAGING }}
+      VITE_LOCK_SCREEN_ENABLED_STAGING: ${{ secrets.VITE_LOCK_SCREEN_ENABLED_STAGING }}
+      VITE_ONRAMPER_API_KEY_DEV_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_STAGING }}
+      VITE_ONRAMPER_API_KEY_PROD_STAGING: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_STAGING }}
+      VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING }}
+      DFX_DEPLOY_KEY_STAGING: ${{ secrets.DFX_DEPLOY_KEY_STAGING }}
+
+      VITE_ETHERSCAN_API_KEY_BETA: ${{ secrets.VITE_ETHERSCAN_API_KEY_BETA }}
+      VITE_INFURA_API_KEY_BETA: ${{ secrets.VITE_INFURA_API_KEY_BETA }}
+      VITE_ALCHEMY_API_KEY_BETA: ${{ secrets.VITE_ALCHEMY_API_KEY_BETA }}
+      VITE_QUICKNODE_API_KEY_BETA: ${{ secrets.VITE_QUICKNODE_API_KEY_BETA }}
+      VITE_WALLET_CONNECT_PROJECT_ID_BETA: ${{ secrets.VITE_WALLET_CONNECT_PROJECT_ID_BETA }}
+      VITE_COINGECKO_API_KEY_BETA: ${{ secrets.VITE_COINGECKO_API_KEY_BETA }}
+      VITE_POUH_ENABLED_BETA: ${{ secrets.VITE_POUH_ENABLED_BETA }}
+      VITE_AUTH_ALTERNATIVE_ORIGINS_BETA: ${{ secrets.VITE_AUTH_ALTERNATIVE_ORIGINS_BETA }}
+      VITE_ONRAMPER_API_KEY_DEV_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_DEV_BETA }}
+      VITE_SWAP_ACTION_ENABLED_BETA: ${{ secrets.VITE_SWAP_ACTION_ENABLED_BETA }}
+      VITE_POW_FEATURE_ENABLED_BETA: ${{ secrets.VITE_POW_FEATURE_ENABLED_BETA }}
+      VITE_PLAUSIBLE_ENABLED_BETA: ${{ secrets.VITE_PLAUSIBLE_ENABLED_BETA }}
+      VITE_ICP_SWAP_ENABLED_BETA: ${{ secrets.VITE_ICP_SWAP_ENABLED_BETA }}
+      VITE_VELORA_SWAP_ENABLED_BETA: ${{ secrets.VITE_VELORA_SWAP_ENABLED_BETA }}
+      VITE_NFTS_ENABLED_BETA: ${{ secrets.VITE_NFTS_ENABLED_BETA }}
+      VITE_FRONTEND_DERIVATION_ENABLED_BETA: ${{ secrets.VITE_FRONTEND_DERIVATION_ENABLED_BETA }}
+      VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_BETA: ${{ secrets.VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_BETA }}
+      VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA: ${{ secrets.VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA }}
+      VITE_AVATAR_ENABLED_BETA: ${{ secrets.VITE_AVATAR_ENABLED_BETA }}
+      VITE_LOCK_SCREEN_ENABLED_BETA: ${{ secrets.VITE_LOCK_SCREEN_ENABLED_BETA }}
+      VITE_ONRAMPER_API_KEY_PROD_BETA: ${{ secrets.VITE_ONRAMPER_API_KEY_PROD_BETA }}
+      DFX_DEPLOY_KEY_BETA: ${{ secrets.DFX_DEPLOY_KEY_BETA }}

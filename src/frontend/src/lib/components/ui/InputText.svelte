@@ -1,18 +1,43 @@
 <script lang="ts">
-	import { Input } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
+	import Input from '$lib/components/ui/Input.svelte';
 
-	export let value = '';
-	export let name: string;
-	export let placeholder: string;
-	export let required = true;
+	interface Props {
+		value: string;
+		name: string;
+		placeholder: string;
+		showResetButton?: boolean;
+		required?: boolean;
+		testId?: string;
+		autofocus?: boolean;
+		disabled?: boolean;
+		innerEnd?: Snippet;
+	}
+
+	let {
+		value = $bindable(''),
+		name,
+		placeholder,
+		showResetButton = false,
+		required = true,
+		testId,
+		autofocus = false,
+		disabled,
+		innerEnd
+	}: Props = $props();
 </script>
 
 <Input
 	{name}
-	inputType="text"
-	{required}
-	bind:value
-	{placeholder}
-	spellcheck={false}
 	autocomplete="off"
+	{autofocus}
+	{disabled}
+	{innerEnd}
+	inputType="text"
+	{placeholder}
+	{required}
+	{showResetButton}
+	spellcheck={false}
+	{testId}
+	bind:value
 />

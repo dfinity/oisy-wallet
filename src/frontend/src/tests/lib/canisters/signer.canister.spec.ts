@@ -12,10 +12,11 @@ import { SignerCanisterPaymentError } from '$lib/canisters/signer.errors';
 import type { SendBtcParams } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { type ActorSubclass } from '@dfinity/agent';
+import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { jsonReplacer } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
@@ -84,6 +85,8 @@ describe('signer.canister', () => {
 	// TODO: We should test the SignerCanisterPaymentError as currently there is no test that covers how all possible payment errors are parsed
 	const paymentErrorResponse = { Err: { PaymentError: { UnsupportedPaymentType: null } } };
 
+	const genericErrorResponse = { Err: { CanisterError: null } };
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -132,6 +135,21 @@ describe('signer.canister', () => {
 
 			await expect(res).rejects.toThrow(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
+
+		it('should throw an error if btc_caller_address returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_caller_address.mockResolvedValue(genericErrorResponse);
+
+			const { getBtcAddress } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = getBtcAddress(btcParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown SignerCanisterBtcError')
 			);
 		});
 
@@ -230,6 +248,21 @@ describe('signer.canister', () => {
 
 			await expect(res).rejects.toThrow(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
+
+		it('should throw an error if btc_caller_balance returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_caller_balance.mockResolvedValue(genericErrorResponse);
+
+			const { getBtcBalance } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = getBtcBalance(btcParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown SignerCanisterBtcError')
 			);
 		});
 
@@ -495,7 +528,7 @@ describe('signer.canister', () => {
 		});
 	});
 
-	describe('btc_caller_send', () => {
+	describe('sendBtc', () => {
 		it('sends BTC correctly', async () => {
 			const response = { Ok: { txid: '1' } };
 			service.btc_caller_send.mockResolvedValue(response);
@@ -544,6 +577,44 @@ describe('signer.canister', () => {
 
 			await expect(res).rejects.toThrow(
 				new SignerCanisterPaymentError(paymentErrorResponse.Err.PaymentError)
+			);
+		});
+
+		it.each([
+			['NotEnoughFunds', { NotEnoughFunds: { available: 1000n, required: 2000n } }],
+			['WrongBitcoinNetwork', { WrongBitcoinNetwork: null }],
+			['NotP2WPKHSourceAddress', { NotP2WPKHSourceAddress: null }],
+			['InvalidDestinationAddress', { InvalidDestinationAddress: { address: 'mock-destination' } }],
+			['InvalidSourceAddress', { InvalidSourceAddress: { address: 'mock-source' } }]
+			// eslint-disable-next-line local-rules/prefer-object-params -- It is a simple list of cases
+		])(`should throw an error if btc_caller_send returns a build error %s`, async (_, error) => {
+			const errorResponse = { Err: { BuildP2wpkhError: error } };
+
+			service.btc_caller_send.mockResolvedValue(errorResponse);
+
+			const { sendBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = sendBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(JSON.stringify(error, jsonReplacer))
+			);
+		});
+
+		it('should throw an error if btc_caller_send returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_caller_send.mockResolvedValue(genericErrorResponse);
+
+			const { sendBtc } = await createSignerCanister({
+				serviceOverride: service
+			});
+
+			const res = sendBtc(sendBtcParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown SignerCanisterSendBtcError')
 			);
 		});
 

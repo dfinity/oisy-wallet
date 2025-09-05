@@ -66,6 +66,7 @@ describe('sol-sign.utils', () => {
 			const signatures = await signer.signTransactions(transactions);
 
 			expect(spySignWithSchnorr).toHaveBeenCalledTimes(transactions.length);
+
 			transactions.forEach((_, index) => {
 				expect(spySignWithSchnorr).toHaveBeenNthCalledWith(index + 1, {
 					identity: mockIdentity,
@@ -74,6 +75,7 @@ describe('sol-sign.utils', () => {
 					message: Array.from(mockTransaction.messageBytes)
 				});
 			});
+
 			expect(signatures).toEqual([
 				{ [mockSolAddress]: Uint8Array.from([4, 5, 6]) },
 				{ [mockSolAddress]: Uint8Array.from([7, 8, 9]) }

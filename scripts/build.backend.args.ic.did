@@ -1,18 +1,20 @@
-(variant {
-    Init = record {
-         ecdsa_key_name = "key_1";
-         allowed_callers = vec{ principal "nynz6-haaaa-aaaan-qzqda-cai"; principal "bzhxb-2565m-do3pw-yqhb3-jon2m-phepr-lccqh-zv7qq-q52q2-ognw4-yqe"; };
-         cfs_canister_id = opt principal "grghe-syaaa-aaaar-qabyq-cai";
-         derivation_origin = opt "https://oisy.com";
-         supported_credentials = opt vec {
-            record {
-              credential_type = variant { ProofOfUniqueness };
-              ii_origin = "https://identity.ic0.app";
-              ii_canister_id = principal "rdmx6-jaaaa-aaaaa-aaadq-cai";
-              issuer_origin = "https://id.decideai.xyz/";
-              issuer_canister_id = principal "qgxyr-pyaaa-aaaah-qdcwq-cai";
-            }
-         };
-         ic_root_key_der = null;
-     }
-  })
+(
+	variant {
+		Init = record {
+			ecdsa_key_name = "key_1";
+			allowed_callers = vec { principal "nynz6-haaaa-aaaan-qzqda-cai" };
+			cfs_canister_id = opt principal "grghe-syaaa-aaaar-qabyq-cai";
+			derivation_origin = opt "https://oisy.com";
+			supported_credentials = opt vec {
+				record {
+					credential_type = variant { ProofOfUniqueness };
+					ii_origin = "https://identity.internetcomputer.org";
+					ii_canister_id = principal "rdmx6-jaaaa-aaaaa-aaadq-cai";
+					issuer_origin = "https://id.decideai.xyz/";
+					issuer_canister_id = principal "qgxyr-pyaaa-aaaah-qdcwq-cai"
+				}
+			};
+			ic_root_key_der = null
+		}
+	}
+)

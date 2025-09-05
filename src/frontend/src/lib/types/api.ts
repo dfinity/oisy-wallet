@@ -1,6 +1,7 @@
 import type {
-	AddUserCredentialError,
+	AllowSigningRequest,
 	BitcoinNetwork,
+	Contact,
 	CredentialSpec,
 	GetUserProfileError,
 	UserProfile,
@@ -13,10 +14,13 @@ import type {
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
 } from '$declarations/signer/signer.did';
+import type { IcToken } from '$icp/types/ic-token';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
+import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserNetworks } from '$lib/types/user-networks';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@dfinity/agent';
+import type { Principal } from '@dfinity/principal';
 
 export interface AddUserCredentialParams {
 	credentialJwt: string;
@@ -25,9 +29,11 @@ export interface AddUserCredentialParams {
 	credentialSpec: CredentialSpec;
 }
 
-export type AddUserCredentialResponse = { Ok: null } | { Err: AddUserCredentialError };
-
 export type GetUserProfileResponse = { Ok: UserProfile } | { Err: GetUserProfileError };
+
+export interface AllowSigningParams {
+	request?: AllowSigningRequest;
+}
 
 export interface BtcSelectUserUtxosFeeParams {
 	network: BitcoinNetwork;
@@ -71,6 +77,11 @@ export interface SaveUserNetworksSettings {
 	currentUserVersion?: bigint;
 }
 
+export interface SaveUserAgreements {
+	agreements: Partial<UserAgreements>;
+	currentUserVersion?: bigint;
+}
+
 export interface SetUserShowTestnetsParams {
 	showTestnets: boolean;
 	currentUserVersion?: bigint;
@@ -91,4 +102,73 @@ export interface KongSwapParams {
 	receiveAddress?: Address;
 	sourceToken: Token;
 	payTransactionId?: TxId;
+}
+
+export interface ICPSwapGetPoolParams {
+	token0: {
+		address: string;
+		standard: string;
+	};
+	token1: {
+		address: string;
+		standard: string;
+	};
+	fee: bigint;
+}
+
+export interface ICPSwapQuoteSwapParams {
+	amountIn: string;
+	zeroForOne: boolean;
+	amountOutMinimum: string;
+}
+
+export interface ICPSwapDepositWithdrawParams {
+	token: string;
+	amount: bigint;
+	fee: bigint;
+}
+
+export interface ICPSwapGetUserUnusedBalanceParams {
+	principal: Principal;
+}
+
+export interface ICPSwapQuoteParams {
+	identity: Identity;
+	sourceToken: IcToken;
+	destinationToken: IcToken;
+	sourceAmount: bigint;
+	fee?: bigint;
+}
+
+export interface ICPSwapAmountReply {
+	receiveAmount: bigint;
+}
+
+export interface BtcGetFeePercentilesParams {
+	network: BitcoinNetwork;
+}
+
+export interface GetContactParams {
+	identity: Identity;
+	contactId: bigint;
+}
+
+export interface CreateContactParams {
+	identity: Identity;
+	name: string;
+}
+
+export interface CreateContactParams {
+	identity: Identity;
+	name: string;
+}
+
+export interface UpdateContactParams {
+	identity: Identity;
+	contact: Contact;
+}
+
+export interface DeleteContactParams {
+	identity: Identity;
+	contactId: bigint;
 }

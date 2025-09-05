@@ -1,8 +1,9 @@
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
 import { mapIcrcToken } from '$icp/utils/icrc.utils';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -42,7 +43,7 @@ export const loadAndAssertAddCustomToken = async ({
 	const canisterIds = { ledgerCanisterId, indexCanisterId };
 
 	const { alreadyAvailable } = assertAlreadyAvailable({
-		icrcTokens,
+		icrcTokens: [ICP_TOKEN, TESTICP_TOKEN, ...icrcTokens],
 		...canisterIds
 	});
 
@@ -149,10 +150,7 @@ const loadMetadata = async ({
 			...rest
 		});
 	} catch (err: unknown) {
-		toastsError({
-			msg: { text: get(i18n).tokens.import.error.loading_metadata },
-			err
-		});
+		toastsError({ msg: { text: get(i18n).tokens.import.error.loading_metadata } });
 
 		throw err;
 	}
@@ -190,7 +188,7 @@ const loadIndexBalance = async ({
 			indexCanisterId,
 			identity,
 			owner: identity.getPrincipal(),
-			maxResults: ZERO_BI,
+			maxResults: ZERO,
 			certified: true
 		});
 
@@ -205,7 +203,7 @@ const loadIndexBalance = async ({
 	}
 };
 
-const assertIndexLedgerId = async ({
+export const assertIndexLedgerId = async ({
 	identity,
 	indexCanisterId,
 	ledgerCanisterId

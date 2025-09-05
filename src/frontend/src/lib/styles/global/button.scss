@@ -30,6 +30,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		justify-content: center;
@@ -52,6 +53,7 @@ a.as-button {
 	&.tertiary,
 	&.tertiary-alt,
 	&.tertiary-main-card,
+	&.muted,
 	&.success,
 	&.error {
 		font-weight: var(--font-weight-bold);
@@ -91,7 +93,14 @@ a.as-button {
 	// PRIMARY
 	&.primary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted;
-		@apply bg-brand-primary;
+
+		&:not(.transparent) {
+			@apply bg-brand-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-primary-inverted;
@@ -123,7 +132,14 @@ a.as-button {
 	// SECONDARY
 	&.secondary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary-inverted-alt;
-		@apply bg-primary-inverted;
+
+		&:not(.transparent) {
+			@apply bg-primary-inverted;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-primary-inverted-alt;
@@ -155,7 +171,14 @@ a.as-button {
 	// SECONDARY LIGHT
 	&.secondary-light:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-alt;
-		@apply bg-brand-subtle-10;
+
+		&:not(.transparent) {
+			@apply bg-brand-subtle-10;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-brand-primary-alt;
@@ -187,7 +210,14 @@ a.as-button {
 	// TERTIARY
 	&.tertiary:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-primary;
-		@apply bg-primary;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-brand-primary-alt;
@@ -219,7 +249,14 @@ a.as-button {
 	// TERTIARY ALT
 	&.tertiary-alt:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-alt;
-		@apply bg-primary;
+
+		&:not(.transparent) {
+			@apply bg-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-brand-primary-alt;
@@ -251,7 +288,14 @@ a.as-button {
 	// TERTIARY MAIN CARD
 	&.tertiary-main-card:not([disabled]):not(.disabled):not(.loading):not(.link) {
 		@apply text-brand-primary-inverted;
-		@apply bg-primary-alt;
+
+		&:not(.transparent) {
+			@apply bg-primary-alt;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+		}
 
 		&:hover {
 			@apply text-brand-primary-inverted;
@@ -279,10 +323,65 @@ a.as-button {
 		@apply bg-primary-alt;
 	}
 
+	// MUTED
+	&.muted:not([disabled]):not(.disabled):not(.loading):not(.link) {
+		@apply text-tertiary;
+		@apply bg-transparent;
+
+		&:hover {
+			@apply text-secondary;
+			@apply bg-primary;
+		}
+
+		&:active,
+		&.active {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+
+		&:focus-visible {
+			@apply text-secondary;
+			@apply bg-disabled;
+		}
+	}
+
+	&.muted.disabled:not(.loading):not(.link),
+	&.muted[disabled]:not(.loading):not(.link) {
+		@apply text-disabled;
+		@apply bg-primary-alt;
+	}
+
+	&.muted.loading {
+		@apply text-brand-primary-inverted;
+		@apply bg-primary-alt;
+	}
+
 	// SUCCESS
 	&.success {
-		@apply text-primary-inverted;
-		@apply bg-success-primary;
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-success-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-success-primary;
+
+			&:hover {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+
+			&:active {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-success-primary;
+				@apply bg-success-subtle-20;
+			}
+		}
 
 		&:hover {
 			@apply text-primary-inverted;
@@ -313,8 +412,30 @@ a.as-button {
 
 	// ERROR
 	&.error {
-		@apply text-primary-inverted;
-		@apply bg-error-primary;
+		&:not(.transparent) {
+			@apply text-primary-inverted;
+			@apply bg-error-primary;
+		}
+
+		&.transparent {
+			@apply bg-transparent;
+			@apply text-error-primary;
+
+			&:hover {
+				@apply bg-error-subtle-20;
+				@apply text-error-primary;
+			}
+
+			&:active {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+
+			&:focus-visible {
+				@apply text-error-primary;
+				@apply bg-error-subtle-20;
+			}
+		}
 
 		&:hover {
 			@apply text-primary-inverted;
@@ -360,7 +481,7 @@ a.as-button {
 	&.link {
 		@apply p-0;
 		@apply bg-transparent;
-		@apply text-brand-primary;
+		@apply text-brand-primary-alt;
 
 		&.disabled,
 		&[disabled] {
@@ -408,5 +529,17 @@ a.as-button {
 @media (width <= theme(--breakpoint-sm)) {
 	.dropdown-button:not(.loading) {
 		@apply px-2;
+	}
+}
+
+// Mobile-only increased list item height for selector dropdowns (language, currency)
+@media (max-width: #{media.$breakpoint-medium - 1px}) {
+	.lang-selector,
+	.currency-selector {
+		button {
+			min-height: var(--touch-target-min-height);
+			padding-top: var(--padding-1_5x);
+			padding-bottom: var(--padding-1_5x);
+		}
 	}
 }

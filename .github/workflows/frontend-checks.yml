@@ -5,13 +5,17 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   format:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
 
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         continue-on-error: true
         id: app-token
         with:
@@ -20,17 +24,22 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
-          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
-      - name: Checkout
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
+      - name: Checkout for pull request
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
       - name: Checkout
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Format
@@ -45,11 +54,10 @@ jobs:
           fi
       - name: Commit format
         if: steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
           message: '🤖 Apply formatting changes'
+          token: ${{ steps.app-token.outputs.token }}
       - name: Fail for formatting issues without personal access token
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
         run: |
@@ -58,10 +66,14 @@ jobs:
 
   lint:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Lint
@@ -69,10 +81,14 @@ jobs:
 
   check:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Check
@@ -80,34 +96,153 @@ jobs:
 
   test:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        shardTotal: [10]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Set Environment Variables
+        run: echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}" >> $GITHUB_ENV
       - name: Test
-        run: npm run test
+        # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
+        run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
+      - name: Upload Blob Coverage Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: vitest-coverage-report-${{ matrix.shardIndex }}
+          path: .vitest-reports/*
+          include-hidden-files: true
+          retention-days: 1
 
-  config:
+  test-coverage:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    needs: [test]
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Download Blob Coverage Reports
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          path: .vitest-reports
+          pattern: vitest-coverage-report-*
+          merge-multiple: true
+      - name: Merge Coverage Reports
+        run: npm run test:merge
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: vitest-coverage-report
+          path: coverage/
+          retention-days: 3
+
+  config-preparation:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      network-matrix: ${{ steps.set-matrix.outputs.network-matrix }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Set Network Matrix
+        id: set-matrix
+        run: |
+          NETWORKS=$(scripts/build.ic-domains.test.list | jq -R . | jq -s -c .)
+          echo "network-matrix=$NETWORKS" >> $GITHUB_OUTPUT
+
+  config-build:
+    runs-on: ubuntu-24.04
+    needs: config-preparation
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        network: ${{ fromJson(needs.config-preparation.outputs.network-matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Install dfx
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
       - name: Check ic-domains
-        run: scripts/build.ic-domains.test
+        continue-on-error: true
+        run: |
+          FILE="ic-domain.$NETWORK.txt"
+          echo "" > "$FILE"
+          dfx build frontend --network "$NETWORK" >/dev/null 2>/dev/null && \
+            cat build/.well-known/ic-domains > "$FILE" && \
+            echo " $NETWORK" >> "$FILE"
+        env:
+          NETWORK: ${{ matrix.network }}
+      - name: Upload Domain File
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ic-domains-${{ matrix.network }}
+          path: ic-domain.${{ matrix.network }}.txt
+          retention-days: 1
 
-  may-merge:
-    if: always()
-    needs: ['format', 'lint', 'check', 'test', 'config']
+  config:
     runs-on: ubuntu-24.04
+    needs: config-build
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Prepare
+        uses: ./.github/actions/prepare
+      - name: Download All Domain Files
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          path: ic-domains
+          pattern: ic-domains-*
+          merge-multiple: true
+      - name: Merge All Domain Files
+        run: |
+          cat ic-domains/*.txt > combined.ic-domains.txt
+      - name: Run Domain Validation
+        run: scripts/build.ic-domains.test combined.ic-domains.txt
+
+  frontend-checks-pass:
+    if: always()
+    needs: ['format', 'lint', 'check', 'test', 'test-coverage', 'config']
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'

@@ -1,63 +1,47 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import IcFeeDisplay from '$icp/components/send/IcFeeDisplay.svelte';
+	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
-	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
+	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendForm from '$lib/components/send/SendForm.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { NetworkId } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
-	export let source: string;
-	export let simplifiedForm = false;
+	export let selectedContact: ContactUi | undefined = undefined;
 
-	const { sendToken, sendBalance, sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let amountError: IcAmountAssertionError | undefined;
-	let invalidDestination: boolean;
+
+	let invalidDestination = false;
+	$: invalidDestination =
+		isNullishOrEmpty(destination) ||
+		isInvalidDestinationIc({
+			destination,
+			tokenStandard: $sendTokenStandard
+		});
 
 	let invalid = true;
-	$: invalid =
-		invalidDestination ||
-		nonNullish(amountError) ||
-		isNullishOrEmpty(destination) ||
-		isNullish(amount);
+	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
 </script>
 
 <SendForm
-	on:icNext
-	{source}
-	token={$sendToken}
-	balance={$sendBalance}
+	{destination}
 	disabled={invalid}
-	hideSource
+	{invalidDestination}
+	{selectedContact}
+	on:icNext
+	on:icBack
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError {networkId} />
+	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
 
-	<div slot="destination">
-		{#if !simplifiedForm}
-			<IcSendDestination
-				tokenStandard={$sendTokenStandard}
-				bind:destination
-				bind:invalidDestination
-				{networkId}
-				on:icQRCodeScan
-			>
-				<label for="destination" slot="label" class="font-bold">
-					{$i18n.send.text.destination}
-				</label>
-			</IcSendDestination>
-		{/if}
-	</div>
-
-	<IcFeeDisplay slot="fee" {networkId} />
+	<IcTokenFee slot="fee" />
 
 	<slot name="cancel" slot="cancel" />
 </SendForm>

@@ -1,52 +1,94 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
-	import { page } from '$app/stores';
+	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import AllNetworksLogo from '$lib/components/networks/AllNetworksLogo.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
-	import { networkId } from '$lib/derived/network.derived';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { isPrivacyMode } from '$lib/derived/settings.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { NetworkId } from '$lib/types/network';
-	import { formatUSD } from '$lib/utils/format.utils';
-	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import type { LabelSize } from '$lib/types/components';
+	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
+	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let id: NetworkId | undefined;
-	export let name: string;
-	export let icon: string | undefined;
-	export let usdBalance: number | undefined = undefined;
-	export let isTestnet = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		selectedNetworkId?: NetworkId;
+		network?: Network;
+		usdBalance?: number;
+		isTestnet?: boolean;
+		testId?: string;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+		onSelected?: (networkId: OptionNetworkId) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		selectedNetworkId,
+		network,
+		usdBalance,
+		isTestnet = false,
+		testId,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md',
+		onSelected
+	}: Props = $props();
 
-	const onClick = async () => {
-		await switchNetwork(id);
-
-		if (isRouteTransactions($page)) {
-			await gotoReplaceRoot();
-		}
-
-		// A small delay to give the user a visual feedback that the network is checked
-		setTimeout(() => dispatch('icSelected'), 500);
+	const onClick = () => {
+		// If rendered in the dropdown, we add a small delay to give the user a visual feedback that the network is checked
+		delayOnNetworkSelect
+			? setTimeout(() => onSelected?.(network?.id), 500)
+			: onSelected?.(network?.id);
 	};
 </script>
 
-<LogoButton {testId} on:click={onClick} selectable selected={id === $networkId} dividers>
-	<Logo slot="logo" src={icon} />
-	<span slot="title" class="mr-2 text-sm font-normal md:text-base">
-		{name}
-	</span>
-
-	<span slot="description-end">
-		{#if nonNullish(usdBalance)}
-			{formatUSD({ value: usdBalance })}
+<!--
+TODO: Find a way to have the "All networks" not be a fallback for undefined network, and without basically duplicating this component
+-->
+<LogoButton dividers {onClick} selectable selected={network?.id === selectedNetworkId} {testId}>
+	{#snippet logo()}
+		{#if nonNullish(network)}
+			<NetworkLogo {network} />
+		{:else}
+			<AllNetworksLogo />
 		{/if}
+	{/snippet}
 
-		{#if isTestnet}
-			<span class="inline-flex">
-				<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+	{#snippet title()}
+		<span
+			class="mr-2 font-normal md:text-base"
+			class:md:text-base={labelsSize === 'md'}
+			class:md:text-lg={labelsSize === 'lg'}
+			class:text-base={labelsSize === 'lg'}
+			class:text-sm={labelsSize === 'md'}
+		>
+			{network?.name ?? $i18n.networks.chain_fusion}
+		</span>
+	{/snippet}
+
+	{#snippet descriptionEnd()}
+		<span>
+			<span class:md:text-base={labelsSize === 'lg'} class:text-sm={labelsSize === 'lg'}>
+				{#if nonNullish(usdBalance)}
+					{#if $isPrivacyMode}
+						<IconDots variant="xs" />
+					{:else}
+						{formatCurrency({
+							value: usdBalance,
+							currency: $currentCurrency,
+							exchangeRate: $currencyExchangeStore,
+							language: $currentLanguage
+						})}
+					{/if}
+				{/if}
 			</span>
-		{/if}
-	</span>
+			{#if isTestnet}
+				<span class="inline-flex">
+					<Badge styleClass="pt-0 pb-0">{$i18n.networks.testnet}</Badge>
+				</span>
+			{/if}
+		</span>
+	{/snippet}
 </LogoButton>

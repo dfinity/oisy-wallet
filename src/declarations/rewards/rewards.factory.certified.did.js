@@ -21,30 +21,35 @@ export const idlFactory = ({ IDL }) => {
 		name: IDL.Text,
 		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32
+		num_users_per_event: IDL.Nat32,
+		campaign_name: IDL.Opt(IDL.Text)
 	});
-	const UsageCriteria = IDL.Record({
-		measurement_duration: CandidDuration,
-		min_transactions: IDL.Nat32,
-		min_logins: IDL.Nat32,
-		min_valuation_usd: IDL.Nat64
+	const Criterion = IDL.Variant({
+		MinTransactions: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinReferrals: IDL.Record({ count: IDL.Nat32 }),
+		MinLogins: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32,
+			session_duration: IDL.Opt(CandidDuration)
+		}),
+		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
+		Hangover: IDL.Record({ duration: CandidDuration }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 }),
+		MinEligibleReferrals: IDL.Record({
+			count: IDL.Nat32,
+			campaign_name: IDL.Text
+		}),
+		EligibleForCampaign: IDL.Record({ campaign_name: IDL.Text })
 	});
+	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		eligibility_criteria: UsageCriteria
-	});
-	const BatchSizes = IDL.Record({
-		user_fetching: IDL.Nat16,
-		sprinkle: IDL.Nat16,
-		block_processing: IDL.Nat16,
-		airdrop: IDL.Nat16,
-		block_fetching: IDL.Nat16
-	});
-	const AirDropConfig = IDL.Record({
-		number_of_participants: IDL.Nat64,
-		start_timestamp_ns: IDL.Nat64,
-		token_configs: IDL.Vec(TokenConfig)
+		eligibility_criteria: UsageCriteria,
+		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const VipConfig = IDL.Record({
 		code_validity_duration: IDL.Nat64,
@@ -53,11 +58,8 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		usage_awards_config: IDL.Opt(UsageAwardConfig),
-		batch_sizes: IDL.Opt(BatchSizes),
-		airdrop_config: IDL.Opt(AirDropConfig),
-		index_canisters: IDL.Vec(IDL.Principal),
 		vip_config: IDL.Opt(VipConfig),
-		processing_interval_s: IDL.Opt(IDL.Nat16),
+		vip_campaigns: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
 	});
@@ -66,6 +68,24 @@ export const idlFactory = ({ IDL }) => {
 		AlreadyClaimed: IDL.Null,
 		Success: IDL.Null,
 		InvalidCode: IDL.Null
+	});
+	const ClaimedVipReward = IDL.Record({ campaign_id: IDL.Text });
+	const CriterionEligibility = IDL.Record({
+		satisfied: IDL.Bool,
+		criterion: Criterion
+	});
+	const CampaignEligibility = IDL.Record({
+		available: IDL.Bool,
+		eligible: IDL.Bool,
+		criteria: IDL.Vec(CriterionEligibility)
+	});
+	const EligibilityReport = IDL.Record({
+		campaigns: IDL.Vec(IDL.Tuple(IDL.Text, CampaignEligibility))
+	});
+	const EligibilityError = IDL.Variant({ NotAuthorized: IDL.Null });
+	const EligibilityResponse = IDL.Variant({
+		Ok: EligibilityReport,
+		Err: EligibilityError
 	});
 	const LastActivityHistogramRequest = IDL.Record({
 		bucket_count: IDL.Nat32,
@@ -88,40 +108,49 @@ export const idlFactory = ({ IDL }) => {
 	const NewVipRewardResponse = IDL.Variant({
 		Anonymous: IDL.Null,
 		NotImportantPerson: IDL.Null,
+		UnknownCampaign: IDL.Null,
 		VipReward: VipReward
-	});
-	const PublicAirdropStatus = IDL.Variant({
-		Ongoing: IDL.Record({
-			remaining_airdrops: IDL.Nat64,
-			total_airdrops: IDL.Nat64
-		}),
-		Completed: IDL.Record({ total_airdrops: IDL.Nat64 }),
-		Upcoming: IDL.Null
-	});
-	const PublicSprinkleInfo = IDL.Record({
-		timestamp_ns: IDL.Nat64,
-		total_amount: IDL.Nat,
-		n_sprinkled_users: IDL.Nat64,
-		ledger: IDL.Principal
-	});
-	const PublicRewardsInfo = IDL.Record({
-		airdrop: IDL.Opt(PublicAirdropStatus),
-		last_sprinkle: IDL.Opt(PublicSprinkleInfo)
 	});
 	const ReferrerInfo = IDL.Record({
 		referral_code: IDL.Nat32,
 		num_referrals: IDL.Opt(IDL.Nat32)
 	});
+	const AnyToken = IDL.Record({
+		token_symbol: IDL.Text,
+		wraps: IDL.Opt(IDL.Text)
+	});
+	const AnyNetwork = IDL.Record({
+		testnet_for: IDL.Opt(IDL.Text),
+		network_id: IDL.Text
+	});
 	const TransactionType = IDL.Variant({
 		Send: IDL.Null,
 		Receive: IDL.Null
+	});
+	const AccountId_Any = IDL.Text;
+	const Transaction_Any = IDL.Record({
+		transaction_type: TransactionType,
+		network: AnyNetwork,
+		counterparty: AccountId_Any,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat
+	});
+	const AccountSnapshot_Any = IDL.Record({
+		decimals: IDL.Nat8,
+		token_address: AnyToken,
+		network: AnyNetwork,
+		approx_usd_per_token: IDL.Float64,
+		last_transactions: IDL.Vec(Transaction_Any),
+		account: AccountId_Any,
+		timestamp: IDL.Nat64,
+		amount: IDL.Nat
 	});
 	const Transaction_Icrc = IDL.Record({
 		transaction_type: TransactionType,
 		network: IDL.Record({}),
 		counterparty: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshot_Icrc = IDL.Record({
 		decimals: IDL.Nat8,
@@ -131,14 +160,14 @@ export const idlFactory = ({ IDL }) => {
 		last_transactions: IDL.Vec(Transaction_Icrc),
 		account: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const Transaction_Spl = IDL.Record({
 		transaction_type: TransactionType,
 		network: IDL.Record({}),
 		counterparty: IDL.Text,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshot_Spl = IDL.Record({
 		decimals: IDL.Nat8,
@@ -148,9 +177,10 @@ export const idlFactory = ({ IDL }) => {
 		last_transactions: IDL.Vec(Transaction_Spl),
 		account: IDL.Text,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat64
+		amount: IDL.Nat
 	});
 	const AccountSnapshotFor = IDL.Variant({
+		Any: AccountSnapshot_Any,
 		Icrc: AccountSnapshot_Icrc,
 		SplDevnet: AccountSnapshot_Spl,
 		SplMainnet: AccountSnapshot_Spl
@@ -159,29 +189,38 @@ export const idlFactory = ({ IDL }) => {
 		accounts: IDL.Vec(AccountSnapshotFor),
 		timestamp: IDL.Opt(IDL.Nat64)
 	});
+	const SetReferrerError = IDL.Variant({
+		SelfReferral: IDL.Null,
+		AlreadyHasReferrer: IDL.Null,
+		UnknownReferrer: IDL.Null,
+		NotNewUser: IDL.Null,
+		AnonymousCaller: IDL.Null
+	});
+	const SetReferrerResponse = IDL.Variant({
+		Ok: IDL.Null,
+		Err: SetReferrerError
+	});
+	const StatsKeyType = IDL.Variant({
+		TokenGroup: IDL.Null,
+		Network: IDL.Null,
+		TokenSymbol: IDL.Null
+	});
+	const StatsRequest = IDL.Record({ by: StatsKeyType });
+	const StatsValue = IDL.Record({
+		user_count: IDL.Nat64,
+		assets_usd: IDL.Float64
+	});
+	const StatsResponse = IDL.Record({
+		request: StatsRequest,
+		stats: IDL.Vec(IDL.Tuple(IDL.Text, StatsValue))
+	});
 	const UsageAndHolding = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
 		approx_usd_valuation: IDL.Float64,
 		last_activity_ns: IDL.Opt(IDL.Nat64)
 	});
 	const UsageVsHoldingStats = IDL.Record({
 		holdings: IDL.Vec(UsageAndHolding)
-	});
-	const SprinkleEvent = IDL.Record({
-		n_sprinkled_users: IDL.Nat64,
-		timestamp_scheduled: IDL.Nat64,
-		n_eligible_users: IDL.Nat64,
-		n_selected_users: IDL.Nat64
-	});
-	const SprinkleStatus = IDL.Record({
-		next_timestamp: IDL.Opt(IDL.Nat64),
-		past_events: IDL.Vec(SprinkleEvent)
-	});
-	const StatusResponse = IDL.Record({
-		latest_oisy_user_timestamp: IDL.Opt(IDL.Nat64),
-		last_block_fetch_timestamp: IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64)),
-		num_buffered_blocks: IDL.Nat64,
-		processed_block_height: IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Nat64)),
-		sprinkle_status: SprinkleStatus
 	});
 	const UsageAwardStats = IDL.Record({
 		user_count: IDL.Nat64,
@@ -211,16 +250,26 @@ export const idlFactory = ({ IDL }) => {
 		name: IDL.Opt(IDL.Text),
 		ledger: IDL.Principal,
 		timestamp: IDL.Nat64,
-		amount: IDL.Nat
+		amount: IDL.Nat,
+		campaign_id: IDL.Text,
+		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const UserData = IDL.Record({
+		superpowers: IDL.Opt(IDL.Vec(IDL.Text)),
 		airdrops: IDL.Vec(RewardInfo),
 		usage_awards: IDL.Opt(IDL.Vec(RewardInfo)),
 		last_snapshot_timestamp: IDL.Opt(IDL.Nat64),
 		is_vip: IDL.Opt(IDL.Bool),
 		sprinkles: IDL.Vec(RewardInfo)
 	});
-	const UsageAwardState = IDL.Record({ snapshots: IDL.Vec(UserSnapshot) });
+	const UsageAwardState = IDL.Record({
+		first_activity_ns: IDL.Opt(IDL.Nat64),
+		snapshot_timestamps: IDL.Vec(IDL.Nat64),
+		snapshots: IDL.Vec(UserSnapshot),
+		referred_by: IDL.Opt(IDL.Nat32),
+		last_activity_ns: IDL.Opt(IDL.Nat64),
+		referrer_info: IDL.Opt(ReferrerInfo)
+	});
 	const VipStats = IDL.Record({
 		total_rejected: IDL.Nat32,
 		total_redeemed: IDL.Nat32,
@@ -228,31 +277,35 @@ export const idlFactory = ({ IDL }) => {
 	});
 	return IDL.Service({
 		claim_usage_award: IDL.Func([UsageAwardEvent, IDL.Principal], [], []),
-		claim_vip_reward: IDL.Func([VipReward], [ClaimVipRewardResponse], []),
+		claim_vip_reward: IDL.Func(
+			[VipReward],
+			[ClaimVipRewardResponse, IDL.Opt(ClaimedVipReward)],
+			[]
+		),
 		config: IDL.Func([], [Config]),
 		configure_usage_awards: IDL.Func([UsageAwardConfig], [], []),
 		configure_vip: IDL.Func([VipConfig], [], []),
+		configure_vips: IDL.Func([IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))], [], []),
+		eligible: IDL.Func([IDL.Opt(IDL.Principal)], [EligibilityResponse]),
 		last_activity_histogram: IDL.Func(
 			[LastActivityHistogramRequest],
 			[LastActivityHistogramResponse]
 		),
-		new_vip_reward: IDL.Func([], [NewVipRewardResponse], []),
-		public_rewards_info: IDL.Func([], [PublicRewardsInfo]),
+		new_vip_reward: IDL.Func([IDL.Opt(ClaimedVipReward)], [NewVipRewardResponse], []),
 		referrer_info: IDL.Func([], [ReferrerInfo], []),
 		referrer_info_for: IDL.Func([IDL.Principal], [IDL.Opt(ReferrerInfo)]),
 		register_airdrop_recipient: IDL.Func([UserSnapshot], [], []),
 		register_snapshot_for: IDL.Func([IDL.Principal, UserSnapshot], [], []),
-		set_referrer: IDL.Func([IDL.Nat32], [], []),
+		set_referrer: IDL.Func([IDL.Nat32], [SetReferrerResponse], []),
+		stats_by: IDL.Func([StatsKeyType], [StatsResponse]),
 		stats_usage_vs_holding: IDL.Func([], [UsageVsHoldingStats]),
-		status: IDL.Func([], [StatusResponse]),
 		trigger_usage_award_event: IDL.Func([UsageAwardEvent], [], []),
-		usage_eligible: IDL.Func([IDL.Principal], [IDL.Bool, IDL.Bool]),
 		usage_stats: IDL.Func([], [UsageAwardStats]),
 		usage_winners: IDL.Func([IDL.Opt(UsageWinnersRequest)], [UsageWinnersResponse]),
 		user_info: IDL.Func([], [UserData]),
 		user_info_for: IDL.Func([IDL.Principal], [UserData]),
 		user_stats: IDL.Func([IDL.Principal], [UsageAwardState]),
-		vip_stats: IDL.Func([], [VipStats])
+		vip_stats: IDL.Func([IDL.Opt(IDL.Text)], [VipStats])
 	});
 };
 // @ts-ignore
@@ -278,30 +331,35 @@ export const init = ({ IDL }) => {
 		name: IDL.Text,
 		num_events_per_cycle: IDL.Nat32,
 		awards: IDL.Vec(TokenConfig),
-		num_users_per_event: IDL.Nat32
+		num_users_per_event: IDL.Nat32,
+		campaign_name: IDL.Opt(IDL.Text)
 	});
-	const UsageCriteria = IDL.Record({
-		measurement_duration: CandidDuration,
-		min_transactions: IDL.Nat32,
-		min_logins: IDL.Nat32,
-		min_valuation_usd: IDL.Nat64
+	const Criterion = IDL.Variant({
+		MinTransactions: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32
+		}),
+		MinReferrals: IDL.Record({ count: IDL.Nat32 }),
+		MinLogins: IDL.Record({
+			duration: CandidDuration,
+			count: IDL.Nat32,
+			session_duration: IDL.Opt(CandidDuration)
+		}),
+		MinTotalAssetsUsd: IDL.Record({ usd: IDL.Nat32 }),
+		Hangover: IDL.Record({ duration: CandidDuration }),
+		MinTokens: IDL.Record({ count: IDL.Nat32 }),
+		MinEligibleReferrals: IDL.Record({
+			count: IDL.Nat32,
+			campaign_name: IDL.Text
+		}),
+		EligibleForCampaign: IDL.Record({ campaign_name: IDL.Text })
 	});
+	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
 		awards: IDL.Vec(UsageAwardEvent),
-		eligibility_criteria: UsageCriteria
-	});
-	const BatchSizes = IDL.Record({
-		user_fetching: IDL.Nat16,
-		sprinkle: IDL.Nat16,
-		block_processing: IDL.Nat16,
-		airdrop: IDL.Nat16,
-		block_fetching: IDL.Nat16
-	});
-	const AirDropConfig = IDL.Record({
-		number_of_participants: IDL.Nat64,
-		start_timestamp_ns: IDL.Nat64,
-		token_configs: IDL.Vec(TokenConfig)
+		eligibility_criteria: UsageCriteria,
+		campaign_name: IDL.Opt(IDL.Text)
 	});
 	const VipConfig = IDL.Record({
 		code_validity_duration: IDL.Nat64,
@@ -310,11 +368,8 @@ export const init = ({ IDL }) => {
 	});
 	const Config = IDL.Record({
 		usage_awards_config: IDL.Opt(UsageAwardConfig),
-		batch_sizes: IDL.Opt(BatchSizes),
-		airdrop_config: IDL.Opt(AirDropConfig),
-		index_canisters: IDL.Vec(IDL.Principal),
 		vip_config: IDL.Opt(VipConfig),
-		processing_interval_s: IDL.Opt(IDL.Nat16),
+		vip_campaigns: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, VipConfig))),
 		readonly_admins: IDL.Vec(IDL.Principal),
 		oisy_canister: IDL.Opt(IDL.Principal)
 	});

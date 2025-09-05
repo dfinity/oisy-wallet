@@ -1,5 +1,5 @@
 {
-	"dfx": "0.23.0",
+	"dfx": "0.26.1",
 	"canisters": {
 		"signer": {
 			"type": "custom",
@@ -18,6 +18,8 @@
 					"test_fe_2": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_3": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"test_fe_4": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test_fe_5": "tdxud-2yaaa-aaaad-aadiq-cai",
+					"test_fe_6": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"audit": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"staging": "tdxud-2yaaa-aaaad-aadiq-cai",
 					"e2e": "tdxud-2yaaa-aaaad-aadiq-cai"
@@ -40,9 +42,53 @@
 					"test_fe_2": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_3": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"test_fe_4": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"test_fe_5": "2ipq2-uqaaa-aaaar-qailq-cai",
+					"test_fe_6": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"audit": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"staging": "2ipq2-uqaaa-aaaar-qailq-cai",
 					"e2e": "2ipq2-uqaaa-aaaar-qailq-cai"
+				}
+			}
+		},
+		"icp_swap_pool": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_pool.sh",
+			"candid": "target/icp_swap_pool.did",
+			"wasm": "target/icp_swap_pool.wasm.gz",
+			"init_arg_file": "target/icp_swap_pool.arg.did",
+			"shrink": false,
+			"specified_id": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+			"remote": {
+				"id": {
+					"ic": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"beta": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_be_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_1": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_2": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_3": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"test_fe_4": "xmiu5-jqaaa-aaaag-qbz7q-cai",
+					"staging": "xmiu5-jqaaa-aaaag-qbz7q-cai"
+				}
+			}
+		},
+		"icp_swap_factory": {
+			"type": "custom",
+			"build": "scripts/build.icp_swap_factory.sh",
+			"candid": "target/icp_swap_factory.did",
+			"wasm": "target/icp_swap_factory.wasm.gz",
+			"init_arg_file": "target/icp_swap_factory.arg.did",
+			"shrink": false,
+			"specified_id": "4mmnk-kiaaa-aaaag-qbllq-cai",
+			"remote": {
+				"id": {
+					"ic": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"beta": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_be_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_1": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_2": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_3": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"test_fe_4": "4mmnk-kiaaa-aaaag-qbllq-cai",
+					"staging": "4mmnk-kiaaa-aaaag-qbllq-cai"
 				}
 			}
 		},
@@ -60,7 +106,9 @@
 					"test_fe_1": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_2": "d3nvo-aaaaa-aaaar-qagzq-cai",
 					"test_fe_3": "d3nvo-aaaaa-aaaar-qagzq-cai",
-					"test_fe_4": "d3nvo-aaaaa-aaaar-qagzq-cai"
+					"test_fe_4": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_5": "d3nvo-aaaaa-aaaar-qagzq-cai",
+					"test_fe_6": "d3nvo-aaaaa-aaaar-qagzq-cai"
 				}
 			}
 		},
@@ -71,7 +119,6 @@
 			},
 			"source": ["build/"],
 			"type": "assets",
-			"gzip": true,
 			"remote": {
 				"id": {
 					"test_be_1": "tewsx-xaaaa-aaaad-aadia-cai"
@@ -105,6 +152,8 @@
 					"test_fe_2": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_3": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"test_fe_4": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test_fe_5": "rdmx6-jaaaa-aaaaa-aaadq-cai",
+					"test_fe_6": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"audit": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"staging": "rdmx6-jaaaa-aaaaa-aaadq-cai",
 					"beta": "rdmx6-jaaaa-aaaaa-aaadq-cai",
@@ -126,6 +175,8 @@
 					"test_fe_2": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_3": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"test_fe_4": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test_fe_5": "um5iw-rqaaa-aaaaq-qaaba-cai",
+					"test_fe_6": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"audit": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"staging": "um5iw-rqaaa-aaaaq-qaaba-cai",
 					"beta": "um5iw-rqaaa-aaaaq-qaaba-cai",
@@ -147,6 +198,8 @@
 					"test_fe_2": "2vxsx-fae",
 					"test_fe_3": "2vxsx-fae",
 					"test_fe_4": "2vxsx-fae",
+					"test_fe_5": "2vxsx-fae",
+					"test_fe_6": "2vxsx-fae",
 					"audit": "2vxsx-fae",
 					"staging": "2vxsx-fae",
 					"beta": "2vxsx-fae",
@@ -168,11 +221,38 @@
 					"test_fe_2": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_3": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"test_fe_4": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test_fe_5": "qbw6f-caaaa-aaaah-qdcwa-cai",
+					"test_fe_6": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"audit": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"staging": "qbw6f-caaaa-aaaah-qdcwa-cai",
 					"beta": "qgxyr-pyaaa-aaaah-qdcwq-cai",
 					"ic": "qgxyr-pyaaa-aaaah-qdcwq-cai",
 					"e2e": "qgxyr-pyaaa-aaaah-qdcwq-cai"
+				}
+			}
+		},
+		"sol_rpc": {
+			"type": "custom",
+			"build": "scripts/build.sol_rpc.sh",
+			"candid": "target/sol_rpc.did",
+			"wasm": "target/sol_rpc.wasm.gz",
+			"init_arg_file": "target/sol_rpc.arg.did",
+			"shrink": false,
+			"specified_id": "tghme-zyaaa-aaaar-qarca-cai",
+			"remote": {
+				"id": {
+					"ic": "tghme-zyaaa-aaaar-qarca-cai",
+					"beta": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_be_1": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_1": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_2": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_3": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_4": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_5": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_6": "tghme-zyaaa-aaaar-qarca-cai",
+					"audit": "tghme-zyaaa-aaaar-qarca-cai",
+					"staging": "tghme-zyaaa-aaaar-qarca-cai",
+					"e2e": "tghme-zyaaa-aaaar-qarca-cai"
 				}
 			}
 		},
@@ -190,6 +270,8 @@
 					"test_fe_2": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_3": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"test_fe_4": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test_fe_5": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+					"test_fe_6": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"audit": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"staging": "ryjl3-tyaaa-aaaaa-aaaba-cai",
 					"beta": "ryjl3-tyaaa-aaaaa-aaaba-cai",
@@ -213,6 +295,8 @@
 					"test_fe_2": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_3": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"test_fe_4": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test_fe_5": "qhbym-qaaaa-aaaaa-aaafq-cai",
+					"test_fe_6": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"audit": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"staging": "qhbym-qaaaa-aaaaa-aaafq-cai",
 					"beta": "qhbym-qaaaa-aaaaa-aaafq-cai",
@@ -223,8 +307,10 @@
 		},
 		"ckbtc_minter": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_minter.sh",
 			"candid": "target/ic/ckbtc_minter.did",
 			"wasm": "target/ic/ckbtc_minter.wasm",
+			"init_arg_file": "target/ic/ckbtc_minter.args.did",
 			"specified_id": "ml52i-qqaaa-aaaar-qaaba-cai",
 			"remote": {
 				"id": {
@@ -234,6 +320,8 @@
 					"test_fe_2": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_3": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"test_fe_4": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test_fe_5": "ml52i-qqaaa-aaaar-qaaba-cai",
+					"test_fe_6": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"audit": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"staging": "ml52i-qqaaa-aaaar-qaaba-cai",
 					"e2e": "ml52i-qqaaa-aaaar-qaaba-cai"
@@ -253,6 +341,8 @@
 					"test_fe_2": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_3": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"test_fe_4": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test_fe_5": "mc6ru-gyaaa-aaaar-qaaaq-cai",
+					"test_fe_6": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"audit": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"staging": "mc6ru-gyaaa-aaaar-qaaaq-cai",
 					"e2e": "mc6ru-gyaaa-aaaar-qaaaq-cai"
@@ -261,8 +351,10 @@
 		},
 		"ckbtc_index": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_index.sh",
 			"candid": "target/ic/ckbtc_index.did",
 			"wasm": "target/ic/ckbtc_index.wasm",
+			"init_arg_file": "target/ic/ckbtc_index.args.did",
 			"specified_id": "mm444-5iaaa-aaaar-qaabq-cai",
 			"remote": {
 				"id": {
@@ -272,6 +364,8 @@
 					"test_fe_2": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_3": "mm444-5iaaa-aaaar-qaabq-cai",
 					"test_fe_4": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test_fe_5": "mm444-5iaaa-aaaar-qaabq-cai",
+					"test_fe_6": "mm444-5iaaa-aaaar-qaabq-cai",
 					"audit": "mm444-5iaaa-aaaar-qaabq-cai",
 					"staging": "mm444-5iaaa-aaaar-qaabq-cai",
 					"e2e": "mm444-5iaaa-aaaar-qaabq-cai"
@@ -280,8 +374,10 @@
 		},
 		"ckbtc_kyt": {
 			"type": "custom",
+			"build": "scripts/build.ckbtc_kyt.sh",
 			"candid": "target/ic/ckbtc_kyt.did",
 			"wasm": "target/ic/ckbtc_kyt.wasm",
+			"init_arg_file": "target/ic/ckbtc_kyt.args.did",
 			"specified_id": "pvm5g-xaaaa-aaaar-qaaia-cai",
 			"remote": {
 				"id": {
@@ -291,6 +387,8 @@
 					"test_fe_2": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_3": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"test_fe_4": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test_fe_5": "pvm5g-xaaaa-aaaar-qaaia-cai",
+					"test_fe_6": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"audit": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"staging": "pvm5g-xaaaa-aaaar-qaaia-cai",
 					"e2e": "pvm5g-xaaaa-aaaar-qaaia-cai"
@@ -312,6 +410,8 @@
 					"test_fe_2": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_3": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"test_fe_4": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test_fe_5": "jzenf-aiaaa-aaaar-qaa7q-cai",
+					"test_fe_6": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"audit": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"staging": "jzenf-aiaaa-aaaar-qaa7q-cai",
 					"e2e": "jzenf-aiaaa-aaaar-qaa7q-cai"
@@ -335,6 +435,8 @@
 					"test_fe_2": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_3": "apia6-jaaaa-aaaar-qabma-cai",
 					"test_fe_4": "apia6-jaaaa-aaaar-qabma-cai",
+					"test_fe_5": "apia6-jaaaa-aaaar-qabma-cai",
+					"test_fe_6": "apia6-jaaaa-aaaar-qabma-cai",
 					"audit": "apia6-jaaaa-aaaar-qabma-cai",
 					"staging": "apia6-jaaaa-aaaar-qabma-cai",
 					"e2e": "apia6-jaaaa-aaaar-qabma-cai"
@@ -358,6 +460,8 @@
 					"test_fe_2": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_3": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"test_fe_4": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test_fe_5": "sh5u2-cqaaa-aaaar-qacna-cai",
+					"test_fe_6": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"audit": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"staging": "sh5u2-cqaaa-aaaar-qacna-cai",
 					"e2e": "sh5u2-cqaaa-aaaar-qacna-cai"
@@ -380,6 +484,8 @@
 					"test_fe_2": "yfumr-cyaaa-aaaar-qaela-cai",
 					"test_fe_3": "yfumr-cyaaa-aaaar-qaela-cai",
 					"test_fe_4": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_5": "yfumr-cyaaa-aaaar-qaela-cai",
+					"test_fe_6": "yfumr-cyaaa-aaaar-qaela-cai",
 					"audit": "yfumr-cyaaa-aaaar-qaela-cai",
 					"staging": "yfumr-cyaaa-aaaar-qaela-cai"
 				}
@@ -401,15 +507,40 @@
 					"test_fe_2": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"test_fe_3": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"test_fe_4": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_5": "ycvkf-paaaa-aaaar-qaelq-cai",
+					"test_fe_6": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"audit": "ycvkf-paaaa-aaaar-qaelq-cai",
 					"staging": "ycvkf-paaaa-aaaar-qaelq-cai"
 				}
 			}
 		},
+		"xtc_ledger": {
+			"type": "custom",
+			"build": "scripts/build.xtc_ledger.sh",
+			"candid": "target/xtc_ledger.did",
+			"wasm": "target/xtc_ledger.wasm.gz",
+			"specified_id": "aanaa-xaaaa-aaaah-aaeiq-cai",
+			"remote": {
+				"id": {
+					"test_be_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_1": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_2": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_3": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_4": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_5": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"test_fe_6": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"audit": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"staging": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"beta": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"ic": "aanaa-xaaaa-aaaah-aaeiq-cai",
+					"e2e": "aanaa-xaaaa-aaaah-aaeiq-cai"
+				}
+			}
+		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.2.0-referral1/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.2.0-referral1/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.7-api.1/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.7-api.1/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
@@ -420,8 +551,35 @@
 					"test_fe_2": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_3": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"test_fe_4": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_5": "vi6cu-aiaaa-aaaad-aad7q-cai",
+					"test_fe_6": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"e2e": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
+				}
+			}
+		},
+		"llm": {
+			"type": "custom",
+			"build": "scripts/build.llm.sh",
+			"candid": "target/llm.did",
+			"wasm": "target/llm.wasm.gz",
+			"init_arg_file": "target/llm.arg.did",
+			"specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"beta": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"staging": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_be_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_2": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_3": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_4": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_5": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_6": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"e2e": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"audit": "w36hm-eqaaa-aaaal-qr76a-cai"
 				}
 			}
 		}
@@ -451,6 +609,14 @@
 			"type": "persistent"
 		},
 		"test_fe_4": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_5": {
+			"providers": ["https://icp0.io"],
+			"type": "persistent"
+		},
+		"test_fe_6": {
 			"providers": ["https://icp0.io"],
 			"type": "persistent"
 		},

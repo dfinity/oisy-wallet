@@ -3,19 +3,24 @@
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProviderFee } from '$lib/types/swap';
+	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	export let networkFee: ProviderFee;
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{$i18n.swap.text.included_network_fees}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.swap.text.included_network_fees}
+	{/snippet}
 
-	<div slot="main-value" class="flex flex-col">
-		<FeeDisplay
-			feeAmount={networkFee.fee}
-			symbol={networkFee.token.symbol}
-			decimals={networkFee.token.decimals}
-			displayExchangeRate={false}
-		/>
-	</div>
+	{#snippet mainValue()}
+		<div class="flex flex-col">
+			<FeeDisplay
+				decimals={networkFee.token.decimals}
+				displayExchangeRate={false}
+				feeAmount={networkFee.fee}
+				symbol={getTokenDisplaySymbol(networkFee.token)}
+			/>
+		</div>
+	{/snippet}
 </ModalValue>

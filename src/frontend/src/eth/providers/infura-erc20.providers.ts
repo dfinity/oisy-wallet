@@ -1,23 +1,17 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Contract, type ContractTransaction } from 'ethers/contract';
+import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20Provider implements Erc20Provider {
@@ -28,7 +22,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}
 
 	metadata = async ({ address }: Pick<Erc20ContractAddress, 'address'>): Promise<Erc20Metadata> => {
-		const erc20Contract = new ethers.Contract(address, ERC20_ABI, this.provider);
+		const erc20Contract = new Contract(address, ERC20_ABI, this.provider);
 
 		const [name, symbol, decimals] = await Promise.all([
 			erc20Contract.name(),
@@ -39,7 +33,7 @@ export class InfuraErc20Provider implements Erc20Provider {
 		return {
 			name,
 			symbol,
-			decimals
+			decimals: Number(decimals)
 		};
 	};
 
@@ -49,12 +43,12 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		address: EthAddress;
-	}): Promise<BigNumber> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
+	}): Promise<bigint> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.balanceOf(address);
 	};
 
-	getFeeData = ({
+	getFeeData = async ({
 		contract: { address: contractAddress },
 		to,
 		from,
@@ -63,10 +57,21 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		from: EthAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.estimateGas.approve(to, amount, { from });
+		amount: bigint;
+	}): Promise<bigint> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		const results = await Promise.allSettled([
+			erc20Contract.approve.estimateGas(to, amount, { from }),
+			erc20Contract.transfer.estimateGas(to, amount, { from })
+		]);
+
+		return results.reduce((max, result) => {
+			if (result.status === 'fulfilled' && result.value > max) {
+				return result.value;
+			}
+			return max;
+		}, ZERO);
 	};
 
 	// Transaction send: https://ethereum.stackexchange.com/a/131944
@@ -78,10 +83,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<PopulatedTransaction> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.transfer(to, amount);
+		amount: bigint;
+	}): Promise<ContractTransaction> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+		return erc20Contract.transfer.populateTransaction(to, amount);
 	};
 
 	populateApprove = ({
@@ -91,10 +96,10 @@ export class InfuraErc20Provider implements Erc20Provider {
 	}: {
 		contract: Erc20ContractAddress;
 		spender: EthAddress;
-		amount: BigNumber;
-	}): Promise<PopulatedTransaction> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
-		return erc20Contract.populateTransaction.approve(spender, amount);
+		amount: bigint;
+	}): Promise<ContractTransaction> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+		return erc20Contract.approve.populateTransaction(spender, amount);
 	};
 
 	allowance = ({
@@ -105,16 +110,32 @@ export class InfuraErc20Provider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		owner: EthAddress;
 		spender: EthAddress;
-	}): Promise<BigNumber> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ABI, this.provider);
+	}): Promise<bigint> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
 		return erc20Contract.allowance(owner, spender);
+	};
+
+	// We use this function to differentiate between Erc20 and Erc721 contracts, because currently we do
+	// not have another way to find out the token standard only by contract address.
+	isErc20 = async ({ contractAddress }: { contractAddress: string }): Promise<boolean> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ABI, this.provider);
+
+		try {
+			await erc20Contract.decimals();
+			return true;
+		} catch (_: unknown) {
+			return false;
+		}
 	};
 }
 
-const providers: Record<NetworkId, InfuraErc20Provider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraErc20Provider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraErc20Provider> = [
+	...SUPPORTED_ETHEREUM_NETWORKS,
+	...SUPPORTED_EVM_NETWORKS
+].reduce<Record<NetworkId, InfuraErc20Provider>>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20Provider(infura) }),
+	{}
+);
 
 export const infuraErc20Providers = (networkId: NetworkId): InfuraErc20Provider => {
 	const provider = providers[networkId];

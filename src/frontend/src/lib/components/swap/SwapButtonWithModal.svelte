@@ -1,15 +1,21 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import SwapButton from '$lib/components/swap/SwapButton.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let open: (modalId: symbol) => void;
-	export let isOpen: boolean;
+	interface Props {
+		onOpen: (modalId: symbol) => void;
+		isOpen: boolean;
+		children: Snippet;
+	}
+
+	let { onOpen, isOpen, children }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
-<SwapButton on:click={() => open(modalId)} />
+<SwapButton onclick={() => onOpen(modalId)} />
 
 {#if isOpen && $modalStore?.id === modalId}
-	<slot />
+	{@render children()}
 {/if}

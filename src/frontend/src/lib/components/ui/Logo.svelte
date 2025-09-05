@@ -5,48 +5,51 @@
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
 
-	export let src: string | undefined;
-	export let alt = '';
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let ring = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		src?: string;
+		alt?: string;
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		ring?: boolean;
+		circle?: boolean;
+		testId?: string;
+	}
 
-	let sizePx = logoSizes[size];
+	let {
+		src,
+		alt = '',
+		size = 'xxs',
+		color = 'off-white',
+		ring = false,
+		circle = true,
+		testId
+	}: Props = $props();
 
-	let loaded = false;
+	let sizePx = $state(logoSizes[size]);
 
-	$: src,
-		(() => {
-			loaded = isNullish(src);
-			loadingError = false;
-		})();
-
-	let loadingError = false;
-	const onError = () => {
-		loadingError = true;
-		loaded = true;
-	};
+	let loadingError: boolean | undefined = $state();
+	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
 </script>
 
 <div
-	class="flex items-center justify-center overflow-hidden rounded-full ring-primary"
-	class:bg-off-white={color === 'off-white' && !loaded}
-	class:bg-white={color === 'white' && !loaded}
-	class:opacity-10={!loaded}
-	class:ring-2={ring}
 	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	class="flex items-center justify-center overflow-hidden ring-primary"
+	class:bg-off-white={color === 'off-white' && !isReady}
+	class:bg-white={color === 'white' && !isReady}
+	class:opacity-10={!isReady}
+	class:ring-2={ring}
+	class:rounded-full={circle}
+	class:rounded-lg={!circle}
 	data-tid={testId}
 >
 	{#if nonNullish(src) && !loadingError}
 		<Img
-			{src}
 			{alt}
 			fitHeight
 			height={sizePx}
-			on:load={() => (loaded = true)}
-			on:error={onError}
-			rounded
+			onError={() => (loadingError = true)}
+			onLoad={() => (loadingError = false)}
+			{src}
 		/>
 	{:else}
 		<IconRandom size={sizePx} text={alt} />

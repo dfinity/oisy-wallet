@@ -1,36 +1,29 @@
 <script lang="ts">
-	import { getContext, setContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
+	import { ethereumToken } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
 	} from '$icp/stores/receive-token.store';
+	import type { IcCkToken } from '$icp/types/ic-token';
 	import { autoLoadUserToken } from '$icp-eth/services/user-token.services';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalCkETHReceive } from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 
 	const { ckEthereumTwinToken, open, close } =
 		getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	/**
-	 * Send modal context store
-	 */
+	const destinationToken = $derived(nonNullish($pageToken) ? ($pageToken as IcCkToken) : undefined);
 
-	const { sendToken, ...rest } = initSendContext({
-		sendPurpose: 'convert-eth-to-cketh',
-		token: $ckEthereumTwinToken
-	});
-	setContext<SendContext>(SEND_CONTEXT_KEY, {
-		sendToken,
-		...rest
-	});
-
-	$: sendToken.set($ckEthereumTwinToken);
+	const sourceToken = $derived($ckEthereumTwinToken);
 
 	const openReceive = async (modalId: symbol) => {
 		const { result } = await autoLoadUserToken({
@@ -49,6 +42,12 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
-	<IcReceiveCkEthereumModal on:nnsClose={close} slot="modal" />
+<ReceiveButtonWithModal isOpen={$modalCkETHReceive} open={openModal}>
+	{#snippet modal()}
+		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
+			<FeeStoreContext token={$ethereumToken}>
+				<IcReceiveCkEthereumModal {destinationToken} {sourceToken} on:nnsClose={close} />
+			</FeeStoreContext>
+		{/if}
+	{/snippet}
 </ReceiveButtonWithModal>

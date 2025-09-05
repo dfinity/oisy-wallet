@@ -33,15 +33,15 @@
 
 <ContentWithToolbar>
 	<ReceiveAddress
-		labelRef="wallet-address"
 		address={$icrcAccountIdentifierText ?? ''}
+		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
+		labelRef="wallet-address"
 		network={ICP_NETWORK}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.wallet.text.display_wallet_address_qr
 		}}
-		copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
-		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ADDRESS_BUTTON}
 		on:click={() =>
 			displayQRCode({
 				address: $icrcAccountIdentifierText ?? '',
@@ -49,23 +49,27 @@
 				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
 			})}
 	>
-		<svelte:fragment slot="title">{$i18n.wallet.text.wallet_address}</svelte:fragment>
-		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_all_tokens}</svelte:fragment>
+		{#snippet title()}
+			{$i18n.wallet.text.wallet_address}
+		{/snippet}
+		{#snippet text()}
+			{$i18n.receive.icp.text.use_for_all_tokens}
+		{/snippet}
 	</ReceiveAddress>
 
 	<Hr spacing="lg" />
 
 	<ReceiveAddress
-		labelRef="icp-account-id"
 		address={$icpAccountIdentifierText ?? ''}
+		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
+		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
+		labelRef="icp-account-id"
 		network={ICP_NETWORK}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
 		}}
-		copyAriaLabel={$i18n.receive.icp.text.account_id_copied}
-		copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ICP_ACCOUNT_ID_BUTTON}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 		on:click={() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
@@ -73,9 +77,15 @@
 				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
 			})}
 	>
-		<svelte:fragment slot="title">{$i18n.receive.icp.text.account_id}</svelte:fragment>
-		<svelte:fragment slot="text">{$i18n.receive.icp.text.use_for_icp_deposit}</svelte:fragment>
+		{#snippet title()}
+			{$i18n.receive.icp.text.account_id}
+		{/snippet}
+		{#snippet text()}
+			{$i18n.receive.icp.text.use_for_icp_deposit}
+		{/snippet}
 	</ReceiveAddress>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} on:click={close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone onclick={close} testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} />
+	{/snippet}
 </ContentWithToolbar>

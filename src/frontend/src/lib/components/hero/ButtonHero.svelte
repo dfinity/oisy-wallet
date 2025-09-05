@@ -1,28 +1,36 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 
-	export let disabled = false;
-	export let testId: string | undefined = undefined;
-	export let ariaLabel: string;
+	interface Props {
+		icon: Snippet;
+		label: Snippet;
+		onclick: () => void;
+		disabled?: boolean;
+		ariaLabel: string;
+		testId?: string;
+	}
+
+	let { icon, label, onclick, disabled = false, testId, ariaLabel }: Props = $props();
 
 	const { loading } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <Button
-	on:click
 	{ariaLabel}
+	colorStyle="tertiary-main-card"
 	{disabled}
 	loading={$loading}
-	{testId}
-	colorStyle="tertiary-main-card"
+	{onclick}
 	paddingSmall
+	styleClass="py-1 min-w-0"
+	{testId}
 >
-	<div class="flex flex-col items-center justify-center gap-2 lg:flex-row">
-		<slot name="icon" />
-		<div class="min-w-12 max-w-[72px] break-words text-sm lg:text-base">
-			<slot />
-		</div>
+	<div class="flex min-w-0 flex-col items-center justify-center">
+		{@render icon()}
+		<span class="block w-full truncate text-xs sm:text-sm 1.5md:text-base">
+			{@render label()}
+		</span>
 	</div>
 </Button>

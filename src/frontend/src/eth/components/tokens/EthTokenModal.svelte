@@ -1,49 +1,58 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { explorerUrl as explorerUrlStore } from '$eth/derived/network.derived';
-	import type { OptionErc20Token } from '$eth/types/erc20';
-	import Token from '$lib/components/tokens/Token.svelte';
-	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { erc20DefaultTokens } from '$eth/derived/erc20.derived';
+	import type { Erc20Token } from '$eth/types/erc20';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils.js';
+	import { getExplorerUrl } from '$eth/utils/eth.utils';
+	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
+	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
-	import { tokenStandard } from '$lib/derived/token.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	let contractAddress: string | undefined;
-	$: contractAddress =
-		$tokenStandard === 'erc20' ? ($token as OptionErc20Token)?.address : undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
+
+	let { fromRoute }: Props = $props();
+
+	let isErc20 = $derived(nonNullish($pageToken) && isTokenErc20($pageToken));
+
+	let contractAddress = $derived(isErc20 ? ($pageToken as Erc20Token).address : undefined);
+
+	let undeletableToken = $derived(
+		nonNullish($pageToken) && isErc20
+			? $erc20DefaultTokens.some(
+					({ id, network: { id: networkId } }) =>
+						$pageToken.id === id && $pageToken.network.id === networkId
+				)
+			: true
+	);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
+<TokenModal {fromRoute} isDeletable={!undeletableToken} token={$pageToken}>
+	{#if nonNullish(contractAddress)}
+		<ModalListItem>
+			{#snippet label()}
+				{$i18n.tokens.text.contract_address}
+			{/snippet}
 
-	<ContentWithToolbar>
-		{#if nonNullish($token)}
-			<Token token={$token}>
-				{#if nonNullish(contractAddress)}
-					<Value ref="contractAddress">
-						<svelte:fragment slot="label">{$i18n.tokens.text.contract_address}</svelte:fragment>
-						<output>{contractAddress}</output><Copy
-							value={contractAddress}
-							text={$i18n.tokens.details.contract_address_copied}
-							inline
-						/><ExternalLink
-							iconSize="18"
-							href={`${$explorerUrlStore}/address/${contractAddress}`}
-							ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
-							inline
-							color="blue"
-						/>
-					</Value>
-				{/if}
-			</Token>
-		{/if}
+			{#snippet content()}
+				<output>{shortenWithMiddleEllipsis({ text: contractAddress })}</output>
 
-		<ButtonDone on:click={modalStore.close} slot="toolbar" />
-	</ContentWithToolbar>
-</Modal>
+				<Copy inline text={$i18n.tokens.details.contract_address_copied} value={contractAddress} />
+
+				<ExternalLink
+					ariaLabel={$i18n.tokens.alt.open_contract_address_block_explorer}
+					color="blue"
+					href={`${getExplorerUrl({ token: $pageToken })}/address/${contractAddress}`}
+					iconSize="18"
+					inline
+				/>
+			{/snippet}
+		</ModalListItem>
+	{/if}
+</TokenModal>

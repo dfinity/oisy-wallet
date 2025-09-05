@@ -1,3 +1,4 @@
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	CAROUSEL_SLIDE_NAVIGATION,
 	NAVIGATION_ITEM_SETTINGS,
@@ -8,12 +9,12 @@ import { HomepageLoggedIn, type HomepageLoggedInParams } from './homepage.page';
 export type SettingsPageParams = HomepageLoggedInParams;
 
 export class SettingsPage extends HomepageLoggedIn {
-	constructor({ page, iiPage, viewportSize }: SettingsPageParams) {
-		super({ page, iiPage, viewportSize });
+	constructor(params: SettingsPageParams) {
+		super(params);
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo(NAVIGATION_ITEM_SETTINGS);
+		await this.navigateTo({ testId: NAVIGATION_ITEM_SETTINGS, expectedPath: AppPath.Settings });
 
 		await this.mockSelector({ selector: `[data-tid="${SETTINGS_ADDRESS_LABEL}"]` });
 

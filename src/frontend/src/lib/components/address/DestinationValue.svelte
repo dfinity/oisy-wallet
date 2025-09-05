@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -7,28 +8,37 @@
 	import type { Token } from '$lib/types/token';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	export let token: Token;
-	export let destination = '';
-	export let isDestinationCustom = false;
+	interface Props {
+		token: Token;
+		destination?: string;
+		isDestinationCustom?: boolean;
+		children?: Snippet;
+	}
+
+	let { token, destination = '', isDestinationCustom = false, children }: Props = $props();
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{$i18n.core.text.destination}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.core.text.destination}
+	{/snippet}
 
-	<div class="flex items-center gap-2" slot="main-value">
-		{#if !isDestinationCustom}
-			<div
-				class="flex items-center justify-center"
-				style={`width: ${logoSizes['xxs']}; height: ${logoSizes['xxs']};`}
-			>
-				<IconAstronautHelmet />
-			</div>
-			<span>{$i18n.convert.text.default_destination}</span>
-		{:else}
-			<NetworkLogo network={token.network} blackAndWhite color="off-white" />
-			<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
-		{/if}
+	{#snippet mainValue()}
+		<div class="flex items-center gap-2">
+			{#if !isDestinationCustom}
+				<div
+					style={`width: ${logoSizes['xxs']}; height: ${logoSizes['xxs']};`}
+					class="flex items-center justify-center"
+				>
+					<IconAstronautHelmet />
+				</div>
+				<span>{$i18n.convert.text.default_destination}</span>
+			{:else}
+				<NetworkLogo color="off-white" network={token.network} />
+				<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
+			{/if}
 
-		<slot />
-	</div>
+			{@render children?.()}
+		</div>
+	{/snippet}
 </ModalValue>

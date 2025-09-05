@@ -1,8 +1,8 @@
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { PEPE_TOKEN_GROUP } from '$env/tokens/groups/groups.pepe.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import pepe from '$icp-eth/assets/pepe.svg';
 import type { TokenId } from '$lib/types/token';
-
-import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const PEPE_DECIMALS = 18;
@@ -23,6 +23,8 @@ export const PEPE_TOKEN: RequiredErc20Token = {
 	address: '0x6982508145454Ce325dDbE47a25d4ec3d2311933',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckPEPE',
+	groupData: PEPE_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'pepe_ethereum'
 	}

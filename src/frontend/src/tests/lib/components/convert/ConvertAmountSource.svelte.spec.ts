@@ -1,6 +1,6 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import ConvertAmountSource from '$lib/components/convert/ConvertAmountSource.svelte';
-import { ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { TOKEN_INPUT_AMOUNT_EXCHANGE } from '$lib/constants/test-ids.constants';
 import { CONVERT_CONTEXT_KEY } from '$lib/stores/convert.store';
 import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-action-validation-errors.store';
@@ -16,7 +16,7 @@ describe('ConvertAmountSource', () => {
 	const insufficientFunds = false;
 	const insufficientFundsForFee = false;
 	// balance - total fee
-	const maxButtonValue = 0.0499;
+	const maxButtonValue = '0.0499';
 	const maxButtonText = `Max: ${maxButtonValue} BTC`;
 
 	const props = {
@@ -104,7 +104,7 @@ describe('ConvertAmountSource', () => {
 		// wait for debounced setMax to be completed
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
-		expect(testProps.sendAmount).toBe(0.04991);
+		expect(testProps.sendAmount).toBe('0.04991');
 	});
 
 	it('should not update sendAmount value if max button was not clicked and total fee got updated', async () => {
@@ -145,7 +145,7 @@ describe('ConvertAmountSource', () => {
 
 		const { getByTestId } = render(ConvertAmountSource, {
 			props: testProps,
-			context: mockContext(ZERO_BI)
+			context: mockContext(ZERO)
 		});
 
 		await fireEvent.click(getByTestId(balanceTestId));

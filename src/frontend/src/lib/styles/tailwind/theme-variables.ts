@@ -1,8 +1,19 @@
 export const themeVariables = {
+	screens: {
+		// we need to use rem instead of px because the default tailwind values changed to rem,
+		// and mixing units breaks custom screen definitions
+		xs: '28rem', // 448px
+		'1.5md': '56rem', // 896px
+		'1.5lg': '72rem', // 1152px
+		'1.5xl': '88rem', // 1408px
+		'2.5xl': '108rem', // 1728px
+		'h-md': { raw: '(max-height: 68rem)' } // ~1090px
+	},
 	background: {
 		page: 'var(--color-background-page)',
 		surface: 'var(--color-background-surface)',
 		primary: 'var(--color-background-primary)',
+		'primary-light': 'var(--color-background-primary-light)',
 		'primary-alt': 'var(--color-background-primary-alt)',
 		'primary-inverted': 'var(--color-background-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-background-primary-inverted-alt)',
@@ -14,6 +25,7 @@ export const themeVariables = {
 		'tertiary-inverted': 'var(--color-background-tertiary-inverted)',
 		disabled: 'var(--color-background-disabled)',
 		'disabled-alt': 'var(--color-background-disabled-alt)',
+		'disabled-alt2': 'var(--color-background-disabled-alt2)',
 		brand: {
 			'subtle-5': 'var(--color-background-brand-subtle-5)',
 			'subtle-10': 'var(--color-background-brand-subtle-10)',
@@ -51,6 +63,20 @@ export const themeVariables = {
 			secondary: 'var(--color-background-error-secondary)',
 			tertiary: 'var(--color-background-error-tertiary)',
 			light: 'var(--color-background-error-light)'
+		},
+		contact: {
+			'1': 'var(--color-background-contact-1)',
+			'2': 'var(--color-background-contact-2)',
+			'3': 'var(--color-background-contact-3)',
+			'4': 'var(--color-background-contact-4)',
+			'5': 'var(--color-background-contact-5)',
+			'6': 'var(--color-background-contact-6)',
+			'7': 'var(--color-background-contact-7)',
+			'8': 'var(--color-background-contact-8)',
+			'9': 'var(--color-background-contact-9)'
+		},
+		overlay: {
+			'page-30': 'color-mix(in srgb, var(--color-background-page) 30%, transparent)'
 		}
 	},
 	border: {
@@ -97,6 +123,7 @@ export const themeVariables = {
 		primary: 'var(--color-foreground-primary)',
 		'primary-inverted': 'var(--color-foreground-primary-inverted)',
 		'primary-inverted-alt': 'var(--color-foreground-primary-inverted-alt)',
+		secondary: 'var(--color-foreground-secondary)',
 		'secondary-inverted': 'var(--color-foreground-secondary-inverted)',
 		tertiary: 'var(--color-foreground-tertiary)',
 		'tertiary-inverted': 'var(--color-foreground-tertiary-inverted)',
@@ -118,24 +145,43 @@ export const themeVariables = {
 		'warning-alt': 'var(--color-foreground-warning-alt)',
 		'error-primary': 'var(--color-foreground-error-primary)',
 		'error-alt': 'var(--color-foreground-error-alt)',
-		'error-secondary': 'var(--color-foreground-error-secondary)'
+		'error-secondary': 'var(--color-foreground-error-secondary)',
+		contact: {
+			'1': 'var(--color-foreground-contact-1)',
+			'2': 'var(--color-foreground-contact-2)',
+			'3': 'var(--color-foreground-contact-3)',
+			'4': 'var(--color-foreground-contact-4)',
+			'5': 'var(--color-foreground-contact-5)',
+			'6': 'var(--color-foreground-contact-6)',
+			'7': 'var(--color-foreground-contact-7)',
+			'8': 'var(--color-foreground-contact-8)',
+			'9': 'var(--color-foreground-contact-9)'
+		}
 	},
 
 	// custom hard coded gradient colors
 	gradient: {
 		'default-0': '#016DFC',
 		'default-100': '#004EB5',
-		'icp-0': '#3B00B9',
-		'icp-100': '#7014A4',
+		'icp-0': '#3607B1',
+		'icp-100': '#1E0071',
 		'btc-0': '#F7931A',
 		'btc-100': '#DE7900',
 		'eth-0': '#627EEA',
 		'eth-100': '#E18DFF',
+		'base-0': '#0066FF',
+		'base-100': '#0066FF',
+		'bsc-0': '#FB8202',
+		'bsc-100': '#FEBE38',
+		'polygon-0': '#6C00F6',
+		'polygon-100': '#4301A9',
 		'sol-0': '#904EFA',
 		'sol-100': '#1DE59D',
 		'trump-0': '#232BCC',
 		'trump-100': '#000797',
 		'gold-0': '#CCA055',
-		'gold-100': '#EBD27F'
+		'gold-100': '#EBD27F',
+		'arbitrum-0': '#11AAFF',
+		'arbitrum-100': '#203147'
 	}
 };

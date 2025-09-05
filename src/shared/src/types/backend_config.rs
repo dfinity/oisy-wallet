@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use candid::{CandidType, Deserialize, Principal};
 
-use crate::types::{migration::ApiEnabled, verifiable_credential::SupportedCredential};
+use crate::types::verifiable_credential::SupportedCredential;
 
 #[derive(CandidType, Deserialize)]
 pub struct InitArg {
@@ -11,8 +11,6 @@ pub struct InitArg {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_der: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
     /// `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
@@ -37,8 +35,6 @@ pub struct Config {
     pub supported_credentials: Option<Vec<SupportedCredential>>,
     /// Root of trust for checking canister signatures.
     pub ic_root_key_raw: Option<Vec<u8>>,
-    /// Enables or disables APIs
-    pub api: Option<Guards>,
     /// Chain Fusion Signer canister id. Used to derive the bitcoin address in
     /// `btc_select_user_utxos_fee`
     pub cfs_canister_id: Option<Principal>,
@@ -46,20 +42,4 @@ pub struct Config {
     /// Used to validate the id alias credential which includes the derivation origin of the id
     /// alias.
     pub derivation_origin: Option<String>,
-}
-
-#[derive(CandidType, Deserialize, Default, Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Guards {
-    pub threshold_key: ApiEnabled,
-    pub user_data: ApiEnabled,
-}
-#[test]
-fn guards_default() {
-    assert_eq!(
-        Guards::default(),
-        Guards {
-            threshold_key: ApiEnabled::Enabled,
-            user_data: ApiEnabled::Enabled,
-        }
-    );
 }

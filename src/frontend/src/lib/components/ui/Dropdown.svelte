@@ -1,51 +1,75 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
 
-	export let disabled = false;
-	export let asModalOnMobile = false;
-	export let ariaLabel: string;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		visible?: boolean;
+		children: Snippet;
+		title?: Snippet;
+		items: Snippet;
+		disabled?: boolean;
+		asModalOnMobile?: boolean;
+		ariaLabel: string;
+		buttonFullWidth?: boolean;
+		buttonBorder?: boolean;
+		testId?: string;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let {
+		visible = $bindable(false),
+		children,
+		title,
+		items,
+		disabled = false,
+		asModalOnMobile = false,
+		ariaLabel,
+		buttonFullWidth = false,
+		buttonBorder = false,
+		testId
+	}: Props = $props();
+
+	let button: HTMLButtonElement | undefined = $state();
 
 	export const close = () => (visible = false);
 </script>
 
 <DropdownButton
-	bind:button
-	on:click={() => (visible = true)}
 	{ariaLabel}
-	{testId}
+	border={buttonBorder}
 	{disabled}
+	fullWidth={buttonFullWidth}
+	onClick={() => (visible = true)}
 	opened={visible}
+	{testId}
+	bind:button
 >
-	<slot />
+	{@render children()}
 </DropdownButton>
 
-<div
-	class="absolute"
-	class:hidden={asModalOnMobile}
-	class:md:block={asModalOnMobile}
-	class:block={!asModalOnMobile}
->
-	<Popover bind:visible anchor={button} invisibleBackdrop>
-		<slot name="items" />
-	</Popover>
-</div>
-<!-- Mobile dropdown displayed as modal -->
-<div
-	class="absolute"
-	class:md:hidden={asModalOnMobile}
-	class:block={asModalOnMobile}
-	class:hidden={!asModalOnMobile}
->
-	{#if visible}
-		<Modal on:nnsClose={close}>
-			<slot name="title" slot="title" />
+{#if asModalOnMobile}
+	<Responsive up="1.5md">
+		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+			{@render items()}
+		</Popover>
+	</Responsive>
 
-			<slot name="items" />
-		</Modal>
-	{/if}
-</div>
+	<!-- Mobile dropdown displayed as modal -->
+
+	<Responsive down="md">
+		{#if visible}
+			<Modal on:nnsClose={close}>
+				<svelte:fragment slot="title">
+					{@render title?.()}
+				</svelte:fragment>
+
+				{@render items()}
+			</Modal>
+		{/if}
+	</Responsive>
+{:else}
+	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+		{@render items()}
+	</Popover>
+{/if}

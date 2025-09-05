@@ -4,18 +4,19 @@
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+		ETH_FEE_CONTEXT_KEY,
+		type EthFeeContext as FeeContextType,
+		initEthFeeContext,
+		initEthFeeStore
+	} from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { shouldSendWithApproval } from '$eth/utils/send.utils';
 	import { isErc20TransactionApprove } from '$eth/utils/transactions.utils';
@@ -25,7 +26,7 @@
 	import { toCkEthHelperContractAddress } from '$icp-eth/utils/cketh.utils';
 	import SendProgress from '$lib/components/ui/InProgressWizard.svelte';
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
@@ -55,20 +56,20 @@
 	 * Fee context store
 	 */
 
-	let feeStore = initFeeStore();
+	const feeStore = initEthFeeStore();
 
-	let feeSymbolStore = writable<string | undefined>(undefined);
+	const feeSymbolStore = writable<string | undefined>(undefined);
 	$: feeSymbolStore.set($sendToken.symbol);
 
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
+	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	$: feeTokenIdStore.set($sendToken.id);
 
-	let feeDecimalsStore = writable<number | undefined>(undefined);
+	const feeDecimalsStore = writable<number | undefined>(undefined);
 	$: feeDecimalsStore.set($sendToken.decimals);
 
 	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
+		ETH_FEE_CONTEXT_KEY,
+		initEthFeeContext({
 			feeStore,
 			feeSymbolStore,
 			feeTokenIdStore,
@@ -100,7 +101,7 @@
 	 * Modal
 	 */
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.REVIEW,
 			title: $i18n.send.text.review
@@ -111,8 +112,8 @@
 		}
 	];
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const close = () => modalStore.close();
 
@@ -139,7 +140,7 @@
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
 	let amount: bigint;
-	$: amount = BigInt(firstTransaction?.value ?? ZERO_BI);
+	$: amount = BigInt(firstTransaction?.value ?? ZERO);
 
 	const send = async () => {
 		const { success } = await sendServices({
@@ -150,7 +151,7 @@
 			fee: $feeStore,
 			modalNext: modal.next,
 			token: $sendToken,
-			progress: (step: ProgressStepsSend) => (sendProgressStep = step),
+			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
 			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
 			sourceNetwork,
@@ -161,21 +162,24 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} on:nnsClose={reject}>
-	{@const data = firstTransaction.data}
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
+	{@const { data } = firstTransaction}
 
-	<WalletConnectModalTitle slot="title"
-		>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
-	>
+	{#snippet title()}
+		<WalletConnectModalTitle
+			>{erc20Approve ? $i18n.core.text.approve : $i18n.send.text.send}</WalletConnectModalTitle
+		>
+	{/snippet}
 
-	<FeeContext
+	<EthFeeContext
 		amount={amount.toString()}
+		{data}
+		{destination}
+		nativeEthereumToken={$ethereumToken}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
-		{destination}
-		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
-		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === WizardStepsSend.SENDING}
@@ -186,15 +190,15 @@
 			{:else}
 				<WalletConnectSendReview
 					{amount}
-					{destination}
 					{data}
+					{destination}
 					{erc20Approve}
+					onApprove={send}
+					onReject={reject}
 					{sourceNetwork}
 					{targetNetwork}
-					on:icApprove={send}
-					on:icReject={reject}
 				/>
 			{/if}
 		</CkEthLoader>
-	</FeeContext>
+	</EthFeeContext>
 </WizardModal>

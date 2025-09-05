@@ -1,74 +1,92 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
-	import chainFusion from '$lib/assets/chain_fusion.svg';
-	import MainnetNetwork from '$lib/components/networks/MainnetNetwork.svelte';
-	import Network from '$lib/components/networks/Network.svelte';
-	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import { page } from '$app/state';
+	import { SUPPORTED_MAINNET_NETWORKS, SUPPORTED_NETWORKS } from '$env/networks/networks.env';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
+	import NetworkSwitcherLogo from '$lib/components/networks/NetworkSwitcherLogo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
 	import { NETWORKS_SWITCHER_DROPDOWN } from '$lib/constants/test-ids.constants';
-	import { SLIDE_EASING } from '$lib/constants/transition.constants';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedNetwork, networkId } from '$lib/derived/network.derived';
 	import { networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-	import { testnets } from '$lib/derived/testnets.derived';
-	import { enabledMainnetTokensUsdBalancesPerNetwork } from '$lib/derived/tokens.derived';
+	import { testnetsEnabled } from '$lib/derived/testnets.derived';
+	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
+	import type { OptionNetworkId } from '$lib/types/network';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
 
-	export let disabled = false;
+	interface Props {
+		visible: boolean;
+		disabled?: boolean;
+	}
 
-	let dropdown: Dropdown | undefined;
+	let { visible = $bindable(false), disabled = false }: Props = $props();
 
-	let mainnetTokensUsdBalance: number;
-	$: mainnetTokensUsdBalance = $networksMainnets.reduce(
-		(acc, { id }) => acc + ($enabledMainnetTokensUsdBalancesPerNetwork[id] ?? 0),
-		0
+	let dropdown = $state<Dropdown | undefined>();
+
+	const onNetworkSelect = async (networkId: OptionNetworkId) => {
+		await switchNetwork(networkId);
+
+		if (isRouteTransactions(page)) {
+			await gotoReplaceRoot();
+		}
+
+		dropdown?.close();
+	};
+
+	let enabledNetworks = $derived(
+		$networksMainnets.length +
+			($testnetsEnabled && $networksTestnets.length > 0 ? $networksTestnets.length : 0)
 	);
+
+	let totalNetworks = $derived(
+		$testnetsEnabled && $networksTestnets.length > 0
+			? SUPPORTED_NETWORKS.length
+			: SUPPORTED_MAINNET_NETWORKS.length
+	);
+
+	const modalId = Symbol();
 </script>
 
 <Dropdown
 	bind:this={dropdown}
 	ariaLabel={$i18n.networks.title}
-	testId={NETWORKS_SWITCHER_DROPDOWN}
-	{disabled}
 	asModalOnMobile
+	{disabled}
+	testId={NETWORKS_SWITCHER_DROPDOWN}
+	bind:visible
 >
-	{#if nonNullish($selectedNetwork)}
-		<NetworkLogo network={$selectedNetwork} size="xs" />
-	{:else}
-		<Logo src={chainFusion} size="xs" />
-	{/if}
+	<NetworkSwitcherLogo network={$selectedNetwork} />
+
 	<span class="hidden md:block">{$selectedNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 
-	<svelte:fragment slot="title">{$i18n.networks.filter}</svelte:fragment>
-	<div slot="items">
-		<NetworkButton
-			id={undefined}
-			name={$i18n.networks.chain_fusion}
-			icon={chainFusion}
-			usdBalance={mainnetTokensUsdBalance}
-			on:icSelected={dropdown.close}
-		/>
+	{#snippet title()}
+		{$i18n.networks.filter}
+	{/snippet}
 
-		<ul class="flex list-none flex-col">
-			{#each $networksMainnets as network (network.id)}
-				<li transition:slide={SLIDE_EASING}
-					><MainnetNetwork {network} on:icSelected={dropdown.close} /></li
+	{#snippet items()}
+		<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
+
+		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
+			<span class="flex">
+				<Button
+					link
+					onclick={() => {
+						dropdown?.close();
+						modalStore.openSettings({ id: modalId, data: SettingsModalType.ENABLED_NETWORKS });
+					}}><IconManage />{$i18n.networks.manage}</Button
 				>
-			{/each}
-		</ul>
-
-		<span class="my-5 flex px-3 font-bold">{$i18n.networks.test_networks}</span>
-
-		{#if $testnets}
-			<ul class="flex list-none flex-col">
-				{#each $networksTestnets as network (network.id)}
-					<li transition:slide={SLIDE_EASING}
-						><Network {network} on:icSelected={dropdown.close} /></li
-					>
-				{/each}
-			</ul>
-		{/if}
-	</div>
+			</span>
+			{#if enabledNetworks < totalNetworks}
+				<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+					{replacePlaceholders($i18n.networks.number_of_enabled, {
+						$numNetworksEnabled: `${enabledNetworks}`,
+						$numNetworksTotal: `${totalNetworks}`
+					})}
+				</span>
+			{/if}
+		</div>
+	{/snippet}
 </Dropdown>

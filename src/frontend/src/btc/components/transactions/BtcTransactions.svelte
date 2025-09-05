@@ -14,10 +14,14 @@
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalBtcToken, modalBtcTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalBtcToken,
+		modalBtcTokenData,
+		modalBtcTransaction
+	} from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
-	import type { OptionToken } from '$lib/types/token';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let selectedTransaction: BtcTransactionUi | undefined;
@@ -25,8 +29,11 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<BtcTransactionUi>({
 			$modalOpen: $modalBtcTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
+
+	let token: Token;
+	$: token = $pageToken ?? DEFAULT_BITCOIN_TOKEN;
 </script>
 
 <BtcTransactionsHeader />
@@ -34,7 +41,7 @@
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
 		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction transaction={transaction.data} token={$token ?? DEFAULT_BITCOIN_TOKEN} />
+			<BtcTransaction {token} transaction={transaction.data} />
 		</div>
 	{/each}
 
@@ -44,7 +51,7 @@
 </TransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
-	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<BtcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalBtcToken}
-	<BtcTokenModal />
+	<BtcTokenModal fromRoute={$modalBtcTokenData} />
 {/if}

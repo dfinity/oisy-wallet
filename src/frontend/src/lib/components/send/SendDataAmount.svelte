@@ -18,16 +18,21 @@
 	});
 </script>
 
-<Value ref="amount" element="div">
-	<svelte:fragment slot="label">{$i18n.core.text.amount}</svelte:fragment>
-	{#if showNullishLabel}
-		{$i18n.send.error.unable_to_retrieve_amount}
-	{:else}
-		<ExchangeAmountDisplay
-			amount={bigNumberAmount}
-			decimals={token.decimals}
-			symbol={token.symbol}
-			{exchangeRate}
-		/>
-	{/if}
+<Value element="div" ref="amount">
+	{#snippet label()}
+		{$i18n.core.text.amount}
+	{/snippet}
+
+	{#snippet content()}
+		{#if showNullishLabel}
+			{$i18n.send.error.unable_to_retrieve_amount}
+		{:else}
+			<ExchangeAmountDisplay
+				amount={bigNumberAmount}
+				decimals={token.decimals}
+				{exchangeRate}
+				symbol={token.symbol}
+			/>
+		{/if}
+	{/snippet}
 </Value>

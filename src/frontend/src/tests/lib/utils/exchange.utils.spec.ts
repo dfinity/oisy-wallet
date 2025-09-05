@@ -11,10 +11,10 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 		const mock = createMockKongSwapToken({
 			token: { canister_id: MOCK_CANISTER_ID_1 },
 			metrics: {
-				price: '1.23',
-				market_cap: '1000000',
-				volume_24h: '50000',
-				price_change_24h: '2.5',
+				price: 1.23,
+				market_cap: 1000000,
+				volume_24h: 50000,
+				price_change_24h: 2.5,
 				updated_at: '2024-01-01T00:00:00.000Z'
 			}
 		});
@@ -32,9 +32,19 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 
 	it('skips tokenData where metrics.price is null', () => {
 		const mock = createMockKongSwapToken({
-			metrics: { price: null as unknown as string }
+			metrics: { price: null as unknown as number }
 		});
 		const result = formatKongSwapToCoingeckoPrices([mock]);
+
+		expect(result).toEqual({});
+	});
+
+	it('skips tokenData where metrics.price is 0', () => {
+		const mock = createMockKongSwapToken({
+			metrics: { price: 0 }
+		});
+		const result = formatKongSwapToCoingeckoPrices([mock]);
+
 		expect(result).toEqual({});
 	});
 
@@ -42,14 +52,15 @@ describe('formatKongSwapToCoingeckoPrices', () => {
 		const mock = createMockKongSwapToken({
 			token: { canister_id: MOCK_CANISTER_ID_1 },
 			metrics: {
-				price: '1.00',
-				market_cap: undefined as unknown as string,
-				volume_24h: undefined as unknown as string,
-				price_change_24h: undefined as unknown as string,
+				price: 1.0,
+				market_cap: undefined as unknown as number,
+				volume_24h: undefined as unknown as number,
+				price_change_24h: undefined as unknown as number,
 				updated_at: '2024-01-01T00:00:00.000Z'
 			}
 		});
 		const result = formatKongSwapToCoingeckoPrices([mock]);
+
 		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd).toBe(1);
 		expect(result[MOCK_CANISTER_ID_1.toLowerCase()].usd_market_cap).toBeNaN();
 	});

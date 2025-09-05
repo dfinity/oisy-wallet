@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WSTETH_TOKEN_GROUP } from '$env/tokens/groups/groups.wsteth.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wsteth from '$icp-eth/assets/wsteth.svg';
 import type { TokenId } from '$lib/types/token';
@@ -21,5 +22,7 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	icon: wsteth,
 	address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckWSTETH'
+	twinTokenSymbol: 'ckWSTETH',
+	groupData: WSTETH_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };

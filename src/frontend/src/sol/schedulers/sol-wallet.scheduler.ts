@@ -1,6 +1,8 @@
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
+import { retryWithDelay } from '$lib/services/rest.services';
 import type { SolAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type {
 	PostMessageDataRequestSol,
 	PostMessageDataResponseError
@@ -18,6 +20,7 @@ import type { SplTokenAddress } from '$sol/types/spl';
 import { assertNonNullish, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 interface LoadSolWalletParams {
+	identity: OptionIdentity;
 	solanaNetwork: SolanaNetworkType;
 	address: SolAddress;
 	tokenAddress?: SplTokenAddress;
@@ -96,27 +99,39 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 		return transactionsUi.filter(({ data: { id } }) => isNullish(this.store.transactions[`${id}`]));
 	};
 
-	private syncWallet = async ({ data }: SchedulerJobData<PostMessageDataRequestSol>) => {
+	private loadAndSyncWalletData = async ({
+		identity,
+		data
+	}: Required<SchedulerJobData<PostMessageDataRequestSol>>) => {
+		const {
+			address: { data: address },
+			...rest
+		} = data;
+
+		const [balance, transactions] = await Promise.all([
+			this.loadBalance({
+				identity,
+				address,
+				...rest
+			}),
+			this.loadTransactions({
+				identity,
+				address,
+				...rest
+			})
+		]);
+
+		this.syncWalletData({ response: { balance, transactions } });
+	};
+
+	private syncWallet = async ({ identity, data }: SchedulerJobData<PostMessageDataRequestSol>) => {
 		assertNonNullish(data, 'No data provided to get Solana balance.');
 
 		try {
-			const {
-				address: { data: address },
-				...rest
-			} = data;
-
-			const [balance, transactions] = await Promise.all([
-				this.loadBalance({
-					address,
-					...rest
-				}),
-				this.loadTransactions({
-					address,
-					...rest
-				})
-			]);
-
-			this.syncWalletData({ response: { balance, transactions } });
+			await retryWithDelay({
+				request: async () => await this.loadAndSyncWalletData({ identity, data }),
+				maxRetries: 10
+			});
 		} catch (error: unknown) {
 			this.postMessageWalletError({ error });
 		}

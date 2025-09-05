@@ -2,21 +2,112 @@ name: Check devops code
 
 on:
   pull_request:
-    paths:
-      - # Note: shell scripts not ending in .sh can be found with: scripts/format.sh.sh --list | grep -vE '[.]sh$'
-        '**/*.sh'
   merge_group:
   workflow_dispatch:
+
+permissions: {}
 
 jobs:
   lint-shell:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      # Note: shell scripts not ending in .sh can be found with: scripts/format.sh.sh --list | grep -vE '[.]sh$'
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: change
+        with:
+          filters: |
+            shell:
+              - '**/*.sh'
 
       - name: Install shellcheck
+        if: steps.change.outputs.shell == 'true'
         run: ./scripts/setup shellcheck
 
       - name: Lint shell scripts
+        if: steps.change.outputs.shell == 'true'
         run: scripts/lint.sh.sh
+
+  lint-github-actions:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: change
+        with:
+          filters: |
+            actions:
+              - '.github/**/*'
+              - '**/*.yml'
+              - '**/*.yaml'
+
+      - name: Install zizmor
+        if: steps.change.outputs.actions == 'true'
+        run: ./scripts/setup cargo-binstall zizmor
+
+      - name: Lint GitHub workflows
+        if: steps.change.outputs.actions == 'true'
+        run: scripts/lint.github.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  download-candid:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    env:
+      # Suppress the '-mainnet_plaintext_identity' warning to avoid interruptions during the workflow.
+      # This warning relates to the use of plaintext identities on the mainnet. In this context, it is safe to suppress
+      # because the workflow does not involve sensitive operations or production deployments.
+      DFX_WARNING: '-mainnet_plaintext_identity'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: change
+        with:
+          filters: |
+            src:
+              - scripts/download-canister-api.test
+              - scripts/download-canister-api
+              - .github/workflows/devops-checks.yml
+
+      - name: Install dfx
+        if: steps.change.outputs.src == 'true'
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
+
+      - name: Run test
+        if: steps.change.outputs.src == 'true'
+        run: scripts/download-canister-api.test
+
+  devops-checks-pass:
+    needs:
+      - lint-shell
+      - lint-github-actions
+      - download-candid
+    if: ${{ always() }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'

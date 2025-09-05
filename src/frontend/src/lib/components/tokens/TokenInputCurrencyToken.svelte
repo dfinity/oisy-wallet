@@ -14,18 +14,20 @@
 </script>
 
 <TokenInputCurrency
-	bind:value
 	{name}
+	{autofocus}
+	{decimals}
+	{disabled}
 	{error}
 	{loading}
 	{placeholder}
-	{disabled}
-	{decimals}
-	{autofocus}
 	testId={TOKEN_INPUT_CURRENCY_TOKEN}
+	bind:value
 	on:focus
 	on:blur
 	on:nnsInput
 >
-	<slot name="inner-end" slot="inner-end" />
+	{#snippet innerEnd()}
+		<slot name="inner-end" />
+	{/snippet}
 </TokenInputCurrency>

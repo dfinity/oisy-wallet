@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { BigNumber } from '@ethersproject/bignumber';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -15,10 +14,13 @@
 	export let token: Token;
 	export let iconType: 'token' | 'transaction' = 'transaction';
 
-	let value: BigNumber;
+	let value: bigint;
 	let timestamp: number | undefined;
 	let displayTimestamp: number | undefined;
 	let type: EthTransactionType;
+	let to: string | undefined;
+	let from: string | undefined;
+	let tokenId: number | undefined;
 
 	let pending: boolean;
 	$: pending = isTransactionPending(transaction);
@@ -26,7 +28,7 @@
 	let status: TransactionStatus;
 	$: status = pending ? 'pending' : 'confirmed';
 
-	$: ({ value, timestamp, displayTimestamp, type } = transaction);
+	$: ({ value, timestamp, displayTimestamp, type, to, from, tokenId } = transaction);
 
 	let ckTokenSymbol: string;
 	$: ckTokenSymbol = isSupportedEthToken(token)
@@ -61,20 +63,25 @@
 					: $i18n.receive.text.receive;
 
 	let amount: bigint;
-	$: amount = value.toBigInt() * (type === 'send' || type === 'deposit' ? -1n : 1n);
+	$: amount = value * (type === 'send' || type === 'deposit' ? -1n : 1n);
 
 	let transactionDate: number | undefined;
 	$: transactionDate = timestamp ?? displayTimestamp;
+
+	const modalId = Symbol();
 </script>
 
 <Transaction
-	on:click={() => modalStore.openEthTransaction({ transaction, token })}
 	{amount}
-	{type}
-	timestamp={transactionDate}
-	{status}
-	{token}
+	{from}
 	{iconType}
+	onClick={() => modalStore.openEthTransaction({ id: modalId, data: { transaction, token } })}
+	{status}
+	timestamp={transactionDate}
+	{to}
+	{token}
+	{tokenId}
+	{type}
 >
 	{label}
 </Transaction>

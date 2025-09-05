@@ -10,19 +10,24 @@
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let request: WalletKitTypes.SessionRequest;
+	interface Props {
+		request: WalletKitTypes.SessionRequest;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let message: string;
-	$: message = getSignParamsMessageHex(request.params.request.params);
+	let { request, onApprove, onReject }: Props = $props();
 
-	let json: unknown | undefined;
-	$: (() => {
+	let message = $derived(getSignParamsMessageHex(request.params.request.params));
+
+	let json = $state<unknown | undefined>();
+	$effect(() => {
 		try {
 			json = JSON.parse(message);
 		} catch (_err: unknown) {
 			json = undefined;
 		}
-	})();
+	});
 </script>
 
 <ContentWithToolbar>
@@ -34,7 +39,7 @@
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 	{#if nonNullish(json)}
 		<div class="rounded-xs mt-4 bg-disabled p-4">
-			<Json {json} _collapsed={true} />
+			<Json _collapsed={true} {json} />
 		</div>
 	{:else}
 		<p class="mb-4 font-normal">
@@ -42,5 +47,7 @@
 		</p>
 	{/if}
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions {onApprove} {onReject} />
+	{/snippet}
 </ContentWithToolbar>

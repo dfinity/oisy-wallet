@@ -6,9 +6,11 @@ import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
 import * as authUtils from '$lib/utils/auth.utils';
+import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import type { TestUtil } from '$tests/types/utils';
 import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
@@ -78,14 +80,12 @@ describe('btc-wallet.worker', () => {
 
 	const postMessageMock = vi.fn();
 
+	// We don't await the job execution promise in the scheduler's function, so we need to advance the timers to verify the correct execution of the job
+	const awaitJobExecution = () => vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS - 100);
+
 	beforeAll(() => {
 		originalPostmessage = window.postMessage;
 		window.postMessage = postMessageMock;
-	});
-
-	afterAll(() => {
-		// @ts-expect-error redo original
-		window.postMessage = originalPostmessage;
 	});
 
 	beforeEach(() => {
@@ -94,18 +94,10 @@ describe('btc-wallet.worker', () => {
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
+		let mockBlockHeight = 1000;
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
 
-		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue({
-			txs: [mockBtcTransaction],
-			address: mockBtcAddress,
-			final_balance: 100,
-			total_received: 100,
-			hash160: 'hash160',
-			n_tx: 100,
-			n_unredeemed: 100,
-			total_sent: 100
-		});
+		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 
 		vi.spyOn(SignerCanister, 'create').mockResolvedValue(signerCanisterMock);
 		vi.spyOn(BitcoinCanister, 'create').mockReturnValue(bitcoinCanisterMock);
@@ -121,11 +113,16 @@ describe('btc-wallet.worker', () => {
 		vi.useRealTimers();
 	});
 
+	afterAll(() => {
+		// @ts-expect-error redo original
+		window.postMessage = originalPostmessage;
+	});
+
 	const testWorker = ({
 		startData = undefined
 	}: {
 		startData?: PostMessageDataRequestBtc | undefined;
-	}) => {
+	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
 		const mockPostMessageUncertified = mockPostMessage({
@@ -137,97 +134,111 @@ describe('btc-wallet.worker', () => {
 			withTransactions: false
 		});
 
-		afterEach(() => {
-			// reset internal store with transactions
-			scheduler['store'] = {
-				transactions: {},
-				balance: undefined
-			};
+		return {
+			setup: () => {},
 
-			scheduler.stop();
-		});
+			teardown: () => {
+				// reset internal store with transactions
+				scheduler['store'] = {
+					transactions: {},
+					balance: undefined,
+					latestBitcoinBlockHeight: undefined
+				};
 
-		it('should trigger postMessage with correct data', async () => {
-			await scheduler.start(startData);
+				scheduler.stop();
+			},
 
-			expect(postMessageMock).toHaveBeenCalledTimes(4);
-			expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
-			expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+			tests: () => {
+				it('should trigger postMessage with correct data', async () => {
+					await scheduler.start(startData);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await awaitJobExecution();
 
-			expect(postMessageMock).toHaveBeenCalledTimes(6);
-			expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(postMessageMock).toHaveBeenCalledTimes(8);
-			expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
-		});
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
-		it('should start the scheduler with an interval', async () => {
-			await scheduler.start(startData);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-			expect(scheduler['timer']['timer']).toBeDefined();
-		});
+					expect(postMessageMock).toHaveBeenCalledTimes(8);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+				});
 
-		it('should trigger the scheduler manually', async () => {
-			await scheduler.trigger(startData);
+				it('should start the scheduler with an interval', async () => {
+					await scheduler.start(startData);
 
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
-		});
+					expect(scheduler['timer']['timer']).toBeDefined();
+				});
 
-		it('should stop the scheduler', () => {
-			scheduler.stop();
-			expect(scheduler['timer']['timer']).toBeUndefined();
-		});
+				it('should trigger the scheduler manually', async () => {
+					await scheduler.trigger(startData);
 
-		it('should trigger syncWallet periodically', async () => {
-			await scheduler.start(startData);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
+				});
 
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(1);
-			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(1);
+				it('should stop the scheduler', () => {
+					scheduler.stop();
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					expect(scheduler['timer']['timer']).toBeUndefined();
+				});
 
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(2);
-			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
+				it('should trigger syncWallet periodically', async () => {
+					await scheduler.start(startData);
 
-			await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 
-			expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(3);
-			expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
-		});
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-		it('should postMessage with status of the worker', async () => {
-			await scheduler.start(startData);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(2);
+					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
 
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-			expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
-		});
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-		it('should trigger postMessage with error', async () => {
-			const err = new Error('test');
-			signerCanisterMock.getBtcBalance.mockRejectedValue(err);
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(3);
+					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
+				});
 
-			await scheduler.start(startData);
+				it('should postMessage with status of the worker', async () => {
+					await scheduler.start(startData);
 
-			// idle and in_progress
-			// error
-			expect(postMessageMock).toHaveBeenCalledTimes(3);
+					await awaitJobExecution();
 
-			expect(postMessageMock).toHaveBeenCalledWith({
-				msg: 'syncBtcWalletError',
-				data: {
-					error: err
-				}
-			});
-		});
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+				});
+
+				it('should trigger postMessage with error on third try', async () => {
+					const err = new Error('test');
+					signerCanisterMock.getBtcBalance.mockRejectedValue(err);
+
+					await scheduler.start(startData);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
+
+					// idle and in_progress 3 times
+					// error
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
+
+					expect(postMessageMock).toHaveBeenCalledWith({
+						msg: 'syncBtcWalletError',
+						data: {
+							error: err
+						}
+					});
+				});
+			}
+		};
 	};
 
 	describe('btc-wallet worker should work', () => {
@@ -241,6 +252,12 @@ describe('btc-wallet.worker', () => {
 			minterCanisterId: 'mqygn-kiaaa-aaaar-qaadq-cai'
 		};
 
-		testWorker({ startData });
+		const { setup, teardown, tests } = testWorker({ startData });
+
+		beforeEach(setup);
+
+		afterEach(teardown);
+
+		tests();
 	});
 });

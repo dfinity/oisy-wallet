@@ -33,6 +33,7 @@ describe('ContextMenu', () => {
 		const { container } = render(ContextMenu);
 
 		const button: HTMLButtonElement | null = container.querySelector(icTokenMenuButtonSelector);
+
 		expect(button).toBeInTheDocument();
 	});
 
@@ -42,6 +43,7 @@ describe('ContextMenu', () => {
 		const { container } = render(ContextMenu);
 
 		const button: HTMLButtonElement | null = container.querySelector(ethTokenMenuButtonSelector);
+
 		expect(button).toBeInTheDocument();
 	});
 
@@ -51,6 +53,7 @@ describe('ContextMenu', () => {
 		const { container } = render(ContextMenu);
 
 		const button: HTMLButtonElement | null = container.querySelector(btcTokenMenuButtonSelector);
+
 		expect(button).toBeInTheDocument();
 	});
 
@@ -60,6 +63,7 @@ describe('ContextMenu', () => {
 		const { container } = render(ContextMenu);
 
 		const button: HTMLButtonElement | null = container.querySelector(solTokenMenuButtonSelector);
+
 		expect(button).toBeInTheDocument();
 	});
 });

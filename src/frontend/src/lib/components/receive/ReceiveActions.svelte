@@ -1,24 +1,38 @@
 <script lang="ts">
 	import { IconQRCodeScanner } from '@dfinity/gix-components';
+	import { createEventDispatcher } from 'svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 
-	export let address: string;
-	export let qrCodeAction: ReceiveQRCodeAction = { enabled: false };
-	export let copyAriaLabel: string;
-	export let copyButtonTestId: string | undefined = undefined;
+	interface Props {
+		address: string;
+		qrCodeAction?: ReceiveQRCodeAction;
+		copyAriaLabel: string;
+		copyButtonTestId?: string;
+	}
+
+	let {
+		address,
+		qrCodeAction = { enabled: false },
+		copyAriaLabel,
+		copyButtonTestId
+	}: Props = $props();
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <div class="flex justify-center gap-2">
 	{#if qrCodeAction.enabled}
 		<ButtonIcon
 			ariaLabel={qrCodeAction.ariaLabel}
-			on:click
-			testId={qrCodeAction?.testId}
 			link={false}
+			onclick={() => dispatch('click')}
+			testId={qrCodeAction?.testId}
 		>
-			<IconQRCodeScanner size="24" slot="icon" />
+			{#snippet icon()}
+				<IconQRCodeScanner size="24" />
+			{/snippet}
 		</ButtonIcon>
 	{/if}
 

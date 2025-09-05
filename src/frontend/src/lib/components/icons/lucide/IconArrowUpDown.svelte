@@ -1,20 +1,25 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
-	export let size = '24';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '24' }: Props = $props();
 </script>
 
 <svg
-	xmlns="http://www.w3.org/2000/svg"
-	width={size}
-	height={size}
-	viewBox="0 0 24 24"
 	fill="none"
+	height={size}
 	stroke="currentColor"
-	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
-	class="lucide lucide-arrow-up-down"
-	><path d="m21 16-4 4-4-4" /><path d="M17 20V4" /><path d="m3 8 4-4 4 4" /><path
-		d="M7 4v16"
-	/></svg
+	stroke-width="2"
+	viewBox="0 0 24 24"
+	width={size}
+	xmlns="http://www.w3.org/2000/svg"
 >
+	<path d="m21 16-4 4-4-4" />
+	<path d="M17 20V4" />
+	<path d="m3 8 4-4 4 4" />
+	<path d="M7 4v16" />
+</svg>

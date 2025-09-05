@@ -43,24 +43,24 @@
 		return 'success';
 	};
 
-	const onClick = async () => {
+	const onClick = () => {
 		const result = connect();
 
 		if (result === 'error') {
 			return;
 		}
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT
 		});
 	};
 
-	const onQRCodeSuccess = async ({ detail }: CustomEvent<string>) => {
+	const onQRCodeSuccess = ({ detail }: CustomEvent<string>) => {
 		uri = detail;
 
 		connect();
 
-		await trackEvent({
+		trackEvent({
 			name: TRACK_COUNT_WALLET_CONNECT_QR_CODE
 		});
 	};
@@ -74,11 +74,11 @@
 
 		{#if !renderQRCodeReader}
 			<Button
-				type="button"
-				styleClass="inset-center"
 				colorStyle="primary"
+				onclick={() => (renderQRCodeReader = true)}
 				paddingSmall
-				on:click={() => (renderQRCodeReader = true)}>{$i18n.wallet_connect.text.scan_qr}</Button
+				styleClass="inset-center"
+				type="button">{$i18n.wallet_connect.text.scan_qr}</Button
 			>
 		{/if}
 	</div>
@@ -89,11 +89,13 @@
 		<InputText name="uri" placeholder={$i18n.wallet_connect.alt.connect_input} bind:value={uri} />
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<Button disabled={invalid} on:click={onClick}>
-			{$i18n.wallet_connect.text.connect}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<Button disabled={invalid} onclick={onClick}>
+				{$i18n.wallet_connect.text.connect}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

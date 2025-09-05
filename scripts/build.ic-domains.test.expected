@@ -2,9 +2,10 @@ oisy.com ic
 audit.oisy.com audit
 beta.oisy.com beta
 staging.oisy.com staging
-staging.oisy.com test_be_1
 fe1.oisy.com test_fe_1
 fe2.oisy.com test_fe_2
 fe3.oisy.com test_fe_3
 fe4.oisy.com test_fe_4
+fe5.oisy.com test_fe_5
+fe6.oisy.com test_fe_6
 e2e.oisy.com e2e

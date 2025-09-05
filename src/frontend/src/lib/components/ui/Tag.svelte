@@ -1,7 +1,15 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import type { TagVariant } from '$lib/types/style';
 
-	export let ariaHidden = false;
+	interface Props {
+		children: Snippet;
+		ariaHidden?: boolean;
+		variant?: TagVariant;
+		size?: 'xs' | 'sm' | 'md';
+	}
+
+	let { children, ariaHidden = false, variant = 'default', size = 'xs' }: Props = $props();
 
 	const variantClassNames = {
 		default: 'bg-primary text-primary border border-secondary',
@@ -12,23 +20,20 @@
 		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-off-white'
 	};
-
-	export let variant: TagVariant = 'default';
-	export let size: 'xs' | 'sm' | 'md' = 'xs';
 </script>
 
 <span
-	aria-hidden={ariaHidden}
 	class="rounded-md {variantClassNames[variant]}"
-	class:text-xs={size === 'sm'}
-	class:text-sm={size === 'xs' || size === 'md'}
-	class:px-1.5={size === 'xs'}
-	class:px-1={size === 'sm' || size === 'md'}
 	class:md:px-2={size === 'sm' || size === 'md'}
-	class:py-0={size === 'xs'}
 	class:md:py-0={size === 'xs'}
-	class:py-0.5={size === 'sm' || size === 'md'}
 	class:md:py-1={size === 'sm' || size === 'md'}
+	class:px-1={size === 'sm' || size === 'md'}
+	class:px-1.5={size === 'xs'}
+	class:py-0={size === 'xs'}
+	class:py-0.5={size === 'sm' || size === 'md'}
+	class:text-sm={size === 'xs' || size === 'md'}
+	class:text-xs={size === 'sm'}
+	aria-hidden={ariaHidden}
 >
-	<slot />
+	{@render children?.()}
 </span>

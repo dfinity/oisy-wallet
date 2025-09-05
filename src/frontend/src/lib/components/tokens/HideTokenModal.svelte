@@ -6,22 +6,26 @@
 		type WizardStep,
 		type WizardSteps
 	} from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { onDestroy } from 'svelte';
 	import HideTokenReview from '$lib/components/tokens/HideTokenReview.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
+	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
-	import { gotoReplaceRoot } from '$lib/utils/nav.utils';
+	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	export let assertHide: () => { valid: boolean };
 	export let hideToken: (params: { identity: Identity }) => Promise<void>;
 	export let updateUi: (params: { identity: Identity }) => Promise<void>;
+	export let fromRoute: NavigationTarget | undefined;
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -30,7 +34,7 @@
 			return;
 		}
 
-		if (!$tokenToggleable) {
+		if (!$pageTokenToggleable) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.not_toggleable }
 			});
@@ -53,9 +57,6 @@
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
-			// We must navigate first otherwise we might land on the default token Ethereum selected while being on network ICP.
-			await gotoReplaceRoot();
-
 			await updateUi({
 				identity: $authIdentity
 			});
@@ -73,13 +74,13 @@
 		}
 	};
 
-	const steps: WizardSteps = [
+	const steps: WizardSteps<WizardStepsHideToken> = [
 		{
-			name: 'Hide',
+			name: WizardStepsHideToken.HIDE,
 			title: $i18n.tokens.hide.title
 		},
 		{
-			name: 'Hiding',
+			name: WizardStepsHideToken.HIDING,
 			title: $i18n.tokens.hide.hiding
 		}
 	];
@@ -104,24 +105,28 @@
 
 	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
+	let modal: WizardModal<WizardStepsHideToken>;
 
 	const close = () => {
 		modalStore.close();
 
 		hideProgressStep = ProgressStepsHideToken.INITIALIZATION;
 	};
+
+	onDestroy(async () =>
+		nonNullish(fromRoute) ? await back({ pop: nonNullish(fromRoute) }) : await gotoReplaceRoot()
+	);
 </script>
 
 <WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === 'Hiding'}
+	onClose={close}
 	{steps}
 	bind:currentStep
-	bind:this={modal}
-	on:nnsClose={close}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
 >
-	<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 	{#if currentStep?.name === 'Hiding'}
 		<InProgressWizard

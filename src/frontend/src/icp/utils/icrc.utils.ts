@@ -1,10 +1,23 @@
-import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-import { DEPRECATED_SNES } from '$env/tokens/tokens.sns.deprecated.env';
+import { ICP_NETWORK, ICP_PSEUDO_TESTNET_NETWORK } from '$env/networks/networks.icp.env';
+import {
+	BITCAT_LEDGER_CANISTER_ID,
+	FORSETISCN_LEDGER_CANISTER_ID,
+	GHOSTNODE_LEDGER_CANISTER_ID,
+	ICONFUCIUS_LEDGER_CANISTER_ID,
+	ODINDOG_LEDGER_CANISTER_ID
+} from '$env/networks/networks.icrc.env';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
-import type { IcTokenWithoutIdExtended, IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type {
+	IcTokenExtended,
+	IcTokenWithoutIdExtended,
+	IcrcCustomToken
+} from '$icp/types/icrc-custom-token';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import { parseTokenId } from '$lib/validation/token.validation';
+import { UrlSchema } from '$lib/validation/url.validation';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
@@ -19,12 +32,46 @@ export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	icrcCustomTokens?: Record<LedgerCanisterIdText, IcTokenWithoutIdExtended>;
 };
 
+const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string> = {
+	[BITCAT_LEDGER_CANISTER_ID]: 'BITCAT',
+	[FORSETISCN_LEDGER_CANISTER_ID]: 'FORSETISCN',
+	[GHOSTNODE_LEDGER_CANISTER_ID]: 'GHOSTNODE',
+	[ICONFUCIUS_LEDGER_CANISTER_ID]: 'ICONFUCIUS',
+	[ODINDOG_LEDGER_CANISTER_ID]: 'ODINDOG'
+};
+
+/**
+ * Determines which network a given ICRC token belongs to based on its ledger canister ID.
+ *
+ * Some tokens (e.g., `ckSepoliaETH`, `ckSepoliaUSDC`) are considered "testnet" tokens.
+ * These are tied to testnets of external chains (like Sepolia for Ethereum), but since the
+ * Internet Computer (IC) does not have a native testnet environment, we fake one.
+ *
+ * Originally, testnet tokens were shown as part of the IC network, but that led to confusion
+ * — especially when aggregating balances — as their balances would mix with mainnet tokens.
+ *
+ * To avoid this, we now separate these testnet tokens into a pseudo-test network:
+ * `ICP_PSEUDO_TESTNET_NETWORK`, which mirrors the IC network in behavior but is visually
+ * and logically distinct.
+ *
+ * This ensures:
+ * - Production tokens only show in the "real" IC network (`ICP_NETWORK`)
+ * - Testnet tokens only show in the pseudo-network when testnet mode is enabled
+ *
+ * @param ledgerCanisterId - The ledger canister ID of the token.
+ * @returns The appropriate network identifier for the token:
+ *          - `ICP_NETWORK` for "mainnet" tokens
+ *          - `ICP_PSEUDO_TESTNET_NETWORK` for known "testnet" tokens
+ */
+const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
+	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
+
 export const mapIcrcToken = ({
 	metadata,
 	icrcCustomTokens,
 	ledgerCanisterId,
 	...rest
-}: IcrcLoadData): IcTokenWithoutIdExtended | undefined => {
+}: IcrcLoadData): IcTokenExtended | undefined => {
 	const token = mapOptionalToken(metadata);
 
 	if (isNullish(token)) {
@@ -33,11 +80,19 @@ export const mapIcrcToken = ({
 
 	const { symbol, icon: tokenIcon, ...metadataToken } = token;
 
-	const icon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+	const staticIcon = `/icons/icrc/${ledgerCanisterId}.png`;
+
+	const dynamicIcon = icrcCustomTokens?.[ledgerCanisterId]?.icon ?? tokenIcon;
+
+	const { success: dynamicIconIsUrl } = UrlSchema.safeParse(dynamicIcon);
+
+	// We do not allow external URLs anyway, so it is safe to use the static icon, even if it does not exist
+	const icon = dynamicIconIsUrl ? staticIcon : dynamicIcon;
 
 	return {
-		network: ICP_NETWORK,
-		standard: 'icrc',
+		id: parseTokenId(symbol),
+		network: mapIcNetwork(ledgerCanisterId),
+		standard: icrcCustomTokens?.[ledgerCanisterId]?.standard ?? 'icrc',
 		symbol,
 		...(notEmptyString(icon) && { icon }),
 		...(nonNullish(icrcCustomTokens?.[ledgerCanisterId]?.explorerUrl) && {
@@ -98,12 +153,23 @@ export const buildIcrcCustomTokenMetadataPseudoResponse = ({
 	];
 };
 
+export const isTokenIcp = (token: Partial<IcToken>): token is IcToken => token.standard === 'icp';
+
+export const isTokenIcrc = (token: Partial<IcToken>): token is IcToken => token.standard === 'icrc';
+
+export const isTokenDip20 = (token: Partial<IcToken>): token is IcToken =>
+	token.standard === 'dip20';
+
+export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
+	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
+
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	(token.standard === 'icp' || token.standard === 'icrc') && 'enabled' in token;
+	isTokenIc(token) && 'enabled' in token;
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
 
+// TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 	...token,
 	...(isIcCkInterface(token) && nonNullish(token.twinToken)
@@ -116,9 +182,14 @@ export const mapTokenOisyName = (token: IcInterface): IcInterface => ({
 		: {})
 });
 
-export const isDeprecatedSns = ({ ledgerCanisterId }: Pick<IcToken, 'ledgerCanisterId'>): boolean =>
-	ledgerCanisterId in DEPRECATED_SNES;
-
-export const isNotDeprecatedSns = ({
-	ledgerCanisterId
-}: Pick<IcToken, 'ledgerCanisterId'>): boolean => !isDeprecatedSns({ ledgerCanisterId });
+// TODO: create tests
+export const mapTokenOisySymbol = (token: IcInterface): IcInterface => ({
+	...token,
+	...(nonNullish(CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId])
+		? {
+				oisySymbol: {
+					oisySymbol: CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID[token.ledgerCanisterId]
+				}
+			}
+		: {})
+});

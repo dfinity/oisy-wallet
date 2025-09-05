@@ -1,9 +1,5 @@
 import { PrincipalTextSchema } from '@dfinity/zod-schemas';
-import * as z from 'zod';
-
-const NumberAsStringSchema = z.string().refine((val) => !isNaN(Number(val)), {
-	message: 'Invalid number string'
-});
+import * as z from 'zod/v4';
 
 const DateTimeSchema = z
 	.string()
@@ -11,14 +7,15 @@ const DateTimeSchema = z
 
 const KongSwapTokenMetricsSchema = z.object({
 	token_id: z.number(),
-	total_supply: NumberAsStringSchema.nullable(),
-	market_cap: NumberAsStringSchema.nullable(),
-	price: NumberAsStringSchema,
+	total_supply: z.number().nullable(),
+	market_cap: z.number().nullable(),
+	price: z.number().nullable(),
 	updated_at: DateTimeSchema,
-	volume_24h: NumberAsStringSchema,
-	tvl: NumberAsStringSchema,
-	price_change_24h: NumberAsStringSchema,
-	previous_price: NumberAsStringSchema.nullable()
+	volume_24h: z.number().nullable(),
+	tvl: z.number().nullable(),
+	price_change_24h: z.number().nullable(),
+	previous_price: z.number().nullable(),
+	is_verified: z.boolean()
 });
 
 const KongSwapTokenBaseSchema = z.object({
@@ -49,14 +46,5 @@ export const KongSwapTokenWithMetricsSchema = KongSwapTokenBaseSchema.extend({
 	metrics: KongSwapTokenMetricsSchema
 });
 
-export const KongSwapTokensSchema = z.object({
-	items: z.array(KongSwapTokenWithMetricsSchema),
-	total_pages: z.number(),
-	total_count: z.number(),
-	page: z.number(),
-	limit: z.number()
-});
-
 export type KongSwapTokenMetrics = z.infer<typeof KongSwapTokenMetricsSchema>;
-export type KongSwapTokens = z.infer<typeof KongSwapTokensSchema>;
 export type KongSwapToken = z.infer<typeof KongSwapTokenSchema>;

@@ -65,39 +65,12 @@ describe('TokenLogo', () => {
 
 	describe('when badge type is "network"', () => {
 		it('should display network icon badge', () => {
-			const { getByTestId, getByAltText } = render(TokenLogo, {
+			const { getByTestId } = render(TokenLogo, {
 				props: { data: mockToken, badge: { type: 'network' }, badgeTestId: 'badge' }
 			});
 
-			expect(getByTestId('network-badge')).toBeInTheDocument();
-
-			const expected = replacePlaceholders(en.core.alt.logo, {
-				$name: mockToken.network.name
-			});
-
-			const networkBadge = getByAltText(expected);
-			expect(networkBadge).toBeInTheDocument();
-			expect(networkBadge).toHaveAttribute('src', 'network-icon-url');
-		});
-
-		it('should display black-and-white network icon when set to black and white', () => {
-			const { getByTestId, getByAltText } = render(TokenLogo, {
-				props: {
-					data: mockToken,
-					badge: { type: 'network', blackAndWhite: true },
-					badgeTestId: 'badge'
-				}
-			});
-
-			expect(getByTestId('network-badge')).toBeInTheDocument();
-
-			const expected = replacePlaceholders(en.core.alt.logo, {
-				$name: mockToken.network.name
-			});
-
-			const networkBadge = getByAltText(expected);
-			expect(networkBadge).toBeInTheDocument();
-			expect(networkBadge).toHaveAttribute('src', 'network-icon-bw-url');
+			expect(getByTestId('network-badge-light')).toBeInTheDocument();
+			expect(getByTestId('network-badge-dark')).toBeInTheDocument();
 		});
 	});
 

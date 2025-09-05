@@ -3,6 +3,9 @@
 .idea/
 **/*~
 
+# ESLint and Prettier
+.eslintcache
+
 # Mac OSX temporary files
 .DS_Store
 **/.DS_Store
@@ -54,9 +57,11 @@ backend-v*.wasm.gz
 pocket-ic
 
 coverage/
+.vitest-reports/
 
 /scripts/build.ic-domains.test.actual.*
 
 # Frontend reproducibility script output folder
 tmp
 .qodo
+/cycles-ledger.wasm.gz

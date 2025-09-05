@@ -24,5 +24,5 @@
 
 	<output id="btc-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: address ?? '' })}</output
-	><Copy color="inherit" inline value={address ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline text={$i18n.wallet.text.address_copied} value={address ?? ''} />
 </div>

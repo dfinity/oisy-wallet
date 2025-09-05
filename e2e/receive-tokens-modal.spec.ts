@@ -6,7 +6,9 @@ import {
 	RECEIVE_TOKENS_MODAL_ETH_SECTION,
 	RECEIVE_TOKENS_MODAL_ICP_SECTION,
 	RECEIVE_TOKENS_MODAL_ICRC_SECTION,
-	RECEIVE_TOKENS_MODAL_OPEN_BUTTON
+	RECEIVE_TOKENS_MODAL_OPEN_BUTTON,
+	RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
+	RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
 } from '$lib/constants/test-ids.constants';
 import { testWithII } from '@dfinity/internet-identity-playwright';
 import { MODALS_VIEWPORT_WIDTH } from './utils/constants/e2e.constants';
@@ -43,7 +45,9 @@ testWithII('should display receive-tokens modal', async () => {
 			RECEIVE_TOKENS_MODAL_ETH_SECTION,
 			RECEIVE_TOKENS_MODAL_BTC_MAINNET_SECTION,
 			RECEIVE_TOKENS_MODAL_BTC_TESTNET_SECTION,
-			RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION
+			RECEIVE_TOKENS_MODAL_BTC_REGTEST_SECTION,
+			RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
+			RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
 		])
 	});
 });
@@ -63,5 +67,17 @@ testWithII('should display correct QR codes for receiving ICRC tokens', async ()
 testWithII('should display correct QR codes for receiving ETH tokens', async () => {
 	await homepageLoggedIn.testReceiveModalQrCode({
 		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving SOL mainnet tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
+	});
+});
+
+testWithII('should display correct QR codes for receiving SOL devnet tokens', async () => {
+	await homepageLoggedIn.testReceiveModalQrCode({
+		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
 	});
 });

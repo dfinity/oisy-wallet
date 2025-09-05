@@ -5,8 +5,11 @@ import {
 	IC_CKBTC_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import { Currency } from '$lib/enums/currency';
 import {
 	JsonTransactionsTextSchema,
+	POST_MESSAGE_REQUESTS,
+	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
@@ -22,6 +25,7 @@ import {
 	PostMessageDataResponseSchema,
 	PostMessageDataResponseWalletCleanUpSchema,
 	PostMessageDataResponseWalletSchema,
+	PostMessageErrorResponseSchema,
 	PostMessageJsonDataResponseSchema,
 	PostMessageRequestSchema,
 	PostMessageResponseSchema,
@@ -35,38 +39,11 @@ import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod';
+import * as z from 'zod/v4';
 
 describe('post-message.schema', () => {
 	describe('PostMessageRequestSchema', () => {
-		const validCases = [
-			'startIdleTimer',
-			'stopIdleTimer',
-			'startCodeTimer',
-			'stopCodeTimer',
-			'startExchangeTimer',
-			'stopExchangeTimer',
-			'stopIcpWalletTimer',
-			'startIcpWalletTimer',
-			'triggerIcpWalletTimer',
-			'stopIcrcWalletTimer',
-			'startIcrcWalletTimer',
-			'triggerIcrcWalletTimer',
-			'stopBtcWalletTimer',
-			'startBtcWalletTimer',
-			'triggerBtcWalletTimer',
-			'stopBtcStatusesTimer',
-			'startBtcStatusesTimer',
-			'triggerBtcStatusesTimer',
-			'stopCkBTCUpdateBalanceTimer',
-			'startCkBTCUpdateBalanceTimer',
-			'stopCkEthMinterInfoTimer',
-			'startCkEthMinterInfoTimer',
-			'triggerCkEthMinterInfoTimer',
-			'stopCkBtcMinterInfoTimer',
-			'startCkBtcMinterInfoTimer',
-			'triggerCkBtcMinterInfoTimer'
-		];
+		const validCases = POST_MESSAGE_REQUESTS;
 
 		const invalidCases = [
 			'invalidTimer',
@@ -113,6 +90,7 @@ describe('post-message.schema', () => {
 
 		it('should validate with correct structure for erc20Addresses and icrcCanisterIds', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: [mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
 				splAddresses: [mockValidSplAddress]
@@ -123,6 +101,7 @@ describe('post-message.schema', () => {
 
 		it('should an invalid erc20Addresses given the lack of zod parser for erc20', () => {
 			const validData = {
+				currentCurrency: Currency.USD,
 				erc20Addresses: ['invalid_address', mockValidErc20Address],
 				icrcCanisterIds: [mockValidIndexCanisterId],
 				splAddresses: [mockValidSplAddress]
@@ -176,21 +155,25 @@ describe('post-message.schema', () => {
 
 		it('should validate with correct structure for IcCanistersSchema and env field from NetworkSchema', () => {
 			const validData = { ...mockCanisters, ...mockEnv };
+
 			expect(PostMessageDataRequestIcrcSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should throw an error if env field is missing', () => {
 			const invalidData = { ...mockCanisters };
+
 			expect(() => PostMessageDataRequestIcrcSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if IcCanistersSchema fields are missing', () => {
 			const invalidData = { ...mockEnv };
+
 			expect(() => PostMessageDataRequestIcrcSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if env field is invalid', () => {
 			const invalidData = { ...mockCanisters, env: 'invalid_env' };
+
 			expect(() => PostMessageDataRequestIcrcSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -205,26 +188,31 @@ describe('post-message.schema', () => {
 
 		it('should validate with correct structure for IcCanistersSchema and env field from NetworkSchema', () => {
 			const validData = { ...mockCanisters, ...mockEnv };
+
 			expect(PostMessageDataRequestIcrcStrictSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should throw an error if env field is missing', () => {
 			const invalidData = { ...mockCanisters };
+
 			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if IcCanistersSchema fields are missing', () => {
 			const invalidData = { ...mockEnv };
+
 			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if env field is invalid', () => {
 			const invalidData = { ...mockCanisters, env: 'invalid_env' };
+
 			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if IcCanistersSchema fields is missing the index', () => {
 			const invalidData = { ledgerCanisterId: mockCanisters.ledgerCanisterId, ...mockEnv };
+
 			expect(() => PostMessageDataRequestIcrcStrictSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -244,6 +232,7 @@ describe('post-message.schema', () => {
 
 		it('should throw an error if minterCanisterId is invalid', () => {
 			const invalidData = { minterCanisterId: 'invalid_canister_id' };
+
 			expect(() => PostMessageDataRequestIcCkSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -258,6 +247,7 @@ describe('post-message.schema', () => {
 				bitcoinNetwork: mockValidBitcoinNetwork,
 				btcAddress: mockBtcAddress
 			};
+
 			expect(PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -266,6 +256,7 @@ describe('post-message.schema', () => {
 				...mockValidMinterCanisterId,
 				bitcoinNetwork: mockValidBitcoinNetwork
 			};
+
 			expect(PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -275,6 +266,7 @@ describe('post-message.schema', () => {
 				bitcoinNetwork: 'invalid_network',
 				btcAddress: mockBtcAddress
 			};
+
 			expect(PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -284,6 +276,7 @@ describe('post-message.schema', () => {
 				bitcoinNetwork: mockValidBitcoinNetwork,
 				btcAddress: mockBtcAddress
 			};
+
 			expect(() => PostMessageDataRequestIcCkBTCUpdateBalanceSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -301,6 +294,7 @@ describe('post-message.schema', () => {
 				shouldFetchTransactions: true,
 				bitcoinNetwork: mockValidBitcoinNetwork
 			};
+
 			expect(PostMessageDataRequestBtcSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -310,6 +304,7 @@ describe('post-message.schema', () => {
 				shouldFetchTransactions: true,
 				bitcoinNetwork: mockValidBitcoinNetwork
 			};
+
 			expect(PostMessageDataRequestBtcSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -318,6 +313,7 @@ describe('post-message.schema', () => {
 				btcAddress: mockValidBtcAddress,
 				bitcoinNetwork: mockValidBitcoinNetwork
 			};
+
 			expect(() => PostMessageDataRequestBtcSchema.parse(invalidData)).toThrow();
 		});
 
@@ -327,6 +323,7 @@ describe('post-message.schema', () => {
 				shouldFetchTransactions: true,
 				bitcoinNetwork: 'invalid_network'
 			};
+
 			expect(PostMessageDataRequestBtcSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -356,19 +353,15 @@ describe('post-message.schema', () => {
 			'signOutIdleTimer',
 			'delegationRemainingTime',
 			'syncExchange',
-			'syncExchangeError',
 			'syncIcpWallet',
 			'syncIcrcWallet',
+			'syncDip20Wallet',
 			'syncBtcWallet',
-			'syncIcpWalletError',
-			'syncIcrcWalletError',
-			'syncBtcWalletError',
 			'syncIcpWalletCleanUp',
 			'syncIcrcWalletCleanUp',
+			'syncDip20WalletCleanUp',
 			'syncBtcStatuses',
-			'syncBtcStatusesError',
 			'syncCkMinterInfo',
-			'syncCkMinterInfoError',
 			'syncBtcPendingUtxos',
 			'syncCkBTCUpdateOk',
 			'syncBtcAddress',
@@ -391,11 +384,13 @@ describe('post-message.schema', () => {
 			const validData = {
 				authRemainingTime: 120
 			};
+
 			expect(PostMessageDataResponseAuthSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should throw an error if authRemainingTime is missing', () => {
 			const invalidData = {};
+
 			expect(() => PostMessageDataResponseAuthSchema.parse(invalidData)).toThrow();
 		});
 
@@ -403,6 +398,7 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				authRemainingTime: 'not_a_number'
 			};
+
 			expect(() => PostMessageDataResponseAuthSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -412,12 +408,17 @@ describe('post-message.schema', () => {
 
 		it('should validate with all valid price fields', () => {
 			const validData = {
+				currentExchangeRate: {
+					exchangeRateToUsd: 1.5,
+					currency: Currency.EUR
+				},
 				currentEthPrice: mockValidPrice,
 				currentBtcPrice: mockValidPrice,
 				currentErc20Prices: mockValidPrice,
 				currentIcpPrice: mockValidPrice,
 				currentIcrcPrices: mockValidPrice
 			};
+
 			expect(PostMessageDataResponseExchangeSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -429,6 +430,7 @@ describe('post-message.schema', () => {
 				currentIcpPrice: mockValidPrice,
 				currentIcrcPrices: mockValidPrice
 			};
+
 			expect(PostMessageDataResponseExchangeSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -438,11 +440,13 @@ describe('post-message.schema', () => {
 			const validData = {
 				err: 'An error occurred'
 			};
+
 			expect(PostMessageDataResponseExchangeErrorSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should validate when err is missing, as it is optional', () => {
 			const validData = {};
+
 			expect(PostMessageDataResponseExchangeErrorSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -450,6 +454,7 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				err: 12345 // incorrect type
 			};
+
 			expect(() => PostMessageDataResponseExchangeErrorSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -457,11 +462,13 @@ describe('post-message.schema', () => {
 	describe('JsonTransactionsTextSchema', () => {
 		it('should validate a string successfully', () => {
 			const validData = JSON.stringify([{ id: 'tx1', amount: 500 }]);
+
 			expect(JsonTransactionsTextSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should fail validation for non-string values', () => {
 			const invalidData = 123n;
+
 			expect(() => JsonTransactionsTextSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -478,6 +485,7 @@ describe('post-message.schema', () => {
 				balance: mockValidBalance,
 				newTransactions: mockValidTransactions
 			};
+
 			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -485,6 +493,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				balance: mockValidBalance
 			};
+
 			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -493,6 +502,7 @@ describe('post-message.schema', () => {
 				balance: 'not_a_bigint',
 				newTransactions: mockValidTransactions
 			};
+
 			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -501,6 +511,7 @@ describe('post-message.schema', () => {
 				balance: mockValidBalance,
 				newTransactions: 'invalid_json'
 			};
+
 			expect(PostMessageWalletDataSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -519,6 +530,7 @@ describe('post-message.schema', () => {
 					newTransactions: mockValidTransactions
 				}
 			};
+
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -528,6 +540,7 @@ describe('post-message.schema', () => {
 					balance: mockValidBalance
 				}
 			};
+
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -538,6 +551,7 @@ describe('post-message.schema', () => {
 					newTransactions: mockValidTransactions
 				}
 			};
+
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -548,6 +562,7 @@ describe('post-message.schema', () => {
 					newTransactions: 'invalid_json'
 				}
 			};
+
 			expect(PostMessageDataResponseWalletSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -557,27 +572,78 @@ describe('post-message.schema', () => {
 			const validData = {
 				error: 'An error occurred'
 			};
+
 			expect(PostMessageDataResponseErrorSchema.parse(validData)).toEqual(validData);
 
 			const validDataNumber = {
 				error: 12345
 			};
+
 			expect(PostMessageDataResponseErrorSchema.parse(validDataNumber)).toEqual(validDataNumber);
 
 			const validDataObject = {
 				error: { message: 'An error occurred' }
 			};
+
 			expect(PostMessageDataResponseErrorSchema.parse(validDataObject)).toEqual(validDataObject);
 
 			const validDataArray = {
 				error: ['Error 1', 'Error 2']
 			};
+
 			expect(PostMessageDataResponseErrorSchema.parse(validDataArray)).toEqual(validDataArray);
 		});
 
 		it('should validate when error is missing, as it’s optional in the base schema', () => {
 			const validData = {};
+
 			expect(PostMessageDataResponseErrorSchema.parse(validData)).toEqual(validData);
+		});
+	});
+
+	describe('PostMessageDataErrorSchema', () => {
+		const [validErrorResponseMsg] = PostMessageErrorResponseSchema.options;
+
+		it('should validate when error is provided with any type of value', () => {
+			const validData = {
+				error: 'An error occurred'
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
+
+			const validDataNumber = {
+				error: 12345
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataNumber })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataNumber });
+
+			const validDataObject = {
+				error: { message: 'An error occurred' }
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataObject })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataObject });
+
+			const validDataArray = {
+				error: ['Error 1', 'Error 2']
+			};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validDataArray })
+			).toEqual({ msg: validErrorResponseMsg, data: validDataArray });
+		});
+
+		it('should validate when error is missing, as it’s optional in the base schema', () => {
+			const validData = {};
+
+			expect(
+				PostMessageDataErrorSchema.parse({ msg: validErrorResponseMsg, data: validData })
+			).toEqual({ msg: validErrorResponseMsg, data: validData });
 		});
 	});
 
@@ -586,11 +652,13 @@ describe('post-message.schema', () => {
 			const validData = {
 				transactionIds: ['tx1', 'tx2', 'tx3']
 			};
+
 			expect(PostMessageDataResponseWalletCleanUpSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should throw an error if transactionIds is missing', () => {
 			const invalidData = {};
+
 			expect(() => PostMessageDataResponseWalletCleanUpSchema.parse(invalidData)).toThrow();
 		});
 
@@ -598,6 +666,7 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				transactionIds: 'not_an_array'
 			};
+
 			expect(() => PostMessageDataResponseWalletCleanUpSchema.parse(invalidData)).toThrow();
 		});
 
@@ -605,6 +674,7 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				transactionIds: ['tx1', 123, 'tx3']
 			};
+
 			expect(() => PostMessageDataResponseWalletCleanUpSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -616,6 +686,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				json: mockValidJson
 			};
+
 			expect(PostMessageJsonDataResponseSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -623,6 +694,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				json: 'invalid_json'
 			};
+
 			expect(PostMessageJsonDataResponseSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -632,6 +704,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				state: 'idle'
 			};
+
 			expect(PostMessageSyncStateSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -639,6 +712,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				state: 'in_progress'
 			};
+
 			expect(PostMessageSyncStateSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -646,6 +720,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				state: 'error'
 			};
+
 			expect(PostMessageSyncStateSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -653,11 +728,13 @@ describe('post-message.schema', () => {
 			const invalidData = {
 				state: 'completed'
 			};
+
 			expect(() => PostMessageSyncStateSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should throw an error if state is missing', () => {
 			const invalidData = {};
+
 			expect(() => PostMessageSyncStateSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -672,6 +749,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				address: mockValidBtcAddress
 			};
+
 			expect(PostMessageDataResponseBTCAddressSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -679,6 +757,7 @@ describe('post-message.schema', () => {
 			const validData = {
 				address: 12345
 			};
+
 			expect(PostMessageDataResponseBTCAddressSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -689,8 +768,8 @@ describe('post-message.schema', () => {
 		});
 		const SchemaWithCustomData = inferPostMessageSchema(CustomDataSchema);
 
-		const validRequestMsg = PostMessageRequestSchema.options[0];
-		const validResponseMsg = PostMessageResponseSchema.options[0];
+		const [validRequestMsg] = PostMessageRequestSchema.options;
+		const [validResponseMsg] = PostMessageResponseSchema.options;
 		const validData = { additionalInfo: 'sample info' };
 
 		it('should validate with a valid request msg and data matching dataSchema', () => {
@@ -698,6 +777,7 @@ describe('post-message.schema', () => {
 				msg: validRequestMsg,
 				data: validData
 			};
+
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
@@ -706,6 +786,7 @@ describe('post-message.schema', () => {
 				msg: validResponseMsg,
 				data: validData
 			};
+
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
@@ -713,11 +794,37 @@ describe('post-message.schema', () => {
 			const validPayload = {
 				msg: validRequestMsg
 			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
 		});
 
 		it('should throw an error if msg is missing', () => {
 			const invalidPayload = { data: validData };
+
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 
@@ -726,6 +833,7 @@ describe('post-message.schema', () => {
 				msg: 'invalid_message',
 				data: validData
 			};
+
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 
@@ -734,6 +842,7 @@ describe('post-message.schema', () => {
 				msg: validRequestMsg,
 				data: { additionalInfo: 123 }
 			};
+
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 	});

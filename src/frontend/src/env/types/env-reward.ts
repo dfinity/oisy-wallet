@@ -1,4 +1,4 @@
-import type { RewardEventsSchema } from '$env/schema/env-reward.schema';
-import * as z from 'zod';
+import type { RewardCampaignSchema } from '$env/schema/env-reward-campaign.schema';
+import type * as z from 'zod/v4';
 
-export type RewardDescription = z.infer<typeof RewardEventsSchema>;
+export type RewardCampaignDescription = z.infer<typeof RewardCampaignSchema>;

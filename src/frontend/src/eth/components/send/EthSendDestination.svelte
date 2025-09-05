@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { createEventDispatcher } from 'svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NetworkContacts } from '$lib/types/contacts';
 	import type { Network } from '$lib/types/network';
 	import type { OptionToken } from '$lib/types/token';
+	import type { KnownDestinations } from '$lib/types/transactions';
 	import { invalidIcpAddress, isEthAddress } from '$lib/utils/account.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
@@ -15,6 +16,8 @@
 	export let network: Network | undefined = undefined;
 	export let destination = '';
 	export let invalidDestination = false;
+	export let knownDestinations: KnownDestinations | undefined = undefined;
+	export let networkContacts: NetworkContacts | undefined = undefined;
 
 	let networkICP = false;
 	$: networkICP = isNetworkICP(network);
@@ -41,16 +44,16 @@
 		return !isEthAddress(destination);
 	};
 
-	const { evaluateFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
-	const onInput = () => evaluateFee?.();
+	// TODO: add support for updating fees when input value changes
 </script>
 
 <SendInputDestination
+	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
+	{knownDestinations}
+	{networkContacts}
+	onInvalidDestination={isInvalidDestination}
+	onQRButtonClick={() => dispatch('icQRCodeScan')}
 	bind:destination
 	bind:invalidDestination
-	{isInvalidDestination}
-	inputPlaceholder={$i18n.send.placeholder.enter_eth_address}
-	on:nnsInput={onInput}
 	on:icQRCodeScan
-	onQRButtonClick={() => dispatch('icQRCodeScan')}
 />

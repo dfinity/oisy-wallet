@@ -30,6 +30,24 @@
 		}
 	}
 
+	:root[theme='light'] {
+		.dark-hidden {
+			display: block !important;
+		}
+
+		.dark-block {
+			display: none !important;
+		}
+	}
+	:root[theme='dark'] {
+		.dark-hidden {
+			display: none !important;
+		}
+		.dark-block {
+			display: block !important;
+		}
+	}
+
 	@include meta.load-css('global/font-faces');
 	@include meta.load-css('global/fonts');
 	@include meta.load-css('global/theme');
@@ -37,10 +55,12 @@
 	@include meta.load-css('global/layout');
 	@include meta.load-css('global/body');
 	@include meta.load-css('global/button');
+	@include meta.load-css('global/input');
 	@include meta.load-css('global/text');
 	@include meta.load-css('global/gix');
 	@include meta.load-css('global/position');
 	@include meta.load-css('global/links');
+	@include meta.load-css('global/lists');
 	@include meta.load-css('global/scrollbar');
 
 	// Themes

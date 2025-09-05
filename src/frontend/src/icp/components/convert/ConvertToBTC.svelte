@@ -9,13 +9,15 @@
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { modalConvertCkBTCToBTC } from '$lib/derived/modal.derived';
-	import { networkICPDisabled } from '$lib/derived/networks.derived';
+	import { networkBitcoinMainnetDisabled } from '$lib/derived/networks.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+
+	const modalId = Symbol();
 
 	const isDisabled = (): boolean =>
 		isNullish($tokenId) || isNullish($ckBtcMinterInfoStore?.[$tokenId]);
@@ -27,7 +29,7 @@
 			return;
 		}
 
-		modalStore.openConvertCkBTCToBTC();
+		modalStore.openConvertCkBTCToBTC(modalId);
 	};
 
 	let ckBtcToken: OptionIcCkToken;
@@ -37,14 +39,18 @@
 </script>
 
 <ButtonHero
-	disabled={$networkICPDisabled || $isBusy || $outflowActionsDisabled}
-	on:click={async () => await openConvert()}
 	ariaLabel={$i18n.convert.text.convert_to_btc}
+	disabled={$networkBitcoinMainnetDisabled || $isBusy || $outflowActionsDisabled}
+	onclick={async () => await openConvert()}
 >
-	<IconCkConvert size="28" slot="icon" />
-	{BTC_MAINNET_SYMBOL}
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
+	{#snippet label()}
+		{BTC_MAINNET_SYMBOL}
+	{/snippet}
 </ButtonHero>
 
 {#if $modalConvertCkBTCToBTC && nonNullish(ckBtcToken) && nonNullish(ckBtcToken.twinToken)}
-	<ConvertModal sourceToken={ckBtcToken} destinationToken={ckBtcToken.twinToken} />
+	<ConvertModal destinationToken={ckBtcToken.twinToken} sourceToken={ckBtcToken} />
 {/if}

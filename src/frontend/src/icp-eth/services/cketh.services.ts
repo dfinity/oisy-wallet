@@ -2,7 +2,6 @@ import { minterInfo } from '$icp-eth/api/cketh-minter.api';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
 import type { IcCkMetadata } from '$icp/types/ic-token';
-import { queryAndUpdate } from '$lib/actors/query.ic';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
@@ -10,7 +9,7 @@ import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
 import { AnonymousIdentity } from '@dfinity/agent';
 import type { MinterInfo } from '@dfinity/cketh';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const loadCkEthMinterInfo = async ({
@@ -35,8 +34,8 @@ export const loadCkEthMinterInfo = async ({
 				certified
 			}),
 		onLoad: ({ response: data, certified }) =>
-			ckEthMinterInfoStore.set({ tokenId, data: { data, certified } }),
-		onCertifiedError: ({ error }) => {
+			ckEthMinterInfoStore.set({ id: tokenId, data: { data, certified } }),
+		onUpdateError: ({ error }) => {
 			// We silence the error here because we display a visual error when we try to effectively use the information
 			console.error(error);
 
@@ -51,7 +50,7 @@ export const assertCkEthMinterInfoLoaded = ({
 	network
 }: {
 	minterInfo: OptionCertifiedMinterInfo;
-	network: Network | undefined;
+	network?: Network;
 }): { valid: boolean } => {
 	if (!isNetworkICP(network)) {
 		return { valid: true };

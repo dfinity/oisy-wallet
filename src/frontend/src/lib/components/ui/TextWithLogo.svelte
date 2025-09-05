@@ -1,21 +1,23 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Snippet } from 'svelte';
 
-	export let name: string;
-	export let icon: string | undefined;
-	export let logo: 'start' | 'end' = 'end';
-	export let description: string | undefined = undefined;
+	interface Props {
+		name: string;
+		logo?: 'start' | 'end';
+		description?: string;
+		icon: Snippet;
+	}
+
+	let { name, logo = 'end', description, icon }: Props = $props();
 </script>
 
 <span
 	class="flex"
-	class:items-center={!description}
-	class:gap-2={logo === 'start'}
-	class:gap-1={logo === 'end'}
 	class:flex-row-reverse={logo === 'start'}
+	class:gap-1={logo === 'end'}
+	class:gap-2={logo === 'start'}
+	class:items-center={!description}
 >
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>
@@ -23,5 +25,5 @@
 			<span class="text-left text-xs leading-none text-tertiary">{description}</span>
 		{/if}
 	</span>
-	<Logo src={icon} alt={replacePlaceholders($i18n.core.alt.logo, { $name: name })} />
+	{@render icon()}
 </span>

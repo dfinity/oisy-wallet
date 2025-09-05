@@ -11,3 +11,5 @@ export class InsufficientFundsError extends Error {}
 
 export type Amount = string | number;
 export type OptionAmount = Amount | undefined;
+
+export type SendDestinationTab = 'recentlyUsed' | 'contacts';

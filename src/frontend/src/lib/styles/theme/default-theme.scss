@@ -30,6 +30,16 @@
 	--color-foreground-primary-inverted-alt: #{$base-white};
 	--color-foreground-white: #{$base-white};
 
+	--color-foreground-contact-1: #{$contact-green};
+	--color-foreground-contact-2: #{$contact-blue};
+	--color-foreground-contact-3: #{$contact-orange};
+	--color-foreground-contact-4: #{$contact-teal};
+	--color-foreground-contact-5: #{$contact-gold};
+	--color-foreground-contact-6: #{$contact-red};
+	--color-foreground-contact-7: #{$contact-purple};
+	--color-foreground-contact-8: #{$contact-pink};
+	--color-foreground-contact-9: #{$contact-indigo};
+
 	--color-background-page: #{$oisy-blue-100};
 	--color-background-surface: #{$base-white};
 	--color-background-modal-overlay: #{$a-dark-60};
@@ -45,6 +55,7 @@
 	--color-background-tertiary-inverted: #{$gray-iron-500};
 	--color-background-disabled: #{$a-dark-5};
 	--color-background-disabled-alt: #{$a-dark-10};
+	--color-background-disabled-alt2: #{$a-dark-16};
 	--color-background-success-primary: #{$emerald-500};
 	--color-background-success-secondary: #{$emerald-700};
 	--color-background-success-tertiary: #{$emerald-800};
@@ -76,6 +87,16 @@
 	--color-background-brand-subtle-30: #{$a-oisy-blue-30};
 	--color-background-brand-tertiary: #{$oisy-blue-950};
 	--color-background-brand-light: #{$oisy-blue-200};
+	--color-background-contact-1: #{$contact-green};
+	--color-background-contact-2: #{$contact-blue};
+	--color-background-contact-3: #{$contact-orange};
+	--color-background-contact-4: #{$contact-teal};
+	--color-background-contact-5: #{$contact-gold};
+	--color-background-contact-6: #{$contact-red};
+	--color-background-contact-7: #{$contact-purple};
+	--color-background-contact-8: #{$contact-pink};
+	--color-background-contact-9: #{$contact-indigo};
+	--color-background-primary-light: #{$a-white-70};
 
 	--color-border-primary: #{$a-dark-20};
 	--color-border-primary-inverted: #{$base-white};

@@ -14,14 +14,17 @@ describe('mapBtcTransaction', () => {
 		inputs: [
 			{
 				...mockBtcTransaction.inputs[0],
-				prev_out: { ...mockBtcTransaction.inputs[0].prev_out, addr: mockBtcAddress }
+				prev_out: {
+					...mockBtcTransaction.inputs[0].prev_out,
+					addr: mockBtcAddress
+				}
 			}
 		]
 	} as BitcoinTransaction;
-	const sendTransactionFee =
-		mockBtcTransaction.inputs[0].prev_out.value -
-		mockBtcTransaction.out.reduce((acc, { value }) => acc + value, 0);
-	const sendTransactionValue = BigInt(mockBtcTransaction.out[0].value + sendTransactionFee);
+	const sendTransactionValue = 202174416n;
+	const to = mockBtcTransaction.out
+		.map(({ addr }) => addr)
+		.filter((addr) => addr !== mockBtcAddress);
 
 	it('should map correctly when receive transaction is pending', () => {
 		const result = mapBtcTransaction({
@@ -88,7 +91,7 @@ describe('mapBtcTransaction', () => {
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
-			to: mockBtcTransaction.out[0].addr,
+			to,
 			value: sendTransactionValue,
 			type: 'send',
 			blockNumber: undefined,
@@ -105,7 +108,7 @@ describe('mapBtcTransaction', () => {
 			block_index: mockBtcTransactionUi.blockNumber
 		} as BitcoinTransaction;
 		const result = mapBtcTransaction({
-			transaction: transaction,
+			transaction,
 			btcAddress: mockBtcAddress,
 			latestBitcoinBlockHeight:
 				(mockBtcTransactionUi.blockNumber ?? 0) + UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
@@ -114,7 +117,7 @@ describe('mapBtcTransaction', () => {
 			...mockBtcTransactionUi,
 			status: 'unconfirmed',
 			from: mockBtcAddress,
-			to: mockBtcTransaction.out[0].addr,
+			to,
 			value: sendTransactionValue,
 			type: 'send',
 			confirmations: UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
@@ -137,8 +140,55 @@ describe('mapBtcTransaction', () => {
 		const expectedResult = {
 			...mockBtcTransactionUi,
 			from: mockBtcAddress,
-			to: mockBtcTransaction.out[0].addr,
+			to,
 			value: sendTransactionValue,
+			type: 'send',
+			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
+		};
+
+		expect(result).toEqual(expectedResult);
+	});
+
+	it('should map correctly a self-transaction', () => {
+		const transaction = {
+			...sendTransaction,
+			block_index: mockBtcTransactionUi.blockNumber,
+			inputs: [
+				{
+					...mockBtcTransaction.inputs[0],
+					prev_out: {
+						...mockBtcTransaction.inputs[0].prev_out,
+						addr: mockBtcAddress,
+						value: 45_235
+					}
+				}
+			],
+			out: [
+				{
+					...mockBtcTransaction.out[0],
+					addr: mockBtcAddress,
+					spent: false,
+					value: 1_000
+				},
+				{
+					...mockBtcTransaction.out[1],
+					addr: mockBtcAddress,
+					spent: true,
+					value: 43_955
+				}
+			]
+		} as BitcoinTransaction;
+		const result = mapBtcTransaction({
+			transaction,
+			btcAddress: mockBtcAddress,
+			latestBitcoinBlockHeight:
+				(mockBtcTransactionUi.blockNumber ?? 0) + CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
+		});
+		const expectedResult = {
+			...mockBtcTransactionUi,
+			from: mockBtcAddress,
+			to: [mockBtcAddress],
+			value: BigInt(transaction.inputs[0].prev_out.value),
 			type: 'send',
 			confirmations: CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS + 1
 		};
@@ -191,6 +241,61 @@ describe('sortBtcTransactions', () => {
 		const expectedResult = [
 			pendingTransaction2,
 			pendingTransaction1,
+			unconfirmedTransaction2,
+			unconfirmedTransaction1,
+			confirmedTransaction2,
+			confirmedTransaction1
+		];
+
+		expect(
+			transactionsToSort.sort((transactionA, transactionB) =>
+				sortBtcTransactions({ transactionA, transactionB })
+			)
+		).toStrictEqual(expectedResult);
+	});
+
+	it('sorts on top transactions without timestamp', () => {
+		const pendingTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: undefined,
+			status: 'pending' as BtcTransactionStatus
+		};
+		const pendingTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: undefined,
+			status: 'pending' as BtcTransactionStatus
+		};
+		const unconfirmedTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: 3n,
+			status: 'unconfirmed' as BtcTransactionStatus
+		};
+		const unconfirmedTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: 4n,
+			status: 'unconfirmed' as BtcTransactionStatus
+		};
+		const confirmedTransaction1 = {
+			...mockBtcTransactionUi,
+			timestamp: 5n,
+			status: 'confirmed' as BtcTransactionStatus
+		};
+		const confirmedTransaction2 = {
+			...mockBtcTransactionUi,
+			timestamp: 6n,
+			status: 'confirmed' as BtcTransactionStatus
+		};
+		const transactionsToSort = [
+			confirmedTransaction2,
+			pendingTransaction1,
+			unconfirmedTransaction2,
+			pendingTransaction2,
+			confirmedTransaction1,
+			unconfirmedTransaction1
+		];
+		const expectedResult = [
+			pendingTransaction1,
+			pendingTransaction2,
 			unconfirmedTransaction2,
 			unconfirmedTransaction1,
 			confirmedTransaction2,

@@ -17,6 +17,10 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
+}));
+
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
 		vi.resetAllMocks();
@@ -24,7 +28,7 @@ describe('AllTransactionsList', () => {
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 
-		vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORKS_IDS', 'get').mockImplementation(() => [
+		vi.spyOn(ethEnv, 'SUPPORTED_ETHEREUM_NETWORK_IDS', 'get').mockImplementation(() => [
 			ETHEREUM_NETWORK_ID,
 			SEPOLIA_NETWORK_ID
 		]);
@@ -61,6 +65,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -91,8 +96,11 @@ describe('AllTransactionsList', () => {
 			ethTransactionsStore.add({
 				tokenId: ETHEREUM_TOKEN_ID,
 				transactions: createMockEthTransactions(ethTransactionsNumber).map((transaction) => ({
-					...transaction,
-					timestamp: yesterdayTimestamp
+					data: {
+						...transaction,
+						timestamp: yesterdayTimestamp
+					},
+					certified: false
 				}))
 			});
 
@@ -120,6 +128,7 @@ describe('AllTransactionsList', () => {
 				const skeleton: HTMLParagraphElement | null = container.querySelector(
 					`div[data-tid="all-transactions-skeleton-card-${i}"]`
 				);
+
 				expect(skeleton).toBeNull();
 			});
 		});
@@ -128,10 +137,12 @@ describe('AllTransactionsList', () => {
 			const { getByText, getByTestId } = render(AllTransactionsList);
 
 			const todayDateGroup = getByTestId('all-transactions-date-group-0');
+
 			expect(todayDateGroup).toBeInTheDocument();
 			expect(getByText('today')).toBeInTheDocument();
 
 			const yesterdayDateGroup = getByTestId('all-transactions-date-group-1');
+
 			expect(yesterdayDateGroup).toBeInTheDocument();
 			expect(getByText('yesterday')).toBeInTheDocument();
 		});

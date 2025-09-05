@@ -1,69 +1,65 @@
 <!-- source: ICONLY PRO - The license is bought and owned by the DFINITY Foundation - Please read the documentation in the README file, or see terms and conditions here https://iconly.pro/pages/terms -->
 <!-- This icon was adjusted by the DFINITY Foundation to fulfill our needs. -->
-<div class="ufo-wrapper">
-	<svg
-		class="ufo"
-		width="24"
-		height="24"
-		viewBox="0 0 20 20"
-		fill="none"
-		xmlns="http://www.w3.org/2000/svg"
-	>
-		<!-- UFO details (dome, etc.) -->
+<svg
+	class="ufo"
+	fill="none"
+	height="24"
+	viewBox="0 0 20 20"
+	width="24"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<!-- UFO details (dome, etc.) -->
+	<path
+		class="dome"
+		d="M11.052 1.28372C12.8799 0.126719 15.3283 0.345017 16.922 1.9387L17.3056 2.32229C18.8994 3.91607 19.1176 6.36449 17.9604 8.19237C17.9228 8.19615 17.8843 8.19494 17.8451 8.1879C17.3486 8.09875 16.1268 7.62869 13.8712 5.37313C11.6157 3.11758 11.1456 1.89573 11.0565 1.39927C11.0494 1.35997 11.0482 1.32137 11.052 1.28372Z"
+		fill="currentColor"
+	></path>
+
+	<!-- UFO Body -->
+	<g opacity="0.4">
 		<path
-			class="dome"
-			d="M11.052 1.28372C12.8799 0.126719 15.3283 0.345017 16.922 1.9387L17.3056 2.32229C18.8994 3.91607 19.1176 6.36449 17.9604 8.19237C17.9228 8.19615 17.8843 8.19494 17.8451 8.1879C17.3486 8.09875 16.1268 7.62869 13.8712 5.37313C11.6157 3.11758 11.1456 1.89573 11.0565 1.39927C11.0494 1.35997 11.0482 1.32137 11.052 1.28372Z"
+			d="M9.5765 0.997494C7.37171 -0.127427 5.4568 -0.354961 4.50869 0.593151C2.87878 2.22306 4.7233 6.71019 8.62855 10.6154C12.5338 14.5207 17.0209 16.3652 18.6508 14.7353C19.5989 13.7872 19.3714 11.8725 18.2467 9.66795C18.0437 9.70326 17.8207 9.70754 17.58 9.66432C16.6349 9.49461 15.145 8.7682 12.8106 6.43383C10.4762 4.09946 9.74981 2.60951 9.5801 1.66442C9.53687 1.42364 9.54117 1.20056 9.5765 0.997494Z"
 			fill="currentColor"
 		></path>
+	</g>
 
-		<!-- UFO Body -->
-		<g opacity="0.4">
-			<path
-				d="M9.5765 0.997494C7.37171 -0.127427 5.4568 -0.354961 4.50869 0.593151C2.87878 2.22306 4.7233 6.71019 8.62855 10.6154C12.5338 14.5207 17.0209 16.3652 18.6508 14.7353C19.5989 13.7872 19.3714 11.8725 18.2467 9.66795C18.0437 9.70326 17.8207 9.70754 17.58 9.66432C16.6349 9.49461 15.145 8.7682 12.8106 6.43383C10.4762 4.09946 9.74981 2.60951 9.5801 1.66442C9.53687 1.42364 9.54117 1.20056 9.5765 0.997494Z"
-				fill="currentColor"
-			></path>
-		</g>
+	<!-- Animated Windows drawn on top -->
+	<g class="window1">
+		<path
+			d="M7.21429 4.95823C7.60481 5.34876 8.23798 5.34876 8.6285 4.95823C9.01903 4.56771 9.01903 3.93455 8.6285 3.54402C8.23798 3.1535 7.60481 3.1535 7.21429 3.54402C6.82377 3.93455 6.82377 4.56771 7.21429 4.95823Z"
+		/>
+	</g>
+	<g class="window2">
+		<path
+			d="M11.4571 9.2014C11.0666 9.59192 10.4334 9.59192 10.0429 9.2014C9.65238 8.81087 9.65238 8.17771 10.0429 7.78718C10.4334 7.39666 11.0666 7.39666 11.4571 7.78718C11.8476 8.17771 11.8476 8.81087 11.4571 9.2014Z"
+		/>
+	</g>
+	<g class="window3">
+		<path
+			d="M15.6998 12.0295C15.3093 12.42 14.6761 12.42 14.2856 12.0295C13.8951 11.639 13.8951 11.0058 14.2856 10.6153C14.6761 10.2248 15.3093 10.2248 15.6998 10.6153C16.0903 11.0058 16.0903 11.639 15.6998 12.0295Z"
+		/>
+	</g>
 
-		<!-- Animated Windows drawn on top -->
-		<g class="window1">
-			<path
-				d="M7.21429 4.95823C7.60481 5.34876 8.23798 5.34876 8.6285 4.95823C9.01903 4.56771 9.01903 3.93455 8.6285 3.54402C8.23798 3.1535 7.60481 3.1535 7.21429 3.54402C6.82377 3.93455 6.82377 4.56771 7.21429 4.95823Z"
-			/>
-		</g>
-		<g class="window2">
-			<path
-				d="M11.4571 9.2014C11.0666 9.59192 10.4334 9.59192 10.0429 9.2014C9.65238 8.81087 9.65238 8.17771 10.0429 7.78718C10.4334 7.39666 11.0666 7.39666 11.4571 7.78718C11.8476 8.17771 11.8476 8.81087 11.4571 9.2014Z"
-			/>
-		</g>
-		<g class="window3">
-			<path
-				d="M15.6998 12.0295C15.3093 12.42 14.6761 12.42 14.2856 12.0295C13.8951 11.639 13.8951 11.0058 14.2856 10.6153C14.6761 10.2248 15.3093 10.2248 15.6998 10.6153C16.0903 11.0058 16.0903 11.639 15.6998 12.0295Z"
-			/>
-		</g>
-
-		<!-- Speed lines at the bottom -->
-		<g opacity="0.4">
-			<path
-				class="bottom-lines"
-				d="M7.03758 13.2672C7.33047 12.9743 7.33047 12.4994 7.03758 12.2065C6.74468 11.9137 6.26981 11.9137 5.97692 12.2065L1.8556 16.3279C1.5627 16.6208 1.5627 17.0956 1.8556 17.3885C2.14849 17.6814 2.62336 17.6814 2.91626 17.3885L7.03758 13.2672Z"
-				fill="currentColor"
-			></path>
-		</g>
+	<!-- Speed lines at the bottom -->
+	<g opacity="0.4">
 		<path
 			class="bottom-lines"
-			d="M3.55145 8.2629C3.81423 7.94271 3.76769 7.47013 3.44751 7.20735C3.12732 6.94457 2.65473 6.99111 2.39195 7.31129L0.170272 10.0183C-0.0925076 10.3385 -0.0459698 10.8111 0.274217 11.0739C0.594404 11.3367 1.06699 11.2901 1.32977 10.9699L3.55145 8.2629Z"
+			d="M7.03758 13.2672C7.33047 12.9743 7.33047 12.4994 7.03758 12.2065C6.74468 11.9137 6.26981 11.9137 5.97692 12.2065L1.8556 16.3279C1.5627 16.6208 1.5627 17.0956 1.8556 17.3885C2.14849 17.6814 2.62336 17.6814 2.91626 17.3885L7.03758 13.2672Z"
 			fill="currentColor"
 		></path>
-		<path
-			class="bottom-lines"
-			d="M12.0368 15.7966C12.2995 16.1168 12.2529 16.5894 11.9327 16.8522L9.22546 19.0736C8.90524 19.3364 8.43266 19.2898 8.16991 18.9696C7.90716 18.6493 7.95375 18.1768 8.27396 17.914L10.9812 15.6926C11.3014 15.4298 11.774 15.4764 12.0368 15.7966Z"
-			fill="currentColor"
-		></path>
-	</svg>
-</div>
+	</g>
+	<path
+		class="bottom-lines"
+		d="M3.55145 8.2629C3.81423 7.94271 3.76769 7.47013 3.44751 7.20735C3.12732 6.94457 2.65473 6.99111 2.39195 7.31129L0.170272 10.0183C-0.0925076 10.3385 -0.0459698 10.8111 0.274217 11.0739C0.594404 11.3367 1.06699 11.2901 1.32977 10.9699L3.55145 8.2629Z"
+		fill="currentColor"
+	></path>
+	<path
+		class="bottom-lines"
+		d="M12.0368 15.7966C12.2995 16.1168 12.2529 16.5894 11.9327 16.8522L9.22546 19.0736C8.90524 19.3364 8.43266 19.2898 8.16991 18.9696C7.90716 18.6493 7.95375 18.1768 8.27396 17.914L10.9812 15.6926C11.3014 15.4298 11.774 15.4764 12.0368 15.7966Z"
+		fill="currentColor"
+	></path>
+</svg>
 
-<!-- TODO: fix CSS rules by making the solution generic and scoped -->
-<!-- svelte-ignore css-unused-selector -->
 <style lang="scss">
 	:root {
 		--window-fill-color: white;
@@ -76,130 +72,5 @@
 	.window2,
 	.window3 {
 		fill: var(--window-fill-color);
-	}
-
-	a.nav-item {
-		&:hover {
-			.ufo-wrapper {
-				.dome {
-					animation: dome-animation 0.75s ease-in-out infinite alternate;
-				}
-
-				.bottom-lines {
-					transform-origin: 10px 10px;
-					animation: speed-lines 0.75s ease-in-out infinite alternate;
-				}
-
-				.window1 {
-					animation: blink-window1 0.75s linear infinite;
-				}
-				.window2 {
-					animation: blink-window2 0.75s linear infinite;
-				}
-				.window3 {
-					animation: blink-window3 0.75s linear infinite;
-				}
-			}
-		}
-	}
-	.mobile-nav {
-		a.nav-item {
-			&.selected {
-				.ufo-wrapper {
-					.dome {
-						animation: dome-animation 0.75s ease-in-out 5 alternate;
-					}
-
-					.bottom-lines {
-						transform-origin: 10px 10px;
-						animation: speed-lines 0.75s ease-in-out 5 alternate;
-					}
-
-					.window1 {
-						animation: blink-window1 0.75s linear 5;
-					}
-					.window2 {
-						animation: blink-window2 0.75s linear 5;
-					}
-					.window3 {
-						animation: blink-window3 0.75s linear 5;
-					}
-				}
-			}
-		}
-	}
-
-	@keyframes dome-animation {
-		0% {
-			transform: translateY(0px) translateX(0px);
-			opacity: 1;
-		}
-		100% {
-			transform: translateY(0.5px) translateX(-0.5px);
-			opacity: 1;
-		}
-	}
-
-	@keyframes speed-lines {
-		0% {
-			transform: translateY(-0.75px) translateX(0.75px);
-			opacity: 1;
-		}
-		100% {
-			transform: translateY(0px) translateX(0px);
-			opacity: 0.5;
-		}
-	}
-
-	@keyframes blink-window1 {
-		0% {
-			opacity: 0;
-		}
-		25% {
-			opacity: 0;
-		}
-		50% {
-			opacity: 1;
-		}
-		75% {
-			opacity: 1;
-		}
-		100% {
-			opacity: 0;
-		}
-	}
-	@keyframes blink-window2 {
-		0% {
-			opacity: 0;
-		}
-		25% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 1;
-		}
-		75% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 0;
-		}
-	}
-	@keyframes blink-window3 {
-		0% {
-			opacity: 1;
-		}
-		25% {
-			opacity: 1;
-		}
-		50% {
-			opacity: 0;
-		}
-		75% {
-			opacity: 0;
-		}
-		100% {
-			opacity: 0;
-		}
 	}
 </style>

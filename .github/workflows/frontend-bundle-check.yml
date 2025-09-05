@@ -1,0 +1,103 @@
+name: Frontend Bundle Size Check
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-base-branch:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      size: ${{ steps.get-size.outputs.size }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.event.pull_request.base.ref }}
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Build project
+        run: npm run build
+
+      - name: Get bundle size
+        id: get-size
+        run: |
+          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
+          echo "Base branch bundle size: $SIZE KB"
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+
+  build-pr:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      size: ${{ steps.get-size.outputs.size }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          persist-credentials: false
+
+      - name: Prepare
+        uses: ./.github/actions/prepare
+
+      - name: Build project
+        run: npm run build
+
+      - name: Get bundle size
+        id: get-size
+        run: |
+          SIZE=$(du -sk build/_app/immutable/**/*.js{,.gz} 2>/dev/null | awk '{sum += $1} END {print sum}')
+          echo "PR bundle size: $SIZE KB"
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+
+  compare-sizes:
+    needs: [build-base-branch, build-pr]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Compare bundle sizes
+        run: |
+          BASE_SIZE=$BASE_SIZE
+          PR_SIZE=$PR_SIZE
+
+          DIFF=$((PR_SIZE - BASE_SIZE))
+
+          if (( BASE_SIZE > 0 )); then
+            PERCENT=$((100 * DIFF / BASE_SIZE))
+          else
+            PERCENT=0
+          fi
+
+          echo "Base bundle size: ${BASE_SIZE} KB"
+          echo "PR bundle size:   ${PR_SIZE} KB"
+          echo "::notice::Difference:       ${DIFF} KB"
+          echo "::notice::Percent change:   ${PERCENT}%"
+          echo "::endgroup::"
+
+          MAX_KB=100
+          MAX_PERCENT=10
+
+           if (( DIFF > MAX_KB )); then
+            echo "🚨 Bundle size increased by ${DIFF}KB, over the limit of ${MAX_KB}KB."
+            exit 1
+          fi
+
+          if (( PERCENT > MAX_PERCENT )); then
+            echo "🚨 Bundle size increased by ${PERCENT}%, over the limit of ${MAX_PERCENT}%."
+            exit 1
+          fi
+
+          echo "✅ Bundle size within acceptable limits."
+    env:
+      BASE_SIZE: ${{ needs.build-base-branch.outputs.size }}
+      PR_SIZE: ${{ needs.build-pr.outputs.size }}

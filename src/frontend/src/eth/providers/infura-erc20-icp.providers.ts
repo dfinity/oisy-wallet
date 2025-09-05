@@ -1,9 +1,4 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ICP_ABI } from '$eth/constants/erc20-icp.constants';
 import type { Erc20Provider, PopulateTransactionParams } from '$eth/types/contracts-providers';
@@ -13,11 +8,8 @@ import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
-import { ethers } from 'ethers';
+import { Contract, type ContractTransaction } from 'ethers/contract';
+import { InfuraProvider, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraErc20IcpProvider implements Erc20Provider {
@@ -36,10 +28,10 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		to: EthAddress;
 		from: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
-		return erc20Contract.estimateGas.burnToAccountId(amount, to, { from });
+		amount: bigint;
+	}): Promise<bigint> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ICP_ABI, this.provider);
+		return erc20Contract.burnToAccountId.estimateGas(amount, to, { from });
 	};
 
 	/**
@@ -49,16 +41,18 @@ export class InfuraErc20IcpProvider implements Erc20Provider {
 		contract: { address: contractAddress },
 		to,
 		amount
-	}: PopulateTransactionParams & { amount: BigNumber }): Promise<PopulatedTransaction> => {
-		const erc20Contract = new ethers.Contract(contractAddress, ERC20_ICP_ABI, this.provider);
-		return erc20Contract.populateTransaction.burnToAccountId(amount, to);
+	}: PopulateTransactionParams & { amount: bigint }): Promise<ContractTransaction> => {
+		const erc20Contract = new Contract(contractAddress, ERC20_ICP_ABI, this.provider);
+		return erc20Contract.burnToAccountId.populateTransaction(amount, to);
 	};
 }
 
-const providers: Record<NetworkId, InfuraErc20IcpProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraErc20IcpProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraErc20IcpProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraErc20IcpProvider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
+	Record<NetworkId, InfuraErc20IcpProvider>
+>(
+	(acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraErc20IcpProvider(infura) }),
+	{}
+);
 
 export const infuraErc20IcpProviders = (networkId: NetworkId): InfuraErc20IcpProvider => {
 	const provider = providers[networkId];

@@ -1,5 +1,5 @@
-import icpLight from '$icp/assets/icp_light.svg';
-import icpBW from '$lib/assets/networks/icp-bw.svg';
+import icpIconDark from '$lib/assets/networks/dark/icp.svg';
+import icpIconLight from '$lib/assets/networks/light/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -28,7 +28,28 @@ export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Internet Computer',
-	icon: icpLight,
-	iconBW: icpBW,
+	iconLight: icpIconLight,
+	iconDark: icpIconDark,
 	buy: { onramperId: 'icp' }
+};
+
+/**
+ * ICP Pseudo Testnet Network
+ *
+ * This is a pseudo testnet network for ICP, used for testing/developing purposes.
+ * It will be associated with what we call "testnet" tokens.
+ * This allows us to simplify the filters of the token list and avoid polluting "real" ICP balance with the balances of the testnet tokens.
+ */
+export const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
+
+export const ICP_PSEUDO_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(
+	ICP_PSEUDO_TESTNET_NETWORK_SYMBOL
+);
+
+export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
+	id: ICP_PSEUDO_TESTNET_NETWORK_ID,
+	env: 'testnet',
+	name: 'IC (testnet tokens)',
+	iconLight: icpIconLight,
+	iconDark: icpIconDark
 };

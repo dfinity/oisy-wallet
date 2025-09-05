@@ -1,14 +1,14 @@
 @use '../mixins/media';
 
-/************* USE OF !IMPORTANT ********************
-**   Only in this file the use of !important       **
-**   CAN be warranted. As this file is the last    **
-**   instance where the gix components can be      **
-**   styled, !important can be used to override    **
-**   certain styles. However, it still is a last   **
-**   resort solution and if possible, a proper     **
-**   solution must be tried and still is prefered. **
-****************************************************/
+/************* USE OF !IMPORTANT *********************
+**   Only in this file the use of !important        **
+**   CAN be warranted. As this file is the last     **
+**   instance where the gix components can be       **
+**   styled, !important can be used to override     **
+**   certain styles. However, it still is a last    **
+**   resort solution and if possible, a proper      **
+**   solution must be tried and still is preferred. **
+*****************************************************/
 
 :root {
 	--toggle-disabled-opacity: 1;
@@ -36,12 +36,17 @@
 
 	--overlay-box-shadow: 0 4px 16px 0 #0000001f;
 
+	--bottom-sheet-border-color: var(--color-border-primary);
+	--bottom-sheet-z-index: var(--modal-z-index);
+	--card-background: var(--color-background-primary);
+
 	// Input
 	--input-background: var(--color-background-primary);
 	--focus-background: var(--color-background-primary);
 	--focus-border-color: var(---color-border-brand-primary);
 	--input-border-color: var(--color-border-primary);
 	--input-border-size: 1px;
+	--input-width: 100%;
 	--animation-time-short: 0.2s;
 
 	// General GIX
@@ -83,6 +88,8 @@
 
 	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
 
 	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
@@ -120,6 +127,10 @@ label + div[class*='input-block'] {
 
 div.input-field input[id] {
 	padding: var(--padding-1_5x);
+}
+
+.input-field.condensed input {
+	padding-block: var(--padding-1_5x) !important;
 }
 
 div.input-field input[id]::placeholder {
@@ -187,6 +198,7 @@ div.modal {
 
 		& > div.container {
 			border-radius: 0;
+			max-width: 100% !important;
 		}
 	}
 
@@ -249,15 +261,21 @@ div.popover {
 }
 
 div.toggle {
-	zoom: 1.45;
+	scale: 1.45;
+	transform-origin: 50%;
+	margin-inline: var(--padding);
 
-	--card-background-contrast: var(--color-background-brand-subtle-20);
+	--card-background-contrast: var(--color-background-disabled-alt);
 	--card-background: var(--color-base-white);
+
+	&:hover {
+		--card-background-contrast: var(--color-background-disabled-alt2);
+	}
 
 	&:disabled,
 	&.disabled {
-		--card-background: var(--color-background-primary-alt);
-		--card-background-contrast: var(--color-background-disabled-alt);
+		--card-background: var(--color-background-disabled);
+		--card-background-contrast: var(--color-background-disabled);
 	}
 
 	&:has(input[type='checkbox']:checked) {
@@ -276,6 +294,16 @@ div.toggle {
 			--card-background: var(--color-background-primary-alt);
 			--card-background-contrast: var(--color-background-brand-subtle-20);
 		}
+	}
+
+	@media (width < theme(--breakpoint-lg)) {
+		scale: 1.6;
+		margin-inline: var(--padding);
+	}
+
+	@media (width < theme(--breakpoint-sm)) {
+		scale: 1.8;
+		margin-inline: var(--padding-2x);
 	}
 }
 
@@ -304,6 +332,13 @@ div.step {
 		.state {
 			color: var(--color-foreground-success-primary) !important;
 			background: var(--color-background-success-subtle-30) !important;
+		}
+	}
+
+	&.failed {
+		.state {
+			color: var(--negative-emphasis) !important;
+			background: var(--color-background-error-light) !important;
 		}
 	}
 
@@ -363,10 +398,48 @@ div.select {
 	}
 }
 
-// TOASTS
-// Toasts other than error are not used
-// Also, it seems that gix components dont apply the success and warn classes correctly
-div.error .toast {
-	--overlay-background: var(--color-background-error-light);
-	--overlay-background-contrast: var(--color-foreground-error-secondary);
+// Toasts
+.toast {
+	--toast-error-background: var(--color-background-error-light);
+	--toast-error-color: var(--color-foreground-error-secondary);
+
+	--toast-warn-background: var(--color-background-warning-light);
+	--toast-warn-color: var(--color-foreground-warning-secondary);
+}
+
+// Tooltip
+.tooltip {
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
+	--tooltip-border-color: var(--color-base-black);
+	--tooltip-border-size: 1px;
+}
+
+.gix-tooltip {
+	background-color: var(--color-base-black);
+	color: var(--color-foreground-primary-inverted);
+}
+
+/* Tooltip arrow */
+.tooltip::after,
+.gix-tooltip::after {
+	content: '';
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 0 6px 6px 6px;
+	border-style: solid;
+	border-color: transparent transparent var(--tooltip-background) transparent;
+}
+
+.tooltip.top::after,
+.gix-tooltip.top::after {
+	bottom: -6px;
+	top: auto;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 6px 6px 0 6px;
+	border-style: solid;
+	border-color: var(--tooltip-background) transparent transparent transparent;
 }

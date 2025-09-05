@@ -1,4 +1,4 @@
-import {
+import type {
 	IcCanistersSchema,
 	IcCanistersStrictSchema,
 	IcCkInterfaceSchema,
@@ -11,7 +11,7 @@ import {
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
-import * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export type IcFee = z.infer<typeof IcFeeSchema>;
 

@@ -5,11 +5,15 @@
 	import Header from '$lib/components/ui/Header.svelte';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { modalSolToken, modalSolTransaction } from '$lib/derived/modal.derived';
+	import {
+		modalSolToken,
+		modalSolTokenData,
+		modalSolTransaction
+	} from '$lib/derived/modal.derived';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
-	import type { OptionToken } from '$lib/types/token';
+	import type { OptionToken, Token } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
@@ -24,8 +28,11 @@
 	$: ({ transaction: selectedTransaction, token: selectedToken } =
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
-			$modalStore: $modalStore
+			$modalStore
 		}));
+
+	let token: Token;
+	$: token = $pageToken ?? DEFAULT_SOLANA_TOKEN;
 </script>
 
 <Header>
@@ -34,10 +41,10 @@
 
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
-		<SolTransactionsScroll token={$token ?? DEFAULT_SOLANA_TOKEN}>
+		<SolTransactionsScroll {token}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {transaction} token={$token ?? DEFAULT_SOLANA_TOKEN} />
+					<SolTransaction {token} {transaction} />
 				</li>
 			{/each}
 		</SolTransactionsScroll>
@@ -47,7 +54,7 @@
 </SolTransactionsSkeletons>
 
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
-	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<SolTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalSolToken}
-	<SolTokenModal />
+	<SolTokenModal fromRoute={$modalSolTokenData} />
 {/if}

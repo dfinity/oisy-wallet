@@ -1,6 +1,6 @@
 import BtcConvertTokenWizard from '$btc/components/convert/BtcConvertTokenWizard.svelte';
 import * as btcPendingSentTransactionsStore from '$btc/services/btc-pending-sent-transactions.services';
-import * as btcSendApi from '$btc/services/btc-send.services';
+import * as btcUtxosApi from '$btc/services/btc-utxos.service';
 import * as utxosFeeStore from '$btc/stores/utxos-fee.store';
 import {
 	UTXOS_FEE_CONTEXT_KEY,
@@ -65,20 +65,23 @@ describe('BtcConvertTokenWizard', () => {
 			title: 'title'
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount: sendAmount,
+		sendAmount,
 		receiveAmount: sendAmount
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
-	const mockSelectUtxosFeeApi = () =>
-		vi.spyOn(btcSendApi, 'selectUtxosFee').mockResolvedValue(mockUtxosFee);
+	const mockprepareBtcSendApi = () =>
+		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
+			feeSatoshis: mockUtxosFee.feeSatoshis,
+			utxos: mockUtxosFee.utxos
+		});
 	const mockBackendApi = () =>
 		vi
 			.spyOn(backendApi, 'addPendingBtcTransaction')
 			.mockResolvedValue(pendingBtcTransactionResponse);
 	const mockBtcAddressStore = (address: string | undefined = mockBtcAddress) => {
 		btcAddressStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: {
 				certified: true,
 				data: address
@@ -108,7 +111,7 @@ describe('BtcConvertTokenWizard', () => {
 	beforeEach(() => {
 		mockPage.reset();
 		mockBtcPendingSentTransactionsStore();
-		mockSelectUtxosFeeApi();
+		mockprepareBtcSendApi();
 	});
 
 	it('should call sendBtc if all requirements are met', async () => {

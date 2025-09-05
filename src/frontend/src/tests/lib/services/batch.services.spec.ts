@@ -9,12 +9,10 @@ describe('batch.services', () => {
 
 		it('should execute promises in batches with throttling', async () => {
 			const results: number[] = [];
-			const promises = values.map((value) =>
-				(async () => {
-					results.push(value);
-					await delay(10);
-				})()
-			);
+			const promises = values.map((value) => async () => {
+				results.push(value);
+				await delay(10);
+			});
 
 			const generator = batch({
 				promises,
@@ -29,11 +27,9 @@ describe('batch.services', () => {
 		});
 
 		it('should wait 1 second between batches', async () => {
-			const promises = values.map(() =>
-				(async () => {
-					await delay(10);
-				})()
-			);
+			const promises = values.map(() => async () => {
+				await delay(10);
+			});
 
 			const generator = batch({
 				promises,
@@ -74,15 +70,13 @@ describe('batch.services', () => {
 		it('should process all promises even when some fail', async () => {
 			const results: number[] = [];
 
-			const promises = values.map((value) =>
-				(async () => {
-					if (value === 2) {
-						throw new Error('Test error');
-					}
-					results.push(value);
-					await delay(10);
-				})()
-			);
+			const promises = values.map((value) => async () => {
+				if (value === 2) {
+					throw new Error('Test error');
+				}
+				results.push(value);
+				await delay(10);
+			});
 
 			const generator = batch({
 				promises,

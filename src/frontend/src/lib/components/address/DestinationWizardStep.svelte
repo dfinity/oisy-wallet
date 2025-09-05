@@ -40,31 +40,33 @@
 	<div class="mb-4 font-bold"><slot name="title" /></div>
 
 	<DestinationWizardStepSection
-		on:click={() => (activeAddressType = 'default')}
 		isActive={activeAddressType === 'default'}
 		label={$i18n.convert.text.default_destination}
+		on:click={() => (activeAddressType = 'default')}
 	/>
 
 	<DestinationWizardStepSection
-		on:click={() => (activeAddressType = 'custom')}
 		isActive={activeAddressType === 'custom'}
 		label={$i18n.convert.text.custom_destination}
+		on:click={() => (activeAddressType = 'custom')}
 	>
 		<IcSendDestination
 			slot="content"
+			{networkId}
 			{tokenStandard}
 			bind:destination
 			bind:invalidDestination
-			{networkId}
 			on:icQRCodeScan
 		/>
 	</DestinationWizardStepSection>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={back} />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={back} />
 
-		<Button on:click={apply} {disabled}>
-			{$i18n.core.text.apply}
-		</Button>
-	</ButtonGroup>
+			<Button {disabled} onclick={apply}>
+				{$i18n.core.text.apply}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

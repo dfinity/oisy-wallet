@@ -1,4 +1,4 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { busy } from '$lib/stores/busy.store';
@@ -21,24 +21,81 @@ export const loadTokenAndRun = async ({
 	await callback();
 };
 
-export interface AutoLoadTokenParams<
-	T extends SaveUserToken | SaveCustomToken,
-	K extends Erc20Token | IcCkToken
-> {
-	tokens: T[];
-	sendToken: K;
+export interface AutoLoadSingleTokenParams<T extends SaveUserToken | SaveCustomToken> {
+	token: T | undefined;
 	identity: OptionIdentity;
-	expectedSendTokenStandard: TokenStandard;
-	assertSendTokenData: (sendToken: K) => AutoLoadTokenResult | undefined;
-	findToken: (params: { tokens: T[]; sendToken: K }) => T | undefined;
 	setToken: (params: { identity: Identity; token: T; enabled: boolean }) => Promise<void>;
 	loadTokens: (params: { identity: OptionIdentity }) => Promise<void>;
 	errorMessage: string;
 }
 
+export type AutoLoadTokenParams<
+	T extends SaveUserToken | SaveCustomToken,
+	K extends Erc20Token | IcCkToken
+> = Omit<AutoLoadSingleTokenParams<T>, 'token'> & {
+	tokens: T[];
+	sendToken: K;
+	expectedSendTokenStandard: TokenStandard;
+	assertSendTokenData: (sendToken: K) => AutoLoadTokenResult | undefined;
+	findToken: (params: { tokens: T[]; sendToken: K }) => T | undefined;
+};
+
 export interface AutoLoadTokenResult {
 	result: 'loaded' | 'skipped' | 'error';
 }
+
+/**
+ * A generic function to handle loading a specific token.
+ *
+ * @param {Object} params - The parameters for the function.
+ * @param {Token} params.token - The token to be loaded.
+ * @param {OptionIdentity} params.identity - The user's identity.
+ * @param {function} params.setToken - A function to enable the counterpart token.
+ * @param {function} params.loadTokens - A function to reload tokens.
+ * @param {string} params.errorMessage - A message to display in case of an error.
+ * @returns The result of the operation.
+ */
+export const autoLoadSingleToken = async <T extends SaveUserToken | SaveCustomToken>({
+	token,
+	identity,
+	setToken,
+	loadTokens,
+	errorMessage
+}: AutoLoadSingleTokenParams<T>): Promise<AutoLoadTokenResult> => {
+	if (isNullish(token)) {
+		return { result: 'skipped' };
+	}
+
+	if (token.enabled) {
+		return { result: 'skipped' };
+	}
+
+	busy.start();
+
+	try {
+		assertNonNullish(identity);
+
+		await setToken({
+			identity,
+			token,
+			enabled: true
+		});
+
+		// TODO(GIX-2740): Only reload the tokens we need.
+		await loadTokens({ identity });
+	} catch (err: unknown) {
+		toastsError({
+			msg: { text: errorMessage },
+			err
+		});
+
+		return { result: 'error' };
+	} finally {
+		busy.stop();
+	}
+
+	return { result: 'loaded' };
+};
 
 /**
  * A generic function to handle loading a token that is either:
@@ -83,37 +140,11 @@ export const autoLoadToken = async <
 
 	const counterpartToken = findToken({ tokens, sendToken });
 
-	if (isNullish(counterpartToken)) {
-		return { result: 'skipped' };
-	}
-
-	if (counterpartToken.enabled) {
-		return { result: 'skipped' };
-	}
-
-	busy.start();
-
-	try {
-		assertNonNullish(identity);
-
-		await setToken({
-			identity,
-			token: counterpartToken,
-			enabled: true
-		});
-
-		// TODO(GIX-2740): Only reload the tokens we need.
-		await loadTokens({ identity });
-	} catch (err: unknown) {
-		toastsError({
-			msg: { text: errorMessage },
-			err
-		});
-
-		return { result: 'error' };
-	} finally {
-		busy.stop();
-	}
-
-	return { result: 'loaded' };
+	return await autoLoadSingleToken({
+		token: counterpartToken,
+		identity,
+		setToken,
+		loadTokens,
+		errorMessage
+	});
 };

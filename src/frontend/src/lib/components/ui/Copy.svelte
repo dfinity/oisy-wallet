@@ -1,26 +1,40 @@
 <script lang="ts">
 	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { ButtonColorStyle } from '$lib/types/style';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
-	export let value: string;
-	export let text: string;
-	export let inline = false;
-	export let color: 'blue' | 'inherit' = 'blue';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		text: string;
+		value: string;
+		testId?: string;
+		colorStyle?: ButtonColorStyle;
+		disabled?: boolean;
+		link?: boolean;
+		transparent?: boolean;
+		inline?: boolean;
+	}
+
+	const { text, value, testId, inline = false, ...rest }: Props = $props();
+
+	const handleClick = async (e: MouseEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		await copyToClipboard({ value, text });
+	};
 </script>
 
-<button
-	on:click|preventDefault|stopPropagation={async () => await copyToClipboard({ value, text })}
-	aria-label={`${$i18n.core.text.copy}: ${value}`}
-	class="pl-0.5"
-	data-tid={testId}
-	class:py-2={!inline}
-	class:inline-block={inline}
-	class:text-brand-primary-alt={color === 'blue'}
-	class:hover:text-inherit={color === 'blue'}
-	class:active:text-inherit={color === 'blue'}
-	style={`${inline ? 'vertical-align: sub;' : ''}`}
+<ButtonIcon
+	ariaLabel={`${$i18n.core.text.copy}: ${value}`}
+	height={inline ? 'h-6' : undefined}
+	onclick={handleClick}
+	styleClass={`${inline ? 'inline-block align-sub' : 'flex'}`}
+	{testId}
+	width={inline ? 'w-6' : undefined}
+	{...rest}
 >
-	<IconCopy />
-</button>
+	{#snippet icon()}
+		<IconCopy />
+	{/snippet}
+</ButtonIcon>

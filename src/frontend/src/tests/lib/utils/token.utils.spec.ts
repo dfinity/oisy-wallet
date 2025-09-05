@@ -11,23 +11,23 @@ import { ckErc20Production } from '$env/tokens/tokens.ckerc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcCkToken } from '$icp/types/ic-token';
-import type { TokenStandard, TokenUi } from '$lib/types/token';
+import type { TokenStandard } from '$lib/types/token';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
 	findTwinToken,
 	getMaxTransactionAmount,
+	getTokenDisplaySymbol,
 	mapDefaultTokenToToggleable,
 	mapTokenUi,
-	sumTokenBalances,
 	sumUsdBalances
 } from '$lib/utils/token.utils';
-import { bn1Bi, bn2Bi, bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
+import { bn3Bi, mockBalances } from '$tests/mocks/balances.mock';
 import { mockExchanges } from '$tests/mocks/exchanges.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { MockedFunction } from 'vitest';
 
 const tokenDecimals = 8;
 const tokenStandards: TokenStandard[] = ['ethereum', 'icp', 'icrc', 'bitcoin'];
@@ -49,7 +49,8 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
-				expect(result).toBe(Number(balance - fee) / 10 ** tokenDecimals);
+
+				expect(result).toBe((Number(balance - fee) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -61,7 +62,8 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
-				expect(result).toBe(0);
+
+				expect(result).toBe('0');
 			});
 		});
 
@@ -73,7 +75,8 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
-				expect(result).toBe(0);
+
+				expect(result).toBe('0');
 			});
 		});
 
@@ -85,7 +88,8 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
-				expect(result).toBe(0);
+
+				expect(result).toBe('0');
 
 				result = getMaxTransactionAmount({
 					balance,
@@ -93,7 +97,8 @@ describe('token.utils', () => {
 					tokenDecimals,
 					tokenStandard
 				});
-				expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+
+				expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 			});
 		});
 
@@ -101,25 +106,27 @@ describe('token.utils', () => {
 			const result = getMaxTransactionAmount({
 				balance,
 				fee,
-				tokenDecimals: tokenDecimals,
+				tokenDecimals,
 				tokenStandard: 'erc20'
 			});
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 
 		it('should return the untouched amount if the token is SPL', () => {
 			const result = getMaxTransactionAmount({
 				balance,
 				fee,
-				tokenDecimals: tokenDecimals,
+				tokenDecimals,
 				tokenStandard: 'spl'
 			});
-			expect(result).toBe(Number(balance) / 10 ** tokenDecimals);
+
+			expect(result).toBe((Number(balance) / 10 ** tokenDecimals).toString());
 		});
 	});
 
 	describe('calculateTokenUsdBalance', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -135,6 +142,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(Number(bn3Bi));
 		});
 
@@ -144,6 +152,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: {}
 			});
+
 			expect(result).toEqual(undefined);
 		});
 
@@ -153,6 +162,7 @@ describe('token.utils', () => {
 				$balances: {},
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 
@@ -162,12 +172,13 @@ describe('token.utils', () => {
 				$balances: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 	});
 
 	describe('calculateTokenUsdAmount', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -183,6 +194,7 @@ describe('token.utils', () => {
 				amount: bn3Bi,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(Number(bn3Bi));
 		});
 
@@ -192,6 +204,7 @@ describe('token.utils', () => {
 				amount: bn3Bi,
 				$exchanges: {}
 			});
+
 			expect(result).toEqual(undefined);
 		});
 
@@ -201,12 +214,13 @@ describe('token.utils', () => {
 				amount: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual(0);
 		});
 	});
 
 	describe('mapTokenUi', () => {
-		const mockUsdValue = usdValue as MockedFunction<typeof usdValue>;
+		const mockUsdValue = vi.mocked(usdValue);
 
 		beforeEach(() => {
 			vi.resetAllMocks();
@@ -222,6 +236,7 @@ describe('token.utils', () => {
 				$balances: mockBalances,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: bn3Bi,
@@ -231,6 +246,7 @@ describe('token.utils', () => {
 
 		it('should return an object TokenUi with undefined usdBalance if exchange rate is not available', () => {
 			const result = mapTokenUi({ token: ETHEREUM_TOKEN, $balances: mockBalances, $exchanges: {} });
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: bn3Bi,
@@ -244,6 +260,7 @@ describe('token.utils', () => {
 				$balances: undefined,
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: undefined,
@@ -257,6 +274,7 @@ describe('token.utils', () => {
 				$balances: {},
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: undefined,
@@ -270,59 +288,12 @@ describe('token.utils', () => {
 				$balances: { [ETHEREUM_TOKEN.id]: null },
 				$exchanges: mockExchanges
 			});
+
 			expect(result).toEqual({
 				...ETHEREUM_TOKEN,
 				balance: null,
 				usdBalance: 0
 			});
-		});
-	});
-
-	describe('sumTokenBalances', () => {
-		// We mock ETH to be a twin of ICP
-		const token1: TokenUi = { ...ICP_TOKEN, balance: bn1Bi, decimals: 18 };
-		const token2: TokenUi = { ...ETHEREUM_TOKEN, balance: bn2Bi, decimals: 18 };
-
-		it('should sum token balances when both balances are non-null and decimals match', () => {
-			const result = sumTokenBalances([token1, token2]);
-
-			expect(result).toStrictEqual(bn1Bi + bn2Bi);
-		});
-
-		it('should return null when decimals do not match', () => {
-			expect(sumTokenBalances([token1, { ...token2, decimals: 8 }])).toBeNull();
-		});
-
-		it('should return the first balance when the second balance is nullish', () => {
-			expect(sumTokenBalances([token1, { ...token2, balance: null }])).toBe(bn1Bi);
-		});
-
-		it('should return the second balance when the first balance is nullish', () => {
-			expect(sumTokenBalances([{ ...token1, balance: null }, token2])).toBe(bn2Bi);
-		});
-
-		it('should return the first balance nullish value when both balances are nullish but not undefined', () => {
-			expect(
-				sumTokenBalances([
-					{ ...token1, balance: null },
-					{ ...token2, balance: null }
-				])
-			).toBeNull();
-		});
-
-		it('should return undefined when one of the balances is undefined', () => {
-			expect(sumTokenBalances([token1, { ...token2, balance: undefined }])).toBeUndefined();
-
-			expect(sumTokenBalances([{ ...token1, balance: undefined }, token2])).toBeUndefined();
-		});
-
-		it('should return undefined when both balances are undefined', () => {
-			expect(
-				sumTokenBalances([
-					{ ...token1, balance: undefined },
-					{ ...token2, balance: undefined }
-				])
-			).toBeUndefined();
 		});
 	});
 
@@ -418,28 +389,28 @@ describe('token.utils', () => {
 				it('should enable the token if user enables it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: true }
+						customToken: { ...token, enabled: true }
 					});
 
-					expect(result.enabled).toEqual(true);
+					expect(result.enabled).toBeTruthy();
 				});
 
 				it('should not enable the token if user has not enabled it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: false }
+						customToken: { ...token, enabled: false }
 					});
 
-					expect(result.enabled).toEqual(false);
+					expect(result.enabled).toBeFalsy();
 				});
 
-				it('should not enable the token if userToken is undefined', () => {
+				it('should not enable the token if customToken is undefined', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: undefined
+						customToken: undefined
 					});
 
-					expect(result.enabled).toEqual(false);
+					expect(result.enabled).toBeFalsy();
 				});
 			}
 		);
@@ -463,25 +434,28 @@ describe('token.utils', () => {
 		])('$description - Default/Suggested Tokens', ({ token, setupMock }) => {
 			beforeEach(() => setupMock(token.ledgerCanisterId));
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
-				expect(result.enabled).toEqual(true);
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
+
+				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled false', () => {
+			it('should enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
-				expect(result.enabled).toEqual(true);
+
+				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
-				expect(result.enabled).toEqual(true);
+
+				expect(result.enabled).toBeTruthy();
 			});
 		});
 
@@ -489,6 +463,7 @@ describe('token.utils', () => {
 			...mockValidIcToken,
 			ledgerCanisterId: ckErc20Production.ckUSDT?.ledgerCanisterId
 		};
+
 		describe.each([
 			{
 				description: 'Suggested ICRC token ckUSDT',
@@ -502,26 +477,45 @@ describe('token.utils', () => {
 				beforeEach(() => setupMock(token.ledgerCanisterId));
 			}
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
-				expect(result.enabled).toEqual(true);
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
+
+				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should not enable the token if userToken has enabled false', () => {
+			it('should not enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
-				expect(result.enabled).toEqual(false);
+
+				expect(result.enabled).toBeFalsy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
-				expect(result.enabled).toEqual(true);
+
+				expect(result.enabled).toBeTruthy();
 			});
+		});
+	});
+
+	describe('getTokenDisplaySymbol', () => {
+		it('should return oisy symbol if exists', () => {
+			const oisySymbol = 'OISY';
+
+			const result = getTokenDisplaySymbol({ ...mockIcrcCustomToken, oisySymbol: { oisySymbol } });
+
+			expect(result).toBe(oisySymbol);
+		});
+
+		it('should return token symbol if oisy symbol does not exist', () => {
+			const result = getTokenDisplaySymbol(mockIcrcCustomToken);
+
+			expect(result).toBe(mockIcrcCustomToken.symbol);
 		});
 	});
 });

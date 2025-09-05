@@ -11,5 +11,12 @@ export const DEPRECATED_SNES: Record<
 		alternativeName: undefined,
 		url: undefined,
 		icon: undefined
+	},
+	['rffwt-piaaa-aaaaq-aabqq-cai']: {
+		name: '---- (formerly Seers)',
+		symbol: '--- (SEER)',
+		alternativeName: undefined,
+		url: undefined,
+		icon: undefined
 	}
 };

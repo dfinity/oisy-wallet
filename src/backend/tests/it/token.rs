@@ -192,6 +192,43 @@ fn test_add_user_token_symbol_max_length() {
 }
 
 #[test]
+fn test_cannot_exceed_max_user_token_length() {
+    let pic_setup = setup();
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let max_token_list_length = 1000;
+
+    for i in 0..max_token_list_length {
+        let token: UserToken = UserToken {
+            chain_id: SEPOLIA_CHAIN_ID,
+            contract_address: format!("0x{:040x}", i),
+            decimals: Some(18),
+            symbol: Some(format!("T{i}")),
+            version: None,
+            enabled: Some(true),
+        };
+        let result = pic_setup.update::<()>(caller, "set_user_token", token);
+        assert!(result.is_ok(), "failed on token {i}");
+    }
+
+    let extra_token: UserToken = UserToken {
+        chain_id: SEPOLIA_CHAIN_ID,
+        contract_address: "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef".to_string(),
+        decimals: Some(18),
+        symbol: Some("Extra".to_string()),
+        version: None,
+        enabled: Some(true),
+    };
+
+    let result = pic_setup.update::<()>(caller, "set_user_token", extra_token);
+
+    assert!(result.is_err());
+    assert!(result.unwrap_err().contains(&format!(
+        "Token list length should not exceed {max_token_list_length}"
+    )));
+}
+
+#[test]
 fn test_anonymous_cannot_add_user_token() {
     let pic_setup = setup();
 
@@ -200,8 +237,8 @@ fn test_anonymous_cannot_add_user_token() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
@@ -217,8 +254,8 @@ fn test_anonymous_cannot_remove_user_token() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 
@@ -234,8 +271,8 @@ fn test_anonymous_cannot_list_user_tokens() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+  "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 

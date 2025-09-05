@@ -23,6 +23,7 @@ describe('DappsCarousel', () => {
 		vi.spyOn(rewards, 'rewardCampaigns', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -33,6 +34,7 @@ describe('DappsCarousel', () => {
 		);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -43,6 +45,7 @@ describe('DappsCarousel', () => {
 		vi.spyOn(dapps, 'dAppDescriptions', 'get').mockReturnValue([]);
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -69,6 +72,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -76,6 +80,7 @@ describe('DappsCarousel', () => {
 		userProfileStore.reset();
 
 		const { container } = render(DappsCarousel);
+
 		expect(container.textContent).toBe('');
 	});
 
@@ -88,11 +93,13 @@ describe('DappsCarousel', () => {
 		userProfileStore.set({ profile: userProfile, certified: false });
 
 		const { getByTestId } = render(DappsCarousel);
+
 		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
 	});
 
 	it('should render the Carousel when data exist', () => {
 		const { getByTestId } = render(DappsCarousel);
+
 		expect(getByTestId(CAROUSEL_CONTAINER)).toBeInTheDocument();
 	});
 });

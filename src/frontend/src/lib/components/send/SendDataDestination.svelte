@@ -1,11 +1,21 @@
 <script lang="ts">
-	import Value from '$lib/components/ui/Value.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	export let destination: string;
+	interface Props {
+		destination: string;
+	}
+
+	let { destination }: Props = $props();
 </script>
 
-<Value ref="destination" element="div">
-	<svelte:fragment slot="label">{$i18n.send.text.destination}</svelte:fragment>
-	{destination}
-</Value>
+<ModalValue>
+	{#snippet label()}
+		{$i18n.send.text.destination}
+	{/snippet}
+
+	{#snippet mainValue()}
+		{shortenWithMiddleEllipsis({ text: destination })}
+	{/snippet}
+</ModalValue>

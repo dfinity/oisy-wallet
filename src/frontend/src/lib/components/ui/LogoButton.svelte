@@ -1,58 +1,89 @@
 <script lang="ts">
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import Divider from '$lib/components/common/Divider.svelte';
 
-	export let selectable = false;
-	export let selected = false;
-	export let dividers = false;
-	export let hover = true;
-	export let rounded = true;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		selectable?: boolean;
+		selected?: boolean;
+		dividers?: boolean;
+		hover?: boolean;
+		rounded?: boolean;
+		condensed?: boolean;
+		styleClass?: string;
+		testId?: string;
+		logo: Snippet;
+		title?: Snippet;
+		subtitle?: Snippet;
+		titleEnd?: Snippet;
+		description?: Snippet;
+		descriptionEnd?: Snippet;
+		action?: Snippet;
+		onClick?: () => void;
+		fullWidth?: boolean;
+	}
 
-	let hasTitleSlot: boolean;
-	$: hasTitleSlot = nonNullish($$slots['title']);
-
-	let hasSubtitleSlot: boolean;
-	$: hasSubtitleSlot = nonNullish($$slots['subtitle']);
-
-	let hasTitleEndSlot: boolean;
-	$: hasTitleEndSlot = nonNullish($$slots['title-end']);
-
-	let hasDescriptionSlot: boolean;
-	$: hasDescriptionSlot = nonNullish($$slots['description']);
-
-	let hasDescriptionEndSlot: boolean;
-	$: hasDescriptionEndSlot = nonNullish($$slots['description-end']);
-
-	let hasActionSlot: boolean;
-	$: hasActionSlot = nonNullish($$slots['action']);
+	let {
+		selectable = false,
+		selected = false,
+		dividers = false,
+		hover = true,
+		rounded = true,
+		condensed = false,
+		styleClass,
+		testId,
+		logo,
+		title,
+		subtitle,
+		titleEnd,
+		description,
+		descriptionEnd,
+		action,
+		onClick,
+		fullWidth = false
+	}: Props = $props();
 </script>
 
-<div class:hover:bg-brand-subtle-10={hover} class:rounded-lg={rounded}>
-	<button on:click class="flex w-full border-0 px-2" data-tid={testId}>
+<div
+	class={`flex ${styleClass ?? ''}`}
+	class:hover:bg-brand-subtle-10={hover}
+	class:rounded-lg={rounded}
+	class:w-full={dividers || fullWidth}
+>
+	<button class="flex w-full border-0 px-2" data-tid={testId} onclick={onClick}>
 		<span
-			class="flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0 py-3"
-			class:border-brand-subtle-20={dividers}
+			class="logo-button-wrapper flex w-full flex-row justify-between rounded-none border-l-0 border-r-0 border-t-0"
 			class:border-b={dividers}
+			class:border-brand-subtle-20={dividers}
+			class:py-1={condensed}
+			class:py-3={!condensed}
 		>
-			<span class="flex items-center">
-				<span class="mr-4"><slot name="logo" /></span>
-				<span class="flex flex-col text-left">
-					<span class="text-base">
-						{#if hasTitleSlot}
-							<span class="float-left font-bold"><slot name="title" /></span>
-						{/if}
-						{#if hasSubtitleSlot}
-							{#if dividers}
-								<span class="float-left text-tertiary"> &nbsp;&middot;&nbsp; </span>
-							{/if}
-							<span class="float-left text-tertiary"> <slot name="subtitle" /></span>
+			<span class="flex min-w-0 items-center">
+				{#if selectable}
+					<span class="mr-2 flex min-w-4 text-brand-primary" in:fade>
+						{#if selected}
+							<IconCheck size="16px" />
 						{/if}
 					</span>
-					{#if hasDescriptionSlot}
-						<span class="text-sm text-tertiary">
-							<slot name="description" />
+				{/if}
+				<span class="mr-2 flex">{@render logo()}</span>
+				<span class="flex min-w-0 flex-col text-left">
+					<span class="truncate text-nowrap">
+						{#if nonNullish(title)}
+							<span class="text-lg font-bold text-primary">{@render title()}</span>
+						{/if}
+						{#if nonNullish(subtitle)}
+							{#if dividers}
+								<span class="text-tertiary"><Divider /></span>
+							{/if}
+							<span class="text-base text-tertiary">{@render subtitle()}</span>
+						{/if}
+					</span>
+					{#if nonNullish(description)}
+						<span class="truncate text-sm text-tertiary">
+							{@render description()}
 						</span>
 					{/if}
 				</span>
@@ -60,24 +91,20 @@
 
 			<span class="flex items-center">
 				<span class="flex flex-col text-right">
-					{#if hasTitleEndSlot}
-						<span class="text-base font-bold">
-							<slot name="title-end" />
+					{#if nonNullish(titleEnd)}
+						<span class="text-lg font-bold">
+							{@render titleEnd()}
 						</span>
 					{/if}
-					{#if hasDescriptionEndSlot}
+					{#if nonNullish(descriptionEnd)}
 						<span class="text-sm text-tertiary">
-							<slot name="description-end" />
+							{@render descriptionEnd()}
 						</span>
 					{/if}
 				</span>
 
-				{#if selectable && selected}
-					<span in:fade class="ml-2 flex text-brand-primary"><IconCheck size="20px" /></span>
-				{/if}
-
-				{#if hasActionSlot}
-					<span in:fade class="ml-2 flex text-brand-primary"><slot name="action" /></span>
+				{#if nonNullish(action)}
+					<span class="ml-2 flex text-brand-primary" in:fade>{@render action()}</span>
 				{/if}
 			</span>
 		</span>

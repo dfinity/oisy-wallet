@@ -5,17 +5,30 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let sourceToken: Token | undefined = undefined;
-	export let destinationToken: Token | undefined = undefined;
-	export let sourceTokenExchangeRate: number | undefined;
-	export let destinationTokenExchangeRate: number | undefined;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		sourceToken?: Token;
+		destinationToken?: Token;
+		sourceTokenExchangeRate?: number;
+		destinationTokenExchangeRate?: number;
+	}
+
+	let {
+		sendAmount,
+		receiveAmount,
+		sourceToken,
+		destinationToken,
+		sourceTokenExchangeRate,
+		destinationTokenExchangeRate
+	}: Props = $props();
 </script>
 
 <div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow-sm">
-	<SwapToken token={sourceToken} amount={sendAmount} exchangeRate={sourceTokenExchangeRate}>
-		<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+	<SwapToken amount={sendAmount} exchangeRate={sourceTokenExchangeRate} token={sourceToken}>
+		{#snippet title()}
+			{$i18n.tokens.text.source_token_title}
+		{/snippet}
 	</SwapToken>
 
 	<div class="my-2 flex w-full items-center justify-between text-tertiary-inverted">
@@ -25,10 +38,12 @@
 	</div>
 
 	<SwapToken
-		token={destinationToken}
 		amount={receiveAmount}
 		exchangeRate={destinationTokenExchangeRate}
+		token={destinationToken}
 	>
-		<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
+		{#snippet title()}
+			{$i18n.tokens.text.destination_token_title}
+		{/snippet}
 	</SwapToken>
 </div>

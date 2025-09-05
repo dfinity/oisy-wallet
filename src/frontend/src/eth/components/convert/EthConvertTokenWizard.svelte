@@ -1,22 +1,18 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import { writable } from 'svelte/store';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
-	import FeeContext from '$eth/components/fee/FeeContext.svelte';
+	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
-	import {
-		FEE_CONTEXT_KEY,
-		type FeeContext as FeeContextType,
-		initFeeContext,
-		initFeeStore
-	} from '$eth/stores/fee.store';
+	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
+	import type { EthereumNetwork } from '$eth/types/network';
+	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import {
@@ -32,10 +28,9 @@
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR,
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 	} from '$lib/constants/analytics.contants';
+	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
-	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -43,7 +38,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
@@ -55,39 +49,15 @@
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	let feeStore = initFeeStore();
-
-	let feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($ethereumToken.symbol);
-
-	let feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set($ethereumToken.id);
-
-	let feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set($ethereumToken.decimals);
-
-	let feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[$ethereumToken.id]?.usd);
-
-	let feeContext: FeeContext | undefined;
-	const evaluateFee = () => feeContext?.triggerUpdateFee();
-
-	setContext<FeeContextType>(
-		FEE_CONTEXT_KEY,
-		initFeeContext({
-			feeStore,
-			feeSymbolStore,
-			feeTokenIdStore,
-			feeDecimalsStore,
-			feeExchangeRateStore,
-			evaluateFee
-		})
-	);
+	const { feeStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let destination = '';
 	$: destination = isTokenErc20($sourceToken)
 		? ($ckErc20HelperContractAddress ?? '')
 		: ($ckEthHelperContractAddress ?? '');
+
+	let sourceNetwork: EthereumNetwork;
+	$: sourceNetwork = $selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK;
 
 	const dispatch = createEventDispatcher();
 
@@ -153,7 +123,7 @@
 			await executeSend({
 				from: $ethAddress,
 				to: isErc20Icp($sourceToken) ? destination : mapAddressStartsWith0x(destination),
-				progress: (step: ProgressStepsSend) => (convertProgressStep = step),
+				progress: (step: ProgressStep) => (convertProgressStep = step),
 				token: $sourceToken,
 				amount: parseToken({
 					value: `${sendAmount}`,
@@ -162,19 +132,19 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
-				sourceNetwork: $selectedEthereumNetwork,
+				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
 			});
 
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
-			await trackEvent({
+			trackEvent({
 				name: TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR
 			});
 
@@ -191,39 +161,39 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<FeeContext
-	bind:this={feeContext}
-	sendToken={$sourceToken}
-	sendTokenId={$sourceToken.id}
+<EthFeeContext
 	amount={sendAmount}
 	{destination}
-	observe={currentStep?.name !== WizardStepsConvert.CONVERTING}
-	sourceNetwork={$selectedEthereumNetwork}
-	targetNetwork={ICP_NETWORK}
 	nativeEthereumToken={$ethereumToken}
+	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
+		currentStep?.name !== WizardStepsConvert.REVIEW}
+	sendToken={$sourceToken}
+	sendTokenId={$sourceToken.id}
+	{sourceNetwork}
+	targetNetwork={ICP_NETWORK}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
+		<EthConvertForm {destination} on:icNext on:icClose bind:sendAmount bind:receiveAmount>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
-					<ButtonBack on:click={back} />
+					<ButtonBack onclick={back} />
 				{:else}
-					<ButtonCancel on:click={close} />
+					<ButtonCancel onclick={close} />
 				{/if}
 			</svelte:fragment>
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
-			<ButtonBack slot="cancel" on:click={back} />
+		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack>
+			<ButtonBack slot="cancel" onclick={back} />
 		</EthConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<EthConvertProgress
-			bind:convertProgressStep
-			sourceTokenId={$sourceToken.id}
 			{destination}
 			nativeEthereumToken={$ethereumToken}
+			sourceTokenId={$sourceToken.id}
+			bind:convertProgressStep
 		/>
 	{:else}
 		<slot />
 	{/if}
-</FeeContext>
+</EthFeeContext>

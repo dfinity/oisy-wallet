@@ -2,7 +2,9 @@
 use candid::{CandidType, Decode, Deserialize, Encode};
 use serde::{de, Deserializer};
 
-use crate::validate::{test_validate_on_deserialize, validate_on_deserialize, Validate};
+use crate::validate::{
+    test_validate_on_deserialize, validate_on_deserialize, TestVector, Validate,
+};
 
 /// A toy type to test the validation macro
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -26,13 +28,8 @@ impl Validate for ToyType {
 }
 validate_on_deserialize!(ToyType);
 
-struct TestVector {
-    input: ToyType,
-    valid: bool,
-    description: &'static str,
-}
-
-fn test_vectors() -> Vec<TestVector> {
+test_validate_on_deserialize!(
+    ToyType,
     vec![
         TestVector {
             input: ToyType {
@@ -49,6 +46,4 @@ fn test_vectors() -> Vec<TestVector> {
             description: "Too long",
         },
     ]
-}
-
-test_validate_on_deserialize! {ToyType}
+);

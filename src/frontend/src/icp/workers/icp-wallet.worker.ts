@@ -1,28 +1,33 @@
-import { getTransactions as getTransactionsApi } from '$icp/api/icp-index.api';
-import { IcWalletTransactionsScheduler } from '$icp/schedulers/ic-wallet-transactions.scheduler';
+import { getTransactions } from '$icp/api/icp-index.api';
+import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
+import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-message';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
 	TransactionWithId
 } from '@dfinity/ledger-icp';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 
-const getTransactions = ({
+const getBalanceAndTransactions = ({
 	identity,
-	certified
-}: SchedulerJobParams<PostMessageDataRequest>): Promise<GetAccountIdentifierTransactionsResponse> =>
-	getTransactionsApi({
+	certified,
+	data
+}: SchedulerJobParams<PostMessageDataRequestIcp>): Promise<GetAccountIdentifierTransactionsResponse> => {
+	assertNonNullish(data, 'No data - indexCanisterId - provided to fetch transactions.');
+
+	return getTransactions({
 		identity,
 		certified,
 		owner: identity.getPrincipal(),
 		// We query tip to discover the new transactions
-		start: undefined
+		start: undefined,
+		...data
 	});
+};
 
 const mapTransaction = ({
 	transaction,
@@ -31,16 +36,16 @@ const mapTransaction = ({
 	transaction: Pick<TransactionWithId, 'id'> & {
 		transaction: Transaction & IcTransactionAddOnsInfo;
 	};
-	jobData: SchedulerJobData<PostMessageDataRequest>;
+	jobData: SchedulerJobData<PostMessageDataRequestIcp>;
 }): IcTransactionUi => mapIcpTransaction({ transaction, identity });
 
-const initIcpWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
+const initIcpWalletBalanceAndTransactionsScheduler = (): IcWalletBalanceAndTransactionsScheduler<
 	Transaction,
 	TransactionWithId,
-	PostMessageDataRequest
+	PostMessageDataRequestIcp
 > =>
-	new IcWalletTransactionsScheduler(
-		getTransactions,
+	new IcWalletBalanceAndTransactionsScheduler(
+		getBalanceAndTransactions,
 		mapTransactionIcpToSelf,
 		mapTransaction,
 		'syncIcpWallet'
@@ -48,14 +53,14 @@ const initIcpWalletTransactionsScheduler = (): IcWalletTransactionsScheduler<
 
 // Exposed for test purposes
 export const initIcpWalletScheduler = (
-	_data: PostMessageDataRequest | undefined
-): IcWalletScheduler<PostMessageDataRequest> => initIcpWalletTransactionsScheduler();
+	_data: PostMessageDataRequestIcp | undefined
+): IcWalletScheduler<PostMessageDataRequestIcp> => initIcpWalletBalanceAndTransactionsScheduler();
 
-let scheduler: IcWalletScheduler<PostMessageDataRequest> | undefined;
+let scheduler: IcWalletScheduler<PostMessageDataRequestIcp> | undefined;
 
 export const onIcpWalletMessage = async ({
 	data: dataMsg
-}: MessageEvent<PostMessage<PostMessageDataRequest>>) => {
+}: MessageEvent<PostMessage<PostMessageDataRequestIcp>>) => {
 	const { msg, data } = dataMsg;
 
 	switch (msg) {

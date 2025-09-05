@@ -19,12 +19,17 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   format:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         continue-on-error: true
         id: app-token
         with:
@@ -34,22 +39,27 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
-          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Install rust
-        uses: ./.github/actions/install-rust
+        run: scripts/setup rust
 
       - name: Install shfmt
         run: scripts/setup shfmt
@@ -74,11 +84,10 @@ jobs:
 
       - name: Commit format
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
           message: '🤖 Apply formatting changes'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Provide diff
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'

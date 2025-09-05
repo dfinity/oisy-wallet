@@ -13,28 +13,27 @@
 	import {
 		btcAddressMainnetStore,
 		btcAddressRegtestStore,
-		btcAddressTestnetStore,
-		type StorageAddressData
+		btcAddressTestnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { BtcAddress } from '$lib/types/address';
-	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	let addressData: StorageAddressData<BtcAddress>;
-	$: addressData = isNetworkIdBTCTestnet($networkId)
-		? $btcAddressTestnetStore
-		: isNetworkIdBTCRegtest($networkId)
-			? $btcAddressRegtestStore
-			: $btcAddressMainnetStore;
+	let addressData = $derived(
+		isNetworkIdBTCTestnet($networkId)
+			? $btcAddressTestnetStore
+			: isNetworkIdBTCRegtest($networkId)
+				? $btcAddressRegtestStore
+				: $btcAddressMainnetStore
+	);
 
-	let addressToken: Token;
-	$: addressToken = isNetworkIdBTCTestnet($networkId)
-		? BTC_TESTNET_TOKEN
-		: isNetworkIdBTCRegtest($networkId)
-			? BTC_REGTEST_TOKEN
-			: BTC_MAINNET_TOKEN;
+	let addressToken = $derived(
+		isNetworkIdBTCTestnet($networkId)
+			? BTC_TESTNET_TOKEN
+			: isNetworkIdBTCRegtest($networkId)
+				? BTC_REGTEST_TOKEN
+				: BTC_MAINNET_TOKEN
+	);
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
@@ -51,12 +50,13 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive}>
-	<ReceiveModal
-		slot="modal"
-		address={addressData?.data}
-		{addressToken}
-		network={addressToken.network}
-		copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
-	/>
+<ReceiveButtonWithModal isOpen={$modalBtcReceive} open={openReceive}>
+	{#snippet modal()}
+		<ReceiveModal
+			address={addressData?.data}
+			{addressToken}
+			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			network={addressToken.network}
+		/>
+	{/snippet}
 </ReceiveButtonWithModal>

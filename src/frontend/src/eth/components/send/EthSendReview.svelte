@@ -1,31 +1,25 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
-	import SendInfo from '$eth/components/send/SendInfo.svelte';
-	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import SendData from '$lib/components/send/SendData.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import { getContext } from 'svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
+	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Network } from '$lib/types/network';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	export let destination = '';
-	export let targetNetwork: Network | undefined = undefined;
-	export let sourceNetwork: EthereumNetwork;
-	export let destinationEditable = true;
 	export let amount: OptionAmount = undefined;
+	export let selectedContact: ContactUi | undefined = undefined;
 
-	const { feeStore: storeFeeData }: FeeContext = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const { feeStore: storeFeeData }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	let invalid = true;
 	$: invalid =
@@ -33,33 +27,14 @@
 		!isEthAddress(destination) ||
 		invalidAmount(amount) ||
 		isNullish($storeFeeData);
-
-	const dispatch = createEventDispatcher();
-
-	const { sendToken, sendBalance, sendTokenExchangeRate } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<ContentWithToolbar>
-	<SendData
-		{amount}
-		destination={destinationEditable ? destination : null}
-		token={$sendToken}
-		balance={$sendBalance}
-		source={$ethAddress ?? ''}
-		exchangeRate={$sendTokenExchangeRate}
-	>
-		<FeeDisplay slot="fee" />
+<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
+	<EthFeeDisplay slot="fee">
+		{#snippet label()}
+			<Html text={$i18n.fee.text.max_fee_eth} />
+		{/snippet}
+	</EthFeeDisplay>
 
-		<SendReviewNetwork {targetNetwork} {sourceNetwork} token={$sendToken} slot="network" />
-	</SendData>
-
-	<SendInfo />
-
-	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button disabled={invalid} on:click={() => dispatch('icSend')}>
-			{$i18n.send.text.send}
-		</Button>
-	</ButtonGroup>
-</ContentWithToolbar>
+	<ReviewNetwork slot="network" sourceNetwork={$sendToken.network} />
+</SendReview>

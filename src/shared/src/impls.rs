@@ -1,31 +1,81 @@
 use std::{collections::BTreeMap, fmt};
 
-use candid::{Deserialize, Principal};
+use candid::{Deserialize, Error, Principal};
 use ic_canister_sig_creation::{extract_raw_root_pk_from_der, IC_ROOT_PK_DER};
 use serde::{de, Deserializer};
-#[cfg(test)]
-use strum::IntoEnumIterator;
 
 use crate::{
     types::{
+        agreement::{Agreements, UpdateAgreementsError, UserAgreements},
         backend_config::{Config, InitArg},
-        custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
-        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings},
-        migration::{ApiEnabled, Migration, MigrationProgress, MigrationReport},
+        contact::{
+            Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
+        },
+        custom_token::{
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
+            Token,
+        },
+        dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         network::{
-            NetworkSettingsMap, NetworksSettings, SaveNetworksSettingsError,
-            SaveTestnetsSettingsError,
+            NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
+            UpdateNetworksSettingsError,
         },
         settings::Settings,
-        token::UserToken,
+        token::{UserToken, EVM_CONTRACT_ADDRESS_LENGTH},
         user_profile::{
             AddUserCredentialError, OisyUser, StoredUserProfile, UserCredential, UserProfile,
         },
         verifiable_credential::CredentialType,
-        Timestamp, TokenVersion, Version,
+        Timestamp, TokenVersion, Version, MAX_SYMBOL_LENGTH,
     },
     validate::{validate_on_deserialize, Validate},
 };
+
+// Constants for validation limits
+const CONTACT_MAX_NAME_LENGTH: usize = 100;
+const CONTACT_MAX_ADDRESSES: usize = 40;
+const CONTACT_MAX_LABEL_LENGTH: usize = 50;
+/// Maximum image size in bytes (100 KB)
+pub const MAX_IMAGE_SIZE_BYTES: usize = 100 * 1024;
+
+// Helper functions for validation
+fn validate_string_length(value: &str, max_length: usize, field_name: &str) -> Result<(), Error> {
+    if value.chars().count() > max_length {
+        return Err(Error::msg(format!(
+            "{field_name} too long, max allowed is {max_length} characters"
+        )));
+    }
+    Ok(())
+}
+
+fn validate_string_whitespace_padding(value: &str, field_name: &str) -> Result<(), Error> {
+    // Check if string is empty or contains only whitespace (this handles cases like "  ")
+    if value.trim().is_empty() {
+        return Err(Error::msg(format!("{field_name} cannot be empty")));
+    }
+
+    // Check for leading or trailing whitespace
+    if value != value.trim() {
+        return Err(Error::msg(format!(
+            "{field_name} cannot have leading or trailing whitespace"
+        )));
+    }
+
+    Ok(())
+}
+
+fn validate_collection_size<T>(
+    collection: &[T],
+    max_size: usize,
+    collection_name: &str,
+) -> Result<(), Error> {
+    if collection.len() > max_size {
+        return Err(Error::msg(format!(
+            "Too many {collection_name}, max allowed is {max_size}"
+        )));
+    }
+    Ok(())
+}
 
 impl From<&Token> for CustomTokenId {
     fn from(token: &Token) -> Self {
@@ -37,6 +87,21 @@ impl From<&Token> for CustomTokenId {
             Token::SplDevnet(SplToken { token_address, .. }) => {
                 CustomTokenId::SolDevnet(token_address.clone())
             }
+            Token::Erc20(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            })
+            | Token::Erc721(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            })
+            | Token::Erc1155(ErcToken {
+                token_address,
+                chain_id,
+                ..
+            }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
         }
     }
 }
@@ -70,7 +135,6 @@ impl From<InitArg> for Config {
             allowed_callers,
             supported_credentials,
             ic_root_key_der,
-            api,
             cfs_canister_id,
             derivation_origin,
         } = arg;
@@ -86,7 +150,6 @@ impl From<InitArg> for Config {
             cfs_canister_id,
             supported_credentials,
             ic_root_key_raw: Some(ic_root_key_raw),
-            api,
             derivation_origin,
         }
     }
@@ -147,9 +210,11 @@ impl StoredUserProfile {
                 },
             },
         };
+        let agreements = Agreements::default();
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
         StoredUserProfile {
             settings: Some(settings),
+            agreements: Some(agreements),
             credentials,
             created_timestamp: now,
             updated_timestamp: now,
@@ -197,9 +262,9 @@ impl StoredUserProfile {
         now: Timestamp,
         networks: NetworkSettingsMap,
         overwrite: bool,
-    ) -> Result<StoredUserProfile, SaveNetworksSettingsError> {
+    ) -> Result<StoredUserProfile, UpdateNetworksSettingsError> {
         if profile_version != self.version {
-            return Err(SaveNetworksSettingsError::VersionMismatch);
+            return Err(UpdateNetworksSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -236,9 +301,9 @@ impl StoredUserProfile {
         profile_version: Option<Version>,
         now: Timestamp,
         show_testnets: bool,
-    ) -> Result<StoredUserProfile, SaveTestnetsSettingsError> {
+    ) -> Result<StoredUserProfile, SetTestnetsSettingsError> {
         if profile_version != self.version {
-            return Err(SaveTestnetsSettingsError::VersionMismatch);
+            return Err(SetTestnetsSettingsError::VersionMismatch);
         }
 
         let settings = self.settings.clone().unwrap_or_default();
@@ -287,12 +352,70 @@ impl StoredUserProfile {
         let mut new_dapp_carousel_settings = new_dapp_settings.dapp_carousel.clone();
         let mut new_hidden_dapp_ids = new_dapp_carousel_settings.hidden_dapp_ids.clone();
 
+        if new_hidden_dapp_ids.len() == MAX_DAPP_ID_LIST_LENGTH {
+            return Err(AddDappSettingsError::MaxHiddenDappIds);
+        }
+
         new_hidden_dapp_ids.push(dapp_id);
         new_dapp_carousel_settings.hidden_dapp_ids = new_hidden_dapp_ids;
         new_dapp_settings.dapp_carousel = new_dapp_carousel_settings;
         new_settings.dapp = new_dapp_settings;
         new_profile.settings = Some(new_settings);
         new_profile.updated_timestamp = now;
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with the specified user agreements updated.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_agreements(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        agreements: UserAgreements,
+    ) -> Result<StoredUserProfile, UpdateAgreementsError> {
+        if profile_version != self.version {
+            return Err(UpdateAgreementsError::VersionMismatch);
+        }
+
+        let current = self.agreements.clone().unwrap_or_default().agreements;
+
+        let mut new_agreements = current.clone();
+
+        if agreements.license_agreement.accepted.is_some() {
+            new_agreements.license_agreement = agreements.license_agreement;
+        }
+        if agreements.terms_of_use.accepted.is_some() {
+            new_agreements.terms_of_use = agreements.terms_of_use;
+        }
+        if agreements.privacy_policy.accepted.is_some() {
+            new_agreements.privacy_policy = agreements.privacy_policy;
+        }
+
+        if current.eq(&new_agreements) {
+            return Ok(self.clone());
+        }
+
+        if matches!(new_agreements.license_agreement.accepted, Some(true)) {
+            new_agreements.license_agreement.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.terms_of_use.accepted, Some(true)) {
+            new_agreements.terms_of_use.last_accepted_at_ns = Some(now);
+        }
+        if matches!(new_agreements.privacy_policy.accepted, Some(true)) {
+            new_agreements.privacy_policy.last_accepted_at_ns = Some(now);
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.agreements = {
+            let mut agreements = new_profile.agreements.unwrap_or_default();
+            agreements.agreements = new_agreements;
+            Some(agreements)
+        };
+        new_profile.updated_timestamp = now;
+
         Ok(new_profile)
     }
 }
@@ -305,6 +428,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version,
             credentials,
             settings,
+            agreements,
         } = user;
         UserProfile {
             created_timestamp: *created_timestamp,
@@ -312,6 +436,7 @@ impl From<&StoredUserProfile> for UserProfile {
             version: *version,
             credentials: credentials.clone().into_values().collect(),
             settings: settings.clone(),
+            agreements: agreements.clone(),
         }
     }
 }
@@ -327,103 +452,6 @@ impl OisyUser {
             updated_timestamp: user.updated_timestamp,
         }
     }
-}
-
-impl From<&Migration> for MigrationReport {
-    fn from(migration: &Migration) -> Self {
-        MigrationReport {
-            to: migration.to,
-            progress: migration.progress,
-        }
-    }
-}
-
-impl Default for ApiEnabled {
-    fn default() -> Self {
-        Self::Enabled
-    }
-}
-impl ApiEnabled {
-    #[must_use]
-    pub fn readable(&self) -> bool {
-        matches!(self, Self::Enabled | Self::ReadOnly)
-    }
-
-    #[must_use]
-    pub fn writable(&self) -> bool {
-        matches!(self, Self::Enabled)
-    }
-}
-#[test]
-fn test_api_enabled() {
-    assert!(ApiEnabled::Enabled.readable());
-    assert!(ApiEnabled::Enabled.writable());
-    assert!(ApiEnabled::ReadOnly.readable());
-    assert!(!ApiEnabled::ReadOnly.writable());
-    assert!(!ApiEnabled::Disabled.readable());
-    assert!(!ApiEnabled::Disabled.writable());
-}
-
-impl MigrationProgress {
-    /// The next phase in the migration process.
-    ///
-    /// Note: A given phase, such as migrating a `BTreeMap`, may need multiple steps.
-    /// The code for that phase will have to keep track of those steps by means of the data in the
-    /// variant.
-    ///
-    /// Prior art:
-    /// - There is an `enum_iterator` crate, however it deals only with simple enums without variant
-    ///   fields.  In this implementation, `next()` always uses the default value for the new field,
-    ///   which is always None.  `next()` does NOT step through the values of the variant field.
-    /// - `strum` has the `EnumIter` derive macro, but that implements `.next()` on an iterator, not
-    ///   on the enum itself, so stepping from one variant to the next is not straightforward.
-    ///
-    /// Note: The next state after Completed is Completed, so the the iterator will run
-    /// indefinitely.  In our case returning an option and ending with None would be fine but needs
-    /// additional code that we don't need.
-    #[must_use]
-    pub fn next(&self) -> Self {
-        match self {
-            MigrationProgress::Pending => MigrationProgress::LockingTarget,
-            MigrationProgress::LockingTarget => MigrationProgress::CheckingTarget,
-            MigrationProgress::CheckingTarget => MigrationProgress::MigratedUserTokensUpTo(None),
-            MigrationProgress::MigratedUserTokensUpTo(_) => {
-                MigrationProgress::MigratedCustomTokensUpTo(None)
-            }
-            MigrationProgress::MigratedCustomTokensUpTo(_) => {
-                MigrationProgress::MigratedUserTimestampsUpTo(None)
-            }
-            MigrationProgress::MigratedUserTimestampsUpTo(_) => {
-                MigrationProgress::MigratedUserProfilesUpTo(None)
-            }
-            MigrationProgress::MigratedUserProfilesUpTo(_) => {
-                MigrationProgress::CheckingDataMigration
-            }
-            MigrationProgress::CheckingDataMigration => MigrationProgress::UnlockingTarget,
-            MigrationProgress::UnlockingTarget => MigrationProgress::Unlocking,
-            &MigrationProgress::Unlocking | MigrationProgress::Completed => {
-                MigrationProgress::Completed
-            }
-            MigrationProgress::Failed(e) => MigrationProgress::Failed(*e),
-        }
-    }
-}
-
-// `MigrationProgress::next(&self)` should list all the elements in the enum in order, but stop at
-// Completed.
-#[test]
-fn next_matches_strum_iter() {
-    let mut iter = MigrationProgress::iter();
-    let mut next = MigrationProgress::Pending;
-    while next != MigrationProgress::Completed {
-        assert_eq!(iter.next(), Some(next), "iter.next() != Some(next)");
-        next = next.next();
-    }
-    assert_eq!(
-        next,
-        next.next(),
-        "Once completed, it should stay completed"
-    );
 }
 
 impl SplTokenId {
@@ -461,14 +489,32 @@ impl Validate for SplTokenId {
     }
 }
 
+impl ErcTokenId {
+    pub const MAX_LENGTH: usize = 42;
+    pub const MIN_LENGTH: usize = 42;
+}
+
+impl Validate for ErcTokenId {
+    /// Verifies that an Ethereum/EVM address is valid.
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.0.len() != 42 {
+            return Err(candid::Error::msg(
+                "Invalid Ethereum/EVM contract address length",
+            ));
+        }
+        Ok(())
+    }
+}
+
 impl Validate for CustomTokenId {
     fn validate(&self) -> Result<(), candid::Error> {
         match self {
-            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle we could */
+            CustomTokenId::Icrc(_) => Ok(()), /* This is a principal.  In principle, we could */
             // check the exact type of principal.
             CustomTokenId::SolMainnet(token_address) | CustomTokenId::SolDevnet(token_address) => {
                 token_address.validate()
             }
+            CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
         }
     }
 }
@@ -484,6 +530,7 @@ impl Validate for Token {
         match self {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
+            Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
         }
     }
 }
@@ -492,10 +539,20 @@ impl Validate for SplToken {
     fn validate(&self) -> Result<(), candid::Error> {
         use crate::types::MAX_SYMBOL_LENGTH;
         if let Some(symbol) = &self.symbol {
-            if symbol.len() > MAX_SYMBOL_LENGTH {
-                return Err(candid::Error::msg("Symbol too long"));
+            if symbol.chars().count() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Symbol too long: {} > {}",
+                    symbol.len(),
+                    MAX_SYMBOL_LENGTH
+                )));
             }
         }
+        self.token_address.validate()
+    }
+}
+
+impl Validate for ErcToken {
+    fn validate(&self) -> Result<(), candid::Error> {
         self.token_address.validate()
     }
 }
@@ -526,8 +583,115 @@ impl Validate for IcrcToken {
     }
 }
 
+impl Validate for UserToken {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if self.contract_address.len() != EVM_CONTRACT_ADDRESS_LENGTH {
+            return Err(candid::Error::msg("Invalid EVM contract address length"));
+        }
+        if let Some(symbol) = &self.symbol {
+            if symbol.len() > MAX_SYMBOL_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Token symbol should not exceed {MAX_SYMBOL_LENGTH} bytes",
+                )));
+            }
+        }
+        Ok(())
+    }
+}
+
+impl Validate for Contact {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate name length
+        validate_string_length(&self.name, CONTACT_MAX_NAME_LENGTH, "Contact.name")?;
+
+        // Validate number of addresses
+        validate_collection_size(&self.addresses, CONTACT_MAX_ADDRESSES, "Contact.addresses")?;
+
+        Ok(())
+    }
+}
+
+impl Validate for ContactAddressData {
+    fn validate(&self) -> Result<(), Error> {
+        // Note: We don't need to validate TokenAccountId since it has its own validation
+
+        // Check if the label exists
+        if let Some(label) = &self.label {
+            validate_string_length(label, CONTACT_MAX_LABEL_LENGTH, "ContactAddressData.label")?;
+        }
+
+        Ok(())
+    }
+}
+
+impl Validate for ContactImage {
+    fn validate(&self) -> Result<(), Error> {
+        if self.data.len() > MAX_IMAGE_SIZE_BYTES {
+            return Err(Error::msg(format!(
+                "ContactImage.data exceeds max size of {MAX_IMAGE_SIZE_BYTES} bytes"
+            )));
+        }
+        Ok(())
+    }
+}
+
+impl Validate for CreateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
+
+        // Validate that string does not contain leading, trailing or empty whitespaces
+        validate_string_whitespace_padding(&self.name, "CreateContactRequest.name")?;
+
+        // Validate that the name is not an empty string
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "CreateContactRequest.name",
+        )?;
+
+        Ok(())
+    }
+}
+
+impl Validate for UpdateContactRequest {
+    fn validate(&self) -> Result<(), Error> {
+        // Validate that string length is not greater than the max allowed
+        validate_string_length(
+            &self.name,
+            CONTACT_MAX_NAME_LENGTH,
+            "UpdateContactRequest.name",
+        )?;
+
+        // Validate that string does not contain leading, trailing or empty whitespaces
+        validate_string_whitespace_padding(&self.name, "UpdateContactRequest.name")?;
+
+        // Validate that the number of addresses is not greater than the max allowed
+        validate_collection_size(
+            &self.addresses,
+            CONTACT_MAX_ADDRESSES,
+            "UpdateContactRequest.addresses",
+        )?;
+
+        Ok(())
+    }
+}
+
+// Apply the validation during deserialization for all types
+validate_on_deserialize!(Contact);
+validate_on_deserialize!(ContactAddressData);
+validate_on_deserialize!(CreateContactRequest);
+validate_on_deserialize!(UpdateContactRequest);
+validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
+validate_on_deserialize!(ErcToken);
+validate_on_deserialize!(ErcTokenId);
+validate_on_deserialize!(UserToken);

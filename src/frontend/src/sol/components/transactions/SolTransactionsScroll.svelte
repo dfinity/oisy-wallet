@@ -1,38 +1,21 @@
 <script lang="ts">
 	import { InfiniteScroll } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import {
-		solAddressDevnet,
-		solAddressLocal,
-		solAddressMainnet,
-		solAddressTestnet
-	} from '$lib/derived/address.derived';
-	import { networkId } from '$lib/derived/network.derived';
-	import type { OptionSolAddress } from '$lib/types/address';
+	import type { Snippet } from 'svelte';
+	import { authIdentity } from '$lib/derived/auth.derived';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import { loadNextSolTransactions } from '$sol/services/sol-transactions.services';
-	import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
-	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children: Snippet;
+	}
 
-	let disableInfiniteScroll = false;
+	let { token, children }: Props = $props();
 
-	let address: OptionSolAddress;
-	$: address = isNetworkIdSOLTestnet($networkId)
-		? $solAddressTestnet
-		: isNetworkIdSOLDevnet($networkId)
-			? $solAddressDevnet
-			: isNetworkIdSOLLocal($networkId)
-				? $solAddressLocal
-				: $solAddressMainnet;
+	let disableInfiniteScroll = $state(false);
 
 	const onIntersect = async () => {
 		const lastSignature = last($solTransactions)?.signature;
@@ -42,32 +25,15 @@
 			return;
 		}
 
-		if (isNullish(token)) {
-			// Prevent unlikely events. UI wise if we are about to load the next transactions, it's probably because transactions for a loaded token have been fetched.
-			return;
-		}
-
-		const network = mapNetworkIdToNetwork(token.network.id);
-
-		if (isNullish(network) || isNullish(address)) {
-			return;
-		}
-
-		const { address: tokenAddress, owner: tokenOwnerAddress } = isTokenSpl(token)
-			? token
-			: { address: undefined, owner: undefined };
-
 		await loadNextSolTransactions({
-			network,
-			address,
-			tokenAddress,
-			tokenOwnerAddress,
+			identity: $authIdentity,
+			token,
 			before: lastSignature,
 			signalEnd: () => (disableInfiniteScroll = true)
 		});
 	};
 </script>
 
-<InfiniteScroll on:nnsIntersect={onIntersect} disabled={disableInfiniteScroll}>
-	<slot />
+<InfiniteScroll disabled={disableInfiniteScroll} {onIntersect}>
+	{@render children()}
 </InfiniteScroll>

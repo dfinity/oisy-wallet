@@ -13,14 +13,24 @@ use serde::Serialize;
 use super::token_id::TokenId;
 use crate::types::network::marker_trait::{
     BitcoinMainnet, BitcoinRegtest, BitcoinTestnet, EthereumMainnet, EthereumSepolia,
-    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet, SolanaTestnet,
+    InternetComputer, Network, SolanaDevnet, SolanaLocal, SolanaMainnet,
 };
+
+pub mod conversion;
 
 /// A marker trait, used to indicate that a type is an account identifier for a given network.
 pub trait AccountId<T>
 where
     T: Network,
 {
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum TokenAccountId {
+    Icrcv2(Icrcv2AccountId),
+    Sol(SolPrincipal),
+    Btc(BtcAddress),
+    Eth(EthAddress),
 }
 
 /// An account identifier for Internet Computer tokens.
@@ -49,11 +59,9 @@ pub struct IcrcSubaccountId(pub [u8; 32]);
 pub struct SolPrincipal(pub String);
 impl AccountId<SolanaMainnet> for SolPrincipal {}
 impl AccountId<SolanaDevnet> for SolPrincipal {}
-impl AccountId<SolanaTestnet> for SolPrincipal {}
 impl AccountId<SolanaLocal> for SolPrincipal {}
 impl TokenId<SolanaMainnet> for SolPrincipal {}
 impl TokenId<SolanaDevnet> for SolPrincipal {}
-impl TokenId<SolanaTestnet> for SolPrincipal {}
 impl TokenId<SolanaLocal> for SolPrincipal {}
 
 /// A bitcoin address
@@ -135,7 +143,7 @@ pub enum BtcAddress {
     /// use a script hash instead of a public key hash is to accommodate multisig arrangements.
     ///
     /// ## Format
-    /// P2WSH addresses are exactly 62 characters in length, starting with `bc1p`.
+    /// P2WSH addresses are exactly 62 characters in length, starting with `bc1q`.
     ///
     /// ## Example
     /// - `bc1qeklep85ntjz4605drds6aww9u0qr46qzrv5xswd35uhjuj8ahfcqgf6hak`

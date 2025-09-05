@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { USDT_TOKEN_GROUP } from '$env/tokens/groups/groups.usdt.env';
 import usdt from '$eth/assets/usdt.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -22,6 +23,8 @@ export const USDT_TOKEN: RequiredErc20Token = {
 	address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDT',
+	groupData: USDT_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'usdt_ethereum'
 	}

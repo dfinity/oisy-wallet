@@ -20,13 +20,13 @@ import type { ResultSuccess } from '$lib/types/utils';
 import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION } from '$sol/constants/wallet-connect.constants';
-import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
+import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import {
 	sendSignedTransaction,
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction } from '$sol/services/sol-sign.services';
-import { mapNetworkIdToNetwork } from '$sol/utils/network.utils';
+import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
@@ -61,14 +61,7 @@ export const decode = async ({
 	base64EncodedTransactionMessage,
 	networkId
 }: WalletConnectDecodeTransactionParams) => {
-	const solNetwork = mapNetworkIdToNetwork(networkId);
-
-	assertNonNullish(
-		solNetwork,
-		replacePlaceholders(get(i18n).init.error.no_solana_network, {
-			$network: networkId.description ?? ''
-		})
-	);
+	const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 	const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 		transactionMessage: base64EncodedTransactionMessage,
@@ -119,14 +112,7 @@ export const sign = ({
 				return { success: false };
 			}
 
-			const solNetwork = mapNetworkIdToNetwork(networkId);
-
-			assertNonNullish(
-				solNetwork,
-				replacePlaceholders(get(i18n).init.error.no_solana_network, {
-					$network: networkId.description ?? ''
-				})
-			);
+			const solNetwork = safeMapNetworkIdToNetwork(networkId);
 
 			const parsedTransactionMessage = await parseSolBase64TransactionMessage({
 				transactionMessage: base64EncodedTransactionMessage,
@@ -211,11 +197,7 @@ export const sign = ({
 					// Even if some DEXs send an only-sign transaction, they do not send it when we return it.
 					// So, for good measure, we will send it anyway. It is not an issue if it is sent twice, since only one will pass.
 					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
-					sendSignedTransaction({
-						rpc,
-						rpcSubscriptions: solanaWebSocketRpc(solNetwork),
-						signedTransaction
-					});
+					sendSignedTransaction({ rpc, signedTransaction });
 				} catch (err: unknown) {
 					// If the transaction requires that we send it, and it fails, we reject the request, otherwise we just log the error
 					if (method !== SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
@@ -233,7 +215,7 @@ export const sign = ({
 
 				progress(ProgressStepsSign.DONE);
 
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_SUCCESS,
 					metadata: {
 						token: token.symbol
@@ -242,7 +224,7 @@ export const sign = ({
 
 				return { success: true, amount, destination };
 			} catch (err: unknown) {
-				await trackEvent({
+				trackEvent({
 					name: TRACK_COUNT_WC_SOL_SEND_ERROR,
 					metadata: {
 						token: token.symbol
@@ -254,7 +236,7 @@ export const sign = ({
 				throw err;
 			}
 		},
-		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.sol_transaction_executed, {
+		toastMsg: replacePlaceholders(get(i18n).wallet_connect.info.transaction_executed, {
 			$method: params.request.params.request.method
 		})
 	});

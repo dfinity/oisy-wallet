@@ -1,22 +1,29 @@
 <script lang="ts">
-	import { KeyValuePairInfo } from '@dfinity/gix-components';
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import NetworksTestnetsToggle from '$lib/components/networks/NetworksTestnetsToggle.svelte';
+	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
+	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
+	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
-	import ThemeSelector from '$lib/components/settings/ThemeSelector.svelte';
-	import TokensZeroBalanceToggle from '$lib/components/tokens/TokensZeroBalanceToggle.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import { POUH_ENABLED } from '$lib/constants/credentials.constants';
-	import { SETTINGS_ADDRESS_LABEL } from '$lib/constants/test-ids.constants';
+	import {
+		SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON,
+		SETTINGS_ADDRESS_LABEL
+	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import {
+		type SettingsModalType,
+		SettingsModalType as SettingsModalEnum
+	} from '$lib/enums/settings-modal-types';
 	import { requestPouhCredential } from '$lib/services/request-pouh-credential.services';
 	import { authRemainingTimeStore } from '$lib/stores/auth.store';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
 	import type { OptionIdentity } from '$lib/types/identity';
 	import type { Option } from '$lib/types/utils';
@@ -42,100 +49,94 @@
 			}
 		}
 	};
+
+	const modalId = Symbol();
+
+	const openSettingsModal = (t: SettingsModalType) =>
+		modalStore.openSettings({ id: modalId, data: t });
 </script>
 
-<KeyValuePairInfo>
-	<svelte:fragment slot="key">
-		<span class="font-bold">{$i18n.settings.text.principal}:</span>
-	</svelte:fragment>
-	<svelte:fragment slot="value">
-		<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
-			{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
-		</output>
-		<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
-	</svelte:fragment>
-	<svelte:fragment slot="info">
-		{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
-	</svelte:fragment>
-</KeyValuePairInfo>
+<SettingsCard>
+	<svelte:fragment slot="title">General</svelte:fragment>
 
-<div class="mt-4">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.text.session}:</span></svelte:fragment
-		>
-		<output slot="value" class="mr-1.5">
+	<SettingsCardItem>
+		<svelte:fragment slot="key">
+			{$i18n.settings.text.principal}
+		</svelte:fragment>
+		<svelte:fragment slot="value">
+			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
+				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
+			</output>
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
+		</svelte:fragment>
+		<svelte:fragment slot="info">
+			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
+		</svelte:fragment>
+	</SettingsCardItem>
+
+	<SettingsCardItem permanentInfo>
+		<svelte:fragment slot="key">
+			{$i18n.settings.text.session_duration}
+		</svelte:fragment>
+
+		<svelte:fragment slot="info">
 			{#if nonNullish(remainingTimeMilliseconds)}
+				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
 					? '0'
-					: secondsToDuration({ seconds: BigInt(remainingTimeMilliseconds) / 1000n })}
+					: secondsToDuration({
+							seconds: BigInt(remainingTimeMilliseconds) / 1000n,
+							i18n: $i18n.temporal.seconds_to_duration
+						})}
 			{/if}
-		</output>
-
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.session_description}
 		</svelte:fragment>
-	</KeyValuePairInfo>
-</div>
+	</SettingsCardItem>
+</SettingsCard>
 
-<div class="mt-2">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.settings.text.testnets}:</span></svelte:fragment
-		>
+<SettingsCard>
+	<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
 
-		<NetworksTestnetsToggle slot="value" />
+	<SettingsCardItem>
+		<svelte:fragment slot="key">{$i18n.settings.text.active_networks}</svelte:fragment>
+		<svelte:fragment slot="value">
+			<EnabledNetworksPreviewIcons />
 
-		<svelte:fragment slot="info">
-			{$i18n.settings.text.testnets_description}
+			<Button
+				link
+				onclick={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
+			>
+				{$i18n.core.text.edit} >
+			</Button>
 		</svelte:fragment>
-	</KeyValuePairInfo>
-</div>
-
-<div class="mt-2">
-	<KeyValuePairInfo>
-		<svelte:fragment slot="key"
-			><span class="font-bold">{$i18n.tokens.text.hide_zero_balances}:</span></svelte:fragment
-		>
-
-		<TokensZeroBalanceToggle slot="value" />
-
 		<svelte:fragment slot="info">
-			{$i18n.settings.text.hide_zero_balances_description}
+			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
 		</svelte:fragment>
-	</KeyValuePairInfo>
-</div>
+	</SettingsCardItem>
+</SettingsCard>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
-	<div class="mt-8" in:fade>
-		<h2 class="mb-6 pb-1 text-base">{$i18n.settings.text.credentials_title}</h2>
+	<SettingsCard>
+		<svelte:fragment slot="title">{$i18n.settings.text.credentials_title}</svelte:fragment>
 
-		<div class="mt-4">
-			<KeyValuePairInfo>
-				<span slot="key" class="font-bold">{$i18n.settings.text.pouh_credential}:</span>
-				<svelte:fragment slot="value">
-					{#if $userHasPouhCredential}
-						<output in:fade class="mr-1.5">
-							{$i18n.settings.text.pouh_credential_verified}
-						</output>
-					{:else}
-						<Button type="button" on:click={getPouhCredential}>
-							{$i18n.settings.text.present_pouh_credential}
-						</Button>
-					{/if}
-				</svelte:fragment>
-
-				<svelte:fragment slot="info">
-					{$i18n.settings.text.pouh_credential_description}
-				</svelte:fragment>
-			</KeyValuePairInfo>
-		</div>
-	</div>
+		<SettingsCardItem>
+			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
+			<svelte:fragment slot="value">
+				{#if $userHasPouhCredential}
+					<output class="mr-1.5" in:fade>
+						{$i18n.settings.text.pouh_credential_verified}
+					</output>
+				{:else}
+					<Button link onclick={getPouhCredential}>
+						{$i18n.settings.text.present_pouh_credential}&hellip;
+					</Button>
+				{/if}
+			</svelte:fragment>
+			<svelte:fragment slot="info">
+				{$i18n.settings.text.pouh_credential_description}
+			</svelte:fragment>
+		</SettingsCardItem>
+	</SettingsCard>
 {/if}
-
-<div class="mt-10">
-	<h2 class="mb-4 pb-1 text-base">{$i18n.settings.text.appearance}:</h2>
-	<ThemeSelector />
-</div>
 
 <SettingsVersion />

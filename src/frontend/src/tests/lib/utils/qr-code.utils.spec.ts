@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { EthereumNetwork } from '$eth/types/network';
+import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
@@ -7,7 +8,6 @@ import { generateUrn } from '$tests/mocks/qr-generator.mock';
 import { decodePayment } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { MockedFunction } from 'vitest';
 
 vi.mock('@dfinity/ledger-icrc', () => ({
 	decodePayment: vi.fn()
@@ -21,6 +21,7 @@ describe('decodeUrn', () => {
 	it('should return undefined for an invalid URN', () => {
 		const urn = 'invalidURN';
 		const result = decodeQrCodeUrn(urn);
+
 		expect(result).toBeUndefined();
 	});
 
@@ -31,17 +32,17 @@ describe('decodeUrn', () => {
 
 			const result = decodeQrCodeUrn(urn);
 
-			const standard = token.standard;
+			const { standard } = token;
 			const expectedPrefix =
 				standard === 'erc20'
 					? 'ethereum'
-					: standard === 'icrc'
+					: isTokenIcrc(token)
 						? token.name.toLowerCase()
 						: standard;
 			const expectedResult: DecodedUrn = {
 				prefix: expectedPrefix,
-				destination: destination,
-				amount: amount
+				destination,
+				amount
 			};
 			if (standard === 'ethereum' || standard === 'erc20') {
 				expectedResult.networkId = (token.network as EthereumNetwork).chainId.toString();
@@ -62,7 +63,7 @@ describe('decodeQrCode', () => {
 	const address = 'some-address';
 	const amount = 1.23;
 	const code = 'some-qr-code';
-	const mockDecodePayment = decodePayment as MockedFunction<typeof decodePayment>;
+	const mockDecodePayment = vi.mocked(decodePayment);
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -70,11 +71,13 @@ describe('decodeQrCode', () => {
 
 	it('should return { result } when result is not success', () => {
 		const response = decodeQrCode({ status: 'cancelled' });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
 	it('should return { status: "cancelled" } when code is nullish', () => {
 		const response = decodeQrCode({ status: 'success', code: undefined });
+
 		expect(response).toEqual({ status: 'cancelled' });
 	});
 
@@ -82,6 +85,7 @@ describe('decodeQrCode', () => {
 		mockDecodePayment.mockReturnValue(undefined);
 
 		const response = decodeQrCode({ status: 'success', code });
+
 		expect(response).toEqual({ status: 'success', destination: code });
 
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
@@ -91,11 +95,12 @@ describe('decodeQrCode', () => {
 		const payment = {
 			token: `not-${token.symbol}`,
 			identifier: address,
-			amount: amount
+			amount
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
+
 		expect(response).toEqual({ status: 'token_incompatible' });
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});
@@ -104,16 +109,17 @@ describe('decodeQrCode', () => {
 		const payment = {
 			token: token.symbol,
 			identifier: address,
-			amount: amount
+			amount
 		};
 		mockDecodePayment.mockReturnValue(payment);
 
-		const response = decodeQrCode({ status: 'success', code: code, expectedToken: token });
+		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
+
 		expect(response).toEqual({
 			status: 'success',
 			destination: address,
 			symbol: token.symbol,
-			amount: amount
+			amount
 		});
 		expect(mockDecodePayment).toHaveBeenCalledWith(code);
 	});

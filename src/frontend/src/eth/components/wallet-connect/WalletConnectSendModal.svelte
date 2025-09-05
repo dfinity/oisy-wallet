@@ -5,6 +5,7 @@
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -15,13 +16,13 @@
 	export let listener: OptionWalletConnectListener;
 
 	let token: Token | undefined;
-	$: token = $enabledEthereumTokens.find(
+	$: token = [...$enabledEthereumTokens, ...$enabledEvmTokens].find(
 		({ network: { id: networkId } }) => networkId === sourceNetwork.id
 	);
 </script>
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {request} {firstTransaction} {listener} {sourceNetwork} />
+		<WalletConnectSendTokenModal {firstTransaction} {listener} {request} {sourceNetwork} />
 	</SendTokenContext>
 {/if}

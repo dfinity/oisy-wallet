@@ -20,7 +20,7 @@ import type {
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
-import { Canister, createServices, toNullable } from '@dfinity/utils';
+import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
 import {
 	mapSignerCanisterBtcError,
 	mapSignerCanisterGetEthAddressError,
@@ -219,7 +219,7 @@ export class SignerCanister extends Canister<SignerService> {
 		);
 
 		if ('Ok' in response) {
-			const { public_key } = response.Ok[0];
+			const { public_key } = fromDefinedNullable(response.Ok);
 			return public_key;
 		}
 
@@ -246,7 +246,7 @@ export class SignerCanister extends Canister<SignerService> {
 		);
 
 		if ('Ok' in response) {
-			const { signature } = response.Ok[0];
+			const { signature } = fromDefinedNullable(response.Ok);
 			return signature;
 		}
 

@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { LINK_TOKEN_GROUP } from '$env/tokens/groups/groups.link.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import link from '$icp-eth/assets/link.svg';
 import type { TokenId } from '$lib/types/token';
@@ -22,6 +23,8 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckLINK',
+	groupData: LINK_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'link_ethereum'
 	}

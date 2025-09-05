@@ -1,6 +1,6 @@
 //! Code for interacting with the chain fusion signer.
 use bitcoin::{Address, CompressedPublicKey, Network};
-use candid::{CandidType, Deserialize, Nat, Principal};
+use candid::{Nat, Principal};
 use ic_cdk::api::{
     call::call_with_payment128,
     management_canister::{
@@ -9,26 +9,23 @@ use ic_cdk::api::{
     },
 };
 use ic_cycles_ledger_client::{
-    Account, ApproveArgs, ApproveError, CyclesLedgerService, DepositArgs, DepositResult,
+    Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
 };
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
-use shared::types::signer::topup::{
-    TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
-    TopUpCyclesLedgerResult,
+use shared::types::signer::GetAllowedCyclesError;
+pub(crate) use shared::types::signer::{
+    topup::{
+        TopUpCyclesLedgerError, TopUpCyclesLedgerRequest, TopUpCyclesLedgerResponse,
+        TopUpCyclesLedgerResult,
+    },
+    AllowSigningError,
 };
 
 use crate::{
     read_config,
     state::{CYCLES_LEDGER, SIGNER},
 };
-
-#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
-pub enum AllowSigningError {
-    Other(String),
-    FailedToContactCyclesLedger,
-    ApproveError(ApproveError),
-}
 
 /// Current ledger fee in cycles.  Historically stable.
 ///
@@ -58,17 +55,59 @@ const fn per_user_cycles_allowance() -> u64 {
     LEDGER_FEE + (LEDGER_FEE + SIGNER_FEE) * SIGNING_OPS_PER_LOGIN
 }
 
+/// Retrieves the amount of cycles that the signer canister is allowed to spend
+/// on behalf of the current canister.
+///
+/// This function calls `icrc_2_allowance` on the cycles ledger to get the
+/// current allowance. The allowance is queried using the current canister
+/// identity as the account owner, and the signer canister as the spender,
+/// with the caller's principal encoded as the subaccount.
+///
+/// # Returns
+/// - On success: `Ok(Nat)` containing the number of cycles that are allowed to be spent
+/// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
+///
+/// # Errors
+/// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
+pub async fn get_allowed_cycles() -> Result<Nat, GetAllowedCyclesError> {
+    let cycles_ledger: Principal = *CYCLES_LEDGER;
+    let signer: Principal = *SIGNER;
+    let caller = ic_cdk::caller();
+
+    // Create the AllowanceArgs structure as specified in the JSON
+    let allowance_args = AllowanceArgs {
+        account: Account {
+            owner: ic_cdk::id(),
+            subaccount: None,
+        },
+        spender: Account {
+            owner: signer,
+            subaccount: Some(principal2account(&caller)),
+        },
+    };
+
+    // Call icrc_2_allowance on the CyclesLedgerService
+    let (allowance,) = CyclesLedgerService(cycles_ledger)
+        .icrc_2_allowance(&allowance_args)
+        .await
+        .map_err(|_| GetAllowedCyclesError::FailedToContactCyclesLedger)?;
+
+    Ok(allowance.allowance)
+}
+
 /// Enables the user to sign transactions.
 ///
 /// Signing costs cycles.  Managing that cycle payment can be painful so we take care of that.
 ///
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`
-pub async fn allow_signing() -> Result<(), AllowSigningError> {
+/// TODO Remove the Option type (that has been added for backward-compatibility)
+/// as soon as the `PoW` feature has been stabilized
+pub async fn allow_signing(allowed_cycles: Option<u64>) -> Result<(), AllowSigningError> {
     let cycles_ledger: Principal = *CYCLES_LEDGER;
     let signer: Principal = *SIGNER;
     let caller = ic_cdk::caller();
-    let amount = Nat::from(per_user_cycles_allowance());
+    let amount = Nat::from(allowed_cycles.unwrap_or_else(per_user_cycles_allowance));
     CyclesLedgerService(cycles_ledger)
         .icrc_2_approve(&ApproveArgs {
             spender: Account {
@@ -183,7 +222,10 @@ pub async fn btc_principal_to_p2wpkh_address(
 /// # Errors
 /// Errors are enumerated by: `TopUpCyclesLedgerError`
 pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyclesLedgerResult {
-    request.check()?;
+    match request.check() {
+        Ok(()) => {}
+        Err(err) => return TopUpCyclesLedgerResult::Err(err),
+    }
 
     // Cycles ledger account details:
     let cycles_ledger = CyclesLedgerService(*CYCLES_LEDGER);
@@ -193,10 +235,14 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
     };
 
     // Backend balance on the cycles ledger:
-    let (ledger_balance,): (Nat,) = cycles_ledger
+    let (ledger_balance,): (Nat,) = match cycles_ledger
         .icrc_1_balance_of(&account)
         .await
-        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)?;
+        .map_err(|_| TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger)
+    {
+        Ok(res) => res,
+        Err(err) => return TopUpCyclesLedgerResult::Err(err),
+    };
 
     // Cycles directly attached to the backend:
     let backend_cycles = Nat::from(ic_cdk::api::canister_balance128());
@@ -217,12 +263,15 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
                 unreachable!("Failed to convert cycle amount to u128: {}", err)
             });
         let (result,): (DepositResult,) =
-            call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
+            match call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
                 .await
                 .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
                     available: backend_cycles,
                     tried_to_send: to_send.clone(),
-                })?;
+                }) {
+                Ok(res) => res,
+                Err(err) => return TopUpCyclesLedgerResult::Err(err),
+            };
         let new_ledger_balance = result.balance;
 
         Ok(TopUpCyclesLedgerResponse {
@@ -230,11 +279,13 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             backend_cycles: to_retain,
             topped_up: to_send,
         })
+        .into()
     } else {
         Ok(TopUpCyclesLedgerResponse {
             ledger_balance,
             backend_cycles,
             topped_up: Nat::from(0u32),
         })
+        .into()
     }
 }

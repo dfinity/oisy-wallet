@@ -18,22 +18,29 @@ on:
       next:
         required: false
         type: boolean
-        description: 'Update all dependencies to the next version'
+        description: 'Use the `@next` tag instead of the latest version'
         default: true
+
+permissions: {}
 
 jobs:
   update-dependencies:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
         with:
           app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
           private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
 
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Prepare
         uses: ./.github/actions/prepare
@@ -41,18 +48,25 @@ jobs:
       - name: Set package variable
         id: package_name
         run: |
-          case "${{ inputs.package }}" in
-            "gix-components") echo "PKG_NAME=gix-cmp" >> "$GITHUB_ENV" ;;
-            "ic-js") echo "PKG_NAME=ic-js" >> "$GITHUB_ENV" ;;
-            "oisy-wallet-signer") echo "PKG_NAME=signer" >> "$GITHUB_ENV" ;;
-            "eslint-config-oisy-wallet") echo "PKG_NAME=oisy-eslint" >> "$GITHUB_ENV" ;;
-            "agent") echo "PKG_NAME=agent" >> "$GITHUB_ENV" ;;
-            "agent & ic-js") echo "PKG_NAME=agent:ic-js" >> "$GITHUB_ENV" ;;
-            *) echo "Invalid package selection" && exit 1 ;;
+          case "$PACKAGE" in
+            "gix-components") PKG_NAME="gix-cmp" ;;
+            "ic-js") PKG_NAME="ic-js" ;;
+            "oisy-wallet-signer") PKG_NAME="signer" ;;
+            "eslint-config-oisy-wallet") PKG_NAME="oisy-eslint" ;;
+            "agent") PKG_NAME="agent" ;;
+            "agent & ic-js") PKG_NAME="agent:ic-js" ;;
+            *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
+          echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
+          echo "PKG_TAG=$NEXT_TAG" >> "$GITHUB_ENV"
+        env:
+          PACKAGE: ${{ inputs.package }}
+          NEXT_TAG: ${{ inputs.next && 'next' || '' }}
 
       - name: Update package
-        run: npm run update:${{ env.PKG_NAME }}${{ inputs.next && ':next' || '' }}
+        run: npm run update:$PKG_SCRIPT --script-shell bash
+        env:
+          PKG_SCRIPT: ${{ env.PKG_NAME }}${{ env.PKG_TAG && ':' || '' }}${{ env.PKG_TAG }}
 
       - name: Create Pull Request
         uses: ./.github/actions/create-pr

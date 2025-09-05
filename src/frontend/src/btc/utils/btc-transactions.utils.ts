@@ -4,7 +4,6 @@ import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-// TODO: Add docs/comments to the steps needed to parse a BTC tx
 export const mapBtcTransaction = ({
 	transaction: { inputs, block_index, out, hash, time },
 	btcAddress,
@@ -14,6 +13,7 @@ export const mapBtcTransaction = ({
 	btcAddress: BtcAddress;
 	latestBitcoinBlockHeight: number;
 }): BtcTransactionUi => {
+	// Step 1: Calculate total input value and determine if the transaction is a "send"
 	const { totalInputValue, isTypeSend } = inputs.reduce<{
 		totalInputValue: number;
 		isTypeSend: boolean;
@@ -28,58 +28,73 @@ export const mapBtcTransaction = ({
 		}
 	);
 
-	const { totalOutputValue, value, to } = out.reduce<{
+	// Step 2: Analyse outputs to determine total value, destination addresses, and whether it's a self-transaction
+	const { totalOutputValue, totalValue, to, selfTransaction } = out.reduce<{
+		to: string[];
+		totalValue: number | undefined;
 		totalOutputValue: number;
-		value: number | undefined;
-		to: string | undefined;
+		selfTransaction: boolean;
 	}>(
-		(acc, { addr, value }) => {
-			// TODO: test what happens when user sends to the current address (hence isValidOutput = false)
+		(acc, output) => {
+			const { addr, value } = output;
+
+			// For 'send' tx: include outputs not to the sender
+			// For 'receive' tx: include only outputs to the user
 			const isValidOutput =
 				(isTypeSend && addr !== btcAddress) || (!isTypeSend && addr === btcAddress);
 
-			if (isNullish(acc.value) && isValidOutput) {
-				acc.value = (acc.value ?? 0) + value;
-			}
-
-			if (isNullish(acc.to) && isValidOutput) {
-				acc.to = addr;
-			}
-
 			return {
 				...acc,
-				totalOutputValue: acc.totalOutputValue + value
+				totalValue: isValidOutput ? (acc.totalValue ?? 0) + value : acc.totalValue,
+				to: isValidOutput ? [...acc.to, addr] : acc.to,
+				totalOutputValue: acc.totalOutputValue + value,
+				// If all outputs are to the sender, it's a self-transaction
+				selfTransaction: acc.selfTransaction && addr === btcAddress
 			};
 		},
 		{
 			totalOutputValue: 0,
-			value: undefined,
-			to: undefined
+			totalValue: undefined,
+			to: [],
+			selfTransaction: true
 		}
 	);
 
+	// Step 3: Calculate the transaction fee from the difference between input and output values
 	const utxosFee = totalInputValue - totalOutputValue;
 
+	// Step 4: Compute the number of confirmations
 	// +1 is needed to account for the block where the transaction was first included
 	const confirmations = nonNullish(block_index)
 		? latestBitcoinBlockHeight - block_index + 1
 		: undefined;
 
+	// Step 5: Derive transaction status based on confirmations thresholds
 	const status = isNullish(confirmations)
 		? 'pending'
 		: confirmations >= CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 			? 'confirmed'
 			: 'unconfirmed';
 
+	// Step 6: Determine the value of the transaction
+	const value = selfTransaction
+		? // For self-transactions, we consider the total output value plus the fee, since that is logically the value spent for the presumable 'send' transaction
+			BigInt(totalOutputValue + utxosFee)
+		: nonNullish(totalValue)
+			? // For 'send' transactions, we consider the total value sent plus the fee, since that is logically the value spent for the transaction
+				BigInt(isTypeSend ? totalValue + utxosFee : totalValue)
+			: undefined;
+
+	// Step 7: Compose the final structured BTC transaction object for the UI
 	return {
 		id: hash,
 		timestamp: BigInt(time),
-		value: nonNullish(value) ? BigInt(isTypeSend ? value + utxosFee : value) : undefined,
+		value,
 		status,
 		blockNumber: block_index ?? undefined,
 		type: isTypeSend ? 'send' : 'receive',
 		from: isTypeSend ? btcAddress : inputs[0].prev_out.addr,
-		to,
+		to: selfTransaction ? [btcAddress] : to,
 		confirmations
 	};
 };

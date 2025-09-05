@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { XAUT_TOKEN_GROUP } from '$env/tokens/groups/groups.xaut.env';
 import xaut from '$eth/assets/xaut.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -21,5 +22,7 @@ export const XAUT_TOKEN: RequiredErc20Token = {
 	icon: xaut,
 	address: '0x68749665FF8D2d112Fa859AA293F07A622782F38',
 	exchange: 'erc20',
-	twinTokenSymbol: 'ckXAUT'
+	twinTokenSymbol: 'ckXAUT',
+	groupData: XAUT_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };

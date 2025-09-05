@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { USDC_TOKEN_GROUP } from '$env/tokens/groups/groups.usdc.env';
 import usdc from '$eth/assets/usdc.svg';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import type { TokenId } from '$lib/types/token';
@@ -22,6 +23,8 @@ export const USDC_TOKEN: RequiredErc20Token = {
 	address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckUSDC',
+	groupData: USDC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'usdc_ethereum'
 	}

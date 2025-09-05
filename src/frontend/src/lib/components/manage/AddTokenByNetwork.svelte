@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { Dropdown, DropdownItem } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
 	import type { AddTokenData } from '$icp-eth/types/add-token';
+	import AddTokenByNetworkDropdown from '$lib/components/manage/AddTokenByNetworkDropdown.svelte';
 	import AddTokenByNetworkToolbar from '$lib/components/manage/AddTokenByNetworkToolbar.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -17,6 +16,7 @@
 	import {
 		isNetworkIdBitcoin,
 		isNetworkIdEthereum,
+		isNetworkIdEvm,
 		isNetworkIdICP,
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
@@ -26,10 +26,10 @@
 	export let tokenData: Partial<AddTokenData>;
 
 	let networkName: string | undefined = network?.name;
-	$: networkName,
+	$: (networkName,
 		(network = nonNullish(networkName)
 			? $networks.find(({ name }) => name === networkName)
-			: undefined);
+			: undefined));
 
 	let isIcpNetwork = false;
 	$: isIcpNetwork = isNetworkIdICP(network?.id);
@@ -37,35 +37,34 @@
 	let isEthereumNetwork = false;
 	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
 
+	let isEvmNetwork = false;
+	$: isEvmNetwork = isNetworkIdEvm(network?.id);
+
 	let isSolanaNetwork = false;
 	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
 
-	let { ledgerCanisterId, indexCanisterId, erc20ContractAddress, splTokenAddress } = tokenData;
+	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } = tokenData;
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
-	$: {
-		if (isIcpNetwork) {
-			tokenData = {
-				ledgerCanisterId,
-				indexCanisterId:
-					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
-						? indexCanisterId
-						: undefined
-			};
-		} else if (isEthereumNetwork) {
-			tokenData = { erc20ContractAddress };
-		} else if (isSolanaNetwork) {
-			tokenData = { splTokenAddress };
-		} else {
-			tokenData = {};
-		}
+	$: if (isIcpNetwork) {
+		tokenData = {
+			ledgerCanisterId,
+			indexCanisterId:
+				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
+		};
+	} else if (isEthereumNetwork || isEvmNetwork) {
+		tokenData = { ethContractAddress };
+	} else if (isSolanaNetwork) {
+		tokenData = { splTokenAddress };
+	} else {
+		tokenData = {};
 	}
 
 	const dispatch = createEventDispatcher();
 
-	let invalidErc20 = true;
-	$: invalidErc20 = isNullishOrEmpty(erc20ContractAddress);
+	let invalidEth = true;
+	$: invalidEth = isNullishOrEmpty(ethContractAddress);
 
 	let invalidIc = true;
 	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
@@ -76,8 +75,8 @@
 	let invalid = true;
 	$: invalid = isIcpNetwork
 		? invalidIc
-		: isEthereumNetwork
-			? invalidErc20
+		: isEthereumNetwork || isEvmNetwork
+			? invalidEth
 			: isSolanaNetwork
 				? invalidSpl
 				: true;
@@ -92,45 +91,24 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" on:submit|preventDefault={() => dispatch('icNext')} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<Value ref="network" element="div">
-				<svelte:fragment slot="label">{$i18n.tokens.manage.text.network}</svelte:fragment>
-
-				<div id="network" class="network mt-1 pt-0.5">
-					<Dropdown name="network" bind:selectedValue={networkName}>
-						<option disabled selected value={undefined} class:hidden={nonNullish(networkName)}
-							>{$i18n.tokens.manage.placeholder.select_network}</option
-						>
-						{#each availableNetworks as network (network.id)}
-							<DropdownItem value={network.name}>{network.name}</DropdownItem>
-						{/each}
-					</Dropdown>
-				</div>
-			</Value>
+			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
 		{/if}
 
 		{#if isIcpNetwork}
 			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
-		{:else if isEthereumNetwork}
-			<EthAddTokenForm on:icBack bind:contractAddress={erc20ContractAddress} />
+		{:else if isEthereumNetwork || isEvmNetwork}
+			<EthAddTokenForm on:icBack bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}
 
-		<AddTokenByNetworkToolbar slot="toolbar" {invalid} on:icBack />
+		{#snippet toolbar()}
+			<AddTokenByNetworkToolbar {invalid} on:icBack />
+		{/snippet}
 	</ContentWithToolbar>
 </form>
-
-<style lang="scss">
-	.hidden {
-		display: none;
-	}
-
-	.network {
-		--disable-contrast: rgba(0, 0, 0, 0.5);
-	}
-</style>

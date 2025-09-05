@@ -1,24 +1,37 @@
 <script lang="ts">
 	import NetworkButton from '$lib/components/networks/NetworkButton.svelte';
 	import { NETWORKS_SWITCHER_SELECTOR } from '$lib/constants/test-ids.constants';
-	import type { Network, NetworkId } from '$lib/types/network';
+	import type { LabelSize } from '$lib/types/components';
+	import type { Network, NetworkId, OptionNetworkId } from '$lib/types/network';
 
-	export let network: Network;
-	export let usdBalance: number | undefined = undefined;
-	export let testIdPrefix = NETWORKS_SWITCHER_SELECTOR;
+	interface Props {
+		network: Network;
+		selectedNetworkId?: NetworkId;
+		usdBalance?: number;
+		testIdPrefix?: string;
+		delayOnNetworkSelect?: boolean;
+		labelsSize?: LabelSize;
+		onSelected?: (networkId: OptionNetworkId) => void;
+	}
 
-	let id: NetworkId;
-	let name: string;
-	let icon: string | undefined;
-	$: ({ id, name, iconBW: icon } = network);
+	let {
+		network,
+		selectedNetworkId,
+		usdBalance,
+		testIdPrefix = NETWORKS_SWITCHER_SELECTOR,
+		delayOnNetworkSelect = true,
+		labelsSize = 'md',
+		onSelected
+	}: Props = $props();
 </script>
 
 <NetworkButton
-	{id}
-	{name}
-	{usdBalance}
-	{icon}
+	{delayOnNetworkSelect}
 	isTestnet={network.env === 'testnet'}
-	testId={`${testIdPrefix}-${id.description}`}
-	on:icSelected
+	{labelsSize}
+	{network}
+	{onSelected}
+	{selectedNetworkId}
+	testId={`${testIdPrefix}-${network.id.description}`}
+	{usdBalance}
 />

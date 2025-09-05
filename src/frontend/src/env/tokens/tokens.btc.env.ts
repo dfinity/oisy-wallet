@@ -1,11 +1,14 @@
+import bitcoinTestnet from '$btc/assets/bitcoin-testnet.svg';
+import bitcoin from '$btc/assets/bitcoin.svg';
 import {
+	BTC_MAINNET_ENABLED,
 	BTC_MAINNET_NETWORK,
 	BTC_REGTEST_NETWORK,
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
-import bitcoin from '$icp/assets/bitcoin.svg';
-import bitcoinTestnet from '$icp/assets/bitcoin_testnet.svg';
+import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
 import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
+import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
 export const BTC_DECIMALS = 8;
@@ -23,7 +26,10 @@ export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
 	symbol: BTC_MAINNET_SYMBOL,
 	decimals: BTC_DECIMALS,
 	icon: bitcoin,
-	twinTokenSymbol: 'ckBTC'
+	twinTokenSymbol: 'ckBTC',
+	groupData: BTC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
+	buy: { onramperId: 'btc' }
 };
 
 export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
@@ -55,3 +61,12 @@ export const BTC_REGTEST_TOKEN: Token = {
 	decimals: BTC_DECIMALS,
 	icon: bitcoinTestnet
 };
+
+// The following tokens are used as fallback for any Bitcoin token defined in the token store.
+// That means that the order of the tokens in the array is important, to have a correct fallback chain.
+export const SUPPORTED_BITCOIN_TOKENS: Token[] = defineSupportedTokens({
+	mainnetFlag: BTC_MAINNET_ENABLED,
+	mainnetTokens: [BTC_MAINNET_TOKEN],
+	testnetTokens: [BTC_TESTNET_TOKEN],
+	localTokens: [BTC_REGTEST_TOKEN]
+});

@@ -11,18 +11,20 @@
 </script>
 
 <ButtonIcon
-	colorStyle="tertiary-alt"
 	ariaLabel={$i18n.settings.alt[
 		`appearance_${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`
 	]}
-	on:click={handleClick}
+	colorStyle="tertiary-alt"
 	link={false}
+	onclick={handleClick}
 >
-	<span slot="icon">
-		{#if $themeStore === Theme.DARK}
-			<IconSun size="44" />
-		{:else}
-			<IconMoon size="18" />
-		{/if}</span
-	>
+	{#snippet icon()}
+		<span>
+			{#if $themeStore === Theme.DARK}
+				<IconSun size="24" />
+			{:else}
+				<IconMoon size="24" />
+			{/if}
+		</span>
+	{/snippet}
 </ButtonIcon>

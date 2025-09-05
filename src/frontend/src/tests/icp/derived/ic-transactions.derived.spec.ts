@@ -4,7 +4,7 @@ import {
 	IC_CKETH_MINTER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN, ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
-import { icTransactions } from '$icp/derived/ic-transactions.derived';
+import { icKnownDestinations, icTransactions } from '$icp/derived/ic-transactions.derived';
 import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -25,6 +25,7 @@ describe('ic-transactions.derived', () => {
 
 	it('should return an empty array when all source stores are empty', () => {
 		const result = get(icTransactions);
+
 		expect(result).toEqual([]);
 	});
 
@@ -39,6 +40,7 @@ describe('ic-transactions.derived', () => {
 		icTransactionsStore.nullify(ICP_TOKEN_ID);
 
 		const result = get(icTransactions);
+
 		expect(result).toHaveLength(0);
 		expect(result).toEqual([]);
 	});
@@ -55,6 +57,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([...transactions]);
 		});
 	});
@@ -68,6 +71,7 @@ describe('ic-transactions.derived', () => {
 
 		it('should derive only pending ckBTC', () => {
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockCkBtcPendingUtxoTransaction,
@@ -83,6 +87,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockCkBtcPendingUtxoTransaction,
@@ -127,6 +132,7 @@ describe('ic-transactions.derived', () => {
 
 		it('should derive only pending ckETH', () => {
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockPendingCkEth,
@@ -142,6 +148,7 @@ describe('ic-transactions.derived', () => {
 			});
 
 			const result = get(icTransactions);
+
 			expect(result).toEqual([
 				{
 					data: mockPendingCkEth,
@@ -149,6 +156,34 @@ describe('ic-transactions.derived', () => {
 				},
 				...transactions
 			]);
+		});
+	});
+
+	describe('icKnownDestinations', () => {
+		beforeEach(() => {
+			icTransactionsStore.reset(ICP_TOKEN_ID);
+		});
+
+		it('should return known destinations for ICP if transactions store has some data', () => {
+			token.set(ICP_TOKEN);
+			icTransactionsStore.append({
+				tokenId: ICP_TOKEN_ID,
+				transactions
+			});
+
+			const maxTimestamp = Math.max(...transactions.map(({ data }) => Number(data.timestamp)));
+
+			expect(get(icKnownDestinations)).toEqual({
+				[transactions[0].data.to as string]: {
+					amounts: transactions.map(({ data }) => ({ value: data.value, token: ICP_TOKEN })),
+					timestamp: maxTimestamp,
+					address: transactions[0].data.to
+				}
+			});
+		});
+
+		it('should return empty object if transactions store does not have data', () => {
+			expect(get(icKnownDestinations)).toEqual({});
 		});
 	});
 });

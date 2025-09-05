@@ -1,38 +1,53 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import {
+		CONVERT_AMOUNT_DISPLAY_SKELETON,
+		CONVERT_AMOUNT_DISPLAY_VALUE
+	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let amount: OptionAmount = undefined;
-	export let symbol: string;
-	export let exchangeRate: number | undefined = undefined;
-	export let displayExchangeRate = true;
-	export let zeroAmountLabel: string | undefined = undefined;
+	interface Props {
+		amount?: OptionAmount;
+		symbol: string;
+		exchangeRate?: number;
+		displayExchangeRate?: boolean;
+		zeroAmountLabel?: string;
+		label?: Snippet;
+	}
+
+	let {
+		amount,
+		symbol,
+		exchangeRate,
+		displayExchangeRate = true,
+		zeroAmountLabel,
+		label
+	}: Props = $props();
 </script>
 
-<ModalValue>
-	<slot name="label" slot="label" />
-
-	<svelte:fragment slot="main-value">
+<ModalValue {label}>
+	{#snippet mainValue()}
 		{#if nonNullish(amount)}
-			<div in:fade data-tid="convert-amount-display-value">
+			<div data-tid={CONVERT_AMOUNT_DISPLAY_VALUE} in:fade>
 				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
 					? zeroAmountLabel
 					: `${amount} ${symbol}`}
 			</div>
 		{:else}
-			<div class="w-14 sm:w-24" data-tid="convert-amount-display-skeleton">
+			<div class="w-14 sm:w-24" data-tid={CONVERT_AMOUNT_DISPLAY_SKELETON}>
 				<SkeletonText />
 			</div>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<svelte:fragment slot="secondary-value">
+	{#snippet secondaryValue()}
 		{#if displayExchangeRate}
 			<ConvertAmountExchange {amount} {exchangeRate} />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </ModalValue>

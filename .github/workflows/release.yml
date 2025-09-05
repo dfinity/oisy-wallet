@@ -5,8 +5,7 @@ on:
     types: [released]
   workflow_dispatch:
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
   #####################
@@ -15,15 +14,21 @@ jobs:
 
   docker-build-base:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build Base Docker Image
         uses: ./.github/actions/docker-build-base
 
   docker-build:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     needs: docker-build-base
     strategy:
       matrix:
@@ -33,7 +38,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Build ${{ matrix.name }} canister WASM
         uses: ./.github/actions/docker-build-backend
@@ -44,6 +51,8 @@ jobs:
 
   candid:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     strategy:
       matrix:
         include:
@@ -51,34 +60,40 @@ jobs:
             target: backend
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: 'Upload ${{ matrix.name }}'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ matrix.name }}
           path: ./src/${{ matrix.target }}/${{ matrix.name }}
 
   release:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     needs: ['docker-build', 'candid']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
       - name: Download backend.wasm.gz
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: backend.wasm.gz
           path: .
 
       - name: Download backend.did
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: backend.did
           path: .
 
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@72f2c25fcb47643c292f7107632f7a47c1df5cd8 # v2.3.2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: |

@@ -1,14 +1,22 @@
-import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
+import type { Token } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
+export interface SwapError {
+	variant: 'error' | 'warning' | 'info';
+	message: string;
+	url?: { url: string; text: string };
+	errorType?: string;
+	swapSucceded?: boolean;
+}
+
 export interface SwapData {
-	sourceToken?: IcTokenToggleable;
-	destinationToken?: IcTokenToggleable;
+	sourceToken?: Token;
+	destinationToken?: Token;
 }
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
@@ -55,13 +63,13 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
-		failedSwapError: writable<string | undefined>(undefined),
-		setSourceToken: (token: IcTokenToggleable) =>
+		failedSwapError: writable<SwapError | undefined>(undefined),
+		setSourceToken: (token: Token) =>
 			update((state) => ({
 				...state,
 				sourceToken: token
 			})),
-		setDestinationToken: (token: IcTokenToggleable) =>
+		setDestinationToken: (token: Token | undefined) =>
 			update((state) => ({
 				...state,
 				destinationToken: token
@@ -75,16 +83,16 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 };
 
 export interface SwapContext {
-	sourceToken: Readable<IcTokenToggleable | undefined>;
-	destinationToken: Readable<IcTokenToggleable | undefined>;
+	sourceToken: Readable<Token | undefined>;
+	destinationToken: Readable<Token | undefined>;
 	sourceTokenBalance: Readable<Balance | undefined>;
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean>;
-	failedSwapError: Writable<string | undefined>;
-	setSourceToken: (token: IcTokenToggleable) => void;
-	setDestinationToken: (token: IcTokenToggleable) => void;
+	failedSwapError: Writable<SwapError | undefined>;
+	setSourceToken: (token: Token) => void;
+	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
 }
 

@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { WBTC_TOKEN_GROUP } from '$env/tokens/groups/groups.wbtc.env';
 import type { RequiredErc20Token } from '$eth/types/erc20';
 import wbtc from '$icp-eth/assets/wbtc.svg';
 import type { TokenId } from '$lib/types/token';
@@ -22,6 +23,8 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	address: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWBTC',
+	groupData: WBTC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'wbtc_ethereum'
 	}

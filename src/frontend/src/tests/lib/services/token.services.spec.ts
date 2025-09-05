@@ -1,13 +1,17 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import {
+	autoLoadSingleToken,
 	autoLoadToken,
 	loadTokenAndRun,
+	type AutoLoadSingleTokenParams,
 	type AutoLoadTokenParams
 } from '$lib/services/token.services';
 import { busy } from '$lib/stores/busy.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { token } from '$lib/stores/token.store';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { get } from 'svelte/store';
@@ -24,6 +28,7 @@ describe('token.services', () => {
 		it('should set the token in tokenStore', async () => {
 			await loadTokenAndRun({ token: mockValidToken, callback: mockCallback });
 			const tokenStore = get(token);
+
 			expect(tokenStore).toBe(mockValidToken);
 		});
 
@@ -51,8 +56,91 @@ describe('token.services', () => {
 			).rejects.toThrow('Callback failed');
 
 			const tokenStore = get(token);
+
 			expect(tokenStore).toBe(mockValidToken);
 			expect(failingCallback).toHaveBeenCalled();
+		});
+	});
+
+	describe('autoLoadSingleToken', () => {
+		let mockSetToken: Mock;
+		let mockLoadTokens: Mock;
+
+		const mockErrorMessage = 'Error loading token';
+
+		let params: AutoLoadSingleTokenParams<IcrcCustomToken>;
+
+		let spyToastsError: MockInstance;
+		let spyBusyStart: MockInstance;
+		let spyBusyStop: MockInstance;
+
+		beforeEach(() => {
+			mockSetToken = vi.fn();
+			mockLoadTokens = vi.fn();
+
+			params = {
+				token: mockIcrcCustomToken,
+				identity: mockIdentity,
+				setToken: mockSetToken,
+				loadTokens: mockLoadTokens,
+				errorMessage: mockErrorMessage
+			};
+
+			spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+			spyBusyStart = vi.spyOn(busy, 'start');
+			spyBusyStop = vi.spyOn(busy, 'stop');
+		});
+
+		it('should return "skipped" if token is nullish', async () => {
+			const result = await autoLoadSingleToken({ ...params, token: undefined });
+
+			expect(result.result).toBe('skipped');
+		});
+
+		it('should return "skipped" if token is already enabled', async () => {
+			const result = await autoLoadSingleToken({
+				...params,
+				token: { ...mockIcrcCustomToken, enabled: true }
+			});
+
+			expect(result.result).toBe('skipped');
+		});
+
+		it('should return "error" if setToken fails and show toast error', async () => {
+			const error = new Error('Set token failed');
+
+			mockSetToken.mockRejectedValue(error);
+
+			const { result } = await autoLoadSingleToken(params);
+
+			expect(result).toBe('error');
+
+			expect(spyToastsError).toHaveBeenCalledWith({
+				msg: { text: mockErrorMessage },
+				err: error
+			});
+
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
+		});
+
+		it('should enable token, reload tokens, and return "loaded" on success', async () => {
+			mockSetToken.mockResolvedValue(undefined);
+			mockLoadTokens.mockResolvedValue(undefined);
+
+			const { result } = await autoLoadSingleToken(params);
+
+			expect(result).toBe('loaded');
+
+			expect(mockSetToken).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				token: params.token,
+				enabled: true
+			});
+			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
+
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -144,8 +232,8 @@ describe('token.services', () => {
 				err: error
 			});
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 
 		it('should enable counterpart token, reload tokens, and return "loaded" on success', async () => {
@@ -167,8 +255,8 @@ describe('token.services', () => {
 			});
 			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
 
-			expect(spyBusyStart).toHaveBeenCalledTimes(1);
-			expect(spyBusyStop).toHaveBeenCalledTimes(1);
+			expect(spyBusyStart).toHaveBeenCalledOnce();
+			expect(spyBusyStop).toHaveBeenCalledOnce();
 		});
 	});
 });

@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SendData from '$lib/components/send/SendData.svelte';
+	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
+	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -9,41 +9,38 @@
 	import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
-	export let source: string;
 	export let disabled: boolean | undefined = false;
+	export let selectedContact: ContactUi | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
-	const { sendToken, sendBalance, sendTokenExchangeRate } =
-		getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
-	{#if nonNullish($sendToken)}
-		<SendData
-			{amount}
-			{destination}
-			token={$sendToken}
-			balance={$sendBalance}
-			exchangeRate={$sendTokenExchangeRate}
-			{source}
-		>
-			<slot name="fee" slot="fee" />
+	<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
 
-			<slot name="network" slot="network" />
-		</SendData>
-	{/if}
+	<div class="mb-4">
+		<SendReviewDestination {destination} {selectedContact} />
+	</div>
+
+	<slot name="network" />
+
+	<slot name="fee" />
 
 	<slot name="info" />
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack on:click={() => dispatch('icBack')} />
-		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
-			{$i18n.send.text.send}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup testId="toolbar">
+			<ButtonBack onclick={() => dispatch('icBack')} />
+			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
+				{$i18n.send.text.send}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

@@ -1,4 +1,4 @@
-import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import {
 	certifyAddress,
 	loadIdbTokenAddress,
@@ -9,7 +9,7 @@ import { authStore } from '$lib/stores/auth.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { LoadIdbAddressError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import type { MockInstance } from 'vitest';
@@ -20,7 +20,7 @@ describe('address.services', () => {
 	const mockGetIdbAddress = vi.fn();
 	const mockUpdateIdbAddressLastUsage = vi.fn();
 
-	const mockTokenId = ETHEREUM_TOKEN_ID;
+	const mockNetworkId = ETHEREUM_NETWORK_ID;
 	const mockAddress = mockEthAddress;
 
 	const mockAddressStore = {
@@ -39,7 +39,7 @@ describe('address.services', () => {
 
 	describe('loadTokenAddress', () => {
 		const mockParams: LoadTokenAddressParams<string> = {
-			tokenId: mockTokenId,
+			networkId: mockNetworkId,
 			getAddress: mockGetAddress,
 			setIdbAddress: mockSetIdbAddress,
 			addressStore: mockAddressStore
@@ -90,7 +90,7 @@ describe('address.services', () => {
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
-						$symbol: mockTokenId.description ?? ''
+						$symbol: mockNetworkId.description ?? ''
 					})
 				},
 				err: expect.any(Error)
@@ -100,7 +100,7 @@ describe('address.services', () => {
 
 	describe('loadIdbTokenAddress', () => {
 		const mockParams = {
-			tokenId: mockTokenId,
+			networkId: mockNetworkId,
 			getIdbAddress: mockGetIdbAddress,
 			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
 			addressStore: mockAddressStore
@@ -111,7 +111,7 @@ describe('address.services', () => {
 
 			const result = await loadIdbTokenAddress(mockParams);
 
-			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockTokenId) });
+			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
 			expect(mockGetIdbAddress).toHaveBeenCalledOnce();
 			expect(mockGetIdbAddress).toHaveBeenCalledWith(mockIdentity.getPrincipal());
 			expect(mockAddressStore.set).not.toHaveBeenCalled();
@@ -137,7 +137,7 @@ describe('address.services', () => {
 
 			const result = await loadIdbTokenAddress(mockParams);
 
-			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockTokenId) });
+			expect(result).toEqual({ success: false, err: new LoadIdbAddressError(mockNetworkId) });
 			expect(mockGetIdbAddress).toHaveBeenCalledOnce();
 			expect(mockGetIdbAddress).toHaveBeenCalledWith(mockIdentity.getPrincipal());
 			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
@@ -145,14 +145,14 @@ describe('address.services', () => {
 
 			expect(console.error).toHaveBeenCalledOnce();
 			expect(console.error).toHaveBeenCalledWith(
-				`Error encountered while searching for locally stored ${mockTokenId.description} public address in the browser.`
+				`Error encountered while searching for locally stored ${mockNetworkId.description} public address in the browser.`
 			);
 		});
 	});
 
 	describe('certifyAddress', () => {
 		const mockParams = {
-			tokenId: mockTokenId,
+			networkId: mockNetworkId,
 			address: mockAddress,
 			getAddress: mockGetAddress,
 			updateIdbAddressLastUsage: mockUpdateIdbAddressLastUsage,
@@ -184,7 +184,7 @@ describe('address.services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: `The address used to load the data did not match your actual ${mockTokenId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
+				err: `The address used to load the data did not match your actual ${mockNetworkId.description} wallet address, which is why your session was ended. Please sign in again to reload your own data.`
 			});
 			expect(mockGetAddress).toHaveBeenCalledOnce();
 			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);
@@ -197,7 +197,7 @@ describe('address.services', () => {
 
 			expect(result).toEqual({
 				success: false,
-				err: `Error while loading the ${mockTokenId.description} address.`
+				err: `Error while loading the ${mockNetworkId.description} address.`
 			});
 			expect(mockGetAddress).toHaveBeenCalledOnce();
 			expect(mockGetAddress).toHaveBeenCalledWith(mockIdentity);

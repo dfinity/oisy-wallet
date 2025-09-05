@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeDisplay from '$eth/components/fee/FeeDisplay.svelte';
+	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
@@ -16,16 +16,31 @@
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let destination: string;
-	export let data: string | undefined;
-	export let erc20Approve: boolean;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
+	interface Props {
+		amount: bigint;
+		destination: string;
+		data?: string;
+		erc20Approve: boolean;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let amountDisplay: bigint;
-	$: amountDisplay =
-		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue(data).toBigInt() : amount;
+	let {
+		amount,
+		destination,
+		data,
+		erc20Approve,
+		sourceNetwork,
+		targetNetwork,
+		onApprove,
+		onReject
+	}: Props = $props();
+
+	let amountDisplay = $derived(
+		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
+	);
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -33,17 +48,19 @@
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
-		{destination}
-		token={$sendToken}
 		balance={$balance}
+		{destination}
 		source={$ethAddress ?? ''}
+		token={$sendToken}
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
-		<FeeDisplay slot="fee" />
+		<EthFeeDisplay slot="fee" />
 
-		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
+		<SendReviewNetwork slot="network" {sourceNetwork} {targetNetwork} token={$sendToken} />
 	</SendData>
 
-	<WalletConnectActions on:icApprove on:icReject slot="toolbar" />
+	{#snippet toolbar()}
+		<WalletConnectActions {onApprove} {onReject} />
+	{/snippet}
 </ContentWithToolbar>

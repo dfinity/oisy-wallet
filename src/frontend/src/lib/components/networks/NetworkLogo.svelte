@@ -5,17 +5,36 @@
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let network: Network;
-	export let blackAndWhite = false;
-	export let size: LogoSize = 'xxs';
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		network: Network;
+		size?: LogoSize;
+		color?: 'off-white' | 'white';
+		testId?: string;
+	}
+
+	let { network, size = 'xxs', color = 'off-white', testId }: Props = $props();
 </script>
 
-<Logo
-	src={blackAndWhite ? network.iconBW : network.icon}
-	alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
-	{size}
-	{color}
-	{testId}
-/>
+<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
+	<Logo
+		alt={replacePlaceholders($i18n.core.alt.logo, {
+			$name: network.name
+		})}
+		{color}
+		{size}
+		src={network.iconLight}
+		testId={`${testId}-light`}
+	/>
+</div>
+
+<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
+	<Logo
+		alt={replacePlaceholders($i18n.core.alt.logo, {
+			$name: network.name
+		})}
+		{color}
+		{size}
+		src={network.iconDark}
+		testId={`${testId}-dark`}
+	/>
+</div>

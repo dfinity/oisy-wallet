@@ -1,26 +1,18 @@
-import {
-	ETHEREUM_NETWORK_ID,
-	INFURA_NETWORK_HOMESTEAD,
-	INFURA_NETWORK_SEPOLIA,
-	SEPOLIA_NETWORK_ID
-} from '$env/networks/networks.eth.env';
+import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
 import type { ContractAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
+import { TRACK_INFURA_GET_LOGS_CALL } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';
-import type { BlockTag } from '@ethersproject/abstract-provider';
-import type { BigNumber } from '@ethersproject/bignumber';
-import type { PopulatedTransaction } from '@ethersproject/contracts';
-import type { Networkish } from '@ethersproject/networks';
-import { InfuraProvider } from '@ethersproject/providers';
-import type { Log } from 'alchemy-sdk';
-import { ethers } from 'ethers';
+import { Contract, type ContractTransaction } from 'ethers/contract';
+import { InfuraProvider, type BlockTag, type Log, type Networkish } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export class InfuraCkETHProvider implements Erc20Provider {
@@ -38,10 +30,10 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		contract: Erc20ContractAddress;
 		from: EthAddress;
 		to: EthAddress;
-		amount: BigNumber;
-	}): Promise<BigNumber> => {
-		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
-		return ckEthContract.estimateGas.deposit(to, { from });
+		amount: bigint;
+	}): Promise<bigint> => {
+		const ckEthContract = new Contract(contractAddress, CKETH_ABI, this.provider);
+		return ckEthContract.deposit.estimateGas(to, { from });
 	};
 
 	populateTransaction = ({
@@ -50,9 +42,9 @@ export class InfuraCkETHProvider implements Erc20Provider {
 	}: {
 		contract: ContractAddress;
 		to: EthAddress;
-	}): Promise<PopulatedTransaction> => {
-		const ckEthContract = new ethers.Contract(contractAddress, CKETH_ABI, this.provider);
-		return ckEthContract.populateTransaction.deposit(to);
+	}): Promise<ContractTransaction> => {
+		const ckEthContract = new Contract(contractAddress, CKETH_ABI, this.provider);
+		return ckEthContract.deposit.populateTransaction(to);
 	};
 
 	getLogs = ({
@@ -63,19 +55,37 @@ export class InfuraCkETHProvider implements Erc20Provider {
 		contract: ContractAddress;
 		startBlock?: BlockTag;
 		topics: (string | null)[];
-	}): Promise<Log[]> =>
-		this.provider.getLogs({
+	}): Promise<Log[]> => {
+		try {
+			// We have sudden spikes in the number of getLogs calls to Infura, which is causing issues.
+			// However, we are not sure when and how they happen.
+			// This event is used to track the number of calls to Infura's getLogs endpoint.
+			// TODO: Remove this event once the issue is resolved.
+			trackEvent({
+				name: TRACK_INFURA_GET_LOGS_CALL,
+				metadata: {
+					network: this.network.toString(),
+					contractAddress,
+					fromBlock: fromBlock?.toString() ?? 'latest',
+					topics: topics.join(',')
+				}
+			});
+		} catch (_: unknown) {
+			// We don't really care if we cannot track the event, so we just ignore any errors here.
+		}
+
+		return this.provider.getLogs({
 			fromBlock,
 			toBlock: 'latest',
 			address: contractAddress,
 			topics
 		});
+	};
 }
 
-const providers: Record<NetworkId, InfuraCkETHProvider> = {
-	[ETHEREUM_NETWORK_ID]: new InfuraCkETHProvider(INFURA_NETWORK_HOMESTEAD),
-	[SEPOLIA_NETWORK_ID]: new InfuraCkETHProvider(INFURA_NETWORK_SEPOLIA)
-};
+const providers: Record<NetworkId, InfuraCkETHProvider> = SUPPORTED_ETHEREUM_NETWORKS.reduce<
+	Record<NetworkId, InfuraCkETHProvider>
+>((acc, { id, providers: { infura } }) => ({ ...acc, [id]: new InfuraCkETHProvider(infura) }), {});
 
 export const infuraCkETHProviders = (networkId: NetworkId): InfuraCkETHProvider => {
 	const provider = providers[networkId];

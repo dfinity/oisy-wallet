@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import { FEE_CONTEXT_KEY, type FeeContext } from '$eth/stores/fee.store';
+	import { createEventDispatcher, getContext } from 'svelte';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
+	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -20,6 +21,8 @@
 	export let insufficientFunds: boolean;
 	export let nativeEthereumToken: Token;
 
+	const dispatch = createEventDispatcher();
+
 	let exchangeValueUnit: DisplayUnit = 'usd';
 	let inputUnit: DisplayUnit;
 	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
@@ -28,7 +31,11 @@
 
 	$: insufficientFunds = nonNullish(insufficientFundsError);
 
-	const { feeStore: storeFeeData, minGasFee, maxGasFee } = getContext<FeeContext>(FEE_CONTEXT_KEY);
+	const {
+		feeStore: storeFeeData,
+		minGasFee,
+		maxGasFee
+	} = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 	const { sendTokenDecimals, sendBalance, sendTokenId, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -47,11 +54,11 @@
 					}),
 					unitName: $sendTokenDecimals
 				})
-			: ZERO_BI;
+			: ZERO;
 
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
-		if (isSupportedEthTokenId($sendTokenId)) {
-			const total = userAmount + ($minGasFee ?? ZERO_BI);
+		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
+			const total = userAmount + ($minGasFee ?? ZERO);
 
 			if (total > parsedSendBalance) {
 				return new InsufficientFundsError($i18n.send.assertion.insufficient_funds_for_gas);
@@ -66,7 +73,7 @@
 		}
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
-		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO_BI;
+		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
 		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
 			return new InsufficientFundsError(
 				$i18n.send.assertion.insufficient_ethereum_funds_to_cover_the_fees
@@ -82,15 +89,17 @@
 
 <div class="mb-4">
 	<TokenInput
+		autofocus={nonNullish($sendToken)}
+		customErrorValidate={customValidate}
+		displayUnit={inputUnit}
+		exchangeRate={$sendTokenExchangeRate}
 		token={$sendToken}
 		bind:amount
-		displayUnit={inputUnit}
 		bind:amountSetToMax
-		isSelectable={false}
-		exchangeRate={$sendTokenExchangeRate}
 		bind:error={insufficientFundsError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
+		on:click={() => {
+			dispatch('icTokensList');
+		}}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -110,12 +119,12 @@
 		<svelte:fragment slot="balance">
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
+					balance={$sendBalance}
+					error={nonNullish(insufficientFundsError)}
+					fee={$maxGasFee}
+					token={$sendToken}
 					bind:amount
 					bind:amountSetToMax
-					error={nonNullish(insufficientFundsError)}
-					balance={$sendBalance}
-					token={$sendToken}
-					fee={$maxGasFee}
 				/>
 			{/if}
 		</svelte:fragment>

@@ -11,6 +11,8 @@ import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import { SolanaNetworks } from '$sol/types/network';
 import type { SolSignature, SolTransactionUi } from '$sol/types/sol-transaction';
 import type { RequiredSplToken, SplTokenAddress } from '$sol/types/spl';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import {
 	mockSolSignature,
 	mockSolSignatureResponse,
@@ -25,7 +27,7 @@ import {
 } from '$tests/mocks/sol.mock';
 import * as solProgramToken from '@solana-program/token';
 import { address, type Address } from '@solana/kit';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('@solana-program/token', () => ({
 	findAssociatedTokenPda: vi.fn()
@@ -94,6 +96,7 @@ describe('sol-signatures.services', () => {
 				wallet: mockSolAddress,
 				limit: Number(WALLET_PAGINATION)
 			});
+
 			mockTokensList.forEach(({ address }, index) => {
 				expect(spyFetchSignatures).toHaveBeenNthCalledWith(index + 2, {
 					network: mockNetwork,
@@ -235,10 +238,13 @@ describe('sol-signatures.services', () => {
 			spyFetchTransactionsForSignature.mockResolvedValue(mockSolTransactions);
 
 			spyFindAssociatedTokenPda = vi.spyOn(solProgramToken, 'findAssociatedTokenPda');
+
+			mockAuthStore();
 		});
 
 		it('should fetch transactions successfully', async () => {
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -252,6 +258,7 @@ describe('sol-signatures.services', () => {
 			spyFindAssociatedTokenPda.mockResolvedValueOnce([mockSplAddress]);
 
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				tokenAddress: mockSplAddress,
@@ -269,6 +276,7 @@ describe('sol-signatures.services', () => {
 		it('should handle before parameter', async () => {
 			const signature = mockSolSignature();
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				before: signature
@@ -283,6 +291,7 @@ describe('sol-signatures.services', () => {
 
 		it('should handle limit parameter', async () => {
 			await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet,
 				limit: 5
@@ -299,6 +308,7 @@ describe('sol-signatures.services', () => {
 			spyFetchSignatures.mockReturnValue([]);
 
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -312,6 +322,7 @@ describe('sol-signatures.services', () => {
 			spyFetchTransactionsForSignature.mockReturnValue([]);
 
 			const transactions = await getSolTransactions({
+				identity: mockIdentity,
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
@@ -324,6 +335,7 @@ describe('sol-signatures.services', () => {
 
 			await expect(
 				getSolTransactions({
+					identity: mockIdentity,
 					address: mockSolAddress,
 					network: SolanaNetworks.mainnet
 				})

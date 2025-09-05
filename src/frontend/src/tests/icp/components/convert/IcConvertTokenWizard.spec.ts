@@ -29,14 +29,14 @@ import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { type MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -72,7 +72,7 @@ describe('IcConvertTokenWizard', () => {
 			title: 'title'
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
-		sendAmount: sendAmount,
+		sendAmount,
 		receiveAmount: sendAmount
 	};
 	let sendSpy: MockInstance;
@@ -125,7 +125,7 @@ describe('IcConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		const args = sendSpy.mock.calls[0][0];
+		const [[args]] = sendSpy.mock.calls;
 
 		expect(sendSpy).toHaveBeenCalledOnce();
 		expect(stringifyJson({ value: args })).toBe(
@@ -160,7 +160,7 @@ describe('IcConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		const args = sendSpy.mock.calls[0][0];
+		const [[args]] = sendSpy.mock.calls;
 
 		expect(sendSpy).toHaveBeenCalledOnce();
 		expect(stringifyJson({ value: args })).toBe(

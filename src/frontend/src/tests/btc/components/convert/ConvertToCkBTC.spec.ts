@@ -37,7 +37,8 @@ describe('ConvertToCkBTC', () => {
 		vi.spyOn(ckMinterInfoWorkerServices, 'initCkBTCMinterInfoWorker').mockResolvedValue({
 			start: () => {},
 			stop: () => {},
-			trigger: () => {}
+			trigger: () => {},
+			destroy: () => {}
 		});
 	const mockIsBusyStore = (isBusy = false) =>
 		vi.spyOn(isBusyStore, 'isBusy', 'get').mockImplementation(() => readable(isBusy));

@@ -2,7 +2,6 @@ import { KONGSWAP_API_URL } from '$env/rest/kongswap.env';
 import { fetchBatchKongSwapPrices, getKongSwapTokenById } from '$lib/rest/kongswap.rest';
 import { MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2 } from '$tests/mocks/exchanges.mock';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const EXPECTED_ENDPOINT = `${KONGSWAP_API_URL}/tokens/${MOCK_CANISTER_ID_1}`;
 const mockTokenResponse = createMockKongSwapToken({});
@@ -85,7 +84,7 @@ describe('KongSwap REST client', () => {
 
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
 
-			expect(fetch).toHaveBeenCalledTimes(1);
+			expect(fetch).toHaveBeenCalledOnce();
 			expect(result).toEqual([]);
 		});
 
@@ -101,6 +100,34 @@ describe('KongSwap REST client', () => {
 			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
 			expect(fetch).toHaveBeenCalledTimes(2);
+			expect(result).toEqual([]);
+		});
+
+		it('skips token when token field is null', async () => {
+			const invalidResponse = { token: null, metrics: { price: '1.23' } };
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(invalidResponse)
+			} as unknown as Response);
+
+			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
+
+			expect(fetch).toHaveBeenCalledOnce();
+			expect(result).toEqual([]);
+		});
+
+		it('skips token when metrics field is null', async () => {
+			const invalidResponse = { token: { canister_id: MOCK_CANISTER_ID_1 }, metrics: null };
+
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				json: () => Promise.resolve(invalidResponse)
+			} as unknown as Response);
+
+			const result = await fetchBatchKongSwapPrices([MOCK_CANISTER_ID_1]);
+
+			expect(fetch).toHaveBeenCalledOnce();
 			expect(result).toEqual([]);
 		});
 	});

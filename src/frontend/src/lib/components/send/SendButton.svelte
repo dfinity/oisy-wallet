@@ -7,15 +7,25 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	interface Props {
+		onclick: () => void;
+	}
+
+	let { onclick }: Props = $props();
+
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
-	on:click
-	disabled={$isBusy || $outflowActionsDisabled}
 	ariaLabel={$i18n.send.text.send}
+	disabled={$isBusy || $outflowActionsDisabled}
+	{onclick}
 	testId={SEND_TOKENS_MODAL_OPEN_BUTTON}
 >
-	<IconlySend size="28" slot="icon" />
-	{$i18n.send.text.send}
+	{#snippet icon()}
+		<IconlySend size="24" />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.send.text.send}
+	{/snippet}
 </ButtonHero>

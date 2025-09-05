@@ -6,9 +6,9 @@ import type { EnvAdditionalIcrcTokensWithMetadata } from '$env/types/env-icrc-ad
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import { closeSync, existsSync, openSync, writeFileSync, writeSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadMetadata } from './build.tokens.utils';
+import { loadMetadata, saveLogo } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
 
 interface TokensAndIcons {
@@ -36,10 +36,6 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 
 			if (isNullish(savedLedgerCanisterId)) {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
-			}
-
-			if (isNullish(savedIndexCanisterId)) {
-				throw new Error(`Index canister ID is missing for token symbol ${key}.`);
 			}
 
 			const { tokens: accTokens, icons: accIcons } = await acc;
@@ -99,21 +95,7 @@ const saveTokenLogo = ({ name, logoData }: { name: EnvTokenSymbol; logoData: str
 		return;
 	}
 
-	// Open the file for writing only if it does not already exist (wx flag).
-	// This avoids a potential file system race condition warning.
-	const fd = openSync(file, 'wx');
-
-	if (!logoData.includes(';') || !logoData.includes(',')) {
-		console.error(`Invalid logoData format for ${name}: ${logoData}`);
-		return;
-	}
-
-	const [encoding, encodedStr] = logoData.split(';')[1].split(',');
-
-	const svgContent = Buffer.from(encodedStr, encoding as BufferEncoding).toString('utf-8');
-
-	writeSync(fd, svgContent, 0, 'utf-8');
-	closeSync(fd);
+	saveLogo({ logoData, file, name });
 };
 
 const findAdditionalIcrc = async () => {

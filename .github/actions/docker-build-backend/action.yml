@@ -19,14 +19,14 @@ runs:
   using: 'composite'
   steps:
     - name: Set up docker buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
 
     - name: Prepare docker build inputs
       shell: bash
       run: scripts/docker-build.pre
 
     - name: Build ${{ inputs.name }}
-      uses: docker/build-push-action@v5
+      uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
       with:
         context: .
         file: Dockerfile
@@ -37,14 +37,18 @@ runs:
         outputs: ./out
         target: ${{ inputs.target }}
 
-    - run: sha256sum out/${{ inputs.name }}
+    - run: sha256sum "out/$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
-    - run: mv out/${{ inputs.name }} ${{ inputs.name }}
+    - run: mv "out/$NAME" "$NAME"
+      env:
+        NAME: ${{ inputs.name }}
       shell: bash
 
     - name: 'Upload ${{ inputs.name }}'
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
       with:
         # name is the name used to display and retrieve the artifact
         name: ${{ inputs.name }}

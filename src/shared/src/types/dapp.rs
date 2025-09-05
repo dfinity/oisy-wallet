@@ -2,6 +2,8 @@ use candid::{CandidType, Deserialize};
 
 use crate::types::Version;
 
+pub const MAX_DAPP_ID_LIST_LENGTH: usize = 1000;
+
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct DappCarouselSettings {
     pub hidden_dapp_ids: Vec<String>,
@@ -17,6 +19,7 @@ pub enum AddDappSettingsError {
     DappIdTooLong,
     UserNotFound,
     VersionMismatch,
+    MaxHiddenDappIds,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

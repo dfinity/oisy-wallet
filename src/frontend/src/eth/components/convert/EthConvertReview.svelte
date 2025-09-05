@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
@@ -15,8 +16,12 @@
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
-	<EthFeeDisplay slot="fee" />
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
+	<EthFeeDisplay slot="fee">
+		{#snippet label()}
+			<Html text={$i18n.fee.text.convert_fee} />
+		{/snippet}
+	</EthFeeDisplay>
 
 	<div slot="info-message" class="mt-4">
 		<MessageBox>

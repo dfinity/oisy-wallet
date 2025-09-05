@@ -1,4 +1,4 @@
-import { testnets } from '$lib/derived/testnets.derived';
+import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
 	mockNetworksSettings,
@@ -14,12 +14,14 @@ describe('testnets.derived', () => {
 	describe('testnets', () => {
 		it('should return false when user profile is not set', () => {
 			userProfileStore.reset();
-			expect(get(testnets)).toBe(false);
+
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 
 		it('should return false when settings are not set', () => {
 			userProfileStore.set({ certified, profile: { ...mockUserProfile, settings: [] } });
-			expect(get(testnets)).toBe(false);
+
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 
 		it('should return the value of show testnets settings', () => {
@@ -33,7 +35,8 @@ describe('testnets.derived', () => {
 					})
 				}
 			});
-			expect(get(testnets)).toBe(true);
+
+			expect(get(testnetsEnabled)).toBeTruthy();
 
 			userProfileStore.set({
 				certified,
@@ -45,7 +48,8 @@ describe('testnets.derived', () => {
 					})
 				}
 			});
-			expect(get(testnets)).toBe(false);
+
+			expect(get(testnetsEnabled)).toBeFalsy();
 		});
 	});
 });

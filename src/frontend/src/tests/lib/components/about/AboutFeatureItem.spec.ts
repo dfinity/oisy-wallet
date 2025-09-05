@@ -10,7 +10,8 @@ describe('AboutFeatureItem', () => {
 		const { getByText } = render(AboutFeatureItem, {
 			props: {
 				title: mockTitle,
-				description: mockDescription
+				description: mockDescription,
+				icon: () => ''
 			}
 		});
 
@@ -25,7 +26,8 @@ describe('AboutFeatureItem', () => {
 		const { getByText } = render(AboutFeatureItem, {
 			props: {
 				title: titleWithPlaceholder,
-				description: descriptionWithPlaceholder
+				description: descriptionWithPlaceholder,
+				icon: () => ''
 			}
 		});
 

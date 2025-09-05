@@ -10,14 +10,7 @@ export default {
 		},
 		screens: {
 			...defaultTheme.screens,
-			// we need to use rem instead of px because the default tailwind values changed to rem,
-			// and mixing units breaks custom screen definitions
-			xs: '28rem', // 448px
-			'1.5md': '56rem', // 896px
-			'1.5lg': '72rem', // 1152px
-			'1.5xl': '88rem', // 1408px
-			'2.5xl': '108rem', // 1728px
-			'h-md': { raw: '(max-height: 68rem)' } // ~1090px
+			...themeVariables.screens
 		},
 		colors: {
 			// base colors, can be left in
@@ -41,7 +34,11 @@ export default {
 			textColor: themeVariables.foreground,
 			backgroundImage: {
 				'trump-token-hero-image':
-					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)'
+					'url(/images/trump-token-hero-image.webp), linear-gradient(to bottom, #232bcc, #000797)',
+				'vchf-token-hero-image':
+					'url(/images/vchf-token-hero-image.webp), radial-gradient(#DA291C, #AD1207)',
+				'veur-token-hero-image':
+					'url(/images/veur-token-hero-image.webp), linear-gradient(180deg, #00319E, #00319E)'
 			},
 			backgroundSize: {
 				'size-200': '200% 200%'

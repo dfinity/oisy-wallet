@@ -18,6 +18,6 @@ export const mockCkBtcPendingUtxoTransaction: IcTransactionUi = {
 	status: 'pending',
 	txExplorerUrl: `${BTC_MAINNET_EXPLORER_URL}/tx/${utxoTxIdToString(mockPendingUtxo.outpoint.txid)}`,
 	type: 'receive',
-	typeLabel: 'transaction.label.receiving_twin_token',
+	typeLabel: 'transaction.label.converting_twin_token',
 	value: mockPendingUtxo.value - mockCkBtcMinterInfo.kyt_fee
 };

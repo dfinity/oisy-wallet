@@ -5,12 +5,17 @@ on:
   merge_group:
   workflow_dispatch:
 
+permissions: {}
+
 jobs:
   generate:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Create GitHub App Token
-        uses: actions/create-github-app-token@v1
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
         id: app-token
         continue-on-error: true
         with:
@@ -20,23 +25,30 @@ jobs:
       - name: Check if commits can be added
         id: check_can_add_commit
         run: |
-          echo steps.app-token.outputs.token null ${{ steps.app-token.outputs.token == null}}
-          echo steps.app-token.outputs.token empty ${{ steps.app-token.outputs.token == ''}}
-          echo "can_add_commit=${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}" >> $GITHUB_OUTPUT
+          echo steps.app-token.outputs.token null $TOKEN_IS_NULL
+          echo steps.app-token.outputs.token empty $TOKEN_IS_EMPTY
+          echo "can_add_commit=$CAN_ADD_COMMIT" >> $GITHUB_OUTPUT
+        env:
+          TOKEN_IS_NULL: ${{ steps.app-token.outputs.token == null }}
+          TOKEN_IS_EMPTY: ${{ steps.app-token.outputs.token == '' }}
+          CAN_ADD_COMMIT: ${{ steps.app-token.outputs.token != '' && github.event_name == 'pull_request' }}
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'true'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
 
       - name: Checkout code
         if: steps.check_can_add_commit.outputs.can_add_commit == 'false'
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
         with:
           filters: |
@@ -69,23 +81,15 @@ jobs:
         uses: ./.github/actions/prepare
 
       - name: Install rust
-        uses: ./.github/actions/install-rust
+        run: scripts/setup rust
 
       - name: Install dfx
         if: steps.changes.outputs.src == 'true'
-        uses: dfinity/setup-dfx@main
+        uses: dfinity/setup-dfx@e50c04f104ee4285ec010f10609483cf41e4d365 # main
 
-      - name: Install binstall
+      - name: Install other tools
         if: steps.changes.outputs.src == 'true'
-        run: scripts/setup cargo-binstall
-
-      - name: Install candid-extractor
-        if: steps.changes.outputs.src == 'true'
-        run: cargo binstall --no-confirm candid-extractor@0.1.4 && candid-extractor --version
-
-      - name: Install didc
-        if: steps.changes.outputs.src == 'true'
-        run: ./scripts/setup didc
+        run: scripts/setup cargo-binstall candid-extractor didc
 
       - name: Generate bindings
         if: steps.changes.outputs.src == 'true'
@@ -103,11 +107,10 @@ jobs:
 
       - name: Commit bindings
         if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'true' && steps.check_changes.outputs.changes_detected == 'true'
-        uses: EndBug/add-and-commit@v9
+        uses: ./.github/actions/add-and-commit
         with:
-          add: .
-          default_author: github_actions
           message: '🤖 Apply bindings changes'
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Provide diff
         if: steps.changes.outputs.src == 'true' && steps.check_can_add_commit.outputs.can_add_commit == 'false' && steps.check_changes.outputs.changes_detected == 'true'
@@ -120,8 +123,12 @@ jobs:
     needs: ['generate']
     if: ${{ always() }}
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/needs_success
         with:
           needs: '${{ toJson(needs) }}'

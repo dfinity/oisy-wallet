@@ -25,9 +25,11 @@ lazy_static = { workspace = true }
 pretty_assertions = { workspace = true }
 serde = { workspace = true }
 serde_bytes = { workspace = true }
+sha2 = { workspace = true }
 shared = { path = "../shared" }
 
 [dev-dependencies]
+candid_parser = { workspace = true }
 lazy_static = { workspace = true }
 pocket-ic = { workspace = true }
 

@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
 
-use crate::types::Version;
+use crate::types::{network::marker_trait::Network, Version};
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct NetworkSettings {
@@ -12,6 +12,7 @@ pub struct NetworkSettings {
     pub is_testnet: bool,
 }
 
+/// A flat list of logical networks.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
 pub enum NetworkSettingsFor {
     #[default]
@@ -22,10 +23,82 @@ pub enum NetworkSettingsFor {
     EthereumMainnet,
     EthereumSepolia,
     SolanaMainnet,
-    SolanaTestnet,
     SolanaDevnet,
     SolanaLocal,
+    BaseMainnet,
+    BaseSepolia,
+    BscMainnet,
+    BscTestnet,
+    PolygonMainnet,
+    PolygonAmoy,
+    ArbitrumMainnet,
+    ArbitrumSepolia,
 }
+
+/// A list of logical networks grouped by type.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
+pub enum NetworkId {
+    InternetComputer(ICPNetworkId),
+    Bitcoin(BitcoinNetworkId),
+    Ethereum(EthereumNetworkId),
+    Solana(SolanaNetworkId),
+}
+impl Network for NetworkId {}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum ICPNetworkId {
+    #[default]
+    Mainnet,
+    Local,
+}
+impl Network for ICPNetworkId {}
+
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+pub enum BitcoinNetworkId {
+    #[default]
+    Mainnet,
+}
+impl Network for BitcoinNetworkId {}
+
+/// The authoritative list of EVM networks.
+///
+/// List of chain IDs: <https://chainlist.org>
+///
+/// List of RPC endpoints: <https://www.alchemy.com/chain-connect>
+///
+/// Note: This supercedes the `UserToken ChainId` type that specifies an integer but not the
+/// corresponding network name.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[repr(u64)]
+#[non_exhaustive] // Note: This allows chain IDs to be used that are not yet included in this list.
+pub enum EthereumNetworkId {
+    #[default]
+    Mainnet = 1,
+    BaseMainnet = 8_453,
+    BaseSepolia = 84_532,
+    BNBSmartChainMainnet = 56,
+    BNBSmartChainTestnet = 97,
+    PolygonMainnet = 137,
+    PolygonAmoy = 80_002,
+    Sepolia = 11_155_111,
+    ArbitrumMainnet = 42_161,
+    ArbitrumSepolia = 421_614,
+}
+impl Network for EthereumNetworkId {}
+/// Solana networks, or "clusters".
+///
+/// See: <https://docs.solana.com/clusters> for more information, including RPC endpoints.
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+pub enum SolanaNetworkId {
+    #[default]
+    Mainnet,
+    Testnet,
+    Devnet,
+    Local,
+}
+impl Network for SolanaNetworkId {}
 
 pub type NetworkSettingsMap = BTreeMap<NetworkSettingsFor, NetworkSettings>;
 
@@ -41,13 +114,13 @@ pub struct NetworksSettings {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveNetworksSettingsError {
+pub enum UpdateNetworksSettingsError {
     UserNotFound,
     VersionMismatch,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveTestnetsSettingsError {
+pub enum SetTestnetsSettingsError {
     UserNotFound,
     VersionMismatch,
 }
@@ -86,11 +159,6 @@ pub mod marker_trait {
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct SolanaDevnet {}
     impl Network for SolanaDevnet {}
-
-    /// A marker trait, used to indicate that a type is to be used with the Solana testnet.
-    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-    pub struct SolanaTestnet {}
-    impl Network for SolanaTestnet {}
 
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct SolanaLocal {}

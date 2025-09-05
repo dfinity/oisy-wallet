@@ -14,7 +14,7 @@ const initKongSwapTokensStore = (): KongSwapTokensStore => {
 	return {
 		subscribe,
 
-		setKongSwapTokens(data: KongSwapTokensStoreData) {
+		setKongSwapTokens: (data: KongSwapTokensStoreData) => {
 			set(data);
 		}
 	};

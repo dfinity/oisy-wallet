@@ -11,7 +11,11 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+	}
+
+	let { token }: Props = $props();
 
 	const isDisabled = (): boolean => $ethAddressNotCertified || $metamaskNotInitialized;
 
@@ -28,18 +32,19 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
-	<ReceiveModal
-		slot="modal"
-		address={$networkAddress}
-		addressToken={token}
-		network={token.network}
-		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
-	>
-		<svelte:fragment slot="content">
-			{#if $networkEthereum}
-				<EthReceiveMetamask />
-			{/if}
-		</svelte:fragment>
-	</ReceiveModal>
+<ReceiveButtonWithModal isOpen={$modalEthReceive} open={openReceive}>
+	{#snippet modal()}
+		<ReceiveModal
+			address={$networkAddress}
+			addressToken={token}
+			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+			network={token.network}
+		>
+			{#snippet content()}
+				{#if $networkEthereum}
+					<EthReceiveMetamask />
+				{/if}
+			{/snippet}
+		</ReceiveModal>
+	{/snippet}
 </ReceiveButtonWithModal>

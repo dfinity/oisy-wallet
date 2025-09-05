@@ -1,385 +1,527 @@
 type Account = record {
-    owner : principal;
-    subaccount : opt blob;
+	owner : principal;
+	subaccount : opt blob
 };
+
+type AccountId_Any = text;
 
 type AccountSnapshotFor = variant {
-  Icrc : AccountSnapshot_Icrc;
-  SplDevnet : AccountSnapshot_Spl;
-  SplMainnet : AccountSnapshot_Spl;
+	Any : AccountSnapshot_Any;
+	Icrc : AccountSnapshot_Icrc;
+	SplDevnet : AccountSnapshot_Spl;
+	SplMainnet : AccountSnapshot_Spl
+};
+type AccountSnapshot_Any = record {
+	decimals : nat8;
+	token_address : AnyToken;
+	network : AnyNetwork;
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_Any;
+	account : AccountId_Any;
+	timestamp : nat64;
+	amount : nat
 };
 type AccountSnapshot_Icrc = record {
-  decimals : nat8;
-  token_address : principal;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction_Icrc;
-  account : principal;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : principal;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_Icrc;
+	account : principal;
+	timestamp : nat64;
+	amount : nat
 };
 type AccountSnapshot_Spl = record {
-  decimals : nat8;
-  token_address : text;
-  network : record {};
-  approx_usd_per_token : float64;
-  last_transactions : vec Transaction_Spl;
-  account : text;
-  timestamp : nat64;
-  amount : nat64;
+	decimals : nat8;
+	token_address : text;
+	network : record {};
+	approx_usd_per_token : float64;
+	last_transactions : vec Transaction_Spl;
+	account : text;
+	timestamp : nat64;
+	amount : nat
 };
 
-type AirDropConfig = record {
-    /// Max number of participants
-    number_of_participants : nat64;
-    /// When to start the timestamp
-    start_timestamp_ns : nat64;
-    /// The tokens to distribute during the airdrop
-    token_configs : vec TokenConfig;
+/// A network on which a token can be found.
+type AnyNetwork = record {
+	network_id : text;
+	testnet_for : opt text
 };
 
-/// Batch sizes for the processing
-type BatchSizes = record {
-    user_fetching: nat16;
-    sprinkle: nat16;
-    block_processing: nat16;
-    airdrop: nat16;
-    block_fetching: nat16;
+/// A token on a specified network.
+type AnyToken = record {
+	token_symbol : text;
+	wraps : opt text
 };
+
+///
+type CampaignEligibility = record {
+	///
+	available : bool;
+	///
+	eligible : bool;
+	///
+	criteria : vec CriterionEligibility;
+	///
+};
+/// A span of time.
 type CandidDuration = variant {
-  Minutes : nat64;
-  Seconds : nat64;
-  Days : nat64;
-  Forever;
-  Hours : nat64;
-  Nanoseconds : nat64;
+	Minutes : nat64;
+	Seconds : nat64;
+	Days : nat64;
+	Forever;
+	Hours : nat64;
+	Nanoseconds : nat64
+};
+type ClaimedVipReward = record {
+	/// The campaign ID
+	campaign_id : text
 };
 type ClaimVipRewardResponse = variant {
-    /// The code has been claimed already
-    AlreadyClaimed;
-    /// The reward code
-    Success;
-    /// The code is invalid
-    InvalidCode;
+	/// The code has been claimed already
+	AlreadyClaimed;
+	/// The reward code
+	Success;
+	/// The code is invalid
+	InvalidCode
 };
 
 type Config = record {
-  usage_awards_config : opt UsageAwardConfig;
-    batch_sizes: opt BatchSizes;
-    airdrop_config : opt AirDropConfig;
-    /// List of index canisters to track the user's balance
-    /// (in addition to the ledger index configured in the sprinkle)
-    /// Useful to shorten the time for this canister to sync (and for testing).
-    index_canisters: vec principal;
-    /// The VIP configuration
-    vip_config: opt VipConfig;
-    /// The interval at which the canister make progress in seconds.
-    /// Trade-off between the canister's responsiveness and the cycles consumed.
-    processing_interval_s: opt nat16;
-    /// Admin principals that have privileges to _read_ configuration and internal status.
-    readonly_admins: vec principal;
-    /// Oisy canister to fetch users from
-    oisy_canister: opt principal;
+	usage_awards_config : opt UsageAwardConfig;
+	/// The VIP configuration
+	vip_config : opt VipConfig;
+	/// VIP Campaigns
+	vip_campaigns : opt vec record {
+		/// The VIP campaign name
+		text;
+		/// The campaign configuration
+		VipConfig
+	};
+	/// Admin principals that have privileges to _read_ configuration and internal status.
+	readonly_admins : vec principal;
+	/// Oisy canister to fetch users from
+	oisy_canister : opt principal
+};
+/// A requirement that a user must satisfy to be eligible for an airdrop.
+type Criterion = variant {
+	/// The user must have made at least this many transactions.
+	MinTransactions : record { count : nat32; duration : CandidDuration };
+	/// The user must have made at least this many successful referrals.
+	MinReferrals : record { count : nat32 };
+	/// The user must have logged in a certain number of times recently.
+	MinLogins : record {
+		/// "recent" is defined by this duration.
+		duration : CandidDuration;
+		/// The user must have logged in at least this many times recently.
+		count : nat32;
+		/// The assumed session length.
+		session_duration : opt CandidDuration
+	};
+	/// The minimum total assets at the last valuation.
+	MinTotalAssetsUsd : record { usd : nat32 };
+	/// The minimum number of distinct tokens that the user must hold.
+	MinTokens : record { count : nat32 };
+	/// The minimum time since the user's last sprinkles award.
+	Hangover : record {
+		/// The time that must pass before a sprinkled user can be eligible again.
+		duration : CandidDuration
+	};
+	/// The user must be eligible for this campaign.
+	EligibleForCampaign : record { campaign_name : text };
+	/// The user must have made at least this many referrals.
+	MinEligibleReferrals : record { count : nat32; campaign_name : text }
+};
+/// Whether a user satisfies a given criterion.
+type CriterionEligibility = record {
+	/// Whether the user satisfies the criterion
+	satisfied : bool;
+	///
+	criterion : Criterion;
+	///
+};
+///
+type EligibilityError = variant {
+	///
+	NotAuthorized;
+	///
+};
+///
+type EligibilityReport = record {
+	///
+	campaigns : vec record {
+		///
+		text;
+		///
+		CampaignEligibility;
+		///
+	};
+	///
+};
+///
+type EligibilityResponse = variant {
+	///
+	Ok : EligibilityReport;
+	///
+	Err : EligibilityError;
+	///
 };
 type LastActivityHistogram = record {
-  older : nat32;
-  unknown : nat32;
-  buckets : vec LastActivityHistogramBucket;
+	older : nat32;
+	unknown : nat32;
+	buckets : vec LastActivityHistogramBucket
 };
 type LastActivityHistogramBucket = record {
-  start_ns : nat64;
-  count : nat32;
+	start_ns : nat64;
+	count : nat32
 };
 type LastActivityHistogramRequest = record {
-  bucket_count : nat32;
-  bucket_duration : CandidDuration;
+	bucket_count : nat32;
+	bucket_duration : CandidDuration
 };
 type LastActivityHistogramResponse = record {
-  request_time : nat64;
-  request : LastActivityHistogramRequest;
-  response : LastActivityHistogram;
+	request_time : nat64;
+	request : LastActivityHistogramRequest;
+	response : LastActivityHistogram
 };
 
 /// The ledger configuration used for sending funds and checking balances
 type LedgerConfig = record {
-    /// The ledger index indexing `.ledger`
-    ledger_index: principal;
-    /// The ledger canister to use
-    ledger: principal;
-    /// The account on `.ledger` to send funds _from_
-    ledger_account: Account;
+	/// The ledger index indexing `.ledger`
+	ledger_index : principal;
+	/// The ledger canister to use
+	ledger : principal;
+	/// The account on `.ledger` to send funds _from_
+	ledger_account : Account
 };
 
 type NewVipRewardResponse = variant {
-    /// The VIP is not logged in.
-    Anonymous;
-    /// User is not a VIP
-    NotImportantPerson;
-    /// The reward code
-    VipReward: VipReward;
+	/// The VIP is not logged in.
+	Anonymous;
+	/// User is not a VIP
+	NotImportantPerson;
+	/// The reward code
+	VipReward : VipReward;
+	/// The requested VIP campaign doesn't exist.
+	UnknownCampaign
 };
 type PublicAirdropStatus = variant {
-    /// The airdrop is currently ongoing
-    Ongoing: record {
-        /// The total number of airdrops.
-        total_airdrops: nat64;
-        /// The remaining number of airdrops.
-        remaining_airdrops: nat64;
-    };
-    /// The airdrop has been completed
-    Completed: record {
-      /// The total number of airdrops.
-      total_airdrops: nat64;
-    };
-    /// The airdrop will start in the future
-    Upcoming;
-};
-type PublicRewardsInfo = record {
-    /// The status of the airdrop. If absent, then no airdrop is configured (and none happened in the past).
-    airdrop : opt PublicAirdropStatus;
-    /// Information about the last sprinkle event, if any.
-    last_sprinkle : opt PublicSprinkleInfo;
+	/// The airdrop is currently ongoing
+	Ongoing : record {
+		/// The total number of airdrops.
+		total_airdrops : nat64;
+		/// The remaining number of airdrops.
+		remaining_airdrops : nat64
+	};
+	/// The airdrop has been completed
+	Completed : record {
+		/// The total number of airdrops.
+		total_airdrops : nat64
+	};
+	/// The airdrop will start in the future
+	Upcoming
 };
 type PublicSprinkleInfo = record {
-    /// When a sprinkle event was scheduled
-    /// in nanoseconds since the EPOCH.
-    timestamp_ns: nat64;
-    /// Total number of tokens that were sprinkled
-    total_amount: nat;
-    /// The number of users that were successfully sprinkled
-    n_sprinkled_users: nat64;
-    /// Ledger canister id of the token that was sprinkled
-    ledger: principal;
+	/// When a sprinkle event was scheduled
+	/// in nanoseconds since the EPOCH.
+	timestamp_ns : nat64;
+	/// Total number of tokens that were sprinkled
+	total_amount : nat;
+	/// The number of users that were successfully sprinkled
+	n_sprinkled_users : nat64;
+	/// Ledger canister id of the token that was sprinkled
+	ledger : principal
 };
 /// A user's own referral code & basic stats.
 type ReferrerInfo = record {
-    /// A short pseudonymous identifier for the referrer.
-    referral_code : nat32;
-    /// The number of times the referral code has been used.
-    num_referrals : opt nat32;
+	/// A short pseudonymous identifier for the referrer.
+	referral_code : nat32;
+	/// The number of times the referral code has been used.
+	num_referrals : opt nat32
 };
 type RewardInfo = record {
-    /// The name of the reward
-    name : opt text;
-    /// Ledger canister id of the token that was awarded.
-    ledger : principal;
-    /// The timestamp when the reward was awarded.
-    timestamp : nat64;
-    /// The amount of tokens awarded.
-    amount : nat;
+	/// The name of the reward
+	name : opt text;
+	/// The campaign name of the reward
+	campaign_name : opt text;
+	/// The campaign id of the reward
+	campaign_id : text;
+	/// Ledger canister id of the token that was awarded.
+	ledger : principal;
+	/// The timestamp when the reward was awarded.
+	timestamp : nat64;
+	/// The amount of tokens awarded.
+	amount : nat
+};
+/// Possible errors for `set_referrer()`
+type SetReferrerError = variant {
+	/// The caller is attempting to refer themselves.
+	SelfReferral;
+	/// The caller already has a different referrer.
+	///
+	/// (Repeatedly setting the referrer to the same value will cause no issues.)
+	AlreadyHasReferrer;
+	/// The referrer code is unknown.
+	UnknownReferrer;
+	/// Only new users may set a referrer.
+	///
+	/// A small allowance for existing state is made, in case the front-end
+	/// sends a snapshot before setting the referrer.
+	NotNewUser;
+	/// The caller is anonymous.
+	AnonymousCaller
+};
+/// Result of calling `set_referrer()`
+type SetReferrerResponse = variant {
+	/// The referrer was set successfully.
+	Ok;
+	/// Ther was an error setting the referrer.
+	Err : SetReferrerError
 };
 type SetSprinkleTimestampArg = record {
-    /// The total amount that will be distributed across all users in the current/next sprinkle
-    total_sprinkle_amount: nat;
-    /// Minimum amount that must be in any user's account for the user to be eligible
-    /// for the current/next sprinkle
-    min_account_amount: nat;
-    /// The amount that will be distributed to selected users in the current/next sprinkle
-    user_sprinkle_amount: nat;
-    /// The timestamp at which the current/next sprinkle will start (if any)
-    /// in nanos since the epoch
-    timestamp: nat64;
-    /// Ledger configuration used in the current/next sprinkle
-    ledger_config: LedgerConfig;
+	/// The total amount that will be distributed across all users in the current/next sprinkle
+	total_sprinkle_amount : nat;
+	/// Minimum amount that must be in any user's account for the user to be eligible
+	/// for the current/next sprinkle
+	min_account_amount : nat;
+	/// The amount that will be distributed to selected users in the current/next sprinkle
+	user_sprinkle_amount : nat;
+	/// The timestamp at which the current/next sprinkle will start (if any)
+	/// in nanos since the epoch
+	timestamp : nat64;
+	/// Ledger configuration used in the current/next sprinkle
+	ledger_config : LedgerConfig
 };
 type SprinkleEvent = record {
-    /// The number of users that were successfully sprinkled
-    n_sprinkled_users: nat64;
-    /// When a sprinkle event was scheduled (via set_sprinkle_timestamp)
-    /// in nanoseconds since the EPOCH.
-    timestamp_scheduled: nat64;
-    /// The number of users that eligible to get sprinkled during this sprinkle event
-    n_eligible_users: nat64;
-    /// The number of users that were selected to receive sprinkle funds during this sprinkle event
-    /// (may be higher than actual number of users that actually received funds due to potential
-    /// transaction errors)
-    n_selected_users: nat64;
+	/// The number of users that were successfully sprinkled
+	n_sprinkled_users : nat64;
+	/// When a sprinkle event was scheduled (via set_sprinkle_timestamp)
+	/// in nanoseconds since the EPOCH.
+	timestamp_scheduled : nat64;
+	/// The number of users that eligible to get sprinkled during this sprinkle event
+	n_eligible_users : nat64;
+	/// The number of users that were selected to receive sprinkle funds during this sprinkle event
+	/// (may be higher than actual number of users that actually received funds due to potential
+	/// transaction errors)
+	n_selected_users : nat64
 };
 /// The status of the sprinkle
 type SprinkleStatus = record {
-    /// The next scheduled event, if any
-    next_timestamp: opt nat64;
-    /// A list of past sprinkle events that have been completed
-    past_events: vec SprinkleEvent;
+	/// The next scheduled event, if any
+	next_timestamp : opt nat64;
+	/// A list of past sprinkle events that have been completed
+	past_events : vec SprinkleEvent
 };
+type StatsKeyType = variant { TokenGroup; Network; TokenSymbol };
+type StatsRequest = record { by : StatsKeyType };
+type StatsResponse = record {
+	request : StatsRequest;
+	stats : vec record { text; StatsValue }
+};
+type StatsValue = record { user_count : nat64; assets_usd : float64 };
 type StatusResponse = record {
-    /// The latest last_updated timestamp of a fetched Oisy user
-    latest_oisy_user_timestamp: opt nat64;
-    /// Timestamps when the last successful fetch from each index canister was initiated.
-    last_block_fetch_timestamp: vec record {
-      principal;
-      nat64;
-    };
-    /// The number of blocks that are currently in the block buffer
-    num_buffered_blocks: nat64;
-    /// Processed block height per ledger index canister
-    processed_block_height: vec record {
-      principal;
-      nat64;
-    };
-    /// The sprinkle status
-    sprinkle_status: SprinkleStatus;
+	/// The latest last_updated timestamp of a fetched Oisy user
+	latest_oisy_user_timestamp : opt nat64;
+	/// Timestamps when the last successful fetch from each index canister was initiated.
+	last_block_fetch_timestamp : vec record {
+		principal;
+		nat64
+	};
+	/// The number of blocks that are currently in the block buffer
+	num_buffered_blocks : nat64;
+	/// Processed block height per ledger index canister
+	processed_block_height : vec record {
+		principal;
+		nat64
+	};
+	/// The sprinkle status
+	sprinkle_status : SprinkleStatus
 };
 type TokenConfig = record {
-    /// The amount of tokens to distribute per user.
-    amount_per_user : nat;
-    /// Account that holds the tokens for the airdrop.
-    /// The rewards canister will use `icrc2_transfer_from` to distribute the tokens.
-    account : Account;
-    /// The ledger canister that manages the token.
-    ledger_canister : principal;
+	/// The amount of tokens to distribute per user.
+	amount_per_user : nat;
+	/// Account that holds the tokens for the airdrop.
+	/// The rewards canister will use `icrc2_transfer_from` to distribute the tokens.
+	account : Account;
+	/// The ledger canister that manages the token.
+	ledger_canister : principal
+};
+type Transaction_Any = record {
+	transaction_type : TransactionType;
+	network : AnyNetwork;
+	counterparty : AccountId_Any;
+	timestamp : nat64;
+	amount : nat
 };
 type Transaction_Icrc = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : principal;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : principal;
+	timestamp : nat64;
+	amount : nat
 };
 type TransactionType = variant {
-  Send;
-  Receive;
+	Send;
+	Receive
 };
 type Transaction_Spl = record {
-  transaction_type : TransactionType;
-  network : record {};
-  counterparty : text;
-  timestamp : nat64;
-  amount : nat64;
+	transaction_type : TransactionType;
+	network : record {};
+	counterparty : text;
+	timestamp : nat64;
+	amount : nat
 };
+
 type UsageAndHolding = record {
-  approx_usd_valuation : float64;
-  last_activity_ns : opt nat64;
+	// Account valuation at the time of the last snapshot.
+	approx_usd_valuation : float64;
+	// Time of account creation or first recorded activity.
+	first_activity_ns : opt nat64;
+	// Time of last recorded activity.
+	last_activity_ns : opt nat64
 };
 type UsageAwardConfig = record {
-  cycle_duration : CandidDuration;
-  awards : vec UsageAwardEvent;
-  eligibility_criteria : UsageCriteria;
+	cycle_duration : CandidDuration;
+	awards : vec UsageAwardEvent;
+	eligibility_criteria : UsageCriteria;
+	/// The campaign the award is associated with.
+	campaign_name : opt text
 };
 type UsageAwardEvent = record {
-  name : text;
-  num_events_per_cycle : nat32;
-  awards : vec TokenConfig;
-  num_users_per_event : nat32;
+	name : text;
+	num_events_per_cycle : nat32;
+	awards : vec TokenConfig;
+	num_users_per_event : nat32;
+	/// The campaign the award is associated with.
+	campaign_name : opt text
 };
 type UsageAwardState = record {
-  snapshots : vec UserSnapshot;
+	/// The last few snapshots
+	snapshots : vec UserSnapshot;
+	/// Timestamps of recent snapshots
+	snapshot_timestamps : vec nat64;
+	/// Pseudonym for user who introduced the caller to Oisy.
+	referred_by : opt nat32;
+	/// User's code for inviting others to the platform, and referral stats.
+	referrer_info : opt ReferrerInfo;
+	/// The time of the first activity.
+	first_activity_ns : opt nat64;
+	/// The time of the last activity.
+	last_activity_ns : opt nat64
 };
 type UsageAwardStats = record {
-  user_count : nat64;
-  eligible_user_count : nat64;
-  assets_usd : float64;
-  snapshot_count : nat64;
-  awarded_count : nat64;
-  award_events : nat64;
-  eligible_snapshots : nat64;
+	user_count : nat64;
+	eligible_user_count : nat64;
+	assets_usd : float64;
+	snapshot_count : nat64;
+	awarded_count : nat64;
+	award_events : nat64;
+	eligible_snapshots : nat64
 };
 type UsageCriteria = record {
-  measurement_duration : CandidDuration;
-  min_transactions : nat32;
-  min_logins : nat32;
-  min_valuation_usd : nat64;
+	criteria : vec Criterion
 };
-    ///
+///
 type UsageVsHoldingStats = record {
-    ///
-    holdings : vec UsageAndHolding;
-    ///
+	///
+	holdings : vec UsageAndHolding;
+	///
 };
-    ///
+///
 type UsageWinnersRequest = record {
-  to_ns : nat64;
-  from_ns : nat64;
-  limit : nat32;
-  after_user : opt UserDbKey;
+	to_ns : nat64;
+	from_ns : nat64;
+	limit : nat32;
+	after_user : opt UserDbKey
 };
 type UsageWinnersResponse = record {
-  last : opt UserDbKey;
-  num_checked : nat32;
-  winners : vec principal;
+	last : opt UserDbKey;
+	num_checked : nat32;
+	winners : vec principal
 };
 type UserData = record {
-    /// Airdrops the user has received
-    airdrops : vec RewardInfo;
-    /// Usage awards the user has received
-    usage_awards : opt vec RewardInfo;
-    /// The last time the user submitted a snapshot, if ever.
-    last_snapshot_timestamp : opt nat64;
-    /// Very Important Powers
-    is_vip : opt bool;
-    /// Sprinkles the user has received
-    sprinkles : vec RewardInfo;
+	/// Airdrops the user has received
+	airdrops : vec RewardInfo;
+	/// Usage awards the user has received
+	usage_awards : opt vec RewardInfo;
+	/// The last time the user submitted a snapshot, if ever.
+	last_snapshot_timestamp : opt nat64;
+	/// Very Important Powers
+	is_vip : opt bool;
+	/// Super Important Powers
+	///
+	/// Values are: Campaign IDs such as "vip" or "gold".
+	superpowers : opt vec text;
+	/// Sprinkles the user has received
+	sprinkles : vec RewardInfo
 };
 type UserDbKey = record {
-pouh_verified : bool;
-oisy_user : principal;
+	pouh_verified : bool;
+	oisy_user : principal
 };
 type UserSnapshot = record {
-    accounts : vec AccountSnapshotFor;
-    timestamp : opt nat64;
+	accounts : vec AccountSnapshotFor;
+	timestamp : opt nat64
 };
 type VipConfig = record {
-    code_validity_duration : nat64;
-    vips : vec principal;
-    rewards : vec TokenConfig;
+	code_validity_duration : nat64;
+	vips : vec principal;
+	rewards : vec TokenConfig
 };
 type VipReward = record {
-    /// The reward code
-    code : text;
+	/// The reward code
+	code : text
 };
 type VipStats = record {
-  total_rejected : nat32;
-  total_redeemed : nat32;
-  total_issued : nat32;
+	total_rejected : nat32;
+	total_redeemed : nat32;
+	total_issued : nat32
 };
 service : (opt Config) -> {
-    /// Pays usage rewards.  This is normally called internally after the random timing & user selection
-    /// has taken place.  For testing, it can be convenient to call it directly.
-    claim_usage_award : (UsageAwardEvent, principal) -> ();
-    /// Requests rewards from a VIP token.
-    claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse);
-    /// Retrieves the current configuration of the canister.
-    config : () -> (Config) query;
-    /// Configures bonuses for using & holding assets in Oisy.
-    configure_usage_awards : (UsageAwardConfig) -> ();
-    /// Configures VIP rewards
-    configure_vip : (VipConfig) -> ();
-    /// A histogram of when users were last active
-    last_activity_histogram : (LastActivityHistogramRequest) -> (
-      LastActivityHistogramResponse,
-    ) query;
-    /// Gets a VIP reward token.
-    new_vip_reward : () -> (NewVipRewardResponse);
-    /// Public endpoint to query general information with regards to rewards distributed by this canister.
-    public_rewards_info : () -> (PublicRewardsInfo) query;
-    /// Get or create referrer info for the caller.
-    referrer_info : () -> (ReferrerInfo);
-    /// Get the referrer info for a user.
-    referrer_info_for : (principal) -> (opt ReferrerInfo) query;
-    /// Provides a user's account IDs for airdrop.
-    register_airdrop_recipient : (UserSnapshot) -> ();
-    register_snapshot_for : (principal, UserSnapshot) -> ();
-    stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
-    /// Sets a timestamp for a sprinkle event in the future. The sprinkle will be executed
-  set_referrer : (nat32) -> ();
-    /// as soon as possible after the timestamp.
-    /// Gives information about the current status of the canister.
-    status : () -> (StatusResponse) query;
-    /// Runs the provided award event.  This is normally done automatically.  It can be useful
-    /// to trigger an event directly when testing.
-    trigger_usage_award_event : (UsageAwardEvent) -> ();
-    /// Usage Awards: User is eligible.
-    usage_eligible : (principal) -> (bool, bool) query;
-    /// Aggregate usage stats.
-    usage_stats : () -> (UsageAwardStats) query;
-    /// Finds winners
-    usage_winners : (opt UsageWinnersRequest) -> (UsageWinnersResponse) query;
-    /// Endpoint for users to query their information with regards to rewards distributed by this canister.
-    user_info : () -> (UserData) query;
-    /// Endpoint for admins to query information about a specific user with regards to rewards distributed by this canister.
-    user_info_for : (principal) -> (UserData) query;
-    /// Stats for an individual user
-    user_stats : (principal) -> (UsageAwardState) query;
-    /// Gets rewards stats
-    vip_stats : () -> (VipStats) query;
+	/// Pays usage rewards.  This is normally called internally after the random timing & user selection
+	/// has taken place.  For testing, it can be convenient to call it directly.
+	claim_usage_award : (UsageAwardEvent, principal) -> ();
+	/// Requests rewards from a VIP token.
+	claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse, opt ClaimedVipReward);
+	/// Retrieves the current configuration of the canister.
+	config : () -> (Config) query;
+	/// Configures bonuses for using & holding assets in Oisy.
+	configure_usage_awards : (UsageAwardConfig) -> ();
+	/// Configures VIP rewards
+	configure_vip : (VipConfig) -> ();
+	/// Configures VIP campaigns
+	configure_vips : (vec record { text; VipConfig }) -> ();
+	/// Eligibility of the caller or specified principal for airdrops.
+	eligible : (opt principal) -> (EligibilityResponse) query;
+	/// A histogram of when users were last active
+	last_activity_histogram : (LastActivityHistogramRequest) -> (
+		LastActivityHistogramResponse
+	) query;
+	/// Gets a VIP reward token for a given campaign ID.
+	new_vip_reward : (opt ClaimedVipReward) -> (NewVipRewardResponse);
+	/// Get or create referrer info for the caller.
+	referrer_info : () -> (ReferrerInfo);
+	/// Get the referrer info for a user.
+	referrer_info_for : (principal) -> (opt ReferrerInfo) query;
+	/// Provides a user's account IDs for airdrop.
+	register_airdrop_recipient : (UserSnapshot) -> ();
+	register_snapshot_for : (principal, UserSnapshot) -> ();
+	/// Sets the caller's referrer.
+	set_referrer : (nat32) -> (SetReferrerResponse);
+	stats_by : (StatsKeyType) -> (StatsResponse) query;
+	stats_usage_vs_holding : () -> (UsageVsHoldingStats) query;
+	/// Runs the provided award event.  This is normally done automatically.  It can be useful
+	/// to trigger an event directly when testing.
+	trigger_usage_award_event : (UsageAwardEvent) -> ();
+	/// Aggregate usage stats.
+	usage_stats : () -> (UsageAwardStats) query;
+	/// Finds winners
+	usage_winners : (opt UsageWinnersRequest) -> (UsageWinnersResponse) query;
+	/// Endpoint for users to query their information with regards to rewards distributed by this canister.
+	user_info : () -> (UserData) query;
+	/// Endpoint for admins to query information about a specific user with regards to rewards distributed by this canister.
+	user_info_for : (principal) -> (UserData) query;
+	/// Stats for an individual user
+	user_stats : (principal) -> (UsageAwardState) query;
+	/// Gets rewards stats
+	vip_stats : (opt text) -> (VipStats) query
 }

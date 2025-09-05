@@ -1,4 +1,4 @@
-name: 'PR checks'
+name: 'PR Checks'
 
 on:
   pull_request:
@@ -8,11 +8,15 @@ on:
       - reopened
       - synchronize
       - labeled
+  merge_group:
+
+permissions: {}
 
 jobs:
   check-pr-title:
-    name: 'check-pr-title:required'
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
     env:
       TITLE: ${{ github.event.pull_request.title }}
     steps:
@@ -30,8 +34,9 @@ jobs:
           fi
 
   check-pr-description:
-    name: 'check-pr-description:required'
     runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
     env:
       DESCRIPTION: ${{ github.event.pull_request.body }}
     steps:
@@ -43,3 +48,56 @@ jobs:
           else
               echo "PR Description passes"
           fi
+
+  check-empty-pr:
+    runs-on: ubuntu-24.04
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - name: Create GitHub App Token
+        uses: actions/create-github-app-token@a8d616148505b5069dccd32f177bb87d7f39123b # v2.1.1
+        id: app-token
+        with:
+          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
+          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ steps.app-token.outputs.token }}
+          persist-credentials: false
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin "$BASE_REF:$BASE_REF"
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+
+      - name: 'Check for changed files'
+        id: file_check
+        run: |
+          CHANGED_FILES=$(git diff "origin/$BASE_REF" HEAD --name-only | wc -l)
+          echo "Changed files: $CHANGED_FILES"
+          if [ "$CHANGED_FILES" -eq "0" ]; then
+            echo "No changes detected in PR!"
+            exit 1
+          fi
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+
+  pr-checks-pass:
+    if: always()
+    needs: ['check-pr-title', 'check-pr-description', 'check-empty-pr']
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/needs_success
+        with:
+          needs: '${{ toJson(needs) }}'

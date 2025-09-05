@@ -1,89 +1,92 @@
 <script lang="ts">
-	import { Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { allKnownIcrcTokensLedgerCanisterIds } from '$icp/derived/icrc.derived';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
-	import Token from '$lib/components/tokens/Token.svelte';
-	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { isTokenIcrc } from '$icp/utils/icrc.utils';
+	import ModalListItem from '$lib/components/common/ModalListItem.svelte';
+	import TokenModal from '$lib/components/tokens/TokenModal.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import Value from '$lib/components/ui/Value.svelte';
+	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
-	import type { Token as TokenType } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let twinToken: TokenType | undefined;
-	$: twinToken = ($token as OptionIcCkToken)?.twinToken;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
+	let { fromRoute }: Props = $props();
 
-	let ckToken: OptionIcCkToken;
-	$: ckToken = $token as OptionIcCkToken;
+	let twinToken = $derived(($pageToken as OptionIcCkToken)?.twinToken);
+	let ckToken = $derived($pageToken as OptionIcCkToken);
+
+	let knownIcrcToken = $derived(
+		nonNullish($pageToken) && isTokenIcrc($pageToken)
+			? $allKnownIcrcTokensLedgerCanisterIds.some(
+					(ledgerCanisterId) => $pageToken.ledgerCanisterId === ledgerCanisterId
+				)
+			: true
+	);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.tokens.details.title}</svelte:fragment>
+<TokenModal
+	{fromRoute}
+	isDeletable={!knownIcrcToken}
+	isEditable={!knownIcrcToken}
+	token={$pageToken}
+>
+	{#if nonNullish(twinToken)}
+		<ModalListItem>
+			{#snippet label()}
+				{$i18n.tokens.details.twin_token}
+			{/snippet}
 
-	<ContentWithToolbar>
-		{#if nonNullish($token)}
-			<Token token={$token}>
-				{#if nonNullish(twinToken)}
-					<Value ref="name">
-						<svelte:fragment slot="label">{$i18n.tokens.details.twin_token}</svelte:fragment>
-						<span class="flex items-center gap-1">
-							<output>{twinToken.name}</output>
-							<Logo
-								src={twinToken.icon}
-								alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
-								color="white"
-							/>
-						</span>
-					</Value>
-				{/if}
+			{#snippet content()}
+				<output>{twinToken.name}</output>
+				<Logo
+					alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
+					color="white"
+					src={twinToken.icon}
+				/>
+			{/snippet}
+		</ModalListItem>
+	{/if}
 
-				{#if nonNullish(ckToken)}
-					{#if nonNullish(ckToken.ledgerCanisterId)}
-						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.ledger_canister_id}</svelte:fragment
-							>
-							<output class="break-all">{ckToken.ledgerCanisterId}</output><Copy
-								value={ckToken.ledgerCanisterId}
-								text={$i18n.tokens.import.text.ledger_canister_id_copied}
-								inline
-							/>
-						</Value>
-					{/if}
+	{#if nonNullish(ckToken)}
+		{#if nonNullish(ckToken.ledgerCanisterId)}
+			<ModalListItem>
+				{#snippet label()}
+					{$i18n.tokens.import.text.ledger_canister_id}
+				{/snippet}
 
-					{#if nonNullish(ckToken.indexCanisterId)}
-						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.index_canister_id}</svelte:fragment
-							>
-							<output>{ckToken.indexCanisterId}</output><Copy
-								value={ckToken.indexCanisterId}
-								text={$i18n.tokens.import.text.index_canister_id_copied}
-								inline
-							/>
-						</Value>
-					{/if}
-
-					{#if nonNullish(ckToken.minterCanisterId)}
-						<Value ref="name">
-							<svelte:fragment slot="label"
-								>{$i18n.tokens.import.text.minter_canister_id}</svelte:fragment
-							>
-							<output>{ckToken.minterCanisterId}</output><Copy
-								value={ckToken.minterCanisterId}
-								text={$i18n.tokens.import.text.minter_canister_id_copied}
-								inline
-							/>
-						</Value>
-					{/if}
-				{/if}
-			</Token>
+				{#snippet content()}
+					<output class="break-all">{ckToken.ledgerCanisterId}</output>
+					<Copy
+						inline
+						text={$i18n.tokens.import.text.ledger_canister_id_copied}
+						value={ckToken.ledgerCanisterId}
+					/>
+				{/snippet}
+			</ModalListItem>
 		{/if}
 
-		<ButtonDone on:click={modalStore.close} slot="toolbar" />
-	</ContentWithToolbar>
-</Modal>
+		{#if nonNullish(ckToken.minterCanisterId)}
+			{@const { minterCanisterId: safeMinterCanisterId } = ckToken}
+
+			<ModalListItem>
+				{#snippet label()}
+					{$i18n.tokens.import.text.minter_canister_id}
+				{/snippet}
+
+				{#snippet content()}
+					<output>{safeMinterCanisterId}</output>
+					<Copy
+						inline
+						text={$i18n.tokens.import.text.minter_canister_id_copied}
+						value={safeMinterCanisterId}
+					/>
+				{/snippet}
+			</ModalListItem>
+		{/if}
+	{/if}
+</TokenModal>

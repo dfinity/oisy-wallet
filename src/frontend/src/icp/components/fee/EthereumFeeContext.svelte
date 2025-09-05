@@ -16,7 +16,7 @@
 		isConvertCkErc20ToErc20,
 		isConvertCkEthToEth
 	} from '$icp-eth/utils/cketh-transactions.utils';
-	import { ZERO_BI } from '$lib/constants/app.constants';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { tokenId } from '$lib/derived/token.derived';
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
@@ -53,7 +53,7 @@
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
 	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = undefined;
 	$: maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
-		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO_BI)
+		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
 		: undefined;
 
 	let maxTransactionFee: bigint | undefined = undefined;
@@ -75,7 +75,7 @@
 		store.setFee(null);
 	};
 
-	$: maxTransactionFee, updateContext();
+	$: (maxTransactionFee, updateContext());
 
 	const loadFee = async () => {
 		clearTimer();
@@ -97,7 +97,7 @@
 		timer = setInterval(load, 30000);
 	};
 
-	$: networkId, (async () => await loadFee())();
+	$: (networkId, (async () => await loadFee())());
 
 	let timer: NodeJS.Timeout | undefined;
 

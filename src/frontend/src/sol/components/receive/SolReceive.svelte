@@ -8,37 +8,32 @@
 	import {
 		solAddressDevnetStore,
 		solAddressLocalnetStore,
-		solAddressMainnetStore,
-		solAddressTestnetStore,
-		type StorageAddressData
+		solAddressMainnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { SolAddress } from '$lib/types/address';
 	import type { Token } from '$lib/types/token';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+	}
 
-	let addressData: StorageAddressData<SolAddress>;
-	//TODO consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
-	$: addressData = isNetworkIdSOLTestnet($networkId)
-		? $solAddressTestnetStore
-		: isNetworkIdSOLDevnet($networkId)
+	let { token }: Props = $props();
+
+	// TODO: consolidate this logic together with btc into $networkAddress like it's done for ICP and ETH
+	let addressData = $derived(
+		isNetworkIdSOLDevnet($networkId)
 			? $solAddressDevnetStore
 			: isNetworkIdSOLLocal($networkId)
 				? $solAddressLocalnetStore
-				: $solAddressMainnetStore;
+				: $solAddressMainnetStore
+	);
 
 	const isDisabled = (): boolean => isNullish(addressData) || !addressData.certified;
 
 	// TODO: PRODSEC: provide the ATA address too in the receive modal for SPL tokens
-	let address: SolAddress | undefined;
-	$: address = addressData?.data;
+	let address = $derived(addressData?.data);
 
 	const openReceive = async (modalId: symbol) => {
 		if (isDisabled()) {
@@ -53,12 +48,13 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalSolReceive}>
-	<ReceiveModal
-		slot="modal"
-		{address}
-		addressToken={token}
-		network={token.network}
-		copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
-	/>
+<ReceiveButtonWithModal isOpen={$modalSolReceive} open={openReceive}>
+	{#snippet modal()}
+		<ReceiveModal
+			{address}
+			addressToken={token}
+			copyAriaLabel={$i18n.receive.solana.text.solana_address_copied}
+			network={token.network}
+		/>
+	{/snippet}
 </ReceiveButtonWithModal>

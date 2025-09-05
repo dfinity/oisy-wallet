@@ -1,9 +1,46 @@
 //! Types related to the signer & topping up the cycles ledger account for use with the signer.
 
+use candid::Nat;
+use ic_cycles_ledger_client::ApproveError;
+
 use super::{CandidType, Debug, Deserialize};
+use crate::types::pow::{AllowSigningStatus, ChallengeCompletion, ChallengeCompletionError};
 /// Types related to topping up the cycles ledger account for use with the signer.
+
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum GetAllowedCyclesError {
+    FailedToContactCyclesLedger,
+    Other(String),
+}
+
+#[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+pub enum AllowSigningError {
+    Other(String),
+    FailedToContactCyclesLedger,
+    ApproveError(ApproveError),
+    PowChallenge(ChallengeCompletionError),
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct AllowSigningRequest {
+    pub nonce: u64,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct AllowSigningResponse {
+    pub status: AllowSigningStatus,
+    pub allowed_cycles: u64,
+    pub challenge_completion: Option<ChallengeCompletion>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub struct GetAllowedCyclesResponse {
+    pub allowed_cycles: Nat,
+}
+
 pub mod topup {
     use candid::Nat;
+    use serde::Serialize;
 
     use super::{CandidType, Debug, Deserialize};
     /// A request to top up the cycles ledger.
@@ -62,14 +99,14 @@ pub mod topup {
     pub const MAX_PERCENTAGE: u8 = 99;
 
     /// Possible error conditions when topping up the cycles ledger.
-    #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
     pub enum TopUpCyclesLedgerError {
         CouldNotGetBalanceFromCyclesLedger,
         InvalidArgPercentageOutOfRange { percentage: u8, min: u8, max: u8 },
         CouldNotTopUpCyclesLedger { available: Nat, tried_to_send: Nat },
     }
     /// Possible successful responses when topping up the cycles ledger.
-    #[derive(CandidType, Deserialize, Debug, Clone, Eq, PartialEq)]
+    #[derive(CandidType, Serialize, Deserialize, Debug, Clone, Eq, PartialEq)]
     pub struct TopUpCyclesLedgerResponse {
         /// The ledger balance after topping up.
         pub ledger_balance: Nat,
@@ -81,5 +118,19 @@ pub mod topup {
         pub topped_up: Nat,
     }
 
-    pub type TopUpCyclesLedgerResult = Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>;
+    #[derive(CandidType, Serialize, Deserialize, Clone, Eq, PartialEq, Debug)]
+    pub enum TopUpCyclesLedgerResult {
+        /// The cycles ledger was topped up successfully.
+        Ok(TopUpCyclesLedgerResponse),
+        /// The cycles ledger could not be topped up due to an error.
+        Err(TopUpCyclesLedgerError),
+    }
+    impl From<Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>> for TopUpCyclesLedgerResult {
+        fn from(result: Result<TopUpCyclesLedgerResponse, TopUpCyclesLedgerError>) -> Self {
+            match result {
+                Ok(res) => TopUpCyclesLedgerResult::Ok(res),
+                Err(err) => TopUpCyclesLedgerResult::Err(err),
+            }
+        }
+    }
 }

@@ -20,7 +20,7 @@ import {
 import { parseTokenId } from '$lib/validation/token.validation';
 
 describe('ic-token.schema', () => {
-	const { chainId: _, explorerUrl: __, ...mockNetwork } = SEPOLIA_NETWORK;
+	const { chainId: _, explorerUrl: __, providers: ___, ...mockNetwork } = SEPOLIA_NETWORK;
 
 	const mockToken = {
 		id: parseTokenId('Test'),
@@ -51,11 +51,13 @@ describe('ic-token.schema', () => {
 	describe('IcFeeSchema', () => {
 		it('should validate with correct data', () => {
 			const validData = mockFee;
+
 			expect(IcFeeSchema.parse(validData)).toEqual(validData);
 		});
 
 		it('should fail with invalid fee type', () => {
 			const invalidData = { fee: 1000 };
+
 			expect(() => IcFeeSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -72,6 +74,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				position: 'first'
 			};
+
 			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 
@@ -80,6 +83,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				explorerUrl: 'http://localhost:8080'
 			};
+
 			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 
@@ -88,6 +92,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				exchangeCoinId: 'test'
 			};
+
 			expect(() => IcAppMetadataSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -103,6 +108,7 @@ describe('ic-token.schema', () => {
 			const validData = {
 				ledgerCanisterId: mockCanisters.ledgerCanisterId
 			};
+
 			expect(IcCanistersSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -111,6 +117,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				ledgerCanisterId: 'abc'
 			};
+
 			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 
@@ -119,6 +126,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				indexCanisterId: 'abc'
 			};
+
 			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 
@@ -126,6 +134,7 @@ describe('ic-token.schema', () => {
 			const invalidData = {
 				indexCanisterId: IC_CKBTC_INDEX_CANISTER_ID
 			};
+
 			expect(() => IcCanistersSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -155,11 +164,13 @@ describe('ic-token.schema', () => {
 			const invalidData = {
 				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 			};
+
 			expect(() => IcCanistersStrictSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail for token with missing index canister field', () => {
 			const { indexCanisterId: _, ...tokenWithoutIndexCanisterId } = validToken;
+
 			expect(() => IcCanistersStrictSchema.parse(tokenWithoutIndexCanisterId)).toThrow();
 		});
 	});
@@ -179,6 +190,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				twinToken: { id: 'not-a-symbol' }
 			};
+
 			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrow();
 		});
 
@@ -187,6 +199,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				feeLedgerCanisterId: 123
 			};
+
 			expect(() => IcCkLinkedAssetsSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -204,6 +217,7 @@ describe('ic-token.schema', () => {
 
 		it('should fail with missing minterCanisterId', () => {
 			const { minterCanisterId: _, ...invalidData } = validData;
+
 			expect(() => IcCkMetadataSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -220,6 +234,7 @@ describe('ic-token.schema', () => {
 
 		it('should validate without Index canister', () => {
 			const { indexCanisterId: _, ...restValidData } = validData;
+
 			expect(IcInterfaceSchema.parse(restValidData)).toEqual(restValidData);
 		});
 
@@ -228,6 +243,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				ledgerCanisterId: 123
 			};
+
 			expect(() => IcInterfaceSchema.parse(invalidData)).toThrow();
 		});
 
@@ -236,6 +252,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				position: 'first'
 			};
+
 			expect(() => IcInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -257,6 +274,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				id: 'not-a-symbol'
 			};
+
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 
@@ -265,6 +283,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				fee: 1000
 			};
+
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 
@@ -273,6 +292,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				ledgerCanisterId: 123
 			};
+
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 
@@ -281,6 +301,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				position: 'first'
 			};
+
 			expect(() => IcTokenSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -304,6 +325,7 @@ describe('ic-token.schema', () => {
 				...validData,
 				id
 			};
+
 			expect(() => IcTokenWithoutIdSchema.parse(invalidData)).toThrow();
 		});
 	});
@@ -320,6 +342,7 @@ describe('ic-token.schema', () => {
 			const validData = {
 				...mockIcToken
 			};
+
 			expect(IcCkTokenSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -329,6 +352,7 @@ describe('ic-token.schema', () => {
 				twinToken: mockToken,
 				minterCanisterId: IC_CKBTC_MINTER_CANISTER_ID
 			};
+
 			expect(IcCkTokenSchema.parse(validData)).toEqual(validData);
 		});
 
@@ -337,6 +361,7 @@ describe('ic-token.schema', () => {
 				...mockIcToken,
 				twinToken: mockToken
 			};
+
 			expect(IcCkTokenSchema.parse(validData)).toEqual(validData);
 		});
 	});
@@ -359,11 +384,13 @@ describe('ic-token.schema', () => {
 				...validData,
 				ledgerCanisterId: 123
 			};
+
 			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrow();
 		});
 
 		it('should fail with incorrect IcCkMetadataSchema data', () => {
 			const { minterCanisterId: _, ...invalidData } = validData;
+
 			expect(() => IcCkInterfaceSchema.parse(invalidData)).toThrow();
 		});
 	});

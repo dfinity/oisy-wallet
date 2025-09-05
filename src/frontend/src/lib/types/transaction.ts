@@ -1,47 +1,50 @@
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import {
+import type {
 	TransactionIdSchema,
-	type TransactionStatusSchema,
-	type TransactionTypeSchema
+	TransactionStatusSchema,
+	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
 import type { Token } from '$lib/types/token';
+import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { TransactionResponse } from '@ethersproject/abstract-provider';
-import { ethers } from 'ethers';
-import * as z from 'zod';
+import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
+import type { FeeData } from 'ethers/providers';
+import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
+import type * as z from 'zod/v4';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
 export type EthersTransaction = Pick<
-	ethers.Transaction,
-	| 'hash'
-	| 'to'
-	| 'from'
-	| 'nonce'
-	| 'gasLimit'
-	| 'gasPrice'
-	| 'data'
-	| 'value'
-	| 'chainId'
-	| 'type'
-	| 'maxPriorityFeePerGas'
-	| 'maxFeePerGas'
->;
+	EthersTransactionLib,
+	'nonce' | 'gasLimit' | 'data' | 'value' | 'chainId'
+> & {
+	hash?: string;
+	from?: string;
+	to?: string;
+	gasPrice?: bigint;
+};
 
-export type Transaction = Omit<EthersTransaction, 'data'> &
-	Pick<TransactionResponse, 'blockNumber' | 'from' | 'to' | 'timestamp'> & {
+// TODO: Remove this type when `alchemy-sdk` upgrades to `ethers` v6 since `TransactionResponse` will be with BigInt
+export type TransactionResponseWithBigInt = Omit<
+	AlchemyTransactionResponse,
+	'value' | 'gasLimit' | 'gasPrice' | 'chainId'
+> &
+	Pick<EthersTransaction, 'value' | 'gasLimit' | 'gasPrice' | 'chainId'>;
+
+export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
+	Required<Pick<EthersTransaction, 'from'>> & {
+		blockNumber?: number;
+		timestamp?: number;
 		pendingTimestamp?: number;
 		displayTimestamp?: number;
+		tokenId?: number;
 	};
 
-// TODO: use FeeData type again once we upgrade to ethers v6
-export interface TransactionFeeData {
-	maxFeePerGas: bigint | null;
-	maxPriorityFeePerGas: bigint | null;
+export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;
-}
+};
 
 export type RequiredTransactionFeeData = {
 	[K in keyof Pick<
@@ -64,11 +67,17 @@ export interface TransactionUiCommon {
 	blockNumber?: number;
 }
 
+export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
+
 export type AnyTransactionUi =
 	| BtcTransactionUi
 	| EthTransactionUi
 	| IcTransactionUi
 	| SolTransactionUi;
+
+export type AnyTransactionUiWithToken = AnyTransactionUi & {
+	token: Token;
+};
 
 export type AnyTransactionUiWithCmp =
 	| { component: 'bitcoin'; transaction: BtcTransactionUi }
@@ -80,12 +89,9 @@ export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
 	token: Token;
 };
 
-export type AllTransactionUiWithCmpNonEmptyList = [
-	AllTransactionUiWithCmp,
-	...AllTransactionUiWithCmp[]
-];
+export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
 
 export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
 	string,
-	[T, ...T[]]
+	NonEmptyArray<T>
 >;

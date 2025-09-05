@@ -1,10 +1,10 @@
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 import type { CanisterOptions } from '@dfinity/utils';
 import { PrincipalTextSchema } from '@dfinity/zod-schemas';
-import * as z from 'zod';
+import type * as z from 'zod/v4';
 
 export const CanisterIdTextSchema = PrincipalTextSchema;
 
@@ -22,3 +22,10 @@ export interface CreateCanisterOptions<T> extends Omit<CanisterOptions<T>, 'cani
 	canisterId: Principal;
 	identity: Identity;
 }
+
+export type CanisterApiFunctionParamsWithCanisterId<T = unknown> = Omit<
+	CanisterApiFunctionParams<T>,
+	'canisterId'
+> & {
+	canisterId: CanisterIdText;
+};

@@ -8,7 +8,7 @@
 		type PermissionsConfirmation
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type ComponentType, getContext } from 'svelte';
+	import { type Component, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
@@ -67,7 +67,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: ComponentType; label: string }>;
+	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }>;
 	$: listItems = {
 		icrc27_accounts: {
 			icon: IconWallet,
@@ -86,7 +86,7 @@
 </script>
 
 {#if nonNullish($payload)}
-	<form in:fade on:submit={onApprove} method="POST">
+	<form method="POST" on:submit={onApprove} in:fade>
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
@@ -123,7 +123,7 @@
 		{/if}
 
 		<ButtonGroup>
-			<Button colorStyle="error" on:click={onReject}>
+			<Button colorStyle="error" onclick={onReject}>
 				{$i18n.core.text.reject}
 			</Button>
 			<Button colorStyle="success" type="submit">

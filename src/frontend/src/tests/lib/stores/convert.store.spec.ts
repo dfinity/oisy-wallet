@@ -3,7 +3,7 @@ import {
 	LOCAL_CKETH_LEDGER_CANISTER_ID,
 	LOCAL_CKUSDC_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
-import { ETHEREUM_TOKEN, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
+import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -20,7 +20,6 @@ import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
 import { get, readable } from 'svelte/store';
-import { vi } from 'vitest';
 
 const ethExchangeValue = 1;
 const icpExchangeValue = 2;
@@ -64,11 +63,11 @@ describe('convertStore', () => {
 		const icpBalance = bn2Bi;
 
 		balancesStore.set({
-			tokenId: ETHEREUM_TOKEN.id,
+			id: ETHEREUM_TOKEN.id,
 			data: { data: ethBalance, certified: true }
 		});
 		balancesStore.set({
-			tokenId: ICP_TOKEN.id,
+			id: ICP_TOKEN.id,
 			data: { data: icpBalance, certified: true }
 		});
 
@@ -88,7 +87,7 @@ describe('convertStore', () => {
 	it('should have balance for fee set if sourceToken is ERC20', () => {
 		const ethBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			id: SEPOLIA_TOKEN_ID,
 			data: { data: ethBalance, certified: true }
 		});
 
@@ -103,7 +102,7 @@ describe('convertStore', () => {
 	it('should have balance for fee set if sourceToken is ckERC20', () => {
 		const ckEthBalance = bn1Bi;
 		balancesStore.set({
-			tokenId: parseTokenId('ckETH'),
+			id: parseTokenId('ckETH'),
 			data: { data: ckEthBalance, certified: true }
 		});
 
@@ -124,7 +123,7 @@ describe('convertStore', () => {
 			certified: true
 		};
 		ckEthMinterInfoStore.set({
-			tokenId: SEPOLIA_TOKEN_ID,
+			id: ETHEREUM_TOKEN_ID,
 			data: mockCkEthMinterInfo
 		});
 
@@ -142,7 +141,7 @@ describe('convertStore', () => {
 	it('should have minter info fee set if sourceToken is ckBTC', () => {
 		const mockCkBtcMinterInfo = { data: mockCkBtcMinterInfoData, certified: true };
 		ckBtcMinterInfoStore.set({
-			tokenId: mockValidToken.id,
+			id: mockValidToken.id,
 			data: mockCkBtcMinterInfo
 		});
 

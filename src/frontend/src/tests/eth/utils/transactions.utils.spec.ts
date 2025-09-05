@@ -2,7 +2,11 @@ import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { SEPOLIA_USDC_TOKEN, USDC_TOKEN } from '$env/tokens/tokens-erc20/tokens.usdc.env';
 import type { Erc20Token } from '$eth/types/erc20';
-import { mapAddressToName, mapEthTransactionUi } from '$eth/utils/transactions.utils';
+import {
+	decodeErc20AbiDataValue,
+	mapAddressToName,
+	mapEthTransactionUi
+} from '$eth/utils/transactions.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
@@ -14,7 +18,7 @@ import {
 	mockErc20HelperContractAddress,
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import type { MinterInfo } from '@dfinity/cketh';
 
 const transaction: Transaction = {
@@ -25,12 +29,12 @@ const transaction: Transaction = {
 	nonce: 1,
 	gasLimit: ZERO,
 	value: ZERO,
-	chainId: 1
+	chainId: 1n
 };
 
 const ckMinterInfoAddresses: EthAddress[] = ['0xffff'];
 
-const $ethAddress: OptionEthAddress = '0xffff';
+const ethAddress: OptionEthAddress = '0xffff';
 
 describe('transactions.utils', () => {
 	describe('mapAddressToName', () => {
@@ -158,7 +162,7 @@ describe('transactions.utils', () => {
 		it('should map to "withdraw" when the "from" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0x1234'];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('withdraw');
 		});
@@ -166,32 +170,32 @@ describe('transactions.utils', () => {
 		it('should map to "deposit" when the "to" address is in ckMinterInfoAddresses', () => {
 			const ckMinterInfoAddresses: EthAddress[] = ['0xabcd'];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('deposit');
 		});
 
-		it('should map to "send" when the "from" address matches the $ethAddress', () => {
+		it('should map to "send" when the "from" address matches the ethAddress', () => {
 			const result = mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: '0x1234'
+				ethAddress: '0x1234'
 			});
 
 			expect(result.type).toBe('send');
 		});
 
 		it('should map to "receive" when none of the other conditions match', () => {
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).toBe('receive');
 		});
 
-		it('should map to "receive" when it does not match MinterInfoAddresses and $ethAddress is undefined', () => {
+		it('should map to "receive" when it does not match MinterInfoAddresses and ethAddress is undefined', () => {
 			const result = mapEthTransactionUi({
 				transaction,
 				ckMinterInfoAddresses,
-				$ethAddress: undefined
+				ethAddress: undefined
 			});
 
 			expect(result.type).toBe('receive');
@@ -200,7 +204,7 @@ describe('transactions.utils', () => {
 		it('should not map to "withdraw" or to "deposit" when the MinterInfoAddresses are empty', () => {
 			const ckMinterInfoAddresses: EthAddress[] = [];
 
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
 			expect(result.type).not.toBe('withdraw');
 			expect(result.type).not.toBe('deposit');
@@ -210,16 +214,39 @@ describe('transactions.utils', () => {
 			const result = mapEthTransactionUi({
 				transaction: { ...transaction, hash: '0x1234' },
 				ckMinterInfoAddresses,
-				$ethAddress
+				ethAddress
 			});
 
 			expect(result.id).toBe('0x1234');
 		});
 
-		it('should map an ID to undefined if the transaction hash does not exist', () => {
-			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, $ethAddress });
+		it('should map an ID to empty string if the transaction hash does not exist', () => {
+			const result = mapEthTransactionUi({ transaction, ckMinterInfoAddresses, ethAddress });
 
-			expect(result.id).toBeUndefined;
+			expect(result.id).toBe('');
+		});
+	});
+
+	describe('decodeErc20AbiDataValue', () => {
+		const txData =
+			'0x26b3293f000000000000000000000000a0b86991c6218b36c1d19d4a2e9eb0ce3606eb4800000000000000000000000000000000000000000000000000000000000f42401db5f0b9209d75b4b358ddd228eb7097ccec7b8f65e0acef29e51271ce020000';
+		const result = 1000000n;
+
+		it('should decode ERC20 ABI data value correctly if bytesParam is false', () => {
+			expect(
+				decodeErc20AbiDataValue({
+					data: txData
+				})
+			).toBe(result);
+		});
+
+		it('should decode ERC20 ABI data value correctly if bytesParam is true', () => {
+			expect(
+				decodeErc20AbiDataValue({
+					data: txData,
+					bytesParam: true
+				})
+			).toBe(result);
 		});
 	});
 });

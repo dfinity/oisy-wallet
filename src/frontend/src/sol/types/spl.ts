@@ -3,10 +3,14 @@ import type { RequiredToken, Token } from '$lib/types/token';
 
 export type SplTokenAddress = SolAddress;
 
+interface SplAuthorities {
+	mintAuthority?: SplTokenAddress;
+	freezeAuthority?: SplTokenAddress;
+}
+
 export type SplToken = Token & {
 	address: SplTokenAddress;
 	owner: SplTokenAddress;
-	twinToken?: Token;
-};
+} & SplAuthorities;
 
-export type RequiredSplToken = Omit<RequiredToken<SplToken>, 'twinToken'> & { twinToken?: Token };
+export type RequiredSplToken = RequiredToken<SplToken, SplAuthorities>;

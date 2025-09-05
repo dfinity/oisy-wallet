@@ -1,7 +1,10 @@
+use std::sync::LazyLock;
+
 use candid::Principal;
-use lazy_static::lazy_static;
 use shared::types::{
-    custom_token::{CustomToken, CustomTokenId, IcrcToken, SplToken, SplTokenId, Token},
+    custom_token::{
+        ChainId, CustomToken, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId, Token,
+    },
     TokenVersion,
 };
 
@@ -11,51 +14,99 @@ use crate::utils::{
     pocketic::{setup, PicCanisterTrait},
 };
 
-lazy_static! {
-    static ref ICRC_TOKEN: IcrcToken = IcrcToken {
+static ICRC_TOKEN: LazyLock<IcrcToken> = LazyLock::new(|| IcrcToken {
+    ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
+    index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai").unwrap()),
+});
+static USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(ICRC_TOKEN.clone()),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static ANOTHER_USER_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(IcrcToken {
+        ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
+        index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static USER_TOKEN_NO_INDEX: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Icrc(IcrcToken {
         ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
-        index_id: Some(Principal::from_text("dnqcx-eyaaa-aaaaq-aacrq-cai").unwrap()),
-    };
-    static ref USER_TOKEN: CustomToken = CustomToken {
-        token: Token::Icrc(ICRC_TOKEN.clone()),
-        enabled: true,
-        version: None,
-    };
-    static ref USER_TOKEN_ID: CustomTokenId = CustomTokenId::Icrc(ICRC_TOKEN.ledger_id);
-    static ref ANOTHER_USER_TOKEN: CustomToken = CustomToken {
-        token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("uf2wh-taaaa-aaaaq-aabna-cai").unwrap(),
-            index_id: Some(Principal::from_text("ux4b6-7qaaa-aaaaq-aaboa-cai").unwrap()),
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref USER_TOKEN_NO_INDEX: CustomToken = CustomToken {
-        token: Token::Icrc(IcrcToken {
-            ledger_id: Principal::from_text("ddsp7-7iaaa-aaaaq-aacqq-cai").unwrap(),
-            index_id: None,
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref SPL_TOKEN_ID: SplTokenId =
-        SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string());
-    static ref SPL_TOKEN: CustomToken = CustomToken {
-        token: Token::SplMainnet(SplToken {
-            token_address: SPL_TOKEN_ID.clone(),
-            symbol: Some("BOOONDOGGLE".to_string()),
-            decimals: Some(u8::MAX),
-        }),
-        enabled: true,
-        version: None,
-    };
-    static ref CUSTOM_SPL_TOKEN_ID: CustomTokenId = CustomTokenId::SolMainnet(SPL_TOKEN_ID.clone());
-    static ref LOTS_OF_CUSTOM_TOKENS: Vec<CustomToken> = vec![
+        index_id: None,
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static SPL_TOKEN_ID: LazyLock<SplTokenId> =
+    LazyLock::new(|| SplTokenId("AQoKYV7tYpTrFZN6P5oUufbQKAUr9mNYGe1TTJC9wajM".to_string()));
+static SPL_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::SplMainnet(SplToken {
+        token_address: SPL_TOKEN_ID.clone(),
+        symbol: Some("BOOONDOGGLE".to_string()),
+        decimals: Some(u8::MAX),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static ERC20_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913".to_string()));
+static ERC20_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 8453);
+static ERC20_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc20(ErcToken {
+        token_address: ERC20_TOKEN_ID.clone(),
+        chain_id: ERC20_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: None,
+});
+static ERC721_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x8821bee2ba0df28761afff119d66390d594cd280".to_string()));
+static ERC721_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 137);
+static ERC721_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc721(ErcToken {
+        token_address: ERC721_TOKEN_ID.clone(),
+        chain_id: ERC721_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: Some(true),
+});
+static ERC1155_TOKEN_ID: LazyLock<ErcTokenId> =
+    LazyLock::new(|| ErcTokenId("0x6a00bfd7f89204721aaf9aec39592cf444bff845".to_string()));
+static ERC1155_CHAIN_ID: LazyLock<ChainId> = LazyLock::new(|| 42161);
+static ERC1155_TOKEN: LazyLock<CustomToken> = LazyLock::new(|| CustomToken {
+    token: Token::Erc1155(ErcToken {
+        token_address: ERC1155_TOKEN_ID.clone(),
+        chain_id: ERC1155_CHAIN_ID.clone(),
+    }),
+    enabled: true,
+    version: None,
+    section: None,
+    allow_external_content_source: Some(false),
+});
+static LOTS_OF_CUSTOM_TOKENS: LazyLock<Vec<CustomToken>> = LazyLock::new(|| {
+    vec![
         USER_TOKEN.clone(),
         ANOTHER_USER_TOKEN.clone(),
         SPL_TOKEN.clone(),
-    ];
-}
+        ERC20_TOKEN.clone(),
+        ERC721_TOKEN.clone(),
+        ERC1155_TOKEN.clone(),
+    ]
+});
 
 #[test]
 fn test_add_custom_tokens() {
@@ -81,6 +132,63 @@ fn test_add_custom_token(user_token: &CustomToken) {
 
     let expected_tokens: Vec<CustomToken> = vec![user_token.with_incremented_version()];
     assert_tokens_data_eq(&after_set.unwrap(), &expected_tokens);
+}
+
+#[test]
+fn test_remove_custom_spl_token() {
+    test_remove_custom_token(&SPL_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc20_token() {
+    test_remove_custom_token(&ERC20_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc721_token() {
+    test_remove_custom_token(&ERC721_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_erc1155_token() {
+    test_remove_custom_token(&ERC1155_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_icrc_token() {
+    test_remove_custom_token(&USER_TOKEN)
+}
+
+#[test]
+fn test_remove_custom_no_index_token() {
+    test_remove_custom_token(&USER_TOKEN_NO_INDEX)
+}
+
+fn test_remove_custom_token(token: &CustomToken) {
+    let pic_setup = setup();
+
+    let caller = Principal::from_text(CALLER).unwrap();
+
+    let before_set = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(before_set, Ok(Vec::new()));
+
+    let result = pic_setup.update::<()>(caller, "set_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let before_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    let expected_tokens: Vec<CustomToken> = vec![token.with_incremented_version()];
+    assert_tokens_data_eq(&before_remove.unwrap(), &expected_tokens);
+
+    let result = pic_setup.update::<()>(caller, "remove_custom_token", token.clone());
+
+    assert_eq!(result, Ok(()));
+
+    let after_remove = pic_setup.query::<Vec<CustomToken>>(caller, "list_custom_tokens", ());
+
+    assert_eq!(after_remove, Ok(Vec::new()));
 }
 
 #[test]
@@ -114,6 +222,8 @@ fn test_update_custom_token(user_token: &CustomToken) {
         enabled: false,
         token: user_token.token.clone(),
         version: results.unwrap().first().unwrap().version,
+        section: user_token.section.clone(),
+        allow_external_content_source: user_token.allow_external_content_source.clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -202,12 +312,16 @@ fn test_update_many_custom_tokens(user_token: &CustomToken) {
         enabled: false,
         token: user_token.token.clone(),
         version: results.clone().unwrap().first().unwrap().version,
+        section: user_token.section.clone(),
+        allow_external_content_source: user_token.allow_external_content_source.clone(),
     };
 
     let update_another_token: CustomToken = CustomToken {
         enabled: false,
         token: ANOTHER_USER_TOKEN.token.clone(),
         version: results.unwrap().get(1).unwrap().version,
+        section: user_token.section.clone(),
+        allow_external_content_source: user_token.allow_external_content_source.clone(),
     };
 
     let update_tokens: Vec<CustomToken> = vec![update_token.clone(), update_another_token.clone()];
@@ -278,6 +392,8 @@ fn test_cannot_update_custom_token_without_version(user_token: &CustomToken) {
         enabled: false,
         token: user_token.token.clone(),
         version: None,
+        section: user_token.section.clone(),
+        allow_external_content_source: user_token.allow_external_content_source.clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -311,6 +427,8 @@ fn test_cannot_update_custom_token_with_invalid_version(user_token: &CustomToken
         enabled: false,
         token: user_token.token.clone(),
         version: Some(123456789),
+        section: user_token.section.clone(),
+        allow_external_content_source: user_token.allow_external_content_source.clone(),
     };
 
     let update_result = pic_setup.update::<()>(caller, "set_custom_token", update_token.clone());
@@ -334,7 +452,7 @@ fn test_anonymous_cannot_add_custom_token() {
     assert!(result.is_err());
     assert_eq!(
         result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        "Update call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized.".to_string()
     );
 }
 
@@ -350,8 +468,8 @@ fn test_anonymous_cannot_list_custom_tokens() {
 
     assert!(result.is_err());
     assert_eq!(
-        result.unwrap_err(),
-        "Anonymous caller not authorized.".to_string()
+        &result.unwrap_err(),
+        "Query call error. RejectionCode: CanisterReject, Error: Update call error. RejectionCode: CanisterReject, Error: Anonymous caller not authorized."
     );
 }
 

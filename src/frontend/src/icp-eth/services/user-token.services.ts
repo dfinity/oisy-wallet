@@ -1,9 +1,8 @@
 import type { UserToken } from '$declarations/backend/backend.did';
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens-services';
+import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-import type { EthereumNetwork } from '$eth/types/network';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { setUserToken as setUserTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';
@@ -76,7 +75,7 @@ export const toUserToken = ({
 	enabled
 }: SaveUserToken): UserToken => ({
 	contract_address,
-	chain_id: (network as EthereumNetwork).chainId,
+	chain_id: network.chainId,
 	decimals: toNullable(decimals),
 	symbol: toNullable(symbol),
 	version: toNullable(version),

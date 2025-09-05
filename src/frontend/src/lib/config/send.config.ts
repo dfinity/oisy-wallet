@@ -6,7 +6,14 @@ interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
 }
 
-export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): WizardSteps => [
+export const sendWizardSteps = ({
+	i18n,
+	converting
+}: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
+	{
+		name: WizardStepsSend.DESTINATION,
+		title: i18n.send.text.send
+	},
 	{
 		name: WizardStepsSend.SEND,
 		title: i18n.send.text.send
@@ -21,7 +28,9 @@ export const sendWizardSteps = ({ i18n, converting }: SendWizardStepsParams): Wi
 	}
 ];
 
-export const sendWizardStepsWithQrCodeScan = (params: SendWizardStepsParams): WizardSteps => [
+export const sendWizardStepsWithQrCodeScan = (
+	params: SendWizardStepsParams
+): WizardSteps<WizardStepsSend> => [
 	...sendWizardSteps(params),
 	{
 		name: WizardStepsSend.QR_CODE_SCAN,
@@ -29,10 +38,14 @@ export const sendWizardStepsWithQrCodeScan = (params: SendWizardStepsParams): Wi
 	}
 ];
 
-export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps => [
+export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
 	{
 		name: WizardStepsSend.TOKENS_LIST,
-		title: params.i18n.send.text.send
+		title: params.i18n.send.text.select_token
+	},
+	{
+		name: WizardStepsSend.FILTER_NETWORKS,
+		title: params.i18n.send.text.select_network_filter
 	},
 	...sendWizardStepsWithQrCodeScan(params)
 ];

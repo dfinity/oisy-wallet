@@ -7,7 +7,7 @@
 	const modalId = Symbol();
 </script>
 
-<BuyButton on:click={() => modalStore.openBuy(modalId)} />
+<BuyButton onclick={() => modalStore.openBuy(modalId)} />
 
 {#if $modalBuy && $modalStore?.id === modalId}
 	<BuyModal />

@@ -4,8 +4,8 @@ use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
     network::{
-        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsError,
-        SaveNetworksSettingsRequest,
+        NetworkSettings, NetworkSettingsFor, NetworkSettingsMap, SaveNetworksSettingsRequest,
+        UpdateNetworksSettingsError,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
@@ -44,7 +44,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::SolanaTestnet,
+            NetworkSettingsFor::SolanaDevnet,
             NetworkSettings {
                 enabled: true,
                 is_testnet: true,
@@ -83,7 +83,7 @@ lazy_static! {
             },
         );
         map.insert(
-            NetworkSettingsFor::SolanaTestnet,
+            NetworkSettingsFor::SolanaDevnet,
             NetworkSettings {
                 enabled: true,
                 is_testnet: true,
@@ -108,247 +108,6 @@ lazy_static! {
 }
 
 #[test]
-fn test_set_user_network_settings_saves_settings() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-
-    let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: NEW_NETWORKS.clone(),
-        current_user_version: profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    let user_profile = get_profile_response
-        .expect("Call to get profile failed")
-        .expect("Get profile failed");
-
-    let settings = user_profile.settings.unwrap();
-
-    assert_eq!(settings.networks.networks, NEW_NETWORKS.clone());
-}
-
-#[test]
-fn test_set_user_network_settings_overwrites_existing_settings() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-
-    let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: INITIAL_NETWORKS.clone(),
-        current_user_version: profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    let user_profile = get_profile_response
-        .expect("Call to get profile failed")
-        .expect("Get profile failed");
-
-    let settings = user_profile.settings.unwrap();
-
-    assert_eq!(settings.networks.networks, INITIAL_NETWORKS.clone());
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: NEW_NETWORKS.clone(),
-        current_user_version: user_profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    let user_profile = get_profile_response
-        .expect("Call to get profile failed")
-        .expect("Get profile failed");
-
-    let settings = user_profile.settings.unwrap();
-
-    assert_eq!(settings.networks.networks, NEW_NETWORKS.clone());
-}
-
-#[test]
-fn test_set_user_network_settings_cannot_update_wrong_version() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-
-    let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: INITIAL_NETWORKS.clone(),
-        current_user_version: profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: NEW_NETWORKS.clone(),
-        current_user_version: profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(
-        set_user_network_settings_response,
-        Ok(Err(SaveNetworksSettingsError::VersionMismatch))
-    );
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    assert_eq!(
-        get_profile_response
-            .expect("Call to get profile failed")
-            .expect("Get profile failed")
-            .settings
-            .unwrap()
-            .networks
-            .networks,
-        INITIAL_NETWORKS.clone()
-    );
-}
-
-#[test]
-fn test_set_user_network_settings_does_not_change_existing_value_if_same() {
-    let pic_setup = setup();
-
-    let caller = Principal::from_text(CALLER).unwrap();
-
-    let create_profile_response =
-        pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
-
-    let profile = create_profile_response.expect("Create failed");
-
-    assert_eq!(profile.settings.unwrap().networks.networks.len(), 0);
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: INITIAL_NETWORKS.clone(),
-        current_user_version: profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    let user_profile = get_profile_response
-        .expect("Call to get profile failed")
-        .expect("Get profile failed");
-
-    let settings = user_profile.settings.unwrap();
-
-    assert_eq!(settings.networks.networks, INITIAL_NETWORKS.clone());
-
-    let set_user_network_settings_arg = SaveNetworksSettingsRequest {
-        networks: INITIAL_NETWORKS.clone(),
-        current_user_version: user_profile.version,
-    };
-
-    let set_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
-            caller,
-            "set_user_network_settings",
-            set_user_network_settings_arg,
-        );
-
-    assert_eq!(set_user_network_settings_response, Ok(Ok(())));
-
-    let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
-        caller,
-        "get_user_profile",
-        (),
-    );
-
-    let user_profile = get_profile_response
-        .expect("Call to get profile failed")
-        .expect("Get profile failed");
-
-    let settings = user_profile.settings.unwrap();
-
-    assert_eq!(settings.networks.networks, INITIAL_NETWORKS.clone());
-}
-
-#[test]
 fn test_update_user_network_settings_saves_settings() {
     let pic_setup = setup();
 
@@ -366,7 +125,7 @@ fn test_update_user_network_settings_saves_settings() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -407,7 +166,7 @@ fn test_update_user_network_settings_merges_with_existing_settings() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -435,7 +194,7 @@ fn test_update_user_network_settings_merges_with_existing_settings() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -476,7 +235,7 @@ fn test_update_user_network_settings_cannot_update_wrong_version() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -490,7 +249,7 @@ fn test_update_user_network_settings_cannot_update_wrong_version() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -498,7 +257,7 @@ fn test_update_user_network_settings_cannot_update_wrong_version() {
 
     assert_eq!(
         update_user_network_settings_response,
-        Ok(Err(SaveNetworksSettingsError::VersionMismatch))
+        Ok(Err(UpdateNetworksSettingsError::VersionMismatch))
     );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
@@ -538,7 +297,7 @@ fn test_update_user_network_settings_does_not_change_existing_value_if_same() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,
@@ -566,7 +325,7 @@ fn test_update_user_network_settings_does_not_change_existing_value_if_same() {
     };
 
     let update_user_network_settings_response = pic_setup
-        .update::<Result<(), SaveNetworksSettingsError>>(
+        .update::<Result<(), UpdateNetworksSettingsError>>(
             caller,
             "update_user_network_settings",
             update_user_network_settings_arg,

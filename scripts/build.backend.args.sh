@@ -61,16 +61,15 @@ case "$DFX_NETWORK" in
 esac
 
 # If the rewards canister is known, it may perform privileged actions such as find which users are eligible for rewards.
-# Furthermore, we include some OISY team's users in the allowed_callers list, so that they can fetch statistics data.
 if [[ "${CANISTER_ID_REWARDS:-}" == "" ]]; then
   ALLOWED_CALLERS="vec {}"
 else
-  ALLOWED_CALLERS="vec{ principal \"$CANISTER_ID_REWARDS\"; principal \"bzhxb-2565m-do3pw-yqhb3-jon2m-phepr-lccqh-zv7qq-q52q2-ognw4-yqe\";  }"
+  ALLOWED_CALLERS="vec{ principal \"$CANISTER_ID_REWARDS\" }"
 fi
 
 # URL used by II-issuer in the id_alias-verifiable credentials (hard-coded in II)
 # Represents more an ID than a URL
-II_VC_URL="https://identity.ic0.app"
+II_VC_URL="https://identity.internetcomputer.org"
 
 echo "Deploying backend with the following arguments: ${POUH_ISSUER_VC_URL}"
 

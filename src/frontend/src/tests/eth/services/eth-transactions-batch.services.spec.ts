@@ -54,10 +54,12 @@ describe('eth-transactions-batch.services', () => {
 			const result = await generator.next();
 
 			expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockTokensNotLoaded.length);
+
 			mockTokensNotLoaded.forEach((token) => {
 				expect(loadEthereumTransactions).toHaveBeenCalledWith({
 					tokenId: token.id,
-					networkId: token.network.id
+					networkId: token.network.id,
+					standard: token.standard
 				});
 			});
 
@@ -78,7 +80,8 @@ describe('eth-transactions-batch.services', () => {
 			mockTokensAlreadyLoaded.forEach((token) => {
 				expect(loadEthereumTransactions).not.toHaveBeenCalledWith({
 					tokenId: token.id,
-					networkId: token.network.id
+					networkId: token.network.id,
+					standard: token.standard
 				});
 			});
 		});
@@ -105,8 +108,15 @@ describe('eth-transactions-batch.services', () => {
 
 			expect(batch).toHaveBeenCalled();
 
-			const result = await generator.next();
-			expect(result.value).toEqual(expectedReturn);
+			const firstBatchResult = await generator.next();
+
+			expect(firstBatchResult.value).toEqual(
+				expectedReturn.slice(0, ETHERSCAN_MAX_CALLS_PER_SECOND)
+			);
+
+			const secondBatchResult = await generator.next();
+
+			expect(secondBatchResult.value).toEqual(expectedReturn.slice(ETHERSCAN_MAX_CALLS_PER_SECOND));
 		});
 
 		it('should respect ETHERSCAN_MAX_CALLS_PER_SECOND as batchSize', () => {

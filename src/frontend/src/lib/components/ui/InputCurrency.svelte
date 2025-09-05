@@ -1,18 +1,33 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
-	export let value: string | number | undefined = undefined;
-	export let disabled: boolean | undefined = undefined;
-	export let name: string;
-	export let placeholder: string;
-	export let required = true;
-	export let decimals: number | undefined = undefined;
-	export let testId: string | undefined = undefined;
-	export let autofocus = false;
+	interface Props {
+		innerEnd: Snippet;
+		value?: string | number;
+		disabled?: boolean;
+		name: string;
+		placeholder: string;
+		required?: boolean;
+		decimals?: number;
+		testId?: string;
+		autofocus?: boolean;
+	}
 
-	let inputElement: HTMLInputElement | undefined;
+	let {
+		innerEnd,
+		value = $bindable(),
+		disabled,
+		name,
+		placeholder,
+		required = true,
+		decimals,
+		testId,
+		autofocus = false
+	}: Props = $props();
+
+	let inputElement = $state<HTMLInputElement | undefined>();
 
 	onMount(() => {
 		if (autofocus && nonNullish(inputElement)) {
@@ -24,20 +39,22 @@
 <div class="input-currency-container">
 	<Input
 		{name}
-		inputType="currency"
-		{required}
-		bind:value
-		{decimals}
-		{placeholder}
-		spellcheck={false}
 		autocomplete="off"
-		{testId}
+		{decimals}
 		{disabled}
+		inputType="currency"
+		{placeholder}
+		{required}
+		spellcheck={false}
+		{testId}
+		bind:value
 		on:nnsInput
 		on:blur
 		on:focus
 		bind:inputElement
 	>
-		<slot name="inner-end" slot="inner-end" />
+		<svelte:fragment slot="inner-end">
+			{@render innerEnd()}
+		</svelte:fragment>
 	</Input>
 </div>

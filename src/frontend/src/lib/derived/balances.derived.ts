@@ -1,5 +1,5 @@
-import { ZERO_BI } from '$lib/constants/app.constants';
-import { enabledNetworkTokens } from '$lib/derived/network-tokens.derived';
+import { ZERO } from '$lib/constants/app.constants';
+import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { token } from '$lib/stores/token.store';
 import type { OptionBalance } from '$lib/types/balance';
@@ -20,25 +20,22 @@ export const balanceZero: Readable<boolean> = derived(
 		nonNullish($balanceStore) &&
 		nonNullish($token) &&
 		nonNullish($balanceStore?.[$token.id]) &&
-		$balanceStore[$token.id]?.data === ZERO_BI
+		$balanceStore[$token.id]?.data === ZERO
 );
 
-// TODO: Create tests for this store
 export const anyBalanceNonZero: Readable<boolean> = derived([balancesStore], ([$balanceStore]) =>
 	checkAnyNonZeroBalance($balanceStore)
 );
 
-// TODO: Create tests for this store
 export const allBalancesZero: Readable<boolean> = derived(
-	[balancesStore, enabledNetworkTokens],
+	[balancesStore, enabledFungibleNetworkTokens],
 	([$balancesStore, $enabledNetworkTokens]) =>
 		checkAllBalancesZero({
-			$balancesStore: $balancesStore,
+			$balancesStore,
 			minLength: $enabledNetworkTokens.length
 		})
 );
 
-// TODO: Create tests for this store
 export const noPositiveBalanceAndNotAllBalancesZero: Readable<boolean> = derived(
 	[anyBalanceNonZero, allBalancesZero],
 	([$anyBalanceNonZero, $allBalancesZero]) => !$anyBalanceNonZero && !$allBalancesZero

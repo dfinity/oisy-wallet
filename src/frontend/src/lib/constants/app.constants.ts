@@ -1,17 +1,19 @@
+import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { BigNumber } from '@ethersproject/bignumber';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
-export const STAGING =
-	MODE === 'staging' || MODE.startsWith('test_fe_') || MODE === 'audit' || MODE === 'e2e';
+export const TEST_FE = MODE.startsWith('test_fe_');
+export const AUDIT = MODE === 'audit';
+export const E2E = MODE === 'e2e';
+export const STAGING = MODE === 'staging' || TEST_FE || AUDIT || E2E;
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
-export const TEST = JSON.parse(import.meta.env.TEST ?? false) === true;
+export const TEST = parseBoolEnvVar(import.meta.env.TEST);
 
 const MAINNET_DOMAIN = 'icp0.io';
 
@@ -23,7 +25,7 @@ export const INTERNET_IDENTITY_CANISTER_ID = LOCAL
 
 export const INTERNET_IDENTITY_ORIGIN = LOCAL
 	? `http://${INTERNET_IDENTITY_CANISTER_ID}.localhost:4943`
-	: 'https://identity.ic0.app';
+	: 'https://identity.internetcomputer.org';
 
 export const POUH_ISSUER_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_POUH_ISSUER_CANISTER_ID
@@ -46,9 +48,14 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
-		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+	: TEST_FE || AUDIT || E2E
+		? (import.meta.env[`VITE_${MODE.toUpperCase()}_BACKEND_CANISTER_ID`] ??
+			import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID)
+		: STAGING
+			? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+			: BETA
+				? import.meta.env.VITE_BETA_BACKEND_CANISTER_ID
+				: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
@@ -75,6 +82,38 @@ export const KONG_BACKEND_CANISTER_ID = LOCAL
 		: BETA
 			? import.meta.env.VITE_BETA_KONG_BACKEND_CANISTER_ID
 			: import.meta.env.VITE_IC_KONG_BACKEND_CANISTER_ID;
+
+export const ICP_SWAP_FACTORY_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_ICP_SWAP_FACTORY_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_ICP_SWAP_FACTORY_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_ICP_SWAP_FACTORY_CANISTER_ID
+			: import.meta.env.VITE_IC_ICP_SWAP_FACTORY_CANISTER_ID;
+
+export const XTC_LEDGER_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_XTC_LEDGER_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_XTC_LEDGER_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_XTC_LEDGER_CANISTER_ID
+			: import.meta.env.VITE_IC_XTC_LEDGER_CANISTER_ID;
+
+export const SOL_RPC_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_SOL_RPC_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_SOL_RPC_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_SOL_RPC_CANISTER_ID
+			: import.meta.env.VITE_IC_SOL_RPC_CANISTER_ID;
+
+export const LLM_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_LLM_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_LLM_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_LLM_CANISTER_ID
+			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
@@ -120,8 +159,10 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
-export const ZERO_BI = 0n;
-export const ZERO = BigNumber.from(ZERO_BI);
+export const ZERO = 0n;
+
+// NFTs
+export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -131,11 +172,33 @@ export const WALLET_PAGINATION = 10n;
 // TODO: Use the normal one when we have a better way to handle the Solana wallets, for example when we have the internal Solana RPC canister, or when we don't load again the transactions that are already loaded.
 export const SOL_WALLET_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
 
-// VIP
-export const VIP_CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
+// Code generation
+export const CODE_REGENERATE_INTERVAL_IN_SECONDS = 45;
 
 // User Snapshot
 export const USER_SNAPSHOT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 5 * 1000; // 5 minutes in milliseconds
 
 // Fallback
 export const FALLBACK_TIMEOUT = 10000;
+
+// Git
+export const GIT_COMMIT_HASH = VITE_GIT_COMMIT_HASH;
+export const GIT_BRANCH_NAME = VITE_GIT_BRANCH_NAME;
+
+// Threshold
+export const FAILURE_THRESHOLD = 3;
+
+// Micro transaction
+export const MICRO_TRANSACTION_USD_THRESHOLD = 0.01;
+
+// Known destinations
+export const MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS = 3;
+
+// Send destination
+export const MIN_DESTINATION_LENGTH_FOR_ERROR_STATE = 10;
+
+// Contact validation
+export const CONTACT_MAX_LABEL_LENGTH = 50;
+
+// Contact validation
+export const CONTACT_MAX_NAME_LENGTH = 100;

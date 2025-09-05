@@ -1,4 +1,4 @@
-import type { TypedDataDomain, TypedDataField } from 'ethers';
+import type { TypedDataDomain, TypedDataField } from 'ethers/hash';
 
 export type WalletConnectEthApproveRequestMessage = string;
 

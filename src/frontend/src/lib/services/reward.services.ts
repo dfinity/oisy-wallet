@@ -1,50 +1,109 @@
-import type { RewardInfo, VipReward } from '$declarations/rewards/rewards.did';
+import type {
+	ClaimedVipReward,
+	EligibilityReport,
+	ReferrerInfo,
+	RewardInfo,
+	SetReferrerResponse,
+	VipReward
+} from '$declarations/rewards/rewards.did';
 import type { IcToken } from '$icp/types/ic-token';
 import {
 	claimVipReward as claimVipRewardApi,
 	getNewVipReward as getNewVipRewardApi,
+	getReferrerInfo as getReferrerInfoApi,
 	getUserInfo,
-	getUserInfo as getUserInfoApi
+	getUserInfo as getUserInfoApi,
+	isEligible as isEligibleApi,
+	setReferrer as setReferrerApi
 } from '$lib/api/reward.api';
-import { MILLISECONDS_IN_DAY, ZERO_BI } from '$lib/constants/app.constants';
+import { ZERO } from '$lib/constants/app.constants';
+import { QrCodeType, asQrCodeType } from '$lib/enums/qr-code-types';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { AlreadyClaimedError, InvalidCodeError, UserNotVipError } from '$lib/types/errors';
-import type { RewardResponseInfo, RewardsResponse } from '$lib/types/reward';
-import type { AnyTransactionUiWithCmp } from '$lib/types/transaction';
+import {
+	AlreadyClaimedError,
+	InvalidCampaignError,
+	InvalidCodeError,
+	UserNotVipError
+} from '$lib/types/errors';
+import type {
+	CampaignEligibility,
+	RewardClaimApiResponse,
+	RewardClaimResponse,
+	RewardResponseInfo,
+	RewardsResponse,
+	UserRoleResult
+} from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
-import { formatNanosecondsToTimestamp } from '$lib/utils/format.utils';
+import { mapEligibilityReport } from '$lib/utils/rewards.utils';
 import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const queryVipUser = async (params: {
+const queryEligibilityReport = async (params: {
 	identity: Identity;
 	certified: boolean;
-}): Promise<ResultSuccess> => {
+}): Promise<EligibilityReport> =>
+	await isEligibleApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+export const getCampaignEligibilities = async (params: {
+	identity: Identity;
+}): Promise<CampaignEligibility[]> => {
+	try {
+		const eligibilityReport = await queryEligibilityReport({
+			...params,
+			certified: false
+		});
+
+		return mapEligibilityReport(eligibilityReport);
+	} catch (err: unknown) {
+		const { vip } = get(i18n);
+		toastsError({
+			msg: { text: vip.reward.error.loading_eligibility },
+			err
+		});
+		return [];
+	}
+};
+
+const queryUserRoles = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<UserRoleResult> => {
 	const userData = await getUserInfoApi({
 		...params,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	return { success: fromNullable(userData.is_vip) === true };
+	const superpowers = fromNullable(userData.superpowers);
+	if (isNullish(superpowers)) {
+		return { isVip: false, isGold: false };
+	}
+
+	return {
+		isVip: superpowers.includes(QrCodeType.VIP),
+		isGold: superpowers.includes(QrCodeType.GOLD)
+	};
 };
 
 /**
- * Checks if a user is a VIP user.
+ * Gets the roles of a user.
  *
- * This function performs **always** a query (not certified) to determine the VIP status of a user.
+ * This function performs **always** a query (not certified) to determine the roles of a user.
  *
  * @async
  * @param {Object} params - The parameters required to check VIP status.
  * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<ResultSuccess>} - Resolves with the result indicating if the user is a VIP.
+ * @returns {Promise<UserRoleResult>} - Resolves with the result indicating the users roles.
  *
  * @throws {Error} Displays an error toast and logs the error if the query fails.
  */
-export const isVipUser = async (params: { identity: Identity }): Promise<ResultSuccess> => {
+export const getUserRoles = async (params: { identity: Identity }): Promise<UserRoleResult> => {
 	try {
-		return await queryVipUser({ ...params, certified: false });
+		return await queryUserRoles({ ...params, certified: false });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -52,7 +111,7 @@ export const isVipUser = async (params: { identity: Identity }): Promise<ResultS
 			err
 		});
 
-		return { success: false, err };
+		return { isVip: false, isGold: false };
 	}
 };
 
@@ -69,13 +128,20 @@ const queryRewards = async (params: {
 
 	return {
 		rewards: nonNullish(awards) ? awards.map(mapRewardsInfo) : [],
-		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO_BI
+		lastTimestamp: fromNullable(last_snapshot_timestamp) ?? ZERO
 	};
 };
 
-const mapRewardsInfo = ({ name, ...rest }: RewardInfo): RewardResponseInfo => ({
+const mapRewardsInfo = ({
+	name,
+	campaign_name,
+	campaign_id,
+	...rest
+}: RewardInfo): RewardResponseInfo => ({
 	...rest,
-	name: fromNullable(name)
+	name: fromNullable(name),
+	campaignName: fromNullable(campaign_name),
+	campaignId: campaign_id
 });
 
 /**
@@ -101,11 +167,18 @@ export const getRewards = async (params: { identity: Identity }): Promise<Reward
 		});
 	}
 
-	return { rewards: [], lastTimestamp: ZERO_BI };
+	return { rewards: [], lastTimestamp: ZERO };
 };
 
-const updateReward = async (identity: Identity): Promise<VipReward> => {
+const updateReward = async ({
+	rewardType,
+	identity
+}: {
+	rewardType: ClaimedVipReward;
+	identity: Identity;
+}): Promise<VipReward> => {
 	const response = await getNewVipRewardApi({
+		rewardType,
 		identity,
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
@@ -120,19 +193,26 @@ const updateReward = async (identity: Identity): Promise<VipReward> => {
 };
 
 /**
- * Generates a new VIP reward code.
+ * Generates a new VIP or Gold reward code.
  *
  * This function **always** makes an **update** call and cannot be a query.
  *
  * @async
  * @param {Identity} identity - The user's identity for authentication.
- * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP reward or `undefined` if the operation fails.
+ * @param {string} campaignId - The campaign's id.
+ * @returns {Promise<VipReward | undefined>} - Resolves with the generated VIP or Gold reward or `undefined` if the operation fails.
  *
  * @throws {Error} Displays an error toast and logs the error if the update call fails.
  */
-export const getNewReward = async (identity: Identity): Promise<VipReward | undefined> => {
+export const getNewReward = async ({
+	campaignId,
+	identity
+}: {
+	campaignId: QrCodeType;
+	identity: Identity;
+}): Promise<VipReward | undefined> => {
 	try {
-		return await updateReward(identity);
+		return await updateReward({ rewardType: { campaign_id: campaignId }, identity });
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
@@ -149,22 +229,27 @@ const updateVipReward = async ({
 }: {
 	identity: Identity;
 	code: string;
-}): Promise<void> => {
-	const response = await claimVipRewardApi({
+}): Promise<string> => {
+	const response: RewardClaimApiResponse = await claimVipRewardApi({
 		identity,
 		vipReward: { code },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 	});
 
-	if ('Success' in response) {
-		return;
+	if ('Success' in response.claimRewardResponse) {
+		const { claimedVipReward } = response;
+		if (isNullish(claimedVipReward)) {
+			throw new InvalidCampaignError();
+		}
+
+		return claimedVipReward.campaign_id;
 	}
 
-	if ('InvalidCode' in response) {
+	if ('InvalidCode' in response.claimRewardResponse) {
 		throw new InvalidCodeError();
 	}
 
-	if ('AlreadyClaimed' in response) {
+	if ('AlreadyClaimed' in response.claimRewardResponse) {
 		throw new AlreadyClaimedError();
 	}
 
@@ -180,59 +265,123 @@ const updateVipReward = async ({
  * @param {Object} params - The parameters required to claim the reward.
  * @param {Identity} params.identity - The user's identity for authentication.
  * @param {string} params.code - The reward code to claim the VIP reward.
- * @returns {Promise<ResultSuccess>} - Resolves with the result of the claim if successful.
+ * @returns {Promise<RewardClaimResponse>} - Resolves with the result state and campaign id of the claim if successful.
  *
  * @throws {Error} Throws an error if the update call fails or the reward cannot be claimed.
  */
 export const claimVipReward = async (params: {
 	identity: Identity;
 	code: string;
+}): Promise<RewardClaimResponse> => {
+	try {
+		const campaignId = await updateVipReward(params);
+		return { success: true, campaignId: asQrCodeType(campaignId) };
+	} catch (err: unknown) {
+		return { success: false, err };
+	}
+};
+
+const queryReferrerInfo = async (params: {
+	identity: Identity;
+	certified: boolean;
+}): Promise<ReferrerInfo> =>
+	await getReferrerInfoApi({
+		...params,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+/**
+ * Gets the referrer info of the user.
+ *
+ * This function performs **always** a query (not certified) to get the referrer info of a user.
+ *
+ * @async
+ * @param {Object} params - The parameters required to load the referrer info.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @returns {Promise<ReferrerInfo>} - Resolves with the received referral code and the number of referrals.
+ *
+ * @throws {Error} Displays an error toast and returns undefined if the query fails.
+ */
+export const getReferrerInfo = async (params: {
+	identity: Identity;
+}): Promise<
+	| {
+			referralCode: number;
+			numberOfReferrals: number;
+	  }
+	| undefined
+> => {
+	try {
+		const referrerInfo = await queryReferrerInfo({ ...params, certified: false });
+
+		return {
+			referralCode: referrerInfo.referral_code,
+			numberOfReferrals: fromNullable(referrerInfo.num_referrals) ?? 0
+		};
+	} catch (err: unknown) {
+		const { referral } = get(i18n);
+		toastsError({
+			msg: { text: referral.invitation.error.loading_referrer_info },
+			err
+		});
+	}
+};
+
+const updateReferrer = async ({
+	identity,
+	referrerCode
+}: {
+	identity: Identity;
+	referrerCode: number;
+}): Promise<SetReferrerResponse> =>
+	await setReferrerApi({
+		identity,
+		referrerCode,
+		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
+	});
+
+/**
+ * Establish a referral connection using a provided referral code.
+ *
+ * This function **always** makes an **update** call and cannot be a query.
+ *
+ * @async
+ * @param {Object} params - The parameters required to establish the connection.
+ * @param {Identity} params.identity - The user's identity for authentication.
+ * @param {string} params.referrerCode - The referral code to establish the connection.
+ * @returns {Promise<ResultSuccess>} - Resolves with the result if successful.
+ *
+ * @throws {Error} Throws an error if the update call fails or if the connection cannot be established.
+ */
+export const setReferrer = async (params: {
+	identity: Identity;
+	referrerCode: number;
 }): Promise<ResultSuccess> => {
 	try {
-		await updateVipReward(params);
+		await updateReferrer(params);
 		return { success: true };
 	} catch (err: unknown) {
-		const { vip } = get(i18n);
+		const { referral } = get(i18n);
 		toastsError({
-			msg: { text: vip.reward.error.claiming_reward },
+			msg: { text: referral.invitation.error.setting_referrer },
 			err
 		});
 		return { success: false, err };
 	}
 };
 
-// Todo: for the moment we evaluate if requirements are fulfilled in frontend
-// this will change once we get this info from rewards canister
-export const getRewardRequirementsFulfilled = ({
-	transactions,
-	totalUsdBalance
-}: {
-	transactions: AnyTransactionUiWithCmp[];
-	totalUsdBalance: number;
-}): boolean[] => {
-	const req1 = true; // logged in once in last 7 days
-	const req2: boolean =
-		transactions.filter((trx) =>
-			trx.transaction.timestamp
-				? new Date().getTime() - MILLISECONDS_IN_DAY * 7 <
-					formatNanosecondsToTimestamp(BigInt(trx.transaction.timestamp))
-				: false
-		).length >= 2; // at least 2 transactions in last 7 days
-	const req3: boolean = totalUsdBalance >= 20; // at least 20$ balance
-
-	return [req1, req2, req3];
-};
-
 export const getUserRewardsTokenAmounts = async ({
 	ckBtcToken,
 	ckUsdcToken,
 	icpToken,
-	identity
+	identity,
+	campaignId
 }: {
 	ckBtcToken: IcToken;
 	ckUsdcToken: IcToken;
 	icpToken: IcToken;
 	identity: Identity;
+	campaignId: string;
 }): Promise<{
 	ckBtcReward: bigint;
 	ckUsdcReward: bigint;
@@ -240,9 +389,9 @@ export const getUserRewardsTokenAmounts = async ({
 	amountOfRewards: number;
 }> => {
 	const initialRewards = {
-		ckBtcReward: ZERO_BI,
-		ckUsdcReward: ZERO_BI,
-		icpReward: ZERO_BI,
+		ckBtcReward: ZERO,
+		ckUsdcReward: ZERO,
+		icpReward: ZERO,
 		amountOfRewards: 0
 	};
 
@@ -253,7 +402,9 @@ export const getUserRewardsTokenAmounts = async ({
 		return initialRewards;
 	}
 
-	return usageAwards.reduce((acc, { ledger, amount }) => {
+	const filteredUsageAwards = usageAwards.filter(({ campaign_id }) => campaign_id === campaignId);
+
+	return filteredUsageAwards.reduce((acc, { ledger, amount }) => {
 		const canisterId = ledger.toText();
 
 		return ckBtcToken.ledgerCanisterId === canisterId
