@@ -5,7 +5,6 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
-	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -18,20 +17,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { getContactForAddress, filterAddressFromContact } from '$lib/utils/contact.utils';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import {
-		isNetworkIdBitcoin,
-		isNetworkIdEvm,
-		isNetworkIdEthereum,
-		isNetworkIdICP,
-		isNetworkIdSolana
-	} from '$lib/utils/network.utils';
+	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
+	import { shortenWithMiddleEllipsis , formatSecondsToDate } from '$lib/utils/format.utils';
+		import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -69,46 +59,21 @@
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
+
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	const address: string | undefined = $derived(
+	const contactAddress: string | undefined = $derived(
 		type === 'send' ? to : type === 'receive' ? from : undefined
 	);
 
 	const contact: ContactUi | undefined = $derived(
-		nonNullish(address)
-			? getContactForAddress({ contactList: $contacts, addressString: address })
+		nonNullish(contactAddress)
+			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
 			: undefined
 	);
 
 	const addressAlias: string | undefined = $derived(
-		nonNullish(address) ? filterAddressFromContact({ contact, address })?.label : undefined
-	);
-
-	const network: Network | undefined = $derived(token.network);
-
-	const mapNetworkToAccountType = (net: Network | undefined): TokenAccountIdTypes | undefined => {
-if (isNullish(net)) {
-return
-}
-
-		const {id} = net;
-		if (isNetworkIdBitcoin(id)) {
-			return 'Btc';
-		}
-		if (isNetworkIdEthereum(id) || isNetworkIdEvm(id)) {
-			return 'Eth';
-		}
-		if (isNetworkIdSolana(id)) {
-			return 'Sol';
-		}
-		if (isNetworkIdICP(id)) {
-			return 'Icrcv2';
-		}
-	};
-
-	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
-		mapNetworkToAccountType(network)
+		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 
 	const nft = $derived(
@@ -121,24 +86,13 @@ return
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin>
-			<span class="relative inline-flex items-center gap-1 whitespace-nowrap">
+			<span
+				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
+			>
 				{#if nonNullish(contact)}
-					{type === 'send'
-						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
-						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
+					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
 				{:else}
 					{@render children?.()}
-				{/if}
-
-				{#if nonNullish(network)}
-					<div class="flex">
-						<NetworkLogo
-							addressType={networkAddressType}
-							color="transparent"
-							{network}
-							testId="transaction-network"
-						/>
-					</div>
 				{/if}
 			</span>
 
@@ -170,15 +124,18 @@ return
 					{/if}
 				{/if}
 			{/snippet}
-
 			{#snippet amountDescription()}
 				{#if nonNullish(timestamp)}
 					<span data-tid="receive-tokens-modal-transaction-timestamp">
-						{new Intl.DateTimeFormat($currentLanguage, {
-							hour: '2-digit',
-							minute: '2-digit',
-							hour12: false
-						}).format(new Date(Number(timestamp) * 1000))}
+						{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage,
+							formatOptions: {
+								hour: '2-digit',
+								minute: '2-digit',
+								hour12: false
+							}
+						})}
 					</span>
 				{/if}
 			{/snippet}
@@ -201,8 +158,8 @@ return
 						<span>
 							{#if nonNullish(contact)}
 								{contact.name}
-							{:else if nonNullish(address)}
-								{shortenWithMiddleEllipsis({ text: address })}
+							{:else if nonNullish(contactAddress)}
+								{shortenWithMiddleEllipsis({ text: contactAddress })}
 							{/if}
 						</span>
 						{#if nonNullish(addressAlias) && addressAlias !== ''}

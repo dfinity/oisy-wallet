@@ -9,6 +9,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		network: Network;
