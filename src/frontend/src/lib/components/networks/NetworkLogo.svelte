@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconAddressTypeBtc from '$lib/components/icons/IconAddressTypeBtc.svelte';
-	import IconAddressTypeEth from '$lib/components/icons/IconAddressTypeEth.svelte';
-	import IconAddressTypeIcrc2 from '$lib/components/icons/IconAddressTypeIcrcv2.svelte';
-	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
+	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
@@ -24,20 +21,15 @@
 
 {#if color === 'transparent' && nonNullish(addressType)}
 	<div data-tid={`${testId}-transparent`}>
-		{#if addressType === 'Icrcv2'}
-			<IconAddressTypeIcrc2 size="16" />
-		{:else if addressType === 'Btc'}
-			<IconAddressTypeBtc size="16" />
-		{:else if addressType === 'Eth'}
-			<IconAddressTypeEth size="16" />
-		{:else if addressType === 'Sol'}
-			<IconAddressTypeSol size="16" />
-		{/if}
+		<IconAddressType {addressType} size="24" />
 	</div>
 {:else}
 	<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
 		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			alt={replacePlaceholders($i18n.core.alt.logo, {
+				$name: network.name
+			})}
+			{color}
 			{size}
 			src={network.iconLight}
 			testId={`${testId}-light`}
@@ -46,7 +38,10 @@
 
 	<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
 		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
+			alt={replacePlaceholders($i18n.core.alt.logo, {
+				$name: network.name
+			})}
+			{color}
 			{size}
 			src={network.iconDark}
 			testId={`${testId}-dark`}
