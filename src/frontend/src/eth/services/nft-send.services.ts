@@ -9,6 +9,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import type { Identity } from '@dfinity/agent';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { assertNonNullish } from '@dfinity/utils';
 import { Interface } from 'ethers';
@@ -16,20 +17,20 @@ import type { TransactionResponse } from 'ethers/providers';
 
 export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork; // must include { id: NetworkId; chainId: number }
-	identity: OptionIdentity; // your IC identity (passkey)
+	identity: Identity; // your IC identity (passkey)
 	from?: EthAddress; // optional; derived from identity if absent
 	gas?: bigint;
 	maxFeePerGas?: bigint;
 	maxPriorityFeePerGas?: bigint;
 }
 
-export interface TransferErc721ViaIdentityParams extends CommonNftTransferParams {
+export interface TransferErc721Params extends CommonNftTransferParams {
 	contractAddress: string;
 	tokenId: bigint | number | string;
 	to: EthAddress;
 }
 
-export interface TransferErc1155ViaIdentityParams extends CommonNftTransferParams {
+export interface TransferErc1155Params extends CommonNftTransferParams {
 	contractAddress: string;
 	id: bigint | number | string;
 	amount: bigint | number | string;
@@ -37,13 +38,8 @@ export interface TransferErc1155ViaIdentityParams extends CommonNftTransferParam
 	data?: `0x${string}` | string; // defaults to "0x"
 }
 
-interface PrepareErc721Params extends TransferErc721ViaIdentityParams {}
-interface PrepareErc1155Params extends TransferErc1155ViaIdentityParams {}
-
-interface ResolveFromAddressParams {
-	identity: OptionIdentity;
-	from?: EthAddress;
-}
+interface PrepareErc721Params extends TransferErc721Params {}
+interface PrepareErc1155Params extends TransferErc1155Params {}
 
 interface BuildSignRequestParams {
 	to: EthAddress;
@@ -66,28 +62,43 @@ interface SendRawParams {
 	raw: string;
 }
 
-/* --------------------------------- API ----------------------------------- */
-
-export const transferErc721ViaIdentity = async (
-	params: TransferErc721ViaIdentityParams
-): Promise<TransactionResponse> => {
-	const txReq = await prepareErc721Transfer(params);
-	const raw = await signWithIdentity({ identity: params.identity, transaction: txReq });
-	return await sendRaw({ networkId: params.sourceNetwork.id, raw });
+export const transferErc721 = async ({
+	identity,
+	sourceNetwork,
+	to,
+	tokenId,
+	contractAddress
+}: TransferErc721Params): Promise<TransactionResponse> => {
+	const txReq = await prepareErc721Transfer({
+		identity,
+		sourceNetwork,
+		to,
+		tokenId,
+		contractAddress
+	});
+	const raw = await signWithIdentity({ identity, transaction: txReq });
+	return await sendRaw({ networkId: sourceNetwork.id, raw });
 };
 
-export const transferErc1155ViaIdentity = async (
-	params: TransferErc1155ViaIdentityParams
-): Promise<TransactionResponse> => {
-	const txReq = await prepareErc1155Transfer(params);
-	const raw = await signWithIdentity({ identity: params.identity, transaction: txReq });
-	return await sendRaw({ networkId: params.sourceNetwork.id, raw });
+export const transferErc1155 = async ({
+	identity,
+	sourceNetwork,
+	to,
+	id,
+	amount,
+	contractAddress
+}: TransferErc1155Params): Promise<TransactionResponse> => {
+	const txReq = await prepareErc1155Transfer({
+		identity,
+		sourceNetwork,
+		to,
+		id,
+		amount,
+		contractAddress
+	});
+	const raw = await signWithIdentity({ identity, transaction: txReq });
+	return await sendRaw({ networkId: sourceNetwork.id, raw });
 };
-
-/* ------------------------------- Helpers --------------------------------- */
-
-const ERC721_IFACE = new Interface(ERC721_ABI);
-const ERC1155_IFACE = new Interface(ERC1155_ABI);
 
 const prepareErc721Transfer = async (
 	params: PrepareErc721Params
@@ -98,16 +109,19 @@ const prepareErc721Transfer = async (
 		to,
 		sourceNetwork,
 		identity,
-		from,
 		gas,
 		maxFeePerGas,
 		maxPriorityFeePerGas
 	} = params;
 
-	const fromAddr = await resolveFromAddress({ identity, from });
+	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
-	const data = ERC721_IFACE.encodeFunctionData('safeTransferFrom', [fromAddr, to, BigInt(tokenId)]);
+	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
+		fromAddr,
+		to,
+		BigInt(tokenId)
+	]);
 
 	return buildSignRequest({
 		to: contractAddress as EthAddress,
@@ -132,16 +146,15 @@ const prepareErc1155Transfer = async (
 		data = '0x',
 		sourceNetwork,
 		identity,
-		from,
 		gas,
 		maxFeePerGas,
 		maxPriorityFeePerGas
 	} = params;
 
-	const fromAddr = await resolveFromAddress({ identity, from });
+	const fromAddr = encodePrincipalToEthAddress(identity.getPrincipal());
 	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(fromAddr);
 
-	const encoded = ERC1155_IFACE.encodeFunctionData('safeTransferFrom', [
+	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [
 		fromAddr,
 		to,
 		BigInt(id),
@@ -159,12 +172,6 @@ const prepareErc1155Transfer = async (
 		maxFeePerGas,
 		maxPriorityFeePerGas
 	});
-};
-
-const resolveFromAddress = async (params: ResolveFromAddressParams): Promise<EthAddress> => {
-	if (params.from) return params.from;
-	assertNonNullish(params.identity, 'No Internet Identity available to derive from-address');
-	return encodePrincipalToEthAddress(params.identity.getPrincipal());
 };
 
 const buildSignRequest = (params: BuildSignRequestParams): EthSignTransactionRequest => ({

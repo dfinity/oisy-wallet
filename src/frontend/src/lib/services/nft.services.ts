@@ -10,14 +10,12 @@ import {
 	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
-import {
-	transferErc1155ViaIdentity,
-	transferErc721ViaIdentity
-} from '$eth/services/nft-send.services';
+import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -370,27 +368,31 @@ export const sendNft = async ({
 	fromAddress: string;
 	identity: OptionIdentity;
 }) => {
-	let tx;
-	if (isTokenErc721(token)) {
-		tx = await transferErc721ViaIdentity({
-			contractAddress: token.address,
-			tokenId,
-			sourceNetwork: ETHEREUM_NETWORK,
-			from: fromAddress,
-			to: destination,
-			identity
-		});
-	} else if (isTokenErc1155(token)) {
-		tx = await transferErc1155ViaIdentity({
-			contractAddress: token.address,
-			id: tokenId,
-			sourceNetwork: ETHEREUM_NETWORK,
-			from: fromAddress,
-			to: destination,
-			identity,
-			amount: 1
-		});
-	}
+	if (isNullish(identity)) {
+		await nullishSignOut();
+	} else {
+		let tx;
+		if (isTokenErc721(token)) {
+			tx = await transferErc721({
+				contractAddress: token.address,
+				tokenId,
+				sourceNetwork: ETHEREUM_NETWORK,
+				from: fromAddress,
+				to: destination,
+				identity
+			});
+		} else if (isTokenErc1155(token)) {
+			tx = await transferErc1155({
+				contractAddress: token.address,
+				id: tokenId,
+				sourceNetwork: ETHEREUM_NETWORK,
+				from: fromAddress,
+				to: destination,
+				identity,
+				amount: 1
+			});
+		}
 
-	console.log('tx', tx);
+		console.log('tx', tx);
+	}
 };
