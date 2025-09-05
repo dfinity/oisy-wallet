@@ -298,7 +298,7 @@ describe('wallet-connect.services', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should ignore errors when simulating the transaction', async () => {
+		it('should log simulation errors but continue execution', async () => {
 			const mockError = new Error('mock-simulation-error');
 			const mockSimulationResult = { value: { err: mockError } };
 
