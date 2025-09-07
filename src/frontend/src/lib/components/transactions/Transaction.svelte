@@ -162,7 +162,7 @@
 								{shortenWithMiddleEllipsis({ text: contactAddress })}
 							{/if}
 						</span>
-						{#if nonNullish(addressAlias) && addressAlias !== ''}
+						{#if notEmptyString(addressAlias)}
 							<span class="inline-flex items-center gap-1 text-tertiary">
 								<Divider />{addressAlias}
 							</span>
