@@ -613,7 +613,7 @@ service : (Arg) -> {
 	//
 	// # Errors
 	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
-	update_user_experimental_features : (
+	update_user_experimental_feature_settings : (
 		UpdateExperimentalFeaturesSettingsRequest
 	) -> (SetUserShowTestnetsResult);
 	// Updates the user's preference to enable (or disable) networks in the interface, merging with any

@@ -744,7 +744,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
-pub fn update_user_experimental_features(
+pub fn update_user_experimental_feature_settings(
     request: UpdateExperimentalFeaturesSettingsRequest,
 ) -> UpdateExperimentalFeaturesSettingsResult {
     let user_principal = ic_cdk::caller();
