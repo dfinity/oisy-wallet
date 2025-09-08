@@ -202,7 +202,7 @@ describe('LoaderNfts', () => {
 	});
 
 	describe('handleUpdatedNfts', () => {
-		const customMockNft1  = {
+		const customMockNft1 = {
 			...mockValidErc1155Nft,
 			id: parseNftId(123),
 			collection: {

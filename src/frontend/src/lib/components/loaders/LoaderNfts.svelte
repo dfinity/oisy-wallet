@@ -70,7 +70,7 @@
 				);
 			}
 		}
-	}
+	};
 </script>
 
 <IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
