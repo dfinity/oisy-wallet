@@ -57,7 +57,7 @@ export const getStatus = async ({
 }: {
 	identity: OptionIdentity;
 	indexCanisterId: IndexCanisterIdText;
-} & QueryParams): Promise< IcrcStatus > => {
+} & QueryParams): Promise< IcrcNgStatus > => {
 	assertNonNullish(identity);
 
 	const { status } = await indexNgCanister({ identity, indexCanisterId });
