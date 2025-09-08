@@ -278,7 +278,7 @@ jobs:
           # Prefer override if present, else default
           get() {
             local key="$1" default="$2"
-            if [[ -n "${OV[$key]+x}" ]]; then
+            if [[ ${OV[$key]+isset} ]]; then
               echo "${OV[$key]}"
             else
               echo "$default"
