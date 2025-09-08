@@ -10,13 +10,13 @@ resolver = "2"
 
 [workspace.dependencies]
 bs58 = "0.5.1"
-ic-cdk = "0.18.0"
-ic-cdk-macros = "0.18.0"
-ic-cdk-timers = "0.9.0"
+ic-cdk = "0.18.7"
+ic-cdk-macros = "0.18.7"
+ic-cdk-timers = "0.12.2"
 ic-cycles-ledger-client = { path = "src/cycles_ledger/client" }
 ic-cycles-ledger-pic = { path = "src/cycles_ledger/pic" }
 ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
-ic-ledger-types = "0.13.0"
+ic-ledger-types = "0.15.0"
 ic-stable-structures = "0.6.9"
 ic-metrics-encoder = "1.1.1"
 ic-canister-sig-creation = "1.1.0"
@@ -36,8 +36,7 @@ lazy_static = "1.5.0"
 # See:
 # Server version: ~/.cache/dfinity/versions/0.26.0/pocket-ic --version
 # Library version: https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU/edit?pli=1&tab=t.0#heading=h.5wf28dvt742x
-pocket-ic = "7.0"
-pocket-ic = "9.0.0"
+pocket-ic = "9.0.2"
 pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
