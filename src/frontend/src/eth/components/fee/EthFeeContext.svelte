@@ -78,6 +78,7 @@
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
+			console.log('Before SUGGESTED FEE DATA: ', (sendToken.network as EthereumNetwork).chainId);
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
 			);

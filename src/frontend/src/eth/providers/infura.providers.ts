@@ -2,6 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import type { GetFeeData } from '$eth/services/fee.services';
+import type { EthereumNetwork } from '$eth/types/network';
 import { TRACK_ETH_ESTIMATE_GAS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -26,11 +27,15 @@ export class InfuraProvider {
 
 	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
-	getFeeData = (): Promise<FeeData> => this.provider.getFeeData();
+	getFeeData = (): Promise<FeeData> => {
+		console.log('getFeeData: ', (this.network as unknown as EthereumNetwork).chainId);
+		return this.provider.getFeeData();
+	};
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
 	safeEstimateGas = async (params: GetFeeData): Promise<bigint | undefined> => {
+		console.log('safeEstimateGas: ', (this.network as unknown as EthereumNetwork).chainId);
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
