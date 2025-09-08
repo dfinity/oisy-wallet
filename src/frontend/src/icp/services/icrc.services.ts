@@ -28,6 +28,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -80,25 +81,30 @@ export const loadCustomTokens = ({
 	});
 
 const loadDefaultIcrc = ({
-	data,
+	data: { ledgerCanisterId, ...data },
 	strategy
 }: {
 	data: IcInterface;
 	strategy?: QueryAndUpdateStrategy;
 }): Promise<void> =>
 	queryAndUpdate<IcrcLoadData>({
-		request: (params) => requestIcrcMetadata({ ...params, ...data, category: 'default' }),
+		request: (params) =>
+			requestIcrcMetadata({ ...params, ...data, ledgerCanisterId, category: 'default' }),
 		onLoad: loadIcrcData,
 		onUpdateError: ({ error: err }) => {
-			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
+			icrcDefaultTokensStore.reset(ledgerCanisterId);
 
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
-				metadata: mapIcErrorMetadata(err)
+				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
 			});
 
 			toastsError({
-				msg: { text: get(i18n).init.error.icrc_canisters },
+				msg: {
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+						$ledgerCanisterId: ledgerCanisterId
+					})
+				},
 				err
 			});
 		},
