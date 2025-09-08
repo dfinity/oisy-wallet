@@ -175,14 +175,14 @@ impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetUserProfileResult {
     /// The user's profile was retrieved successfully.
-    Ok(UserProfile),
+    Ok(Box<UserProfile>),
     /// The user's profile was not retrieved due to an error.
     Err(GetUserProfileError),
 }
 impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
     fn from(result: Result<UserProfile, GetUserProfileError>) -> Self {
         match result {
-            Ok(profile) => GetUserProfileResult::Ok(profile),
+            Ok(profile) => GetUserProfileResult::Ok(Box::new(profile)),
             Err(err) => GetUserProfileResult::Err(err),
         }
     }
