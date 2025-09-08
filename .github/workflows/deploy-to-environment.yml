@@ -268,10 +268,24 @@ jobs:
               [[ -n "$key" ]] && OV["$key"]="$val"
             done <<< "$raw"
           }
+          
+          # Hide all override values (and raw lines) in logs
+          mask_overrides() {
+            # Mask the full raw input lines too (defense-in-depth)
+            while IFS= read -r line; do
+              [[ -n "$line" ]] && echo "::add-mask::$line"
+            done <<< "${ENV_OVERRIDE:-}"
+              
+            # Mask each value
+            for v in "${OV[@]}"; do
+                [[ -n "$v" ]] && echo "::add-mask::$v"
+            done
+          }
 
           # Only allow overrides for test_* or audit
           if ([[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]) && [[ -n "${ENV_OVERRIDE:-}" ]]; then
             parse_overrides "$ENV_OVERRIDE"
+            mask_overrides
             echo "Overrides provided; applying permitted keys."
           fi
 
