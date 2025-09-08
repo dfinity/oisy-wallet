@@ -62,6 +62,8 @@ export const encodeErc721SafeTransfer = ({
 		BigInt(tokenId)
 	]) as `0x${string}`;
 
+	console.log('Prepare snd erc721', data);
+
 	return { to: contractAddress as EthAddress, data };
 };
 
@@ -87,6 +89,7 @@ export const encodeErc1155SafeTransfer = ({
 		BigInt(amount),
 		data
 	]) as `0x${string}`;
+	console.log('Prepare snd erc1155', data);
 
 	return { to: contractAddress as EthAddress, data: encoded };
 };
