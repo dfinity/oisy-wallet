@@ -20,12 +20,12 @@ import {
 	mockSolAddress2,
 	mockSolAddress3
 } from '$tests/mocks/sol.mock';
+import { estimateComputeUnitLimitFactory } from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import * as solanaWeb3 from '@solana/kit';
 import {
 	appendTransactionMessageInstructions,
-	getComputeUnitEstimateForTransactionMessageFactory,
 	pipe,
 	sendTransactionWithoutConfirmingFactory,
 	type Rpc,
@@ -45,11 +45,10 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 	return {
 		...actual,
 		appendTransactionMessageInstructions: vi.fn(),
+		assertIsFullySignedTransaction: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
-		assertTransactionIsFullySigned: vi.fn(),
 		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
-		getComputeUnitEstimateForTransactionMessageFactory: vi.fn(),
 		getSignatureFromTransaction: vi.fn(),
 		prependTransactionMessageInstruction: vi.fn(),
 		sendTransactionWithoutConfirmingFactory: vi.fn(),
@@ -69,6 +68,10 @@ vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
 		waitForRecentTransactionConfirmation: vi.fn()
 	};
 });
+
+vi.mock('@solana-program/compute-budget', () => ({
+	estimateComputeUnitLimitFactory: vi.fn()
+}));
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
@@ -156,9 +159,8 @@ describe('sol-send.services', () => {
 				Promise.resolve()
 			);
 			vi.mocked(waitForRecentTransactionConfirmation).mockResolvedValue();
-			vi.mocked(getComputeUnitEstimateForTransactionMessageFactory).mockReturnValue(() =>
-				Promise.resolve(123)
-			);
+
+			vi.mocked(estimateComputeUnitLimitFactory).mockReturnValue(() => Promise.resolve(123));
 
 			spyMapNetworkIdToNetwork = vi.spyOn(networkUtils, 'safeMapNetworkIdToNetwork');
 
