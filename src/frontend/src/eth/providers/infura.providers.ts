@@ -23,7 +23,7 @@ export class InfuraProvider {
 	private readonly tmpnetwork: Networkish;
 
 	constructor(private readonly network: Networkish) {
-		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
+		this.provider = new InfuraProviderLib(network, INFURA_API_KEY);
 		this.tmpnetwork = this.network;
 	}
 

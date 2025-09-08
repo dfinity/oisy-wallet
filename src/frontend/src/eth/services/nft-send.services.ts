@@ -13,8 +13,6 @@ import type { Identity } from '@dfinity/agent';
 import { Interface } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
-type Bigish = bigint | number | string;
-
 export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork;
 	identity: Identity;
@@ -26,14 +24,14 @@ export interface CommonNftTransferParams {
 
 export interface TransferErc721Params extends CommonNftTransferParams {
 	contractAddress: string;
-	tokenId: Bigish;
+	tokenId: number;
 	to: EthAddress;
 }
 
 export interface TransferErc1155Params extends CommonNftTransferParams {
 	contractAddress: string;
-	id: Bigish;
-	amount: Bigish;
+	id: number;
+	amount: bigint;
 	to: EthAddress;
 	data?: `0x${string}` | string;
 }
@@ -54,7 +52,7 @@ export const encodeErc721SafeTransfer = ({
 	contractAddress: string;
 	from: EthAddress;
 	to: EthAddress;
-	tokenId: Bigish;
+	tokenId: number;
 }): PreparedContractCall => {
 	const encoded = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
 		from,
@@ -78,8 +76,8 @@ export const encodeErc1155SafeTransfer = ({
 	contractAddress: string;
 	from: EthAddress;
 	to: EthAddress;
-	tokenId: Bigish;
-	amount: Bigish;
+	tokenId: number;
+	amount: bigint;
 	data?: `0x${string}` | string;
 }): PreparedContractCall => {
 	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [

@@ -397,7 +397,7 @@ export const sendNft = async ({
 				from: fromAddress,
 				to: destination,
 				identity,
-				amount: 1, // currently fixed at 1
+				amount: 1n, // currently fixed at 1
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas
