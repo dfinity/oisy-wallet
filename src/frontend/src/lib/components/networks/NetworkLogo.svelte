@@ -21,7 +21,7 @@
 
 {#if nonNullish(addressType)}
 	<div data-tid={`${testId}-transparent`}>
-		<IconAddressType {addressType} {color} size="24" />
+		<IconAddressType {addressType} size="24" transparent />
 	</div>
 {:else}
 	<div class="dark-hidden block" data-tid={`${testId}-light-container`}>

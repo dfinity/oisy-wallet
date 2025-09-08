@@ -5,15 +5,14 @@
 	import IconAddressTypeSol from '$lib/components/icons/IconAddressTypeSol.svelte';
 	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
-	let {
-		addressType,
-		size,
-		color
-	}: {
+	interface Props {
 		addressType: TokenAccountIdTypes;
 		size?: string;
-		color?: 'off-white' | 'white' | 'transparent';
-	} = $props();
+		transparent?: boolean;
+	}
+
+
+	let {addressType, size,transparent= false}: Props = $props();
 </script>
 
 {#snippet icon()}
@@ -28,7 +27,7 @@
 	{/if}
 {/snippet}
 
-{#if color === 'transparent'}
+{#if transparent}
 	{@render icon()}
 {:else}
 	<div class="border-1 box-content rounded-full border-primary bg-primary">
