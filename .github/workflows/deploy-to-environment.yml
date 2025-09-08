@@ -305,9 +305,7 @@ jobs:
           elif [[ "$NETWORK" == "staging" ]]; then
             echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING" >> $GITHUB_OUTPUT
           elif [[ "$NETWORK" == "beta" ]]; then
-            {
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
-            } >> $GITHUB_OUTPUT
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA" >> $GITHUB_OUTPUT
           fi
 
           # For staging/test/audit common vars default to STAGING, but allow overrides:
