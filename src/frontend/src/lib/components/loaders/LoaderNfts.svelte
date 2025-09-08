@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { etherscanProviders } from '$eth/providers/etherscan.providers';
 	import {
@@ -132,6 +133,10 @@
 	};
 
 	const onLoad = async () => {
+		if (!NFTS_ENABLED) {
+			return;
+		}
+
 		for (const token of $enabledNonFungibleTokens) {
 			if (isTokenErc721(token)) {
 				await handleErc721(token);
