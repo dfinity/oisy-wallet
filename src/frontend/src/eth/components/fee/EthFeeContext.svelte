@@ -153,11 +153,17 @@
 
 				const gas = await safeEstimateGas(toGetFeeData({ from: $ethAddress, call }));
 
+				console.log("gas estimate", gas)
+
 				// Get fee fields (with robust fallback for non-EIP1559 networks)
 				const fd = await getFeeData();
 				const gasPrice = fd.gasPrice ?? 0n; // fallback 3 gwei
 				const maxPriority = fd.maxPriorityFeePerGas ?? (fd.maxFeePerGas ? 0n : gasPrice);
 				const maxFee = fd.maxFeePerGas ?? (fd.maxPriorityFeePerGas ? maxPriority + 0n : gasPrice);
+
+				console.log("gasPrice estimate", gasPrice)
+				console.log("maxPriority estimate", maxPriority)
+				console.log("maxFee estimate", maxFee)
 
 				feeStore.setFee({
 					...fd,
