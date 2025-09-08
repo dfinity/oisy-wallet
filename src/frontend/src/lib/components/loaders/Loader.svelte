@@ -23,8 +23,6 @@
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
-	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
-	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -58,7 +56,6 @@
 	import { loadNfts } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
-	import { nftStore } from '$lib/stores/nft.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
