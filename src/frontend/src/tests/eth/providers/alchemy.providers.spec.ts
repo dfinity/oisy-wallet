@@ -147,13 +147,13 @@ describe('alchemy.providers', () => {
 					id: parseNftId(1),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
-					},
+					}
 				},
 				{
 					id: parseNftId(2),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
-					},
+					}
 				}
 			]);
 		});
@@ -168,10 +168,12 @@ describe('alchemy.providers', () => {
 
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
-			await expect(provider.getNftsByOwner({address: mockEthAddress, token: mockValidErc1155Token})).rejects.toThrow('Nfts Error');
+			await expect(
+				provider.getNftsByOwner({ address: mockEthAddress, token: mockValidErc1155Token })
+			).rejects.toThrow('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
-		})
+		});
 	});
 
 	describe('getTokensForOwner', () => {
