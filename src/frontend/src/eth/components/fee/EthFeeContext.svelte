@@ -62,7 +62,9 @@
 
 	const updateFeeData = async () => {
 		try {
-			console.log(`From: ${$ethAddress} - To ${destination} - Amount ${amount} - Data ${data}`);
+			console.log(
+				`From: ${$ethAddress} - To ${destination} - Amount ${amount} - Data ${data} - Token ${sendToken.name} - Sendttoken Network ${sendToken.network.name} - nft network ${sendNft?.collection.network.name}`
+			);
 			if (isNullish($ethAddress)) {
 				return;
 			}
