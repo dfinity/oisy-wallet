@@ -11,7 +11,7 @@
 	interface Props {
 		network: Network;
 		size?: LogoSize;
-		color?: 'off-white' | 'white' | 'transparent';
+		color?: 'off-white' | 'white';
 		addressType?: TokenAccountIdTypes;
 		testId?: string;
 	}
@@ -19,7 +19,7 @@
 	let { network, size = 'xxs', color = 'off-white', addressType, testId }: Props = $props();
 </script>
 
-{#if color === 'transparent' && nonNullish(addressType)}
+{#if nonNullish(addressType)}
 	<div data-tid={`${testId}-transparent`}>
 		<IconAddressType {addressType} {color} size="24" />
 	</div>

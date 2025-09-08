@@ -106,7 +106,6 @@
 					<div class="flex">
 						<NetworkLogo
 							addressType={networkAddressType}
-							color="transparent"
 							{network}
 							testId="transaction-network"
 						/>
