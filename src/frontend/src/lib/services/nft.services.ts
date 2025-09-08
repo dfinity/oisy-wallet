@@ -22,7 +22,9 @@ export const loadNfts = async ({
 		try {
 			nfts = await alchemyProvider.getNftsByOwner({ address: walletAddress, token });
 		} catch (_: unknown) {
-			console.warn(`Failed to load NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`);
+			console.warn(
+				`Failed to load NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`
+			);
 			nfts = [];
 		}
 

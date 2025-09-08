@@ -65,7 +65,9 @@
 
 				nftStore.addAll(nfts);
 			} catch (_: unknown) {
-				console.warn(`Failed to fetch NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`);
+				console.warn(
+					`Failed to fetch NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`
+				);
 			}
 		}
 	};
