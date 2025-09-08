@@ -40,45 +40,45 @@ describe('alchemy.providers', () => {
 		});
 	});
 
-	describe('getNftIdsForOwner', () => {
-		const mockApiResponse = {
-			ownedNfts: [
-				{ tokenId: '1', balance: '1' },
-				{ tokenId: '2', balance: '4' },
-				{ tokenId: '3', balance: '1' }
-			]
-		};
-
-		const expectedTokenIds: OwnedNft[] = [
-			{ id: parseNftId(1), balance: 1 },
-			{ id: parseNftId(2), balance: 4 },
-			{ id: parseNftId(3), balance: 1 }
-		];
-
-		beforeEach(() => {
-			vi.clearAllMocks();
-
-			Object.defineProperty(Alchemy.prototype, 'nft', {
-				value: {
-					getNftsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
-				},
-				configurable: true
-			});
-		});
-
-		// it('should fetch and map token ids correctly', async () => {
-		// 	const provider = alchemyProviders(ETHEREUM_NETWORK.id);
-		//
-		// 	const tokenIds = await provider.getNftIdsForOwner({
-		// 		address: mockEthAddress,
-		// 		contractAddress: mockValidErc1155Token.address
-		// 	});
-		//
-		// 	expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
-		//
-		// 	expect(tokenIds).toStrictEqual(expectedTokenIds);
-		// });
-	});
+	// describe('getNftIdsForOwner', () => {
+	// 	const mockApiResponse = {
+	// 		ownedNfts: [
+	// 			{ tokenId: '1', balance: '1' },
+	// 			{ tokenId: '2', balance: '4' },
+	// 			{ tokenId: '3', balance: '1' }
+	// 		]
+	// 	};
+	//
+	// 	const expectedTokenIds: OwnedNft[] = [
+	// 		{ id: parseNftId(1), balance: 1 },
+	// 		{ id: parseNftId(2), balance: 4 },
+	// 		{ id: parseNftId(3), balance: 1 }
+	// 	];
+	//
+	// 	beforeEach(() => {
+	// 		vi.clearAllMocks();
+	//
+	// 		Object.defineProperty(Alchemy.prototype, 'nft', {
+	// 			value: {
+	// 				getNftsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
+	// 			},
+	// 			configurable: true
+	// 		});
+	// 	});
+	//
+	// 	it('should fetch and map token ids correctly', async () => {
+	// 		const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+	//
+	// 		const tokenIds = await provider.getNftIdsForOwner({
+	// 			address: mockEthAddress,
+	// 			contractAddress: mockValidErc1155Token.address
+	// 		});
+	//
+	// 		expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+	//
+	// 		expect(tokenIds).toStrictEqual(expectedTokenIds);
+	// 	});
+	// });
 
 	describe('getTokensForOwner', () => {
 		const mockApiResponse: AlchemyProviderContracts = {
