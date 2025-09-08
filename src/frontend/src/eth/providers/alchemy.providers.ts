@@ -16,11 +16,11 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
+	AlchemySubscription,
+	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
-	AlchemySubscription,
-	type Network,
-	NftOrdering
+	type Network
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
@@ -179,7 +179,9 @@ export class AlchemyProvider {
 				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
 				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
 				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
-				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && { acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp) }),
+				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
+					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
+				}),
 				collection: {
 					...mapTokenToCollection(token),
 					...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
