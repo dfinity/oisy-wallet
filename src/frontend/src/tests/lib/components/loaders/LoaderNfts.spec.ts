@@ -1,21 +1,21 @@
-import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
-import type { MockInstance } from 'vitest';
+import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
-import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
+import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
+import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
+import { ethAddressStore } from '$lib/stores/address.store';
+import { nftStore } from '$lib/stores/nft.store';
+import { parseNftId } from '$lib/validation/nft.validation';
+import { BUILD_AN_APE_TOKEN, NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { ethAddressStore } from '$lib/stores/address.store';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { nftStore } from '$lib/stores/nft.store';
-import { get } from 'svelte/store';
-import * as nftEnv from '$env/nft.env';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { parseNftId } from '$lib/validation/nft.validation';
 import { render, waitFor } from '@testing-library/svelte';
-import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
+import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 describe('LoaderNfts', () => {
 	let alchemyProvidersSpy: MockInstance;
@@ -72,13 +72,13 @@ describe('LoaderNfts', () => {
 		setupUserNetworksStore('allEnabled');
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
-	})
+	});
 
 	describe('handleNewNfts', () => {
 		it('should add new ERC721 nfts', async () => {
 			erc721CustomTokensStore.setAll([
 				{ data: mockedEnabledAzukiToken, certified: false },
-				{data: mockedEnabledGodsToken, certified: false}
+				{ data: mockedEnabledGodsToken, certified: false }
 			]);
 
 			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
@@ -91,20 +91,20 @@ describe('LoaderNfts', () => {
 
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					token: mockedEnabledAzukiToken,
-				})
+					token: mockedEnabledAzukiToken
+				});
 
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					token: mockedEnabledGodsToken,
-				})
-			})
+					token: mockedEnabledGodsToken
+				});
+			});
 		});
 
 		it('should add new ERC1155 nfts', async () => {
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },
-				{data: mockedEnabledApeToken, certified: false}
+				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
 			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
@@ -117,28 +117,28 @@ describe('LoaderNfts', () => {
 
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					token: mockedEnabledNyanToken,
-				})
+					token: mockedEnabledNyanToken
+				});
 
 				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
-					token: mockedEnabledApeToken,
-				})
-			})
+					token: mockedEnabledApeToken
+				});
+			});
 		});
 	});
 
 	describe('handleRemovedNfts', () => {
 		beforeEach(() => {
 			nftStore.resetAll();
-		})
+		});
 
 		it('should remove ERC721 nfts from nft store', async () => {
 			nftStore.addAll([mockNft1, mockNft2, mockNft3]);
 
 			erc721CustomTokensStore.setAll([
 				{ data: mockedEnabledAzukiToken, certified: false },
-				{data: mockedEnabledGodsToken, certified: false}
+				{ data: mockedEnabledGodsToken, certified: false }
 			]);
 
 			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1]);
@@ -161,7 +161,7 @@ describe('LoaderNfts', () => {
 					address: NYAN_CAT_TOKEN.address,
 					network: NYAN_CAT_TOKEN.network
 				}
-			}
+			};
 
 			nftStore.addAll([
 				customMockNft1,
@@ -173,12 +173,19 @@ describe('LoaderNfts', () => {
 						network: NYAN_CAT_TOKEN.network
 					}
 				},
-				{ ...mockNft3, collection: { ...mockValidErc1155Nft.collection, address: BUILD_AN_APE_TOKEN.address, network: BUILD_AN_APE_TOKEN.network} }
+				{
+					...mockNft3,
+					collection: {
+						...mockValidErc1155Nft.collection,
+						address: BUILD_AN_APE_TOKEN.address,
+						network: BUILD_AN_APE_TOKEN.network
+					}
+				}
 			]);
 
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },
-				{data: mockedEnabledApeToken, certified: false}
+				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
 			mockGetNftIdsForOwner.mockResolvedValueOnce([customMockNft1]);
@@ -226,16 +233,18 @@ describe('LoaderNfts', () => {
 		beforeEach(() => {
 			nftStore.resetAll();
 			nftStore.addAll([customMockNft1, customMockNft2, customMockNft3]);
-
-		})
+		});
 
 		it('should update ERC1155 nfts from the nft store', async () => {
 			erc1155CustomTokensStore.setAll([
 				{ data: mockedEnabledNyanToken, certified: false },
-				{data: mockedEnabledApeToken, certified: false}
+				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([{ ...customMockNft1, balance: 2 }, { ...customMockNft2, balance: 1 }]);
+			mockGetNftIdsForOwner.mockResolvedValueOnce([
+				{ ...customMockNft1, balance: 2 },
+				{ ...customMockNft2, balance: 1 }
+			]);
 			mockGetNftIdsForOwner.mockResolvedValueOnce([{ ...customMockNft3, balance: 3 }]);
 
 			render(LoaderNfts);

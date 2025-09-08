@@ -23,6 +23,7 @@
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
 	import { loadEthAddress } from '$eth/services/eth-address.services';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
+	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
@@ -66,7 +67,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -280,9 +280,9 @@
 {:else}
 	<div in:fade>
 		<!--		<LoaderCollections> -->
-					<LoaderNfts>
-		{@render children()}
-					</LoaderNfts>
+		<LoaderNfts>
+			{@render children()}
+		</LoaderNfts>
 		<!--		</LoaderCollections> -->
 	</div>
 {/if}
