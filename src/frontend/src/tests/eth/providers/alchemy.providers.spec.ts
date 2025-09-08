@@ -6,12 +6,12 @@ import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Nft, OwnedContract, OwnedNft } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();

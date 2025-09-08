@@ -13,6 +13,7 @@ import type { Nft, NonFungibleToken, OwnedContract, OwnedNft } from '$lib/types/
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -24,7 +25,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -166,9 +166,9 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
-														address,
-														token
-													}: {
+		address,
+		token
+	}: {
 		address: EthAddress;
 		token: NonFungibleToken;
 	}): Promise<Nft[]> => {
@@ -186,9 +186,9 @@ export class AlchemyProvider {
 
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({
-					traitType,
-					value: value.toString()
-				}))
+						traitType,
+						value: value.toString()
+					}))
 				: [];
 
 			const nft: Nft = {
