@@ -1,5 +1,3 @@
-//! Level 0 experimental eatures
-
 use std::collections::BTreeMap;
 
 use candid::{CandidType, Deserialize};
