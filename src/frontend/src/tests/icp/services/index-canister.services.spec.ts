@@ -30,7 +30,7 @@ describe('index-canister.services', () => {
 			archived_blocks: []
 		};
 
-		const mockIndexCanisterStatus: IcrcStatus = { num_blocks_synced: mockTotalBlocks };
+		const mockIndexCanisterStatus: IcrcNgStatus = { num_blocks_synced: mockTotalBlocks };
 
 		beforeEach(() => {
 			vi.clearAllMocks();
