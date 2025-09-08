@@ -367,7 +367,7 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
         env:
-          ENV_OVERRIDE: ${{ github.event.inputs.env-override || inputs.env-override }}
+          ENV_OVERRIDE: ${{ github.event.inputs.env-override }}
 
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
           VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
