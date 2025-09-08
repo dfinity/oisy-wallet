@@ -43,7 +43,9 @@ export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
 
-export type SolSignedTransaction = Transaction & FullySignedTransaction & TransactionWithBlockhashLifetime;
+export type SolSignedTransaction = Transaction &
+	FullySignedTransaction &
+	TransactionWithBlockhashLifetime;
 
 export interface MappedSolTransaction {
 	amount: bigint | undefined;
