@@ -272,9 +272,7 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 fn parse_eth_address(address: &str) -> [u8; 20] {
     match address.parse() {
         Ok(H160(addr)) => addr,
-        Err(err) => ic_cdk::trap(format!(
-            "failed to parse contract address {address}: {err}",
-        )),
+        Err(err) => ic_cdk::trap(format!("failed to parse contract address {address}: {err}",)),
     }
 }
 

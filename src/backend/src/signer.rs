@@ -2,11 +2,10 @@
 use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
 use ic_cdk::{
-    api::{canister_cycle_balance, msg_caller, canister_self},
+    api::{call::call_with_payment128, canister_cycle_balance, canister_self, msg_caller},
     bitcoin_canister::Network,
+    management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
 };
-use ic_cdk::api::call::call_with_payment128;
-use ic_cdk::management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs};
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
 };
@@ -274,7 +273,6 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
                 Ok(res) => res,
                 Err(err) => return TopUpCyclesLedgerResult::Err(err),
             };
-
 
         let new_ledger_balance = result.balance;
 

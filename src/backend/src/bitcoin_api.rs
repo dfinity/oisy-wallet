@@ -1,5 +1,9 @@
 use std::{cell::RefCell, collections::HashMap};
-use ic_cdk::bitcoin_canister::{bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network, Utxo, UtxosFilter};
+
+use ic_cdk::bitcoin_canister::{
+    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest,
+    GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network, Utxo, UtxosFilter,
+};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
 
@@ -93,11 +97,7 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
     use futures::future::join_all;
 
     // Create an array of network types to fetch
-    let networks = [
-        Network::Mainnet,
-        Network::Testnet,
-        Network::Regtest,
-    ];
+    let networks = [Network::Mainnet, Network::Testnet, Network::Regtest];
 
     // Create a vector of futures, each fetching percentiles for a network
     let futures = networks
