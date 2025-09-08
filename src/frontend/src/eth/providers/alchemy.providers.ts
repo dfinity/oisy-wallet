@@ -143,25 +143,6 @@ export class AlchemyProvider {
 		};
 	};
 
-	// // https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
-	// getNftIdsForOwner = async ({
-	// 	address,
-	// 	contractAddress
-	// }: {
-	// 	address: EthAddress;
-	// 	contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
-	// }): Promise<OwnedNft[]> => {
-	// 	const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-	// 		contractAddresses: [contractAddress],
-	// 		omitMetadata: true
-	// 	});
-	//
-	// 	return result.ownedNfts.map((ownedNft) => ({
-	// 		id: parseNftId(parseInt(ownedNft.tokenId)),
-	// 		balance: Number(ownedNft.balance)
-	// 	}));
-	// };
-
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
 		address,
