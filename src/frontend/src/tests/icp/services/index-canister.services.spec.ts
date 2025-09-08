@@ -6,7 +6,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { IcrcIndexNgGetTransactions, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
 
-
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getTransactions: vi.fn()
 }));
