@@ -52,10 +52,10 @@
 		}
 
 		for (const token of $enabledNonFungibleTokens) {
-			const alchemyProvider = alchemyProviders(token.network.id);
+			const { getNftsByOwner } = alchemyProviders(token.network.id);
 
 			try {
-				const nfts = await alchemyProvider.getNftsByOwner({ address: $ethAddress, token });
+				const nfts = await getNftsByOwner({ address: $ethAddress, token });
 
 				handleRemovedNfts({ token, inventory: nfts.map((nft) => nft.id) });
 
