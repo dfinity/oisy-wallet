@@ -23,6 +23,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import Button from '$lib/components/ui/Button.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -108,6 +109,8 @@
 				<SkeletonText />
 			</span>
 		{/if}
+
+		<Button onclick={() => modalStore.openSend({ id: Symbol(), data: nft })}>Send</Button>
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem>

@@ -49,7 +49,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
-	export let sendNft: Nft;
+	export let sendNft: Nft | undefined;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -63,7 +63,7 @@
 
 	const updateFeeData = async () => {
 		try {
-			console.log('uDATe', destination);
+			console.log(`From: ${ethAddress} - To ${destination} - Amount ${amount} - Data ${data}`);
 			if (isNullish($ethAddress)) {
 				return;
 			}
@@ -153,7 +153,7 @@
 
 				const gas = await safeEstimateGas(toGetFeeData({ from: $ethAddress, call }));
 
-				console.log("gas estimate", gas)
+				console.log('gas estimate', gas);
 
 				// Get fee fields (with robust fallback for non-EIP1559 networks)
 				const fd = await getFeeData();
@@ -161,9 +161,9 @@
 				const maxPriority = fd.maxPriorityFeePerGas ?? (fd.maxFeePerGas ? 0n : gasPrice);
 				const maxFee = fd.maxFeePerGas ?? (fd.maxPriorityFeePerGas ? maxPriority + 0n : gasPrice);
 
-				console.log("gasPrice estimate", gasPrice)
-				console.log("maxPriority estimate", maxPriority)
-				console.log("maxFee estimate", maxFee)
+				console.log('gasPrice estimate', gasPrice);
+				console.log('maxPriority estimate', maxPriority);
+				console.log('maxFee estimate', maxFee);
 
 				feeStore.setFee({
 					...fd,

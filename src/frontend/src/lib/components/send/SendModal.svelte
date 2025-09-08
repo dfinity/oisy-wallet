@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { createEventDispatcher, onMount, setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
@@ -58,10 +58,12 @@
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import { nonNullish } from '@dfinity/utils';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
+	export let nft: Nft | undefined = undefined;
 
 	let destination = '';
 	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
@@ -174,7 +176,27 @@
 			: decodeQrCode(params);
 	};
 
-	console.log($nonFungibleTokens);
+	const selectNft = (nft: Nft) => {
+		console.log('RUN1');
+		selectedNft = nft;
+		loadTokenAndRun({
+			token: findNonFungibleToken({
+				tokens: $nonFungibleTokens,
+				networkId: nft.collection.network.id,
+				address: nft.collection.address
+			}) as Token,
+			callback: async () => {
+				console.log('RUN2');
+				goToStep(WizardStepsSend.DESTINATION);
+			}
+		});
+	};
+
+	onMount(() => {
+		if (nonNullish(nft) && isNftsPage) {
+			selectNft(nft as Nft);
+		}
+	});
 </script>
 
 <SendTokenContext token={$token}>
@@ -197,19 +219,7 @@
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 			<SendNftsList
 				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-				onSelect={(nft) => {
-					selectedNft = nft;
-					loadTokenAndRun({
-						token: findNonFungibleToken({
-							tokens: $nonFungibleTokens,
-							networkId: nft.collection.network.id,
-							address: nft.collection.address
-						}) as Token,
-						callback: async () => {
-							goToStep(WizardStepsSend.DESTINATION);
-						}
-					});
-				}}
+				onSelect={selectNft}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />

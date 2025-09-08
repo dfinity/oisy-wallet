@@ -8,6 +8,9 @@
 	export let isNftsPage: boolean;
 </script>
 
-<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
+<SendButtonWithModal
+	isOpen={$modalSend}
+	open={(id) => modalStore.openSend({ id, data: undefined })}
+>
 	<SendModal slot="modal" {isTransactionsPage} {isNftsPage} on:nnsClose />
 </SendButtonWithModal>

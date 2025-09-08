@@ -30,9 +30,12 @@
 		modalNftImageConsent,
 		modalNftImageConsentData,
 		modalNftFullscreenDisplayData,
-		modalNftFullscreenDisplayOpen
+		modalNftFullscreenDisplayOpen,
+		modalSend,
+		modalSendData
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
+	import SendModal from '$lib/components/send/SendModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -64,5 +67,7 @@
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
 		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
+	{:else if $modalSend && nonNullish($modalSendData)}
+		<SendModal isNftsPage isTransactionsPage={false} nft={$modalSendData} />
 	{/if}
 {/if}
