@@ -7,7 +7,7 @@ interface OwnedNft {
 	raw: { metadata: Metadata };
 	tokenId: string;
 	contract: Contract;
-	acquiredAt?: { blockTimestamp: string}
+	acquiredAt?: { blockTimestamp?: string}
 }
 
 interface Contract {
