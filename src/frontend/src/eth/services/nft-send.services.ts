@@ -64,7 +64,7 @@ export const encodeErc721SafeTransfer = ({
 
 	console.log('Prepare snd erc721', encoded);
 
-	return { to: contractAddress as EthAddress, data };
+	return { to: contractAddress as EthAddress, encoded };
 };
 
 export const encodeErc1155SafeTransfer = ({
