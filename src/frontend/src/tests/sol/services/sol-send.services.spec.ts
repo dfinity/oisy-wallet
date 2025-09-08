@@ -69,9 +69,13 @@ vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
 	};
 });
 
-vi.mock('@solana-program/compute-budget', () => ({
-	estimateComputeUnitLimitFactory: vi.fn()
-}));
+vi.mock(import('@solana-program/compute-budget'), async (importOriginal) => {
+	const actual = await importOriginal();
+	return {
+		...actual,
+		estimateComputeUnitLimitFactory: vi.fn()
+	};
+});
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
@@ -305,7 +309,7 @@ describe('sol-send.services', () => {
 		});
 
 		it('should use the destination address if it is an ATA address already', async () => {
-			// Providing an owner for the destination address, so that it is considered an ATA address
+			// Providing an owner for the destination address so that it is considered an ATA address
 			vi.mocked(solanaHttpRpc).mockReturnValue({
 				...mockRpc,
 				getAccountInfo: vi.fn((address: SolAddress) => ({
