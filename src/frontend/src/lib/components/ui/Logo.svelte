@@ -9,7 +9,7 @@
 		src?: string;
 		alt?: string;
 		size?: LogoSize;
-		color?: 'off-white' | 'white' | 'transparent';
+		color?: 'off-white' | 'white';
 		ring?: boolean;
 		circle?: boolean;
 		testId?: string;
