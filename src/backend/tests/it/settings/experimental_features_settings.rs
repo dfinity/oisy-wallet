@@ -4,8 +4,9 @@ use candid::Principal;
 use lazy_static::lazy_static;
 use shared::types::{
     experimental_feature::{
-        ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor, ExperimentalFeatureSettingsMap,
-        UpdateExperimentalFeaturesSettingsRequest, UpdateExperimentalFeaturesSettingsError,
+        ExperimentalFeatureSettings, ExperimentalFeatureSettingsFor,
+        ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
+        UpdateExperimentalFeaturesSettingsRequest,
     },
     user_profile::{GetUserProfileError, UserProfile},
 };
@@ -20,9 +21,7 @@ lazy_static! {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
-            ExperimentalFeatureSettings {
-                enabled: false,
-            },
+            ExperimentalFeatureSettings { enabled: false },
         );
         map
     };
@@ -30,19 +29,15 @@ lazy_static! {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
-            ExperimentalFeatureSettings {
-                enabled: true,
-            },
+            ExperimentalFeatureSettings { enabled: true },
         );
         map
     };
-    pub static UPDATE_EXPERIMENTAL_FEATURES: ExperimentalFeatureSettingsMap = {
+    pub static ref UPDATE_EXPERIMENTAL_FEATURES: ExperimentalFeatureSettingsMap = {
         let mut map = BTreeMap::new();
         map.insert(
             ExperimentalFeatureSettingsFor::AiAssistantBeta,
-            ExperimentalFeatureSettings {
-                enabled: true,
-            },
+            ExperimentalFeatureSettings { enabled: true },
         );
         map
     };
@@ -58,15 +53,23 @@ fn test_update_experimental_feature_settings_saves_settings() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().experimental_features.experimental_features.len(), 0);
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .experimental_features
+            .experimental_features
+            .len(),
+        0
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: NEW_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -86,7 +89,10 @@ fn test_update_experimental_feature_settings_saves_settings() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.experimental_features.experimental_features, NEW_EXPERIMENTAL_FEATURES.clone());
+    assert_eq!(
+        settings.experimental_features.experimental_features,
+        NEW_EXPERIMENTAL_FEATURES.clone()
+    );
 }
 
 #[test]
@@ -99,15 +105,23 @@ fn test_update_experimental_feature_settings_merges_with_existing_settings() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().experimental_features.experimental_features.len(), 0);
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .experimental_features
+            .experimental_features
+            .len(),
+        0
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: INITIAL_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -127,15 +141,18 @@ fn test_update_experimental_feature_settings_merges_with_existing_settings() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.experimental_features.experimental_features, INITIAL_EXPERIMENTAL_FEATURES.clone());
+    assert_eq!(
+        settings.experimental_features.experimental_features,
+        INITIAL_EXPERIMENTAL_FEATURES.clone()
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: NEW_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: user_profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -155,7 +172,10 @@ fn test_update_experimental_feature_settings_merges_with_existing_settings() {
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.experimental_features.experimental_features, UPDATE_EXPERIMENTAL_FEATURES.clone());
+    assert_eq!(
+        settings.experimental_features.experimental_features,
+        UPDATE_EXPERIMENTAL_FEATURES.clone()
+    );
 }
 
 #[test]
@@ -168,15 +188,23 @@ fn test_update_experimental_feature_settings_cannot_update_wrong_version() {
         pic_setup.update::<UserProfile>(caller, "create_user_profile", ());
 
     let profile = create_profile_response.expect("Create failed");
-    assert_eq!(profile.settings.unwrap().experimental_features.experimental_features.len(), 0);
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .experimental_features
+            .experimental_features
+            .len(),
+        0
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: INITIAL_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -189,8 +217,8 @@ fn test_update_experimental_feature_settings_cannot_update_wrong_version() {
         current_user_version: profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -198,7 +226,9 @@ fn test_update_experimental_feature_settings_cannot_update_wrong_version() {
 
     assert_eq!(
         update_experimental_feature_settings_response,
-        Ok(Err(UpdateExperimentalFeaturesSettingsError::VersionMismatch))
+        Ok(Err(
+            UpdateExperimentalFeaturesSettingsError::VersionMismatch
+        ))
     );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
@@ -230,15 +260,23 @@ fn test_update_experimental_feature_settings_does_not_change_existing_value_if_s
 
     let profile = create_profile_response.expect("Create failed");
 
-    assert_eq!(profile.settings.unwrap().experimental_features.experimental_features.len(), 0);
+    assert_eq!(
+        profile
+            .settings
+            .unwrap()
+            .experimental_features
+            .experimental_features
+            .len(),
+        0
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: INITIAL_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -258,15 +296,18 @@ fn test_update_experimental_feature_settings_does_not_change_existing_value_if_s
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.experimental_features.experimental_features, INITIAL_EXPERIMENTAL_FEATURES.clone());
+    assert_eq!(
+        settings.experimental_features.experimental_features,
+        INITIAL_EXPERIMENTAL_FEATURES.clone()
+    );
 
     let update_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: INITIAL_EXPERIMENTAL_FEATURES.clone(),
         current_user_version: user_profile.version,
     };
 
-    let update_experimental_feature_settings_response = pic_setup
-        .update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
+    let update_experimental_feature_settings_response =
+        pic_setup.update::<Result<(), UpdateExperimentalFeaturesSettingsError>>(
             caller,
             "update_experimental_feature_settings",
             update_experimental_feature_settings_arg,
@@ -286,5 +327,8 @@ fn test_update_experimental_feature_settings_does_not_change_existing_value_if_s
 
     let settings = user_profile.settings.unwrap();
 
-    assert_eq!(settings.experimental_features.experimental_features, INITIAL_EXPERIMENTAL_FEATURES.clone());
+    assert_eq!(
+        settings.experimental_features.experimental_features,
+        INITIAL_EXPERIMENTAL_FEATURES.clone()
+    );
 }
