@@ -94,16 +94,6 @@ export const encodeErc1155SafeTransfer = ({
 	return { to: contractAddress as EthAddress, data: encoded };
 };
 
-/* ---------------- estimation bridge ---------------- */
-
-export const toGetFeeData = ({
-	from,
-	call: { to, data }
-}: {
-	from: EthAddress;
-	call: PreparedContractCall;
-}): { from: EthAddress; to: EthAddress; data?: string } => ({ from, to, data });
-
 /* ---------------- sign request builder ---------------- */
 
 const buildSignRequest = ({

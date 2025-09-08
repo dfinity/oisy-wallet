@@ -35,8 +35,7 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 	import {
 		encodeErc1155SafeTransfer,
-		encodeErc721SafeTransfer,
-		toGetFeeData
+		encodeErc721SafeTransfer
 	} from '$eth/services/nft-send.services';
 	import { type Nft } from '$lib/types/nft';
 
@@ -134,7 +133,7 @@
 			}
 
 			if (nonNullish(sendNft)) {
-				const call =
+				const { to, data } =
 					sendNft.collection.standard === 'erc721'
 						? encodeErc721SafeTransfer({
 								contractAddress: sendNft.collection.address,
@@ -151,25 +150,17 @@
 								data: '0x'
 							});
 
-				const gas = await safeEstimateGas(toGetFeeData({ from: $ethAddress, call }));
+				const estimatedGasNft = await safeEstimateGas({ from: $ethAddress, to, data });
 
-				console.log('gas estimate', gas);
+				console.log('gas estimate', estimatedGasNft);
 
-				// Get fee fields (with robust fallback for non-EIP1559 networks)
-				const fd = await getFeeData();
-				const gasPrice = fd.gasPrice ?? 0n; // fallback 3 gwei
-				const maxPriority = fd.maxPriorityFeePerGas ?? (fd.maxFeePerGas ? 0n : gasPrice);
-				const maxFee = fd.maxFeePerGas ?? (fd.maxPriorityFeePerGas ? maxPriority + 0n : gasPrice);
-
-				console.log('gasPrice estimate', gasPrice);
-				console.log('maxPriority estimate', maxPriority);
-				console.log('maxFee estimate', maxFee);
+				if (isNullish(estimatedGasNft)) {
+					return;
+				}
 
 				feeStore.setFee({
-					...fd,
-					maxFeePerGas: maxFee,
-					maxPriorityFeePerGas: maxPriority,
-					gas: gas ?? gasPrice
+					...feeData,
+					gas: estimatedGasNft
 				});
 				return;
 			}
