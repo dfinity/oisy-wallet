@@ -20,7 +20,7 @@ import type { MockInstance } from 'vitest';
 describe('LoaderNfts', () => {
 	let alchemyProvidersSpy: MockInstance;
 
-	const mockGetNftIdsForOwner = vi.fn();
+	const mockGetNftsForOwner = vi.fn();
 
 	const mockedEnabledAzukiToken = { ...AZUKI_ELEMENTAL_BEANS_TOKEN, enabled: true };
 	const mockedEnabledGodsToken = { ...DE_GODS_TOKEN, enabled: true };
@@ -60,7 +60,7 @@ describe('LoaderNfts', () => {
 
 		alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 		alchemyProvidersSpy.mockReturnValue({
-			getNftsByOwner: mockGetNftIdsForOwner
+			getNftsByOwner: mockGetNftsForOwner
 		} as unknown as AlchemyProvider);
 
 		erc721CustomTokensStore.resetAll();
@@ -81,20 +81,20 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledGodsToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
-			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft3]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockNft3]);
 
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
 					token: mockedEnabledAzukiToken
 				});
 
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
 					token: mockedEnabledGodsToken
 				});
@@ -107,20 +107,20 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
-			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft3]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockNft3]);
 
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
 					token: mockedEnabledNyanToken
 				});
 
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
 					address: mockEthAddress,
 					token: mockedEnabledApeToken
 				});
@@ -141,13 +141,13 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledGodsToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([mockNft1]);
-			mockGetNftIdsForOwner.mockResolvedValueOnce([]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1]);
+			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
 				expect(get(nftStore)).toEqual([mockNft1]);
 			});
@@ -188,13 +188,13 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([customMockNft1]);
-			mockGetNftIdsForOwner.mockResolvedValueOnce([]);
+			mockGetNftsForOwner.mockResolvedValueOnce([customMockNft1]);
+			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
 				expect(get(nftStore)).toEqual([customMockNft1]);
 			});
@@ -241,16 +241,16 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
-			mockGetNftIdsForOwner.mockResolvedValueOnce([
+			mockGetNftsForOwner.mockResolvedValueOnce([
 				{ ...customMockNft1, balance: 2 },
 				{ ...customMockNft2, balance: 1 }
 			]);
-			mockGetNftIdsForOwner.mockResolvedValueOnce([{ ...customMockNft3, balance: 3 }]);
+			mockGetNftsForOwner.mockResolvedValueOnce([{ ...customMockNft3, balance: 3 }]);
 
 			render(LoaderNfts);
 
 			await waitFor(() => {
-				expect(mockGetNftIdsForOwner).toHaveBeenCalledTimes(2);
+				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
 				expect(get(nftStore)).toEqual([
 					customMockNft1,
