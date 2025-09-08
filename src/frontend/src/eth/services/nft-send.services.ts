@@ -56,13 +56,13 @@ export const encodeErc721SafeTransfer = ({
 	to: EthAddress;
 	tokenId: Bigish;
 }): PreparedContractCall => {
-	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
+	const encoded = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
 		from,
 		to,
 		BigInt(tokenId)
 	]) as `0x${string}`;
 
-	console.log('Prepare snd erc721', data);
+	console.log('Prepare snd erc721', encoded);
 
 	return { to: contractAddress as EthAddress, data };
 };
@@ -89,7 +89,7 @@ export const encodeErc1155SafeTransfer = ({
 		BigInt(amount),
 		data
 	]) as `0x${string}`;
-	console.log('Prepare snd erc1155', data);
+	console.log('Prepare snd erc1155', encoded);
 
 	return { to: contractAddress as EthAddress, data: encoded };
 };
