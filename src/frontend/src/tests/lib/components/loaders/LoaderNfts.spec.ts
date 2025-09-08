@@ -21,6 +21,7 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
+import * as nftEnv from '$env/nft.env';
 
 describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;
@@ -55,6 +56,8 @@ describe('LoaderNfts', () => {
 
 		erc721CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.resetAll();
+
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		mockAuthStore();
 
