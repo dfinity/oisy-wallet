@@ -292,7 +292,7 @@
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
-	isNft={nonNullish(nft)}
+	sendNft={nft}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<EthSendReview

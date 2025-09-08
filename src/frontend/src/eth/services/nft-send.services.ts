@@ -13,6 +13,8 @@ import type { Identity } from '@dfinity/agent';
 import { Interface } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
+type Bigish = bigint | number | string;
+
 export interface CommonNftTransferParams {
 	sourceNetwork: EthereumNetwork;
 	identity: Identity;
@@ -24,41 +26,129 @@ export interface CommonNftTransferParams {
 
 export interface TransferErc721Params extends CommonNftTransferParams {
 	contractAddress: string;
-	tokenId: bigint | number | string;
+	tokenId: Bigish;
 	to: EthAddress;
 }
 
 export interface TransferErc1155Params extends CommonNftTransferParams {
 	contractAddress: string;
-	id: bigint | number | string;
-	amount: bigint | number | string;
+	id: Bigish;
+	amount: Bigish;
 	to: EthAddress;
 	data?: `0x${string}` | string;
 }
 
-interface PrepareErc721Params extends TransferErc721Params {}
-interface PrepareErc1155Params extends TransferErc1155Params {}
-
-interface BuildSignRequestParams {
+export type PreparedContractCall = {
 	to: EthAddress;
-	value: bigint;
 	data: `0x${string}` | string;
+};
+
+/* ---------------- encoders (shared) ---------------- */
+
+export const encodeErc721SafeTransfer = ({
+	contractAddress,
+	from,
+	to,
+	tokenId
+}: {
+	contractAddress: string;
+	from: EthAddress;
+	to: EthAddress;
+	tokenId: Bigish;
+}): PreparedContractCall => {
+	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
+		from,
+		to,
+		BigInt(tokenId)
+	]) as `0x${string}`;
+
+	return { to: contractAddress as EthAddress, data };
+};
+
+export const encodeErc1155SafeTransfer = ({
+	contractAddress,
+	from,
+	to,
+	tokenId,
+	amount,
+	data = '0x'
+}: {
+	contractAddress: string;
+	from: EthAddress;
+	to: EthAddress;
+	tokenId: Bigish;
+	amount: Bigish;
+	data?: `0x${string}` | string;
+}): PreparedContractCall => {
+	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [
+		from,
+		to,
+		BigInt(tokenId),
+		BigInt(amount),
+		data
+	]) as `0x${string}`;
+
+	return { to: contractAddress as EthAddress, data: encoded };
+};
+
+/* ---------------- estimation bridge ---------------- */
+
+export const toGetFeeData = ({
+	from,
+	call: { to, data }
+}: {
+	from: EthAddress;
+	call: PreparedContractCall;
+}): { from: EthAddress; to: EthAddress; data?: string } => ({ from, to, data });
+
+/* ---------------- sign request builder ---------------- */
+
+const buildSignRequest = ({
+	call: { to, data },
+	nonce,
+	chainId,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	value = ZERO
+}: {
+	call: PreparedContractCall;
 	nonce: number;
-	gas: bigint;
 	chainId: bigint;
+	gas: bigint;
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
-}
+	value?: bigint;
+}): EthSignTransactionRequest => ({
+	to,
+	chain_id: chainId,
+	nonce: BigInt(nonce),
+	gas: gas ?? ETH_BASE_FEE,
+	max_fee_per_gas: maxFeePerGas ?? ETH_BASE_FEE,
+	max_priority_fee_per_gas: maxPriorityFeePerGas ?? ETH_BASE_FEE,
+	value,
+	data: [data]
+});
 
-interface SignWithIdentityParams {
+/* ---------------- sign+send helpers ---------------- */
+
+const signWithIdentity = async ({
+	identity,
+	transaction
+}: {
 	identity: OptionIdentity;
 	transaction: EthSignTransactionRequest;
-}
+}): Promise<string> => signTransaction({ identity, transaction });
 
-interface SendRawParams {
+const sendRaw = async ({
+	networkId,
+	raw
+}: {
 	networkId: NetworkId;
 	raw: string;
-}
+}): Promise<TransactionResponse> => infuraProviders(networkId).sendTransaction(raw);
+
+/* ---------------- public API ---------------- */
 
 export const transferErc721 = async ({
 	identity,
@@ -71,19 +161,21 @@ export const transferErc721 = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas
 }: TransferErc721Params): Promise<TransactionResponse> => {
-	const txReq = await prepareErc721Transfer({
-		identity,
-		sourceNetwork,
-		to,
-		from,
-		tokenId,
-		contractAddress,
+	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
+	const { id: networkId, chainId } = sourceNetwork;
+	const nonce = await infuraProviders(networkId).getTransactionCount(from);
+
+	const tx = buildSignRequest({
+		call,
+		nonce,
+		chainId,
 		gas,
 		maxFeePerGas,
 		maxPriorityFeePerGas
 	});
-	const raw = await signWithIdentity({ identity, transaction: txReq });
-	return await sendRaw({ networkId: sourceNetwork.id, raw });
+
+	const raw = await signWithIdentity({ identity, transaction: tx });
+	return await sendRaw({ networkId, raw });
 };
 
 export const transferErc1155 = async ({
@@ -96,115 +188,29 @@ export const transferErc1155 = async ({
 	contractAddress,
 	gas,
 	maxFeePerGas,
-	maxPriorityFeePerGas
-}: TransferErc1155Params): Promise<TransactionResponse> => {
-	const txReq = await prepareErc1155Transfer({
-		identity,
-		sourceNetwork,
-		to,
-		from,
-		id,
-		amount,
-		contractAddress,
-		gas,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
-	const raw = await signWithIdentity({ identity, transaction: txReq });
-	return await sendRaw({ networkId: sourceNetwork.id, raw });
-};
-
-const prepareErc721Transfer = async ({
-	contractAddress,
-	tokenId,
-	to,
-	from,
-	sourceNetwork,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas
-}: PrepareErc721Params): Promise<EthSignTransactionRequest> => {
-	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(from);
-
-	const data = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
-		from,
-		to,
-		BigInt(tokenId)
-	]);
-
-	return buildSignRequest({
-		to: contractAddress as EthAddress,
-		value: ZERO,
-		data,
-		nonce,
-		gas,
-		chainId: sourceNetwork.chainId,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
-};
-
-const prepareErc1155Transfer = async ({
-	contractAddress,
-	id,
-	amount,
-	to,
-	from,
-	data = '0x',
-	sourceNetwork,
-	gas,
-	maxFeePerGas,
-	maxPriorityFeePerGas
-}: PrepareErc1155Params): Promise<EthSignTransactionRequest> => {
-	const nonce = await infuraProviders(sourceNetwork.id).getTransactionCount(from);
-
-	const encoded = new Interface(ERC1155_ABI).encodeFunctionData('safeTransferFrom', [
-		from,
-		to,
-		BigInt(id),
-		BigInt(amount),
-		data
-	]);
-
-	return buildSignRequest({
-		to: contractAddress as EthAddress,
-		value: ZERO,
-		data: encoded,
-		nonce,
-		gas,
-		chainId: sourceNetwork.chainId,
-		maxFeePerGas,
-		maxPriorityFeePerGas
-	});
-};
-
-const buildSignRequest = ({
-	to,
-	chainId,
-	nonce,
-	gas,
-	maxFeePerGas,
 	maxPriorityFeePerGas,
-	value,
 	data
-}: BuildSignRequestParams): EthSignTransactionRequest => ({
-	to: to,
-	chain_id: chainId,
-	nonce: BigInt(nonce),
-	gas: gas ?? ETH_BASE_FEE,
-	max_fee_per_gas: maxFeePerGas ?? ETH_BASE_FEE,
-	max_priority_fee_per_gas: maxPriorityFeePerGas ?? ETH_BASE_FEE,
-	value: value,
-	data: [data]
-});
+}: TransferErc1155Params): Promise<TransactionResponse> => {
+	const call = encodeErc1155SafeTransfer({
+		contractAddress,
+		from,
+		to,
+		tokenId: id,
+		amount,
+		data
+	});
+	const { id: networkId, chainId } = sourceNetwork;
+	const nonce = await infuraProviders(networkId).getTransactionCount(from);
 
-const signWithIdentity = async ({
-	identity,
-	transaction
-}: SignWithIdentityParams): Promise<string> => {
-	return await signTransaction({ identity, transaction: transaction });
-};
+	const tx = buildSignRequest({
+		call,
+		nonce,
+		chainId,
+		gas,
+		maxFeePerGas,
+		maxPriorityFeePerGas
+	});
 
-const sendRaw = async ({ networkId, raw }: SendRawParams): Promise<TransactionResponse> => {
-	return await infuraProviders(networkId).sendTransaction(raw);
+	const raw = await signWithIdentity({ identity, transaction: tx });
+	return await sendRaw({ networkId, raw });
 };

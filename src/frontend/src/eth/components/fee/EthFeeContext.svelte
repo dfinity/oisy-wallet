@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
@@ -33,6 +33,12 @@
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import {
+		encodeErc1155SafeTransfer,
+		encodeErc721SafeTransfer,
+		toGetFeeData
+	} from '$eth/services/nft-send.services';
+	import { type Nft } from '$lib/types/nft';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -43,7 +49,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
-	export let isNft = false;
+	export let sendNft: Nft;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -99,7 +105,7 @@
 				? undefined
 				: await safeEstimateGas({ ...params, data });
 
-			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId) || isNft) {
+			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				feeStore.setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
@@ -123,6 +129,43 @@
 							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
 						)
 					})
+				});
+				return;
+			}
+
+			if (nonNullish(sendNft)) {
+				const call =
+					sendNft.collection.standard === 'erc721'
+						? encodeErc721SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id
+							})
+						: encodeErc1155SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id,
+								amount: 1,
+								data: '0x'
+							});
+
+				const gas = await safeEstimateGas(toGetFeeData({ from: $ethAddress, call }));
+
+				// Get fee fields (with robust fallback for non-EIP1559 networks)
+				const fd = await getFeeData();
+				const gasPrice = fd.gasPrice ?? 3_000_000_000n; // fallback 3 gwei
+				const maxPriority =
+					fd.maxPriorityFeePerGas ?? (fd.maxFeePerGas ? 2_000_000_000n : gasPrice);
+				const maxFee =
+					fd.maxFeePerGas ?? (fd.maxPriorityFeePerGas ? maxPriority + 2_000_000_000n : gasPrice);
+
+				feeStore.setFee({
+					...fd,
+					maxFeePerGas: maxFee,
+					maxPriorityFeePerGas: maxPriority,
+					gas: gas ?? gasPrice
 				});
 				return;
 			}
