@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",

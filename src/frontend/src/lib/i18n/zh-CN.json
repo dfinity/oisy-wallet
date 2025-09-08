@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",

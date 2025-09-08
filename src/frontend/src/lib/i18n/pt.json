@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Erro ao buscar os status de retirada de BTC.",
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc1155_custom_tokens": "Erro ao carregar o token personalizado ERC1155.",
