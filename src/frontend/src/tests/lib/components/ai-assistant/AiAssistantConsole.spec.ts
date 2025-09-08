@@ -16,7 +16,7 @@ vi.mock('$lib/api/llm.api');
 describe('AiAssistantConsole', () => {
 	const message = {
 		role: 'user',
-		content: 'hey'
+		data: { text: 'hey' }
 	} as ChatMessage;
 	const newMessageContent = 'new message';
 	const responseContent = 'content';
@@ -47,7 +47,22 @@ describe('AiAssistantConsole', () => {
 
 		await waitFor(() => {
 			expect(() => getByText(en.ai_assistant.text.welcome_message)).toThrow();
-			expect(getByText(message.content)).toBeInTheDocument();
+			expect(getByText(message.data.text ?? '')).toBeInTheDocument();
+		});
+	});
+
+	it('calls nullishSignOut if no identity available', async () => {
+		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
+
+		const input = getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder);
+		const button = getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON);
+
+		await fireEvent.input(input, { target: { value: newMessageContent } });
+
+		await waitFor(async () => {
+			await fireEvent.click(button);
+
+			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 	});
 
@@ -66,23 +81,6 @@ describe('AiAssistantConsole', () => {
 
 			expect(getByText(newMessageContent)).toBeInTheDocument();
 			expect(getByText(responseContent)).toBeInTheDocument();
-		});
-	});
-
-	it('calls nullishSignOut if no identity available', async () => {
-		vi.resetAllMocks();
-
-		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
-
-		const input = getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder);
-		const button = getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON);
-
-		await fireEvent.input(input, { target: { value: newMessageContent } });
-
-		await waitFor(async () => {
-			await fireEvent.click(button);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 	});
 });

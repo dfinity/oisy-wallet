@@ -1,4 +1,3 @@
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { writable, type Readable } from 'svelte/store';
 
@@ -11,17 +10,13 @@ export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
 	open: () => void;
 	close: () => void;
 	reset: () => void;
+	resetChatHistory: () => void;
 	appendMessage: (message: ChatMessage) => void;
 }
 
 const initialState = {
 	isOpen: false,
-	chatHistory: [
-		{
-			role: 'system',
-			content: AI_ASSISTANT_SYSTEM_PROMPT
-		}
-	]
+	chatHistory: []
 } as AiAssistant;
 
 const initAiAssistantStore = (): AiAssistantStore => {
@@ -40,6 +35,10 @@ const initAiAssistantStore = (): AiAssistantStore => {
 
 		reset: () => {
 			set(initialState);
+		},
+
+		resetChatHistory: () => {
+			update((state) => ({ ...state, chatHistory: initialState.chatHistory }));
 		},
 
 		appendMessage: (message: ChatMessage) => {

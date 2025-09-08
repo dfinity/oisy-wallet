@@ -277,11 +277,6 @@ export const claimVipReward = async (params: {
 		const campaignId = await updateVipReward(params);
 		return { success: true, campaignId: asQrCodeType(campaignId) };
 	} catch (err: unknown) {
-		const { vip } = get(i18n);
-		toastsError({
-			msg: { text: vip.reward.error.claiming_reward },
-			err
-		});
 		return { success: false, err };
 	}
 };

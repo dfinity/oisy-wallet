@@ -100,6 +100,14 @@ export const replaceErrorFields = ({
 export const replaceIcErrorFields = (err: unknown): string | undefined =>
 	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
 
+const stripHttpDetails = (text: string): string =>
+	text
+		// Remove from "HTTP d'-0tails:" + "{" up to the next closing brace on its own line
+		.replace(/HTTP details\s*:\s*\{[\s\S]*?\n}/i, '')
+		// Tidy leftover blank lines/commas
+		.replace(/\n{2,}/g, '\n')
+		.trim();
+
 export const parseIcErrorMessage = (err: unknown): Record<string, string> | undefined => {
 	if (isNullish(err)) {
 		return;
@@ -116,10 +124,11 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 	}
 
 	try {
-		const messageParts = message
-			.replace(/\\n/g, '\n')
-			.replace(/\\'/g, "'")
-			.replace(/\\"/g, '"')
+		const normalisedMsg = stripHttpDetails(
+			message.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\"/g, '"')
+		);
+
+		const messageParts = normalisedMsg
 			.split('\n')
 			// The first part is just the "Call failed" initial text, we skip it
 			.slice(1);

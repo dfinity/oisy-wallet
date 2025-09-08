@@ -1,4 +1,3 @@
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -8,15 +7,17 @@ import { get } from 'svelte/store';
 describe('ai-assistant.store', () => {
 	const defaultState = {
 		isOpen: false,
-		chatHistory: [
-			{
-				role: 'system',
-				content: AI_ASSISTANT_SYSTEM_PROMPT
-			}
-		]
+		chatHistory: []
 	};
 
+	const message = {
+		role: 'user',
+		data: { text: 'hey' }
+	} as ChatMessage;
+
 	beforeEach(() => {
+		aiAssistantStore.reset();
+
 		mockPage.reset();
 	});
 
@@ -41,12 +42,24 @@ describe('ai-assistant.store', () => {
 		expect(get(aiAssistantStore)).toStrictEqual(defaultState);
 	});
 
-	it('should append a message', () => {
-		const message = {
-			role: 'user',
-			content: 'hey'
-		} as ChatMessage;
+	it('should reset chat history', () => {
+		aiAssistantStore.appendMessage(message);
+		aiAssistantStore.open();
 
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.resetChatHistory();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: []
+		});
+	});
+
+	it('should append a message', () => {
 		aiAssistantStore.appendMessage(message);
 
 		expect(get(aiAssistantStore)).toStrictEqual({

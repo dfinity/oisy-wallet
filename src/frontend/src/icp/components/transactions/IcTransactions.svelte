@@ -82,14 +82,14 @@
 <IcTransactionsSkeletons>
 	<svelte:component
 		this={additionalListener}
-		{token}
 		ckEthereumNativeToken={$ckEthereumNativeToken}
+		{token}
 	>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll {token}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} {token} />
+						<IcTransaction {token} transaction={transaction.data} />
 					</li>
 				{/each}
 			</IcTransactionsScroll>
@@ -106,7 +106,7 @@
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<IcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalIcToken}
 	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}

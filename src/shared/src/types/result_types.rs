@@ -14,9 +14,10 @@ use super::{
     user_profile::{GetUserProfileError, UserProfile},
 };
 use crate::types::{
+    agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::SaveTestnetsSettingsError,
+    network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
 };
 
@@ -139,15 +140,30 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserNetworkSettingsResult {
+    /// The user's network settings were updated successfully.
+    Ok(()),
+    /// The user's network settings were not updated due to an error.
+    Err(UpdateNetworksSettingsError),
+}
+impl From<Result<(), UpdateNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), UpdateNetworksSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
+            Err(err) => UpdateUserNetworkSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
-    Err(SaveTestnetsSettingsError),
+    Err(SetTestnetsSettingsError),
 }
-
-impl From<Result<(), SaveTestnetsSettingsError>> for SetUserShowTestnetsResult {
-    fn from(result: Result<(), SaveTestnetsSettingsError>) -> Self {
+impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
+    fn from(result: Result<(), SetTestnetsSettingsError>) -> Self {
         match result {
             Ok(()) => SetUserShowTestnetsResult::Ok(()),
             Err(err) => SetUserShowTestnetsResult::Err(err),
@@ -301,6 +317,22 @@ impl From<Result<(), AddDappSettingsError>> for AddUserHiddenDappIdResult {
         match result {
             Ok(()) => AddUserHiddenDappIdResult::Ok(()),
             Err(err) => AddUserHiddenDappIdResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserAgreementsResult {
+    /// The user's agreements were updated successfully.
+    Ok(()),
+    /// The user's agreements were not updated due to an error.
+    Err(UpdateAgreementsError),
+}
+impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
+    fn from(result: Result<(), UpdateAgreementsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserAgreementsResult::Ok(()),
+            Err(err) => UpdateUserAgreementsResult::Err(err),
         }
     }
 }
