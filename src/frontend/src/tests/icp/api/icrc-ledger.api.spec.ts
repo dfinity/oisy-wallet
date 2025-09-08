@@ -13,12 +13,12 @@ import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
 import {
-	type IcrcAllowance,
-	type IcrcGetBlocksResult,
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
 	type IcrcAccount,
+	type IcrcAllowance,
 	type IcrcBlockIndex,
+	type IcrcGetBlocksResult,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
