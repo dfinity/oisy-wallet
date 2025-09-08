@@ -21,6 +21,7 @@
 <!--	import { nftStore } from '$lib/stores/nft.store';-->
 <!--	import type { NftId, NonFungibleToken, OwnedNft } from '$lib/types/nft';-->
 <!--	import { findNewNftIds, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';-->
+<!--import { NFTS_ENABLED } from '$env/nft.env';-->
 
 <!--	interface Props {-->
 <!--		children?: Snippet;-->
@@ -132,6 +133,10 @@
 <!--	};-->
 
 <!--	const onLoad = async () => {-->
+<!--if (!NFTS_ENABLED) {-->
+<!--	return;-->
+<!--}-->
+<!---->
 <!--		for (const token of $enabledNonFungibleTokens) {-->
 <!--			if (isTokenErc721(token)) {-->
 <!--				await handleErc721(token);-->
