@@ -15,7 +15,7 @@
 	}
 
 	const {
-		icon,
+		icon: IconCmp,
 		opacity = false,
 		colorStyle = 'bg-primary',
 		size = '16',
@@ -33,10 +33,5 @@
 	aria-label={ariaLabel}
 	data-tid={testId}
 >
-	<svelte:component
-		this={icon}
-		style={`width:${size}px;height:${size}px`}
-		class={`${iconClass} ${opacity ? 'opacity-10' : ''}`}
-		{size}
-	/>
+	<IconCmp style={`width:${size}px;height:${size}px`} class={`${iconClass} ${opacity ? 'opacity-10' : ''}`} {size}/>
 </div>
