@@ -8,6 +8,7 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import {
 		erc1155CustomTokensInitialized,
 		erc1155CustomTokensNotInitialized
@@ -68,7 +69,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { NFTS_ENABLED } from '$env/nft.env';
 
 	interface Props {
 		children: Snippet;
@@ -231,7 +231,8 @@
 
 	$effect(() => {
 		if (
-			(NFTS_ENABLED && ($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized)) &&
+			NFTS_ENABLED &&
+			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
 			nonNullish($ethAddress) &&
 			$nonFungibleTokens.length > 0
 		) {
