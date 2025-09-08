@@ -11,8 +11,7 @@
 		transparent?: boolean;
 	}
 
-
-	let {addressType, size,transparent= false}: Props = $props();
+	let { addressType, size, transparent = false }: Props = $props();
 </script>
 
 {#snippet icon()}

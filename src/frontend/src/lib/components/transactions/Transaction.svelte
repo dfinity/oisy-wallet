@@ -104,11 +104,7 @@
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
-						<NetworkLogo
-							addressType={networkAddressType}
-							{network}
-							testId="transaction-network"
-						/>
+						<NetworkLogo addressType={networkAddressType} {network} testId="transaction-network" />
 					</div>
 				{/if}
 			</span>
