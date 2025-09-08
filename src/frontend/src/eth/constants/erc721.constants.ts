@@ -4,5 +4,5 @@ export const ERC721_ABI = [
 	'function name() view returns (string)',
 	'function symbol() view returns (string)',
 	'function tokenURI(uint256 tokenId) view returns (string)',
-	'function safeTransferFrom(address from, address to, uint256 tokenId, bytes data)'
+	'function safeTransferFrom(address from, address to, uint256 tokenId)'
 ];
