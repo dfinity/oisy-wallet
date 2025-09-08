@@ -24,7 +24,7 @@ describe('index-canister.services', () => {
 
 		const mockTotalBlocks = 123n;
 
-		const mockGetBlocksResponse: GetBlocksResult = {
+		const mockGetBlocksResponse: IcrcGetBlocksResult = {
 			log_length: mockTotalBlocks,
 			blocks: [],
 			archived_blocks: []
