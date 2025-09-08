@@ -23,7 +23,9 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	id: z.custom<TokenId>(),
 	network: z.custom<Network>(),
-	standard: z.custom<TokenStandard>()
+	standard: z.custom<TokenStandard>(),
+	bannerImageUrl: z.string().url().optional(),
+	description: z.string().optional()
 });
 
 export const NftSchema = z.object({
