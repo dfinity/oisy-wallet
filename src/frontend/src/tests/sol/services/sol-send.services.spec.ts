@@ -70,13 +70,10 @@ vi.mock(import('@solana/transaction-confirmation'), async (importOriginal) => {
 	};
 });
 
-vi.mock(import('@solana-program/compute-budget'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		estimateComputeUnitLimitFactory: vi.fn()
-	};
-});
+vi.mock('@solana-program/compute-budget', () => ({
+	estimateComputeUnitLimitFactory: vi.fn(),
+	getSetComputeUnitPriceInstruction: vi.fn().mockReturnValue('mock-compute-unit-price-instruction')
+}));
 
 vi.mock('@solana-program/system', () => ({
 	getTransferSolInstruction: vi.fn().mockReturnValue('mock-transfer-sol-instruction')
