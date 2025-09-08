@@ -34,11 +34,6 @@ export const NftSchema = z.object({
 	collection: NftCollectionSchema
 });
 
-export const OwnedNftSchema = z.object({
-	id: NftIdSchema,
-	balance: z.number()
-});
-
 export const OwnedContractSchema = z.object({
 	address: z.string(),
 	isSpam: z.boolean(),

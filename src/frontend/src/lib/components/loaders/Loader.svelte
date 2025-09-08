@@ -66,6 +66,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 
 	interface Props {
 		children: Snippet;
@@ -279,9 +280,9 @@
 {:else}
 	<div in:fade>
 		<!--		<LoaderCollections> -->
-		<!--			<LoaderNfts> -->
+					<LoaderNfts>
 		{@render children()}
-		<!--			</LoaderNfts> -->
+					</LoaderNfts>
 		<!--		</LoaderCollections> -->
 	</div>
 {/if}
