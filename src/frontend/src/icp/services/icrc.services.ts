@@ -24,7 +24,7 @@ import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exc
 import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
+import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
@@ -99,13 +99,11 @@ const loadDefaultIcrc = ({
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
 			});
 
-			toastsError({
-				msg: {
-					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-						$ledgerCanisterId: ledgerCanisterId
-					})
-				},
-				err
+			toastsShow({
+				text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+					$ledgerCanisterId: ledgerCanisterId
+				}),
+				level: 'warn'
 			});
 		},
 		strategy,
