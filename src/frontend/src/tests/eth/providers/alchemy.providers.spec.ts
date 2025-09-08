@@ -130,16 +130,16 @@ describe('alchemy.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+		});
 
+		it('should fetch and map token ids correctly', async () => {
 			Object.defineProperty(Alchemy.prototype, 'nft', {
 				value: {
 					getNftsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
 				},
 				configurable: true
 			});
-		});
 
-		it('should fetch and map token ids correctly', async () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
 			const nfts = await provider.getNftsByOwner({
@@ -150,6 +150,67 @@ describe('alchemy.providers', () => {
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
 			expect(nfts).toStrictEqual(expectedTokenIds);
 		});
+
+		it('should only map existing data', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftsForOwner: vi.fn().mockResolvedValue({
+						ownedNfts: [
+							{
+								tokenId: '1',
+								raw: { metadata: {} },
+								contract: {}
+							},
+							{
+								tokenId: '2',
+								raw: { metadata: {} },
+								contract: {}
+							}
+						]
+					})
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const nfts = await provider.getNftsByOwner({
+				address: mockEthAddress,
+				token: mockValidErc1155Token
+			});
+
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+
+			expect(nfts).toStrictEqual([
+				{
+					id: parseNftId(1),
+					collection: {
+						...mapTokenToCollection(mockValidErc1155Token)
+					},
+				},
+				{
+					id: parseNftId(2),
+					collection: {
+						...mapTokenToCollection(mockValidErc1155Token)
+					},
+				}
+			]);
+		});
+
+		it('should throw an error', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftsForOwner: vi.fn().mockRejectedValueOnce(new Error('Nfts Error'))
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.getNftsByOwner({address: mockEthAddress, token: mockValidErc1155Token})).rejects.toThrow('Nfts Error');
+
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+		})
 	});
 
 	describe('getTokensForOwner', () => {
