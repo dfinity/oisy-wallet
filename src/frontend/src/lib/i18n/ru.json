@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC20.",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC721.",
 			"erc1155_custom_tokens": "",
