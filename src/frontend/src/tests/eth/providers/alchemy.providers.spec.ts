@@ -108,7 +108,6 @@ describe('alchemy.providers', () => {
 			});
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
-
 			expect(nfts).toStrictEqual(expectedTokenIds);
 		});
 
