@@ -12,13 +12,6 @@
 	let { onclick, disabled = false, fullWidth = false, testId }: Props = $props();
 </script>
 
-<Button
-	colorStyle="secondary-light"
-	type="button"
-	{disabled}
-	{fullWidth}
-	{testId}
-	on:click={onclick}
->
+<Button colorStyle="secondary-light" {disabled} {fullWidth} {onclick} {testId} type="button">
 	{$i18n.core.text.back}
 </Button>

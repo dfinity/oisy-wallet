@@ -45,9 +45,9 @@ export const mapSolTransactionMessage = ({
 			return {
 				...acc,
 				amount: nonNullish(amount) ? (acc.amount ?? ZERO) + amount : acc.amount,
-				source,
-				destination,
-				payer
+				...(nonNullish(source) && { source }),
+				...(nonNullish(destination) && { destination }),
+				...(nonNullish(payer) && { payer })
 			};
 		},
 		{ amount: undefined }

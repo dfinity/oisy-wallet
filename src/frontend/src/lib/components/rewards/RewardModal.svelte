@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import type { RewardDescription } from '$env/types/env-reward';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -11,6 +11,10 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import Share from '$lib/components/ui/Share.svelte';
+	import {
+		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+		TRACK_REWARD_CAMPAIGN_SHARE
+	} from '$lib/constants/analytics.contants';
 	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -18,10 +22,11 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
-		reward: RewardDescription;
+		reward: RewardCampaignDescription;
 	}
 
 	let { reward }: Props = $props();
@@ -38,8 +43,10 @@
 	let amountOfRewards = $state(0);
 </script>
 
-<Modal on:nnsClose={modalStore.close} testId={REWARDS_MODAL}>
-	<span class="text-center text-xl" slot="title">{reward.title}</span>
+<Modal testId={REWARDS_MODAL} on:nnsClose={modalStore.close}>
+	<span slot="title" class="text-center text-xl">
+		{resolveText({ i18n: $i18n, path: reward.title })}
+	</span>
 
 	<ContentWithToolbar>
 		<RewardBanner {reward} />
@@ -50,35 +57,49 @@
 		{/if}
 
 		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{$i18n.rewards.text.participate_title}</span>
+			<span class="inline-flex">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
 			<span>
 				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
 			</span>
 		</div>
-		<p class="my-3"><Html text={reward.description} /></p>
+		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 
 		{#if !hasEnded}
 			<ExternalLink
-				href={reward.learnMoreHref}
 				ariaLabel={$i18n.rewards.text.learn_more}
-				iconVisible={false}
 				asButton
+				href={reward.learnMoreHref}
+				iconVisible={false}
 				styleClass="rounded-xl px-3 py-2 secondary-light mb-3"
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_LEARN_MORE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
 			>
 				{$i18n.rewards.text.learn_more}
 			</ExternalLink>
 
-			<Share text={$i18n.rewards.text.share} href={reward.campaignHref} styleClass="my-2" />
+			<Share
+				href={resolveText({ i18n: $i18n, path: reward.campaignHref })}
+				styleClass="my-2"
+				text={$i18n.rewards.text.share}
+				trackEvent={{
+					name: TRACK_REWARD_CAMPAIGN_SHARE,
+					metadata: { campaignId: `${reward.id}`, state: getCampaignState(reward) }
+				}}
+			/>
 
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {isEligible} {criteria} />
+				<RewardsRequirements {criteria} {isEligible} />
 			{/if}
 		{/if}
 
-		<Button paddingSmall type="button" fullWidth on:click={modalStore.close} slot="toolbar">
-			{$i18n.rewards.text.modal_button_text}
-		</Button>
+		{#snippet toolbar()}
+			<Button fullWidth onclick={modalStore.close} paddingSmall type="button">
+				{$i18n.rewards.text.modal_button_text}
+			</Button>
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

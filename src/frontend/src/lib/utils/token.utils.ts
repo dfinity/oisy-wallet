@@ -40,24 +40,22 @@ export const getMaxTransactionAmount = ({
 	fee?: bigint;
 	tokenDecimals: number;
 	tokenStandard: TokenStandard;
-}): number => {
+}): string => {
 	const value =
 		(balance ?? ZERO) - (tokenStandard !== 'erc20' && tokenStandard !== 'spl' ? fee : ZERO);
 
-	return Number(
-		value <= ZERO
-			? ZERO
-			: formatToken({
-					value,
-					unitName: tokenDecimals,
-					displayDecimals: tokenDecimals
-				})
-	);
+	return value <= ZERO
+		? ZERO.toString()
+		: formatToken({
+				value,
+				unitName: tokenDecimals,
+				displayDecimals: tokenDecimals
+			});
 };
 
 /**
  * /**
- *  * We always display following tokens on the "Tokens" view:
+ *  * We always display the following tokens on the "Tokens" view:
  *  * - ICP token
  *  * - Ethereum token
  *  * - A subset of cK tokens
@@ -69,10 +67,10 @@ export const getMaxTransactionAmount = ({
  */
 export const mapDefaultTokenToToggleable = <T extends Token>({
 	defaultToken,
-	userToken
+	customToken
 }: {
 	defaultToken: T;
-	userToken: TokenToggleable<T> | undefined;
+	customToken: TokenToggleable<T> | undefined;
 }): TokenToggleable<T> => {
 	const ledgerCanisterId =
 		'ledgerCanisterId' in defaultToken &&
@@ -91,9 +89,9 @@ export const mapDefaultTokenToToggleable = <T extends Token>({
 		...defaultToken,
 		enabled:
 			isEnabledByDefault ||
-			(isNullish(userToken?.enabled) && isSuggestedToken) ||
-			userToken?.enabled === true,
-		version: userToken?.version
+			(isNullish(customToken?.enabled) && isSuggestedToken) ||
+			customToken?.enabled === true,
+		version: customToken?.version
 	};
 };
 

@@ -35,21 +35,27 @@
 <div class={`flex ${styleClass}`}>
 	{#if !hideCopyButton}
 		<Copy
+			colorStyle="tertiary-alt"
+			link={false}
 			testId={ADDRESS_LIST_ITEM_COPY_BUTTON}
 			text={$i18n.wallet.text.address_copied}
+			transparent
 			value={address.address}
 		/>
 	{/if}
 	{#if nonNullish(onInfo)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
 			ariaLabel={$i18n.core.text.view}
-			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
+			colorStyle="tertiary-alt"
+			link={false}
 			onclick={(e) => {
 				e.preventDefault();
 				e.stopPropagation();
 				onInfo();
 			}}
+			styleClass="-m-1 md:m-0"
+			testId={ADDRESS_LIST_ITEM_INFO_BUTTON}
+			transparent
 		>
 			{#snippet icon()}
 				<IconInfo />
@@ -58,10 +64,13 @@
 	{/if}
 	{#if nonNullish(onEdit)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 hover:text-inherit"
 			ariaLabel={$i18n.core.text.edit}
-			testId={ADDRESS_LIST_ITEM_EDIT_BUTTON}
+			colorStyle="tertiary-alt"
+			link={false}
 			onclick={onEdit}
+			styleClass="-m-1 md:m-0"
+			testId={ADDRESS_LIST_ITEM_EDIT_BUTTON}
+			transparent
 		>
 			{#snippet icon()}
 				<IconPencil />
@@ -70,10 +79,13 @@
 	{/if}
 	{#if nonNullish(onDelete)}
 		<ButtonIcon
-			styleClass="-m-1 md:m-0 text-error-primary hover:text-inherit"
 			ariaLabel={$i18n.core.text.delete}
-			testId={ADDRESS_LIST_ITEM_DELETE_BUTTON}
+			colorStyle="error"
+			link={false}
 			onclick={onDelete}
+			styleClass="-m-1 md:m-0"
+			testId={ADDRESS_LIST_ITEM_DELETE_BUTTON}
+			transparent
 		>
 			{#snippet icon()}
 				<IconCircleMinus />

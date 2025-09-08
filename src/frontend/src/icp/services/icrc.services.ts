@@ -3,6 +3,7 @@ import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/n
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
+import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -16,7 +17,8 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -25,6 +27,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
+import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
 import {
 	fromNullable,
@@ -50,16 +53,23 @@ const loadDefaultIcrcTokens = async () => {
 
 export const loadCustomTokens = ({
 	identity,
-	useCache = false
+	useCache = false,
+	onSuccess
 }: {
 	identity: OptionIdentity;
 	useCache?: boolean;
+	onSuccess?: () => void;
 }): Promise<void> =>
 	queryAndUpdate<IcrcCustomToken[]>({
 		request: (params) => loadIcrcCustomTokens({ ...params, useCache }),
-		onLoad: loadIcrcCustomData,
+		onLoad: (params) => loadIcrcCustomData({ ...params, onSuccess }),
 		onUpdateError: ({ error: err }) => {
 			icrcCustomTokensStore.resetAll();
+
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -69,7 +79,7 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-export const loadDefaultIcrc = ({
+const loadDefaultIcrc = ({
 	data,
 	strategy
 }: {
@@ -81,6 +91,11 @@ export const loadDefaultIcrc = ({
 		onLoad: loadIcrcData,
 		onUpdateError: ({ error: err }) => {
 			icrcDefaultTokensStore.reset(data.ledgerCanisterId);
+
+			trackEvent({
+				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
+				metadata: mapIcErrorMetadata(err)
+			});
 
 			toastsError({
 				msg: { text: get(i18n).init.error.icrc_canisters },
@@ -128,8 +143,6 @@ const loadIcrcCustomTokens = async ({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
-		setIdbTokens: setIdbIcTokens,
-		getIdbTokens: getIdbIcTokens,
 		useCache
 	});
 
@@ -150,6 +163,7 @@ const loadCustomIcrcTokensData = async ({
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
+		...buildIndexedIcpTokens(),
 		...buildIndexedIcrcCustomTokens(),
 		...buildIndexedDip20Tokens()
 	};
@@ -231,11 +245,15 @@ const loadCustomIcrcTokensData = async ({
 
 const loadIcrcCustomData = ({
 	response: tokens,
-	certified
+	certified,
+	onSuccess
 }: {
 	certified: boolean;
 	response: IcrcCustomToken[];
+	onSuccess?: () => void;
 }) => {
+	onSuccess?.();
+
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 

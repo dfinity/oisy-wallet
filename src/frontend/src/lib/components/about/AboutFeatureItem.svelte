@@ -1,15 +1,21 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let title: string;
-	export let description: string;
+	interface Props {
+		icon: Snippet;
+		title: string;
+		description: string;
+	}
+
+	let { icon, title, description }: Props = $props();
 </script>
 
 <div>
 	<div class="flex items-center gap-3 font-bold text-primary">
 		<div class="text-primary">
-			<slot name="icon" />
+			{@render icon()}
 		</div>
 		<Html text={replaceOisyPlaceholders(title)} />
 	</div>

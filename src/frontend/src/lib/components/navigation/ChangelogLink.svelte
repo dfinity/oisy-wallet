@@ -15,10 +15,10 @@
 </script>
 
 <ExternalLink
+	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	{asMenuItem}
 	{asMenuItemCondensed}
 	href="https://github.com/dfinity/oisy-wallet/releases"
-	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.changelog)}
 	iconVisible={false}
 	trackEvent={{
 		name: TRACK_COUNT_OPEN_CHANGELOG,

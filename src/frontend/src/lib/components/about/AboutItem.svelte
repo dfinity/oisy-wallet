@@ -1,24 +1,40 @@
 <script lang="ts">
-	export let asMenuItem = false;
-	export let testId: string | undefined = undefined;
-	export let asMenuItemCondensed = false;
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		icon?: Snippet;
+		label: Snippet;
+		onClick: () => void;
+		asMenuItem?: boolean;
+		asMenuItemCondensed?: boolean;
+		testId?: string;
+	}
+
+	let {
+		icon,
+		label,
+		onClick,
+		asMenuItem = false,
+		asMenuItemCondensed = false,
+		testId
+	}: Props = $props();
 </script>
 
 <button
-	class:text={asMenuItem}
+	class:font-bold={!asMenuItem}
 	class:nav-item={asMenuItem}
 	class:nav-item-condensed={asMenuItemCondensed}
-	class:whitespace-nowrap={!asMenuItem}
-	class:text-center={!asMenuItem}
-	class:font-bold={!asMenuItem}
+	class:text={asMenuItem}
 	class:text-brand-primary-alt={!asMenuItem}
-	on:click
+	class:text-center={!asMenuItem}
+	class:whitespace-nowrap={!asMenuItem}
 	data-tid={testId}
+	onclick={onClick}
 >
 	<div class="flex items-center gap-2">
 		{#if asMenuItem}
-			<slot name="icon" />
+			{@render icon?.()}
 		{/if}
-		<slot name="label"></slot>
+		{@render label()}
 	</div>
 </button>

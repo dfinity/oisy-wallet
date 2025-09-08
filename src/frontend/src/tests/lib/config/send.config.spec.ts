@@ -8,7 +8,7 @@ import en from '$tests/mocks/i18n.mock';
 import type { WizardSteps } from '@dfinity/gix-components';
 
 describe('send.config', () => {
-	const expectedBaseConfig: WizardSteps = [
+	const expectedBaseConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.DESTINATION,
 			title: en.send.text.send
@@ -23,7 +23,7 @@ describe('send.config', () => {
 		}
 	];
 
-	const expectedSendConfig: WizardSteps = [
+	const expectedSendConfig: WizardSteps<WizardStepsSend> = [
 		...expectedBaseConfig,
 		{
 			name: WizardStepsSend.SENDING,
@@ -31,7 +31,7 @@ describe('send.config', () => {
 		}
 	];
 
-	const expectedConvertConfig: WizardSteps = [
+	const expectedConvertConfig: WizardSteps<WizardStepsSend> = [
 		...expectedBaseConfig,
 		{
 			name: WizardStepsSend.SENDING,
@@ -39,14 +39,14 @@ describe('send.config', () => {
 		}
 	];
 
-	const expectedQrCodeConfig: WizardSteps = [
+	const expectedQrCodeConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.QR_CODE_SCAN,
 			title: en.send.text.scan_qr
 		}
 	];
 
-	const expectedAllSendConfig: WizardSteps = [
+	const expectedAllSendConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.TOKENS_LIST,
 			title: en.send.text.select_token

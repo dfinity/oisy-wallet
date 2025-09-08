@@ -4,14 +4,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 
-	let toggleContent: () => void;
+	let cmp = $state<Collapsible | undefined>(undefined);
 
 	const onInfoButtonClick = () => {
-		toggleContent();
+		cmp?.toggleContent();
 	};
 
-	let isNetworkMainnet = false;
-	$: isNetworkMainnet = isNetworkIdBTCMainnet($networkId);
+	let isNetworkMainnet = $derived(isNetworkIdBTCMainnet($networkId));
 </script>
 
 <div class="mb-6">
@@ -19,12 +18,13 @@
 		<h2 class="text-base">{$i18n.transactions.text.title}</h2>
 
 		{#if isNetworkMainnet}
-			<button class="ml-1 opacity-50" on:click={onInfoButtonClick}><IconInfo /></button>
+			<button class="ml-1 opacity-50" onclick={onInfoButtonClick}><IconInfo /></button>
 		{/if}
 	</div>
 
 	{#if isNetworkMainnet}
-		<Collapsible expandButton={false} externalToggle={true} bind:toggleContent>
+		<Collapsible bind:this={cmp} expandButton={false} externalToggle={true}>
+			{#snippet header()}{/snippet}
 			<p class="mb-0 font-normal opacity-50">
 				{$i18n.transactions.text.mainnet_btc_transactions_info}
 			</p>

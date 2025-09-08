@@ -24,6 +24,7 @@ export const WBTC_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWBTC',
 	groupData: WBTC_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'wbtc_ethereum'
 	}

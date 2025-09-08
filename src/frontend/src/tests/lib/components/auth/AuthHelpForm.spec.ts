@@ -104,7 +104,7 @@ describe('AuthHelpForm', () => {
 		await waitFor(() => {
 			securityButton?.click();
 
-			expect(onOtherMock).toHaveBeenCalledTimes(1);
+			expect(onOtherMock).toHaveBeenCalledOnce();
 		});
 
 		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_CONCERNED_ABOUT_SECURITY });

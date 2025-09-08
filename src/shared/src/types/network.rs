@@ -23,7 +23,6 @@ pub enum NetworkSettingsFor {
     EthereumMainnet,
     EthereumSepolia,
     SolanaMainnet,
-    SolanaTestnet,
     SolanaDevnet,
     SolanaLocal,
     BaseMainnet,
@@ -32,6 +31,8 @@ pub enum NetworkSettingsFor {
     BscTestnet,
     PolygonMainnet,
     PolygonAmoy,
+    ArbitrumMainnet,
+    ArbitrumSepolia,
 }
 
 /// A list of logical networks grouped by type.
@@ -82,6 +83,8 @@ pub enum EthereumNetworkId {
     PolygonMainnet = 137,
     PolygonAmoy = 80_002,
     Sepolia = 11_155_111,
+    ArbitrumMainnet = 42_161,
+    ArbitrumSepolia = 421_614,
 }
 impl Network for EthereumNetworkId {}
 /// Solana networks, or "clusters".
@@ -111,13 +114,13 @@ pub struct NetworksSettings {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveNetworksSettingsError {
+pub enum UpdateNetworksSettingsError {
     UserNotFound,
     VersionMismatch,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
-pub enum SaveTestnetsSettingsError {
+pub enum SetTestnetsSettingsError {
     UserNotFound,
     VersionMismatch,
 }
@@ -156,11 +159,6 @@ pub mod marker_trait {
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct SolanaDevnet {}
     impl Network for SolanaDevnet {}
-
-    /// A marker trait, used to indicate that a type is to be used with the Solana testnet.
-    #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
-    pub struct SolanaTestnet {}
-    impl Network for SolanaTestnet {}
 
     #[derive(CandidType, Serialize, Deserialize, Clone, Debug, Eq, PartialEq)]
     pub struct SolanaLocal {}

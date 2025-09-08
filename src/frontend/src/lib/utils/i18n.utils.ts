@@ -7,7 +7,8 @@ import {
 	OISY_TWITTER_URL,
 	OISY_URL
 } from '$lib/constants/oisy.constants';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { Languages } from '$lib/enums/languages';
+import { isEmptyString, isNullish, nonNullish } from '@dfinity/utils';
 
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions#escaping
 const escapeRegExp = (regExpText: string): string =>
@@ -47,18 +48,45 @@ interface MaybeI18n extends I18n {
 	[key: string]: any;
 }
 
-export const resolveText = ({
-	i18n,
-	path
-}: {
-	i18n: MaybeI18n;
-	path: string | undefined;
-}): string | undefined => {
-	// For simplicity reason, we defer this checks within that function that way we can keep our components concise and use optional chaining within those.
-	if (isNullish(path)) {
-		return undefined;
-	}
-
+export const resolveText = ({ i18n, path }: { i18n: MaybeI18n; path: string }): string => {
 	const text = path.split('.').reduce((prev, current) => prev?.[current], i18n);
 	return nonNullish(text) && typeof text !== 'object' ? text : path;
+};
+
+export const mergeWithFallback = ({
+	refLang,
+	targetLang
+}: {
+	refLang: I18n;
+	targetLang: I18n;
+}): I18n => {
+	const merged = {} as I18n;
+
+	for (const key in refLang) {
+		const refValue = refLang[key as keyof I18n];
+		const targetValue = targetLang?.[key as keyof I18n];
+
+		if (typeof refValue === 'object' && !Array.isArray(refValue)) {
+			merged[key as keyof I18n] = mergeWithFallback({
+				refLang: refValue,
+				targetLang: targetValue ?? {}
+			});
+		} else {
+			merged[key as keyof I18n] =
+				isNullish(targetValue) || isEmptyString(targetValue) ? refValue : targetValue;
+		}
+	}
+
+	return merged;
+};
+
+export const getDefaultLang = (): Languages => {
+	const browserLocale = new Intl.Locale(navigator.language);
+	const browserLanguage = Object.keys(Languages).find(
+		(l) => Languages[l as keyof typeof Languages] === browserLocale.language
+	);
+	if (nonNullish(browserLanguage)) {
+		return Languages[browserLanguage as keyof typeof Languages];
+	}
+	return Languages.ENGLISH;
 };

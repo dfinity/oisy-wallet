@@ -56,7 +56,7 @@ describe('loader.services', () => {
 			vi.spyOn(window.history, 'replaceState').mockImplementation(() => {});
 		});
 
-		it('should return success', async () => {
+		it('should work correctly', async () => {
 			apiMock.mockResolvedValueOnce(undefined);
 
 			const result = await initSignerAllowance();
@@ -64,20 +64,32 @@ describe('loader.services', () => {
 			expect(result.success).toBeTruthy();
 		});
 
-		it('should return success equals to false', async () => {
+		it('should handle errors', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
 
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 			const result = await initSignerAllowance();
 
 			expect(result.success).toBeFalsy();
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 
 		it('should sign out and ultimately reload the window', async () => {
 			apiMock.mockImplementation(() => {
 				throw new CanisterInternalError('Test');
 			});
+
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
 
 			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
 
@@ -87,6 +99,10 @@ describe('loader.services', () => {
 
 			expect(spySignOut).toHaveBeenCalledOnce();
 			expect(spy).toHaveBeenCalledOnce();
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 	});
 
@@ -196,6 +212,7 @@ describe('loader.services', () => {
 									[{ BaseMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ BscMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ PolygonMainnet: null }, { enabled: false, is_testnet: false }],
+									[{ ArbitrumMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
 								]
 							}

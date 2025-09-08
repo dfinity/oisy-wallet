@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { BottomSheet, Backdrop } from '@dfinity/gix-components';
 	import DeleteAddressConfirmContent from '$lib/components/address-book/DeleteAddressConfirmContent.svelte';
-	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import BottomSheetConfirmationPopup from '$lib/components/ui/BottomSheetConfirmationPopup.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 
@@ -17,27 +15,12 @@
 	let { onCancel, onDelete, address, contact, disabled = false }: Props = $props();
 </script>
 
-<div class="fixed inset-0 z-50">
-	<BottomSheet transition>
-		<div class="flex w-full flex-col">
-			<div class="w-full p-4">
-				<ButtonIcon
-					onclick={onCancel}
-					styleClass="text-disabled float-right"
-					ariaLabel={$i18n.core.alt.close_details}
-					{disabled}
-				>
-					{#snippet icon()}
-						<IconClose size="24" />
-					{/snippet}
-				</ButtonIcon>
-			</div>
+<BottomSheetConfirmationPopup {disabled} {onCancel}>
+	{#snippet title()}
+		{$i18n.address.delete.title}
+	{/snippet}
 
-			<h3 class="mb-2 mt-4 text-center">{$i18n.address.delete.title}</h3>
-
-			<DeleteAddressConfirmContent {onCancel} {onDelete} {address} {contact} {disabled} />
-		</div>
-	</BottomSheet>
-
-	<Backdrop on:nnsClose={onCancel} />
-</div>
+	{#snippet content()}
+		<DeleteAddressConfirmContent {address} {contact} {disabled} {onCancel} {onDelete} />
+	{/snippet}
+</BottomSheetConfirmationPopup>

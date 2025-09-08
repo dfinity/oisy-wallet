@@ -1,24 +1,46 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 
-	export let disabled = false;
-	export let button: HTMLButtonElement | undefined = undefined;
-	export let ariaLabel: string;
-	export let opened = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		children?: Snippet;
+		onClick: () => void;
+		disabled?: boolean;
+		button?: HTMLButtonElement;
+		ariaLabel: string;
+		opened?: boolean;
+		fullWidth?: boolean;
+		border?: boolean;
+		testId?: string;
+	}
+
+	let {
+		children,
+		onClick,
+		disabled = false,
+		button = $bindable(),
+		ariaLabel,
+		opened = false,
+		fullWidth = false,
+		border = false,
+		testId
+	}: Props = $props();
 </script>
 
 <button
-	class="dropdown-button"
 	bind:this={button}
-	on:click
+	class="dropdown-button"
+	class:border
+	class:border-tertiary={border}
+	class:disabled
+	class:opened
+	class:w-full={fullWidth}
 	aria-label={ariaLabel}
 	data-tid={testId}
 	{disabled}
-	class:disabled
-	class:opened
+	onclick={onClick}
 >
-	<slot />
+	{@render children?.()}
 	<div class="transform transition-transform duration-300 ease-in-out" class:-scale-y-100={opened}>
 		<IconExpandMore size="24" />
 	</div>

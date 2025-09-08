@@ -1,5 +1,5 @@
 import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 import {
@@ -25,7 +25,7 @@ describe('RewardCard', () => {
 	store.setCampaignEligibilities(mockCampaignEligibilities);
 
 	it('should render active reward card content', () => {
-		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === SPRINKLES_SEASON_1_EPISODE_3_ID
 		);
 		assertNonNullish(mockedReward);
@@ -60,7 +60,7 @@ describe('RewardCard', () => {
 	});
 
 	it('should render inactive reward card content', () => {
-		const mockedReward: RewardDescription | undefined = mockRewardCampaigns.find(
+		const mockedReward: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 			(campaign) => campaign.id === 'sprinkles_s1e5'
 		);
 		assertNonNullish(mockedReward);

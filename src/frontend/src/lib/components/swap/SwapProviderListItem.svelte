@@ -12,6 +12,7 @@
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
 
 	interface Props {
 		amount: bigint;
@@ -51,9 +52,9 @@
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton onClick={() => dispatch('click')} dividers>
+	<LogoButton dividers onClick={() => dispatch('click')}>
 		{#snippet title()}
-			{dapp.name}
+			{resolveText({ i18n: $i18n, path: dapp.name })}
 		{/snippet}
 
 		{#snippet description()}
@@ -64,9 +65,11 @@
 
 		{#snippet logo()}
 			<Logo
-				src={dapp.logo}
-				alt={replacePlaceholders($i18n.dapps.alt.logo, { $dAppName: dapp.name })}
+				alt={replacePlaceholders($i18n.dapps.alt.logo, {
+					$dAppName: resolveText({ i18n: $i18n, path: dapp.name })
+				})}
 				size={logoSize}
+				src={dapp.logo}
 			/>
 		{/snippet}
 

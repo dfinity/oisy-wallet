@@ -26,13 +26,16 @@
 	}: InputProps & GixInputProps = $props();
 </script>
 
-<div style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}>
+<div
+	style={`--input-padding-inner-end: calc(var(--padding-2x) + ${endWidth}px)`}
+	class="base-input"
+>
 	<GixInput {...props} bind:value on:nnsInput>
 		<svelte:fragment slot="inner-end">
-			<div bind:clientWidth={endWidth} class="flex items-center pl-2">
+			<div class="flex items-center pl-2" bind:clientWidth={endWidth}>
 				{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}
 					<div transition:fade>
-						<ButtonReset onclick={() => (value = undefined)} ariaLabel={resetButtonAriaLabel} />
+						<ButtonReset ariaLabel={resetButtonAriaLabel} onclick={() => (value = undefined)} />
 					</div>
 					{#if nonNullish(innerEnd) || showPasteButton}
 						<div class="border-r-1 self-stretch border-black/20" transition:fade></div>
@@ -46,3 +49,9 @@
 		</svelte:fragment>
 	</GixInput>
 </div>
+
+<style lang="scss">
+	:global(div.base-input input) {
+		font-size: var(--input-font-size);
+	}
+</style>

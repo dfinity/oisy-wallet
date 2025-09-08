@@ -4,7 +4,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
@@ -18,11 +17,7 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
-	import {
-		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
-	} from '$lib/utils/network.utils';
+	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
@@ -41,13 +36,11 @@
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
 	let solanaNativeToken: Token;
-	$: solanaNativeToken = isNetworkIdSOLTestnet($sendTokenNetworkId)
-		? SOLANA_TESTNET_TOKEN
-		: isNetworkIdSOLDevnet($sendTokenNetworkId)
-			? SOLANA_DEVNET_TOKEN
-			: isNetworkIdSOLLocal($sendTokenNetworkId)
-				? SOLANA_LOCAL_TOKEN
-				: SOLANA_TOKEN;
+	$: solanaNativeToken = isNetworkIdSOLDevnet($sendTokenNetworkId)
+		? SOLANA_DEVNET_TOKEN
+		: isNetworkIdSOLLocal($sendTokenNetworkId)
+			? SOLANA_LOCAL_TOKEN
+			: SOLANA_TOKEN;
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
@@ -79,13 +72,13 @@
 
 <div class="mb-4">
 	<TokenInput
-		token={$sendToken}
-		bind:amount
+		autofocus={nonNullish($sendToken)}
+		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		token={$sendToken}
+		bind:amount
 		bind:error={amountError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
 		on:click={() => {
 			dispatch('icTokensList');
 		}}
@@ -108,11 +101,11 @@
 		<svelte:fragment slot="balance">
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
-					bind:amount
-					error={nonNullish(amountError)}
 					balance={$sendBalance}
-					token={$sendToken}
+					error={nonNullish(amountError)}
 					fee={$fee ?? ZERO}
+					token={$sendToken}
+					bind:amount
 				/>
 			{/if}
 		</svelte:fragment>

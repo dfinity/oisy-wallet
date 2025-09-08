@@ -20,7 +20,11 @@ export enum ProgressStepsConvert {
 
 export enum ProgressStepsSwap {
 	INITIALIZATION = 'initialization',
+	SIGN_APPROVE = 'sign_approve',
+	APPROVE = 'approve',
+	SIGN_TRANSFER = 'sign_transfer',
 	SWAP = 'swap',
+	WITHDRAW = 'withdraw',
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
@@ -73,6 +77,7 @@ export enum ProgressStepsSendSol {
 	INITIALIZATION = 'initialization',
 	SIGN = 'sign',
 	SEND = 'send',
+	CONFIRM = 'confirm',
 	RELOAD = 'reload',
 	DONE = 'done'
 }
@@ -93,6 +98,8 @@ export enum AddressBookSteps {
 	DELETE_CONTACT = 'delete_contact',
 	DELETE_ADDRESS = 'delete_address',
 	EDIT_ADDRESS = 'edit_address',
+	QR_CODE_SCAN = 'qr_code_scan',
 	SHOW_ADDRESS = 'show_address',
-	SAVE_ADDRESS = 'save_address'
+	SAVE_ADDRESS = 'save_address',
+	CREATE_CONTACT = 'create_contact'
 }

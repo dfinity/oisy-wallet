@@ -1,6 +1,9 @@
-import type { ContactUi } from '$lib/types/contact';
+import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
+import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import {
+	filterAddressFromContact,
 	getContactForAddress,
+	getNetworkContactKey,
 	isContactMatchingFilter,
 	mapAddressToContactAddressUi,
 	mapToBackendContact,
@@ -16,7 +19,7 @@ import {
 	mockBackendContactAddressSol,
 	mockContactBtcAddressUi
 } from '$tests/mocks/contacts.mock';
-import { mockEthAddress3 } from '$tests/mocks/eth.mocks';
+import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { fromNullable } from '@dfinity/utils';
@@ -168,11 +171,27 @@ describe('contact.utils', () => {
 			expect(result).toBeUndefined();
 		});
 
-		it('should match address only case sensitive', () => {
+		it('should not match address only case-sensitive for a case-insensitive network', () => {
 			const upperCasedAddress = mockEthAddress3.toUpperCase();
 			const result = getContactForAddress({
 				addressString: upperCasedAddress,
 				contactList: mockContacts
+			});
+
+			expect(result?.addresses?.[0]?.address).toEqual(mockEthAddress3);
+		});
+
+		it('should match address only case-sensitive for a case-sensitive network', () => {
+			const upperCasedAddress = mockEthAddress3.toUpperCase();
+			const result = getContactForAddress({
+				addressString: upperCasedAddress,
+				contactList: mockContacts.map((c) => ({
+					...c,
+					addresses: c.addresses.map((a) => ({
+						...a,
+						addressType: 'Sol'
+					}))
+				}))
 			});
 
 			expect(result?.addresses?.[0]?.address).not.toEqual(mockEthAddress3);
@@ -221,7 +240,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Joh'
+					filterValue: 'Joh',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -231,7 +251,8 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Bitcoin'
+					filterValue: 'Bitcoin',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
 		});
@@ -241,9 +262,32 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'bc1qt0nkp9'
+					filterValue: mockContactBtcAddressUi.address,
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeTruthy();
+		});
+
+		it('should return true if contact address partially matches filter', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: mockContactBtcAddressUi.address.slice(0, 6),
+					networkId: ICP_NETWORK_ID
+				})
+			).toBeTruthy();
+		});
+
+		it('should return false if filter is empty string', () => {
+			expect(
+				isContactMatchingFilter({
+					address: mockContactBtcAddressUi.address,
+					contact,
+					filterValue: '',
+					networkId: ICP_NETWORK_ID
+				})
+			).toBeFalsy();
 		});
 
 		it('should return false if contact address does not match filter', () => {
@@ -251,9 +295,104 @@ describe('contact.utils', () => {
 				isContactMatchingFilter({
 					address: mockContactBtcAddressUi.address,
 					contact,
-					filterValue: 'Test1'
+					filterValue: 'Test1',
+					networkId: ICP_NETWORK_ID
 				})
 			).toBeFalsy();
+		});
+	});
+
+	describe('filterAddressFromContact', () => {
+		const mockAddresses: ContactAddressUi[] = [
+			{
+				label: 'Mock Label',
+				address: mockBtcAddress,
+				addressType: 'Btc'
+			},
+			{
+				address: mockEthAddress,
+				addressType: 'Eth'
+			},
+			{
+				address: mockSolAddress,
+				addressType: 'Sol'
+			}
+		];
+
+		const mockContact: ContactUi = {
+			name: 'Mock Contact',
+			id: BigInt(1),
+			updateTimestampNs: 123456789n,
+			addresses: mockAddresses
+		};
+
+		it('should return undefined if contact is nullish', () => {
+			expect(
+				filterAddressFromContact({ contact: undefined, address: mockEthAddress })
+			).toBeUndefined();
+
+			expect(
+				filterAddressFromContact({ contact: undefined, address: mockSolAddress })
+			).toBeUndefined();
+		});
+
+		it('should return undefined if address is nullish', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: undefined })
+			).toBeUndefined();
+
+			expect(filterAddressFromContact({ contact: mockContact, address: null })).toBeUndefined();
+		});
+
+		it('should return undefined if address is empty', () => {
+			expect(filterAddressFromContact({ contact: mockContact, address: '' })).toBeUndefined();
+		});
+
+		it('should return the matched contact address', () => {
+			mockAddresses.forEach((address) => {
+				expect(
+					filterAddressFromContact({ contact: mockContact, address: address.address })
+				).toStrictEqual(address);
+			});
+		});
+
+		it('should return undefined if address does not match any contact address', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: '0xINEXISTENTADDRESS' })
+			).toBeUndefined();
+		});
+
+		it('should return undefined if contact has no addresses', () => {
+			expect(
+				filterAddressFromContact({
+					contact: { ...mockContact, addresses: [] },
+					address: mockEthAddress
+				})
+			).toBeUndefined();
+		});
+
+		it('should return undefined if it does no match for case-sensitive network', () => {
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: mockSolAddress })
+			).toBeDefined();
+
+			expect(
+				filterAddressFromContact({ contact: mockContact, address: mockSolAddress.toUpperCase() })
+			).toBeUndefined();
+		});
+	});
+
+	describe('getNetworkContactKey', () => {
+		it('returns correct key', () => {
+			const [contact] = getMockContactsUi({
+				n: 1,
+				name: 'Multiple Addresses Contact',
+				addresses: [mockContactBtcAddressUi]
+			}) as unknown as ContactUi[];
+
+			expect(getNetworkContactKey({ address: mockContactBtcAddressUi.address, contact })).toBe(
+				`${mockContactBtcAddressUi.address}-${contact.id.toString()}`
+			);
 		});
 	});
 });

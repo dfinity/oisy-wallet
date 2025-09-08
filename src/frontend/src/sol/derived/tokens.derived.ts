@@ -1,10 +1,5 @@
 import { SOL_MAINNET_ENABLED } from '$env/networks/networks.sol.env';
-import {
-	SOLANA_DEVNET_TOKEN,
-	SOLANA_LOCAL_TOKEN,
-	SOLANA_TESTNET_TOKEN,
-	SOLANA_TOKEN
-} from '$env/tokens/tokens.sol.env';
+import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
 import { userNetworks } from '$lib/derived/user-networks.derived';
 import type { RequiredToken } from '$lib/types/token';
@@ -19,7 +14,7 @@ export const enabledSolanaTokens: Readable<RequiredToken[]> = derived(
 			$userNetworks,
 			mainnetFlag: SOL_MAINNET_ENABLED,
 			mainnetTokens: [SOLANA_TOKEN],
-			testnetTokens: [SOLANA_TESTNET_TOKEN, SOLANA_DEVNET_TOKEN],
+			testnetTokens: [SOLANA_DEVNET_TOKEN],
 			localTokens: [SOLANA_LOCAL_TOKEN]
 		})
 );

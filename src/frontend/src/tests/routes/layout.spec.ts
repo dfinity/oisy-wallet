@@ -2,6 +2,7 @@ import * as analytics from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import App from '$routes/+layout.svelte';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
@@ -15,6 +16,8 @@ vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => 
 });
 
 describe('App Layout', () => {
+	const mockSnippet = createMockSnippet('Mock Snippet');
+
 	beforeAll(() => {
 		Object.defineProperty(window, 'matchMedia', {
 			writable: true,
@@ -36,15 +39,15 @@ describe('App Layout', () => {
 	});
 
 	it('should initialize all services in parallel', () => {
-		const spyAuthSync = vi.spyOn(authStore, 'sync');
+		const spyAuthSync = vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
 		const spyInitPlausibleAnalytics = vi.spyOn(analytics, 'initPlausibleAnalytics');
 		const spyI18n = vi.spyOn(i18n, 'init');
 
-		render(App);
+		render(App, { children: mockSnippet });
 
-		expect(spyAuthSync).toHaveBeenCalledTimes(1);
-		expect(spyInitPlausibleAnalytics).toHaveBeenCalledTimes(1);
-		expect(spyI18n).toHaveBeenCalledTimes(1);
+		expect(spyAuthSync).toHaveBeenCalledOnce();
+		expect(spyInitPlausibleAnalytics).toHaveBeenCalledOnce();
+		expect(spyI18n).toHaveBeenCalledOnce();
 	});
 
 	it('should initialize analytics tracking on mount', () => {
@@ -52,8 +55,8 @@ describe('App Layout', () => {
 
 		expect(spy).not.toHaveBeenCalled();
 
-		render(App);
+		render(App, { children: mockSnippet });
 
-		expect(spy).toHaveBeenCalledTimes(1);
+		expect(spy).toHaveBeenCalledOnce();
 	});
 });

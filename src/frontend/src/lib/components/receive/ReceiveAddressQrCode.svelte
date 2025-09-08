@@ -26,14 +26,16 @@
 		{address}
 		{addressLabel}
 		{addressToken}
-		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
+		{copyAriaLabel}
 		{network}
 		{qrCodeAction}
-		{copyAriaLabel}
+		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
 		on:click
 	/>
 
-	<Button colorStyle="secondary-light" fullWidth on:click={() => dispatch('icBack')} slot="toolbar">
-		{$i18n.core.text.back}
-	</Button>
+	{#snippet toolbar()}
+		<Button colorStyle="secondary-light" fullWidth onclick={() => dispatch('icBack')}>
+			{$i18n.core.text.back}
+		</Button>
+	{/snippet}
 </ContentWithToolbar>

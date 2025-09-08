@@ -6,6 +6,7 @@
 	import Amount from '$lib/components/ui/Amount.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import { MAX_DISPLAYED_KNOWN_DESTINATION_AMOUNTS } from '$lib/constants/app.constants';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
@@ -33,13 +34,13 @@
 	let currentDate = $state(new Date());
 </script>
 
-<LogoButton styleClass="group" {onClick}>
+<LogoButton {onClick} styleClass="group">
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge
-				{contact}
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
+				{contact}
 				variant="sm"
 			/>
 		</div>
@@ -50,7 +51,7 @@
 			{#if isNullish(contact)}
 				{shortenWithMiddleEllipsis({ text: destination })}
 			{:else}
-				<SendContactName {contact} address={destination} />
+				<SendContactName address={destination} {contact} />
 			{/if}
 		</span>
 	{/snippet}
@@ -73,7 +74,8 @@
 			{#if nonNullish(timestamp)}
 				{formatSecondsToNormalizedDate({
 					seconds: normalizeTimestampToSeconds(timestamp),
-					currentDate
+					currentDate,
+					language: $currentLanguage
 				})}
 			{/if}
 		</div>

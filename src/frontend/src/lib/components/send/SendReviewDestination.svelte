@@ -1,48 +1,45 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
 
 	interface Props {
 		destination: string;
 		selectedContact?: ContactUi;
+		aiAssistantConsoleView?: boolean;
 	}
 
-	const { destination, selectedContact }: Props = $props();
-
-	let selectedContactLabel = $derived(
-		nonNullish(selectedContact)
-			? selectedContact.addresses.find(({ address }) => address === destination)?.label
-			: undefined
-	);
+	const { destination, selectedContact, aiAssistantConsoleView }: Props = $props();
 </script>
 
 <AddressCard>
 	{#snippet logo()}
 		<div class="mr-2">
 			<AvatarWithBadge
-				contact={selectedContact}
 				address={destination}
 				badge={{ type: 'addressType', address: destination }}
+				contact={selectedContact}
+				variant={aiAssistantConsoleView ? 'sm' : 'md'}
 			/>
 		</div>
 	{/snippet}
 
 	{#snippet content()}
-		<span>
-			<span class="font-bold">
-				{$i18n.transaction.text.to}{nonNullish(selectedContact) ? `: ${selectedContact?.name}` : ''}
-			</span>
-
-			{#if notEmptyString(selectedContactLabel)}
-				<Divider />
-				{selectedContactLabel}
+		<div class:text-sm={aiAssistantConsoleView}>
+			{#if isNullish(selectedContact)}
+				<span class="font-bold">{$i18n.transaction.text.to}</span>
+			{:else}
+				<SendContactName address={destination} contact={selectedContact}>
+					{$i18n.transaction.text.to} :
+				</SendContactName>
 			{/if}
-		</span>
+		</div>
 
-		<span class="w-full whitespace-normal break-all">{destination}</span>
+		<span class="w-full whitespace-normal break-all" class:text-sm={aiAssistantConsoleView}>
+			{destination}
+		</span>
 	{/snippet}
 </AddressCard>

@@ -1,4 +1,7 @@
-export type RequiredExcept<T, K extends keyof T> = Required<Omit<T, K>> & Pick<T, K>;
+export type RequiredExcept<T, K extends keyof T, M extends object = {}> = Required<
+	Omit<T, Extract<K | keyof M, keyof T>>
+> &
+	Pick<T, Extract<K | keyof M, keyof T>>;
 
 export interface ResultSuccess<T = unknown> {
 	success: boolean;

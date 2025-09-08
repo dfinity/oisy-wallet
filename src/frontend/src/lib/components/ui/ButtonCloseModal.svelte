@@ -3,15 +3,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let isPrimary = false;
+	interface Props {
+		isPrimary?: boolean;
+	}
+
+	let { isPrimary = false }: Props = $props();
 </script>
 
 <Button
-	paddingSmall
 	colorStyle={isPrimary ? 'primary' : 'secondary-light'}
-	type="button"
 	fullWidth
-	on:click={modalStore.close}
+	onclick={modalStore.close}
+	paddingSmall
+	type="button"
 >
 	{$i18n.core.text.close}
 </Button>

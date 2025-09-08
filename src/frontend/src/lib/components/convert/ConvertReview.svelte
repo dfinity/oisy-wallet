@@ -20,12 +20,12 @@
 
 <ContentWithToolbar>
 	<TokensReview
-		{sendAmount}
-		{receiveAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		{receiveAmount}
+		{sendAmount}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
 	<ConvertReviewNetworks />
@@ -36,11 +36,13 @@
 
 	<slot name="info-message" />
 
-	<ButtonGroup slot="toolbar">
-		<slot name="cancel" />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<slot name="cancel" />
 
-		<Button on:click={() => dispatch('icConvert')} testId="convert-review-button-next">
-			{$i18n.convert.text.convert_button}
-		</Button>
-	</ButtonGroup>
+			<Button onclick={() => dispatch('icConvert')} testId="convert-review-button-next">
+				{$i18n.convert.text.convert_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

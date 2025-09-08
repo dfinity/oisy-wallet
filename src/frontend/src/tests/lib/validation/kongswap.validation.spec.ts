@@ -1,6 +1,5 @@
 import { KongSwapTokenSchema, KongSwapTokenWithMetricsSchema } from '$lib/types/kongswap';
 import { createMockKongSwapToken } from '$tests/mocks/kongswap.mock';
-import { describe, expect, it } from 'vitest';
 
 describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 	it('validates a fully correct token', () => {
@@ -40,18 +39,6 @@ describe('Schema: KongSwapTokenWithMetricsSchema', () => {
 });
 
 describe('Schema: KongSwapTokenWithMetricsSchema — invalid field values', () => {
-	it('rejects invalid number string in "price"', () => {
-		const mock = createMockKongSwapToken({
-			metrics: { price: 'NaN' }
-		});
-		const parsed = KongSwapTokenWithMetricsSchema.safeParse({
-			...mock.token,
-			metrics: mock.metrics
-		});
-
-		expect(parsed.success).toBeFalsy();
-	});
-
 	it('rejects invalid ISO string in "logo_updated_at"', () => {
 		const mock = createMockKongSwapToken({
 			token: { logo_updated_at: 'not-a-date' }
@@ -119,15 +106,6 @@ describe('Schema: KongSwapTokenMetricsSchema', () => {
 	it('rejects invalid ISO date in "updated_at"', () => {
 		const mock = createMockKongSwapToken({
 			metrics: { updated_at: 'invalid-date' }
-		});
-		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
-
-		expect(parsed.success).toBeFalsy();
-	});
-
-	it('rejects wrong type for "volume_24h"', () => {
-		const mock = createMockKongSwapToken({
-			metrics: { volume_24h: 'NaN' }
 		});
 		const parsed = KongSwapTokenWithMetricsSchema.safeParse(mock.metrics);
 

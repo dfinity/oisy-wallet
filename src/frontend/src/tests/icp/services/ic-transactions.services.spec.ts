@@ -68,8 +68,7 @@ describe('ic-transactions.services', () => {
 			const mockError = new Error('Test error, Request ID: 423, status: rejected');
 			onLoadTransactionsError({ tokenId, error: mockError });
 
-			expect(spyAnalytics).toHaveBeenCalledOnce();
-			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
+			expect(spyAnalytics).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
 					tokenId: tokenId.description,
@@ -81,9 +80,7 @@ describe('ic-transactions.services', () => {
 		it('should log error to console', () => {
 			onLoadTransactionsError({ tokenId, error: mockError });
 
-			expect(console.warn).toHaveBeenCalledOnce();
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`${get(i18n).transactions.error.loading_transactions}:`,
 				mockError
 			);
@@ -98,15 +95,13 @@ describe('ic-transactions.services', () => {
 			expect(spyAnalytics).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description,
-					error: 'null'
+					tokenId: tokenId.description
 				}
 			});
 			expect(spyAnalytics).toHaveBeenNthCalledWith(2, {
 				name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 				metadata: {
-					tokenId: tokenId.description,
-					error: 'undefined'
+					tokenId: tokenId.description
 				}
 			});
 
@@ -253,6 +248,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -260,6 +256,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -295,12 +292,14 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
 				maxResults: WALLET_PAGINATION,
@@ -313,6 +312,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -320,6 +320,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -442,6 +443,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -449,6 +451,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -470,6 +473,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(lastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -477,6 +481,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(lastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -492,6 +497,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -499,6 +505,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -514,6 +521,7 @@ describe('ic-transactions.services', () => {
 
 			expect(getTransactionsIcp).toHaveBeenCalledTimes(2);
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(1, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,
@@ -521,6 +529,7 @@ describe('ic-transactions.services', () => {
 				certified: false
 			});
 			expect(getTransactionsIcp).toHaveBeenNthCalledWith(2, {
+				indexCanisterId: mockToken.indexCanisterId,
 				start: BigInt(mockLastId),
 				owner: mockIdentity.getPrincipal(),
 				identity: mockIdentity,

@@ -61,18 +61,18 @@
 	{:else}
 		<div class="flex w-full items-end gap-2">
 			<InputSearch
-				bind:filter={searchTerm}
-				showResetButton={notEmptyString(searchTerm)}
-				placeholder={$i18n.address_book.text.search_contact}
 				autofocus={isDesktop()}
+				placeholder={$i18n.address_book.text.search_contact}
+				showResetButton={notEmptyString(searchTerm)}
 				testId={ADDRESS_BOOK_SEARCH_CONTACT_INPUT}
+				bind:filter={searchTerm}
 			/>
 			<Button
-				colorStyle="secondary-light"
-				on:click={onAddContact}
-				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
-				styleClass="rounded-xl"
 				ariaLabel={$i18n.address_book.text.add_contact}
+				colorStyle="secondary-light"
+				onclick={onAddContact}
+				styleClass="rounded-xl"
+				testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}
 			>
 				<IconPlus />
 				<span class="hidden whitespace-nowrap xs:block">{$i18n.address_book.text.add_contact}</span
@@ -80,7 +80,7 @@
 			>
 		</div>
 
-		<List styleClass="py-6" noPadding>
+		<List noPadding styleClass="py-6">
 			{#if filteredContacts.length > 0}
 				{#each filteredContacts as contact, index (index)}
 					<ListItem>
@@ -99,5 +99,7 @@
 		</List>
 	{/if}
 
-	<ButtonCloseModal slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonCloseModal />
+	{/snippet}
 </ContentWithToolbar>

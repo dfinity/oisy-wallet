@@ -24,6 +24,7 @@ export const LINK_TOKEN: RequiredErc20Token = {
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckLINK',
 	groupData: LINK_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true,
 	buy: {
 		onramperId: 'link_ethereum'
 	}

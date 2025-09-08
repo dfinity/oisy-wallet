@@ -11,8 +11,7 @@
 	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
-		SOLANA_MAINNET_NETWORK,
-		SOLANA_TESTNET_NETWORK
+		SOLANA_MAINNET_NETWORK
 	} from '$env/networks/networks.sol.env';
 	import {
 		BTC_MAINNET_TOKEN,
@@ -24,7 +23,6 @@
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
-		SOLANA_TESTNET_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -43,8 +41,7 @@
 		RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
 		RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION,
 		RECEIVE_TOKENS_MODAL_SOL_LOCAL_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION,
-		RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION
+		RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
 	} from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnet,
@@ -53,8 +50,7 @@
 		ethAddress,
 		solAddressDevnet,
 		solAddressLocal,
-		solAddressMainnet,
-		solAddressTestnet
+		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import {
 		networkBitcoinMainnetEnabled,
@@ -66,8 +62,7 @@
 		networkSepoliaEnabled,
 		networkSolanaDevnetEnabled,
 		networkSolanaLocalEnabled,
-		networkSolanaMainnetEnabled,
-		networkSolanaTestnetEnabled
+		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -195,18 +190,6 @@
 			condition: $networkSolanaMainnetEnabled
 		},
 		{
-			labelRef: 'solAddressTestnet',
-			address: $solAddressTestnet,
-			network: SOLANA_TESTNET_NETWORK,
-			token: SOLANA_TESTNET_TOKEN,
-			testId: RECEIVE_TOKENS_MODAL_SOL_TESTNET_SECTION,
-			title: $i18n.receive.solana.text.solana_testnet_address,
-			label: $i18n.receive.solana.text.solana_testnet_address,
-			copyAriaLabel: $i18n.receive.solana.text.solana_address_copied,
-			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
-			condition: $networkSolanaTestnetEnabled && $testnetsEnabled
-		},
-		{
 			labelRef: 'solAddressDevnet',
 			address: $solAddressDevnet,
 			network: SOLANA_DEVNET_NETWORK,
@@ -279,13 +262,13 @@
 			{#if condition !== false}
 				{#if nonNullish(_text)}
 					<ReceiveAddress
-						on:click={on.click}
-						{labelRef}
 						{address}
-						{network}
-						{testId}
 						{copyAriaLabel}
+						{labelRef}
+						{network}
 						{qrCodeAction}
+						{testId}
+						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
@@ -296,13 +279,13 @@
 					</ReceiveAddress>
 				{:else}
 					<ReceiveAddress
-						on:click={on.click}
-						{labelRef}
 						{address}
-						{network}
-						{testId}
 						{copyAriaLabel}
+						{labelRef}
+						{network}
 						{qrCodeAction}
+						{testId}
+						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
@@ -313,5 +296,7 @@
 		{/each}
 	</div>
 
-	<ButtonDone testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} onclick={modalStore.close} slot="toolbar" />
+	{#snippet toolbar()}
+		<ButtonDone onclick={modalStore.close} testId={RECEIVE_TOKENS_MODAL_DONE_BUTTON} />
+	{/snippet}
 </ContentWithToolbar>

@@ -20,6 +20,7 @@
 	export let convertProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let formCancelAction: 'back' | 'close' = 'back';
+	export let onIcQrCodeBack: () => void;
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
@@ -50,6 +51,7 @@
 	<IcConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
+		{onIcQrCodeBack}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
@@ -59,7 +61,6 @@
 		on:icClose
 		on:icDestination
 		on:icDestinationBack
-		on:icQRCodeBack
 		on:icQRCodeScan
 	/>
 {:else}

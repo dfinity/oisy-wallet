@@ -5,8 +5,7 @@ import {
 	ethAddressNotLoaded,
 	solAddressDevnetNotLoaded,
 	solAddressLocalnetNotLoaded,
-	solAddressMainnetNotLoaded,
-	solAddressTestnetNotLoaded
+	solAddressMainnetNotLoaded
 } from '$lib/derived/address.derived';
 import {
 	btcAddressMainnetStore,
@@ -16,7 +15,6 @@ import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
 	solAddressMainnetStore,
-	solAddressTestnetStore,
 	type AddressStore
 } from '$lib/stores/address.store';
 import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
@@ -33,7 +31,6 @@ describe('address.derived', () => {
 		['btcAddressRegtestNotLoaded', btcAddressRegtestStore, btcAddressRegtestNotLoaded],
 		['ethAddressNotLoaded', ethAddressStore, ethAddressNotLoaded],
 		['solAddressMainnetNotLoaded', solAddressMainnetStore, solAddressMainnetNotLoaded],
-		['solAddressTestnetNotLoaded', solAddressTestnetStore, solAddressTestnetNotLoaded],
 		['solAddressDevnetNotLoaded', solAddressDevnetStore, solAddressDevnetNotLoaded],
 		['solAddressLocalnetNotLoaded', solAddressLocalnetStore, solAddressLocalnetNotLoaded]
 	];

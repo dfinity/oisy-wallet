@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Decimals",
 			"amount": "Amount",
+			"tokenId": "Token id",
 			"max": "Max",
 			"destination": "Destination",
 			"reject": "Reject",
@@ -21,6 +22,7 @@
 			"view": "View",
 			"copy": "Copy",
 			"delete": "Delete",
+			"create": "Create",
 			"clear_filter": "Clear filter",
 			"not_available": "n/a",
 			"new": "New",
@@ -30,17 +32,22 @@
 			"to": "To",
 			"add": "Add",
 			"more_items": "+$items more",
-			"select": "Select"
+			"select": "Select",
+			"language": "Language",
+			"currency": "Currency"
 		},
 		"info": {
-			"test_banner": "For testing purposes only!"
+			"test_banner": "For testing purposes only!",
+			"test_banner_beta": "This is a beta release. You may encounter bugs. Real assets are in play - please use with care."
 		},
 		"alt": {
 			"logo": "$name logo",
 			"go_to_home": "Go to the $oisy_name home page",
 			"back": "Go back to the previous page",
 			"open_details": "Open details",
-			"close_details": "Close details"
+			"close_details": "Close details",
+			"switch_language": "Switch language",
+			"switch_currency": "Switch currency"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done"
@@ -53,6 +60,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
+			"earning": "Earn & Rewards",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -63,9 +71,11 @@
 			"vip_qr_code": "VIP QR codes",
 			"binance_qr_code": "Binance Clubhouse QR",
 			"refer_a_friend": "Refer your friends",
-			"address_book": "Address book",
+			"address_book": "Contacts",
 			"hide_balances": "Hide balances",
-			"show_balances": "Show balances"
+			"show_balances": "Show balances",
+			"privacy_mode_enabled": "Privacy mode enabled. Press [P] to show your balances again.",
+			"privacy_mode_disabled": "Privacy mode disabled. Press [P] to hide your balances."
 		},
 		"alt": {
 			"tokens": "Go to the assets view",
@@ -73,7 +83,6 @@
 			"dapp_explorer": "Open app explorer",
 			"activity": "Open the activity view",
 			"airdrops": "Open the Rewards view",
-			"more_settings": "More settings",
 			"menu": "Your wallet address, settings, sign-out and external links",
 			"changelog": "Open the changelog of $oisy_name on GitHub to review the latest updates",
 			"documentation": "Open the $oisy_name documentation",
@@ -82,7 +91,7 @@
 			"vip_qr_code": "Generate an invitation link",
 			"binance_qr_code": "Generate a Binance clubhouse link",
 			"refer_a_friend": "Generate a referral link for a friend",
-			"address_book": "Open address book",
+			"address_book": "Open contacts",
 			"hide_balances": "Hide the displayed balances",
 			"show_balances": "Show the hidden balances"
 		},
@@ -94,7 +103,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralized",
-			"logout": "Logout",
+			"logout": "Log out",
+			"lock": "Lock",
 			"authenticate": "Open or Create",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
 			"instant_and_private": "Instant and private access anywhere",
@@ -105,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
-			"session_expired": "You have been logged out because your session has expired."
+			"session_expired": "You have been logged out because your session has expired.",
+			"reload_and_retry": "Something went wrong when signing in. Please reload the page and try again. If this error persists, please contact support."
 		},
 		"error": {
 			"no_internet_identity": "No internet identity.",
@@ -153,6 +164,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Unlock to continue",
+			"title_part_2": "You previously locked your wallet to keep it safe. Resume where you left off or log out.",
+			"unlock": "Unlock",
+			"logout": "Log out",
+			"logout_clear_cash_message": "Logging out will clear all cached data",
+			"learn_more": "Learn more"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "All apps",
@@ -175,16 +196,146 @@
 			"submit_your_dapp": "Submit your app to be shown in the app-explorer",
 			"tags": "Tags related to $dAppName",
 			"website": "Image of $dAppName"
+		},
+		"categories": {
+			"defi": "DeFi",
+			"social_media": "Social Media",
+			"verifiable_credentials": "Verifiable Credentials",
+			"staking": "Staking",
+			"walletconnect": "WalletConnect",
+			"game": "Game",
+			"tools": "Tools"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "The one stop token shop - Trade tokens across all chains with ease using KongSwap.",
+				"description": "KongSwap is a fully decentralized exchange (DEX) offering bridgeless cross-chain trading across ICP, Bitcoin, Ethereum, and Solana. <br/><br/>Using Chain Fusion technology and the Internet Computer Protocol, it reduces fees, simplifies user experience, and avoids liquidity fragmentation. Both frontend and backend operate on-chain via smart contracts, delivering a seamless DeFi experience.",
+				"carousel": {
+					"text": "Swap tokens on DEX",
+					"call_to_action": "Try KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "Decentralized alternative to WhatsApp.",
+				"call_to_action": "Go to OpenChat",
+				"description": "OpenChat is a fully featured chat application running end-to-end on the Internet Computer blockchain.<br/><br/>OpenChat is governed by its community as a DAO and has its own CHAT token. CHAT tokens are given as rewards to users to turbo-charge growth and to create a team of millions of advocates allowing OpenChat to become a viable challenger to centralized big tech competitors!",
+				"stats": "80,000+ users",
+				"carousel": {
+					"text": "OpenChat - where web3 communicates",
+					"call_to_action": "Show more"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "Unique Identity Verification for Trustworthy Digital Engagements.",
+				"call_to_action": "Open DecideID",
+				"stats": "50,000+ inference requests",
+				"description": "Decide ID is at the heart of the Decide AI system, ensuring trust and security through its unique Proof of Personhood (PoP) methodology. When you join, you'll go through a verification process where you provide multiple proofs and complete a special challenge to confirm your identity. This makes sure that every user is real, unique, and not a bot. Your Principal ID, a unique on-chain identifier, is created during this process. It can be used across various applications that require verified personhood, ensuring a secure and seamless integration into any app’s sign-up or login process. Plus, the use of Zero-Knowledge proofs means your private data, like biometric information, remains confidential and safe.<br/><br/>With Decide ID, enjoy a flexible, secure, and privacy-first way to verify and engage online.",
+				"carousel": {
+					"text": "Enjoy a privacy-first way to verify and engage online",
+					"call_to_action": "Interested?"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap is an AMM DEX built completely onchain that is the premier hub for full-stack financial and DAO services on ICP.",
+				"call_to_action": "Meet the future",
+				"description": "The Hub of Future Decentralized Finance!<br/>Reinventing the Exchange as a Hub, ICPSwap provides full-stack financial, market, and DAO services on the Internet Computer. Based on the underlying technology of DFINITY's Internet Computer, ICPSwap establishes an ecosystem of genuinely decentralized finance by refactoring the way users and developers build projects jointly."
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI.",
+				"call_to_action": "Get engaged",
+				"description": "The NNS front-end dapp allows anyone to interact with the Internet Computer's Network Nervous System with a user-friendly UI. Served completely end-to-end through blockchain, this decentralized dapp allows you to easily perform the following actions:<br/><ul><li>Send and receive tokens (ICP, ckBTC, CHAT, etc.)</li><li>Stake and manage neurons</li><li>Vote on the governance of the Internet Computer and SNSes</li><li>Participate in decentralization swaps</li><li>Create and top up canisters</li><li>Earn governance rewards</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "The largest onchain marketplace. Buy and sell crypto on Ethereum and 11+ other chains.",
+				"call_to_action": "Let’s get swappin'",
+				"description": "Uniswap is a decentralized cryptocurrency exchange that uses a set of smart contracts to create liquidity pools for the execution of trades. It is an open source project and falls into the category of a DeFi product because it uses smart contracts to facilitate trades instead of a centralized exchange."
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "Optimize your trades across hundreds of DEXes on multiple networks.",
+				"call_to_action": "Have a look",
+				"description": "1inch Network offers a DeFi ecosystem with products like 1inch dApp, Wallet, Developer Portal, Portfolio, and Fusion for secure Web3 operations. 1inch provides access to hundreds of liquidity sources across multiple blockchains.<br/><br/>Powered by the 1inch Swap Engine, Fusion mode enables users to swap tokens without paying any network fees and at the most favorable rates. In addition, Fusion mode offers users extra MEV protection. All swaps in Fusion mode are executed by resolvers – professional traders, who use the most sophisticated and efficient ways of protecting users’ swaps from MEV."
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "A decentralized money market and lending protocol built on Ethereum.",
+				"call_to_action": "Step in",
+				"description": "Compound Finance is <b>a decentralized money market and lending protocol built on Ethereum</b>. Its Compound III (Comet) protocol enables users to borrow or lend from single-collateral pools of “base assets.” Compound III supports base assets (e.g., USDC, WETH, etc.) on Ethereum, Polygon, Base, and Arbitrum."
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers.",
+				"call_to_action": "Access the full power of DeFi",
+				"description": "Aave is a decentralised non-custodial liquidity protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market while earning interest, and borrowers can access liquidity by providing collateral that exceeds the borrowed amount.\nIt is completely permissionless, meaning anyone can access and interact with Aave through a user-friendly interface or directly with its smart contracts on supported blockchain networks."
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "Ethereum based protocol that introduces restaking, allowing to stake any ERC20 token.",
+				"call_to_action": "Restake now",
+				"description": "EigenLayer is a protocol built on Ethereum that introduces restaking, a new primitive in cryptoeconomic security. It allows users to stake assets such as Native ETH, Liquid Staking Tokens (LSTs), EIGEN token or any ERC20 token into EigenLayer smart contracts, thereby extending Ethereum's cryptoeconomic security to additional applications on the network."
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "Leading DEX, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains.",
+				"call_to_action": "Get warped",
+				"description": "Curve finance is a leading decentralized exchange, stablecoin provider, and lending platform on Ethereum and EVM-compatible chains. It's known for it's advanced automated market-makers for stablecoins and volatile assets, and it's unique soft-liquidation system for loans."
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "Unlock the full potential of DeFi and streamlined trading. Swap tokens, earn as a liquidity provider and harness Bitfinity EVM's leading AMM.",
+				"call_to_action": "Open Sonic",
+				"description": "Sonic, a multichain decentralized exchange built on the Internet Computer Protocol (ICP), offers a wide range of DeFi services. Users can easily trade tokens and perpetuals, provide liquidity, and participate in the LBP token sale. Users can engage in DAO governance, stake for rewards, and vote on platform decisions.<br/><br/>Fully on-chain & open-source! Swap tokens like a pro, stack those fees as a liquidity provider, join the AMM vibe, and be an integral part of the Sonic DAO.",
+				"carousel": {
+					"text": "Unlock the full potential of Defi",
+					"call_to_action": "Open Sonic"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "DEX and automated market maker built on the Solana blockchain, offering a central limit order book that enables fast trades.",
+				"call_to_action": "Power the evolution of DeFi",
+				"description": "Raydium is an automated market maker (AMM) built on the Solana blockchain, offering a unique blend of AMM technology and access to the Serum decentralized exchange’s liquidity. As an AMM, Raydium allows for trading digital assets in a permissionless way, using liquidity pools."
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "Solana-based DEX aggregator that optimizes for the best available swaps between any supported token pair.",
+				"call_to_action": "To infinity and beyond",
+				"description": "Jupiter is a decentralized finance platform on the Solana blockchain, that functions as a liquidity aggregator, streamlining and optimizing trading activities within the DeFi space. Its protocol is designed to facilitate liquidity provision and token swapping and ensures efficient, low-latency, and cost-effective transactions. The platform allows users to swap tokens, provide liquidity, and participate in yield farming through an automated market maker (AMM) model."
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "ICP liquid staking - Maximize your capital efficiency by liquid staking your ICP.",
+				"description": "WaterNeuron offers a more capital-efficient method of staking by allowing you to maintain exposure to ICP staking rewards while keeping your tokens liquid. This approach simplifies the staking process, removing the need to select specific validators to maximize rewards."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Decentralized social media - post, earn, own.",
+				"call_to_action": "Go to Taggr",
+				"description": "Taggr is a fully decentralized social media platform that lives on a public distributed compute network powered by the Internet Computer. Unlike traditional social media platforms controlled by corporations, Taggr is owned and governed entirely by its users.",
+				"carousel": {
+					"text": "Decentr. social media - post, earn, own.",
+					"call_to_action": "Learn more"
+				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Where governance meets collaboration to ignite innovation.",
+				"description": "Toolkit is a versatile suite for managing Service Nervous Systems (SNS) and projects on the Internet Computer. From governance proposals to canister deployment, it empowers users to innovate, collaborate, and decentralize seamlessly."
+			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Rewards",
-			"active_campaigns": "Active Opportunities",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 is coming soon!<br> Stay tuned for updates",
+			"upcoming_campaigns": "Upcoming Campaigns",
 			"active_date": "Ends on",
 			"ended_date": "Ended on",
-			"participate_title": "Earn BTC by staying active - and now by inviting others.",
 			"share": "Share on X",
 			"learn_more": "Learn more",
 			"check_status": "Check Status & Eligibility",
@@ -192,29 +343,88 @@
 			"modal_button_text": "Got it",
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
-			"no_balance_title": "Earn $oisy_short Sprinkles",
-			"no_balance_description": "Check back later to see your rewards",
 			"open_wallet": "Take me to the wallet",
-			"state_modal_title": "Congratulations on earning today’s $oisy_short Sprinkles!",
-			"state_modal_title_jackpot": "Congratulations on earning today’s largest $oisy_short Sprinkles!",
-			"state_modal_content_text": "Share your victory on Twitter to qualify for another chance to earn.",
-			"carousel_slide_title": "$oisy_short Sprinkles are now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 is now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
 			"ongoing": "Ongoing",
-			"ended": "Ended ($amount)"
+			"ended": "Ended ($amount)",
+			"banner_text": "Earn daily rewards with OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance"
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
+			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
 			"coming_soon": "$oisy_short episode 4 is coming soon",
 			"reward_banner": "Banner of the campaign $campaignName"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 3 is Live \uD83C\uDF89",
+				"one_liner": "Earn BTC for being active—and now, for <strong>inviting friends</strong>.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer a friend, and earn 10% of the value of their rewards for the entire campaign.",
+				"participate_title": "Earn BTC by staying active - and now by inviting others.",
+				"description": "Meet simple weekly requirements. Log in, make two transactions, and hold at least $20 in tokens to stay eligible for one of 50 BTC drops every day.<br/><strong>Now with referral rewards:</strong> invite a friend to deploy a wallet and earn 10% of their Sprinkles for 30 days. They keep 100% - you earn extra.",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "Congratulations on earning today’s OISY Sprinkles!",
+						"description": "Share your victory on X/Twitter to qualify for another chance to earn.",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "Congratulations on earning today’s largest OISY Sprinkles!",
+						"description": "Share your victory on X/Twitter to qualify for another chance to earn.",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "Here a small thank you",
+						"description": "One of your referred users just got some sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 4 is Live \uD83C\uDF89",
+				"one_liner": "Earn BTC for staying active — and now, earn <strong>guaranteed</strong> Sprinkles for referrals.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer 4 friends and get rewarded directly. Top referrers win even more.",
+				"participate_title": "Earn BTC by staying active - and now by inviting others.",
+				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"win": {
+					"default": {
+						"title": "You got rewarded",
+						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "You've won the jackpot",
+						"description": "You just earned our top Sprinkles Reward<br>Stay active, and keep referring to win more",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "You topped the Leaderboard",
+						"description": "You ranked among the top 4 referrers this season<br>$200 has been added to your wallet",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "You're just getting started",
+						"description": "You earned $1.<br>Refer more - top 4 referrers get $200.<br>You're close. Keep going.",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "Get more for Referring",
+						"description": "You just earned Sprinkles - so did the person who referred you.<br>Send 4 friends and earn $1.<br>Top 4 referrers win $200 each.",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			}
 		}
 	},
 	"footer": {
@@ -222,7 +432,8 @@
 			"incubated_with": "Incubated with",
 			"by": "by",
 			"dfinity_foundation": "DFINITY Foundation",
-			"copyright": "© 2025"
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_short Assistant"
 		},
 		"alt": {
 			"dfinity": "Go to DFINITY Foundation website"
@@ -249,7 +460,7 @@
 		"text": {
 			"initializing_wallet": "Preparing your wallet...",
 			"securing_session": "Securing session with Internet Identity",
-			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon and BNB",
+			"retrieving_public_keys": "Retrieving your public keys for Bitcoin, Ethereum, Solana, Base, Polygon, BNB and Arbitrum",
 			"done": "Enjoy $oisy_short"
 		},
 		"alt": {
@@ -262,13 +473,13 @@
 		"error": {
 			"no_alchemy_config": "No Alchemy config for network $network",
 			"no_alchemy_provider": "No Alchemy provider for network $network",
-			"no_alchemy_erc20_provider": "No Alchemy ERC20 provider for network $network",
 			"no_etherscan_provider": "No Etherscan provider for network $network",
 			"no_infura_provider": "No Infura provider for network $network",
 			"no_infura_cketh_provider": "No Infura CkETH provider for network $network",
 			"no_infura_erc20_provider": "No Infura ERC20 provider for network $network",
-			"no_infura_erc20_icp_provider": "No Infura ERC20 Icp provider for network $network",
-			"no_solana_rpc": "No Solana RPC for network $network",
+			"no_infura_erc721_provider": "No Infura ERC721 provider for network $network",
+			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
+			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
 			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
@@ -277,8 +488,8 @@
 			"spl_tokens": "Error while loading the SPL tokens.",
 			"minter_ckbtc_btc": "A configured minter is required to convert ckBTC to BTC.",
 			"minter_cketh_eth": "A configured minter is required to convert ckETH to ETH.",
-			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to Erc20.",
-			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckErc20 to Erc20.",
+			"minter_ckerc20_erc20": "A configured minter is required to convert ckERC20 to ERC20.",
+			"ledger_cketh_eth": "A configured ckETH ledger is required to convert ckERC20 to ERC20.",
 			"minter_btc": "A configured minter is required to retrieve BTC.",
 			"minter_ckbtc_info": "A configured minter is required to fetch the ckBTC info",
 			"minter_cketh_info": "A configured minter is required to fetch the ckETH info",
@@ -288,12 +499,16 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
+			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
+			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
 			"erc20_user_tokens": "Error while loading the ERC20 user tokens.",
-			"spl_user_tokens": "Error while loading the SPL user tokens.",
+			"spl_custom_tokens": "Error while loading the SPL custom tokens.",
 			"erc20_user_token": "Error while enabling the ERC20 twin token.",
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
+			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
 			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
@@ -301,29 +516,30 @@
 	"hero": {
 		"text": {
 			"available_balance": "Your balance",
-			"unavailable_balance": "$ value is not available",
+			"unavailable_balance": "$currencySymbol value is not available",
+			"hidden_balance": "Your balance is hidden",
 			"top_up": "Top up your wallet to start using it!",
-			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum."
+			"learn_more_about_erc20_icp": "Learn more about ERC20 ICP on Ethereum.",
+			"tooltip_toggle_balance": "Double-click to hide/show balance"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Set privacy mode on and off"
 		}
 	},
 	"settings": {
 		"text": {
 			"title": "Settings",
-			"general": "General",
 			"principal": "Your Principal",
 			"principal_copied": "Principal copied to clipboard",
 			"principal_description": "Your ID for the $oisy_name. Created by your Internet Identity.",
 			"session_duration": "Session duration",
 			"session_expires_in": "Expires in",
-			"session_description": "All sessions last 1 hour. After 1 hour, you will need to authenticate again with Internet Identity.",
 			"networks": "Networks",
 			"enable_testnets": "Enable test networks",
 			"active_networks": "Active networks ",
 			"active_networks_description": "Select the networks you want to work with in $oisy_name. Tokens and transactions from inactive networks will not show or be included in your available balance.",
 			"enable_network": "Enable network",
 			"disable_network": "Disable network",
-			"testnets_description": "Display the test networks (Sepolia) and twin tokens on testnets (ckTESTBTC and ckSepolia).",
-			"hide_zero_balances_description": "Enable this feature to declutter your wallet view by hiding all tokens with a zero balance.",
 			"credentials_title": "Credentials",
 			"pouh_credential": "Humanity Credential",
 			"pouh_credential_description": "The Humanity Credential is a proof of humanity. It is issued by Decide AI.",
@@ -354,7 +570,6 @@
 	"networks": {
 		"title": "Current network. Access to selection.",
 		"test_networks": "Test networks",
-		"more": "More networks coming soon...",
 		"chain_fusion": "All networks",
 		"network": "Network",
 		"testnet": "Testnet",
@@ -428,7 +643,6 @@
 		"solana": {
 			"text": {
 				"solana_address": "Solana Address",
-				"solana_testnet_address": "Solana Testnet Address",
 				"solana_devnet_address": "Solana Devnet Address",
 				"solana_local_address": "Solana Local Address",
 				"solana_address_copied": "Solana address copied to clipboard",
@@ -454,6 +668,7 @@
 			"sending": "Sending...",
 			"signing": "Signing...",
 			"signing_message": "Signing message...",
+			"confirming": "Confirming...",
 			"network": "Network",
 			"source_network": "Source network",
 			"destination_network": "Destination network",
@@ -491,7 +706,6 @@
 			"insufficient_funds": "Insufficient funds.",
 			"unknown_minimum_ckbtc_amount": "The minimum amount of ckBTC required for converting to BTC is unknown.",
 			"unknown_minimum_cketh_amount": "The minimum amount of ckETH required for converting to ETH is unknown.",
-			"unknown_minimum_amount": "The minimum amount of $sourceTokenSymbol required for converting to $destinationTokenSymbol is unknown.",
 			"minimum_ckbtc_amount": "The amount falls below the minimum of $amount ckBTC required for converting to BTC.",
 			"minimum_cketh_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
 			"minimum_amount": "The amount falls below the minimum withdrawal amount of $amount $symbol.",
@@ -511,7 +725,14 @@
 			"minter_info_not_loaded": "Try again in a few seconds, a ckETH configuration parameter is not yet loaded.",
 			"minter_info_not_certified": "Try again in a few seconds, a ckETH configuration parameter has not been certified.",
 			"cketh_max_transaction_fee_missing": "The maximum transaction fee for ckETH is missing.",
-			"utxos_fee_missing": "UTXOs fee is missing."
+			"utxos_fee_missing": "UTXOs fee is missing.",
+			"minimum_btc_amount": "Amount too small. Please enter at least $amount BTC.",
+			"btc_insufficient_balance": "No Bitcoin UTXOs available for transaction",
+			"btc_insufficient_balance_for_fee": "Insufficient Bitcoin balance to cover transaction fees",
+			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
+			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
+			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
+			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -519,7 +740,7 @@
 			"metamask_connected": "Cannot get your accounts. Is your Metamask open and already connected?",
 			"metamask_no_accounts": "No Metamask accounts found.",
 			"metamask_switch_network": "Cannot request Metamask to switch to chain ID $chain_id. Is your Metamask using $network_name?",
-			"erc20_data_undefined": "Erc20 transaction Data cannot be undefined or null.",
+			"erc20_data_undefined": "ERC20 transaction Data cannot be undefined or null.",
 			"data_undefined": "Transaction Data cannot be undefined or null.",
 			"no_identity_calculate_fee": "No identity provided to calculate the fee for its principal.",
 			"invalid_destination": "The destination is invalid. Please try again with a valid wallet address or destination.",
@@ -529,7 +750,8 @@
 			"no_pending_bitcoin_transaction": "There was an error loading the pending Bitcoin transactions. Please try again later.",
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
-			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again."
+			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
+			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly."
 		}
 	},
 	"convert": {
@@ -587,17 +809,15 @@
 			"review": "Review transaction",
 			"review_button": "Review swap",
 			"max_slippage": "Max slippage",
-			"max_balance": "Max",
-			"not_available": "n/a",
 			"value_difference": "Value difference",
 			"total_fee": "Total estimated fee",
 			"network_fee": "Network fee",
 			"approval_fee": "Approval fee",
 			"gas_fee": "Gas fee",
 			"lp_fee": "LP fee",
-			"max_slippage_info": "Enter value between 0% and 50%",
+			"max_slippage_info": "Enter value between 0% and $maxSlippage%",
 			"max_slippage_warning": "Risk warning: high slippage may lead to losses due to market volatility",
-			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed 50%",
+			"max_slippage_error": "Slippage tolerance cannot be 0% or exceed $maxSlippage%",
 			"swap_button": "Swap now",
 			"swap_is_not_offered": "This swap is currently not offered.",
 			"executing_transaction": "Executing transaction...",
@@ -605,6 +825,7 @@
 			"swapping": "Swapping...",
 			"refreshing_ui": "Refreshing UI",
 			"swap_provider": "Swap provider",
+			"swap_provider_website": "Website",
 			"swap_route": "Swap route",
 			"included_network_fees": "Included network fees",
 			"included_liquidity_fees": "Included liquidity pool fees",
@@ -613,7 +834,15 @@
 			"you_receive": "You receive",
 			"select": "Select >",
 			"select_swap_provider": "Select swap provider",
-			"open_icp_swap": "Open ICP Swap website"
+			"open_icp_swap": "Open ICP Swap website",
+			"open_instructions_link": "Open instructions link",
+			"select_token": "Select token",
+			"select_network_filter": "Select network",
+			"withdrawing": "Withdrawing...",
+			"network_cost": "Network cost",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Fees",
+			"cross_chain_networks_info": "You move tokens from <b>$sourceNetwork</b> to <b>$destinationNetwork</b> network"
 		},
 		"error": {
 			"kong_not_available": "There is currently no exchange available to swap tokens. Please try again later.",
@@ -621,9 +850,16 @@
 			"unexpected_missing_data": "Something went wrong while initiating a swap transaction.",
 			"slippage_exceeded": "$oisy_short protects you: The trade is outside of your slippage tolerance of $maxSlippage%. Please adjust the max slippage and try again.",
 			"pool_not_found": "Swap failed. Pool not found.",
-			"deposit_error": "Swap failed. We couldn’t deposit your tokens into the pool. Please try again.",
+			"deposit_error": "Depositing the funds for your swap failed. Please try again or change the swap provider.",
 			"withdraw_failed": "Swap failed and withdraw also failed. Please check your unused balance and try manual withdrawal: ",
-			"swap_failed_withdraw_success": "Swap failed. Your tokens were refunded successfully. You can try again or increase the slippage tolerance."
+			"swap_failed_withdraw_success": "The swap failed and your tokens were successfully refunded. Please try again or change the swap provider.",
+			"withdraw_failed_first_part": "The swap failed and your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow ",
+			"withdraw_failed_second_part": "to withdraw them anytime later directly from their website: ",
+			"swap_failed_instruction_link": "these instructions ",
+			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
+			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
+			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
 		}
 	},
 	"buy": {
@@ -642,12 +878,10 @@
 			"token_address": "Token address",
 			"balance": "Balance",
 			"hide_zero_balances": "Hide zero balances",
-			"hide_zeros": "Hide zeros",
 			"all_tokens_with_zero_hidden": "All assets with zero balance are currently hidden",
-			"filter_nothing_found": "Oops, nothing found",
-			"filter_nothing_found_description": "Type token ticker or name to filter list",
+			"filter_nothing_found": "No enabled tokens match",
+			"filter_nothing_found_description": "Search available assets below ot use \"Manage tokens\" to import additional tokens",
 			"filter_placeholder": "Filter by token or symbol",
-			"filter_button": "Open/close filter",
 			"buy_or_receive": "Buy or receive your first tokens now to see them in the list",
 			"initializing": "Initializing...",
 			"updating_ui": "Updating the UI...",
@@ -661,7 +895,9 @@
 			"chain_key": "Chain Key",
 			"show_more_networks": "Show $number more networks",
 			"hide_more_networks": "Hide more networks",
-			"on_network": " on $network"
+			"on_network": " on $network",
+			"delete_token": "Delete token",
+			"edit_token": "Edit token"
 		},
 		"details": {
 			"title": "Token details",
@@ -670,7 +906,13 @@
 			"contract_address_copied": "Contract address copied to clipboard.",
 			"token_address_copied": "Token address copied to clipboard.",
 			"twin_token": "Twin token",
-			"standard": "Standard"
+			"standard": "Standard",
+			"confirm_deletion_description": "This will remove <span class=\"font-bold\">$token</span> from your $oisy_short token list. Your funds will remain untouched — you can re-add the token at any time.",
+			"deletion_confirmation": "$token has been successfully removed from your $oisy_short token list.",
+			"update_confirmation": "$token has been successfully updated.",
+			"missing_index_canister_id_label": "Not assigned",
+			"missing_index_canister_id_warning": "Index canister is missing, so $oisy_short can’t fetch a list of transactions",
+			"missing_index_canister_id_button": "Set Index Canister"
 		},
 		"balance": {
 			"error": {
@@ -696,7 +938,7 @@
 				"custom_tokens_not_supported": "The selected network does not support custom tokens."
 			},
 			"error": {
-				"loading_metadata": "Error while loading the metadata of the token.",
+				"loading_metadata": "The specified address is not a valid token in the selected network.",
 				"no_metadata": "No metadata for the token is provided. This is unexpected.",
 				"unexpected_ledger": "Something went wrong while validating the Ledger canister.",
 				"unexpected_index": "Something went wrong while validating the Index canister.",
@@ -715,13 +957,11 @@
 			"text": {
 				"title": "Manage tokens",
 				"manage_list": "Manage tokens",
-				"default_message": "Enable the token to see it in your $oisy_short wallet.",
 				"list_settings": "List settings",
-				"do_not_see_import": "Don’t see your token? Import",
 				"import_token": "Import token",
-				"manage_for_network": "Managing tokens for $network",
 				"network": "Network",
-				"all_tokens_zero_balance": "All tokens have zero balance."
+				"all_tokens_zero_balance": "All tokens have zero balance.",
+				"enable_more_assets": "Enable more tokens"
 			},
 			"placeholder": {
 				"select_network": "Select the network"
@@ -762,16 +1002,73 @@
 		"error": {
 			"invalid_contract_address": "Contract address is invalid.",
 			"invalid_token_address": "Token address is invalid.",
-			"invalid_ledger": "The selected token is not linked with an Icrc Ledger canister.",
+			"invalid_ledger": "The selected token is not linked with an ICRC Ledger canister.",
+			"unrecognised_erc_interface": "Unrecognised ERC interface.",
 			"no_metadata": "No metadata were fetched.",
 			"unexpected": "Something went wrong while saving the token.",
 			"unexpected_hiding": "Something went wrong while hiding the token.",
 			"already_available": "Token is already available.",
-			"loading_metadata": "Error while loading the metadata of the token.",
 			"not_toggleable": "Token is not toggleable, it can not be hidden.",
 			"incomplete_metadata": "No name or symbol is provided in the metadata.",
 			"duplicate_metadata": "A token with a similar name or symbol already exists.",
-			"unexpected_undefined": "Token is undefined. This is unexpected."
+			"unexpected_undefined": "Token is undefined. This is unexpected.",
+			"unexpected_error_on_token_delete": "Something went wrong while removing the token.",
+			"unexpected_error_on_token_update": "Something went wrong while updating the token."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs",
+			"title_empty": "Your NFTs will appear here",
+			"description_empty": "It looks like you haven't received NFTs yet",
+			"grouping": "Grouping",
+			"as_plain_list": "Show as plain list",
+			"by_collection": "Group by collection",
+			"show_spam": "Show spam",
+			"show_hidden": "Show hidden",
+			"sorting": "Sorting",
+			"recents_first": "Recents first",
+			"oldest_first": "Oldest first",
+			"collection_atoz": "Collection name A-Z",
+			"collection_ztoa": "Collection name Z-A",
+			"collection_items_count": "$count item(s)",
+			"collection_address": "Collection contract address",
+			"token_standard": "Token standard",
+			"quantity": "Quantity",
+			"item_traits": "Item traits",
+			"collection_not_loaded": "The collection could not be displayed as it has not been loaded yet",
+			"nft_not_loaded": "The NFT could not be displayed as it has not been loaded yet",
+			"collections": "Collections",
+			"all_assets": "All assets",
+			"address_copied": "Address $address copied",
+			"spam": "Spam",
+			"not_spam": "Not spam",
+			"hide": "Hide",
+			"unhide": "Unhide",
+			"hidden": "Hidden",
+			"open_explorer": "Open this contract in blockchain explorer",
+			"img_consent_disabled": "You disabled images from this collection",
+			"img_consent_none": "Image disabled for security reasons",
+			"review_button": "Review",
+			"collection_name": "Collection name",
+			"media_urls": "Media URLs",
+			"display_preference": "Display preference",
+			"review_preference": "Review preference",
+			"media_enabled": "Media enabled",
+			"media_disabled": "Media disabled",
+			"enable_media": "Enable media",
+			"disable_media": "Disable media",
+			"open_in_new_tab": "Open in new tab",
+			"review_title": "Review media sources for \"$collectionName\"",
+			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
+			"learn_more": "Learn more"
+		},
+		"alt": {
+			"placeholder_image": "No NFTs yet",
+			"card": {
+				"image": "Image of NFT with token ID: $tokenId"
+			},
+			"copy_address": "Copy this address to clipboard"
 		}
 	},
 	"fee": {
@@ -826,7 +1123,6 @@
 			"events": "Events",
 			"message": "Message",
 			"hex_data": "HEX Data",
-			"base64_data": "Base-64 Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"
 		},
@@ -848,8 +1144,7 @@
 			"disconnected": "WalletConnect disconnected.",
 			"session_ended": "WalletConnect session was ended.",
 			"connected": "WalletConnect connected.",
-			"eth_transaction_executed": "WalletConnect eth_sendTransaction request executed.",
-			"sol_transaction_executed": "WalletConnect \"$method\" request executed.",
+			"transaction_executed": "WalletConnect \"$method\" request executed.",
 			"sign_executed": "WalletConnect sign request executed."
 		},
 		"error": {
@@ -907,13 +1202,21 @@
 			"safe": "Safe",
 			"unconfirmed": "Unconfirmed"
 		},
+		"type": {
+			"send": "Send",
+			"receive": "Receive",
+			"withdraw": "Withdraw",
+			"deposit": "Deposit",
+			"approve": "Approve",
+			"burn": "Burn",
+			"mint": "Mint"
+		},
 		"label": {
 			"reimbursement": "Reimbursement",
 			"twin_token_sent": "$twinToken sent",
 			"ck_token_sent": "$ckToken sent",
 			"twin_token_converted": "Converted from $twinToken",
 			"ck_token_converted": "Converted from $ckToken",
-			"receiving_twin_token": "Receiving $twinToken",
 			"sending_twin_token": "Sending $twinToken",
 			"sending_twin_token_failed": "Sending $twinToken failed",
 			"converting_twin_token": "Converting $twinToken to $ckToken",
@@ -937,7 +1240,6 @@
 			"title": "Transactions",
 			"buy_or_receive": "Make your first transaction, and buy or receive tokens now!",
 			"transaction_history": "Your transaction history will appear here",
-			"open_transactions": "Open the list of $token transactions",
 			"mainnet_btc_transactions_info": "BTC transaction information is obtained from central third parties and should be independently verified.",
 			"transaction_history_unavailable": "Transaction history unavailable",
 			"missing_index_canister_explanation": "Right now, $oisy_short can’t show your past token transactions because the issuer hasn’t provided the tracking feature yet. It should be added soon. In the meantime, don’t worry — you can still send and receive your tokens as usual.",
@@ -967,7 +1269,7 @@
 				},
 				"network_custody": {
 					"title": "No more private key anxiety with Network Custody",
-					"description": "$oisy_name implements network custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
+					"description": "$oisy_name implements Network Custody, an innovative approach that leverages the Internet Computer's advanced cryptography to eliminate the need for you to handle private keys directly. This provides a secure and user-friendly alternative to traditional methods, aligning with the “Onchain is the New Online“ movement — a shift toward solutions that enhance security and resilience against cyber attacks by running on a distributed network."
 				},
 				"fully_on_chain": {
 					"title": "Tamper-Proof Security with a Fully On-Chain Wallet",
@@ -997,12 +1299,12 @@
 				"reward_received": "Welcome to $oisy_short!",
 				"reward_failed": "Code is expired",
 				"reward_received_description": "You will receive your welcome gift any moment.",
+				"brand_reward_received_description": "Want to earn more? Refer a friend and earn for every person who joins.",
 				"reward_failed_description": "Request a new one and try again"
 			},
 			"error": {
 				"loading_reward": "Error while loading a new reward code.",
 				"loading_user_data": "Failed to load user data from reward canister.",
-				"claiming_reward": "Error while claiming reward.",
 				"loading_eligibility": "Error while loading campaign eligibility."
 			}
 		},
@@ -1022,7 +1324,7 @@
 			"text": {
 				"title": "Refer a friend",
 				"referral_link_copied": "Referral link copied to clipboard.",
-				"information": "Get bonus sprinkles, every time your friends receive one!",
+				"information": "Refer friends and get bonus sprinkles!",
 				"not_referred_yet": "You haven't referred anyone yet",
 				"referred_amount": "You already referred $amount people",
 				"learn_more": "Learn more"
@@ -1031,20 +1333,11 @@
 				"loading_referrer_info": "Error while loading referral info",
 				"setting_referrer": "Error while setting referrer"
 			}
-		},
-		"reward": {
-			"text": {
-				"title": "Congratulations!",
-				"content_title": "Here a small thank you",
-				"content_text": "One of your referred users just got some sprinkles.",
-				"share": "Share on X",
-				"open_wallet": "Take me to the wallet"
-			}
 		}
 	},
 	"address_book": {
 		"text": {
-			"title": "Address book",
+			"title": "Contacts",
 			"empty_title": "Your contacts are empty",
 			"empty_text": "All your contacts will be shown here",
 			"add_new_contact": "Add new contact",
@@ -1064,13 +1357,23 @@
 		},
 		"avatar": {
 			"default": "Default avatar",
-			"avatar_for": "Avatar for"
+			"avatar_for": "Avatar for",
+			"avatar_loading": "Avatar is loading..."
+		},
+		"edit_avatar": {
+			"menu_title": "Contact Image",
+			"upload_image": "Upload",
+			"replace_image": "Replace",
+			"remove_image": "Remove"
 		},
 		"show_contact": {
 			"title": "Contact",
 			"add_address": "Add address",
 			"show_address_text": "Associated addresses will appear here",
 			"add_first_address": "Add first address to contactName!"
+		},
+		"create_contact": {
+			"title": "Create Contact"
 		}
 	},
 	"contact": {
@@ -1084,12 +1387,13 @@
 		"delete": {
 			"title": "Delete $contact contact?",
 			"delete_contact": "Delete contact",
-			"content_text": "This will delete $contact and all associated addresses from your Address Book. This action cannot be undone."
+			"content_text": "This will delete $contact and all associated addresses from your Contacts. This action cannot be undone."
 		},
 		"error": {
 			"create": "Failed to create the contact",
 			"update": "Failed to update the contact",
-			"delete": "Failed to delete the contact"
+			"delete": "Failed to delete the contact",
+			"name_too_long": "Please keep the name to $maxCharacters characters or fewer."
 		}
 	},
 	"address": {
@@ -1122,6 +1426,9 @@
 			"title": "Save address",
 			"add_to_existing_contact": "Add to existing contact",
 			"create_contact": "Create contact"
+		},
+		"qr": {
+			"title": "Scan QR code"
 		}
 	},
 	"signer": {
@@ -1193,8 +1500,24 @@
 			"indicator": "Jump to slide $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "Review Terms & Conditions",
+			"review_updated_title": "Review Updated Terms & Conditions",
+			"review_description": "Before you can use OISY Wallet, you must review and agree to our Terms of Service and Privacy Policy. These documents explain the rules of our service and how we protect your data.",
+			"review_updated_description": "To continue using OISY Wallet, please review and agree to our updated Terms of Service and Privacy Policy. These changes are important for keeping our service secure and compliant.",
+			"reject_warning": "You must accept the Terms and Conditions to proceed. Feel free to try again anytime.",
+			"i_have_accepted": "I have read and agree to the",
+			"i_have_accepted_updated": "I have read and agree to the updated",
+			"accept_and_continue": "Accept and continue"
+		},
+		"error": {
+			"cannot_update_user_agreements": "Something went wrong when updating your agreements."
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "License Agreement",
 			"accept_terms": "By clicking this button, you agree to the",
 			"accept_terms_link": "License Agreement",
 			"title": "$oisy_name License Agreement (“License Agreement”)",
@@ -1213,10 +1536,32 @@
 			"entire_agreement": "<strong>10. ENTIRE AGREEMENT AND SEVERABILITY.</strong> This License Agreement is the entire agreement between You and DFINITY, and supersedes any and all prior agreements, negotiations, or other communications between You and DFINITY, whether oral or written, with respect to the subject matter hereof. DFINITY may make changes to this License Agreement when new versions of $oisy_short are made available. In the event that any provision of this License Agreement is held to be invalid or unenforceable, then: (a) such provision shall be deemed reformed to the extent strictly necessary to render such provision valid and enforceable, or if not capable of such reformation shall be deemed severed from this License Agreement; and (b) the validity and enforceability of all of the other provisions hereof, shall in no way be affected or impaired thereby.",
 			"assignment": "<strong>11. ASSIGNMENT.</strong> You may not assign this License Agreement without the prior written consent of DFINITY, whether expressly or by operation of law, including in connection with a merger or change of control, and any such attempted assignment shall be void and of no effect. DFINITY may assign this License Agreement without restriction and without any notice to You. Subject to the foregoing, this License Agreement shall be binding on the parties and their respective successors and permitted assigns.",
 			"no_waiver": "<strong>12. NO WAIVER.</strong> The failure to exercise, or delay in exercising, a right, power, or remedy provided in this License Agreement or by law shall not constitute a waiver of that right, power, or remedy. DFINITY 's waiver of any obligation or breach of this License Agreement shall not operate as a waiver of any other obligation or subsequent breach of the License Agreement.",
-			"english_version": "<strong>13. ENGLISH VERSION.</strong> The English language version of this License Agreement shall be the official and controlling version of the agreement if any conflict should arise. All communications and notices made pursuant to this License Agreement must be in the English language."
+			"english_version": "<strong>13. ENGLISH VERSION.</strong> The English language version of this License Agreement shall be the official and controlling version of the agreement if any conflict should arise. All communications and notices made pursuant to this License Agreement must be in the English language.",
+			"body": "Thank you for your interest in $oisy_name, a browser-based, self-custodial and multi-chain wallet decentralized application hosted on the Internet Computer public blockchain network (“$oisy_short”). For more information about $oisy_short, its open-source code and related licenses, please refer to the $oisy_short github repository found here: $oisy_repo_url.\n\nThis License Agreement governs your use of $oisy_short (\\\"You\\\"). BY USING $oisy_short, YOU AGREE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS LICENSE AGREEMENT. IF YOU DO NOT AGREE, YOU MAY NOT USE $oisy_short.\n\nIf You choose to use $oisy_short, You and the DFINITY Foundation, including its affiliates and subsidiaries (collectively “DFINITY”), acknowledge and agree as follows:\n\n### 1. LIMITED LICENSE.\n\nSubject to the terms and conditions contained in this License Agreement, DFINITY grants You a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to use $oisy_short only for the purposes of receiving, holding and sending tokens such as native ICP, ICRC-1, ETH, and ERC20 tokens, as well as other tokens which may be made available from time to time. You may create derivative works to the extent permitted by the licensing terms governing use of any open-sourced components included within $oisy_short.\n\n### 2. RESTRICTIONS.\n\nYou are responsible for all activities related to your use of $oisy_short, regardless of whether the activities are authorized by You or undertaken by You, your employees or a third party on your behalf. YOU UNDERSTAND THAT DFINITY IS NOT RESPONSIBLE FOR ANY ACTIVITIES OR TRANSACTIONS (WHETHER COMPLETED OR OTHERWISE) ASSOCIATED WITH YOUR $oisy_name. You will not misrepresent or embellish the relationship between You and DFINITY, including expressing or implying that DFINITY supports, sponsors, endorses, or contributes to You or your business endeavors through your use of $oisy_short. You will not imply any relationship or affiliation with DFINITY except as expressly permitted by this License Agreement. You are prohibited from using the $oisy_short name, logo or any other trademarks related to $oisy_short in any manner that may imply an endorsement or affiliation, misrepresent your relationship with $oisy_short or create confusion regarding the source of $oisy_short.\n\n### 3. APPLICABLE LAWS.\n\nYou will comply with all applicable laws and regulations (including without limitation laws and regulations related to export controls, money laundering or economic sanctions) in connection with your use of $oisy_short and any transactions associated with your $oisy_name.\n\n### 4. RESERVATION OF DFINITY’S RIGHT.\n\n$oisy_short is owned by DFINITY and licensed, not sold, to You. $oisy_short’s content, visual interfaces, interactive features, information, graphics, design, compilation, computer code, products, services, and all other elements of $oisy_short and related documentation, are protected by applicable intellectual property laws. As between You and DFINITY, all DFINITY materials and $oisy_short, including intellectual property rights therein and thereto, are the sole and exclusive property of DFINITY or its subsidiaries or affiliated companies and/or its third-party licensors, subject to any open-source software licenses. DFINITY reserves all rights not expressly granted in this License Agreement. You do not acquire any right, title, or interest to the DFINITY materials or $oisy_short, whether by implication, estoppel, or otherwise, except for the limited rights set forth in this License Agreement and the rights conferred by the licensing terms governing use of any open-sourced components included within $oisy_short. This License Agreement does not grant you any right to use the $oisy_short name, logo or other trademarks related to $oisy_short or DFINITY.\n\n### 5. FEEDBACK.\n\nIf You provide DFINITY with any comments, ideas, bug reports, feedback, enhancements, recommendations or modifications in relation to $oisy_short (\\\"Feedback\\\"), such Feedback is provided on a non-confidential basis, and DFINITY shall have the right to use such Feedback at its discretion, including, but not limited to the incorporation of such suggested changes into the DFINITY materials, $oisy_short or other services. You hereby grant DFINITY a perpetual, irrevocable, transferable, sublicensable, nonexclusive, royalty free license under all rights necessary to so incorporate and use your Feedback for any purpose, including to make and sell products and services, and agree to provide DFINITY with any assistance required to document, perfect and maintain DFINITY’s rights to the Feedback. You agree to allow DFINITY to contact You for Feedback from time to time, but may opt-out by sending written notice to legalnotice@dfinity.org.\n\n### 6. TERMS AND TERMINATION.\n\nThis License Agreement will remain in effect until terminated. The License Agreement, and your rights and licenses hereunder, will terminate immediately upon your breach of the License Agreement. You may terminate the License Agreement at any time by emptying your $oisy_name of tokens and ceasing all use of $oisy_short. DFINITY may terminate this License Agreement at any time for any reason, including without limitation any actual or suspected misuse or abuse by You of $oisy_short or any violation of this License Agreement. Sections 3 through 13 shall survive any termination of this License Agreement.\n\n### 7. WARRANTY DISCLAIMER AND LIMITATION OF LIABILITY.\n\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, $oisy_short IS PROVIDED ON AN \\\"AS IS\\\" BASIS, WITHOUT WARRANTY OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, DFINITY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OR CONDITIONS OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, TITLE, QUALITY, RESULTS, AND NON-INFRINGEMENT. DFINITY DOES NOT GUARANTEE THAT $oisy_short WILL ALWAYS BE AVAILABLE, SAFE, OR SECURE (NOW AND IN THE FUTURE). DFINITY EXPRESSLY DISCLAIMS ANY WARRANTIES OF ANY KIND WITH RESPECT TO THE ACCURACY OR FUNCTIONALITY OF $oisy_short, AND WITH RESPECT TO THE ACCURACY, VALIDITY, OR COMPLETENESS OF ANY INFORMATION OR FEATURES (NOW AND IN THE FUTURE) MADE AVAILABLE THROUGH YOUR USE OF $oisy_short, OR THE QUALITY OR CONSISTENCY OF $oisy_short OR RESULTS OBTAINED THROUGH ITS USE. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, UNDER NO CIRCUMSTANCES WILL DFINITY BE LIABLE FOR ANY CONSEQUENTIAL, SPECIAL, INDIRECT, INCIDENTAL OR PUNITIVE DAMAGES WHATSOEVER ARISING OUT OF THE USE OR INABILITY TO USE AND ACCESS $oisy_short OR DFINITY MATERIALS, EVEN IF DFINITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL DFINITY'S AGGREGATE LIABILITY FOR DAMAGES ARISING OUT OF THIS LICENSE AGREEMENT OR YOUR USE OR INABILITY TO USE $oisy_short EXCEED 100 CHF.\n\n### 8. INDEMNITY.\n\nYou agree to indemnify, defend and hold DFINITY and its affiliates, officers, directors, suppliers, licensors, and other customers harmless from and against any and all liability and costs, including reasonable attorneys' fees incurred by such parties, in connection with your use or misuse of $oisy_short or your violation of this License Agreement or any applicable law or regulation.\n\n### 9. GOVERNING LAW; VENUE.\n\nAny claim relating to $oisy_short shall be governed by the laws of Switzerland, to the exclusion of the rules on conflicts of laws. Any claim or dispute related to this License Agreement or in relation to it shall (including for non-contractual disputes or claims and their interpretation) be subject to the exclusive jurisdiction of the Courts of Zurich, Switzerland, subject to an appeal at the Swiss Federal Court.\n\n### 10. ENTIRE AGREEMENT AND SEVERABILITY.\n\nThis License Agreement is the entire agreement between You and DFINITY, and supersedes any and all prior agreements, negotiations, or other communications between You and DFINITY, whether oral or written, with respect to the subject matter hereof. DFINITY may make changes to this License Agreement when new versions of $oisy_short are made available. In the event that any provision of this License Agreement is held to be invalid or unenforceable, then: (a) such provision shall be deemed reformed to the extent strictly necessary to render such provision valid and enforceable, or if not capable of such reformation shall be deemed severed from this License Agreement; and (b) the validity and enforceability of all of the other provisions hereof, shall in no way be affected or impaired thereby.\n\n### 11. ASSIGNMENT.\n\nYou may not assign this License Agreement without the prior written consent of DFINITY, whether expressly or by operation of law, including in connection with a merger or change of control, and any such attempted assignment shall be void and of no effect. DFINITY may assign this License Agreement without restriction and without any notice to You. Subject to the foregoing, this License Agreement shall be binding on the parties and their respective successors and permitted assigns.\n\n### 12. NO WAIVER.\n\nThe failure to exercise, or delay in exercising, a right, power, or remedy provided in this License Agreement or by law shall not constitute a waiver of that right, power, or remedy. DFINITY's waiver of any obligation or breach of this License Agreement shall not operate as a waiver of any other obligation or subsequent breach of the License Agreement.\n\n### 13. ENGLISH VERSION.\n\nThe English language version of this License Agreement shall be the official and controlling version of the agreement if any conflict should arise. All communications and notices made pursuant to this License Agreement must be in the English language."
 		},
 		"alt": {
 			"license_agreement": "The $oisy_name License Agreement"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Terms of Use",
+			"title": "Terms Of Use",
+			"body": "Effective Date: $date\n\n### 1. Acceptance of Terms\n\nBy using OISY Wallet, the website at oisy.com, or any other services from which we link to these Terms of Use (“Services”), you agree with us, the DFINITY Foundation, including our affiliates and subsidiaries (collectively “DFINITY”), to these Terms of Use and our <a href=\"/license-agreement/\" target=\"_self\">License Agreement</a> (collectively “Agreement”). To the extent of any conflict or inconsistency between these Terms of Use and the License Agreement, the Terms of Use shall prevail. If you do not agree, do not use our Services. By using our Services, you warrant that you are at least 18 years old.\n\n### 2. Description of our Services\n\n* The OISY Wallet is a browser-based, self-custodial and multi-chain wallet decentralized application hosted on the Internet Computer public blockchain network, and allows you to access certain tokens supported by the OISY Wallet and other third party services. We do not own, control or operate such third parties and you use third party services at your own risk.\n* Some OISY Wallet features are experimental or in beta.\n\n### 3. Account Access and Security\n\nYou are responsible for both:\n\n* Making all arrangements necessary for you to have access to the Website.\n* Safeguarding your access credentials, including your Internet Identity.\n\nWe are unable to restore access to your account if you lose your Internet Identity or if it is otherwise compromised.\n\nTo access the Website or some of the resources it offers, you may be asked to provide certain registration details or other information. It is a condition of your use of the Website that all the information you provide on the Website is correct, current, and complete. You agree that all information you provide to register with this Website or otherwise, including, but not limited to, through the use of any interactive features on the Website, is governed by our _<a href=\"/privacy-policy/\" target=\"_self\">Privacy Policy</a>_, and you consent to all actions we take with respect to your information consistent with our Privacy Policy.\n\nYou agree to ensure that you exit from your account at the end of each session. You should use particular caution when accessing your account from a public or shared computer so that others are not able to view or record your password or other personal information.\n\nYou also acknowledge that We do not have custody, access, or control of the funds in your OISY wallet. You acknowledge that OISY wallet is exclusively user-controlled.\n\n### 4. Warranty disclaimer and limitation of liability\n\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, OUR SERVICES ARE PROVIDED ON AN \"AS IS\" BASIS, WITHOUT WARRANTY OF ANY KIND, INCLUDING THAT OISY DOES NOT PROVIDE A WARRANTY OR GUARANTEE FOR ANY LOSS OF FUNDS OR TECHNICAL FAILURES. YOU ASSUME THE RISKS OF USING DECENTRALIZED INFRASTRUCTURE AND ACKNOWLEDGE THAT WE ARE NOT RESPONSIBLE FOR ANY LOSS OF FUNDS, REGARDLESS OF THE CAUSE OF THE LOSS.\n\nTO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, DFINITY DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OR CONDITIONS OF FITNESS FOR A PARTICULAR PURPOSE, MERCHANTABILITY, TITLE, QUALITY, RESULTS, AND NON-INFRINGEMENT. DFINITY DOES NOT GUARANTEE THAT THE SERVICES WILL ALWAYS BE AVAILABLE, SAFE, OR SECURE (NOW AND IN THE FUTURE). DFINITY EXPRESSLY DISCLAIMS ANY WARRANTIES OF ANY KIND WITH RESPECT TO THE ACCURACY OR FUNCTIONALITY OF THE SERVICES, AND WITH RESPECT TO THE ACCURACY, VALIDITY, OR COMPLETENESS OF ANY INFORMATION OR FEATURES (NOW AND IN THE FUTURE) MADE AVAILABLE THROUGH YOUR USE OF THE SERVICES, OR THE QUALITY OR CONSISTENCY OF THE SERVICES OR RESULTS OBTAINED THROUGH ITS USE. DFINITY DOES NOT GUARANTEE THAT THE SERVICES CAN TRANSFER TITLE OR RIGHT IN ANY TOKEN OR DIGITAL ASSET OR MAKE ANY WARRANTIES WHATSOEVER WITH REGARD TO TITLE. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, UNDER NO CIRCUMSTANCES WILL DFINITY BE LIABLE FOR ANY CONSEQUENTIAL, SPECIAL, INDIRECT, INCIDENTAL OR PUNITIVE DAMAGES WHATSOEVER ARISING OUT OF THE USE OR INABILITY TO USE AND ACCESS THE SERVICES OR DFINITY MATERIALS OR ANY THIRD PARTY ITEMS AS DEFINED HEREIN, EVEN IF DFINITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES, AND NOTWITHSTANDING ANY FAILURE OF ESSENTIAL PURPOSE OF ANY LIMITED REMEDY. TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT WILL DFINITY'S AGGREGATE LIABILITY FOR DAMAGES ARISING OUT OF THIS AGREEMENT OR YOUR USE OR INABILITY TO USE THE SERVICES EXCEED CHF 100.\n\n### 5. Indemnity\n\nYou agree to indemnify, defend and hold DFINITY and its affiliates, officers, directors, suppliers, licensors, and other customers harmless from and against any and all liability and costs, including reasonable attorneys' fees incurred by such parties, in connection with your use or misuse of our Services or your violation of this Agreement or any applicable law or regulation.\n\n### 6. Rewards programs\n\nBy participating in our rewards programs, you agree to the [OISY REWARDS INITIATIVE - TERMS AND CONDITIONS](https://docs.oisy.com/rewards/oisy-sprinkles/t-and-cs), which is incorporated herein and subject to change from time to time.\n\n### 7. Compliance with laws and acceptable use\n\nYou will comply with all applicable laws and regulations (including without limitation laws and regulations related to export controls, money laundering or economic sanctions) in connection with your use of the Services. You will not use our Services for any unlawful purposes, or in ways that violate or infringe the rights of any DFINITY entity, other users, or other persons.\n\n### 8. Tax Liability\n\nYou are responsible for complying with all applicable federal, state, and local laws and regulations regarding collection and payment of taxes and fees.\n\n### 9. Governing law; venue\n\nAny claim relating to the Services shall be governed by the laws of Switzerland, to the exclusion of the rules on conflicts of laws. Any claim or dispute related to this Agreement or in relation to it shall (including for non-contractual disputes or claims and their interpretation) be subject to the exclusive jurisdiction of the Courts of Zurich, Switzerland, subject to an appeal at the Swiss Federal Court.\n\n### 10. Third parties and other apps\n\nWe do not own, control, endorse or adopt any third party content, apps, services, websites, or other items (“Third Party Items”) you may see or connect with when using our Services. We disclaim any responsibility related to or arising out of Third Party Items. Your use, dealings, or correspondence with third parties and Third Party Items are solely between you and the third party and you do so at your own risk.\n\nNothing in this Agreement, express or implied, is intended to or shall confer any rights, benefits, or remedies on any third party, including other users of our Services.\n\n### 11. Severability\n\nIn the event that any provision of these Terms of Use is determined to be unlawful, void or unenforceable, such provision shall nonetheless be enforceable to the fullest extent permitted by applicable law, and the unenforceable portion shall be deemed to be severed from these Terms of Use, such determination shall not affect the validity and enforceability of any other remaining provisions.\n\n### 12. Terms and termination\n\nThis Agreement will remain in effect until terminated. The Agreement, and your rights and licenses hereunder, will terminate immediately upon your breach of the Agreement. DFINITY may terminate this Agreement at any time for any reason, including without limitation any actual or suspected misuse or abuse by you of the Services or any violation of this Agreement.\n\n### 13. Entire Agreement\n\nThe failure of us to exercise or enforce any right or provision of these Terms of Use shall not constitute a waiver of such right or provision.\n\nThese Terms of Use and any policies or operating rules posted by us on this site or in respect to the Service constitutes the entire agreement and understanding between you and us and governs your use of the Service, superseding any prior or contemporaneous agreements, communications and proposals, whether oral or written, between you and us (including, but not limited to, any prior versions of the Terms of Use).\n\nAny ambiguities in the interpretation of these Terms of Use shall not be construed against the drafting party.\n\n### 14. Personal Information\n\nPlease review our <a href=\"/privacy-policy/\" target=\"_self\">Privacy Policy here</a>.\n\nIf you use the OISY Wallet or other third party services and blockchain technologies, you share information with a global community that is separate and independent from us and not controlled by us. Because blockchains are decentralized and third party services are not controlled or operated by us or our affiliates, we are not able to control, erase, modify, or alter personal data processed during the use of such blockchain technologies.\n\n### 15. Changes to Terms\n\nWe may update this Agreement at our sole discretion. Continued use constitutes acceptance of changes.\n\n### 16. Contact\n\nFor inquiries, visit [support@oisy.com](mailto:support@oisy.com)."
+		},
+		"alt": {
+			"terms_of_use": "Terms of Use Link"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Privacy Policy",
+			"title": "Privacy Policy",
+			"body": "Effective Date: $date\n\nWe, DFINITY Stiftung, Genferstrasse 11, 8002 Zürich, Switzerland (“**DFINITY**”, “**we**”, “**us**” or “**our**”) disclose in this OISY Privacy Policy (“**Privacy Policy**”) how we process personal data that you submit or we collect when you use OISY Wallet, the website at oisy.com, or any other website from which we link to this Privacy Policy (“**Sites**”).\n\nThis Privacy Policy does not apply to any other data processing, including, without limitation, personal data that we collect offline or via other websites that do not link to this Privacy Policy; personal data that you share with other users of the Sites or other blockchain-based technologies when you use such technologies; or personal data that you share with third party services which we do not own or control.\n\nIf you use the OISY Wallet or other third party services and blockchain technologies, you share information with a global community that is separate and independent from us and not controlled by us. Because blockchains are decentralized and third party services are not controlled or operated by us or our affiliates, we are not able to control, erase, modify, or alter personal data processed during the use of such blockchain technologies.\n\n### 1. Data Controller\n\nData protection laws in certain jurisdictions, including Switzerland (“**CH**”), the European Economic Area (“**EEA**”) and the United Kingdom (“**UK**”), recognise the role of “controller” – the organisation which decides why and how to process personal data.\n\nDFINITY will act as a controller for the personal data processed through the Sites.\n\nThe use of personal data is required for the provision of the OISY Wallet services. For further details of the personal data we collect, please see the table below.\n\nYou provide us with personal data directly when you create an account/set up an OISY Wallet with us, or contact us for information about our Sites. We also create some personal data ourselves, including measuring of your OISY Wallet activity (to help us improve the Sites and allow you to benefit from our rewards programmes (e.g. Sprinkles).\n\nIn the EEA / UK we are required by law to always have a permitted reason or justification (called a “lawful basis”) for processing your personal data. There are six permitted lawful bases for processing standard personal data. In the event that we process special category personal data (for example your biometric data), we are required to have a further lawful basis to process such data lawfully.\n\nIn CH, we are generally not required to have a specific legal basis for processing your personal data, provided that such processing is not unlawful. This means in particular that it must not violate your personality rights and must comply with the principles set out in the Swiss Federal Act on Data Protection (FADP). However, where we process special category personal data (for example your biometric data), we must have a justification under Swiss law. In most cases, this means that your explicit consent is required for such processing to be lawful. For the purposes of the table below, any reference to a \"lawful basis\" should be understood as a corresponding \"justification\" under Swiss law.\n\nThe table below explains the different purposes for which we process your personal data, some of which may be considered sensitive depending on your jurisdiction, and the relevant lawful basis or bases on which we rely for that processing.\n\n| Purposes for processing personal data | Type of personal data we use for this | Our lawful basis |\n| --- | --- | --- |\n| Creating or logging into your OISY Wallet | “Internet Identity number” - this is your unique identifier for accessing OISY Wallet FaceID, TouchID (both of which rely on processing of your biometric data), or security key | Performance of a contract with you; and Your explicit consent for processing of biometric data in jurisdictions where it is deemed sensitive (where you have chosen to complete the sign-in verification using your biometric data through FaceID or TouchID). |\n| **User support and troubleshooting** – communicating with you to solve any queries or problems you might be experiencing as well as to provide technical updates to you | Name Email Address Discord User ID / display name Details of any issues you report | Performance of a contract with you; or Our legitimate interests in ensuring appropriate service levels for our users |\n| Feedback to improve user experience and inform Site development | Discord User ID / display name Any feedback you provide to our feedback channels | Our legitimate interests in developing the Site and informing our strategy |\n| Facilitating our rewards/loyalty schemes | Your account/wallet log-in activity Your transaction volumes/frequency | Our legitimate interests in developing and growing our services and promoting future use of the Sites |\n| Facilitating the Refer Your Friends scheme | Your unique referral code Account/wallet log-in activity associated with your referrals Transaction volumes/frequency of your referrals | Our legitimate interests in developing and growing our services and promoting future use of the Sites |\n| To provide you with our promotional/marketing updates (where you have subscribed) | Name Email Address Discord User ID / display name | Where you have provided your Consent |\n| **Measuring and improving Site performance** | Device/browser type and operating system; IP address and session metadata; Usage logs and authentication attempts [Geo-location data] | Our legitimate interest to optimize the performance of our Sites |\n| Handling media enquiries (where you contact us as a member of the media) | Name Email Address Details of your enquiry | Our legitimate interests in ensuring a strong working relationship with the media and promotion of the Site |\n\n\nThe personal data we hold about you may additionally be converted into aggregated and anonymized data which we will use for the purpose of data analytics, product development and to improve our services, for our business purposes, including the data listed at “Measuring and improving Site performance”.\n\nWe do not knowingly collect the information of children. If we learn we have collected or received personal information from a child under the age of 13, we will promptly delete the information. If you believe that we might have any information from or about a child, please contact us via the methods listed below.\n\n### 2. Data Sharing\n\nWe may share your data with other DFINITY entities/members of our group, service providers and selected third parties (e.g. business partners), for purposes of providing our services to you and in connection with our efforts to prevent and investigate fraudulent activity.\n\n### 3. Data Retention\n\nWe will store your personal data for no longer than is necessary for the performance of our obligations or to achieve the purposes for which your personal data was collected, or as may be permitted under applicable law.  When determining the appropriate length of time for retention, multiple factors are taken into account, including: the nature and sensitivity of the personal information; the purposes for which the information is required; any laws or regulations that we are required to follow; and the period of time during which any claims or proceedings can be brought against us to defend against any such claims.\n\nThis means that typically we retain your personal data for the duration of your relationship with us and then, for a period defined by legal, accounting or reporting requirements. If you would like further information on our retention periods, please reach out to us through the details in the “Contact” section below for further information.\n\n### 4. Transfers from UK/EEA/CH\n\nWe store your personal data in Switzerland and other locations where our employees and contractors work, including the United States.\n\nIn the course of providing our services, we will need to transfer personal data to locations outside the jurisdiction in which you provide it or where you are viewing or using our Sites. If you are based in the UK,EEA or CH, this will mean that your personal data may be transferred to, accessible from, and/or stored at, a destination outside the UK/EEA/CH in which data protection laws may not be as comprehensive as in the UK/EEA/CH.\n\nRegardless of the location of our processing, we will impose the same data protection safeguards that we deploy inside the UK/EEA/CH and implement appropriate measures to ensure that your personal data is protected in accordance with applicable data protection laws.\n\nSimilarly, where a third-party service provider processes the personal data of EEA, UK or CH residents on our behalf, we will ensure that appropriate measures are in place to ensure an adequate level of protection for your personal data.\n\nIf any of our processing activities require your personal data to be transferred from within the UK, EEA or CH to outside the UK/EEA/CH, we will only make that transfer if:\n- the country to which the personal data is to be transferred ensures an adequate level of protection for personal data;\n- we have put in place appropriate safeguards to protect your personal data, such as an appropriate contract with the recipient;\n- the transfer is necessary for one of the reasons specified in data protection legislation, such as the performance of a contract between us and you; or\n- you explicitly consent to the transfer.\n\nPlease contact us as directed below in the “Contact” section if you would like to see a copy of the specific safeguards applied to the export of your personal data.\n\n### 5. Third Party Links\n\nThe Sites may contain third party links to other sites, such as Discord and our project partners. Please be aware that where these sites are not operated by DFINITY we are not responsible for the privacy practices of these sites. We encourage our users to be aware when they leave this website and to read the privacy statements applicable on those sites. This privacy notice does not apply to information that is collected on third parties’ sites.\n\n### 6. OISY Sprinkles\n\nActive wallets are eligible for OISY Sprinkles, OISY’s rewards program. You may win Sprinkles based on daily use and referrals, or other criteria. Sprinkles are deposited directly into your wallet therefore you are only eligible to receive Sprinkles if you have an OISY account.\n\nOISY does not partner with third parties to reward Sprinkles. OISY does not process your sensitive personal data to administer the OISY Sprinkles program. OISY does not sell or process for purposes of targeted advertising personal data collected for purposes of the OISY Sprinkles program.\n\n### 7. Automated decision making\n\nWe do not currently use, and do not anticipate using, any automated decision making in relation to your personal data (i.e. where decisions are made by a computer only without human interaction). If this changes, we will update this notice.\n\n### 8. User Rights,  Questions and Comments\n\nUnder certain circumstances, including if you are a resident of the UK/EEA/CH, or of Colorado, Delaware, Maryland, Minnesota, New Jersey, or Oregon, by law you may have the right to:\n- **Request access to your personal data** (commonly known as a “data subject access request”). This enables you to receive a copy of the personal data we hold about you and to check that we are lawfully processing it. Depending on your jurisdiction, you may also have the right to obtain a list of categories of third parties that we have disclosed your personal information to.\n- **Request correction of the personal data that we hold about you.** This enables you to have any incomplete or inaccurate information we hold about you corrected. We may delete the contested personal information as an alternative to correcting the information if the deletion of the personal information does not negatively impact you, or you consent to the deletion.\n- **Request erasure of your personal data.** This enables you to ask us to delete or remove personal data where there is no legal basis for us continuing to process it. You also have the right to ask us to delete or remove your personal data where you have exercised your right to object to processing (see below).\n- **Object to processing of your personal data.** You also have the right to object where we are processing your personal data for direct marketing purposes.\n- **Object to any automated decision-making including profiling** and request human decision making for that same processing instead (i.e. request not to be subject of any automated decision-making by us using your personal data or profiling of you).\n- **Request the restriction of processing of your personal data.** This enables you to ask us to suspend the processing of personal data about you, for example if you want us to establish its accuracy or the reason for processing it.\n- **Request transfer of your personal data in an electronic and structured form to you or to another party** (commonly known as a right to “data portability”). Subject to certain conditions and to the extent feasible, you may be entitled to receive the personal data in a usable format that allows you to transmit the data to another entity.\n- **Right to withdraw consent.** Where we rely on consent as our legal basis for processing you may withdraw consent at any time by contacting us at support@oisy.com (Note: this does not affect the lawfulness of processing based on consent before its withdrawal). We must stop processing your personal data unless there is another lawful basis upon which we can rely, in which case we would let you know.\n- **<u>Right to opt-out of the sale or sharing of personal information (for US residents).</u>** We currently do not sell personal information to third parties, therefore we do not offer this right. We may share personal information about you with service providers as permitted by law.\n- **<u>Right to opt</u>-out of processing for purposes of targeted advertising <u>(for US residents)</u>.** We currently do not engage in targeted advertising, therefore we do not offer this right.\n- <u>**Right to limit the use, disclosure, or processing of your sensitive personal information (for US residents).** This enables you to ask that we not use, disclose, or process your sensitive personal information.</u>\n\nWhere our processing of your personal data is necessary for our legitimate interests, you can object to this processing at any time. If you do this, we will need to show either a compelling reason why our processing should continue, which overrides your interests, rights and freedoms or that the processing is necessary for us to establish, exercise or defend a legal claim.\n\nPlease note, the rights listed above are not absolute and so may be subject to restrictions or may not be available in your jurisdiction. We do not discriminate against you if you choose to exercise any of these rights.\n\nFor US residents: Please note that depending on your jurisdiction, we are only obligated to respond, free of cost, to personal information requests from the same consumer up to two times in a 12-month period. Depending on your jurisdiction, after you have exceeded the applicable number of requests, we have the right to charge a reasonable fee for fulfilling the request. In addition, under the applicable state privacy law, and for the protection of your personal information, we may be limited in what personal information we can disclose.\n\nYou may exercise your rights by contacting us at support@oisy.com. We must verify your identity before fulfilling your personal information request.\n\nDepending on your jurisdiction, you also may designate an authorized agent to make a request on your behalf.  If you are submitting a request through an authorized agent, the authorized agent must provide us with your signed written permission stating that the agent is authorized to make the request on your behalf.  Alternatively, your authorized agent may provide evidence of having power of attorney or acting as a conservator for you.\n\nIf you feel that your data has not been handled correctly, or you are unhappy with our response to any requests you have made to us regarding the use of your personal data, you have the right to lodge a complaint with a complaint with a competent authority.\n\nIf you are based in the UK, the competent authority is the Information Commissioner’s Office.\n\nYou can contact them by calling 0303 123 1113, or go online to [www.ico.org.uk/concerns](http://www.ico.org.uk/concerns) (opens in a new window; please note we can't be responsible for thecontent of external websites).\n\nIf you are based outside the UK, you have the right to lodge your complaint with the relevant data protection regulator in your country of residence.\n\nIf you are based in Switzerland, the competent authority is the Federal Data Protection and Information Commissioner.\n\nYou can contact them online at www.edoeb.admin.ch (opens in a new window; please note we can't be responsible for the content of external websites). Please note that under Swiss law, there is no formal right to lodge a complaint, but you may report a potential data protection violation to the Federal Data Protection and Information Commissioner.\n\nHowever, please be aware that you will not be able to exercise rights or raise complaints to us for data processed in blockchains or in connection with third party services, as they are not controlled by us or our affiliates. Because blockchains are decentralized and third party services are not controlled or operated by us or our affiliates, we are not able to control, erase, modify, or alter personal data processed during the use of such blockchain technologies\n\n### 9. Changes to This Policy\n\nWe may update this Privacy Policy from time to time, at our discretion, and we may post new versions on our Site,  after which we will update the Effective Date at the top of this Privacy Policy. We therefore encourage you to check the Privacy Policy for such updates on a regular basis.\n\n### 10. Contact\n\nWe welcome any questions or comments in relation to this privacy policy, and advise you to send any such communication, or requests to exercise your rights, to [support@oisy.com](mailto:support@oisy.com)."
+		},
+
+		"alt": {
+			"privacy_policy": "Privacy Policy Link"
 		}
 	},
 	"activity": {
@@ -1229,6 +1574,64 @@
 		"warning": {
 			"no_index_canister": "Transactions for $token_list can not be displayed. No Index canister available.",
 			"unavailable_index_canister": "Transactions for $token_list can not be displayed. Index canister is currently unavailable."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "Earn"
+		},
+		"cards": {
+			"gold_title": "Gold",
+			"gold_description": "GLDT Staking",
+			"stablecoins_title": "Stablecoins",
+			"stablecoins_description": "Coming soon",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"welcome": {
+		"title": "Welcome to $oisy_short!",
+		"subtitle": "Ready to Earn?",
+		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "year",
+			"year_plural": "years",
+			"month": "month",
+			"month_plural": "months",
+			"day": "day",
+			"day_plural": "days",
+			"hour": "hour",
+			"hour_plural": "hours",
+			"minute": "minute",
+			"minute_plural": "minutes",
+			"second": "second",
+			"second_plural": "seconds"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "$oisy_short AI Assistant",
+			"welcome_message": "Hello there! \uD83D\uDC4B I'm OISY, your personal AI concierge. Here's how I can help you:",
+			"action_button_contacts_title": "Show contacts",
+			"action_button_contacts_subtitle": "Display your saved contacts",
+			"action_button_contacts_prompt": "Show me my contacts.",
+			"action_button_send_tokens_title": "Send assets",
+			"action_button_send_tokens_subtitle": "Setup send in few seconds",
+			"action_button_send_tokens_prompt": "I'd like to send tokens.",
+			"select_contact_message": "Select a contact to initiate the sending process:",
+			"send_to_message": "Send to $contact_name ($address_info).",
+			"send_message": "Send message",
+			"send_message_input_placeholder": "What do you want to do?",
+			"send_token_succeeded": "Transaction completed!",
+			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
+			"loading": "Thinking...",
+			"reset_chat_history": "Reset chat history"
+		},
+		"errors": {
+			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
+			"no_response": "Sorry, I didn't get a response from the LLM."
 		}
 	}
 }

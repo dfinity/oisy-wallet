@@ -1,5 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
-DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o target/ .
+OUTDIR="target"
+
+print_help() {
+  cat <<-EOF
+
+	Build the Oisy wallet frontend inside docker. This creates:
+	- A "$OUTDIR" directory in the project directory containing all build artefacts.
+	  Note: If the "$OUTDIR" directory already exists, it will be deleted and replaced.
+
+	EOF
+}
+
+print_docker_help() {
+  cat <<-"EOF"
+	Note: If the docker build fails, it may help to build from a clean cache:
+
+	  ./scripts/docker-build.frontend --no-cache
+
+	EOF
+}
+
+if [[ "${1:-}" == "--help" ]]; then
+  print_help
+
+  print_docker_help
+  exit 0
+fi
+
+rm -fr "$OUTDIR"
+mkdir -p "$OUTDIR"
+
+DOCKER_BUILDKIT=1 docker build -f Dockerfile.frontend --progress=plain --build-arg network=ic -o "$OUTDIR/" . "${@}" || print_docker_help
 echo "BUILD REPORT:"
-cat target/frontend/build-report.txt
+cat "$OUTDIR/frontend/build-report.txt"

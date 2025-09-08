@@ -6,8 +6,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import type { ContactUi } from '$lib/types/contact';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render } from '@testing-library/svelte';
-import { vi } from 'vitest';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('EditContactNameStep', () => {
 	it('should render the add contact step with form and buttons', () => {
@@ -78,7 +77,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the correct contact
-		expect(onAddContact).toHaveBeenCalledTimes(1);
+		expect(onAddContact).toHaveBeenCalledOnce();
 		expect(onAddContact).toHaveBeenCalledWith(expect.objectContaining({ name: 'Test Contact' }));
 	});
 
@@ -97,7 +96,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that addContact was called with the full contact
-		expect(onSaveContact).toHaveBeenCalledTimes(1);
+		expect(onSaveContact).toHaveBeenCalledOnce();
 		expect(onSaveContact).toHaveBeenCalledWith(contact);
 	});
 
@@ -115,7 +114,7 @@ describe('EditContactNameStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(onClose).toHaveBeenCalledTimes(1);
+		expect(onClose).toHaveBeenCalledOnce();
 	});
 
 	it('should update title when contact name changes', async () => {
@@ -123,23 +122,49 @@ describe('EditContactNameStep', () => {
 		const onSaveContact = vi.fn();
 		const onClose = vi.fn();
 
-		const { getByTestId, component } = render(EditContactNameStep, {
+		const { getByTestId, getByLabelText } = render(EditContactNameStep, {
 			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
 		});
 
-		// Initially, the title should be the default
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		const defaultLabel = en.address_book.avatar.default;
 
-		// Enter a name
+		expect(getByLabelText(defaultLabel)).toBeInTheDocument();
+
+		// Type name
 		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
 		await fireEvent.input(nameInput, { target: { value: 'Test Contact' } });
 
-		// Check that the title has been updated
-		expect(component.title).toBe('Test Contact');
+		// Expect aria-label to update
+		await waitFor(() => {
+			expect(
+				getByLabelText(`${en.address_book.avatar.avatar_for} Test Contact`)
+			).toBeInTheDocument();
+		});
 
-		// Empty name should reset to default title
-		await fireEvent.input(nameInput, { target: { value: '  ' } });
+		// Clear the name by actually removing all characters
+		await fireEvent.input(nameInput, { target: { value: '' } });
 
-		expect(component.title).toBe(en.contact.form.add_new_contact);
+		await waitFor(() => {
+			expect(getByLabelText(defaultLabel)).toBeInTheDocument();
+		});
+	});
+
+	it('should trim leading spaces before calling onAddContact', async () => {
+		const onAddContact = vi.fn();
+		const onSaveContact = vi.fn();
+		const onClose = vi.fn();
+
+		const { getByTestId } = render(EditContactNameStep, {
+			props: { onAddContact, onSaveContact, onClose, isNewContact: true }
+		});
+
+		const nameInput = getByTestId(ADDRESS_BOOK_CONTACT_NAME_INPUT);
+		await fireEvent.input(nameInput, { target: { value: '   Test Name' } });
+
+		const saveButton = getByTestId(ADDRESS_BOOK_SAVE_BUTTON);
+		await fireEvent.click(saveButton);
+
+		expect(onAddContact).toHaveBeenCalledOnce();
+		expect(onAddContact).toHaveBeenCalledWith({ name: 'Test Name' }); // No leading space
 	});
 });

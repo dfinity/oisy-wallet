@@ -24,7 +24,7 @@
 
 	<Hr spacing="lg" />
 
-	<Value ref="ethereum-helper-contract" element="div">
+	<Value element="div" ref="ethereum-helper-contract">
 		{#snippet label()}
 			{replacePlaceholders($i18n.receive.ethereum.text.from_network, {
 				$network: $ckEthereumTwinTokenNetwork.name
@@ -45,19 +45,21 @@
 		{/snippet}
 	</Value>
 
-	<div class="flex w-full flex-col gap-3" slot="toolbar">
-		<Button paddingSmall colorStyle="secondary" on:click={() => dispatch('icHowToConvert')}>
-			<span class="text-dark-slate-blue font-bold"
-				>{replacePlaceholders(
-					replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
-					{
-						$token: $ckEthereumTwinToken.symbol,
-						$ckToken: $token.symbol
-					}
-				)}</span
-			>
-		</Button>
+	{#snippet toolbar()}
+		<div class="flex w-full flex-col gap-3">
+			<Button colorStyle="secondary" onclick={() => dispatch('icHowToConvert')} paddingSmall>
+				<span class="text-dark-slate-blue font-bold"
+					>{replacePlaceholders(
+						replaceOisyPlaceholders($i18n.receive.ethereum.text.learn_how_to_convert),
+						{
+							$token: $ckEthereumTwinToken.symbol,
+							$ckToken: $token.symbol
+						}
+					)}</span
+				>
+			</Button>
 
-		<ButtonDone onclick={close} />
-	</div>
+			<ButtonDone onclick={close} />
+		</div>
+	{/snippet}
 </ContentWithToolbar>

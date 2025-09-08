@@ -231,6 +231,31 @@
 				}
 			}
 		},
+		"sol_rpc": {
+			"type": "custom",
+			"build": "scripts/build.sol_rpc.sh",
+			"candid": "target/sol_rpc.did",
+			"wasm": "target/sol_rpc.wasm.gz",
+			"init_arg_file": "target/sol_rpc.arg.did",
+			"shrink": false,
+			"specified_id": "tghme-zyaaa-aaaar-qarca-cai",
+			"remote": {
+				"id": {
+					"ic": "tghme-zyaaa-aaaar-qarca-cai",
+					"beta": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_be_1": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_1": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_2": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_3": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_4": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_5": "tghme-zyaaa-aaaar-qarca-cai",
+					"test_fe_6": "tghme-zyaaa-aaaar-qarca-cai",
+					"audit": "tghme-zyaaa-aaaar-qarca-cai",
+					"staging": "tghme-zyaaa-aaaar-qarca-cai",
+					"e2e": "tghme-zyaaa-aaaar-qarca-cai"
+				}
+			}
+		},
 		"icp_ledger": {
 			"type": "custom",
 			"build": "scripts/build.icp_ledger.sh",
@@ -514,8 +539,8 @@
 		},
 		"rewards": {
 			"type": "custom",
-			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.4/rewards.did",
-			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.4/rewards.wasm.gz",
+			"candid": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.7-api.1/rewards.did",
+			"wasm": "https://github.com/dfinity/oisy-wallet/releases/download/rc0.5.7-api.1/rewards.wasm.gz",
 			"remote": {
 				"id": {
 					"ic": "nynz6-haaaa-aaaan-qzqda-cai",
@@ -530,6 +555,31 @@
 					"test_fe_6": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"e2e": "vi6cu-aiaaa-aaaad-aad7q-cai",
 					"audit": "vi6cu-aiaaa-aaaad-aad7q-cai"
+				}
+			}
+		},
+		"llm": {
+			"type": "custom",
+			"build": "scripts/build.llm.sh",
+			"candid": "target/llm.did",
+			"wasm": "target/llm.wasm.gz",
+			"init_arg_file": "target/llm.arg.did",
+			"specified_id": "w36hm-eqaaa-aaaal-qr76a-cai",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"beta": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"staging": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_be_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_1": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_2": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_3": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_4": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_5": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"test_fe_6": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"e2e": "w36hm-eqaaa-aaaal-qr76a-cai",
+					"audit": "w36hm-eqaaa-aaaal-qr76a-cai"
 				}
 			}
 		}

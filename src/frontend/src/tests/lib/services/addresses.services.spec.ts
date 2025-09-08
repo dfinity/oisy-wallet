@@ -53,11 +53,24 @@ describe('addresses.services', () => {
 			expect(loadEthAddress).not.toHaveBeenCalled();
 			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 		});
+
+		it('should handle empty networkIds array', async () => {
+			const result = await loadAddresses([]);
+
+			expect(result).toEqual({ success: true });
+			expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
+			expect(loadEthAddress).not.toHaveBeenCalled();
+			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('loadIdbAddresses', () => {
 		it('should load IndexedDB addresses for all networks when Solana is enabled', async () => {
-			const result = await loadIdbAddresses();
+			const result = await loadIdbAddresses([
+				BTC_MAINNET_NETWORK_ID,
+				ETHEREUM_NETWORK_ID,
+				SOLANA_MAINNET_NETWORK_ID
+			]);
 
 			expect(result).toEqual({ success: true });
 			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
@@ -72,7 +85,11 @@ describe('addresses.services', () => {
 				err: mockError
 			});
 
-			const result = await loadIdbAddresses();
+			const result = await loadIdbAddresses([
+				BTC_MAINNET_NETWORK_ID,
+				ETHEREUM_NETWORK_ID,
+				SOLANA_MAINNET_NETWORK_ID
+			]);
 
 			expect(result).toEqual({
 				success: false,
@@ -81,6 +98,24 @@ describe('addresses.services', () => {
 			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
 			expect(loadIdbEthAddress).toHaveBeenCalledOnce();
 			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
+		});
+
+		it('should not call load for disabled networks', async () => {
+			const result = await loadIdbAddresses([BTC_MAINNET_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID]);
+
+			expect(result).toEqual({ success: true });
+			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadIdbEthAddress).not.toHaveBeenCalledOnce();
+			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
+		});
+
+		it('should not call any if all networks disabled', async () => {
+			const result = await loadIdbAddresses([]);
+
+			expect(result).toEqual({ success: true });
+			expect(loadIdbBtcAddressMainnet).not.toHaveBeenCalledOnce();
+			expect(loadIdbEthAddress).not.toHaveBeenCalledOnce();
+			expect(loadIdbSolAddressMainnet).not.toHaveBeenCalledOnce();
 		});
 	});
 });

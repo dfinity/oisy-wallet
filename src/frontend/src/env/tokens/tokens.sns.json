@@ -325,7 +325,7 @@
 				"__bigint__": "100000"
 			},
 			"alternativeName": "EstateDAO",
-			"url": "https://wbdy5-yyaaa-aaaap-abysq-cai.icp0.io/"
+			"url": "https://estatedao.org/"
 		}
 	},
 	{
@@ -337,7 +337,7 @@
 			"name": "Motoko",
 			"symbol": "MOTOKO",
 			"fee": {
-				"__bigint__": "10000000"
+				"__bigint__": "1000000"
 			},
 			"alternativeName": "Motoko",
 			"url": "https://2uktw-yiaaa-aaaah-adwxq-cai.icp0.io/"
@@ -411,7 +411,7 @@
 			"name": "Poked",
 			"symbol": "POKED",
 			"fee": {
-				"__bigint__": "100000000000"
+				"__bigint__": "100000000"
 			},
 			"alternativeName": "PokedBots",
 			"url": "https://www.pokedbots.com"
@@ -473,7 +473,7 @@
 			"fee": {
 				"__bigint__": "500000000"
 			},
-			"alternativeName": "Alice",
+			"alternativeName": "Alice Strategy",
 			"url": "https://alice.fun/"
 		}
 	},
@@ -573,7 +573,7 @@
 		"indexCanisterId": "kepm7-ciaaa-aaaaq-aae5a-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "TACO DAO Token",
+			"name": "TACO",
 			"symbol": "TACO",
 			"fee": {
 				"__bigint__": "10000"

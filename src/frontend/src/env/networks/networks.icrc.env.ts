@@ -41,7 +41,12 @@ import { BETA, LOCAL, PROD, STAGING } from '$lib/constants/app.constants';
 import type { CanisterIdText, OptionCanisterIdText } from '$lib/types/canister';
 import type { NetworkEnvironment } from '$lib/types/network';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { nonNullish } from '@dfinity/utils';
+import { last } from '$lib/utils/array.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+
+export const IC_CYCLES_LEDGER_CANISTER_ID =
+	(import.meta.env.VITE_IC_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
+	'um5iw-rqaaa-aaaaq-qaaba-cai';
 
 export const IC_CKBTC_LEDGER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText) ??
@@ -55,12 +60,18 @@ export const IC_CKBTC_MINTER_CANISTER_ID =
 	(import.meta.env.VITE_IC_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText) ??
 	'mqygn-kiaaa-aaaar-qaadq-cai';
 
+export const STAGING_CYCLES_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_STAGING_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
+
 export const STAGING_CKBTC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_INDEX_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_INDEX_CANISTER_ID as OptionCanisterIdText;
 export const STAGING_CKBTC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_STAGING_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
+
+export const LOCAL_CYCLES_LEDGER_CANISTER_ID = import.meta.env
+	.VITE_LOCAL_CYCLES_LEDGER_CANISTER_ID as OptionCanisterIdText;
 
 export const LOCAL_CKBTC_LEDGER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKBTC_LEDGER_CANISTER_ID as OptionCanisterIdText;
@@ -70,6 +81,13 @@ export const LOCAL_CKBTC_INDEX_CANISTER_ID = import.meta.env.VITE_LOCAL_CKBTC_IN
 	| undefined;
 export const LOCAL_CKBTC_MINTER_CANISTER_ID = import.meta.env
 	.VITE_LOCAL_CKBTC_MINTER_CANISTER_ID as OptionCanisterIdText;
+
+export const CYCLES_LEDGER_CANISTER_ID: CanisterIdText =
+	LOCAL && nonNullish(LOCAL_CYCLES_LEDGER_CANISTER_ID)
+		? LOCAL_CYCLES_LEDGER_CANISTER_ID
+		: (STAGING || BETA || PROD) && nonNullish(STAGING_CYCLES_LEDGER_CANISTER_ID)
+			? STAGING_CYCLES_LEDGER_CANISTER_ID
+			: IC_CYCLES_LEDGER_CANISTER_ID;
 
 const CKBTC_LOCAL_DATA: IcCkInterface | undefined =
 	LOCAL &&
@@ -416,75 +434,12 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 
-const BURN_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BURN)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.BURN,
-			position: 12
-		}
-	: undefined;
-
-const POPEYE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.POPEYE)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.POPEYE,
-			position: 13
-		}
-	: undefined;
-
-const CLOUD_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.CLOUD)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.CLOUD,
-			position: 14
-		}
-	: undefined;
-
-const AAA_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.AAA)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.AAA,
-			position: 15
-		}
-	: undefined;
-
 export const GLDT_IC_DATA: IcInterface | undefined = nonNullish(
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT
 )
 	? {
 			...ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT,
 			position: 16
-		}
-	: undefined;
-
-const nICP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.nICP)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.nICP,
-			position: 17
-		}
-	: undefined;
-
-const RUGGY_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.RUGGY)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.RUGGY,
-			position: 18
-		}
-	: undefined;
-
-const NAK_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.NAK)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.NAK,
-			position: 19
-		}
-	: undefined;
-
-const VCHF_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VCHF)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.VCHF,
-			position: 20
-		}
-	: undefined;
-
-const VEUR_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.VEUR)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.VEUR,
-			position: 21
 		}
 	: undefined;
 
@@ -497,17 +452,37 @@ const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
 		}
 	: undefined;
 
-const XP_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.XP)
+const ICONFUCIUS_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.ICONFUCIUS
+)
 	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.XP,
-			position: 24
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.ICONFUCIUS,
+			position: 27
 		}
 	: undefined;
 
-const EXE_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.EXE)
+const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BITCAT)
 	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.EXE,
-			position: 25
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT,
+			position: 30
+		}
+	: undefined;
+
+const FORSETISCN_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.FORSETISCN,
+			position: 31
+		}
+	: undefined;
+
+const ODINDOG_IC_DATA: IcInterface | undefined = nonNullish(
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG
+)
+	? {
+			...ADDITIONAL_ICRC_PRODUCTION_DATA.ODINDOG,
+			position: 34
 		}
 	: undefined;
 
@@ -575,21 +550,17 @@ const ICRC_CK_TOKENS: IcInterface[] = [
 	...(nonNullish(CKXAUT_IC_DATA) ? [CKXAUT_IC_DATA] : [])
 ];
 
-const ADDITIONAL_ICRC_TOKENS: IcInterface[] = [
-	...(nonNullish(BURN_IC_DATA) ? [BURN_IC_DATA] : []),
-	...(nonNullish(POPEYE_IC_DATA) ? [POPEYE_IC_DATA] : []),
-	...(nonNullish(CLOUD_IC_DATA) ? [CLOUD_IC_DATA] : []),
-	...(nonNullish(AAA_IC_DATA) ? [AAA_IC_DATA] : []),
-	...(nonNullish(GLDT_IC_DATA) ? [GLDT_IC_DATA] : []),
-	...(nonNullish(nICP_IC_DATA) ? [nICP_IC_DATA] : []),
-	...(nonNullish(RUGGY_IC_DATA) ? [RUGGY_IC_DATA] : []),
-	...(nonNullish(NAK_IC_DATA) ? [NAK_IC_DATA] : []),
-	...(nonNullish(VCHF_IC_DATA) ? [VCHF_IC_DATA] : []),
-	...(nonNullish(VEUR_IC_DATA) ? [VEUR_IC_DATA] : []),
-	...(nonNullish(GHOSTNODE_IC_DATA) ? [GHOSTNODE_IC_DATA] : []),
-	...(nonNullish(XP_IC_DATA) ? [XP_IC_DATA] : []),
-	...(nonNullish(EXE_IC_DATA) ? [EXE_IC_DATA] : [])
-];
+const POSITION_OFFSET = (last(ICRC_CK_TOKENS) ?? { position: 0 }).position;
+
+const ADDITIONAL_ICRC_TOKENS: IcInterface[] = Object.entries(
+	ADDITIONAL_ICRC_PRODUCTION_DATA ?? {}
+).reduce<IcInterface[]>((acc, [_, data]) => {
+	if (isNullish(data)) {
+		return acc;
+	}
+
+	return [...acc, { ...data, position: POSITION_OFFSET + acc.length + 1 }];
+}, []);
 
 export const ICRC_TOKENS: IcInterface[] = [
 	...PUBLIC_ICRC_TOKENS,
@@ -634,3 +605,15 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 
 export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
+
+export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ICONFUCIUS_IC_DATA?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
+
+export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	BITCAT_IC_DATA?.ledgerCanisterId ?? 'xlwi6-kyaaa-aaaar-qarya-cai';
+
+export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	FORSETISCN_IC_DATA?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
+
+export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ODINDOG_IC_DATA?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';

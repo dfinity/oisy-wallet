@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import AddressForm from '$lib/components/address/AddressForm.svelte';
+	import InputAddressAlias from '$lib/components/address/InputAddressAlias.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -23,6 +23,7 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
+		onQRCodeScan: () => void;
 		isNewAddress: boolean;
 		disabled?: boolean;
 	}
@@ -33,6 +34,7 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
+		onQRCodeScan,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
@@ -62,7 +64,7 @@
 
 	const handleSubmit = (event: Event) => {
 		event.preventDefault();
-		if (!isInvalid) {
+		if (isFormValid && !disabled) {
 			handleSave();
 		}
 	};
@@ -75,12 +77,17 @@
 				: ''
 	);
 
-	let isInvalid = $state(false);
+	let isFormValid = $state(false);
+
+	const focusField = isNewAddress ? 'address' : 'label';
+
+	let originalLabel = $derived(!isNewAddress && nonNullish(address?.label) ? address.label : '');
+	let labelChanged = $derived(isNewAddress ? true : editingAddress.label !== originalLabel);
 </script>
 
-<form onsubmit={handleSubmit} method="POST" class="flex w-full flex-col items-center">
+<form class="flex w-full flex-col items-center" method="POST" onsubmit={handleSubmit}>
 	<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-		<Avatar variant="xl" name={contact.name} />
+		<Avatar name={contact.name} image={contact.image} variant="xl" />
 
 		<div class="text-2xl font-bold text-primary md:text-3xl">
 			{contact.name}
@@ -89,24 +96,30 @@
 		<div class="mt-2 w-full rounded-lg bg-brand-subtle-10 px-3 py-4 text-sm md:px-5 md:text-base">
 			<div class="pb-4 text-xl font-bold">{title}</div>
 
-			<AddressForm
-				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
+			<InputAddressAlias
 				address={addressModel}
-				bind:isInvalid
+				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				{disabled}
+				{focusField}
+				{onQRCodeScan}
+				bind:isValid={isFormValid}
 			/>
 		</div>
-		<ButtonGroup slot="toolbar">
-			<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}></ButtonCancel>
-			<Button
-				colorStyle="primary"
-				disabled={isInvalid}
-				on:click={handleSave}
-				testId={ADDRESS_BOOK_SAVE_BUTTON}
-				loading={disabled}
-			>
-				{$i18n.core.text.save}
-			</Button>
-		</ButtonGroup>
+
+		{#snippet toolbar()}
+			<ButtonGroup>
+				<ButtonCancel {disabled} onclick={onClose} testId={ADDRESS_BOOK_CANCEL_BUTTON}
+				></ButtonCancel>
+				<Button
+					colorStyle="primary"
+					disabled={!isFormValid || (!isNewAddress && !labelChanged)}
+					loading={disabled}
+					onclick={handleSave}
+					testId={ADDRESS_BOOK_SAVE_BUTTON}
+				>
+					{$i18n.core.text.save}
+				</Button>
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

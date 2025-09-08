@@ -1,11 +1,18 @@
+import { USE_NATIVE_CURRENCY_LOCALE } from '$env/currency.env';
 import { ETHEREUM_DEFAULT_DECIMALS } from '$env/tokens/tokens.eth.env';
 import { MILLISECONDS_IN_DAY, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { Currency } from '$lib/enums/currency';
+import { Languages } from '$lib/enums/languages';
 import type { AmountString } from '$lib/types/amount';
-import { nonNullish } from '@dfinity/utils';
+import type { CurrencyExchangeData } from '$lib/types/currency';
+import { getCurrencyDecimalDigits } from '$lib/utils/currency.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { Utils } from 'alchemy-sdk';
+import Decimal from 'decimal.js';
 import type { BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
+const MAX_DEFAULT_DISPLAY_DECIMALS = 8;
 
 interface FormatTokenParams {
 	value: bigint;
@@ -18,16 +25,29 @@ interface FormatTokenParams {
 export const formatToken = ({
 	value,
 	unitName = ETHEREUM_DEFAULT_DECIMALS,
-	displayDecimals = DEFAULT_DISPLAY_DECIMALS,
+	displayDecimals,
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
 	const res = Utils.formatUnits(value, unitName);
-	const formatted = (+res).toLocaleString('en-US', {
-		useGrouping: false,
-		maximumFractionDigits: displayDecimals,
-		minimumFractionDigits: trailingZeros ? displayDecimals : undefined
-	}) as `${number}`;
+
+	const match = res.match(/^0\.0*/);
+	const leadingZeros = match ? match[0].length - 2 : 0;
+
+	if (isNullish(displayDecimals) && leadingZeros >= MAX_DEFAULT_DISPLAY_DECIMALS) {
+		return '< 0.00000001';
+	}
+
+	const maxFractionDigits = Math.min(leadingZeros + 2, MAX_DEFAULT_DISPLAY_DECIMALS);
+	const minFractionDigits = displayDecimals ?? DEFAULT_DISPLAY_DECIMALS;
+
+	const dec = new Decimal(res);
+	const maxDigits =
+		displayDecimals ?? (leadingZeros > 2 ? maxFractionDigits : DEFAULT_DISPLAY_DECIMALS);
+	const decDP = dec.toDecimalPlaces(maxDigits);
+	const minDigits = trailingZeros ? Math.max(minFractionDigits, maxDigits) : undefined;
+
+	const formatted = decDP.toFixed(minDigits) as `${number}`;
 
 	if (trailingZeros) {
 		return formatted;
@@ -68,14 +88,33 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 	hour12: false
 };
 
-export const formatSecondsToDate = (seconds: number): string => {
+export const formatSecondsToDate = ({
+	seconds,
+	language,
+	formatOptions
+}: {
+	seconds: number;
+	language?: Languages;
+	formatOptions?: Intl.DateTimeFormatOptions;
+}): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(
+		language ?? Languages.ENGLISH,
+		nonNullish(formatOptions)
+			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
+			: DATE_TIME_FORMAT_OPTIONS
+	);
 };
 
-export const formatNanosecondsToDate = (nanoseconds: bigint): string => {
+export const formatNanosecondsToDate = ({
+	nanoseconds,
+	language
+}: {
+	nanoseconds: bigint;
+	language?: Languages;
+}): string => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
-	return date.toLocaleDateString('en', DATE_TIME_FORMAT_OPTIONS);
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, DATE_TIME_FORMAT_OPTIONS);
 };
 
 export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
@@ -83,10 +122,11 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 	return date.getTime();
 };
 
-export const formatToShortDateString = (date: Date): string =>
-	date.toLocaleDateString('en', { month: 'long' });
+export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
-const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+const getRelativeTimeFormatter = (language?: Languages) =>
+	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
 
 /** Formats a number of seconds to a normalized date string.
  *
@@ -101,10 +141,12 @@ const relativeTimeFormatter = new Intl.RelativeTimeFormat('en', { numeric: 'auto
  */
 export const formatSecondsToNormalizedDate = ({
 	seconds,
-	currentDate
+	currentDate,
+	language
 }: {
 	seconds: number;
 	currentDate?: Date;
+	language?: Languages;
 }): string => {
 	const date = new Date(seconds * 1000);
 	const today = currentDate ?? new Date();
@@ -116,43 +158,93 @@ export const formatSecondsToNormalizedDate = ({
 
 	if (Math.abs(daysDifference) < 2) {
 		// TODO: When the method is called many times with the same arguments, it is better to create a Intl.DateTimeFormat object and use its format() method, because a DateTimeFormat object remembers the arguments passed to it and may decide to cache a slice of the database, so future format calls can search for localization strings within a more constrained context.
-		return relativeTimeFormatter.format(daysDifference, 'day');
+		return getRelativeTimeFormatter(language).format(daysDifference, 'day');
 	}
 
 	// Same year, return day and month name
 	if (date.getFullYear() === today.getFullYear()) {
-		return date.toLocaleDateString('en', { day: 'numeric', month: 'long' });
+		return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+			day: 'numeric',
+			month: 'long'
+		});
 	}
 
 	// Different year, return day, month, and year
-	return date.toLocaleDateString('en', { day: 'numeric', month: 'long', year: 'numeric' });
+	return date.toLocaleDateString(language ?? Languages.ENGLISH, {
+		day: 'numeric',
+		month: 'long',
+		year: 'numeric'
+	});
 };
 
-export const formatUSD = ({
+export const formatCurrency = ({
 	value,
-	options
+	currency,
+	exchangeRate: { exchangeRateToUsd, currency: exchangeRateCurrency },
+	language,
+	notBelowThreshold = false,
+	hideSymbol = false,
+	normalizeSeparators = false
 }: {
 	value: number;
-	options?: {
-		minFraction?: number;
-		maxFraction?: number;
-		maximumSignificantDigits?: number;
-		symbol?: boolean;
-	};
-}): string => {
-	const {
-		minFraction = 2,
-		maxFraction = 2,
-		maximumSignificantDigits,
-		symbol = true
-	} = options ?? {};
+	currency: Currency;
+	exchangeRate: CurrencyExchangeData;
+	language: Languages;
+	notBelowThreshold?: boolean;
+	hideSymbol?: boolean;
+	normalizeSeparators?: boolean;
+}): string | undefined => {
+	if (currency !== exchangeRateCurrency) {
+		// There could be a case where, after a currency switch, the exchange rate is still the one of the old currency, until the worker updates it
+		return;
+	}
 
-	return new Intl.NumberFormat('en-US', {
-		...(symbol && { style: 'currency', currency: 'USD' }),
-		minimumFractionDigits: minFraction,
-		maximumFractionDigits: maxFraction,
-		...(nonNullish(maximumSignificantDigits) && { maximumSignificantDigits })
-	})
-		.format(value)
-		.replace(/,/g, '’');
+	if (isNullish(exchangeRateToUsd) || exchangeRateToUsd === 0) {
+		// If the exchange rate is not available (probably right after a currency switch), we cannot format the currency
+		return;
+	}
+
+	const locale = USE_NATIVE_CURRENCY_LOCALE[language] ? language : 'en-US';
+
+	const convertedValue = value / exchangeRateToUsd;
+
+	const currencyFormatter = new Intl.NumberFormat(locale, {
+		style: 'currency',
+		currency: currency.toUpperCase(),
+		...(hideSymbol && { currencyDisplay: 'code' })
+	});
+
+	if (notBelowThreshold) {
+		const decimalDigits = getCurrencyDecimalDigits({ currency, language });
+		const minThreshold = 1 / Math.pow(10, decimalDigits);
+
+		if (Math.abs(convertedValue) < minThreshold) {
+			return `< ${currencyFormatter.format(minThreshold)}`;
+		}
+	}
+
+	const formatted = currencyFormatter
+		.format(convertedValue)
+		.replace(hideSymbol ? currency.toUpperCase() : '', '')
+		.trim();
+
+	if (normalizeSeparators) {
+		const parts = currencyFormatter.formatToParts(123456.78);
+		const groupSep = parts.find((p) => p.type === 'group')?.value ?? '';
+		const decimalSep = parts.find((p) => p.type === 'decimal')?.value ?? '.';
+
+		return (
+			formatted
+				// Remove group separators (thousands)
+				.replaceAll(groupSep, '')
+				// Replace decimal separator with '.'
+				.replace(decimalSep, '.')
+		);
+	}
+
+	if (currency === Currency.CHF) {
+		return formatted.replace(/,/g, '’');
+	}
+
+	return formatted;
 };

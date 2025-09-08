@@ -7,7 +7,6 @@
 	import ContactCard from '$lib/components/contact/ContactCard.svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -22,9 +21,10 @@
 	interface Props {
 		onCreateContact?: () => void;
 		onSelectContact: (contact: ContactUi) => void;
+		onClose: () => void;
 	}
 
-	const { onCreateContact, onSelectContact }: Props = $props();
+	const { onCreateContact, onSelectContact, onClose }: Props = $props();
 
 	let inputValue: string = $state('');
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
@@ -41,7 +41,7 @@
 
 <ContentWithToolbar>
 	{#if nonNullish(address)}
-		<AddressCard variant="info" items="center">
+		<AddressCard items="center" variant="info">
 			{#snippet logo()}
 				<AvatarWithBadge {address} badge={{ type: 'addressType', address }} variant="sm" />
 			{/snippet}
@@ -56,11 +56,10 @@
 		{#if nonNullish(onCreateContact)}
 			<span class="flex">
 				<Button
-					link
-					paddingSmall
-					on:click={onCreateContact}
 					ariaLabel={$i18n.address.save.create_contact}
-					><IconPlus /> {$i18n.address.save.create_contact}</Button
+					link
+					onclick={onCreateContact}
+					paddingSmall><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
 			</span>
 		{/if}
@@ -72,20 +71,20 @@
 		<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 		<InputTextWithAction
 			name="search_contacts"
+			autofocus
 			placeholder={$i18n.address_book.text.search_contact}
 			bind:value={inputValue}
-			autofocus
 		/>
 	</div>
 
 	{#if filteredContacts.length > 0}
-		<List styleClass="mt-5" noPadding>
+		<List noPadding styleClass="mt-5">
 			{#each filteredContacts as contact, index (`${index}-${contact.id}`)}
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => onSelectContact(contact)}
 						hideCopyButton
+						onClick={() => onSelectContact(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
 				</ListItem>
@@ -95,7 +94,15 @@
 		<EmptyState title={$i18n.address_book.text.no_contact_found} />
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCloseModal />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<Button
+				colorStyle="secondary-light"
+				fullWidth
+				onclick={() => onClose()}
+				paddingSmall
+				type="button">{$i18n.core.text.close}</Button
+			>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

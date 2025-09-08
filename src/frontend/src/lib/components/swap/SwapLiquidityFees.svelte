@@ -9,16 +9,20 @@
 </script>
 
 <ModalValue labelStyleClass="self-start">
-	<svelte:fragment slot="label">{$i18n.swap.text.included_liquidity_fees}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.swap.text.included_liquidity_fees}
+	{/snippet}
 
-	<div slot="main-value" class="flex flex-col">
-		{#each liquidityFees as { fee, token } (token.id)}
-			<FeeDisplay
-				feeAmount={fee}
-				symbol={getTokenDisplaySymbol(token)}
-				decimals={token.decimals}
-				displayExchangeRate={false}
-			/>
-		{/each}
-	</div>
+	{#snippet mainValue()}
+		<div class="flex flex-col">
+			{#each liquidityFees as { fee, token } (token.id)}
+				<FeeDisplay
+					decimals={token.decimals}
+					displayExchangeRate={false}
+					feeAmount={fee}
+					symbol={getTokenDisplaySymbol(token)}
+				/>
+			{/each}
+		</div>
+	{/snippet}
 </ModalValue>

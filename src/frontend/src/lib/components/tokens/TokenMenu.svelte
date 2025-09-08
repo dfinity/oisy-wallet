@@ -1,6 +1,9 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import type { Snippet } from 'svelte';
+	import { afterNavigate } from '$app/navigation';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
@@ -11,24 +14,40 @@
 		networkICP,
 		networkSolana
 	} from '$lib/derived/network.derived';
-	import { tokenToggleable } from '$lib/derived/token.derived';
+	import { pageToken, pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { token } from '$lib/stores/token.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let testId: string | undefined = undefined;
+	interface Props {
+		testId?: string;
+		children: Snippet;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	const { testId, children }: Props = $props();
+
+	let visible = $state(false);
+	let button = $state<HTMLButtonElement | undefined>();
+	let fromRoute = $state<NavigationTarget | undefined>();
+
+	afterNavigate(({ from }) => {
+		fromRoute = from ?? undefined;
+	});
 
 	const hideModalId = Symbol();
 	const openModalId = Symbol();
 
 	const hideToken = () => {
-		const fn = $networkICP ? modalStore.openIcHideToken : modalStore.openHideToken;
-		fn(hideModalId);
+		const fn = $networkICP
+			? modalStore.openIcHideToken
+			: $networkSolana
+				? modalStore.openSolHideToken
+				: modalStore.openHideToken;
+		fn({
+			id: hideModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};
@@ -43,37 +62,41 @@
 					: $networkSolana
 						? modalStore.openSolToken
 						: () => {};
-		fn(openModalId);
+		fn({
+			id: openModalId,
+			data: fromRoute
+		});
 
 		visible = false;
 	};
 
-	let hideTokenLabel: string;
-	$: hideTokenLabel = replacePlaceholders($i18n.tokens.hide.token, {
-		$token: nonNullish($token) ? getTokenDisplaySymbol($token) : ''
-	});
+	let hideTokenLabel = $derived(
+		replacePlaceholders($i18n.tokens.hide.token, {
+			$token: nonNullish($pageToken) ? getTokenDisplaySymbol($pageToken) : ''
+		})
+	);
 </script>
 
 <button
-	data-tid={`${testId}-button`}
-	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
-	on:click={() => (visible = true)}
+	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	aria-label={$i18n.tokens.alt.context_menu}
+	data-tid={`${testId}-button`}
 	disabled={$erc20UserTokensNotInitialized}
+	onclick={() => (visible = true)}
 >
 	<IconMoreVertical />
 </button>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 	<div class="flex flex-col gap-1">
-		{#if $tokenToggleable}
+		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>
 				{hideTokenLabel}
 			</ButtonMenu>
 		{/if}
 
-		<slot />
+		{@render children()}
 
 		<ButtonMenu ariaLabel={$i18n.tokens.details.title} onclick={openToken}>
 			{$i18n.tokens.details.title}

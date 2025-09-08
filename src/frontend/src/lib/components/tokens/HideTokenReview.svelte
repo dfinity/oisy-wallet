@@ -18,10 +18,10 @@
 <ContentWithToolbar>
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
-			src={$token?.icon}
-			size="xl"
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
+			size="xl"
+			src={$token?.icon}
 		/>
 
 		<p class="text-center font-bold">
@@ -37,12 +37,14 @@
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel onclick={() => dispatch('icCancel')} />
-		<Button on:click={() => dispatch('icHide')}>
-			{$i18n.tokens.hide.confirm}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel onclick={() => dispatch('icCancel')} />
+			<Button onclick={() => dispatch('icHide')}>
+				{$i18n.tokens.hide.confirm}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>
 
 <style lang="scss">

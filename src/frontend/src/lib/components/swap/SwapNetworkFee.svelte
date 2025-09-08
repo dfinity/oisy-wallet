@@ -9,14 +9,18 @@
 </script>
 
 <ModalValue>
-	<svelte:fragment slot="label">{$i18n.swap.text.included_network_fees}</svelte:fragment>
+	{#snippet label()}
+		{$i18n.swap.text.included_network_fees}
+	{/snippet}
 
-	<div slot="main-value" class="flex flex-col">
-		<FeeDisplay
-			feeAmount={networkFee.fee}
-			symbol={getTokenDisplaySymbol(networkFee.token)}
-			decimals={networkFee.token.decimals}
-			displayExchangeRate={false}
-		/>
-	</div>
+	{#snippet mainValue()}
+		<div class="flex flex-col">
+			<FeeDisplay
+				decimals={networkFee.token.decimals}
+				displayExchangeRate={false}
+				feeAmount={networkFee.fee}
+				symbol={getTokenDisplaySymbol(networkFee.token)}
+			/>
+		</div>
+	{/snippet}
 </ModalValue>

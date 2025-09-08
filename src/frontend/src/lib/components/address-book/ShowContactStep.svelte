@@ -30,10 +30,11 @@
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-stretch gap-5">
-	<ContactHeader name={contact.name} onEdit={() => onEdit?.(contact)}></ContactHeader>
+	<ContactHeader name={contact.name} image={contact.image} onEdit={() => onEdit?.(contact)}
+	></ContactHeader>
 
 	{#if hasAddresses}
-		<div>
+		<div class="flex flex-col gap-1">
 			{#each contact.addresses as address, index (index)}
 				<AddressListItem
 					{address}
@@ -52,8 +53,9 @@
 			<Button
 				alignLeft
 				ariaLabel={$i18n.address_book.edit_contact.add_address}
-				colorStyle="tertiary-main-card"
-				on:click={onAddAddress}
+				colorStyle="secondary-light"
+				onclick={onAddAddress}
+				transparent
 			>
 				<IconPlus />
 				{$i18n.address_book.edit_contact.add_address}
@@ -77,11 +79,11 @@
 			</div>
 
 			<Button
-				styleClass="py-1.5"
 				ariaLabel={$i18n.address_book.show_contact.add_address}
 				colorStyle="secondary-light"
+				onclick={onAddAddress}
 				testId={CONTACT_SHOW_ADD_ADDRESS_BUTTON}
-				on:click={onAddAddress}
+				transparent
 			>
 				<IconPlus />
 				{$i18n.address_book.show_contact.add_address}
@@ -89,7 +91,9 @@
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={() => onClose()} testId={CONTACT_SHOW_CLOSE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

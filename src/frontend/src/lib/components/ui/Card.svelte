@@ -1,51 +1,59 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import CardAmount from '$lib/components/ui/CardAmount.svelte';
 	import CardAmountDescription from '$lib/components/ui/CardAmountDescription.svelte';
 
-	export let noMargin = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		icon: Snippet;
+		description?: Snippet;
+		amount?: Snippet;
+		amountDescription?: Snippet;
+		action?: Snippet;
+		children?: Snippet;
+		noMargin?: boolean;
+		testId?: string;
+	}
 
-	let description = false;
-	$: description = nonNullish($$slots.description);
-
-	let amount = true;
-	$: amount = nonNullish($$slots.amount);
-
-	let amountDescription = true;
-	$: amountDescription = nonNullish($$slots.amountDescription);
-
-	let action = true;
-	$: action = nonNullish($$slots.action);
+	let {
+		icon,
+		description,
+		amount,
+		amountDescription,
+		action,
+		children,
+		noMargin = false,
+		testId
+	}: Props = $props();
 </script>
 
 <div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
-	<slot name="icon" />
+	{@render icon()}
 
 	<div class="flex flex-1 flex-col justify-center">
-		<div class="flex gap-1 font-bold leading-5" class:items-center={!description}>
+		<div class="flex gap-1 font-bold leading-5" class:items-center={isNullish(description)}>
 			<span
-				class="clamp-4 inline-flex items-center text-left"
-				style={amount ? 'max-width: 60%' : undefined}><slot /></span
+				style={nonNullish(amount) ? 'max-width: 60%' : undefined}
+				class="clamp-4 inline-flex items-center text-left">{@render children?.()}</span
 			>
 
-			{#if amount}
-				<CardAmount><slot name="amount" /></CardAmount>
+			{#if nonNullish(amount)}
+				<CardAmount>{@render amount()}</CardAmount>
 			{/if}
 		</div>
-		<div class="flex gap-1 text-tertiary" class:items-center={!description}>
+		<div class="flex gap-1 text-tertiary" class:items-center={isNullish(description)}>
 			<span class="inline-flex items-center text-left">
-				<slot name="description" />
+				{@render description?.()}
 			</span>
 
-			{#if amountDescription}
-				<CardAmountDescription><slot name="amountDescription" /></CardAmountDescription>
+			{#if nonNullish(amountDescription)}
+				<CardAmountDescription>{@render amountDescription()}</CardAmountDescription>
 			{/if}
 		</div>
 	</div>
-	{#if action}
+	{#if nonNullish(action)}
 		<div class="flex min-w-14 shrink">
-			<slot name="action" />
+			{@render action()}
 		</div>
 	{/if}
 </div>

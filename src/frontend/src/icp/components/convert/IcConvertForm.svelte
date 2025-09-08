@@ -111,14 +111,14 @@
 </script>
 
 <ConvertForm
+	destinationTokenFee={totalDestinationTokenFee}
+	disabled={invalid}
+	{ethereumEstimateFee}
+	testId={IC_CONVERT_FORM_TEST_ID}
+	totalFee={totalSourceTokenFee}
 	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
-	{ethereumEstimateFee}
-	totalFee={totalSourceTokenFee}
-	destinationTokenFee={totalDestinationTokenFee}
-	disabled={invalid}
-	testId={IC_CONVERT_FORM_TEST_ID}
 >
 	<svelte:fragment slot="message">
 		{#if nonNullish(errorMessage) || nonNullish(infoMessage)}
@@ -131,7 +131,7 @@
 	</svelte:fragment>
 
 	<svelte:fragment slot="destination">
-		<DestinationValue token={$destinationToken} {destination} {isDestinationCustom}>
+		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken}>
 			<button
 				class="text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 				aria-label={$i18n.core.text.change}
@@ -144,12 +144,12 @@
 
 	<IcTokenFees
 		slot="fee"
+		networkId={$destinationToken.network.id}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		bind:totalSourceTokenFee
 		bind:totalDestinationTokenFee
 		bind:ethereumEstimateFee
-		sourceToken={$sourceToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
-		networkId={$destinationToken.network.id}
 	/>
 
 	<slot name="cancel" slot="cancel" />

@@ -23,5 +23,6 @@ export const WSTETH_TOKEN: RequiredErc20Token = {
 	address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
 	exchange: 'erc20',
 	twinTokenSymbol: 'ckWSTETH',
-	groupData: WSTETH_TOKEN_GROUP
+	groupData: WSTETH_TOKEN_GROUP,
+	alwaysShowInTokenGroup: true
 };

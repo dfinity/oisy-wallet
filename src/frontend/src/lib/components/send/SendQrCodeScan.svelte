@@ -1,50 +1,45 @@
 <script lang="ts">
-	import { QRCodeReader } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let expectedToken: OptionToken;
-	export let destination: string | undefined;
-	export let amount: OptionAmount;
-	export let decodeQrCode: ({
-		status,
-		code,
-		expectedToken
-	}: {
-		status: QrStatus;
-		code?: string;
+	interface Props {
 		expectedToken: OptionToken;
-	}) => QrResponse;
+		destination: string | undefined;
+		amount: OptionAmount;
+		onDecodeQrCode: ({
+			status,
+			code,
+			expectedToken
+		}: {
+			status: QrStatus;
+			code?: string;
+			expectedToken: OptionToken;
+		}) => QrResponse;
+		onIcQrCodeBack: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		expectedToken,
+		destination = $bindable(),
+		amount = $bindable(),
+		onDecodeQrCode,
+		onIcQrCodeBack
+	}: Props = $props();
 
-	let resolveQrCodePromise:
-		| (({ status, code }: { status: QrStatus; code?: string }) => void)
-		| undefined = undefined;
-
-	onMount(async () => {
-		await scanQrCode();
-	});
-
-	const scanQrCode = async () => {
-		const result = await new Promise<{ status: QrStatus; code?: string | undefined }>((resolve) => {
-			resolveQrCodePromise = resolve;
-		});
-
-		const { status, code } = result;
-
-		const qrResponse = decodeQrCode({ status, code, expectedToken });
+	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
+		const qrResponse = onDecodeQrCode({ status, code, expectedToken });
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			back();
+			onIcQrCodeBack();
 			return;
 		}
 
@@ -56,35 +51,16 @@
 			({ amount } = qrResponse);
 		}
 
-		back();
-	};
-
-	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
-		resolveQrCodePromise?.({ status: 'success', code });
-		resolveQrCodePromise = undefined;
-	};
-
-	const onCancel = () => {
-		resolveQrCodePromise?.({ status: 'cancelled' });
-		resolveQrCodePromise = undefined;
-	};
-
-	const back = () => {
-		dispatch('icQRCodeBack');
+		onIcQrCodeBack();
 	};
 </script>
 
-<div class="stretch qr-code-wrapper md:min-h-[300px]">
-	<QRCodeReader on:nnsCancel={onCancel} on:nnsQRCode={onQRCode} />
-</div>
+<ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
+	<QrCodeScanner onBack={onIcQrCodeBack} {onScan} />
 
-<ButtonGroup>
-	<ButtonBack onclick={back} />
-</ButtonGroup>
-
-<style lang="scss">
-	.qr-code-wrapper {
-		--primary-rgb: 50, 20, 105;
-		color: rgba(var(--primary-rgb), 0.6);
-	}
-</style>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonBack onclick={onIcQrCodeBack} />
+		</ButtonGroup>
+	{/snippet}
+</ContentWithToolbar>

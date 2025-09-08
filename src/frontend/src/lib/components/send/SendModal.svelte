@@ -17,7 +17,6 @@
 		ethAddressNotLoaded,
 		btcAddressRegtestNotLoaded,
 		btcAddressTestnetNotLoaded,
-		solAddressTestnetNotLoaded,
 		solAddressLocalnetNotLoaded,
 		solAddressDevnetNotLoaded,
 		solAddressMainnetNotLoaded
@@ -48,8 +47,7 @@
 		isNetworkIdBTCRegtest,
 		isNetworkIdSOLMainnet,
 		isNetworkIdSOLDevnet,
-		isNetworkIdSOLLocal,
-		isNetworkIdSOLTestnet
+		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
@@ -62,13 +60,13 @@
 	let amount: number | undefined = undefined;
 	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
 
-	let steps: WizardSteps;
+	let steps: WizardSteps<WizardStepsSend>;
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: allSendWizardSteps({ i18n: $i18n });
 
-	let currentStep: WizardStep | undefined;
-	let modal: WizardModal;
+	let currentStep: WizardStep<WizardStepsSend> | undefined;
+	let modal: WizardModal<WizardStepsSend>;
 
 	const dispatch = createEventDispatcher();
 
@@ -114,9 +112,7 @@
 								? $solAddressDevnetNotLoaded
 								: isNetworkIdSOLLocal(id)
 									? $solAddressLocalnetNotLoaded
-									: isNetworkIdSOLTestnet(id)
-										? $solAddressTestnetNotLoaded
-										: false;
+									: false;
 
 	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
 		if (isDisabled(token)) {
@@ -129,8 +125,6 @@
 
 		// eslint-disable-next-line require-await
 		const callback = async () => {
-			reset();
-
 			goToStep(WizardStepsSend.DESTINATION);
 		};
 
@@ -171,15 +165,15 @@
 
 <SendTokenContext token={$token}>
 	<WizardModal
-		{steps}
-		bind:currentStep
 		bind:this={modal}
-		on:nnsClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
 			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+		onClose={close}
+		{steps}
 		testId={SEND_TOKENS_MODAL}
+		bind:currentStep
 	>
-		<svelte:fragment slot="title">{currentStep?.title ?? ''}</svelte:fragment>
+		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList
@@ -190,10 +184,10 @@
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 			<SendDestinationWizardStep
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
 				on:icClose={close}
@@ -202,10 +196,10 @@
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$token}
+				{onDecodeQrCode}
+				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 				bind:destination
 				bind:amount
-				decodeQrCode={onDecodeQrCode}
-				on:icQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 			/>
 		{:else}
 			<SendWizard

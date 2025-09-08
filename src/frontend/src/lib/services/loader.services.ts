@@ -1,6 +1,8 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -17,8 +19,32 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
+
+/**
+ * Retrieves and checks if the required number of cycles are available for the user.
+ *
+ * This asynchronous function verifies whether the user has sufficient cycles to proceed with further operations.
+ * It retrieves the user's identity and calculates the number of allowed cycles. If the number of allowed cycles
+ * meets or exceeds the defined threshold (`POW_MIN_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
+ * it performs necessary error handling and signs the user out in the event of insufficient cycles or any other
+ * encountered error.
+ *
+ * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
+ * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
+ */
+export const handleInsufficientCycles = async (): Promise<boolean> => {
+	try {
+		const { identity } = get(authStore);
+		assertNonNullish(identity, 'Cannot continue without an identity.');
+		return await hasRequiredCycles({ identity });
+	} catch (_err: unknown) {
+		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
+		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+	}
+	return false;
+};
 
 /**
  * Initializes the signer allowance by calling `allow_signing`.
@@ -47,7 +73,6 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 
 		return { success: false };
 	}
-
 	return { success: true };
 };
 
@@ -96,7 +121,14 @@ export const initLoader = async ({
 		return;
 	}
 
-	const { success: addressIdbSuccess, err } = await loadIdbAddresses();
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	const enabledNetworkIds: NetworkId[] = [
+		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
+		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
+		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
+	];
+
+	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
 
 	if (addressIdbSuccess) {
 		loading.set(false);
@@ -111,21 +143,19 @@ export const initLoader = async ({
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
 
-	const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+	if (FRONTEND_DERIVATION_ENABLED) {
+		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+		initSignerAllowance();
+	} else {
+		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-	if (!initSignerAllowanceSuccess) {
-		// Sign-out is handled within the service.
-		return;
+		if (!initSignerAllowanceSuccess) {
+			// Sign-out is handled within the service.
+			return;
+		}
 	}
 
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
-
-	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
-	const enabledNetworkIds: NetworkId[] = [
-		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
-		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
-		...(get(networkSolanaMainnetEnabled) ? [SOLANA_MAINNET_NETWORK_ID] : [])
-	];
 
 	// We don't need to load the addresses of the disabled networks.
 	const networkIds: NetworkId[] = errorNetworkIds.filter((networkId) =>

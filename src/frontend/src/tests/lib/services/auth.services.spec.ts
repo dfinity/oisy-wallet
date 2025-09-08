@@ -1,16 +1,11 @@
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
+import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
+vi.mock('$lib/utils/idb.utils', () => ({
+	delMultiKeysByPrincipal: vi.fn()
 }));
 
 const rootLocation = 'https://oisy.com/';
@@ -73,7 +68,7 @@ describe('auth.services', () => {
 			expect(sessionStorage.getItem('key')).toBeNull();
 		});
 
-		it('should clean the IDB storage', async () => {
+		it('should clean the IDB storage for the current principal', async () => {
 			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
 				fn({ identity: mockIdentity });
 				return () => {};
@@ -81,8 +76,18 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// addresses + tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(6);
+			// 3 addresses + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+
+			// 4 transactions + 1 balances
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
+		});
+
+		it('should clean the IDB storage for all principals', async () => {
+			await signOut({ clearAllPrincipalsStorages: true });
+
+			// 3 addresses + 1(+1) tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(10);
 		});
 	});
 });

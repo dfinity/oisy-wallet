@@ -22,7 +22,7 @@
 		<span>{$i18n.address_book.text.empty_text}</span>
 	</div>
 
-	<Button on:click={() => onAddContact()} testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}>
+	<Button onclick={() => onAddContact()} testId={ADDRESS_BOOK_ADD_CONTACT_BUTTON}>
 		{$i18n.address_book.text.add_new_contact}
 		<IconCircleArrowRight />
 	</Button>

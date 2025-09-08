@@ -4,5 +4,6 @@ export enum RewardCriterionType {
 	MIN_REFERRALS = 'min_referrals',
 	MIN_LOGINS = 'min_logins',
 	MIN_TOTAL_ASSETS_USD = 'min_total_assets_usd',
-	MIN_TOKENS = 'min_tokens'
+	MIN_TOKENS = 'min_tokens',
+	HANGOVER = 'hangover'
 }

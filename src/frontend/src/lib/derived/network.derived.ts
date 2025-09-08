@@ -5,6 +5,7 @@ import { networks } from '$lib/derived/networks.derived';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
+	isNetworkIdArbitrum,
 	isNetworkIdBase,
 	isNetworkIdBitcoin,
 	isNetworkIdBsc,
@@ -12,7 +13,8 @@ import {
 	isNetworkIdEvm,
 	isNetworkIdICP,
 	isNetworkIdPolygon,
-	isNetworkIdSolana
+	isNetworkIdSolana,
+	isPseudoNetworkIdIcpTestnet
 } from '$lib/utils/network.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -28,6 +30,10 @@ export const networkId: Readable<NetworkId | undefined> = derived(
 export const selectedNetwork: Readable<Network | undefined> = derived(
 	[networks, networkId],
 	([$networks, $networkId]) => $networks.find(({ id }) => id === $networkId)
+);
+
+export const pseudoNetworkICPTestnet: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isPseudoNetworkIdIcpTestnet($networkId)
 );
 
 export const networkICP: Readable<boolean> = derived([networkId], ([$networkId]) =>
@@ -56,6 +62,10 @@ export const networkBsc: Readable<boolean> = derived([networkId], ([$networkId])
 
 export const networkPolygon: Readable<boolean> = derived([networkId], ([$networkId]) =>
 	isNetworkIdPolygon($networkId)
+);
+
+export const networkArbitrum: Readable<boolean> = derived([networkId], ([$networkId]) =>
+	isNetworkIdArbitrum($networkId)
 );
 
 export const networkSolana: Readable<boolean> = derived([networkId], ([$networkId]) =>

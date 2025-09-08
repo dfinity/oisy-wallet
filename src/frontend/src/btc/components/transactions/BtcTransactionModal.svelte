@@ -7,13 +7,15 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -47,6 +49,13 @@
 	let fromExplorerUrl: string | undefined = $derived(
 		nonNullish(explorerUrl) && nonNullish(from) ? `${explorerUrl}/address/${from}` : undefined
 	);
+
+	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
+		modalStore.openBtcTransaction({
+			id: Symbol(),
+			data: data as OpenTransactionParams<BtcTransactionUi>
+		});
+	};
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
@@ -56,7 +65,7 @@
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
@@ -82,11 +91,12 @@
 		{#if nonNullish(to) && nonNullish(from)}
 			{#each to as address, index (`${address}-${index}`)}
 				<TransactionContactCard
-					type={type === 'receive' ? 'receive' : 'send'}
-					to={address}
 					{from}
-					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
 					{fromExplorerUrl}
+					{onSaveAddressComplete}
+					to={address}
+					toExplorerUrl={nonNullish(explorerUrl) ? `${explorerUrl}/address/${address}` : undefined}
+					type={type === 'receive' ? 'receive' : 'send'}
 				/>
 			{/each}
 		{/if}
@@ -101,13 +111,13 @@
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={id}
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: id
 							})}
-							explorerUrl={txExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+							externalLink={txExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
 					</span>
 				</ListItem>
@@ -147,7 +157,12 @@
 						{$i18n.transaction.text.timestamp}
 					</span>
 
-					<output>{formatSecondsToDate(Number(timestamp))}</output>
+					<output
+						>{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage
+						})}</output
+					>
 				</ListItem>
 			{/if}
 
@@ -167,6 +182,8 @@
 			{/if}
 		</List>
 
-		<ButtonCloseModal slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

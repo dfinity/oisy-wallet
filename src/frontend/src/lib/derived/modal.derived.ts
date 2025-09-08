@@ -1,9 +1,11 @@
-import type { RewardDescription } from '$env/types/env-reward';
+import type { RewardCampaignDescription } from '$env/types/env-reward';
 import type { QrCodeType } from '$lib/enums/qr-code-types';
 import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
-import type { VipRewardStateData } from '$lib/types/reward';
+import type { Nft, NftCollection } from '$lib/types/nft';
+import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
 export const modalEthReceive: Readable<boolean> = derived(
@@ -103,9 +105,28 @@ export const modalHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'hide-token'
 );
+export const modalHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalIcHideToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-hide-token'
+);
+export const modalIcHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'ic-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
+export const modalSolHideToken: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'sol-hide-token'
+);
+export const modalSolHideTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'sol-hide-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalBtcTransaction: Readable<boolean> = derived(
 	modalStore,
@@ -119,17 +140,37 @@ export const modalEthToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'eth-token'
 );
+export const modalEthTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'eth-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalBtcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'btc-token'
+);
+export const modalBtcTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'btc-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalIcToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'ic-token'
 );
+export const modalIcTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'ic-token' ? ($modalStore?.data as NavigationTarget) : undefined
+);
 export const modalSolToken: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'sol-token'
+);
+export const modalSolTokenData: Readable<NavigationTarget | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'sol-token' ? ($modalStore?.data as NavigationTarget) : undefined
 );
 export const modalReceiveBitcoin: Readable<boolean> = derived(
 	modalStore,
@@ -152,10 +193,6 @@ export const modalReferralCode: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'referral-code'
 );
-export const modalReferralState: Readable<boolean> = derived(
-	modalStore,
-	($modalStore) => $modalStore?.type === 'referral-state'
-);
 export const modalAddressBook: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'address-book'
@@ -177,19 +214,26 @@ export const modalRewardDetails: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-details'
 );
-export const modalRewardDetailsData: Readable<RewardDescription | undefined> = derived(
+export const modalRewardDetailsData: Readable<RewardCampaignDescription | undefined> = derived(
 	modalStore,
 	($modalStore) =>
-		$modalStore?.type === 'reward-details' ? ($modalStore?.data as RewardDescription) : undefined
+		$modalStore?.type === 'reward-details'
+			? ($modalStore?.data as RewardCampaignDescription)
+			: undefined
 );
 export const modalRewardState: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'reward-state'
 );
-export const modalRewardStateData: Readable<boolean | undefined> = derived(
+export const modalRewardStateData: Readable<RewardStateData | undefined> = derived(
 	modalStore,
 	($modalStore) =>
-		$modalStore?.type === 'reward-state' ? ($modalStore?.data as boolean) : undefined
+		$modalStore?.type === 'reward-state' ? ($modalStore?.data as RewardStateData) : undefined
+);
+
+export const modalWelcome: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'welcome'
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(
@@ -214,4 +258,24 @@ export const modalAuthHelp: Readable<boolean> = derived(
 export const modalAuthHelpData: Readable<boolean | undefined> = derived(
 	modalStore,
 	($modalStore) => ($modalStore?.type === 'auth-help' ? ($modalStore?.data as boolean) : undefined)
+);
+
+export const modalNftImageConsent: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'nft-image-consent'
+);
+export const modalNftImageConsentData: Readable<NftCollection | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'nft-image-consent' ? ($modalStore?.data as NftCollection) : undefined
+);
+
+export const modalNftFullscreenDisplayOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'nft-fullscreen-display'
+);
+export const modalNftFullscreenDisplayData: Readable<Nft | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'nft-fullscreen-display' ? ($modalStore?.data as Nft) : undefined
 );

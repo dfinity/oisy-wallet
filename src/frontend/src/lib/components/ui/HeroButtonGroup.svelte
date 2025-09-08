@@ -1,3 +1,13 @@
-<div role="toolbar" class="flex flex-1 flex-row justify-between gap-2">
-	<slot />
+<script lang="ts">
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
+</script>
+
+<div class="flex w-full justify-between gap-2" role="toolbar">
+	{@render children()}
 </div>

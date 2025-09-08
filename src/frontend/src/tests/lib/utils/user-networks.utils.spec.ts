@@ -19,7 +19,7 @@ describe('user-networks.utils', () => {
 
 			expect(mapUserNetworks(userNetworks)).toEqual(mockUserNetworksMap);
 
-			expect(console.warn).toHaveBeenCalledTimes(1);
+			expect(console.warn).toHaveBeenCalledOnce();
 			expect(console.warn).toHaveBeenNthCalledWith(
 				1,
 				`Unknown networkId: ${unknownNetworkId.description}`

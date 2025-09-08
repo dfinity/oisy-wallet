@@ -1,3 +1,5 @@
+use std::{cell::RefCell, time::Duration};
+
 use bitcoin_utils::estimate_fee;
 use candid::{candid_method, Principal};
 use config::find_credential_config;
@@ -19,33 +21,35 @@ use shared::{
     metrics::get_metrics,
     std_canister_status,
     types::{
+        agreement::UpdateUserAgreementsRequest,
         backend_config::{Arg, Config, InitArg},
         bitcoin::{
             BtcAddPendingTransactionError, BtcAddPendingTransactionRequest,
+            BtcGetFeePercentilesRequest, BtcGetFeePercentilesResponse,
             BtcGetPendingTransactionsError, BtcGetPendingTransactionsReponse,
             BtcGetPendingTransactionsRequest, PendingTransaction, SelectedUtxosFeeError,
             SelectedUtxosFeeRequest, SelectedUtxosFeeResponse,
         },
-        contact::{Contact, CreateContactRequest, UpdateContactRequest},
+        contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
-        network::{SaveNetworksSettingsError, SaveNetworksSettingsRequest, SetShowTestnetsRequest},
+        network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
             CYCLES_PER_DIFFICULTY, POW_ENABLED,
         },
         result_types::{
             AddUserCredentialResult, AddUserHiddenDappIdResult, AllowSigningResult,
-            BtcAddPendingTransactionResult, BtcGetPendingTransactionsResult,
-            BtcSelectUserUtxosFeeResult, CreateContactResult, CreatePowChallengeResult,
-            DeleteContactResult, GetAllowedCyclesResult, GetContactResult, GetContactsResult,
-            GetUserProfileResult, SetUserShowTestnetsResult, UpdateContactResult,
+            BtcAddPendingTransactionResult, BtcGetFeePercentilesResult,
+            BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
+            CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
+            GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
+            UpdateContactResult, UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
             AllowSigningRequest, AllowSigningResponse, GetAllowedCyclesResponse,
         },
-        snapshot::UserSnapshot,
         token::{UserToken, UserTokenId},
         user_profile::{
             AddUserCredentialError, AddUserCredentialRequest, HasUserProfileResponse, UserProfile,
@@ -54,7 +58,6 @@ use shared::{
     },
 };
 use signer::{btc_principal_to_p2wpkh_address, AllowSigningError};
-use std::{cell::RefCell, time::Duration};
 use types::{
     Candid, ConfigCell, CustomTokenMap, StoredPrincipal, UserProfileMap, UserProfileUpdatedMap,
     UserTokenMap,
@@ -64,10 +67,13 @@ use user_profile_model::UserProfileModel;
 
 use crate::{
     assertions::assert_token_enabled_is_some,
+    bitcoin_api::get_current_fee_percentiles,
     guards::{caller_is_allowed, caller_is_controller, caller_is_not_anonymous},
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
-    user_profile::{add_hidden_dapp_id, set_show_testnets, update_network_settings},
+    user_profile::{
+        add_hidden_dapp_id, set_show_testnets, update_agreements, update_network_settings,
+    },
 };
 
 mod assertions;
@@ -197,6 +203,10 @@ pub fn init(arg: Arg) {
         Arg::Init(arg) => set_config(arg),
         Arg::Upgrade => ic_cdk::trap("upgrade args in init"),
     }
+
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -217,6 +227,9 @@ pub fn post_upgrade(arg: Option<Arg>) {
             });
         }
     }
+    // Initialize the Bitcoin fee percentiles cache
+    bitcoin_api::init_fee_percentiles_cache();
+
     start_periodic_housekeeping_timers();
 }
 
@@ -321,7 +334,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
-/// Add, remove or update custom token for the user.
+/// Add or update custom token for the user.
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
@@ -349,6 +362,21 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
     });
 }
 
+/// Remove custom token for the user.
+#[update(guard = "caller_is_not_anonymous")]
+#[allow(clippy::needless_pass_by_value)]
+pub fn remove_custom_token(token: CustomToken) {
+    let stored_principal = StoredPrincipal(ic_cdk::caller());
+
+    mutate_state(|s| {
+        let find = |t: &CustomToken| -> bool {
+            CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
+        };
+
+        remove_from_user_token(stored_principal, &mut s.custom_token, &find);
+    });
+}
+
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
@@ -357,6 +385,34 @@ pub fn list_custom_tokens() -> Vec<CustomToken> {
 }
 
 const MIN_CONFIRMATIONS_ACCEPTED_BTC_TX: u32 = 6;
+
+/// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+/// for the specified network. Fee percentiles are measured in millisatoshi per byte
+/// and are periodically updated in the background.
+///
+/// # Returns
+/// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+/// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+///
+/// # Errors
+/// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+///
+/// # Note
+/// This function only returns data from the in-memory cache and doesn't make any calls
+/// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+/// an error is returned rather than fetching fresh data.
+#[query(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub async fn btc_get_current_fee_percentiles(
+    params: BtcGetFeePercentilesRequest,
+) -> BtcGetFeePercentilesResult {
+    match get_current_fee_percentiles(params.network).await {
+        Ok(fee_percentiles) => Ok(BtcGetFeePercentilesResponse { fee_percentiles }).into(),
+        Err(err) => {
+            BtcGetFeePercentilesResult::Err(SelectedUtxosFeeError::InternalError { msg: err })
+        }
+    }
+}
 
 /// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
 ///
@@ -567,10 +623,11 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 /// # Errors
 /// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 #[update(guard = "caller_is_not_anonymous")]
+#[must_use]
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
-) -> Result<(), SaveNetworksSettingsError> {
-    let user_principal = ic_cdk::api::msg_caller();
+) -> UpdateUserNetworkSettingsResult {
+    let user_principal = ic_cdk::caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -583,6 +640,7 @@ pub fn update_user_network_settings(
             &mut user_profile_model,
         )
     })
+    .into()
 }
 
 /// Sets the user's preference to show (or hide) testnets in the interface.
@@ -645,7 +703,36 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
     inner(request).into()
 }
 
-/// It create a new user profile for the caller.
+/// Updates the user's agreements, merging with any existing ones.
+/// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+/// set to `now`.
+///
+/// # Returns
+/// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+///   same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_agreements(
+            stored_principal,
+            request.current_user_version,
+            request.agreements,
+            &mut user_profile_model,
+        )
+    })
+    .into()
+}
+
+/// It creates a new user profile for the caller.
 /// If the user has already a profile, it will return that profile.
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
@@ -781,10 +868,6 @@ pub async fn get_allowed_cycles() -> GetAllowedCyclesResult {
 /// # Errors
 /// Errors are enumerated by: `AllowSigningError`.
 #[update(guard = "caller_is_not_anonymous")]
-pub async fn allow_signing(
-    request: Option<AllowSigningRequest>,
-) -> Result<AllowSigningResponse, AllowSigningError> {
-    let principal = ic_cdk::api::msg_caller();
 pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigningResult {
     async fn inner(
         request: Option<AllowSigningRequest>,
@@ -865,19 +948,6 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     })
 }
 
-/// Saves a snapshot of the user's account.
-#[update(guard = "caller_is_not_anonymous")]
-#[allow(clippy::needless_pass_by_value)] // Canister API methods are always pass by value.
-pub fn set_snapshot(snapshot: UserSnapshot) {
-    todo!("TODO: Set snapshot to: {:?}", snapshot);
-}
-/// Gets the caller's last snapshot.
-#[query(guard = "caller_is_not_anonymous")]
-#[must_use]
-pub fn get_snapshot() -> Option<UserSnapshot> {
-    todo!()
-}
-
 /// Creates a new contact for the caller.
 ///
 /// # Errors
@@ -902,14 +972,7 @@ pub async fn create_contact(request: CreateContactRequest) -> CreateContactResul
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_contact(request: UpdateContactRequest) -> UpdateContactResult {
-    let contact = Contact {
-        id: request.id,
-        name: request.name,
-        addresses: request.addresses,
-        update_timestamp_ns: request.update_timestamp_ns,
-    };
-
-    let result = contacts::update_contact(contact);
+    let result = contacts::update_contact(request);
     result.into()
 }
 
@@ -934,7 +997,7 @@ pub fn delete_contact(contact_id: u64) -> DeleteContactResult {
 /// # Returns
 /// * `Ok(GetContactResult)` - The requested contact if found
 /// # Errors
-/// * `ContactNotFound` - If no contact for the proivided contact_id could be found
+/// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_contact(contact_id: u64) -> GetContactResult {

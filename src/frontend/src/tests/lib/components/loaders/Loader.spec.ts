@@ -3,7 +3,14 @@ import {
 	loadBtcAddressRegtest,
 	loadBtcAddressTestnet
 } from '$btc/services/btc-address.services';
+import * as erc1155Derived from '$eth/derived/erc1155.derived';
+import * as erc20Derived from '$eth/derived/erc20.derived';
+import * as erc721Derived from '$eth/derived/erc721.derived';
+import { loadErc1155Tokens } from '$eth/services/erc1155.services';
+import { loadErc20Tokens } from '$eth/services/erc20.services';
+import { loadErc721Tokens } from '$eth/services/erc721.services';
 import { loadEthAddress } from '$eth/services/eth-address.services';
+import { loadIcrcTokens } from '$icp/services/icrc.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
 import * as appContants from '$lib/constants/app.constants';
 import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
@@ -15,22 +22,24 @@ import {
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
-	solAddressMainnetStore,
-	solAddressTestnetStore
+	solAddressMainnetStore
 } from '$lib/stores/address.store';
 import { loading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as splDerived from '$sol/derived/spl.derived';
 import {
 	loadSolAddressDevnet,
 	loadSolAddressLocal,
-	loadSolAddressMainnet,
-	loadSolAddressTestnet
+	loadSolAddressMainnet
 } from '$sol/services/sol-address.services';
+import { loadSplTokens } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mocks';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -41,7 +50,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
 	const mod = await vi.importActual<object>('@dfinity/utils');
@@ -87,10 +96,6 @@ vi.mock('$sol/services/sol-address.services', () => ({
 		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
 	}),
-	loadSolAddressTestnet: vi.fn(() => {
-		solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
 	loadSolAddressDevnet: vi.fn(() => {
 		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 		return Promise.resolve({ success: true });
@@ -101,11 +106,19 @@ vi.mock('$sol/services/sol-address.services', () => ({
 	})
 }));
 
-vi.mock('$lib/services/erc20.services', () => ({
+vi.mock('$eth/services/erc20.services', () => ({
 	loadErc20Tokens: vi.fn(() => Promise.resolve())
 }));
 
-vi.mock('$lib/services/icrc.services', () => ({
+vi.mock('$eth/services/erc721.services', () => ({
+	loadErc721Tokens: vi.fn(() => Promise.resolve())
+}));
+
+vi.mock('$eth/services/erc1155.services', () => ({
+	loadErc1155Tokens: vi.fn(() => Promise.resolve())
+}));
+
+vi.mock('$icp/services/icrc.services', () => ({
 	loadIcrcTokens: vi.fn(() => Promise.resolve())
 }));
 
@@ -114,6 +127,8 @@ vi.mock('$sol/services/spl.services', () => ({
 }));
 
 describe('Loader', () => {
+	const mockSnippet = createMockSnippet('Mock Snippet');
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -124,7 +139,7 @@ describe('Loader', () => {
 	});
 
 	it('should not render modal if not loading', async () => {
-		const { queryByTestId } = render(Loader);
+		const { queryByTestId } = render(Loader, { children: mockSnippet });
 
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
@@ -134,7 +149,7 @@ describe('Loader', () => {
 	});
 
 	it('should initialize the user profile and the mainnet addresses', async () => {
-		render(Loader);
+		render(Loader, { children: mockSnippet });
 
 		await waitFor(() => {
 			expect(initLoader).toHaveBeenCalledOnce();
@@ -153,7 +168,7 @@ describe('Loader', () => {
 		});
 
 		it('should render modal', async () => {
-			const { getByTestId } = render(Loader);
+			const { getByTestId } = render(Loader, { children: mockSnippet });
 
 			await waitFor(() => {
 				expect(getByTestId(LOADER_MODAL)).toBeInTheDocument();
@@ -161,7 +176,7 @@ describe('Loader', () => {
 		});
 
 		it('should render the banner image', async () => {
-			const { getByAltText } = render(Loader);
+			const { getByAltText } = render(Loader, { children: mockSnippet });
 
 			const altText = replacePlaceholders(replaceOisyPlaceholders(en.init.alt.loader_banner), {
 				$theme: 'light'
@@ -180,7 +195,7 @@ describe('Loader', () => {
 
 			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
-			render(Loader);
+			render(Loader, { children: mockSnippet });
 
 			await waitFor(() => {
 				expect(loadEthAddress).not.toHaveBeenCalled();
@@ -188,7 +203,6 @@ describe('Loader', () => {
 				expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 
 				expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-				expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 				expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 
 				expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
@@ -212,7 +226,6 @@ describe('Loader', () => {
 			btcAddressRegtestStore.reset();
 
 			solAddressMainnetStore.reset();
-			solAddressTestnetStore.reset();
 			solAddressDevnetStore.reset();
 			solAddressLocalnetStore.reset();
 		});
@@ -227,7 +240,7 @@ describe('Loader', () => {
 			it('should call only mainnet loaders if addresses are not loaded yet', async () => {
 				setupTestnetsStore('disabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -239,7 +252,6 @@ describe('Loader', () => {
 					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
 
 					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -249,7 +261,7 @@ describe('Loader', () => {
 				btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
 				solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -265,7 +277,7 @@ describe('Loader', () => {
 			it('should call loaders only for the enabled mainnet networks', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				userProfileStore.set({
 					certified: false,
@@ -275,7 +287,6 @@ describe('Loader', () => {
 							...mockUserSettings,
 							networks: {
 								...mockNetworksSettings,
-								testnets: { show_testnets: true },
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
@@ -302,7 +313,7 @@ describe('Loader', () => {
 			it('should call loaders only for the enabled networks', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				userProfileStore.set({
 					certified: false,
@@ -312,11 +323,9 @@ describe('Loader', () => {
 							...mockUserSettings,
 							networks: {
 								...mockNetworksSettings,
-								testnets: { show_testnets: true },
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],
-									[{ SolanaTestnet: null }, { enabled: true, is_testnet: true }],
 									[{ SolanaDevnet: null }, { enabled: false, is_testnet: true }]
 								]
 							}
@@ -327,7 +336,6 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
 					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -335,14 +343,13 @@ describe('Loader', () => {
 			it('should call testnet loaders if addresses are not loaded yet', async () => {
 				setupUserNetworksStore('allDisabled');
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				setupUserNetworksStore('allEnabled');
 
 				await waitFor(() => {
 					expect(loadEthAddress).toHaveBeenCalledOnce();
 					expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressTestnet).toHaveBeenCalledOnce();
 					expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
 
 					expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
@@ -353,10 +360,9 @@ describe('Loader', () => {
 			it('should not call loaders if addresses are already loaded', async () => {
 				ethAddressStore.set({ data: mockEthAddress, certified: false });
 				btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
-				solAddressTestnetStore.set({ data: mockSolAddress, certified: false });
 				solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -365,7 +371,6 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadEthAddress).not.toHaveBeenCalled();
 					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
-					expect(loadSolAddressTestnet).not.toHaveBeenCalled();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -373,7 +378,7 @@ describe('Loader', () => {
 			it('should call local addresses loaders when in local env', async () => {
 				vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
 
-				render(Loader);
+				render(Loader, { children: mockSnippet });
 
 				// Toggle the reactive statement
 				setupUserNetworksStore('allDisabled');
@@ -382,6 +387,304 @@ describe('Loader', () => {
 				await waitFor(() => {
 					expect(loadBtcAddressRegtest).toHaveBeenCalledOnce();
 					expect(loadSolAddressLocal).toHaveBeenCalledOnce();
+				});
+			});
+		});
+	});
+
+	describe('token loaders', () => {
+		const erc20NotInitStore = writable(true);
+		const erc721NotInitStore = writable(true);
+		const erc1155NotInitStore = writable(true);
+		const erc721InitStore = writable(false);
+		const erc1155InitStore = writable(false);
+		const splNotInitStore = writable(true);
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			mockAuthStore();
+
+			setupTestnetsStore('disabled');
+			setupUserNetworksStore('allDisabled');
+
+			erc20NotInitStore.set(true);
+			erc721NotInitStore.set(true);
+			erc1155NotInitStore.set(true);
+			erc721InitStore.set(false);
+			erc1155InitStore.set(false);
+			splNotInitStore.set(true);
+
+			vi.spyOn(erc20Derived, 'erc20UserTokensNotInitialized', 'get').mockReturnValue(
+				erc20NotInitStore
+			);
+
+			vi.spyOn(erc721Derived, 'erc721CustomTokensNotInitialized', 'get').mockReturnValue(
+				erc721NotInitStore
+			);
+
+			vi.spyOn(erc721Derived, 'erc721CustomTokensInitialized', 'get').mockReturnValue(
+				erc721InitStore
+			);
+
+			vi.spyOn(erc1155Derived, 'erc1155CustomTokensNotInitialized', 'get').mockReturnValue(
+				erc1155NotInitStore
+			);
+
+			vi.spyOn(erc1155Derived, 'erc1155CustomTokensInitialized', 'get').mockReturnValue(
+				erc1155InitStore
+			);
+
+			vi.spyOn(splDerived, 'splCustomTokensNotInitialized', 'get').mockReturnValue(splNotInitStore);
+		});
+
+		it('should always load ICRC tokens on init', async () => {
+			render(Loader, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(loadIcrcTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			});
+		});
+
+		it('should not load non-ICRC tokens on init if networks are all disabled', async () => {
+			render(Loader, { children: mockSnippet });
+
+			await waitFor(() => {
+				expect(loadErc20Tokens).not.toHaveBeenCalled();
+				expect(loadErc721Tokens).not.toHaveBeenCalled();
+				expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				expect(loadSplTokens).not.toHaveBeenCalled();
+			});
+		});
+
+		it('should load non-ICRC tokens on init if networks are all enabled', async () => {
+			render(Loader, { children: mockSnippet });
+
+			setupUserNetworksStore('allEnabled');
+
+			await waitFor(() => {
+				expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+			});
+		});
+
+		describe('ERC tokens', () => {
+			it('loads ERC tokens when Ethereum or EVM is enabled and the stores are not initialized', async () => {
+				erc20NotInitStore.set(true);
+				erc721NotInitStore.set(true);
+				erc1155NotInitStore.set(true);
+
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).not.toHaveBeenCalled();
+					expect(loadErc721Tokens).not.toHaveBeenCalled();
+					expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				});
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [[{ EthereumMainnet: null }, { enabled: true, is_testnet: false }]]
+							}
+						})
+					}
+				});
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+					expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+					expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				});
+			});
+
+			it('does not load ERC if the stores are already initialized', async () => {
+				setupUserNetworksStore('allEnabled');
+
+				erc20NotInitStore.set(false);
+				erc721NotInitStore.set(false);
+				erc1155NotInitStore.set(false);
+
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).not.toHaveBeenCalled();
+					expect(loadErc721Tokens).not.toHaveBeenCalled();
+					expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				});
+			});
+
+			it('loads ERC tokens only when an Ethereum or EVM network is actually enabled', async () => {
+				render(Loader, { children: mockSnippet });
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [
+									[{ BitcoinMainnet: null }, { enabled: true, is_testnet: false }],
+									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
+								]
+							}
+						})
+					}
+				});
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).not.toHaveBeenCalled();
+					expect(loadErc721Tokens).not.toHaveBeenCalled();
+					expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				});
+			});
+
+			it('loads ERC tokens for testnets if testnets are enabled and the stores are not initialized', async () => {
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).not.toHaveBeenCalled();
+					expect(loadErc721Tokens).not.toHaveBeenCalled();
+					expect(loadErc1155Tokens).not.toHaveBeenCalled();
+				});
+
+				setupTestnetsStore('enabled');
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [[{ EthereumSepolia: null }, { enabled: true, is_testnet: true }]]
+							}
+						})
+					}
+				});
+
+				erc20NotInitStore.set(true);
+				erc721NotInitStore.set(true);
+				erc1155NotInitStore.set(true);
+
+				await waitFor(() => {
+					expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+					expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+					expect(loadErc1155Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				});
+			});
+		});
+
+		describe('SPL tokens', () => {
+			it('loads SPL tokens on Solana mainnet when the stores are not initialized', async () => {
+				splNotInitStore.set(true);
+
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadSplTokens).not.toHaveBeenCalled();
+				});
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]]
+							}
+						})
+					}
+				});
+
+				await waitFor(() => {
+					expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				});
+			});
+
+			it('does not load SPL tokens if the stores are already initialized', async () => {
+				setupUserNetworksStore('allEnabled');
+
+				splNotInitStore.set(false);
+
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadSplTokens).not.toHaveBeenCalled();
+				});
+			});
+
+			it('loads SPL tokens on Solana devnet when testnets are enabled and the stores are not initialized', async () => {
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadSplTokens).not.toHaveBeenCalled();
+				});
+
+				setupTestnetsStore('enabled');
+
+				splNotInitStore.set(true);
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [[{ SolanaDevnet: null }, { enabled: true, is_testnet: true }]]
+							}
+						})
+					}
+				});
+
+				await waitFor(() => {
+					expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
+				});
+			});
+
+			it('loads SPL tokens on Solana localnet only when LOCAL is true and the stores are not initialized', async () => {
+				render(Loader, { children: mockSnippet });
+
+				await waitFor(() => {
+					expect(loadSplTokens).not.toHaveBeenCalled();
+				});
+
+				setupTestnetsStore('enabled');
+
+				vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+
+				userProfileStore.set({
+					certified: false,
+					profile: {
+						...mockUserProfile,
+						settings: toNullable({
+							...mockUserSettings,
+							networks: {
+								...mockNetworksSettings,
+								networks: [[{ SolanaLocal: null }, { enabled: true, is_testnet: true }]]
+							}
+						})
+					}
+				});
+
+				splNotInitStore.set(true);
+
+				await waitFor(() => {
+					expect(loadSplTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 				});
 			});
 		});

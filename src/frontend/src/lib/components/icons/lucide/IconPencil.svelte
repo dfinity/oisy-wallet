@@ -1,18 +1,22 @@
 <!-- source: ISC Lucide - please visit https://lucide.dev/license -->
 <script lang="ts">
-	export let size = '16';
+	interface Props {
+		size?: string;
+	}
+
+	let { size = '16' }: Props = $props();
 </script>
 
 <svg
-	xmlns="http://www.w3.org/2000/svg"
-	width={size}
-	height={size}
-	viewBox="0 0 24 24"
 	fill="none"
+	height={size}
 	stroke="currentColor"
-	stroke-width="2"
 	stroke-linecap="round"
 	stroke-linejoin="round"
+	stroke-width="2"
+	viewBox="0 0 24 24"
+	width={size}
+	xmlns="http://www.w3.org/2000/svg"
 	><path
 		d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"
 	/><path d="m15 5 4 4" /></svg

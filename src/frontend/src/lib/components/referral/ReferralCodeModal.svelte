@@ -95,17 +95,19 @@
 			<div class="flex flex-col gap-3 sm:flex-row">
 				{$i18n.referral.invitation.text.information}
 				<ExternalLink
-					href={OISY_REFERRAL_URL}
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
+					href={OISY_REFERRAL_URL}
+					iconAsLast
 					styleClass="font-semibold min-w-30"
 					testId={REFERRAL_CODE_LEARN_MORE}
-					iconAsLast
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>
 			</div>
 		</MessageBox>
 
-		<ButtonCloseModal isPrimary slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonCloseModal isPrimary />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

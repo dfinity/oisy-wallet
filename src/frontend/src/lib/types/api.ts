@@ -17,6 +17,7 @@ import type {
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
+import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserNetworks } from '$lib/types/user-networks';
 import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
@@ -73,6 +74,11 @@ export interface AddUserHiddenDappIdParams {
 
 export interface SaveUserNetworksSettings {
 	networks: UserNetworks;
+	currentUserVersion?: bigint;
+}
+
+export interface SaveUserAgreements {
+	agreements: Partial<UserAgreements>;
 	currentUserVersion?: bigint;
 }
 
@@ -136,6 +142,10 @@ export interface ICPSwapQuoteParams {
 
 export interface ICPSwapAmountReply {
 	receiveAmount: bigint;
+}
+
+export interface BtcGetFeePercentilesParams {
+	network: BitcoinNetwork;
 }
 
 export interface GetContactParams {

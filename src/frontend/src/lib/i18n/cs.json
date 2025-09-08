@@ -1,0 +1,1636 @@
+{
+	"core": {
+		"text": {
+			"cancel": "Zrušit",
+			"next": "Další",
+			"save": "Uložit",
+			"back": "Zpět",
+			"done": "Hotovo",
+			"close": "Zavřít",
+			"change": "Změnit",
+			"apply": "Použít",
+			"refresh": "Aktualizovat",
+			"name": "Název",
+			"symbol": "Symbol",
+			"decimals": "Desetinná místa",
+			"amount": "Částka",
+			"tokenId": "ID tokenu",
+			"max": "Max",
+			"destination": "Cíl",
+			"reject": "Odmítnout",
+			"approve": "Schválit",
+			"view": "Zobrazit",
+			"copy": "Kopírovat",
+			"delete": "Smazat",
+			"create": "Vytvořit",
+			"clear_filter": "Vymazat filtr",
+			"not_available": "n/a",
+			"new": "Nový",
+			"edit": "Upravit",
+			"no_results": "Žádné výsledky",
+			"paste": "Vložit",
+			"to": "Do",
+			"add": "Přidat",
+			"more_items": "+$items další",
+			"select": "Vybrat",
+			"language": "Jazyk",
+			"currency": "Měna"
+		},
+		"info": {
+			"test_banner": "Pouze pro testovací účely!",
+			"test_banner_beta": ""
+		},
+		"alt": {
+			"logo": "logo $name",
+			"go_to_home": "Přejít na domovskou stránku $oisy_name",
+			"back": "Vrátit se na předchozí stránku",
+			"open_details": "Otevřít podrobnosti",
+			"close_details": "Zavřít podrobnosti",
+			"switch_language": "Přepnout jazyk",
+			"switch_currency": "Přepnout měnu"
+		},
+		"warning": {
+			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
+		}
+	},
+	"navigation": {
+		"text": {
+			"tokens": "Digitální Aktiva",
+			"settings": "Nastavení",
+			"dapp_explorer": "Prozkoumat",
+			"activity": "Aktivita",
+			"airdrops": "Odměny",
+			"earning": "Vydělávat a odměny",
+			"source_code_on_github": "Zdrojový kód na GitHubu",
+			"view_on_explorer": "Zobrazit v průzkumníku",
+			"source_code": "Zdrojový kód",
+			"changelog": "Protokol změn",
+			"documentation": "Dokumentace",
+			"support": "Podpora",
+			"confirm_navigate": "Jste si jisti, že chcete odejít?",
+			"vip_qr_code": "VIP QR kódy",
+			"binance_qr_code": "QR kód Binance Clubhouse",
+			"refer_a_friend": "Doporučte svým přátelům",
+			"address_book": "Kontakty",
+			"hide_balances": "Skrýt zůstatky",
+			"show_balances": "Zobrazit zůstatky",
+			"privacy_mode_enabled": "Režim soukromí je zapnutý. Stiskněte [P] pro opětovné zobrazení zůstatků.",
+			"privacy_mode_disabled": "Režim soukromí je vypnutý. Stiskněte [P] pro skrytí zůstatků."
+		},
+		"alt": {
+			"tokens": "Přejít na zobrazení Digitálních Aktiv",
+			"settings": "Otevřít nastavení",
+			"dapp_explorer": "Otevřít průzkumník aplikací",
+			"activity": "Otevřít zobrazení aktivity",
+			"airdrops": "Otevřít zobrazení odměn",
+			"menu": "Vaše adresa peněženky, nastavení, odhlášení a externí odkazy",
+			"changelog": "Otevřete protokol změn $oisy_name na GitHubu a zkontrolujte nejnovější aktualizace",
+			"documentation": "Otevřít dokumentaci $oisy_name",
+			"support": "Otevřít sekci podpory v dokumentaci $oisy_name",
+			"open_twitter": "Otevřít X/Twitter kanál DFINITY",
+			"vip_qr_code": "Vygenerovat pozvánku",
+			"binance_qr_code": "Vygenerovat odkaz na Binance Clubhouse",
+			"refer_a_friend": "Vygenerovat pozvánku pro přítele",
+			"address_book": "Otevřít kontakty",
+			"hide_balances": "Skrýt zobrazené zůstatky",
+			"show_balances": "Zobrazit skryté zůstatky"
+		},
+		"short": {
+			"documentation": "Dokumentace"
+		}
+	},
+	"auth": {
+		"text": {
+			"title_part_1": "$oisy_name",
+			"title_part_2": "100% Decentralizované",
+			"logout": "Odhlásit se",
+			"lock": "Zamknout",
+			"authenticate": "Otevřít nebo vytvořit",
+			"asset_types": "Bitcoin, Solana, Ethereum, ICP a další",
+			"instant_and_private": "Okamžitý a soukromý přístup kdekoli",
+			"advanced_cryptography": "100% onchain: klidné spaní díky pokročilé kryptografii"
+		},
+		"alt": {
+			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
+		},
+		"warning": {
+			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
+			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
+			"reload_and_retry": ""
+		},
+		"error": {
+			"no_internet_identity": "Žádná internetová identita.",
+			"invalid_pouh_credential": "Omlouváme se, ale při ověřování Dokladu Lidskosti došlo k chybě. Obraťte se prosím na vydavatele a požádejte o doklad znovu.",
+			"error_validating_pouh_credential_oisy": "Omlouváme se, ale při ověřování Dokladu Lidskosti v $oisy_short došlo k chybě: $error",
+			"error_validating_pouh_credential": "Omlouváme se, ale při ověřování Dokladu Lidskosti došlo k chybě.",
+			"error_requesting_pouh_credential": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě.",
+			"missing_pouh_issuer_origin": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě. Chybí původ vydavatele.",
+			"no_pouh_credential": "Omlouváme se, ale při vyžádání Dokladu Lidskosti došlo k chybě. Máte platné pověření v Decide AI?",
+			"error_while_signing_in": "Při přihlašování se něco pokazilo.",
+			"unexpected_issue_with_syncing": "Při synchronizaci stavu vašeho ověření došlo k neočekávanému problému."
+		},
+		"help": {
+			"text": {
+				"title": "Máte problémy s ověřením?",
+				"description": "Všimli jsme si, že jste zrušili ověření pomocí Internet Identity. Rádi bychom pochopili, co se stalo, abychom mohli váš zážitek vylepšit.",
+				"subtitle": "Způsobila problém některá z následujících příčin?",
+				"lost_identity": "Ztratil jsem své číslo Internet Identity",
+				"security": "Měl jsem obavy o bezpečnost nebo soukromí",
+				"got_confused": "Během procesu jsem se ztratil",
+				"other": "Jiné...",
+				"feedback_text": "Vaše zpětná vazba nám pomáhá vylepšovat peněženku.",
+				"thanks_text": "Děkuji!",
+				"identity_new_identity": "Peněženka $oisy_short přepíná doménu Internet Identity na: <span class=\"font-bold\">identity.internetcomputer.org</span>",
+				"identity_legacy_description": "V důsledku toho se vaše číslo Internet Identity nemusí objevit automaticky a možná jej budete muset zadat znovu.",
+				"identity_legacy_sign_in": "Přihlásit se pomocí staré domény Internet Identity",
+				"identity_learn_more": "Více se dozvíte v dokumentaci $oisy_short",
+				"other_title": "Děkujeme za vaši zpětnou vazbu!",
+				"other_description": "Zde jsou některé užitečné zdroje o <span class=\"font-bold\">bezpečnosti</span> a <span class=\"font-bold\">soukromí</span> v $oisy_short a Internet Identity. Doufáme, že vám pomohou učinit informované rozhodnutí:",
+				"other_introduction": "Úvod do $oisy_short",
+				"other_docs": "Dokumentace $oisy_short: Internet Identity",
+				"other_private_key": "Kdo ovládá soukromý klíč k nativním aktivům?",
+				"other_asset_control": "Kontrola aktiv, obnova a správa v peněžence $oisy_short",
+				"need_help": "Potřebujete pomoc",
+				"sign_in": "s přihlášením?"
+			},
+			"alt": {
+				"internet_identity": "Obrázek nové internetové identity",
+				"identity_learn_more": "Více se dozvíte o staré internetové identitě",
+				"other_introduction": "Otevřít úvod do $oisy_short",
+				"other_docs": "Otevřít dokumentaci $oisy_short: Internet Identity",
+				"other_private_key": "Získejte informace ohledně toho, kdo ovládá soukromý klíč k nativním aktivům",
+				"other_asset_control": "Získejte informace o kontrole aktiv, obnově a správě v peněžence $oisy_short",
+				"sign_in": "Potřebujete pomoc s přihlášením?"
+			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Chcete-li pokračovat, odemkněte",
+			"title_part_2": "Předtím jste si pro bezpečnost zamkli peněženku. Pokračujte tam, kde jste skončili, nebo se odhlaste.",
+			"unlock": "Odemknout",
+			"logout": "Odhlásit se",
+			"logout_clear_cash_message": "Odhlášením se vymažou všechna data v mezipaměti",
+			"learn_more": "Zjistěte více"
+		}
+	},
+	"dapps": {
+		"text": {
+			"all_dapps": "Všechny aplikace",
+			"featured": "Doporučené",
+			"sign_in": "Přihlaste se a prozkoumejte ekosystém.",
+			"title": "Prozkoumat aplikace",
+			"open_dapp": "Otevřít $dAppName",
+			"submit_your_dapp": "Odeslat vaši aplikaci"
+		},
+		"alt": {
+			"learn_more": "Více se dozvíte o $dAppName",
+			"logo": "Logo $dAppName",
+			"show_all": "Zobrazit všechny aplikace",
+			"show_tag": "Zobrazit aplikace se značkou $tag",
+			"open_dapp": "Otevřít aplikaci $dAppName",
+			"open_telegram": "Otevřít $dAppName v Telegramu",
+			"open_open_chat": "Otevřít $dAppName v OpenChat",
+			"open_twitter": "Otevřít X/Twitter kanál $dAppName ",
+			"source_code_on_github": "Zobrazit zdrojový kód $dAppName na GitHubu",
+			"submit_your_dapp": "Odeslat vaši aplikaci, aby se zobrazila v průzkumníku aplikací",
+			"tags": "Značky související s $dAppName",
+			"website": "Obrázek $dAppName"
+		},
+		"categories": {
+			"defi": "DeFi",
+			"social_media": "Sociální média",
+			"verifiable_credentials": "Ověřitelné Přihlašovací Údaje",
+			"staking": "Staking",
+			"walletconnect": "WalletConnect",
+			"game": "Hra",
+			"tools": "Nářadí"
+		},
+		"descriptions": {
+			"kongswap": {
+				"name": "KongSwap",
+				"one_liner": "Jediné místo pro všechny tokeny - snadno obchodujte s tokeny na všech chainech pomocí KongSwap.",
+				"description": "KongSwap je plně decentralizovaná burza (DEX) nabízející mezichainové obchodování bez mostů napříč ICP, Bitcoinem, Ethereem a Solanou. <br/><br/>Díky technologii Chain Fusion a protokolu Internet Computer snižuje poplatky, zjednodušuje uživatelské prostředí a zabraňuje fragmentaci likvidity. Frontend i backend fungují on-chain prostřednictvím chytrých smluv a poskytují bezproblémový zážitek DeFi.",
+				"carousel": {
+					"text": "Vyměňujte tokeny na DEX",
+					"call_to_action": "Vyzkoušejte KongSwap"
+				}
+			},
+			"openchat": {
+				"name": "OpenChat",
+				"one_liner": "Decentralizovaná alternativa k WhatsApp.",
+				"call_to_action": "Přejít na OpenChat",
+				"description": "OpenChat je plnohodnotná chatovací aplikace běžící end-to-end na blockchainu Internet Computer.<br/><br/>OpenChat je řízen svou komunitou jako DAO a má svůj vlastní token CHAT. Tokeny CHAT jsou rozdávány jako odměny uživatelům za účelem urychlení růstu a vytvoření týmu milionů příznivců, což OpenChatu umožňuje stát se životaschopným vyzyvatelem centralizovaných velkých technologických konkurentů!",
+				"stats": "80 000+ uživatelů",
+				"carousel": {
+					"text": "OpenChat - kde web3 komunikuje",
+					"call_to_action": "Zobrazit více"
+				}
+			},
+			"decideid": {
+				"name": "DecideID",
+				"one_liner": "Unikátní ověření identity pro důvěryhodné digitální interakce.",
+				"call_to_action": "Otevřít DecideID",
+				"stats": "50 000+ žádostí o odvození",
+				"description": "Decide ID je srdcem systému Decide AI, který zajišťuje důvěru a bezpečnost prostřednictvím své jedinečné metodiky Proof of Personhood (PoP). Po připojení projdete ověřovacím procesem, kde poskytnete několik důkazů a dokončíte speciální výzvu k potvrzení vaší identity. Tím je zajištěno, že každý uživatel je skutečný, jedinečný a není bot. Během tohoto procesu je vytvořeno vaše Hlavní ID, jedinečný on-chain identifikátor. Lze jej použít v různých aplikacích, které vyžadují ověřenou osobnost, což zajišťuje bezpečnou a bezproblémovou integraci do jakéhokoli procesu registrace nebo přihlášení aplikace. Navíc použití důkazů s nulovou znalostí znamená, že vaše soukromé údaje, jako jsou biometrické informace, zůstávají důvěrné a v bezpečí.<br/><br/>S Decide ID si užijte flexibilní, bezpečný a soukromí-na-prvním-místě způsob ověřování a interakce online.",
+				"carousel": {
+					"text": "Užijte si soukromí na prvním místě způsob ověřování a interakce online",
+					"call_to_action": "Máte zájem?"
+				}
+			},
+			"icpswap": {
+				"name": "ICPSwap",
+				"one_liner": "ICPSwap je AMM DEX postavený zcela on-chain, který je předním centrem pro full-stack finanční a DAO služby na ICP.",
+				"call_to_action": "Seznamte se s budoucností",
+				"description": "Centrum budoucnosti decentralizovaných financí!<br/>Znovuobjevením burzy jako centra poskytuje ICPSwap full-stack finanční, tržní a DAO služby na Internet Computer. Na základě základní technologie Internet Computer od DFINITY vytváří ICPSwap ekosystém skutečně decentralizovaných financí tím, že refaktoruje způsob, jakým uživatelé a vývojáři společně budují projekty."
+			},
+			"nnsdapp": {
+				"name": "NNS Dapp",
+				"one_liner": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní.",
+				"call_to_action": "Zapojte se",
+				"description": "Frontendová dapp NNS umožňuje komukoli interagovat s Network Nervous System na Internet Computeru pomocí uživatelsky přívětivého rozhraní. Tato decentralizovaná dapp, která je kompletně obsluhována end-to-end prostřednictvím blockchainu, vám umožňuje snadno provádět následující akce:<br/><ul><li>Odesílat a přijímat tokeny (ICP, ckBTC, CHAT atd.)</li><li>Stakovat a spravovat neurony</li><li>Hlasovat o správě Internet Computeru a SNS</li><li>Účastnit se decentralizačních swapů</li><li>Vytvářet a doplňovat kanystry</li><li>Získávat odměny za správu</li></ul>"
+			},
+			"uniswap": {
+				"name": "Uniswap",
+				"one_liner": "Největší onchain tržiště. Kupujte a prodávejte kryptoměny na Ethereu a více než 11 dalších chainech.",
+				"call_to_action": "Pojďme na swapy",
+				"description": "Uniswap je decentralizovaná kryptoměnová burza, která používá sadu chytrých smluv k vytváření likviditních poolů pro provádění obchodů. Jedná se o open-source projekt, který spadá do kategorie produktů DeFi, protože k usnadnění obchodů používá chytré smlouvy namísto centralizované burzy."
+			},
+			"oneinch": {
+				"name": "1inch",
+				"one_liner": "Optimalizujte své obchody na stovkách DEX na různých sítích.",
+				"call_to_action": "Podívejte se",
+				"description": "Síť 1inch nabízí ekosystém DeFi s produkty jako 1inch dApp, Wallet, Developer Portal, Portfolio a Fusion pro bezpečné operace Web3. 1inch poskytuje přístup ke stovkám zdrojů likvidity na více blockchainech.<br/><br/>Díky 1inch Swap Engine umožňuje režim Fusion uživatelům vyměňovat tokeny bez placení jakýchkoli síťových poplatků a za nejvýhodnějších sazeb. Kromě toho režim Fusion nabízí uživatelům dodatečnou ochranu proti MEV. Všechny swapy v režimu Fusion jsou prováděny resolvery – profesionálními obchodníky, kteří používají nejsofistikovanější a nejefektivnější způsoby ochrany uživatelských swapů před MEV."
+			},
+			"compound_finance": {
+				"name": "Compound Finance",
+				"one_liner": "Decentralizovaný peněžní trh a úvěrový protokol postavený na Ethereu.",
+				"call_to_action": "Vstupte",
+				"description": "Compound Finance je <b>decentralizovaný peněžní trh a úvěrový protokol postavený na Ethereu</b>. Jeho protokol Compound III (Comet) umožňuje uživatelům půjčovat nebo si půjčovat z jednosložkových poolů „základních aktiv“. Compound III podporuje základní aktiva (např. USDC, WETH atd.) na Ethereu, Polygonu, Base a Arbitrum."
+			},
+			"aave": {
+				"name": "Aave",
+				"one_liner": "Aave je decentralizovaný nekustodiální likviditní protokol, kde se uživatelé mohou účastnit jako dodavatelé nebo dlužníci.",
+				"call_to_action": "Získejte plnou moc DeFi",
+				"description": "Aave je decentralizovaný nekustodiální likviditní protokol, kde se uživatelé mohou účastnit jako dodavatelé nebo dlužníci. Dodavatelé poskytují likviditu na trhu a zároveň získávají úroky a dlužníci mohou získat přístup k likviditě poskytnutím zajištění, které převyšuje vypůjčenou částku.\nJe zcela bez povolení, což znamená, že kdokoli může přistupovat a interagovat s Aave prostřednictvím uživatelsky přívětivého rozhraní nebo přímo s jeho chytrými smlouvami v podporovaných blockchainových sítích."
+			},
+			"eigenlayer": {
+				"name": "EigenLayer",
+				"one_liner": "Protokol založený na Ethereu, který zavádí restaking, což umožňuje stakovat jakýkoli token ERC20.",
+				"call_to_action": "Restakujte nyní",
+				"description": "EigenLayer je protokol postavený na Ethereu, který zavádí restaking, nový primitiv v kryptografické bezpečnosti. Umožňuje uživatelům stakovat aktiva, jako je nativní ETH, liquid staking tokeny (LST), token EIGEN nebo jakýkoli token ERC20 do chytrých smluv EigenLayer, čímž rozšiřuje kryptografickou bezpečnost Etherea na další aplikace v síti."
+			},
+			"curve_finance": {
+				"name": "Curve Finance",
+				"one_liner": "Přední DEX, poskytovatel stablecoinů a úvěrová platforma na Ethereu a řetězcích kompatibilních s EVM.",
+				"call_to_action": "Nechte se warpovat",
+				"description": "Curve Finance je přední decentralizovaná burza, poskytovatel stablecoinů a úvěrová platforma na Ethereu a řetězcích kompatibilních s EVM. Je známá svými pokročilými automatizovanými tvůrci trhu pro stablecoiny a volatilní aktiva a svým jedinečným systémem měkké likvidace pro půjčky."
+			},
+			"sonic": {
+				"name": "Sonic",
+				"one_liner": "Uvolněte plný potenciál DeFi a zjednodušeného obchodování. Vyměňujte tokeny, vydělávejte jako poskytovatel likvidity a využívejte přední AMM Bitfinity EVM.",
+				"call_to_action": "Otevřít Sonic",
+				"description": "Sonic, multichainová decentralizovaná burza postavená na protokolu Internet Computer (ICP), nabízí širokou škálu služeb DeFi. Uživatelé mohou snadno obchodovat s tokeny a perpetualy, poskytovat likviditu a účastnit se prodeje tokenů LBP. Uživatelé se mohou zapojit do správy DAO, stakovat za odměny a hlasovat o rozhodnutích platformy.<br/><br/>Plně on-chain a open-source! Vyměňujte tokeny jako profesionál, sbírejte poplatky jako poskytovatel likvidity, připojte se k atmosféře AMM a staňte se nedílnou součástí Sonic DAO.",
+				"carousel": {
+					"text": "Uvolněte plný potenciál Defi",
+					"call_to_action": "Otevřít Sonic"
+				}
+			},
+			"raydium": {
+				"name": "Raydium",
+				"one_liner": "DEX a automatizovaný tvůrce trhu postavený na blockchainu Solana, který nabízí centrální knihu limitních objednávek umožňující rychlé obchody.",
+				"call_to_action": "Podpořte evoluci DeFi",
+				"description": "Raydium je automatizovaný tvůrce trhu (AMM) postavený na blockchainu Solana, který nabízí jedinečnou kombinaci technologie AMM a přístupu k likviditě decentralizované burzy Serum. Jako AMM umožňuje Raydium obchodování s digitálními aktivy bez povolení pomocí likviditních poolů."
+			},
+			"jupiter": {
+				"name": "Jupiter",
+				"one_liner": "Agregátor DEX založený na Solaně, který optimalizuje nejlepší dostupné swapy mezi jakýmkoli podporovaným párem tokenů.",
+				"call_to_action": "Do nekonečna a ještě dál",
+				"description": "Jupiter je platforma decentralizovaných financí na blockchainu Solana, která funguje jako agregátor likvidity, zjednodušuje a optimalizuje obchodní aktivity v rámci prostoru DeFi. Její protokol je navržen tak, aby usnadňoval poskytování likvidity a výměnu tokenů a zajišťoval efektivní, nízko latentní a cenově výhodné transakce. Platforma umožňuje uživatelům vyměňovat tokeny, poskytovat likviditu a účastnit se yield farmingu prostřednictvím modelu automatizovaného tvůrce trhu (AMM)."
+			},
+			"waterneuron": {
+				"name": "WaterNeuron",
+				"one_liner": "ICP likvidní staking - maximalizujte efektivitu svého kapitálu likvidním stakováním svého ICP.",
+				"description": "WaterNeuron nabízí kapitálově efektivnější metodu stakingu tím, že vám umožňuje udržovat expozici vůči odměnám za staking ICP a zároveň udržovat vaše tokeny likvidní. Tento přístup zjednodušuje proces stakingu a eliminuje potřebu výběru konkrétních validátorů pro maximalizaci odměn."
+			},
+			"taggr": {
+				"name": "Taggr",
+				"one_liner": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
+				"call_to_action": "Přejít na Taggr",
+				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli.",
+				"carousel": {
+					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
+					"call_to_action": "Zjistit více"
+				}
+			},
+			"toolkit": {
+				"name": "Toolkit",
+				"one_liner": "Kde se správa setkává se spoluprací a podněcuje inovace.",
+				"description": "Toolkit je univerzální sada pro správu systémů SNS (Service Nervous System) a projektů na Internet Computeru. Umožňuje uživatelům bezproblémově inovovat, spolupracovat a decentralizovat - od návrhů na správu až po nasazení kanystrů."
+			}
+		}
+	},
+	"rewards": {
+		"text": {
+			"title": "Odměny",
+			"upcoming_campaigns": "Nadcházející kampaně",
+			"active_date": "Končí",
+			"ended_date": "Skončilo",
+			"share": "Sdílet na X",
+			"learn_more": "Zjistit více",
+			"check_status": "Zkontrolovat stav a způsobilost",
+			"view_details": "Zobrazit podrobnosti",
+			"modal_button_text": "Rozumím",
+			"activity_button_text": "Zkontrolovat nedávnou aktivitu",
+			"activity_button_text_short": "Zkontrolovat aktivitu",
+			"open_wallet": "Přejít do peněženky",
+			"carousel_slide_title": "Epizoda 4 OISY Sprinkles nyní probíhá!",
+			"carousel_slide_cta": "Zjistit více",
+			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
+			"youre_eligible": "Jste způsobilí!",
+			"ongoing": "Probíhá",
+			"ended": "Skončeno ($amount)",
+			"banner_text": "Získejte denní odměny s OISY Sprinkles"
+		},
+		"requirements": {
+			"requirements_title": "Kritéria způsobilosti",
+			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
+			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
+			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
+			"hangover": "Žádná nedávná výhra (posledních $days dní)"
+		},
+		"alt": {
+			"upcoming_campaigns": "Sledujte nadcházející airdropy tokenů! <a href=\"https://x.com/oisy\" target=\"_blank\">Sledujte nás na X</a>, připojte se k našemu <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Redditu</a> nebo se přidejte do <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discordu</a>, abyste zůstali v obraze.",
+			"coming_soon": "Epizoda 4 $oisy_short se blíží",
+			"reward_banner": "Banner kampaně $campaignName"
+		},
+		"campaigns": {
+			"sprinkles_s1e3": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 3 je živě 🎊",
+				"one_liner": "Vydělávejte BTC za aktivitu – a nyní i za <strong>pozvání přátel</strong>.<br/>Přihlaste se, provádějte transakce a držte tokeny, abyste se kvalifikovali na denní odměny. Doporučte přítele a získejte 10 % z hodnoty jeho odměn po celou dobu kampaně.",
+				"participate_title": "Vydělávejte BTC tím, že zůstanete aktivní - a nyní i tím, že pozvete ostatní.",
+				"description": "Splňte jednoduché týdenní požadavky. Přihlaste se, proveďte dvě transakce a držte alespoň 20 dolarů v tokenech, abyste zůstali způsobilí pro jednu z 50 denních BTC odměn.<br/><strong>Nyní s odměnami za doporučení:</strong> pozvěte přítele, aby si nasadil peněženku, a získejte 10 % z jeho Sprinkles po dobu 30 dnů. On si ponechá 100 % - vy vyděláte navíc.",
+				"campaign_href": "https://x.com/intent/post?text=Haven%E2%80%99t%20joined%20%40OISY%20Sprinkles%20yet%3F%0AThey%E2%80%99re%20dropping%20free%20%24BTC%20-%20all%20day%2C%20every%20day.%0AHead%20to%20OISY.com%20and%20try%20it%20for%20yourself.%20%F0%9F%9A%80%0A",
+				"win": {
+					"default": {
+						"title": "Gratulujeme k získání dnešních OISY Sprinkles!",
+						"description": "Sdílejte své vítězství na Twitteru a získejte další šanci na výhru.",
+						"share_href": "https://x.com/intent/post?text=Just%20scored%20free%20Bitcoin%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThey%E2%80%99re%20dropping%20sprinkles%20of%20%24BTC%20non-stop.%0AIf%20you%E2%80%99re%20not%20on%20OISY.com%20yet%2C%20now%E2%80%99s%20the%20time."
+					},
+					"jackpot": {
+						"title": "Gratulujeme k získání největších OISY Sprinkles dneška!",
+						"description": "Sdílejte své vítězství na Twitteru a získejte další šanci na výhru.",
+						"share_href": "https://x.com/intent/post?text=Just%20hit%20a%20Super%20Sprinkles%20drop%20from%20%40OISY%20Wallet%20%F0%9F%AA%82%0ASmall%20drops%20all%20day%20%2B%205%20big%20%24BTC%20drops%20every%20single%20day.%0ASign%20up%20at%20OISY.com%2C%20and%20get%20free%20Bitcoin."
+					},
+					"referral": {
+						"title": "Zde je malé poděkování",
+						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e4": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 4 nyní běží 🎊",
+				"one_liner": "Vydělávejte BTC za aktivitu – a nyní získejte <strong>zaručené</strong> Sprinkles za doporučení.<br/>Přihlaste se, provádějte transakce a držte tokeny, abyste se kvalifikovali na denní odměny. Doporučte 4 přátele a získejte odměnu přímo. Nejlepší doporučovatelé vyhrají ještě více.",
+				"participate_title": "Vydělávejte BTC tím, že zůstanete aktivní - a nyní i tím, že pozvete ostatní.",
+				"description": "Splňte jednoduché týdenní požadavky: přihlaste se, proveďte dvě transakce a držte alespoň 20 dolarů v tokenech, abyste zůstali způsobilí pro BTC odměny až do výše 50 dolarů každý den.<br>Nyní s odměnami za doporučení: pozvěte přítele, aby si založil peněženku, a oba získáte zaručené Sprinkles. Dostaňte se mezi 4 nejlepší doporučovatele a vyhrajte jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"win": {
+					"default": {
+						"title": "Byli jste odměněni",
+						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "Vyhráli jste jackpot",
+						"description": "Právě jste získali naši nejvyšší odměnu Sprinkles<br>Zůstaňte aktivní a pokračujte v doporučování, abyste vyhráli více",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "Dostali jste se na vrchol žebříčku",
+						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referrer": {
+						"title": "Teprve začínáte",
+						"description": "Vydělali jste 1 dolar.<br>Doporučte více - 4 nejlepší doporučovatelé získají 200 dolarů.<br>Jste blízko. Pokračujte.",
+						"share_href": "https://x.com/intent/post?text=Got%20Sprinkles%20from%20referring%20with%20%40OISY.%0AEveryone%20wins%20this%20season%2C%20referrer%20and%20referee.%0AIt%E2%80%99s%20live%20at%20OISY.com"
+					},
+					"referee": {
+						"title": "Získejte více za doporučení",
+						"description": "Právě jste získali Sprinkles - stejně jako osoba, která vás doporučila.<br>Pošlete čtyřem přátelům a získejte 1 dolar.<br>4 nejlepší doporučovatelé vyhrají každý 200 dolarů.",
+						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			}
+		}
+	},
+	"footer": {
+		"text": {
+			"incubated_with": "Inkubováno s",
+			"by": "od",
+			"dfinity_foundation": "Nadace DFINITY",
+			"copyright": "© 2025",
+			"ai_assistant_console_button": "$oisy_short Asistent"
+		},
+		"alt": {
+			"dfinity": "Přejít na webové stránky Nadace DFINITY"
+		}
+	},
+	"wallet": {
+		"text": {
+			"address": "Adresa",
+			"wallet_address": "Adresa peněženky",
+			"your_addresses": "Vaše adresy",
+			"address_copied": "Adresa zkopírována do schránky.",
+			"wallet_address_copied": "Adresa peněženky zkopírována do schránky.",
+			"display_wallet_address_qr": "Zobrazit adresu peněženky jako QR kód",
+			"icp_deposits": "Poznámka: Pro vklady ICP použijte tlačítko „Přijmout“ ve svém účtu ICP, abyste získali správnou adresu.",
+			"use_address_from_to": "Použijte tuto adresu k převodu $tokenu do a z vaší peněženky."
+		},
+		"alt": {
+			"open_etherscan": "Otevřít vaši adresu na Etherscanu",
+			"open_solscan": "Otevřít vaši adresu na Solscan",
+			"qrcode_address": "Naskenujte tento QR kód a zkopírujte adresu pro příjem tokenů $token"
+		}
+	},
+	"init": {
+		"text": {
+			"initializing_wallet": "Příprava vaší peněženky...",
+			"securing_session": "Zabezpečení relace pomocí Internet Identity",
+			"retrieving_public_keys": "Načítání vašich veřejných klíčů pro Bitcoin, Ethereum, Solana, Base, Polygon, BNB a Arbitrum",
+			"done": "Užijte si $oisy_short"
+		},
+		"alt": {
+			"loader_banner": "Načítání počátečních dat pro $oisy_name (téma $theme)"
+		},
+		"info": {
+			"hold_loading": "Vydržte, načítáme nějaké informace...",
+			"hold_loading_wallet": "Vydržte, načítáme nějaká počáteční data pro vaši peněženku..."
+		},
+		"error": {
+			"no_alchemy_config": "Žádná konfigurace Alchemy pro síť $network",
+			"no_alchemy_provider": "Žádný poskytovatel Alchemy pro síť $network",
+			"no_etherscan_provider": "Žádný poskytovatel Etherscan pro síť $network",
+			"no_infura_provider": "Žádný poskytovatel Infura pro síť $network",
+			"no_infura_cketh_provider": "Žádný poskytovatel Infura CkETH pro síť $network",
+			"no_infura_erc20_provider": "Žádný poskytovatel Infura ERC20 pro síť $network",
+			"no_infura_erc721_provider": "Žádný poskytovatel Infura ERC721 pro síť $network",
+			"no_infura_erc1155_provider": "Žádný poskytovatel Infura ERC1155 pro síť $network",
+			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
+			"no_solana_network": "Žádná síť Solana pro síť $network",
+			"eth_address_unknown": "Adresa ETH je neznámá.",
+			"loading_address": "Chyba při načítání adresy $symbol.",
+			"loading_balance": "Chyba při načítání zůstatku $symbol pro síť $network.",
+			"erc20_contracts": "Chyba při načítání smluv ERC20.",
+			"spl_tokens": "Chyba při načítání tokenů SPL.",
+			"minter_ckbtc_btc": "Pro převod ckBTC na BTC je vyžadován nakonfigurovaný minter.",
+			"minter_cketh_eth": "Pro převod ckETH na ETH je vyžadován nakonfigurovaný minter.",
+			"minter_ckerc20_erc20": "Pro převod ckERC20 на Erc20 je vyžadován nakonfigurovaný minter.",
+			"ledger_cketh_eth": "Pro převod ckErc20 na Erc20 je vyžadována nakonfigurovaná ckETH účetní kniha.",
+			"minter_btc": "Pro získání BTC je vyžadován nakonfigurovaný minter.",
+			"minter_ckbtc_info": "Pro získání informací o ckBTC je vyžadován nakonfigurovaný minter",
+			"minter_cketh_info": "Pro získání informací o ckETH je vyžadován nakonfigurovaný minter",
+			"minter_ckbtc_loading_info": "Chyba při načítání informací o minteru ckBTC.",
+			"minter_cketh_loading_info": "Chyba při načítání informací o minteru ckETH.",
+			"btc_fees_estimation": "Chyba při dotazování na odhad poplatků BTC.",
+			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
+			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
+			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
+			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
+			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
+			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
+			"erc20_user_tokens": "Chyba při načítání uživatelských tokenů ERC20.",
+			"spl_custom_tokens": "Chyba při načítání vlastních tokenů SPL.",
+			"erc20_user_token": "Chyba při povolování dvojitého tokenu ERC20.",
+			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
+			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
+			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
+			"waiting_for_allowed_cycles_aborted": "",
+			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
+			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
+		}
+	},
+	"hero": {
+		"text": {
+			"available_balance": "Váš zůstatek",
+			"unavailable_balance": "$currencySymbol hodnota není k dispozici",
+			"hidden_balance": "Váš zůstatek je skrytý",
+			"top_up": "Doplňte si peněženku a začněte ji používat!",
+			"learn_more_about_erc20_icp": "Více se dozvíte o ERC20 ICP na Ethereu.",
+			"tooltip_toggle_balance": "Dvojitým kliknutím skryjete/zobrazíte zůstatek"
+		},
+		"alt": {
+			"toggle_privacy_mode": "Zapnutí a vypnutí režimu soukromí"
+		}
+	},
+	"settings": {
+		"text": {
+			"title": "Nastavení",
+			"principal": "Váše Hlavní ICP ID",
+			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
+			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
+			"session_duration": "Doba trvání relace",
+			"session_expires_in": "Vyprší za",
+			"networks": "Sítě",
+			"enable_testnets": "Povolit testovací sítě",
+			"active_networks": "Aktivní sítě",
+			"active_networks_description": "Vyberte sítě, se kterými chcete v $oisy_name pracovat. Tokeny a transakce z neaktivních sítí se nezobrazí ani nebudou zahrnuty do vašeho dostupného zůstatku.",
+			"enable_network": "Povolit síť",
+			"disable_network": "Zakázat síť",
+			"credentials_title": "Přihlašovací Údaje",
+			"pouh_credential": "Ověření Lidskosti",
+			"pouh_credential_description": "Ověření Lidskosti je důkazem lidskosti. Vydává ho Decide AI.",
+			"present_pouh_credential": "Předložit",
+			"pouh_credential_verified": "Ověřeno ✅",
+			"appearance": "Vzhled",
+			"appearance_light": "Světlý",
+			"appearance_dark": "Tmavý",
+			"appearance_system": "Systém",
+			"git_disclaimer": "Pro vývojové účely zobrazujeme větev a commit pouze v testovacích kanystrech.",
+			"git_branch_name": "Větev:",
+			"git_commit_hash": "Commit:"
+		},
+		"alt": {
+			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
+			"github_release": "Poznámky k vydání $oisy_short na GitHubu",
+			"appearance_light": "Povolí světlý režim",
+			"appearance_dark": "Povolí tmavý režim",
+			"appearance_system": "Povolí barevný režim vašeho operačního systému"
+		},
+		"error": {
+			"loading_profile": "Chyba při načítání profilu. Pro plnohodnotný zážitek prosím obnovte stránku."
+		}
+	},
+	"shortcuts": {
+		"privacy_mode": "P"
+	},
+	"networks": {
+		"title": "Aktuální síť. Přístup k výběru.",
+		"test_networks": "Testovací sítě",
+		"chain_fusion": "Všechny sítě",
+		"network": "Síť",
+		"testnet": "Testnet",
+		"number_of_enabled": "$numNetworksEnabled z $numNetworksTotal povoleno",
+		"filter": "Filtrovat sítě",
+		"manage": "Spravovat sítě"
+	},
+	"receive": {
+		"text": {
+			"receive": "Přijmout",
+			"address": "Adresa pro příjem",
+			"receive_token": "Přijmout $token"
+		},
+		"icp": {
+			"text": {
+				"account_id": "ID ICP Účtu",
+				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
+				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
+				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
+				"your_private_eth_address": "Vaše soukromá adresa pro všechny tokeny ERC20.",
+				"display_account_id_qr": "Zobrazit ID ICP Účtu jako QR kód",
+				"account_id_copied": "ID ICP Účtu zkopírováno do schránky.",
+				"principal": "Hlavní ICP ID",
+				"internet_computer_principal_copied": "Hlavní ICP ID zkopírováno do schránky.",
+				"display_internet_computer_principal_qr": "Zobrazit Hlavní ICP ID jako QR kód",
+				"icp_account": "ID ICP Účtu (pro burzy)",
+				"icp_account_copied": "ID ICP Účtu zkopírováno do schránky.",
+				"display_icp_account_qr": "Zobrazit ID ICP Účtu jako QR kód"
+			}
+		},
+		"ethereum": {
+			"text": {
+				"checking_status": "Kontrola stavu $tokenu...",
+				"from_network": "Přijmout ze sítě $network",
+				"eth_to_cketh_description": "Převod $tokenu na $ckToken vyžaduje volání chytré smlouvy na $network a předání vašeho ICP principal jako argumentu – $oisy_name tento postup zjednodušuje tím, že vám umožňuje provést převod přímo v peněžence.",
+				"learn_how_to_convert": "Zjistěte, jak převést $token na $ckToken",
+				"metamask": "Přijmout z Metamask",
+				"ethereum": "Ethereum",
+				"ethereum_address": "Adresa",
+				"ethereum_address_copied": "Adresa Ethereum zkopírována do schránky.",
+				"display_ethereum_address_qr": "Zobrazit adresu Ethereum jako QR kód"
+			},
+			"error": {
+				"no_metamask": "Metamask není k dispozici."
+			}
+		},
+		"bitcoin": {
+			"text": {
+				"bitcoin": "Bitcoin",
+				"checking_status": "Kontrola stavu BTC...",
+				"refresh_status": "Aktualizovat stav BTC",
+				"initializing": "Inicializace...",
+				"checking_incoming": "Kontrola příchozích BTC...",
+				"refreshing_wallet": "Aktualizace peněženky...",
+				"bitcoin_address": "Bitcoin",
+				"bitcoin_testnet_address": "Bitcoin (Testnet)",
+				"bitcoin_regtest_address": "Bitcoin (Regtest)",
+				"display_bitcoin_address_qr": "Zobrazit adresu Bitcoin jako QR kód",
+				"bitcoin_address_copied": "Adresa Bitcoin zkopírována do schránky.",
+				"from_network": "Převeďte Bitcoin na síti BTC na tuto adresu, abyste obdrželi ckBTC.",
+				"fee_applied": "Upozorňujeme, že bude účtován odhadovaný mezisíťový poplatek ve výši $fee BTC."
+			},
+			"info": {
+				"no_new_btc": "Žádné nové potvrzené BTC.",
+				"check_btc_progress": "Kontrola příchozích BTC již probíhá."
+			},
+			"error": {
+				"unexpected_btc": "Při kontrole příchozích BTC se něco pokazilo."
+			}
+		},
+		"solana": {
+			"text": {
+				"solana_address": "Adresa Solana",
+				"solana_devnet_address": "Adresa Solana Devnet",
+				"solana_local_address": "Místní adresa Solana",
+				"solana_address_copied": "Adresa Solana zkopírována do schránky",
+				"display_solana_address_qr": "Zobrazit adresu Solana jako QR kód"
+			}
+		}
+	},
+	"send": {
+		"text": {
+			"send": "Odeslat",
+			"destination": "Cíl",
+			"source": "Zdroj",
+			"balance": "Zůstatek",
+			"review": "Zkontrolovat",
+			"signing_approval": "Podepisování schválení...",
+			"approving": "Schvalování...",
+			"approving_fees": "Schvalování poplatků...",
+			"approving_transfer": "Schvalování převodu...",
+			"approving_wallet_connect": "Schvalování požadavku WalletConnect...",
+			"refreshing_ui": "Aktualizace uživatelského rozhraní",
+			"initializing": "Inicializace transakce...",
+			"signing_transaction": "Podepisování transakce...",
+			"sending": "Odesílání...",
+			"signing": "Podepisování...",
+			"signing_message": "Podepisování zprávy...",
+			"confirming": "Potvrzování...",
+			"network": "Síť",
+			"source_network": "Zdrojová síť",
+			"destination_network": "Cílová síť",
+			"initializing_transaction": "Inicializace transakce",
+			"convert_to_native_icp": "Převést na nativní ICP",
+			"open_qr_modal": "Spustit skenování QR kódu pro podrobnosti transakce",
+			"scan_qr": "Skenovat QR kód",
+			"select_token": "Vybrat token k odeslání",
+			"select_network_filter": "Vybrat síťový filtr",
+			"send_again": "Odeslat znovu",
+			"recently_used_tab": "Nedávno použité",
+			"contacts_tab": "Kontakty",
+			"recently_used_empty_state_title": "Nedávno použité adresy se zobrazí zde",
+			"recently_used_empty_state_description": "Udělejte svůj první odeslání hned!",
+			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
+			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
+			"send_review_subtitle": "Odesíláte"
+		},
+		"placeholder": {
+			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
+			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
+			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
+			"select_network": "Vybrat síť"
+		},
+		"info": {
+			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
+			"cketh_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckETH.",
+			"pending_bitcoin_transaction": "Po dokončení čekající transakce můžete odeslat další transakci Bitcoin.",
+			"no_available_utxos": "Nebudete mít k dispozici žádné UTXO k provedení této transakce.",
+			"unknown_destination": "S touto adresou jste dosud neinteragovali. Ujistěte se, že znáte příjemce.",
+			"fee_info": "Poplatek bude zaplacen v $feeSymbol. K dispozici: <strong>$feeBalance $feeSymbol</strong>"
+		},
+		"assertion": {
+			"invalid_destination_address": "Neplatná cílová adresa",
+			"insufficient_funds": "Nedostatek prostředků.",
+			"unknown_minimum_ckbtc_amount": "Minimální množství ckBTC potřebné pro převod na BTC není známo.",
+			"unknown_minimum_cketh_amount": "Minimální množství ckETH potřebné pro převod na ETH není známo.",
+			"minimum_ckbtc_amount": "Částka je nižší než minimální $amount ckBTC potřebné pro převod na BTC.",
+			"minimum_cketh_amount": "Částka je nižší než minimální částka výběru $amount $symbol.",
+			"minimum_amount": "Částka je nižší než minimální částka výběru $amount $symbol.",
+			"minimum_ledger_fees": "Částka je nižší než poplatky za účetní knihu $symbol.",
+			"minimum_cketh_balance": "Zůstatek $symbol je nižší než odhadovaný poplatek $amount.",
+			"unknown_cketh": "Token ckETH nelze získat.",
+			"destination_address_invalid": "Cílová adresa je neplatná.",
+			"amount_invalid": "Částka je neplatná.",
+			"insufficient_funds_for_gas": "Nedostatek prostředků na gas/poplatky",
+			"insufficient_funds_for_amount": "Nedostatek prostředků na částku",
+			"insufficient_ethereum_funds_to_cover_the_fees": "Nedostatek prostředků Ethereum k pokrytí poplatků",
+			"insufficient_solana_funds_to_cover_the_fees": "Nedostatek prostředků Solana k pokrytí poplatků",
+			"not_enough_tokens_for_gas": "Nedostatek $symbol pro gas/poplatky. Zůstatek: $balance $symbol",
+			"gas_fees_not_defined": "Poplatky za gas nejsou definovány.",
+			"max_gas_fee_per_gas_undefined": "Maximální poplatek za gas nebo maximální prioritní poplatek za gas není definován.",
+			"address_unknown": "Adresa je neznámá.",
+			"minter_info_not_loaded": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH ještě není načten.",
+			"minter_info_not_certified": "Zkuste to znovu za několik sekund, parametr konfigurace ckETH nebyl certifikován.",
+			"cketh_max_transaction_fee_missing": "Chybí maximální poplatek za transakci pro ckETH.",
+			"utxos_fee_missing": "Chybí poplatek za UTXO.",
+			"minimum_btc_amount": "Částka je příliš malá. Zadejte prosím alespoň $amount BTC.",
+			"btc_insufficient_balance": "Pro transakci nejsou k dispozici žádné Bitcoin UTXO",
+			"btc_insufficient_balance_for_fee": "Nedostatečný zůstatek Bitcoinu na pokrytí transakčních poplatků",
+			"btc_invalid_utxo_data": "Neplatná data Bitcoin transakce",
+			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
+			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
+			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později."
+		},
+		"error": {
+			"unexpected": "Při odesílání transakce se něco pokazilo.",
+			"destination_address_unknown": "Cílová adresa ETH je neznámá",
+			"metamask_connected": "Nelze získat vaše účty. Je váš Metamask otevřený a již připojený?",
+			"metamask_no_accounts": "Nebyly nalezeny žádné účty Metamask.",
+			"metamask_switch_network": "Nelze požádat Metamask o přepnutí na ID řetězce $chain_id. Používá váš Metamask $network_name?",
+			"erc20_data_undefined": "Data transakce Erc20 nemohou být nedefinovaná nebo nulová.",
+			"data_undefined": "Data transakce nemohou být nedefinovaná nebo nulová.",
+			"no_identity_calculate_fee": "Nebyla poskytnuta žádná identita pro výpočet poplatku za její principal.",
+			"invalid_destination": "Cíl je neplatný. Zkuste to prosím znovu s platnou adresou peněženky nebo cílem.",
+			"incompatible_token": "Token je nekompatibilní. Zkuste to prosím znovu s kompatibilním tokenem.",
+			"no_btc_network_id": "Aktuální síť ($networkId) není síť Bitcoin.",
+			"no_solana_network_id": "Aktuální síť ($networkId) není síť Solana.",
+			"no_pending_bitcoin_transaction": "Při načítání čekajících transakcí Bitcoin došlo k chybě. Zkuste to prosím později znovu.",
+			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
+			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
+			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
+			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně."
+		}
+	},
+	"convert": {
+		"text": {
+			"converting": "Převádění...",
+			"conversion_destination": "Cíl převodu",
+			"default_destination": "Vaše peněženka OISY",
+			"convert_to_btc": "Převést na BTC",
+			"convert_to_ckbtc": "Převést na ckBTC",
+			"convert_to_token": "Převést на $token",
+			"convert_to_cketh": "Převést на ckETH",
+			"convert_to_ckerc20": "Převést на $ckErc20",
+			"convert_eth_to_cketh": "Převést $token на $ckToken",
+			"cketh_conversions_may_take": "Převody ckETH mohou trvat až 20 minut",
+			"ckerc20_conversions_may_take": "Převody $ckErc20 mohou trvat až 20 minut",
+			"how_to_convert_eth_to_cketh": "Zde je návod, jak můžete převést $token na $ckToken na $oisy_name",
+			"send_eth": "Odeslat $token na vaši adresu $oisy_name",
+			"wait_eth_current_balance": "Počkejte na příchod $tokenu. Aktuální zůstatek",
+			"set_amount": "Nastavit částku pro převod",
+			"check_balance_for_fees": "Zkontrolujte zůstatek $tokenu pro poplatky za převod",
+			"fees_explanation": "Potřebujete dostatek $tokenu k pokrytí poplatků za provedení chytré smlouvy.",
+			"current_balance": "👉 Aktuální zůstatek:",
+			"review_button": "Zkontrolovat",
+			"convert_button": "Převést",
+			"input_reset_button": "Resetovat vstupní hodnotu",
+			"swap_to_token": "Převést $sourceToken → $destinationToken",
+			"review": "Zkontrolovat transakci",
+			"max_balance": "Max",
+			"source_network": "Zdrojová síť",
+			"destination_network": "Cílová síť",
+			"conversion_may_take": "Převod může trvat až 1 hodinu",
+			"executing_transaction": "Provádění transakce...",
+			"initializing": "Inicializace transakce...",
+			"refreshing_ui": "Aktualizace uživatelského rozhraní",
+			"unsupported_token_conversion": "Převod pro vybraný token není podporován.",
+			"calculating_max_amount": "Výpočet...",
+			"send_to": "Odeslat převedená aktiva na",
+			"custom_destination": "Jiná adresa"
+		},
+		"assertion": {
+			"insufficient_funds": "Nedostatečný zůstatek"
+		},
+		"error": {
+			"loading_cketh_helper": "Chyba při načítání adresy pomocné smlouvy ckETH. Nebyl inicializován žádný ID kanystru minteru.",
+			"unexpected": "Při převodu tokenů se něco pokazilo.",
+			"unexpected_missing_data": "Při zahájení transakce převodu se něco pokazilo."
+		}
+	},
+	"swap": {
+		"text": {
+			"swap": "Vyměnit",
+			"select_destination_token": "Vybrat token k přijetí",
+			"select_source_token": "Vybrat token k platbě",
+			"switch_tokens_button": "Přepnout tokeny",
+			"review": "Zkontrolovat transakci",
+			"review_button": "Zkontrolovat výměnu",
+			"max_slippage": "Maximální skluz",
+			"value_difference": "Rozdíl v hodnotě",
+			"total_fee": "Celkový odhadovaný poplatek",
+			"network_fee": "Síťový poplatek",
+			"approval_fee": "Schvalovací poplatek",
+			"gas_fee": "Poplatek za gas",
+			"lp_fee": "Poplatek LP",
+			"max_slippage_info": "Zadejte hodnotu mezi 0 % a $maxSlippage%",
+			"max_slippage_warning": "Upozornění na riziko: vysoký skluz může vést ke ztrátám v důsledku volatility trhu",
+			"max_slippage_error": "Tolerance skluzu nemůže být 0 % nebo přesáhnout $maxSlippage%",
+			"swap_button": "Vyměnit nyní",
+			"swap_is_not_offered": "Tato výměna v současné době není nabízena.",
+			"executing_transaction": "Provádění transakce...",
+			"initializing": "Inicializace transakce...",
+			"swapping": "Výměna...",
+			"refreshing_ui": "Aktualizace uživatelského rozhraní",
+			"swap_provider": "Poskytovatel výměny",
+			"swap_provider_website": "Webové stránky",
+			"swap_route": "Trasa výměny",
+			"included_network_fees": "Zahrnuté síťové poplatky",
+			"included_liquidity_fees": "Zahrnuté poplatky za likviditní pool",
+			"best_rate": "Nejlepší kurz",
+			"expected_minimum": "Očekávané minimum",
+			"you_receive": "Obdržíte",
+			"select": "Vybrat >",
+			"select_swap_provider": "Vybrat poskytovatele výměny",
+			"open_icp_swap": "Otevřít webové stránky ICP Swap",
+			"open_instructions_link": "Otevřít odkaz na pokyny",
+			"select_token": "Vyberte token",
+			"select_network_filter": "Vybrat síť",
+			"withdrawing": "Stažení...",
+			"network_cost": "Náklady sítě",
+			"gasless": "Gasless",
+			"swap_fees": "Poplatky za swap",
+			"cross_chain_networks_info": "Přesouváte tokeny ze sítě <b>$sourceNetwork</b> do sítě <b>$destinationNetwork</b>"
+		},
+		"error": {
+			"kong_not_available": "V současné době není k dispozici žádná burza pro výměnu tokenů. Zkuste to prosím později znovu.",
+			"unexpected": "Při výměně tokenů se něco pokazilo.",
+			"unexpected_missing_data": "Při zahájení transakce výměny se něco pokazilo.",
+			"slippage_exceeded": "$oisy_short vás chrání: Obchod je mimo vaši toleranci skluzu $maxSlippage%. Upravte prosím maximální skluz a zkuste to znovu.",
+			"pool_not_found": "Výměna se nezdařila. Pool nebyl nalezen.",
+			"deposit_error": "Vklad finančních prostředků na váš swap selhal. Zkuste to prosím znovu nebo změňte poskytovatele swapu.",
+			"withdraw_failed": "Výměna se nezdařila a výběr také selhal. Zkontrolujte prosím svůj nevyužitý zůstatek a zkuste ruční výběr: ",
+			"swap_failed_withdraw_success": "Výměna se nezdařila a vaše tokeny byly úspěšně vráceny. Zkuste to prosím znovu nebo změňte poskytovatele výměny.",
+			"withdraw_failed_first_part": "Výměna se nezdařila a vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
+			"withdraw_failed_second_part": "abyste si je mohli kdykoli později stáhnout přímo z jejich webových stránek: ",
+			"swap_failed_instruction_link": "tyto pokyny ",
+			"manually_withdraw_success": "Tokeny z vašeho předchozího neúspěšného swapu byly úspěšně vybrány. Můžete zkusit swap znovu nebo změnit poskytovatele swapu.",
+			"manually_withdraw_failed": "Výběr vašich finančních prostředků selhal.<br>Zkuste to prosím znovu nebo sledujte ",
+			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
+			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít."
+		}
+	},
+	"buy": {
+		"text": {
+			"buy": "Koupit",
+			"buy_dev": "Koupit (vývojové prostředí)"
+		},
+		"onramper": {
+			"title": "Koupit přes Onramper"
+		}
+	},
+	"tokens": {
+		"text": {
+			"title": "Tokeny",
+			"contract_address": "Adresa smlouvy",
+			"token_address": "Adresa tokenu",
+			"balance": "Zůstatek",
+			"hide_zero_balances": "Skrýt nulové zůstatky",
+			"all_tokens_with_zero_hidden": "Všechna digitální aktiva s nulovým zůstatkem jsou aktuálně skryta",
+			"filter_nothing_found": "Jejda, nic nenalezeno",
+			"filter_nothing_found_description": "Zadejte ticker nebo název tokenu pro filtrování seznamu",
+			"filter_placeholder": "Filtrovat podle tokenu nebo symbolu",
+			"buy_or_receive": "Kupte nebo přijměte své první tokeny hned, abyste je viděli v seznamu",
+			"initializing": "Inicializace...",
+			"updating_ui": "Aktualizace uživatelského rozhraní...",
+			"show_token": "Zobrazit token",
+			"hide_token": "Skrýt token",
+			"select_token": "Vybrat token",
+			"exchange_is_not_available": "Hodnota v USD momentálně není k dispozici.",
+			"exchange_is_not_available_short": "Hodnota v USD není k dispozici",
+			"source_token_title": "Platíte",
+			"destination_token_title": "Obdržíte",
+			"chain_key": "Klíč řetězce",
+			"show_more_networks": "Zobrazit $number dalších sítí",
+			"hide_more_networks": "Skrýt další sítě",
+			"on_network": " na $network",
+			"delete_token": "Smazat token",
+			"edit_token": "Upravit token"
+		},
+		"details": {
+			"title": "Podrobnosti o tokenu",
+			"token": "Token",
+			"network": "Síť",
+			"contract_address_copied": "Adresa smlouvy zkopírována do schránky.",
+			"token_address_copied": "Adresa tokenu zkopírována do schránky.",
+			"twin_token": "Dvojitý token",
+			"standard": "Standardní",
+			"confirm_deletion_description": "Tímto odstraníte <span class=\"font-bold\">$token</span> z vašeho seznamu tokenů $oisy_short. Vaše prostředky zůstanou nedotčeny – token můžete kdykoli znovu přidat.",
+			"deletion_confirmation": "$token byl úspěšně odstraněn z vašeho seznamu tokenů $oisy_short.",
+			"update_confirmation": "$token byl úspěšně aktualizován.",
+			"missing_index_canister_id_label": "Nepřiřazeno",
+			"missing_index_canister_id_warning": "Chybí indexový kanystr, takže $oisy_short nemůže načíst seznam transakcí",
+			"missing_index_canister_id_button": "Nastavit indexový kanystr"
+		},
+		"balance": {
+			"error": {
+				"not_applicable": "není k dispozici"
+			}
+		},
+		"import": {
+			"text": {
+				"title": "Importovat token",
+				"review": "Zkontrolovat",
+				"saving": "Ukládání...",
+				"updating": "Aktualizace seznamu tokenů",
+				"ledger_canister_id": "ID kanystru účetní knihy",
+				"index_canister_id": "ID kanystru indexu",
+				"minter_canister_id": "ID kanystru minteru",
+				"ledger_canister_id_copied": "ID kanystru účetní knihy zkopírováno do schránky.",
+				"index_canister_id_copied": "ID kanystru indexu zkopírováno do schránky.",
+				"minter_canister_id_copied": "ID kanystru minteru zkopírováno do schránky.",
+				"verifying": "Ověřování podrobností o tokenu...",
+				"add_the_token": "Přidat token",
+				"info": "ID kanystrů účetní knihy a indexu jsou obvykle k dispozici na webových stránkách projektu.",
+				"info_index": "ID kanystru indexu je volitelné, ale bez něj nemůže $oisy_short zobrazit historii transakcí.",
+				"custom_tokens_not_supported": "Vybraná síť nepodporuje vlastní tokeny."
+			},
+			"error": {
+				"loading_metadata": "Zadaná adresa není platným tokenem ve vybrané síti.",
+				"no_metadata": "Pro token nejsou k dispozici žádná metadata. To je neočekávané.",
+				"unexpected_ledger": "Při ověřování kanystru účetní knihy se něco pokazilo.",
+				"unexpected_index": "Při ověřování kanystru indexu se něco pokazilo.",
+				"unexpected_index_ledger": "Při načítání ID účetní knihy souvisejícího s kanystrem indexu se něco pokazilo.",
+				"invalid_ledger_id": "ID účetní knihy nesouvisí s kanystrem indexu.",
+				"missing_ledger_id": "Chybí ID účetní knihy. Zadali jste hodnotu?",
+				"missing_contract_address": "Chybí adresa smlouvy. Zadali jste hodnotu?",
+				"missing_token_address": "Chybí adresa tokenu. Zadali jste hodnotu?",
+				"no_network": "Není vybrána žádná síť. To je neočekávané."
+			},
+			"warning": {
+				"do_not_close_manage": "$oisy_name připravuje a zabezpečuje nové tokeny. Prosím, nezavírejte tuto kartu, dokud není dokončeno."
+			}
+		},
+		"manage": {
+			"text": {
+				"title": "Spravovat tokeny",
+				"manage_list": "Spravovat tokeny",
+				"list_settings": "Nastavení seznamu",
+				"import_token": "Importovat token",
+				"network": "Síť",
+				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
+				"enable_more_assets": "Povolit další tokeny"
+			},
+			"placeholder": {
+				"select_network": "Vybrat síť"
+			},
+			"info": {
+				"no_changes": "Není třeba ukládat žádné změny."
+			},
+			"error": {
+				"unexpected_build": "Při vytváření seznamu známých tokenů došlo k neočekávané chybě.",
+				"empty": "Nebyly vybrány žádné tokeny k povolení nebo zakázání."
+			}
+		},
+		"hide": {
+			"title": "Skrýt token?",
+			"token": "Skrýt $token",
+			"info": "Tento token můžete v budoucnu znovu přidat v zobrazení peněženky v části <strong>„Spravovat tokeny“</strong>.",
+			"confirm": "Skrýt",
+			"hiding": "Skrývání..."
+		},
+		"alt": {
+			"context_menu": "Kontextové menu pro vybraný token",
+			"open_etherscan": "Otevřít podrobnosti o tokenu na Etherscanu",
+			"open_blockstream": "Otevřít podrobnosti o tokenu na Blockstreamu",
+			"open_dashboard": "Otevřít podrobnosti o tokenu na řídicím panelu ICP",
+			"open_contract_address_block_explorer": "Otevřít adresu smlouvy v blockchainovém průzkumníku",
+			"open_token_address_block_explorer": "Otevřít adresu tokenu v blockchainovém průzkumníku",
+			"token_group_number": "Celkový počet tokenů ve skupině pro nativní token $token",
+			"filter_button": "Otevřít/zavřít filtr"
+		},
+		"placeholder": {
+			"enter_contract_address": "Zadejte adresu smlouvy ERC20",
+			"enter_token_address": "Zadejte adresu tokenu SPL",
+			"search_token": "Hledat token"
+		},
+		"warning": {
+			"trust_token": "Ujistěte se, že důvěřujete tokenu, který přidáváte. Pokud je token, který přidáváte, ovládán škodlivou stranou, mohli by se vás pokusit podvést, např. tím, že vás přesvědčí, že jste obdrželi značné množství tokenů, aby vás zmanipulovali a poslali jste jim tokeny na oplátku nebo provedli jiné nežádoucí akce. Více se dozvíte o podvodech a bezpečnostních rizicích např. <a rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://support.metamask.io/hc/en-us/articles/4403988839451\">zde</a>."
+		},
+		"error": {
+			"invalid_contract_address": "Adresa smlouvy je neplatná.",
+			"invalid_token_address": "Adresa tokenu je neplatná.",
+			"invalid_ledger": "Vybraný token není propojen s kanystrem účetní knihy Icrc.",
+			"unrecognised_erc_interface": "Nerozpoznané rozhraní ERC.",
+			"no_metadata": "Nebyly načteny žádné metadata.",
+			"unexpected": "Při ukládání tokenu se něco pokazilo.",
+			"unexpected_hiding": "Při skrývání tokenu se něco pokazilo.",
+			"already_available": "Token je již k dispozici.",
+			"not_toggleable": "Token nelze přepnout, nelze jej skrýt.",
+			"incomplete_metadata": "V metadatech není uveden žádný název ani symbol.",
+			"duplicate_metadata": "Token s podobným názvem nebo symbolem již existuje.",
+			"unexpected_undefined": "Token je nedefinovaný. To je neočekávané.",
+			"unexpected_error_on_token_delete": "Při odstraňování tokenu došlo k chybě.",
+			"unexpected_error_on_token_update": "Při aktualizaci tokenu došlo k chybě."
+		}
+	},
+	"nfts": {
+		"text": {
+			"title": "NFTs",
+			"title_empty": "Your NFTs will appear here",
+			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
+			"grouping": "Seskupování",
+			"as_plain_list": "Zobrazit jako prostý seznam",
+			"by_collection": "Seskupit podle kolekce",
+			"show_spam": "Zobrazit spam",
+			"show_hidden": "Zobrazit skryté",
+			"sorting": "Řazení",
+			"recents_first": "Od nejnovějších",
+			"oldest_first": "Od nejstarších",
+			"collection_atoz": "Název kolekce A-Z",
+			"collection_ztoa": "Název kolekce Z-A",
+			"collection_items_count": "$count položek",
+			"collection_address": "Adresa kontraktu kolekce",
+			"token_standard": "Standard tokenu",
+			"quantity": "Množství",
+			"item_traits": "Vlastnosti položky",
+			"collection_not_loaded": "Kolekci nelze zobrazit, protože ještě nebyla načtena",
+			"nft_not_loaded": "NFT nelze zobrazit, protože ještě nebylo načteno",
+			"collections": "Kolekce",
+			"all_assets": "Všechna aktiva",
+			"address_copied": "Adresa $address zkopírována",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
+		},
+		"alt": {
+			"placeholder_image": "Zatím žádné NFT",
+			"card": {
+				"image": "Obrázek NFT s ID tokenu: $tokenId"
+			},
+			"copy_address": "Zkopírovat tuto adresu do schránky"
+		}
+	},
+	"fee": {
+		"text": {
+			"fee": "Poplatek",
+			"estimated_btc": "Odhadovaný poplatek za síť BTC",
+			"estimated_inter_network": "Odhadovaný mezisíťový poplatek",
+			"estimated_eth": "Odhadovaný poplatek za Ethereum",
+			"max_fee_eth": "Maximální poplatek <small>(pravděpodobně za < 30 sekund)</small>",
+			"convert_fee": "Poplatek za převod",
+			"convert_inter_network_fee": "Mezisíťový poplatek",
+			"convert_btc_network_fee": "Poplatek za síť Bitcoin",
+			"zero_fee": "Zdarma",
+			"total_fee": "Celkový poplatek",
+			"ata_fee": "Poplatek ATA"
+		},
+		"assertion": {
+			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."
+		},
+		"error": {
+			"cannot_fetch_gas_fee": "Nelze načíst poplatek za gas."
+		}
+	},
+	"info": {
+		"bitcoin": {
+			"title": "Přijmout BTC a převést na ckBTC",
+			"description": "Převádějte bitcoiny na ckBTC a využijte nejrychlejší a nejlevnější dostupnou transakci bitcoinů. Proces převodu může trvat až hodinu.",
+			"note": "ckBTC můžete kdykoli převést zpět na BTC.",
+			"how_to": "Jak převést na ckBTC"
+		},
+		"ethereum": {
+			"title": "Převést na $ckToken",
+			"description": "V několika krocích převeďte svůj nativní $network token $token na jeho zdvojený ICP $ckToken přímo v $oisy_name. Proces převodu může trvat až 20 minut.",
+			"note": "$ckToken můžete kdykoli převést zpět na $token.",
+			"how_to": "Jak převést na $ckToken",
+			"how_to_short": "Jak převést $token"
+		}
+	},
+	"wallet_connect": {
+		"text": {
+			"name": "WalletConnect",
+			"session_proposal": "Návrh relace",
+			"connect": "Připojit",
+			"connecting": "Připojování...",
+			"disconnect": "Odpojit",
+			"scan_qr": "Naskenovat QR kód",
+			"or_use_link": "nebo použít odkaz WalletConnect",
+			"proposer": "Navrhovatel",
+			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
+			"method": "Metoda",
+			"methods": "Metody",
+			"events": "Události",
+			"message": "Zpráva",
+			"hex_data": "HEX data",
+			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
+			"sign_message": "Podepsat zprávu"
+		},
+		"alt": {
+			"connect_input": "např. wc:a281567bb3e4..."
+		},
+		"domain": {
+			"title": "Ověření domény",
+			"valid": "Platné ✅",
+			"valid_description": "Ověření domény navrhovatele proběhlo úspěšně.",
+			"invalid": "Neplatné ❌",
+			"invalid_description": "Doména webových stránek navrhovatele se neshoduje s odesílatelem požadavku.",
+			"security_risk": "Bezpečnostní riziko ⚠️",
+			"security_risk_description": "Webové stránky navrhovatele jsou označeny jako nebezpečné.",
+			"unknown": "Neznámé ❓",
+			"unknown_description": "Doménu navrhovatele nelze ověřit."
+		},
+		"info": {
+			"disconnected": "WalletConnect odpojen.",
+			"session_ended": "Relace WalletConnect byla ukončena.",
+			"connected": "WalletConnect připojen.",
+			"transaction_executed": "WalletConnect \"$method\" požadavek proveden.",
+			"sign_executed": "Požadavek na podpis WalletConnect byl proveden."
+		},
+		"error": {
+			"qr_code_read": "Nelze přečíst QR kód.",
+			"missing_uri": "Pro připojení je nutné zadat URI.",
+			"disconnect": "Při odpojování peněženky došlo k neočekávané chybě. Přesto se připojení resetuje.",
+			"connect": "Při pokusu o připojení peněženky došlo k neočekávané chybě.",
+			"manual_workflow": "Dokončete prosím manuální pracovní postup, který již byl zahájen, otevřením modálního okna WalletConnect.",
+			"skipping_request": "Přeskakování požadavku WalletConnect, protože jiná akce právě probíhá prostřednictvím překrytí.",
+			"method_not_support": "Požadovaná metoda \"$method\" není podporována.",
+			"unexpected_pair": "Při pokusu o spárování peněženky došlo k neočekávané chybě.",
+			"no_connection_opened": "Neočekávaná chyba: Žádné připojení není otevřeno.",
+			"no_session_approval": "Neočekávaná chyba: Žádný návrh relace není k dispozici.",
+			"unexpected": "Neočekávaná chyba při komunikaci s WalletConnect.",
+			"request_rejected": "Požadavek WalletConnect byl zamítnut",
+			"unknown_parameter": "Neznámý parametr.",
+			"wallet_not_initialized": "Neočekávaná chyba. Vaše adresa peněženky není inicializována.",
+			"from_address_not_wallet": "Adresa „Od“ požadovaná pro transakci není adresou této peněženky.",
+			"unknown_destination": "Neznámá cílová adresa.",
+			"request_not_defined": "Neočekávaná chyba: Požadavek není definován, proto jej nelze zpracovat.",
+			"unexpected_processing_request": "Neočekávaná chyba při zpracování požadavku pomocí WalletConnect."
+		}
+	},
+	"transaction": {
+		"text": {
+			"details": "Podrobnosti transakce",
+			"hash": "Hash transakce",
+			"hash_copied": "Hash transakce $hash zkopírován do schránky.",
+			"id": "ID transakce",
+			"id_copied": "ID transakce zkopírováno do schránky.",
+			"timestamp": "Časové razítko",
+			"type": "Typ",
+			"from": "Od",
+			"from_copied": "Adresa odesílatele zkopírována do schránky.",
+			"received_from": "Přijato od $name",
+			"from_ata": "Účet tokenu odesílatele (ATA)",
+			"from_ata_copied": "Účet tokenu odesílatele (ATA) zkopírován do schránky.",
+			"to": "Do",
+			"to_copied": "Adresa příjemce zkopírována do schránky.",
+			"sent_to": "Odesláno na $name",
+			"to_ata": "Účet tokenu příjemce (ATA)",
+			"to_ata_copied": "Účet tokenu příjemce (ATA) zkopírován do schránky.",
+			"block": "Blok",
+			"interacted_with": "Interakce s (do)",
+			"status": "Stav",
+			"confirmations": "Potvrzení"
+		},
+		"status": {
+			"confirmed": "Potvrzeno",
+			"included": "Zahrnuto",
+			"finalised": "Dokončeno",
+			"finalized": "Dokončeno",
+			"processed": "Zpracováno",
+			"pending": "Čeká na vyřízení...",
+			"safe": "Bezpečné",
+			"unconfirmed": "Nepotvrzeno"
+		},
+		"type": {
+			"send": "Odeslat",
+			"receive": "Přijmout",
+			"withdraw": "Vybrat",
+			"deposit": "Vložit",
+			"approve": "Schválit",
+			"burn": "Spálit",
+			"mint": "Razit"
+		},
+		"label": {
+			"reimbursement": "Náhrada",
+			"twin_token_sent": "$twinToken odeslán",
+			"ck_token_sent": "$ckToken odeslán",
+			"twin_token_converted": "Převedeno z $twinToken",
+			"ck_token_converted": "Převedeno z $ckToken",
+			"sending_twin_token": "Odesílání $twinToken",
+			"sending_twin_token_failed": "Odeslání $twinToken selhalo",
+			"converting_twin_token": "Převádění $twinToken na $ckToken",
+			"converting_ck_token": "Převádění $ckToken na $twinToken",
+			"twin_network": "síť $twinNetwork",
+			"no_date_available": "Datum není k dispozici",
+			"pending": "Čeká na vyřízení"
+		},
+		"alt": {
+			"open_block_explorer": "Otevřít tuto transakci v blockchainovém průzkumníku",
+			"open_from_block_explorer": "Otevřít adresu „Od“ v blockchainovém průzkumníku",
+			"open_to_block_explorer": "Otevřít adresu „Do“ v blockchainovém průzkumníku"
+		},
+		"error": {
+			"get_block_number": "Nelze získat číslo bloku.",
+			"failed_get_transaction": "Nepodařilo se získat transakci z poskytnutého hashe ($hash). Znovu načtěte dapp peněženky."
+		}
+	},
+	"transactions": {
+		"text": {
+			"title": "Transakce",
+			"buy_or_receive": "Udělejte svou první transakci a kupte nebo přijměte tokeny hned!",
+			"transaction_history": "Vaše historie transakcí se zobrazí zde",
+			"mainnet_btc_transactions_info": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny.",
+			"transaction_history_unavailable": "Historie transakcí není k dispozici",
+			"missing_index_canister_explanation": "Momentálně nemůže $oisy_short zobrazit vaši minulou historii transakcí tokenů, protože vydavatel dosud neposkytl funkci sledování. Měla by být brzy přidána. Mezitím žádné obavy – stále můžete posílat a přijímat své tokeny jako obvykle.",
+			"index_canister_not_working_explanation": "Momentálně nemůže $oisy_short zobrazit vaši minulou historii transakcí tokenů, protože funkce sledování vydavatele v současné době nereaguje. Měla by být brzy vyřešena. Mezitím se žádné obavy – stále můžete posílat a přijímat své tokeny jako obvykle.",
+			"token_needs_enabling": "Pro zobrazení historie transakcí je třeba povolit token."
+		},
+		"error": {
+			"loading_transactions": "Chyba při načítání transakcí.",
+			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",
+			"no_token_loading_transaction": "Token nebyl nalezen. Transakce nelze načíst.",
+			"uncertified_transactions_removed": "Bylo identifikováno několik necertifikovaných transakcí, které byly následně odstraněny ze zobrazených seznamů.",
+			"loading_pending_ck_ethereum_transactions": "Při načítání nevyřízených transakcí $network se něco pokazilo.",
+			"get_transaction_for_hash": "Nepodařilo se získat transakci z poskytnutého hashe ($hash).",
+			"unexpected_transaction_for_hash": "Při načítání nevyřízených pro hash se něco pokazilo: $hash.",
+			"loading_token_with_network": "Token $token v síti $network nelze načíst, protože není ve vašem seznamu tokenů.",
+			"loading_token": "Poskytnutý odkaz na token je neplatný."
+		}
+	},
+	"about": {
+		"why_oisy": {
+			"text": {
+				"label": "Proč $oisy_short",
+				"title": "Proč $oisy_short",
+				"hold_crypto": {
+					"title": "Sjednocená správa všech vašich Digitálních Aktiv",
+					"description": "$oisy_short vám umožňuje spravovat všechna vaše digitální aktiva – včetně Bitcoinu, Solany, Etherea, ICP a dalších – v jedné, sjednocené peněžence. Už žádné žonglování s více peněženkami pro různé kryptoměny – užijte si bezproblémový a efektivní zážitek napříč různými platformami."
+				},
+				"network_custody": {
+					"title": "Už žádná úzkost ze soukromého klíče díky Síťové Úschově",
+					"description": "$oisy_name implementuje síťovou úschovu, inovativní přístup, který využívá pokročilou kryptografii Internet Computeru k odstranění nutnosti, abyste přímo manipulovali se soukromými klíči. To poskytuje bezpečnou a uživatelsky přívětivou alternativu k tradičním metodám, která je v souladu s hnutím „Onchain is the New Online“ – posunem k řešením, která zvyšují bezpečnost a odolnost proti kybernetickým útokům tím, že běží na distribuované síti."
+				},
+				"fully_on_chain": {
+					"title": "Zabezpečení proti neoprávněné manipulaci s Plně On-Chain Peněženkou",
+					"description": "Nejenže jsou vaše klíče zabezpečeny, ale celá aplikace peněženky je uložena <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/capabilities\">plně on-chain</a> a je vám doručena přímo do prohlížeče z Internet Computeru. To znamená, že celá peněženka těží z decentralizovaného modelu důvěry, což ji činí odolnou proti neoprávněné manipulaci a vysoce bezpečnou."
+				},
+				"cross_device": {
+					"title": "Přistupujte ke své peněžence kdykoli a odkudkoli",
+					"description": "Pomocí <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://identity.internetcomputer.org/\">Internet Identity</a> lze $oisy_short snadno používat na všech zařízeních, která jste propojili se svou soukromou decentralizovanou identitou. To zajišťuje bezproblémový a bezpečný přístup k vaší peněžence, ať už jste na chytrém telefonu, tabletu nebo stolním počítači."
+				},
+				"verifiable_credentials": {
+					"title": "Odemkněte Další Funkce pomocí Ověřitelných Přihlašovacích Údajů",
+					"description": "$oisy_short se integruje s platformou <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://internetcomputer.org/docs/current/developer-docs/identity/verifiable-credentials/overview\">Ověřitelných Přihlašovacích Údajů</a> Internet Computer. Získejte přístup k dalším funkcím, jako jsou airdropy a exkluzivní funkce, získáním určitých typů přihlašovacích údajů, čímž vylepšíte svůj celkový zážitek."
+				},
+				"open_source": {
+					"title": "Důvěra v Transparentnost s Otevřeným Zdrojovým Kódem",
+					"description": "$oisy_short je <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"$oisy_repo_url\">open-source</a> projekt vedený specializovaným týmem v rámci <a class='no-underline blue-link' rel=\"noreferrer noopener\" target=\"_blank\" href=\"https://dfinity.org/\">nadace DFINITY</a>, podporovaný více než 200 předními světovými kryptografy a inženýry. Otevřený zdrojový kód zajišťuje transparentnost, což komunitě umožňuje auditovat, přispívat a důvěřovat integritě peněženky."
+				}
+			}
+		}
+	},
+	"vip": {
+		"reward": {
+			"text": {
+				"open_wallet": "Přejít do peněženky",
+				"title_successful": "Gratulujeme!",
+				"title_failed": "Neplatný pozvánkový kód",
+				"reward_received": "Vítejte v $oisy_short!",
+				"reward_failed": "Kód vypršel",
+				"reward_received_description": "Svůj uvítací dárek obdržíte kdykoli.",
+				"brand_reward_received_description": "Chcete vydělat více? Doporučte přítele a vydělávejte za každého, kdo se připojí.",
+				"reward_failed_description": "Požádejte o nový a zkuste to znovu"
+			},
+			"error": {
+				"loading_reward": "Chyba při načítání nového kódu odměny.",
+				"loading_user_data": "Nepodařilo se načíst uživatelská data z kanystru odměn.",
+				"loading_eligibility": "Chyba při načítání způsobilosti ke kampani."
+			}
+		},
+		"invitation": {
+			"text": {
+				"title": "Vygenerovat pozvánku",
+				"binance_title": "QR kód Binance Clubhouse",
+				"invitation_link_copied": "Pozvánka zkopírována do schránky.",
+				"generate_new_link": "Vygenerovat nový odkaz",
+				"generating_new_code": "Generování nového kódu",
+				"regenerate_countdown_text": "Nový odkaz bude vygenerován za $counter sekund"
+			}
+		}
+	},
+	"referral": {
+		"invitation": {
+			"text": {
+				"title": "Doporučte přítele",
+				"referral_link_copied": "Doporučující odkaz zkopírován do schránky.",
+				"information": "Doporučte přátele a získejte bonusové sprinkles!",
+				"not_referred_yet": "Zatím jste nikoho nedoporučili",
+				"referred_amount": "Už jste doporučili $amount lidí",
+				"learn_more": "Zjistit více"
+			},
+			"error": {
+				"loading_referrer_info": "Chyba při načítání informací o doporučení",
+				"setting_referrer": "Chyba při nastavování doporučovatele"
+			}
+		}
+	},
+	"address_book": {
+		"text": {
+			"title": "Kontakty",
+			"empty_title": "Vaše kontakty jsou prázdné",
+			"empty_text": "Všechny vaše kontakty se zobrazí zde",
+			"add_new_contact": "Přidat nový kontakt",
+			"add_contact": "Přidat kontakt",
+			"search_contact": "Hledat kontakt",
+			"no_address_found": "Žádná adresa není k dispozici.",
+			"no_contact_found": "Nebyly nalezeny žádné kontakty"
+		},
+		"alt": {
+			"show_addresses_of_contact": "Zobrazit všechny adresy pro kontakt",
+			"hide_addresses": "Skrýt adresy kontaktu"
+		},
+		"edit_contact": {
+			"title": "Upravit kontakt",
+			"add_address": "Přidat adresu",
+			"delete_contact": "Smazat kontakt"
+		},
+		"avatar": {
+			"default": "Výchozí avatar",
+			"avatar_for": "Avatar pro",
+			"avatar_loading": "Avatar se načítá..."
+		},
+		"edit_avatar": {
+			"menu_title": "Kontaktní obrázek",
+			"upload_image": "Nahrát",
+			"replace_image": "Nahradit",
+			"remove_image": "Odstranit"
+		},
+		"show_contact": {
+			"title": "Kontakt",
+			"add_address": "Přidat adresu",
+			"show_address_text": "Přidružené adresy se zobrazí zde",
+			"add_first_address": "Přidat první adresu do $contactName!"
+		},
+		"create_contact": {
+			"title": "Vytvořit kontakt"
+		}
+	},
+	"contact": {
+		"form": {
+			"edit_contact": "Upravit kontakt",
+			"add_new_contact": "Přidat nový kontakt"
+		},
+		"fields": {
+			"name": "Název"
+		},
+		"delete": {
+			"title": "Smazat kontakt $contact?",
+			"delete_contact": "Smazat kontakt",
+			"content_text": "Tímto smažete $contact a všechny související adresy z vašich kontaktů. Tuto akci nelze vrátit zpět."
+		},
+		"error": {
+			"create": "Nepodařilo se vytvořit kontakt",
+			"update": "Nepodařilo se aktualizovat kontakt",
+			"delete": "Nepodařilo se smazat kontakt",
+			"name_too_long": "Název nesmí být delší než $maxCharacters znaků."
+		}
+	},
+	"address": {
+		"types": {
+			"Icrcv2": "Internet Computer",
+			"Btc": "Bitcoin",
+			"Eth": "Ethereum",
+			"Sol": "Solana"
+		},
+		"form": {
+			"new_address": "Nová adresa",
+			"address_placeholder": "Zadejte nebo vložte adresu",
+			"label_placeholder": "Např. „Mámina peněženka“",
+			"invalid_address": "Neplatná adresa",
+			"valid_for_networks": "Platné pro sítě:",
+			"error": {
+				"label_too_long": "Štítek nesmí přesáhnout $maxCharacters znaků"
+			}
+		},
+		"fields": {
+			"label": "Alias",
+			"address": "Adresa"
+		},
+		"delete": {
+			"title": "Smazat adresu?",
+			"delete_address": "Smazat adresu",
+			"content_text": "Tímto smažete adresu <strong>$address</strong> z kontaktu $contact.<br>Tuto akci nelze vrátit zpět."
+		},
+		"save": {
+			"title": "Uložit adresu",
+			"add_to_existing_contact": "Přidat k existujícímu kontaktu",
+			"create_contact": "Vytvořit kontakt"
+		},
+		"qr": {
+			"title": "Naskenovat QR kód"
+		}
+	},
+	"signer": {
+		"sign_in": {
+			"text": {
+				"access_your_wallet": "Přístup k vaší peněžence $oisy_name",
+				"open_or_create": "Otevřete nebo vytvořte svou peněženku, abyste se bezpečně připojili k dApp a začali spravovat svá digitální aktiva."
+			}
+		},
+		"idle": {
+			"text": {
+				"waiting": "Čekání на interakci dApp..."
+			},
+			"alt": {
+				"img_placeholder": "Logo astronauta pohybuje očima zleva doprava zatím co čeká na zprávy z dapp závisející strany"
+			}
+		},
+		"permissions": {
+			"text": {
+				"title": "Zkontrolovat oprávnění",
+				"requested_permissions": "Požadovaná oprávnění",
+				"your_wallet_address": "Vaše adresa peněženky",
+				"icrc27_accounts": "Zobrazit vaši adresu $oisy_name",
+				"icrc49_call_canister": "Požádat o schválení transakcí"
+			},
+			"error": {
+				"no_confirm_callback": "Žádné zpětné volání pro potvrzení oprávnění, což je neočekávané. Zavřete peněženku a zkuste to znovu."
+			}
+		},
+		"origin": {
+			"text": {
+				"request_from": "Požadavek od:",
+				"invalid_origin": "Neplatný původ!!"
+			},
+			"alt": {
+				"link_to_dapp": "Odkaz na dApp požadující oprávnění"
+			}
+		},
+		"consent_message": {
+			"text": {
+				"loading": "Načítání zprávy o souhlasu..."
+			},
+			"warning": {
+				"token_without_consent_message": "Tento token neposkytuje potvrzovací zprávy, takže níže uvedené informace byly extrahovány $oisy_short."
+			},
+			"error": {
+				"no_approve_callback": "Žádné zpětné volání pro schválení zprávy o souhlasu, což je neočekávané. Zavřete peněženku a zkuste to znovu.",
+				"no_reject_callback": "Žádné zpětné volání pro zamítnutí zprávy o souhlasu, což je neočekávané. Zavřete peněženku a zkuste to znovu.",
+				"retrieve": "Při načítání zprávy o souhlasu došlo k chybě"
+			}
+		},
+		"call_canister": {
+			"text": {
+				"processing": "Zpracování požadavku...",
+				"executed": "Požadavek byl proveden",
+				"close_window": "Můžete zavřít toto okno",
+				"error": "Požadavek selhal kvůli chybě",
+				"try_again": "Zkuste to prosím znovu. Pokud problém přetrvává, obraťte se na vývojáře dapp, kde jste požadavek iniciovali."
+			},
+			"error": {
+				"cannot_call": "Volání nelze zpracovat"
+			}
+		}
+	},
+	"carousel": {
+		"text": {
+			"next_slide": "Další snímek",
+			"prev_slide": "Předchozí snímek",
+			"indicator": "Přejít na snímek $index"
+		}
+	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
+	"license_agreement": {
+		"text": {
+			"license_agreement": "Licenční smlouva",
+			"accept_terms": "Kliknutím na toto tlačítko souhlasíte s",
+			"accept_terms_link": "Licenční smlouvou",
+			"title": "Licenční smlouva $oisy_name („Licenční smlouva“)",
+			"paragraph_1": "Děkujeme za váš zájem o $oisy_name, decentralizovanou aplikaci peněženky s více sítěmi a vlastní úschovou založenou na prohlížeči, hostovanou na veřejné blockchainové síti Internet Computer („$oisy_short“). Další informace o $oisy_short, jeho open-source kódu a souvisejících licencích naleznete v repozitáři GitHub $oisy_short zde: $oisy_repo_url.",
+			"paragraph_2": "Tato licenční smlouva upravuje vaše používání $oisy_short („vy“). POUŽÍVÁNÍM $oisy_short SOUHLASÍTE S TÍM, ŽE JSTE SI PŘEČETLI, POROZUMĚLI A SOUHLASÍTE S TÍM, ŽE BUDETE VÁZÁNI TOUTO LICENČNÍ SMLOUVOU. POKUD NESOUHLASÍTE, NESMÍTE $oisy_short POUŽÍVAT.",
+			"paragraph_3": "Pokud se rozhodnete používat $oisy_short, vy a nadace DFINITY, včetně jejích přidružených společností a dceřiných společností (společně „DFINITY“), berete na vědomí a souhlasíte s následujícím:",
+			"limited_license": "<strong>1. OMEZENÁ LICENCE.</strong> S výhradou podmínek obsažených v této licenční smlouvě vám DFINITY uděluje omezenou, nevýhradní, nepřenosnou, nesublicencovatelnou a odvolatelnou licenci k používání $oisy_short pouze pro účely přijímání, držení a odesílání tokenů, jako jsou nativní ICP, ICRC-1, ETH a tokeny ERC20, a také další tokeny, které mohou být čas od času zpřístupněny. Můžete vytvářet odvozená díla v rozsahu povoleném licenčními podmínkami, které upravují používání jakýchkoli open-source komponent obsažených v $oisy_short.",
+			"restrictions": "<strong>2. OMEZENÍ.</strong> Jste zodpovědní za veškeré aktivity související s vaším používáním $oisy_short, bez ohledu na to, zda jsou tyto aktivity vámi povoleny nebo prováděny vámi, vašimi zaměstnanci nebo třetí stranou vaším jménem. ROZUMÍTE, ŽE DFINITY NENÍ ZODPOVĚDNÁ ZA ŽÁDNÉ AKTIVITY ANI TRANSAKCE (AŤ UŽ DOKONČENÉ ČI JINAK) SPOJENÉ S VAŠÍM $oisy_name. Nebudete zkreslovat ani přikrášlovat vztah mezi vámi a DFINITY, včetně vyjádření nebo naznačení, že DFINITY vás nebo vaše obchodní snahy podporuje, sponzoruje, schvaluje nebo k nim přispívá prostřednictvím vašeho používání $oisy_short. Nebudete naznačovat žádný vztah ani přidružení k DFINITY, s výjimkou případů výslovně povolených touto licenční smlouvou. Je vám zakázáno používat název $oisy_short, logo nebo jakékoli jiné ochranné známky související s $oisy_short jakýmkoli způsobem, který by mohl naznačovat podporu nebo přidružení, zkreslovat váš vztah s $oisy_short nebo vytvářet zmatek ohledně zdroje $oisy_short.",
+			"applicable_laws": "<strong>3. PLATNÉ ZÁKONY.</strong> Budete dodržovat všechny platné zákony a předpisy (včetně, bez omezení, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo ekonomických sankcí) v souvislosti s vaším používáním $oisy_short a jakýmikoli transakcemi spojenými s vaším $oisy_name.",
+			"reservation_rights": "<strong>4. VÝHRADA PRÁV DFINITY.</strong> $oisy_short je majetkem společnosti DFINITY a je vám licencován, nikoli prodán. Obsah $oisy_short, jeho vizuální rozhraní, interaktivní funkce, informace, grafika, design, kompilace, počítačový kód, produkty, služby a všechny ostatní prvky $oisy_short a související dokumentace jsou chráněny platnými zákony o duševním vlastnictví. Mezi vámi a DFINITY jsou veškeré materiály DFINITY a $oisy_short, včetně práv duševního vlastnictví v nich a k nim, výhradním a výhradním vlastnictvím společnosti DFINITY nebo jejích dceřiných společností nebo přidružených společností a/nebo jejích třetích stran poskytovatelů licencí, s výhradou jakýchkoli licencí na software s otevřeným zdrojovým kódem. DFINITY si vyhrazuje všechna práva, která nejsou výslovně udělena v této licenční smlouvě. Nezískáváte žádné právo, nárok ani podíl na materiálech DFINITY nebo $oisy_short, ať už na základě implikace, estoppel nebo jinak, s výjimkou omezených práv stanovených v této licenční smlouvě a práv udělených licenčními podmínkami, které upravují používání jakýchkoli komponent s otevřeným zdrojovým kódem obsažených v $oisy_short. Tato licenční smlouva vám neuděluje žádné právo používat název $oisy_short, logo nebo jiné ochranné známky související s $oisy_short nebo DFINITY.",
+			"feedback": "<strong>5. ZPĚTNÁ VAZBA.</strong> Pokud poskytnete společnosti DFINITY jakékoli komentáře, nápady, hlášení o chybách, zpětnou vazbu, vylepšení, doporučení nebo úpravy v souvislosti s $oisy_short („zpětná vazba“), je taková zpětná vazba poskytována na nedůvěrném základě a společnost DFINITY bude mít právo použít takovou zpětnou vazbu dle svého uvážení, včetně, ale nikoli výhradně, začlenění takových navrhovaných změn do materiálů DFINITY, $oisy_short nebo jiných služeb. Tímto udělujete společnosti DFINITY trvalou, neodvolatelnou, převoditelnou, sublicencovatelnou, nevýhradní licenci bez licenčních poplatků na základě všech práv nezbytných k takovému začlenění a použití vaší zpětné vazby k jakémukoli účelu, včetně výroby a prodeje produktů a služeb, a souhlasíte s poskytnutím společnosti DFINITY veškeré potřebné pomoci k dokumentování, zdokonalování a udržování práv společnosti DFINITY na zpětnou vazbu. Souhlasíte s tím, že společnost DFINITY vás bude čas od času kontaktovat za účelem získání zpětné vazby, ale můžete se odhlásit zasláním písemného oznámení na adresu legalnotice@dfinity.org.",
+			"termination": "<strong>6. PODMÍNKY A UKONČENÍ.</strong> Tato licenční smlouva zůstane v platnosti, dokud nebude ukončena. Licenční smlouva a vaše práva a licence podle této smlouvy skončí okamžitě po vašem porušení licenční smlouvy. Tuto licenční smlouvu můžete kdykoli ukončit vyprázdněním svých $oisy_name tokenů a ukončením veškerého používání $oisy_short. Společnost DFINITY může tuto licenční smlouvu kdykoli ukončit z jakéhokoli důvodu, včetně, bez omezení, jakéhokoli skutečného nebo podezřelého zneužití nebo zneužití $oisy_short z vaší strany nebo jakéhokoli porušení této licenční smlouvy. Články 3 až 13 zůstanou v platnosti i po jakémkoli ukončení této licenční smlouvy.",
+			"warranty_liability": "<strong>7. ZŘEKNUTÍ SE ZÁRUKY A OMEZENÍ ODPOVĚDNOSTI.</strong> V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝM ZÁKONEM JE $oisy_short POSKYTOVÁN „TAK, JAK JE“, BEZ JAKÉKOLI ZÁRUKY. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝM ZÁKONEM SE DFINITY ZŘÍKÁ VŠECH ZÁRUK A PODMÍNEK, VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NE VÝHRADNĚ, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZARUČUJE, ŽE $oisy_short BUDE VŽDY DOSTUPNÝ, BEZPEČNÝ NEBO ZABEZPEČENÝ (NYNÍ I V BUDOUCNU). DFINITY VÝSLOVNĚ ODMÍTÁ JAKÉKOLI ZÁRUKY JAKÉHOKOLI DRUHU S OHLEDEM NA PŘESNOST NEBO FUNKČNOST $oisy_short A S OHLEDEM NA PŘESNOST, PLATNOST NEBO ÚPLNOST JAKÝCHKOLI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNU) ZPŘÍSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ $oisy_short, NEBO KVALITU NEBO KONZISTENCI $oisy_short NEBO VÝSLEDKY ZÍSKANÉ JEHO POUŽÍVÁNÍM. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝM ZÁKONEM V ŽÁDNÉM PŘÍPADĚ NEBUDE DFINITY ODPOVĚDNÁ ZA JAKÉKOLI NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÉ ŠKODY JAKÉHOKOLI DRUHU VZNIKLÉ Z POUŽITÍ NEBO NESCHOPNOSTI POUŽÍVAT A ZPŘÍSTUPNIT $oisy_short NEBO MATERIÁLY DFINITY, I KDYŽ BYLA DFINITY UPOZORNĚNA NA MOŽNOST TAKOVÝCH ŠKOD, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉHOKOLI OMEZENÉHO NÁPRAVNÉHO PROSTŘEDKU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝM ZÁKONEM V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST DFINITY ZA ŠKODY VZNIKLÉ Z TÉTO LICENČNÍ SMLOUVY NEBO VAŠEHO POUŽÍVÁNÍ NEBO NESCHOPNOSTI POUŽÍVAT $oisy_short 100 CHF.",
+			"indemnity": "<strong>8. ODŠKODNĚNÍ.</strong> Souhlasíte s tím, že odškodníte, budete bránit a chránit společnost DFINITY a její přidružené společnosti, úředníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před jakoukoli odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím $oisy_short nebo vaším porušením této licenční smlouvy nebo jakéhokoli platného zákona nebo nařízení.",
+			"governing_law": "<strong>9. ROZHODNÉ PRÁVO; SOUDNÍ PŘÍSLUŠNOST.</strong> Jakýkoli nárok týkající se $oisy_short se bude řídit zákony Švýcarska, s vyloučením pravidel o kolizi právních norem. Jakýkoli nárok nebo spor související s touto licenční smlouvou nebo v souvislosti s ní (včetně nesmluvních sporů nebo nároků a jejich výkladu) bude podléhat výhradní jurisdikci soudů v Curychu, Švýcarsko, s možností odvolání k Švýcarskému federálnímu soudu.",
+			"entire_agreement": "<strong>10. ÚPLNÁ DOHODA A ODDĚLITELNOST.</strong> Tato licenční smlouva představuje úplnou dohodu mezi vámi a společností DFINITY a nahrazuje veškeré předchozí dohody, jednání nebo jiná sdělení mezi vámi a společností DFINITY, ať už ústní nebo písemná, týkající se předmětu této smlouvy. Společnost DFINITY může provádět změny této licenční smlouvy, když budou zpřístupněny nové verze $oisy_short. V případě, že bude jakékoli ustanovení této licenční smlouvy shledáno neplatným nebo nevymahatelným, pak: (a) se takové ustanovení bude považovat za reformované v rozsahu nezbytně nutném k tomu, aby bylo takové ustanovení platné a vymahatelné, nebo pokud není schopno takové reformace, bude se považovat za oddělené od této licenční smlouvy; a (b) platnost a vymahatelnost všech ostatních ustanovení této smlouvy tím nebude nijak ovlivněna ani narušena.",
+			"assignment": "<strong>11. PŘEVOD.</strong> Tuto licenční smlouvu nesmíte převést bez předchozího písemného souhlasu společnosti DFINITY, ať už výslovně nebo na základě zákona, včetně v souvislosti se sloučením nebo změnou kontroly, a jakýkoli takový pokus o převod bude neplatný a bez účinku. Společnost DFINITY může tuto licenční smlouvu převést bez omezení a bez jakéhokoli upozornění. S výhradou výše uvedeného bude tato licenční smlouva závazná pro strany a jejich příslušné nástupce a povolené postupníky.",
+			"no_waiver": "<strong>12. ŽÁDNÉ ZŘEKNUTÍ SE PRÁV.</strong> Nevykonání nebo zpoždění při výkonu práva, pravomoci nebo nápravného prostředku stanoveného v této licenční smlouvě nebo zákonem nepředstavuje zřeknutí se tohoto práva, pravomoci nebo nápravného prostředku. Zřeknutí se společnosti DFINITY jakéhokoli závazku nebo porušení této licenční smlouvy nebude fungovat jako zřeknutí se jakéhokoli jiného závazku nebo následného porušení této licenční smlouvy.",
+			"english_version": "<strong>13. ANGLICKÁ VERZE.</strong> Anglická jazyková verze této licenční smlouvy bude oficiální a řídící verzí smlouvy, pokud dojde k jakémukoli konfliktu. Veškerá sdělení a oznámení učiněná v souladu s touto licenční smlouvou musí být v anglickém jazyce.",
+			"body": "Děkujeme za váš zájem o $oisy_name, decentralizovanou aplikaci peněženku s více řetězci, která je založena na prohlížeči a je hostována na veřejné blockchainové síti Internet Computer („$oisy_short“). Více informací o aplikaci $oisy_short, jejím open source kódu a souvisejících licencích naleznete v repozitáři $oisy_short na GitHubu, který naleznete zde: $oisy_repo_url.\n\nTato licenční smlouva upravuje vaše používání aplikace $oisy_short („Vy“). POUŽÍVÁNÍM aplikace $oisy_short SOUHLASÍTE S TÍM, ŽE JSTE SI TUTO LICENČNÍ SMLOUVU PŘEČETLI, ROZUMÍTE JI A SOUHLASÍTE S TÍM, ŽE JSTE SE JÍ ŘÍDILI. POKUD NESOUHLASÍTE, NESMÍTE $oisy_short POUŽÍVAT.\n\nPokud se rozhodnete používat $oisy_short, vy a nadace DFINITY, včetně jejích přidružených společností a dceřiných společností (souhrnně „DFINITY“), berete na vědomí a souhlasíte s následujícím:\n\n### 1. OMEZENÁ LICENCE.\nV souladu s podmínkami uvedenými v této licenční smlouvě vám DFINITY uděluje omezenou, nevýhradní, nepřenosnou, nesublicencovatelnou a odvolatelnou licenci k používání $oisy_short pouze za účelem přijímání, držení a odesílání tokenů, jako jsou nativní tokeny ICP, ICRC-1, ETH a ERC20, jakož i další tokeny, které mohou být čas od času k dispozici. Můžete vytvářet odvozená díla v rozsahu povoleném licenčními podmínkami upravujícími použití jakýchkoli komponent s otevřeným zdrojovým kódem, které jsou součástí $oisy_short.\n\n### 2. OMEZENÍ.\nJste zodpovědní za veškeré činnosti související s vaším používáním $oisy_short, bez ohledu na to, zda jsou tyto činnosti vámi schváleny nebo zda je provádíte vy, vaši zaměstnanci nebo třetí strana vaším jménem. BERETE NA VĚDOMÍ, ŽE DFINITY NENÍ ZODPOVĚDNÁ ZA ŽÁDNÉ AKTIVITY NEBO TRANSAKCE (AŤ UŽ DOKONČENÉ NEBO JINAK) SPOJENÉ S VAŠÍM $oisy_name. Nebudete zkreslovat ani přikrášlovat vztah mezi vámi a DFINITY, včetně vyjadřování nebo naznačování, že DFINITY podporuje, sponzoruje, schvaluje nebo přispívá k vám nebo vašim obchodním snahám prostřednictvím vašeho používání $oisy_short. Nebudete naznačovat žádný vztah ani spojení s DFINITY, s výjimkou případů výslovně povolených touto licenční smlouvou. Je zakázáno používat název, logo nebo jakékoli jiné ochranné známky $oisy_short související s $oisy_short jakýmkoli způsobem, který by mohl naznačovat schválení nebo přidružení, zkreslovat váš vztah s $oisy_short nebo vyvolávat zmatek ohledně zdroje $oisy_short.\n\n### 3. PŘÍSLUŠNÉ ZÁKONY.\nBudete dodržovat všechny platné zákony a předpisy (včetně, mimo jiné, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo ekonomických sankcí) v souvislosti s vaším používáním $oisy_short a veškerými transakcemi spojenými s vaším $oisy_name.\n\n### 4. VYHRAZENÍ PRÁV SPOLEČNOSTI DFINITY.\n$oisy_short je majetkem společnosti DFINITY a je vám licencován, nikoli prodáván. Obsah, vizuální rozhraní, interaktivní prvky, informace, grafika, design, kompilace, počítačový kód, produkty, služby a všechny ostatní prvky $oisy_short a související dokumentace jsou chráněny platnými zákony o duševním vlastnictví. Ve vztahu mezi vámi a DFINITY jsou veškeré materiály DFINITY a $oisy_short, včetně práv duševního vlastnictví k nim a k nim, výhradním a výhradním vlastnictvím společnosti DFINITY nebo jejích dceřiných společností nebo přidružených společností a/nebo jejích poskytovatelů licencí třetích stran, s výhradou jakýchkoli licencí na software s otevřeným zdrojovým kódem. DFINITY si vyhrazuje veškerá práva, která nejsou výslovně udělena v této licenční smlouvě. Nezískáváte žádná práva, nároky ani podíly k materiálům DFINITY ani k $oisy_short, ať už implicitně, na základě překážky nebo jinak, s výjimkou omezených práv stanovených v této licenční smlouvě a práv udělených licenčními podmínkami upravujícími používání jakýchkoli komponent s otevřeným zdrojovým kódem, které jsou součástí $oisy_short. Tato licenční smlouva vám neuděluje žádné právo používat název, logo ani jiné ochranné známky $oisy_short související s $oisy_short nebo DFINITY.\n\n### 5. ZPĚTNÁ VAZBA.\nPokud poskytnete DFINITY jakékoli komentáře, nápady, hlášení o chybách, zpětnou vazbu, vylepšení, doporučení nebo úpravy týkající se $oisy_short („Zpětná vazba“), je taková zpětná vazba poskytována na nedůvěrné bázi a DFINITY má právo tuto zpětnou vazbu použít dle vlastního uvážení, včetně, ale nikoli výhradně, začlenění těchto navrhovaných změn do materiálů DFINITY, $oisy_short nebo jiných služeb. Tímto udělujete DFINITY trvalou, neodvolatelnou, převoditelnou, sublicencovatelnou, nevýhradní, bezplatnou licenci na základě všech práv nezbytných k začlenění a použití vaší zpětné vazby pro jakýkoli účel, včetně výroby a prodeje produktů a služeb, a souhlasíte s tím, že poskytnete DFINITY veškerou pomoc potřebnou k dokumentaci, zdokonalení a udržování práv DFINITY k zpětné vazbě. Souhlasíte s tím, že vás společnost DFINITY bude moci čas od času kontaktovat za účelem zpětné vazby, ale můžete se odhlásit zasláním písemného oznámení na adresu legalnotice@dfinity.org.\n\n### 6. PODMÍNKY A UKONČENÍ.\nTato licenční smlouva zůstává v platnosti až do jejího ukončení. Licenční smlouva a vaše práva a licence z ní vyplývající zaniknou okamžitě po jejím porušení. Licenční smlouvu můžete kdykoli ukončit vyprázdněním tokenů vašeho účtu $oisy_name a ukončením veškerého používání účtu $oisy_short. Společnost DFINITY může tuto licenční smlouvu kdykoli ukončit z jakéhokoli důvodu, včetně, mimo jiné, jakéhokoli skutečného nebo domnělého zneužití nebo zneužití účtu $oisy_short z vaší strany nebo jakéhokoli porušení této licenční smlouvy. Oddíly 3 až 13 zůstávají v platnosti i po ukončení této licenční smlouvy.\n\n### 7. VYLOUČENÍ ZÁRUKY A OMEZENÍ ODPOVĚDNOSTI.\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY JE $oisy_short POSKYTOVÁN „TAK, JAK JE“, BEZ ZÁRUKY JAKÉHOKOLI DRUHU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY SE DFINITY ZŘÍKÁ VEŠKERÝCH ZÁRUK A PODMÍNEK, AŤ UŽ VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NEJEN, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZÁRUČUJE, ŽE $oisy_short BUDE VŽDY DOSTUPNÝ, BEZPEČNÝ NEBO ZAJIŠTĚNÝ (NYNÍ I V BUDOUCNOSTI). SPOLEČNOST DFINITY VÝSLOVNĚ ODMÍTÁ VEŠKERÉ ZÁRUKY JAKÉHOKOLI DRUHU OHLEDNĚ PŘESNOSTI NEBO FUNKČNOSTI SOUČÁSTKY $oisy_short A OHLEDNĚ PŘESNOSTI, PLATNOSTI NEBO ÚPLNOSTI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNOSTI) ZDOSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ SOUČÁSTKY $oisy_short, NEBO KVALITY NEBO KONZISTENCE SOUČÁSTKY $oisy_short NEBO VÝSLEDKŮ ZÍSKANÝCH JEHO POUŽÍVÁNÍM. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝMI ZÁKONY NEBUDE SPOLEČNOST DFINITY ZA ŽÁDNÝCH OKOLNOSTÍ ODPOVĚDNÁ ZA ŽÁDNÉ NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÍ ŠKODY VZNIKLÉ Z POUŽÍVÁNÍ NEBO NEMOŽNOSTI POUŽÍVAT A PŘÍSTUPOVAT K MATERIÁLŮM $oisy_short NEBO DFINITY, ATO I V PŘÍPADĚ, ŽE SPOLEČNOST DFINITY BYLA NA MOŽNOST TAKOVÝCH ŠKOD UPOZORNĚNA, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉHOKOLI OMEZENÉHO NÁPRAVNÉHO PROSTŘEDKU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST SPOLEČNOSTI DFINITY ZA ŠKODY VYPLÝVAJÍCÍ Z TÉTO LICENČNÍ SMLOUVY NEBO Z VAŠEHO POUŽÍVÁNÍ ČI NEMOŽNOSTI POUŽÍVAT $oisy_short 100 CHF.\n\n### 8. ODŠKODNĚNÍ.\nSouhlasíte s tím, že odškodníte, budete bránit a ochráníte společnost DFINITY a její přidružené společnosti, vedoucí pracovníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před jakoukoli odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím $oisy_short nebo s vaším porušením této Licenční smlouvy nebo jakéhokoli platného zákona či předpisu.\n\n### 9. ROZHODNÉ PRÁVO; MÍSTO KONÁNÍ.\nVeškerý nárok týkající se $oisy_short se řídí zákony Švýcarska, s vyloučením kolizních norem. Veškerý nárok nebo spor týkající se této Licenční smlouvy nebo v souvislosti s ní podléhá (včetně mimosmluvních sporů nebo nároků a jejich výkladu) výlučné jurisdikci soudů v Curychu ve Švýcarsku s výhradou odvolání ke Švýcarskému federálnímu soudu.\n\n### 10. CELÁ SMLOUVA A ODDĚLITELNOST.\nTato Licenční smlouva představuje úplnou dohodu mezi Vámi a společností DFINITY a nahrazuje veškeré předchozí dohody, jednání nebo jinou komunikaci mezi Vámi a společností DFINITY, ať už ústní nebo písemnou, týkající se předmětu této smlouvy. Společnost DFINITY může tuto Licenční smlouvu změnit, jakmile budou k dispozici nové verze $oisy_short. V případě, že se jakékoli ustanovení této Licenční smlouvy ukáže jako neplatné nebo nevymahatelné, pak: (a) takové ustanovení se považuje za upravené v rozsahu nezbytně nutném k tomu, aby se toto ustanovení stalo platným a vymahatelným, nebo pokud takové úpravy nelze provést, považuje se za oddělené od této Licenční smlouvy; a (b) platnost a vymahatelnost všech ostatních ustanovení této smlouvy tím nebudou nijak dotčeny ani narušeny.\n\n### 11. POSTOUPENÍ.\nTuto licenční smlouvu nesmíte postoupit bez předchozího písemného souhlasu společnosti DFINITY, ať už výslovně nebo ze zákona, a to i v souvislosti s fúzí nebo změnou kontroly, a jakýkoli takový pokus o postoupení bude neplatný a bez účinku. Společnost DFINITY může tuto licenční smlouvu postoupit bez omezení a bez jakéhokoli oznámení Vám. S výhradou výše uvedeného je tato licenční smlouva závazná pro strany a jejich příslušné nástupce a povolené postupníky.\n\n### 12. ŽÁDNÉ VZDÁNÍ SE PRÁV.\nNeuplatnění nebo opožděné uplatnění práva, pravomoci nebo nápravného prostředku stanoveného v této licenční smlouvě nebo ze zákona nepředstavuje vzdání se tohoto práva, pravomoci nebo nápravného prostředku. Zřeknutí se jakékoli povinnosti nebo porušení této licenční smlouvy ze strany DFINITY neznamená zřeknutí se jakékoli jiné povinnosti ani následné porušení licenční smlouvy.\n\n### 13. ANGLICKÁ VERZE.\nAnglická verze této licenční smlouvy je oficiální a rozhodující verzí smlouvy v případě jakéhokoli rozporu. Veškerá komunikace a oznámení učiněná na základě této licenční smlouvy musí být v anglickém jazyce."
+		},
+		"alt": {
+			"license_agreement": "Licenční smlouva $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Podmínky použití",
+			"title": "Podmínky použití",
+			"body": "Datum účinnosti: $date\n\n### 1. Souhlas s podmínkami\n\nPoužíváním peněženky OISY, webových stránek na adrese oisy.com nebo jakýchkoli jiných služeb, ze kterých odkazujeme na tyto Podmínky použití („Služby“), souhlasíte s námi, nadací DFINITY, včetně našich přidružených společností a dceřiných společností (souhrnně „DFINITY“), s těmito Podmínkami použití a s naší [Licenční smlouvou](https://oisy.com/license-agreement/) (souhrnně „Smlouva“). V případě jakéhokoli rozporu nebo nesrovnalosti mezi těmito Podmínkami použití a Licenční smlouvou mají přednost Podmínky použití. Pokud s nimi nesouhlasíte, nepoužívejte naše Služby. Používáním našich Služeb prohlašujete, že vám je alespoň 18 let.\n\n### 2. Popis našich Služeb\n\n* Peněženka OISY je decentralizovaná aplikace peněženky založená na prohlížeči, s vlastní správou a více řetězci, hostovaná na veřejné blockchainové síti Internet Computer, která vám umožňuje přístup k určitým tokenům podporovaným peněženkou OISY a dalšími službami třetích stran. Tyto třetí strany nevlastníme, nekontrolujeme ani neprovozujeme a služby třetích stran používáte na vlastní nebezpečí.\n \n* Některé funkce peněženky OISY jsou experimentální nebo v beta verzi.\n \n\n### 3. Přístup k účtu a zabezpečení\n\nJste zodpovědní za obojí:\n\n* Provedení všech nezbytných opatření pro váš přístup na webové stránky.\n \n* Ochrana vašich přístupových údajů, včetně vaší internetové identity.\n \n\nPokud ztratíte svou internetovou identitu nebo pokud je jinak ohrožena, nebudeme moci obnovit přístup k vašemu účtu.\n\nPro přístup na webové stránky nebo k některým zdrojům, které nabízejí, můžete být požádáni o poskytnutí určitých registračních údajů nebo jiných informací. Podmínkou vašeho používání webových stránek je, aby všechny informace, které na webových stránkách poskytnete, byly správné, aktuální a úplné. Souhlasíte s tím, že veškeré informace, které poskytnete k registraci na těchto webových stránkách nebo jinak, včetně, ale nikoli výhradně, prostřednictvím použití jakýchkoli interaktivních funkcí na webových stránkách, se řídí našimi _Zásadami ochrany osobních údajů_ \\[ODKAZ NA ZÁSADY OCHRANY OSOBNÍCH ÚDAJŮ\\], a souhlasíte se všemi kroky, které podnikneme s ohledem na vaše informace v souladu s našimi Zásadami ochrany osobních údajů.\n\nSouhlasíte s tím, že na konci každé relace opustíte svůj účet. Při přístupu k účtu z veřejného nebo sdíleného počítače byste měli být obzvláště opatrní, aby ostatní nemohli zobrazit nebo zaznamenat vaše heslo nebo jiné osobní údaje.\n\nBerete také na vědomí, že nemáme úschovu, přístup ani kontrolu nad finančními prostředky ve vaší peněžence OISY. Berete na vědomí, že peněženka OISY je výhradně pod kontrolou uživatele.\n\n### 4. Prohlášení o vyloučení záruky a omezení odpovědnosti\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY JSOU NAŠE SLUŽBY POSKYTOVÁNY „TAK, JAK JSOU“ BEZ ZÁRUKY JAKÉHOKOLI DRUHU, VČETNĚ TOHO, ŽE OISY NEPOSKYTUJE ZÁRUKU ANI GARANCI ZA JAKOUKOLI ZTRÁTU FINANČNÍCH PROSTŘEDKŮ NEBO TECHNICKÉ PORUCHY. PŘEBÍRÁTE RIZIKA SPOJENÁ S POUŽÍVÁNÍM DECENTRALIZOVANÉ INFRASTRUKTURY A BERETE NA VĚDOMÍ, ŽE NEJSME ZODPOVĚDNÍ ZA ŽÁDNOU ZTRÁTU FINANČNÍCH PROSTŘEDKŮ, BEZ OHLEDU NA PŘÍČINU ZTRÁTY.\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY SE DFINITY ZŘÍKÁ VEŠKERÝCH ZÁRUK A PODMÍNEK, VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NEJEN, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZÁRUČUJE, ŽE SLUŽBY BUDOU VŽDY DOSTUPNÉ, BEZPEČNÉ NEBO ZAJIŠTĚNÉ (NYNÍ I V BUDOUCNOSTI). SPOLEČNOST DFINITY VÝSLOVNĚ ODMÍTÁ JAKÉKOLI ZÁRUKY JAKÉHOKOLI DRUHU OHLEDNĚ PŘESNOSTI NEBO FUNKČNOSTI SLUŽEB A OHLEDNĚ PŘESNOSTI, PLATNOSTI NEBO ÚPLNOSTI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNOSTI) ZDOSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ SLUŽEB, NEBO KVALITY NEBO KONZISTENCE SLUŽEB NEBO VÝSLEDKŮ ZÍSKANÝCH PROSTŘEDNICTVÍM JEJICH POUŽÍVÁNÍ. SPOLEČNOST DFINITY NEZARUČUJE, ŽE SLUŽBY MOHOU PŘEVÉST VLASTNICTVÍ NEBO PRÁVO K JAKÉMUKOLI TOKENU NEBO DIGITÁLNÍMU AKTIVU, ANI NEPOSKYTUJE JAKÉKOLI ZÁRUKY OHLEDNĚ VLASTNICTVÍ. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝMI ZÁKONY NEBUDE SPOLEČNOST DFINITY ZA ŽÁDNÝCH OKOLNOSTÍ ODPOVĚDNÁ ZA ŽÁDNÉ NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÍ ŠKODY VYPLÝVAJÍCÍ Z POUŽÍVÁNÍ NEBO MOŽNOSTI POUŽÍVAT A PŘÍSTUPOVAT K SLUŽBÁM NEBO MATERIÁLŮM DFINITY NEBO K JAKÝMKOLI POLOŽKÁM TŘETÍCH STRAN, JAK JE ZDE DEFINOVÁNO, ATO I V PŘÍPADĚ, ŽE SPOLEČNOST DFINITY BYLA NA MOŽNOST TAKOVÝCH ŠKOD UPOZORNĚNA, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉHOKOLI OMEZENÉHO NÁPRAVNÉHO PROSTŘEDKU. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST SPOLEČNOSTI DFINITY ZA ŠKODY VYPLÝVAJÍCÍ Z TÉTO SMLOUVY NEBO Z VAŠEHO POUŽÍVÁNÍ NEBO MOŽNOSTI POUŽÍVAT SLUŽBY 100 CHF.\n\n### 5. Odškodnění\n\nSouhlasíte s tím, že odškodníte, budete bránit a ochráníte společnost DFINITY a její přidružené společnosti, vedoucí pracovníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před jakoukoli odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím našich Služeb nebo s vaším porušením této Smlouvy nebo jakéhokoli platného zákona či předpisu.\n\n### 6. Programy odměn\n\nÚčastí v našich programech odměn souhlasíte s [INICIATIVA ODMĚN OISY - OBCHODNÍ PODMÍNKY](https://docs.oisy.com/rewards/oisy-sprinkles/t-and-cs), které jsou zde zahrnuty a mohou se změnit. čas od času.\n\n### 7. Dodržování zákonů a přijatelné užívání\n\nV souvislosti s užíváním Služeb budete dodržovat všechny platné zákony a předpisy (včetně, mimo jiné, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo ekonomických sankcí). Naše Služby nebudete používat k žádným nezákonným účelům ani způsobem, který porušuje práva jakékoli entity DFINITY, jiných uživatelů nebo jiných osob.\n\n### 8. Daňová povinnost\n\nJste zodpovědní za dodržování všech platných federálních, státních a místních zákonů a předpisů týkajících se výběru a placení daní a poplatků.\n\n### 9. Rozhodné právo; místo konání\n\nVeškeré nároky týkající se Služeb se řídí zákony Švýcarska, s vyloučením kolizních norem. Jakýkoli nárok nebo spor týkající se této Smlouvy nebo v souvislosti s ní (včetně mimosmluvních sporů nebo nároků a jejich výkladu) podléhá výlučné jurisdikci soudů v Curychu ve Švýcarsku s výhradou odvolání u Švýcarského federálního soudu.\n\n### 10. Třetí strany a jiné aplikace\n\nNevlastníme, nekontrolujeme, neschvalujeme ani nepřijímáme žádný obsah, aplikace, služby, webové stránky ani jiné položky třetích stran („Položky třetích stran“), které můžete vidět nebo se s nimi propojit při používání našich Služeb. Zříkáme se jakékoli odpovědnosti související s Položkami třetích stran nebo s nimiž se můžete setkat. Vaše používání, jednání nebo korespondence s třetími stranami a Položkami třetích stran jsou výhradně mezi vámi a třetí stranou a činíte tak na vlastní nebezpečí.\n\nNic v této Smlouvě, výslovné ani implicitní, není zamýšleno k tomu, aby udělovalo jakákoli práva, výhody nebo opravné prostředky jakékoli třetí straně, včetně ostatních uživatelů našich Služeb, ani je neuděluje žádné třetí straně, včetně ostatních uživatelů našich Služeb.\n\n### 11. Oddělitelnost\n\nV případě, že se jakékoli ustanovení těchto Podmínek používání ukáže jako nezákonné, neplatné nebo nevymahatelné, bude takové ustanovení i přesto vymahatelné v plném rozsahu povoleném platnými právními předpisy a nevymahatelná část se považuje za oddělenou od těchto Podmínek používání. Toto rozhodnutí neovlivní platnost a vymahatelnost jakýchkoli ostatních zbývajících ustanovení.\n\n### 12. Podmínky a ukončení\n\nTato Smlouva zůstává v platnosti, dokud nebude ukončena. Smlouva a vaše práva a licence z ní vyplývající zaniknou okamžitě po jejím porušení. Společnost DFINITY může tuto Smlouvu kdykoli vypovědět z jakéhokoli důvodu, včetně, mimo jiné, jakéhokoli skutečného nebo domnělého zneužití Služeb z vaší strany nebo jakéhokoli porušení této Smlouvy.\n\n### 13. Celá Smlouva\n\nNeuplatnění nebo nevymáhání jakéhokoli práva nebo ustanovení těchto Podmínek užívání z naší strany nepředstavuje vzdání se takového práva nebo ustanovení.\n\nTyto Podmínky užívání a jakékoli zásady nebo provozní pravidla zveřejněné námi na těchto stránkách nebo v souvislosti se Službou představují úplnou dohodu a porozumění mezi vámi a námi a upravují vaše užívání Služby a nahrazují jakékoli předchozí nebo současné dohody, sdělení a návrhy, ať už ústní nebo písemné, mezi vámi a námi (včetně, mimo jiné, jakýchkoli předchozích verzí Podmínek užívání).\n\nJakékoli nejasnosti ve výkladu těchto Podmínek užívání nebudou vykládány v neprospěch strany, která je sepsala.\n\n### 14. Osobní údaje\n\nPřečtěte si prosím naše Zásady ochrany osobních údajů zde \\[odkaz na Zásady ochrany osobních údajů OISY je uveden samostatně\\].\n\nPokud vy Používáním peněženky OISY nebo jiných služeb třetích stran a blockchainových technologií sdílíte informace s globální komunitou, která je na nás oddělená a nezávislá a kterou nekontrolujeme. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 15. Změny podmínek\n\nTuto smlouvu můžeme aktualizovat dle vlastního uvážení. Pokračování v používání představuje přijetí změn.\n\n### 16. Kontakt\n\nS dotazy navštivte [support@oisy.com](mailto:support@oisy.com)."
+		},
+		"alt": {
+			"terms_of_use": "Odkaz na podmínky použití"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Zásady ochrany osobních údajů",
+			"title": "Zásady ochrany osobních údajů",
+			"body": "Datum účinnosti: $date\n\nMy, DFINITY Stiftung, Genferstrasse 11, 8002 Curych, Švýcarsko („DFINITY“ nebo „nás“) v těchto Zásadách ochrany osobních údajů OISY („Zásady ochrany osobních údajů“) zveřejňujeme, jak zpracováváme osobní údaje, které nám poskytnete při používání OISY Wallet, webových stránek na adrese oisy.com nebo jakýchkoli jiných webových stránek, ze kterých odkazujeme na tyto Zásady ochrany osobních údajů („Stránky“). Tyto Zásady ochrany osobních údajů se nevztahují na žádné jiné zpracování dat, včetně, mimo jiné, osobních údajů, které shromažďujeme offline nebo prostřednictvím jiných webových stránek, které neodkazují na tyto Zásady ochrany osobních údajů; osobních údajů, které sdílíte s ostatními uživateli Stránek nebo jiných technologií založených na blockchainu, když tyto technologie používáte; nebo osobních údajů, které sdílíte se službami třetích stran, které nevlastníme ani nekontrolujeme.\n\nPokud používáte OISY Wallet nebo jiné služby třetích stran a technologie blockchainu, sdílíte informace s globální komunitou, která je od nás oddělená a nezávislá a není námi kontrolována. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 1. Kategorie zpracovávaných údajů a účely použití\nKdyž navštívíte naše stránky, automaticky odesíláte svou IP adresu. Toto zpracování je nezbytné pro náš oprávněný zájem optimalizovat výkon našich stránek a nepřevažuje nad ochranou soukromí a jinými zájmy vás ani jiných uživatelů. [Vložte jakékoli další údaje, které DFINITY shromažďuje, např. informace o zařízení, přihlašovací údaje, informace o transakcích. Jak DFINITY dodržuje povinnosti KYC?] Společnost DFINITY může být povinna shromažďovat určité údaje pro účely dodržování právních předpisů, např. jméno, adresu, telefonní číslo, informace o bankovním účtu.]\n\n### 2. Sdílení údajů\nVaše údaje můžeme sdílet s dalšími subjekty DFINITY, poskytovateli služeb a třetími stranami za účelem poskytování našich služeb vám a v souvislosti s naším úsilím o prevenci a vyšetřování podvodné činnosti.\n\n### 3. Uchovávání údajů\nVaše osobní údaje uchováváme ve Švýcarsku a tam, kde pracují naši zaměstnanci a dodavatelé, včetně Spojených států, až 24 měsíců od jejich shromáždění.\n\n### 4. Uživatelská práva a dodržování předpisů\nMůžete požádat o přístup k vašim osobním údajům, jejich opravu, smazání a omezení nebo vznést námitku proti jejich zpracování kontaktováním nás na adrese privacy@dfinity.com. Můžete mít také právo podat stížnost u příslušného orgánu. Nebudete to však moci učinit u dat zpracovávaných v blockchainech nebo v souvislosti se službami třetích stran, protože ty nejsou kontrolovány námi ani našimi přidruženými společnostmi.\n\n### 5. Změny těchto zásad\nTyto zásady ochrany osobních údajů můžeme čas od času aktualizovat dle vlastního uvážení a nové verze můžeme zveřejnit na našich stránkách.\n\n ### 6. Kontakt\nV případě dotazů nebo uplatnění vašich práv navštivte support@oisy.com."
+		},
+		"alt": {
+			"privacy_policy": "Odkaz na zásady ochrany osobních údajů"
+		}
+	},
+	"activity": {
+		"text": {
+			"title": "Nedávná aktivita"
+		},
+		"info": {
+			"btc_transactions": "Informace o transakcích BTC jsou získány od centrálních třetích stran a měly by být nezávisle ověřeny."
+		},
+		"warning": {
+			"no_index_canister": "Transakce pro $token_list nelze zobrazit. Není k dispozici žádný indexový kanystr.",
+			"unavailable_index_canister": "Transakce pro $token_list nelze zobrazit. Indexový kanystr je aktuálně nedostupný."
+		}
+	},
+	"earning": {
+		"text": {
+			"title": "Vydělat"
+		},
+		"cards": {
+			"gold_title": "Zlato",
+			"gold_description": "Staking GLDT",
+			"stablecoins_title": "Stablecoiny",
+			"stablecoins_description": "Již brzy",
+			"sprinkles_title": "Sprinkles",
+			"sprinkles_description": "Odměny OISY"
+		}
+	},
+	"welcome": {
+		"title": "Vítejte v $oisy_short!",
+		"subtitle": "Jste připraveni vydělávat?",
+		"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte 4 přátele a získejte zaručený bonus."
+	},
+	"temporal": {
+		"seconds_to_duration": {
+			"year": "rok",
+			"year_plural": "roky",
+			"month": "měsíc",
+			"month_plural": "měsíce",
+			"day": "den",
+			"day_plural": "dny",
+			"hour": "hodina",
+			"hour_plural": "hodiny",
+			"minute": "minuta",
+			"minute_plural": "minuty",
+			"second": "sekunda",
+			"second_plural": "sekundy"
+		}
+	},
+	"ai_assistant": {
+		"text": {
+			"title": "$oisy_short AI Asistent",
+			"welcome_message": "Dobrý den! 👋 Jsem OISY, váš osobní AI asistent. Zde je návod, jak vám mohu pomoci:",
+			"action_button_contacts_title": "Zobrazit kontakty",
+			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
+			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
+			"action_button_send_tokens_title": "Odeslat aktiva",
+			"action_button_send_tokens_subtitle": "Nastavení odeslání během několika sekund",
+			"action_button_send_tokens_prompt": "Chtěl bych poslat tokeny.",
+			"select_contact_message": "Vyberte kontakt pro zahájení procesu odeslání:",
+			"send_to_message": "Odeslat do $contact_name ($address_info).",
+			"send_message": "Poslat zprávu",
+			"send_message_input_placeholder": "Co chcete dělat?",
+			"send_token_succeeded": "Transakce dokončena!",
+			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
+			"loading": "Přemýšlím...",
+			"reset_chat_history": ""
+		},
+		"errors": {
+			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
+			"no_response": "Omlouvám se, nedostal jsem odpověď od LLM."
+		}
+	}
+}

@@ -1,10 +1,11 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { NetworkContacts } from '$lib/types/contacts';
 	import { isContactMatchingFilter } from '$lib/utils/contact.utils';
@@ -23,37 +24,40 @@
 
 	const dispatch = createEventDispatcher();
 
+	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
 	let filteredNetworkContacts = $derived(
 		nonNullish(networkContacts)
-			? Object.keys(networkContacts).reduce<NetworkContacts>(
-					(acc, address) => ({
-						...acc,
-						...(isContactMatchingFilter({
-							filterValue: destination,
-							contact: networkContacts[address],
-							address
-						})
-							? { [address]: networkContacts[address] }
-							: {})
-					}),
-					{}
-				)
+			? isEmptyString(destination)
+				? networkContacts
+				: Object.entries(networkContacts).reduce<NetworkContacts>(
+						(acc, [key, { contact, address }]) => ({
+							...acc,
+							...(isContactMatchingFilter({
+								filterValue: destination,
+								contact,
+								address,
+								networkId: $sendTokenNetworkId
+							})
+								? { [key]: { address, contact } }
+								: {})
+						}),
+						{}
+					)
 			: {}
 	);
-
-	let filteredNetworkContactsKeys = $derived(Object.keys(filteredNetworkContacts));
 </script>
 
 <div in:fade>
-	{#if nonNullish(networkContacts) && filteredNetworkContactsKeys.length > 0}
-		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
+		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
 			<ul class="list-none overflow-y-auto overscroll-contain">
-				{#each filteredNetworkContactsKeys as address, index (index)}
+				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
-						contact={networkContacts[address]}
 						{address}
+						{contact}
 						onClick={() => {
-							selectedContact = networkContacts[address];
+							selectedContact = contact;
 							destination = address;
 							dispatch('icNext');
 						}}
@@ -63,8 +67,8 @@
 		</div>
 	{:else}
 		<EmptyState
-			title={$i18n.send.text.contacts_empty_state_title}
 			description={$i18n.send.text.contacts_empty_state_description}
+			title={$i18n.send.text.contacts_empty_state_title}
 		/>
 	{/if}
 </div>

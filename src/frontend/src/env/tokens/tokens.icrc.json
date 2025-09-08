@@ -9,16 +9,6 @@
 			"__bigint__": "10000"
 		}
 	},
-	"POPEYE": {
-		"ledgerCanisterId": "6fvyi-faaaa-aaaam-qbiga-cai",
-		"indexCanisterId": "gg3c3-6iaaa-aaaah-aq6dq-cai",
-		"decimals": 8,
-		"name": "Popeye The Sailor",
-		"symbol": "POPEYE",
-		"fee": {
-			"__bigint__": "1000000"
-		}
-	},
 	"CLOUD": {
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
 		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
@@ -55,16 +45,6 @@
 		"decimals": 8,
 		"name": "neuron ICP",
 		"symbol": "nICP",
-		"fee": {
-			"__bigint__": "1000000"
-		}
-	},
-	"RUGGY": {
-		"ledgerCanisterId": "icaf7-3aaaa-aaaam-qcx3q-cai",
-		"indexCanisterId": "qiu4p-taaaa-aaaal-qsi4a-cai",
-		"decimals": 8,
-		"name": "RUGGY",
-		"symbol": "RUGGY",
 		"fee": {
 			"__bigint__": "1000000"
 		}
@@ -108,23 +88,85 @@
 			"__bigint__": "10"
 		}
 	},
-	"XP": {
-		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai",
-		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
+	"BOB": {
+		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
 		"decimals": 8,
-		"name": "WindogeXP",
-		"symbol": "XP",
+		"name": "BOB",
+		"symbol": "BOB",
 		"fee": {
-			"__bigint__": "100000000"
+			"__bigint__": "1000000"
 		}
 	},
-	"EXE": {
-		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
+	"ICONFUCIUS": {
+		"ledgerCanisterId": "5kijx-siaaa-aaaar-qaqda-cai",
+		"decimals": 8,
+		"name": "ICONFUCIUS•ID•RVMN•ODIN",
+		"symbol": "ICONFUCIUS•ID•RVMN•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"DOG.OT": {
+		"ledgerCanisterId": "fmazi-nqaaa-aaaar-qagmq-cai",
+		"decimals": 5,
+		"name": "DOG•GO•TO•THE•MOON",
+		"symbol": "DOG.OT",
 		"fee": {
 			"__bigint__": "100000"
+		}
+	},
+	"MIM.OT": {
+		"ledgerCanisterId": "rk7m2-7yaaa-aaaar-qbmta-cai",
+		"decimals": 0,
+		"name": "MAGIC•INTERNET•MONEY",
+		"symbol": "MIM.OT",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"BITCAT": {
+		"ledgerCanisterId": "xlwi6-kyaaa-aaaar-qarya-cai",
+		"decimals": 8,
+		"name": "BITCAT•ID•YRMO•ODIN",
+		"symbol": "BITCAT•ID•YRMO•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"BDC.OT": {
+		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai",
+		"decimals": 0,
+		"name": "BILLION•DOLLAR•CAT",
+		"symbol": "BDC.OT",
+		"fee": {
+			"__bigint__": "1"
+		}
+	},
+	"FORSETISCN": {
+		"ledgerCanisterId": "tta5j-yqaaa-aaaar-qarbq-cai",
+		"decimals": 8,
+		"name": "FORSETISCN•ID•COIU•ODIN",
+		"symbol": "FORSETISCN•ID•COIU•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"ODINDOG": {
+		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai",
+		"decimals": 8,
+		"name": "ODINDOG•ID•YTTL•ODIN",
+		"symbol": "ODINDOG•ID•YTTL•ODIN",
+		"fee": {
+			"__bigint__": "10"
+		}
+	},
+	"SGLDT": {
+		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
+		"fee": {
+			"__bigint__": "1000"
 		},
-		"name": "Windoge98",
-		"symbol": "EXE",
+		"name": "sGLDT - GLDT Wrapper",
+		"symbol": "sGLDT",
 		"decimals": 8
 	}
 }

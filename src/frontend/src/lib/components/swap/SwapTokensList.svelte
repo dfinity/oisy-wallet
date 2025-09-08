@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { allKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import {
+		allCrossChainSwapTokens,
+		allKongSwapCompatibleIcrcTokens
+	} from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -22,13 +25,17 @@
 	const { setTokens } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
 	const dispatch = createEventDispatcher<{
-		icSelectToken: IcTokenToggleable;
+		icSelectToken: Token;
 		icCloseTokensList: void;
 	}>();
 
-	let tokens: TokenUi<IcTokenToggleable>[] = $derived(
+	let tokens: TokenUi<Token>[] = $derived(
 		pinTokensWithBalanceAtTop({
-			$tokens: [{ ...ICP_TOKEN, enabled: true }, ...$allKongSwapCompatibleIcrcTokens].filter(
+			$tokens: [
+				{ ...ICP_TOKEN, enabled: true },
+				...$allKongSwapCompatibleIcrcTokens,
+				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
+			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 			),
 			$exchanges,
@@ -40,18 +47,19 @@
 		setTokens(tokens);
 	});
 
-	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<IcTokenToggleable>>) => {
+	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<Token>>) => {
 		dispatch('icSelectToken', token);
 	};
 </script>
 
 <ModalTokensList
 	loading={false}
-	networkSelectorViewOnly={true}
+	networkSelectorViewOnly={!VELORA_SWAP_ENABLED}
+	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}
 >
 	{#snippet tokenListItem(token, onClick)}
-		<ModalTokensListItem data={token} on:click={onClick} />
+		<ModalTokensListItem {onClick} {token} />
 	{/snippet}
 	{#snippet noResults()}
 		<p class="text-primary">

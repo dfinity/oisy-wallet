@@ -1,34 +1,57 @@
 <script lang="ts">
 	import { Modal, Popover } from '@dfinity/gix-components';
+	import type { Snippet } from 'svelte';
 	import DropdownButton from '$lib/components/ui/DropdownButton.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
-	export let disabled = false;
-	export let asModalOnMobile = false;
-	export let ariaLabel: string;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		visible?: boolean;
+		children: Snippet;
+		title?: Snippet;
+		items: Snippet;
+		disabled?: boolean;
+		asModalOnMobile?: boolean;
+		ariaLabel: string;
+		buttonFullWidth?: boolean;
+		buttonBorder?: boolean;
+		testId?: string;
+	}
 
-	let visible = false;
-	let button: HTMLButtonElement | undefined;
+	let {
+		visible = $bindable(false),
+		children,
+		title,
+		items,
+		disabled = false,
+		asModalOnMobile = false,
+		ariaLabel,
+		buttonFullWidth = false,
+		buttonBorder = false,
+		testId
+	}: Props = $props();
+
+	let button: HTMLButtonElement | undefined = $state();
 
 	export const close = () => (visible = false);
 </script>
 
 <DropdownButton
-	bind:button
-	on:click={() => (visible = true)}
 	{ariaLabel}
-	{testId}
+	border={buttonBorder}
 	{disabled}
+	fullWidth={buttonFullWidth}
+	onClick={() => (visible = true)}
 	opened={visible}
+	{testId}
+	bind:button
 >
-	<slot />
+	{@render children()}
 </DropdownButton>
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
-		<Popover bind:visible anchor={button} invisibleBackdrop>
-			<slot name="items" />
+		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+			{@render items()}
 		</Popover>
 	</Responsive>
 
@@ -37,14 +60,16 @@
 	<Responsive down="md">
 		{#if visible}
 			<Modal on:nnsClose={close}>
-				<slot name="title" slot="title" />
+				<svelte:fragment slot="title">
+					{@render title?.()}
+				</svelte:fragment>
 
-				<slot name="items" />
+				{@render items()}
 			</Modal>
 		{/if}
 	</Responsive>
 {:else}
-	<Popover bind:visible anchor={button} invisibleBackdrop>
-		<slot name="items" />
+	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
+		{@render items()}
 	</Popover>
 {/if}

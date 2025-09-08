@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import Divider from '$lib/components/common/Divider.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
+	import SendContactName from '$lib/components/send/SendContactName.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import { SEND_DESTINATION_WIZARD_CONTACT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
@@ -15,28 +15,21 @@
 	}
 
 	let { contact, address, onClick }: Props = $props();
-
-	let contactLabel = $derived(
-		nonNullish(contact)
-			? contact.addresses.find(({ address: innerAddress }) => address === innerAddress)?.label
-			: undefined
-	);
 </script>
 
-<LogoButton styleClass="group" {onClick}>
+<LogoButton
+	{onClick}
+	styleClass="group"
+	testId={`${SEND_DESTINATION_WIZARD_CONTACT}-${contact.name}`}
+>
 	{#snippet logo()}
 		<div class="mr-2">
-			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} variant="sm" />
+			<AvatarWithBadge badge={{ type: 'addressType', address }} {contact} variant="sm" />
 		</div>
 	{/snippet}
 
 	{#snippet title()}
-		{contact.name}
-
-		{#if notEmptyString(contactLabel)}
-			<Divider />
-			{contactLabel}
-		{/if}
+		<SendContactName {address} {contact} />
 	{/snippet}
 
 	{#snippet description()}

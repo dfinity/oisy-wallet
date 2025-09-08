@@ -1,14 +1,14 @@
 @use '../mixins/media';
 
-/************* USE OF !IMPORTANT ********************
-**   Only in this file the use of !important       **
-**   CAN be warranted. As this file is the last    **
-**   instance where the gix components can be      **
-**   styled, !important can be used to override    **
-**   certain styles. However, it still is a last   **
-**   resort solution and if possible, a proper     **
-**   solution must be tried and still is prefered. **
-****************************************************/
+/************* USE OF !IMPORTANT *********************
+**   Only in this file the use of !important        **
+**   CAN be warranted. As this file is the last     **
+**   instance where the gix components can be       **
+**   styled, !important can be used to override     **
+**   certain styles. However, it still is a last    **
+**   resort solution and if possible, a proper      **
+**   solution must be tried and still is preferred. **
+*****************************************************/
 
 :root {
 	--toggle-disabled-opacity: 1;
@@ -88,6 +88,8 @@
 
 	--backdrop-contrast: var(--color-foreground-primary-inverted);
 	--backdrop-filter: blur(4px);
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
 
 	@media (width >= theme(--breakpoint-sm)) {
 		--dialog-width: 560px;
@@ -333,6 +335,13 @@ div.step {
 		}
 	}
 
+	&.failed {
+		.state {
+			color: var(--negative-emphasis) !important;
+			background: var(--color-background-error-light) !important;
+		}
+	}
+
 	&.next {
 		.text {
 			color: var(--color-foreground-primary);
@@ -389,10 +398,48 @@ div.select {
 	}
 }
 
-// TOASTS
-// Toasts other than error are not used
-// Also, it seems that gix components dont apply the success and warn classes correctly
-div.error .toast {
-	--overlay-background: var(--color-background-error-light);
-	--overlay-background-contrast: var(--color-foreground-error-secondary);
+// Toasts
+.toast {
+	--toast-error-background: var(--color-background-error-light);
+	--toast-error-color: var(--color-foreground-error-secondary);
+
+	--toast-warn-background: var(--color-background-warning-light);
+	--toast-warn-color: var(--color-foreground-warning-secondary);
+}
+
+// Tooltip
+.tooltip {
+	--tooltip-background: var(--color-base-black);
+	--tooltip-text-color: var(--color-foreground-primary-inverted);
+	--tooltip-border-color: var(--color-base-black);
+	--tooltip-border-size: 1px;
+}
+
+.gix-tooltip {
+	background-color: var(--color-base-black);
+	color: var(--color-foreground-primary-inverted);
+}
+
+/* Tooltip arrow */
+.tooltip::after,
+.gix-tooltip::after {
+	content: '';
+	position: absolute;
+	top: -6px;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 0 6px 6px 6px;
+	border-style: solid;
+	border-color: transparent transparent var(--tooltip-background) transparent;
+}
+
+.tooltip.top::after,
+.gix-tooltip.top::after {
+	bottom: -6px;
+	top: auto;
+	left: 50%;
+	transform: translateX(-50%);
+	border-width: 6px 6px 0 6px;
+	border-style: solid;
+	border-color: var(--tooltip-background) transparent transparent transparent;
 }

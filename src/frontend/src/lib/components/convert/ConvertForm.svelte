@@ -24,13 +24,13 @@
 
 <ContentWithToolbar {testId}>
 	<ConvertAmount
+		{destinationTokenFee}
+		{ethereumEstimateFee}
+		{minFee}
+		{totalFee}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:exchangeValueUnit
-		{totalFee}
-		{destinationTokenFee}
-		{minFee}
-		{ethereumEstimateFee}
 	/>
 
 	<div class="mt-6">
@@ -41,11 +41,13 @@
 		<slot name="fee" />
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		<slot name="cancel" />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<slot name="cancel" />
 
-		<Button {disabled} on:click={() => dispatch('icNext')} testId="convert-form-button-next">
-			{$i18n.convert.text.review_button}
-		</Button>
-	</ButtonGroup>
+			<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
+				{$i18n.convert.text.review_button}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

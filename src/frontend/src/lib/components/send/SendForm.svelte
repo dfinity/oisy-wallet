@@ -17,14 +17,14 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<form on:submit={() => dispatch('icNext')} method="POST">
+<form method="POST" on:submit|preventDefault={() => dispatch('icNext')}>
 	<ContentWithToolbar>
 		<slot name="amount" />
 
 		<SendDestination
 			{destination}
-			{selectedContact}
 			{invalidDestination}
+			{selectedContact}
 			on:icSendDestinationStep={back}
 		/>
 
@@ -32,10 +32,12 @@
 
 		<slot name="info" />
 
-		<ButtonGroup slot="toolbar" testId="toolbar">
-			<slot name="cancel" />
+		{#snippet toolbar()}
+			<ButtonGroup testId="toolbar">
+				<slot name="cancel" />
 
-			<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
-		</ButtonGroup>
+				<ButtonNext {disabled} testId={SEND_FORM_NEXT_BUTTON} />
+			</ButtonGroup>
+		{/snippet}
 	</ContentWithToolbar>
 </form>

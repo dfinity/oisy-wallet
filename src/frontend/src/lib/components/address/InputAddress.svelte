@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { ComponentProps } from 'svelte';
 	import { slide } from 'svelte/transition';
-	import type { ZodError } from 'zod';
+	import type { ZodError } from 'zod/v4';
 	import QrButton from '$lib/components/common/QrButton.svelte';
 	import Input from '$lib/components/ui/Input.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -61,7 +61,7 @@
 </script>
 
 {#snippet qrButton()}
-	{#if nonNullish(onQRCodeScan)}
+	{#if nonNullish(onQRCodeScan) && !disabled}
 		<QrButton on:click={onQRCodeScan} />
 	{/if}
 {/snippet}
@@ -69,16 +69,16 @@
 <div
 	style={`--input-custom-border-color: ${borderColor}; --input-padding-inner-end: 100px; ${disabled ? '--input-background: var(--color-background-disabled);' : ''}`}
 >
-	<Input {disabled} inputType="text" bind:value innerEnd={qrButton} {...props}></Input>
+	<Input {disabled} innerEnd={qrButton} inputType="text" bind:value {...props}></Input>
 
 	<div class="text-md pt-2">
 		{#if error}
-			<p transition:slide={SLIDE_DURATION} class="text-error-primary">
+			<p class="text-error-primary" transition:slide={SLIDE_DURATION}>
 				{error}
 			</p>
 		{/if}
 		{#if isValid}
-			<p transition:slide={SLIDE_DURATION} class="text-success-primary">
+			<p class="text-success-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.address.form.valid_for_networks}
 				{#each networks as network, i (network.id)}
 					{#if i > 0}

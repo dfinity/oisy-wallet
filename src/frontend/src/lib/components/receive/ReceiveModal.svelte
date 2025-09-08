@@ -31,16 +31,18 @@
 
 	<ContentWithToolbar>
 		<ReceiveAddressQrCodeContent
-			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{address}
 			{addressToken}
-			{network}
 			{copyAriaLabel}
+			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
+			{network}
 			qrCodeAction={{ enabled: false }}
 		/>
 
 		{@render content?.()}
 
-		<ButtonDone onclick={modalStore.close} slot="toolbar" />
+		{#snippet toolbar()}
+			<ButtonDone onclick={modalStore.close} />
+		{/snippet}
 	</ContentWithToolbar>
 </Modal>

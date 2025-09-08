@@ -6,7 +6,6 @@ import {
 import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
-import { expect } from 'vitest';
 
 describe('ReviewNetwork', () => {
 	const props = {

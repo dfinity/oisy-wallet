@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import { Html } from '@dfinity/gix-components';
+	import { isEmptyString, nonNullish } from '@dfinity/utils';
+	import { getContext, type Snippet } from 'svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import SwapImpact from '$lib/components/swap/SwapValueDifference.svelte';
 	import TokensReview from '$lib/components/tokens/TokensReview.svelte';
@@ -10,17 +10,41 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
+	import {
+		TRACK_OPEN_DOCUMENTATION,
+		TRACK_OPEN_EXTERNAL_LINK
+	} from '$lib/constants/analytics.contants';
+	import { OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK } from '$lib/constants/swap.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { SwapErrorCodes } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let slippageValue: OptionAmount;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount?: number;
+		slippageValue: OptionAmount;
+		onBack: () => void;
+		onClose?: () => void;
+		onSwap: () => Promise<void>;
+		swapFees: Snippet;
+		isSwapAmountsLoading?: boolean;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		swapAmount = $bindable(),
+		receiveAmount = $bindable(),
+		slippageValue = $bindable(),
+		onBack,
+		onClose,
+		onSwap,
+		swapFees,
+		isSwapAmountsLoading
+	}: Props = $props();
 
 	const {
 		sourceToken,
@@ -30,63 +54,128 @@
 		failedSwapError
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	const onClick = () => {
+	const handleBack = () => {
 		failedSwapError.set(undefined);
-		dispatch('icBack');
+		onBack();
 	};
+
+	const handleClose = () => {
+		failedSwapError.set(undefined);
+		onClose?.();
+	};
+
+	let isManualWithdrawSuccess = $derived(
+		$failedSwapError?.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS &&
+			$failedSwapError?.message === $i18n.swap.error.swap_sucess_manually_withdraw_success
+	);
 </script>
 
 <ContentWithToolbar>
 	<TokensReview
-		sendAmount={swapAmount}
-		{receiveAmount}
-		sourceToken={$sourceToken}
 		destinationToken={$destinationToken}
-		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		destinationTokenExchangeRate={$destinationTokenExchangeRate}
+		{receiveAmount}
+		sendAmount={swapAmount}
+		sourceToken={$sourceToken}
+		sourceTokenExchangeRate={$sourceTokenExchangeRate}
 	/>
 
 	{#if nonNullish($sourceTokenExchangeRate) && nonNullish($destinationTokenExchangeRate)}
 		<ModalValue>
-			<svelte:fragment slot="label">{$i18n.swap.text.value_difference}</svelte:fragment>
+			{#snippet label()}
+				{$i18n.swap.text.value_difference}
+			{/snippet}
 
-			<svelte:fragment slot="main-value">
-				<SwapImpact {swapAmount} {receiveAmount} />
-			</svelte:fragment>
+			{#snippet mainValue()}
+				<SwapImpact {receiveAmount} {swapAmount} />
+			{/snippet}
 		</ModalValue>
 	{/if}
 
 	<ModalValue>
-		<svelte:fragment slot="label">{$i18n.swap.text.max_slippage}</svelte:fragment>
+		{#snippet label()}
+			{$i18n.swap.text.max_slippage}
+		{/snippet}
 
-		<svelte:fragment slot="main-value">
+		{#snippet mainValue()}
 			{slippageValue}%
-		</svelte:fragment>
+		{/snippet}
 	</ModalValue>
 
 	<div class="flex flex-col gap-3">
 		<SwapProvider {slippageValue} />
-		<SwapFees />
+		{@render swapFees()}
 	</div>
+
+	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
+		<Hr spacing="md" />
+
+		<MessageBox styleClass="sm:text-sm">
+			<Html
+				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
+					$sourceNetwork: $sourceToken.network.name,
+					$destinationNetwork: $destinationToken.network.name
+				})}
+			/>
+		</MessageBox>
+	{/if}
 
 	{#if nonNullish($failedSwapError)}
 		<div class="mt-4">
 			<MessageBox level={$failedSwapError.variant}>
-				{$failedSwapError.message}
-				{#if nonNullish($failedSwapError?.url)}
-					<ExternalLink href={$failedSwapError.url.url} ariaLabel={$i18n.swap.text.open_icp_swap}
-						>{$failedSwapError.url.text}</ExternalLink
+				{#if nonNullish($failedSwapError.errorType) && nonNullish($failedSwapError.url) && isEmptyString($failedSwapError?.message)}
+					<Html
+						text={$failedSwapError.errorType === SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED
+							? $i18n.swap.error.withdraw_failed_first_part
+							: $failedSwapError.errorType === SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED
+								? $i18n.swap.error.manually_withdraw_failed
+								: $i18n.swap.error.swap_sucess_withdraw_failed}
+					/>
+					<ExternalLink
+						ariaLabel={$i18n.swap.text.open_instructions_link}
+						href={OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK}
+						iconSize="15"
+						trackEvent={{
+							name: TRACK_OPEN_DOCUMENTATION,
+							metadata: {
+								link: OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK
+							}
+						}}
+						>{$i18n.swap.error.swap_failed_instruction_link}
+					</ExternalLink>
+					{$i18n.swap.error.withdraw_failed_second_part}
+
+					<ExternalLink
+						ariaLabel={$i18n.swap.text.open_icp_swap}
+						href={$failedSwapError.url.url}
+						iconSize="15"
+						trackEvent={{
+							name: TRACK_OPEN_EXTERNAL_LINK,
+							metadata: {
+								link: $failedSwapError.url.url
+							}
+						}}>{$failedSwapError.url.text}</ExternalLink
 					>
+				{:else}
+					{$failedSwapError.message}
 				{/if}
 			</MessageBox>
 		</div>
 	{/if}
 
-	<ButtonGroup slot="toolbar">
-		<ButtonBack onclick={onClick} />
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if isManualWithdrawSuccess}
+				<Button onclick={handleClose}>{$i18n.core.text.close}</Button>
+			{:else}
+				<ButtonBack onclick={handleBack} />
 
-		<Button on:click={() => dispatch('icSwap')}>
-			{$i18n.swap.text.swap_button}
-		</Button>
-	</ButtonGroup>
+				<Button disabled={isSwapAmountsLoading} onclick={onSwap}>
+					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
+						? $i18n.transaction.type.withdraw
+						: $i18n.swap.text.swap_button}
+				</Button>
+			{/if}
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

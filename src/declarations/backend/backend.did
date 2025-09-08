@@ -1,61 +1,3 @@
-type AccountSnapshot = record {
-	decimals : nat8;
-	token_address : EthAddress;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction;
-	account : EthAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshotFor = variant {
-	Erc20Sepolia : AccountSnapshot;
-	EthSepolia : AccountSnapshot;
-	SplTestnet : AccountSnapshot_1;
-	BtcMainnet : AccountSnapshot_2;
-	SolDevnet : AccountSnapshot_1;
-	Erc20Mainnet : AccountSnapshot;
-	SolTestnet : AccountSnapshot_1;
-	Icrcv2 : AccountSnapshot_3;
-	BtcRegtest : AccountSnapshot_2;
-	SplDevnet : AccountSnapshot_1;
-	EthMainnet : AccountSnapshot;
-	SplMainnet : AccountSnapshot_1;
-	SolLocal : AccountSnapshot_1;
-	BtcTestnet : AccountSnapshot_2;
-	SplLocal : AccountSnapshot_1;
-	SolMainnet : AccountSnapshot_1
-};
-type AccountSnapshot_1 = record {
-	decimals : nat8;
-	token_address : text;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_1;
-	account : text;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshot_2 = record {
-	decimals : nat8;
-	token_address : BtcTokenId;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_2;
-	account : BtcAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type AccountSnapshot_3 = record {
-	decimals : nat8;
-	token_address : IcrcTokenId;
-	network : record {};
-	approx_usd_per_token : float64;
-	last_transactions : vec Transaction_3;
-	account : Icrcv2AccountId;
-	timestamp : nat64;
-	amount : nat64
-};
 type AddDappSettingsError = variant {
 	MaxHiddenDappIds;
 	VersionMismatch;
@@ -80,6 +22,7 @@ type AddUserCredentialRequest = record {
 };
 type AddUserCredentialResult = variant { Ok; Err : AddUserCredentialError };
 type AddUserHiddenDappIdResult = variant { Ok; Err : AddDappSettingsError };
+type Agreements = record { agreements : UserAgreements };
 type AllowSigningError = variant {
 	ApproveError : ApproveError;
 	PowChallenge : ChallengeCompletionError;
@@ -131,6 +74,12 @@ type BtcAddress = variant {
 	P2SH : text;
 	P2TR : text
 };
+type BtcGetFeePercentilesRequest = record { network : BitcoinNetwork };
+type BtcGetFeePercentilesResponse = record { fee_percentiles : vec nat64 };
+type BtcGetFeePercentilesResult = variant {
+	Ok : BtcGetFeePercentilesResponse;
+	Err : SelectedUtxosFeeError
+};
 type BtcGetPendingTransactionsReponse = record {
 	transactions : vec PendingTransaction
 };
@@ -146,7 +95,6 @@ type BtcSelectUserUtxosFeeResult = variant {
 	Ok : SelectedUtxosFeeResponse;
 	Err : SelectedUtxosFeeError
 };
-type BtcTokenId = variant { Native };
 type CanisterStatusResultV2 = record {
 	controller : principal;
 	status : CanisterStatusType;
@@ -184,7 +132,8 @@ type Contact = record {
 	id : nat64;
 	name : text;
 	update_timestamp_ns : nat64;
-	addresses : vec ContactAddressData
+	addresses : vec ContactAddressData;
+	image : opt ContactImage
 };
 type ContactAddressData = record {
 	label : opt text;
@@ -192,9 +141,16 @@ type ContactAddressData = record {
 };
 type ContactError = variant {
 	InvalidContactData;
+	CanisterMemoryNearCapacity;
+	InvalidImageFormat;
 	ContactNotFound;
-	RandomnessError
+	ImageTooLarge;
+	RandomnessError;
+	ImageExceedsMaxSize;
+	CanisterStatusError;
+	TooManyContactsWithImages
 };
+type ContactImage = record { data : blob; mime_type : ImageMimeType };
 type CreateChallengeError = variant {
 	ChallengeInProgress;
 	MissingUserProfile;
@@ -206,7 +162,7 @@ type CreateChallengeResponse = record {
 	start_timestamp_ms : nat64;
 	expiry_timestamp_ms : nat64
 };
-type CreateContactRequest = record { name : text };
+type CreateContactRequest = record { name : text; image : opt ContactImage };
 type CreateContactResult = variant { Ok : Contact; Err : ContactError };
 type CreatePowChallengeResult = variant {
 	Ok : CreateChallengeResponse;
@@ -219,6 +175,8 @@ type CredentialSpec = record {
 type CredentialType = variant { ProofOfUniqueness };
 type CustomToken = record {
 	token : Token;
+	allow_external_content_source : opt bool;
+	section : opt TokenSection;
 	version : opt nat64;
 	enabled : bool
 };
@@ -232,6 +190,7 @@ type DefiniteCanisterSettingsArgs = record {
 	compute_allocation : nat
 };
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
+type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
 type GetAllowedCyclesError = variant {
 	Other : text;
@@ -262,13 +221,15 @@ type HttpResponse = record {
 	status_code : nat16
 };
 type IcrcToken = record { ledger_id : principal; index_id : opt principal };
-type IcrcTokenId = variant {
-	Icrc : record { ledger : principal; index : opt principal };
-	Native
-};
 type Icrcv2AccountId = variant {
 	Account : blob;
 	WithPrincipal : record { owner : principal; subaccount : opt blob }
+};
+type ImageMimeType = variant {
+	"image/gif";
+	"image/png";
+	"image/jpeg";
+	"image/webp"
 };
 type InitArg = record {
 	derivation_origin : opt text;
@@ -280,10 +241,10 @@ type InitArg = record {
 };
 type NetworkSettings = record { enabled : bool; is_testnet : bool };
 type NetworkSettingsFor = variant {
+	ArbitrumMainnet;
 	InternetComputer;
 	BaseSepolia;
 	PolygonMainnet;
-	SolanaTestnet;
 	BitcoinRegtest;
 	SolanaDevnet;
 	PolygonAmoy;
@@ -292,6 +253,7 @@ type NetworkSettingsFor = variant {
 	BaseMainnet;
 	BscMainnet;
 	SolanaLocal;
+	ArbitrumSepolia;
 	EthereumMainnet;
 	SolanaMainnet;
 	BitcoinMainnet;
@@ -307,7 +269,6 @@ type SaveNetworksSettingsRequest = record {
 	networks : vec record { NetworkSettingsFor; NetworkSettings };
 	current_user_version : opt nat64
 };
-type SaveTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SelectedUtxosFeeError = variant {
 	PendingTransactions;
 	InternalError : record { msg : text }
@@ -325,10 +286,8 @@ type SetShowTestnetsRequest = record {
 	current_user_version : opt nat64;
 	show_testnets : bool
 };
-type SetUserShowTestnetsResult = variant {
-	Ok;
-	Err : SaveTestnetsSettingsError
-};
+type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
+type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
 type Settings = record { networks : NetworksSettings; dapp : DappSettings };
 type SplToken = record {
 	decimals : opt nat8;
@@ -350,9 +309,12 @@ type SupportedCredential = record {
 };
 type TestnetsSettings = record { show_testnets : bool };
 type Token = variant {
+	Erc20 : ErcToken;
 	Icrc : IcrcToken;
+	Erc721 : ErcToken;
 	SplDevnet : SplToken;
-	SplMainnet : SplToken
+	SplMainnet : SplToken;
+	Erc1155 : ErcToken
 };
 type TokenAccountId = variant {
 	Btc : BtcAddress;
@@ -360,6 +322,7 @@ type TokenAccountId = variant {
 	Sol : text;
 	Icrcv2 : Icrcv2AccountId
 };
+type TokenSection = variant { Spam; Hidden };
 type TopUpCyclesLedgerError = variant {
 	InvalidArgPercentageOutOfRange : record {
 		max : nat8;
@@ -382,34 +345,20 @@ type TopUpCyclesLedgerResult = variant {
 	Ok : TopUpCyclesLedgerResponse;
 	Err : TopUpCyclesLedgerError
 };
-type Transaction = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : EthAddress;
-	timestamp : nat64;
-	amount : nat64
+type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
+type UpdateUserAgreementsRequest = record {
+	agreements : UserAgreements;
+	current_user_version : opt nat64
 };
-type TransactionType = variant { Send; Receive };
-type Transaction_1 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : text;
-	timestamp : nat64;
-	amount : nat64
+type UserAgreement = record {
+	last_accepted_at_ns : opt nat64;
+	accepted : opt bool;
+	last_updated_at_ms : opt nat64
 };
-type Transaction_2 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : BtcAddress;
-	timestamp : nat64;
-	amount : nat64
-};
-type Transaction_3 = record {
-	transaction_type : TransactionType;
-	network : record {};
-	counterparty : Icrcv2AccountId;
-	timestamp : nat64;
-	amount : nat64
+type UserAgreements = record {
+	license_agreement : UserAgreement;
+	privacy_policy : UserAgreement;
+	terms_of_use : UserAgreement
 };
 type UserCredential = record {
 	issuer : text;
@@ -417,15 +366,12 @@ type UserCredential = record {
 	credential_type : CredentialType
 };
 type UserProfile = record {
+	agreements : opt Agreements;
 	credentials : vec UserCredential;
 	version : opt nat64;
 	settings : opt Settings;
 	created_timestamp : nat64;
 	updated_timestamp : nat64
-};
-type UserSnapshot = record {
-	accounts : vec AccountSnapshotFor;
-	timestamp : opt nat64
 };
 type UserToken = record {
 	decimals : opt nat8;
@@ -438,52 +384,216 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
+	// Adds a verifiable credential to the user profile.
+	//
+	// # Errors
+	// Errors are enumerated by: `AddUserCredentialError`.
 	add_user_credential : (AddUserCredentialRequest) -> (AddUserCredentialResult);
+	// Adds a dApp ID to the user's list of dApps that are not shown in the carousel.
+	//
+	// # Arguments
+	// * `request` - The request to add a hidden dApp ID.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the dApp ID was added successfully, or if it was already in the list.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	add_user_hidden_dapp_id : (AddHiddenDappIdRequest) -> (
 		AddUserHiddenDappIdResult
 	);
+	// This function authorizes the caller to spend a specific
+	//
+	// Note:
+	// - The chain fusion signer performs threshold key operations including providing public keys,
+	// creating signatures and assisting with performing signed Bitcoin and Ethereum transactions.
+	//
+	// # Errors
+	// Errors are enumerated by: `AllowSigningError`.
 	allow_signing : (opt AllowSigningRequest) -> (AllowSigningResult);
+	// Adds a pending Bitcoin transaction for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcAddPendingTransactionError`.
 	btc_add_pending_transaction : (BtcAddPendingTransactionRequest) -> (
 		BtcAddPendingTransactionResult
 	);
+	// Retrieves the current fee percentiles for Bitcoin transactions from the cache
+	// for the specified network. Fee percentiles are measured in millisatoshi per byte
+	// and are periodically updated in the background.
+	//
+	// # Returns
+	// - On success: `Ok(BtcGetFeePercentilesResponse)` containing an array of fee percentiles
+	// - On failure: `Err(SelectedUtxosFeeError)` indicating what went wrong
+	//
+	// # Errors
+	// - `InternalError`: If fee percentiles are not available in the cache for the requested network
+	//
+	// # Note
+	// This function only returns data from the in-memory cache and doesn't make any calls
+	// to the Bitcoin API itself. If the cache doesn't have data for the requested network,
+	// an error is returned rather than fetching fresh data.
+	btc_get_current_fee_percentiles : (BtcGetFeePercentilesRequest) -> (
+		BtcGetFeePercentilesResult
+	) query;
+	// Returns the pending Bitcoin transactions for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `BtcGetPendingTransactionsError`.
 	btc_get_pending_transactions : (BtcGetPendingTransactionsRequest) -> (
 		BtcGetPendingTransactionsResult
 	);
+	// Selects the user's UTXOs and calculates the fee for a Bitcoin transaction.
+	//
+	// # Errors
+	// Errors are enumerated by: `SelectedUtxosFeeError`.
 	btc_select_user_utxos_fee : (SelectedUtxosFeeRequest) -> (
 		BtcSelectUserUtxosFeeResult
 	);
+	// Gets the canister configuration.
 	config : () -> (Config) query;
+	// Creates a new contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
+	//
+	// # Returns
+	// The created contact on success.
+	//
+	// # Test
+	// This endpoint is currently a placeholder and will be fully implemented in a future PR.
 	create_contact : (CreateContactRequest) -> (CreateContactResult);
+	// Creates a new proof-of-work challenge for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `CreateChallengeError`.
+	//
+	// # Returns
+	//
+	// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+	// internal errors.
 	create_pow_challenge : () -> (CreatePowChallengeResult);
+	// It creates a new user profile for the caller.
+	// If the user has already a profile, it will return that profile.
 	create_user_profile : () -> (UserProfile);
+	// Deletes a contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
+	//
+	// # Notes
+	// This operation is idempotent - it will return OK if the contact has already been deleted.
 	delete_contact : (nat64) -> (DeleteContactResult);
+	// Gets account creation timestamps.
 	get_account_creation_timestamps : () -> (
 		vec record { principal; nat64 }
 	) query;
+	// Retrieves the amount of cycles that the signer canister is allowed to spend
+	// on behalf of the current user
+	// # Returns
+	// - On success: `Ok(GetAllowedCyclesResponse)` containing the allowance in cycles
+	// - On failure: `Err(GetAllowedCyclesError)` indicating what went wrong
+	//
+	// # Errors
+	// - `FailedToContactCyclesLedger`: If the call to the cycles ledger canister failed
+	// - `Other`: If another error occurred during the operation
 	get_allowed_cycles : () -> (GetAllowedCyclesResult);
+	// API method to get cycle balance and burn rate.
 	get_canister_status : () -> (CanisterStatusResultV2);
+	// Gets a contact by ID for the caller.
+	//
+	// # Arguments
+	// * `contact_id` - The unique identifier of the contact to retrieve
+	// # Returns
+	// * `Ok(GetContactResult)` - The requested contact if found
+	// # Errors
+	// * `ContactNotFound` - If no contact for the provided `contact_id` could be found
 	get_contact : (nat64) -> (GetContactResult) query;
+	// Returns all contacts for the caller
+	//
+	// This query function returns a list of the user's contacts.
+	// # Returns
+	// * `Ok(Vec<Contact>)` - A vector of the user's contacts.
 	get_contacts : () -> (GetContactsResult) query;
-	get_snapshot : () -> (opt UserSnapshot) query;
+	// Returns the caller's user profile.
+	//
+	// # Errors
+	// Errors are enumerated by: `GetUserProfileError`.
+	//
+	// # Panics
+	// - If the caller is anonymous.  See: `may_read_user_data`.
 	get_user_profile : () -> (GetUserProfileResult) query;
+	// Checks if the caller has an associated user profile.
+	//
+	// # Returns
+	// - `Ok(true)` if a user profile exists for the caller.
+	// - `Ok(false)` if no user profile exists for the caller.
+	// # Errors
+	// Does not return any error
 	has_user_profile : () -> (HasUserProfileResponse) query;
+	// Processes external HTTP requests.
 	http_request : (HttpRequest) -> (HttpResponse) query;
 	list_custom_tokens : () -> (vec CustomToken) query;
 	list_user_tokens : () -> (vec UserToken) query;
+	// Remove custom token for the user.
+	remove_custom_token : (CustomToken) -> ();
 	remove_user_token : (UserTokenId) -> ();
+	// Add or update custom token for the user.
 	set_custom_token : (CustomToken) -> ();
 	set_many_custom_tokens : (vec CustomToken) -> ();
 	set_many_user_tokens : (vec UserToken) -> ();
-	set_snapshot : (UserSnapshot) -> ();
+	// Sets the user's preference to show (or hide) testnets in the interface.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the testnets setting was saved successfully, or if it was already set to
+	// the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	set_user_show_testnets : (SetShowTestnetsRequest) -> (
 		SetUserShowTestnetsResult
 	);
 	set_user_token : (UserToken) -> ();
+	// Gets statistics about the canister.
+	//
+	// Note: This is a private method, restricted to authorized users, as some stats may not be
+	// suitable for public consumption.
 	stats : () -> (Stats) query;
+	// Adds cycles to the cycles ledger, if it is below a certain threshold.
+	//
+	// # Errors
+	// Error conditions are enumerated by: `TopUpCyclesLedgerError`
 	top_up_cycles_ledger : (opt TopUpCyclesLedgerRequest) -> (
 		TopUpCyclesLedgerResult
 	);
+	// Updates an existing contact for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `ContactError`.
 	update_contact : (Contact) -> (GetContactResult);
+	// Updates the user's agreements, merging with any existing ones.
+	// Only fields where `accepted` is `Some(_)` are applied. If `Some(true)`, `last_accepted_at_ns` is
+	// set to `now`.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the agreements were saved successfully, or if they were already set to the
+	// same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_agreements : (UpdateUserAgreementsRequest) -> (
+		SetUserShowTestnetsResult
+	);
+	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
+	// existing settings.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the network settings were updated successfully, or if they were already
+	// set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
 	update_user_network_settings : (SaveNetworksSettingsRequest) -> (
 		SetUserShowTestnetsResult
 	)

@@ -8,7 +8,7 @@ import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { derived, type Readable } from 'svelte/store';
 
-const splDefaultTokens: Readable<SplToken[]> = derived(
+export const splDefaultTokens: Readable<SplToken[]> = derived(
 	[splDefaultTokensStore, enabledSolanaNetworksIds],
 	([$splTokensStore, $enabledSolanaNetworksIds]) =>
 		($splTokensStore ?? []).filter(({ network: { id: networkId } }) =>
@@ -22,8 +22,10 @@ const splDefaultTokensAddresses: Readable<SplTokenAddress[]> = derived(
 );
 
 /**
- * The list of SPL tokens the user has added, enabled or disabled. Can contains default tokens for example if user has disabled a default tokens.
- * i.e. default tokens are configured on the client side. If user disable or enable a default tokens, this token is added as a "user token" in the backend.
+ * The list of SPL tokens the user has added, enabled or disabled.
+ * Can contain default tokens, for example, if the user has disabled a default token.
+ * i.e. default tokens are configured on the client side.
+ * If a user disables or enables a default token, this token is added as a "user token" in the backend.
  */
 const splCustomTokens: Readable<SplCustomToken[]> = derived(
 	[splCustomTokensStore, enabledSolanaNetworksIds],
@@ -45,7 +47,7 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 	[splDefaultTokens, splCustomTokens],
 	([$splDefaultTokens, $splCustomTokens]) =>
 		$splDefaultTokens.map(({ address, network, ...rest }) => {
-			const userToken = $splCustomTokens.find(
+			const customToken = $splCustomTokens.find(
 				({ address: contractAddress, network: contractNetwork }) =>
 					contractAddress === address &&
 					(network as SolanaNetwork).chainId === (contractNetwork as SolanaNetwork).chainId
@@ -57,7 +59,7 @@ const splDefaultTokensToggleable: Readable<SplTokenToggleable[]> = derived(
 					network,
 					...rest
 				},
-				userToken
+				customToken
 			});
 		})
 );
@@ -112,4 +114,14 @@ export const enabledSplTokenAddresses: Readable<SplTokenAddress[]> = derived(
 			$enabledSplTokens.map(({ address, owner }) => [`${address}|${owner}`, address])
 		).values()
 	]
+);
+
+export const splCustomTokensInitialized: Readable<boolean> = derived(
+	[splCustomTokensStore],
+	([$splCustomTokensStore]) => $splCustomTokensStore !== undefined
+);
+
+export const splCustomTokensNotInitialized: Readable<boolean> = derived(
+	[splCustomTokensInitialized],
+	([$splCustomTokensInitialized]) => !$splCustomTokensInitialized
 );

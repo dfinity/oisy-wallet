@@ -1,7 +1,9 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
+	import { TRACK_REWARD_FILTER_CHANGE } from '$lib/constants/analytics.contants';
 	import { REWARDS_FILTER } from '$lib/constants/test-ids.constants';
 	import { RewardStates } from '$lib/enums/reward-states';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -11,6 +13,17 @@
 	}
 
 	let { rewardState = $bindable(), endedCampaignsAmount = 0 }: Props = $props();
+
+	const changeFilter = (toState: RewardStates) => {
+		if (rewardState !== toState) {
+			trackEvent({
+				name: TRACK_REWARD_FILTER_CHANGE,
+				metadata: { fromState: rewardState, toState }
+			});
+		}
+
+		rewardState = toState;
+	};
 </script>
 
 <div
@@ -18,24 +31,24 @@
 	data-tid={REWARDS_FILTER}
 >
 	<Button
-		paddingSmall
 		ariaLabel={$i18n.rewards.text.ongoing}
-		on:click={() => (rewardState = RewardStates.ONGOING)}
-		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ONGOING ? 'primary' : 'tertiary'}
+		onclick={() => changeFilter(RewardStates.ONGOING)}
+		paddingSmall
+		styleClass="text-nowrap max-w-28 text-sm"
 		testId={`${REWARDS_FILTER}-${RewardStates.ONGOING}-button`}
 	>
 		{$i18n.rewards.text.ongoing}
 	</Button>
 
 	<Button
-		paddingSmall
 		ariaLabel={$i18n.rewards.text.ended}
-		on:click={() => (rewardState = RewardStates.ENDED)}
-		styleClass="text-nowrap max-w-28 text-sm"
 		colorStyle={rewardState === RewardStates.ENDED ? 'primary' : 'tertiary'}
-		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
 		disabled={endedCampaignsAmount === 0}
+		onclick={() => changeFilter(RewardStates.ENDED)}
+		paddingSmall
+		styleClass="text-nowrap max-w-28 text-sm"
+		testId={`${REWARDS_FILTER}-${RewardStates.ENDED}-button`}
 	>
 		{replacePlaceholders($i18n.rewards.text.ended, { $amount: endedCampaignsAmount.toString() })}
 	</Button>

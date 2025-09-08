@@ -4,13 +4,14 @@
 	import SkeletonAddressCard from '$lib/components/address/SkeletonAddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { AddressBookSteps } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
+	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { AnyTransactionUi } from '$lib/types/transaction';
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
@@ -19,9 +20,10 @@
 		toExplorerUrl?: string;
 		from: string | undefined;
 		fromExplorerUrl?: string;
+		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
 	}
 
-	const { type, to, from, toExplorerUrl, fromExplorerUrl }: Props = $props();
+	const { type, to, from, toExplorerUrl, fromExplorerUrl, onSaveAddressComplete }: Props = $props();
 
 	let address: string | undefined = $derived(
 		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
@@ -35,12 +37,17 @@
 				})
 			: undefined
 	);
+
+	let modalStoreData = $derived($modalStore?.data as OpenTransactionParams<AnyTransactionUi>);
+
+	const getOnComplete = (data: OpenTransactionParams<AnyTransactionUi>) => () =>
+		onSaveAddressComplete?.(data);
 </script>
 
 {#if nonNullish(address)}
 	<AddressCard>
 		{#snippet logo()}
-			<AvatarWithBadge {contact} badge={{ type: 'addressType', address }} />
+			<AvatarWithBadge badge={{ type: 'addressType', address }} {contact} />
 		{/snippet}
 		{#snippet content()}
 			<span class="mx-1 flex flex-col items-start text-left">
@@ -51,32 +58,33 @@
 
 				{#if isNullish(contact)}
 					<Button
-						on:click={() =>
+						ariaLabel={$i18n.address.save.title}
+						link
+						onclick={() =>
 							modalStore.openAddressBook({
 								id: Symbol(),
 								data: {
 									entrypoint: {
 										type: AddressBookSteps.SAVE_ADDRESS,
-										address
+										address,
+										onComplete: getOnComplete(modalStoreData)
 									}
 								}
 							})}
-						link
 						styleClass="mt-3 text-sm"
-						ariaLabel={$i18n.address.save.title}
 						><IconUserSquare size="20px" /> {$i18n.address.save.title}</Button
 					>
 				{/if}
 			</span>
 		{/snippet}
 		{#snippet actions()}
-			<TransactionAddressActions
+			<AddressActions
 				copyAddress={address}
 				copyAddressText={type === 'send'
 					? $i18n.transaction.text.to_copied
 					: $i18n.transaction.text.from_copied}
-				explorerUrl={type === 'send' ? toExplorerUrl : fromExplorerUrl}
-				explorerUrlAriaLabel={type === 'send'
+				externalLink={type === 'send' ? toExplorerUrl : fromExplorerUrl}
+				externalLinkAriaLabel={type === 'send'
 					? $i18n.transaction.alt.open_to_block_explorer
 					: $i18n.transaction.alt.open_from_block_explorer}
 			/>

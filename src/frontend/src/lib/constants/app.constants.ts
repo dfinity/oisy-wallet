@@ -7,7 +7,9 @@ export const APP_VERSION = VITE_APP_VERSION;
 export const MODE = VITE_DFX_NETWORK;
 export const LOCAL = MODE === 'local';
 export const TEST_FE = MODE.startsWith('test_fe_');
-export const STAGING = MODE === 'staging' || TEST_FE || MODE === 'audit' || MODE === 'e2e';
+export const AUDIT = MODE === 'audit';
+export const E2E = MODE === 'e2e';
+export const STAGING = MODE === 'staging' || TEST_FE || AUDIT || E2E;
 export const BETA = MODE === 'beta';
 export const PROD = MODE === 'ic';
 
@@ -46,9 +48,14 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 
 export const BACKEND_CANISTER_ID = LOCAL
 	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
-	: STAGING
-		? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
-		: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+	: TEST_FE || AUDIT || E2E
+		? (import.meta.env[`VITE_${MODE.toUpperCase()}_BACKEND_CANISTER_ID`] ??
+			import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID)
+		: STAGING
+			? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+			: BETA
+				? import.meta.env.VITE_BETA_BACKEND_CANISTER_ID
+				: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
 
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
@@ -91,6 +98,22 @@ export const XTC_LEDGER_CANISTER_ID = LOCAL
 		: BETA
 			? import.meta.env.VITE_BETA_XTC_LEDGER_CANISTER_ID
 			: import.meta.env.VITE_IC_XTC_LEDGER_CANISTER_ID;
+
+export const SOL_RPC_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_SOL_RPC_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_SOL_RPC_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_SOL_RPC_CANISTER_ID
+			: import.meta.env.VITE_IC_SOL_RPC_CANISTER_ID;
+
+export const LLM_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_LLM_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_LLM_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_LLM_CANISTER_ID
+			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
@@ -138,6 +161,9 @@ export const EIGHT_DECIMALS = 8;
 
 export const ZERO = 0n;
 
+// NFTs
+export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
+
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
@@ -173,3 +199,6 @@ export const MIN_DESTINATION_LENGTH_FOR_ERROR_STATE = 10;
 
 // Contact validation
 export const CONTACT_MAX_LABEL_LENGTH = 50;
+
+// Contact validation
+export const CONTACT_MAX_NAME_LENGTH = 100;

@@ -3,6 +3,7 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
+	import { EARNING_ENABLED } from '$env/earning';
 	import IconGift from '$lib/components/icons/IconGift.svelte';
 	import IconWallet from '$lib/components/icons/IconWallet.svelte';
 	import AnimatedIconUfo from '$lib/components/icons/animated/AnimatedIconUfo.svelte';
@@ -24,9 +25,11 @@
 		isRouteRewards,
 		isRouteDappExplorer,
 		isRouteSettings,
-		isRouteTokens,
 		isRouteTransactions,
-		networkUrl
+		networkUrl,
+		isRouteEarning,
+		isRouteTokens,
+		isRouteNfts
 	} from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -48,76 +51,123 @@
 </script>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
 		path: AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.tokens}
-	selected={isRouteTokens(page) || isRouteTransactions(page)}
+	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_TOKENS)}
 >
-	<IconWallet />
-	{$i18n.navigation.text.tokens}
+	{#snippet icon()}
+		<IconWallet />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.tokens}
+	{/snippet}
 </NavigationItem>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.activity}
 	selected={isRouteActivity(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_ACTIVITY)}
 >
-	<IconActivity />
-	{$i18n.navigation.text.activity}
+	{#snippet icon()}
+		<IconActivity />
+	{/snippet}
+
+	{#snippet label()}
+		{$i18n.navigation.text.activity}
+	{/snippet}
 </NavigationItem>
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	selected={isRouteDappExplorer(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_EXPLORER)}
 >
-	<AnimatedIconUfo />
-	{$i18n.navigation.text.dapp_explorer}
+	{#snippet icon()}
+		<AnimatedIconUfo />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.dapp_explorer}
+	{/snippet}
 </NavigationItem>
 
-<NavigationItem
-	href={networkUrl({
-		path: AppPath.Rewards,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
-		fromRoute
-	})}
-	ariaLabel={$i18n.navigation.alt.airdrops}
-	selected={isRouteRewards(page)}
-	testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
->
-	<IconGift />
-	{$i18n.navigation.text.airdrops}
-</NavigationItem>
+<!-- Todo: remove condition once the feature is completed -->
+{#if EARNING_ENABLED}
+	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		href={networkUrl({
+			path: AppPath.Earning,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		selected={isRouteEarning(page)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		{#snippet icon()}
+			<IconGift />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.earning}
+		{/snippet}
+	</NavigationItem>
+{:else}
+	<NavigationItem
+		ariaLabel={$i18n.navigation.alt.airdrops}
+		href={networkUrl({
+			path: AppPath.Rewards,
+			networkId: $networkId,
+			usePreviousRoute: isTransactionsRoute,
+			fromRoute
+		})}
+		selected={isRouteRewards(page)}
+		tag={$i18n.core.text.new}
+		tagVariant="emphasis"
+		testId={addTestIdPrefix(NAVIGATION_ITEM_REWARDS)}
+	>
+		{#snippet icon()}
+			<IconGift />
+		{/snippet}
+		{#snippet label()}
+			{$i18n.navigation.text.airdrops}
+		{/snippet}
+	</NavigationItem>
+{/if}
 
 <NavigationItem
+	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
-	ariaLabel={$i18n.navigation.alt.settings}
 	selected={isRouteSettings(page)}
 	testId={addTestIdPrefix(NAVIGATION_ITEM_SETTINGS)}
 >
-	<IconlySettings />
-	{$i18n.navigation.text.settings}
+	{#snippet icon()}
+		<IconlySettings />
+	{/snippet}
+	{#snippet label()}
+		{$i18n.navigation.text.settings}
+	{/snippet}
 </NavigationItem>

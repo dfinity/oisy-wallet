@@ -7,10 +7,14 @@
 </script>
 
 <ModalValue>
-	<slot slot="label" name="label" />
+	{#snippet label()}
+		<slot name="label" />
+	{/snippet}
 
-	<div class="flex" slot="main-value">
-		<NetworkLogo network={token.network} color="off-white" />
-		<span class="ml-2">{token.network.name}</span>
-	</div>
+	{#snippet mainValue()}
+		<div class="flex">
+			<NetworkLogo color="off-white" network={token.network} />
+			<span class="ml-2">{token.network.name}</span>
+		</div>
+	{/snippet}
 </ModalValue>

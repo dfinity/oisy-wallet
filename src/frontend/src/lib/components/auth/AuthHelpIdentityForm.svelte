@@ -34,10 +34,10 @@
 <ContentWithToolbar>
 	<div class="grid gap-6">
 		<Img
+			alt={$i18n.auth.help.alt.internet_identity}
 			src={helpAuthIdentityBanner}
 			styleClass="w-full"
 			testId={HELP_AUTH_IDENTITY_IMAGE_BANNER}
-			alt={$i18n.auth.help.alt.internet_identity}
 		/>
 
 		<div>
@@ -48,17 +48,17 @@
 				{$i18n.auth.help.text.identity_legacy_description}
 			</p>
 			<p>
-				<Button link on:click={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
+				<Button link onclick={onLegacySignIn} testId={HELP_AUTH_LEGACY_SIGN_IN_BUTTON}
 					>{$i18n.auth.help.text.identity_legacy_sign_in}</Button
 				>
 			</p>
 			<p class="mb-0">
 				<ExternalLink
-					styleClass="font-semibold"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_FIND_INTERNET_IDENTITY_URL}
-					testId={HELP_AUTH_LEARN_MORE_LINK}
 					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_LEARN_MORE_LINK}
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>
@@ -66,10 +66,12 @@
 		</div>
 	</div>
 
-	<ButtonGroup slot="toolbar">
-		{#if !hideBack}
-			<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
-		{/if}
-		<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			{#if !hideBack}
+				<ButtonBack onclick={onBack} testId={HELP_AUTH_BACK_BUTTON} />
+			{/if}
+			<ButtonDone onclick={onDone} testId={HELP_AUTH_DONE_BUTTON} />
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

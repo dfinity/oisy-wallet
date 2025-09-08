@@ -23,10 +23,6 @@ export const TestnetCases: TestnetConfig[] = [
 		tokenSymbol: 'SepoliaETH'
 	},
 	{
-		networkSymbol: 'SOL (Testnet)',
-		tokenSymbol: 'SOL (Testnet)'
-	},
-	{
 		networkSymbol: 'SOL (Devnet)',
 		tokenSymbol: 'SOL (Devnet)'
 	},

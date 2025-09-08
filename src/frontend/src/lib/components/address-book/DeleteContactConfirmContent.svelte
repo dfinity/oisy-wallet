@@ -24,10 +24,12 @@
 		})}
 	</span>
 
-	<ButtonGroup slot="toolbar">
-		<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
-		<Button loading={disabled} colorStyle="error" on:click={() => onDelete(contact.id)}>
-			{$i18n.contact.delete.delete_contact}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup>
+			<ButtonCancel {disabled} onclick={onCancel}></ButtonCancel>
+			<Button colorStyle="error" loading={disabled} onclick={() => onDelete(contact.id)}>
+				{$i18n.contact.delete.delete_contact}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

@@ -82,8 +82,7 @@ export const decodeQrCode = ({
 				erc20Tokens.find(
 					(token) =>
 						token.address.toLowerCase() === tokenAddress.toLowerCase() &&
-						(token.network as EthereumNetwork).chainId.toString() ===
-							parsedEthereumChainId.toString()
+						token.network.chainId.toString() === parsedEthereumChainId.toString()
 				) ?? undefined
 			);
 		}

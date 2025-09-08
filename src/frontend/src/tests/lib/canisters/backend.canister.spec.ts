@@ -21,8 +21,9 @@ import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockUserAgreements } from '$tests/mocks/user-agreements.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
-import { mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
+import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
 import { Principal } from '@dfinity/principal';
@@ -675,7 +676,7 @@ describe('backend.canister', () => {
 
 			const result = await getAllowedCycles();
 
-			expect(service.get_allowed_cycles).toHaveBeenCalledTimes(1);
+			expect(service.get_allowed_cycles).toHaveBeenCalledOnce();
 			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
 		});
 
@@ -765,7 +766,7 @@ describe('backend.canister', () => {
 
 			const res = await allowSigning();
 
-			expect(service.allow_signing).toHaveBeenCalledTimes(1);
+			expect(service.allow_signing).toHaveBeenCalledOnce();
 			expect(res).toBeDefined();
 		});
 
@@ -1087,6 +1088,72 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('updateUserAgreements', () => {
+		it('should update user agreements', async () => {
+			const response = { Ok: null };
+
+			service.update_user_agreements.mockResolvedValue(response);
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserAgreements({
+				agreements: mockUserAgreements
+			});
+
+			expect(service.update_user_agreements).toHaveBeenCalledWith({
+				agreements: mockDefinedUserAgreements.agreements,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should update partial user agreements', async () => {
+			const response = { Ok: null };
+
+			service.update_user_agreements.mockResolvedValue(response);
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const { licenseAgreement: _, ...agreements } = mockUserAgreements;
+
+			const res = await updateUserAgreements({ agreements });
+
+			expect(service.update_user_agreements).toHaveBeenCalledWith({
+				agreements: {
+					...mockDefinedUserAgreements.agreements,
+					license_agreement: {
+						accepted: toNullable(),
+						last_accepted_at_ns: toNullable(),
+						last_updated_at_ms: toNullable()
+					}
+				},
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_agreements throws', async () => {
+			service.update_user_agreements.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserAgreements } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserAgreements({
+				agreements: mockUserAgreements
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('getContact', () => {
 		it('should call get_contact service', async () => {
 			const [mockContact] = getMockContacts({ n: 1 });
@@ -1166,7 +1233,7 @@ describe('backend.canister', () => {
 
 			const res = await createContact('John');
 
-			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John' });
+			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John', image: [] });
 			expect(res).toEqual(mockContact);
 		});
 
@@ -1249,6 +1316,184 @@ describe('backend.canister', () => {
 			const res = updateContact(mockContact);
 
 			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('removeUserToken', () => {
+		it('should call remove_user_token method', async () => {
+			const params = {
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			};
+			const response = undefined;
+
+			service.remove_user_token.mockResolvedValue(response);
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await removeUserToken(params);
+
+			expect(service.remove_user_token).toHaveBeenCalledWith(params);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if remove_user_token throws', async () => {
+			service.remove_user_token.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { removeUserToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = removeUserToken({
+				chain_id: mockedUserToken.chain_id,
+				contract_address: mockedUserToken.contract_address
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('removeCustomToken', () => {
+		it('should call remove_custom_token method', async () => {
+			const params = {
+				token: mockedCustomToken
+			};
+			const response = undefined;
+
+			service.remove_custom_token.mockResolvedValue(response);
+
+			const { removeCustomToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await removeCustomToken(params);
+
+			expect(service.remove_custom_token).toHaveBeenCalledWith(params.token);
+			expect(res).toEqual(response);
+		});
+
+		it('should throw an error if remove_custom_token throws', async () => {
+			service.remove_custom_token.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { removeCustomToken } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = removeCustomToken({
+				token: mockedCustomToken
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('btc_get_current_fee_percentiles', () => {
+		const btcGetFeePercentilesParams = {
+			network: btcAddPendingTransactionParams.network
+		};
+
+		it('should return fee percentiles with success response', async () => {
+			const response = {
+				Ok: {
+					fee_percentiles: [5n, 10n, 15n, 20n, 30n]
+				}
+			};
+
+			service.btc_get_current_fee_percentiles.mockResolvedValue(response);
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			expect(service.btc_get_current_fee_percentiles).toHaveBeenCalledWith(
+				btcGetFeePercentilesParams
+			);
+			expect(res).toEqual(response.Ok);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns an internal error', async () => {
+			service.btc_get_current_fee_percentiles.mockResolvedValue(errorResponse);
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(errorResponse.Err.InternalError.msg)
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns a pending-transactions error', async () => {
+			service.btc_get_current_fee_percentiles.mockResolvedValue({
+				Err: { PendingTransactions: null }
+			});
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError(
+					'Selecting utxos fee is not possible - pending transactions found.'
+				)
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns a generic canister error', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_current_fee_percentiles.mockResolvedValue({ Err: { CanisterError: null } });
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(
+				new CanisterInternalError('Unknown BtcSelectUserUtxosFeeError')
+			);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles throws', async () => {
+			service.btc_get_current_fee_percentiles.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if btc_get_current_fee_percentiles returns an unexpected response', async () => {
+			// @ts-expect-error we test this in purposes
+			service.btc_get_current_fee_percentiles.mockResolvedValue({ test: 'unexpected' });
+
+			const { btcGetCurrentFeePercentiles } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
+
+			await expect(res).rejects.toThrow();
 		});
 	});
 });

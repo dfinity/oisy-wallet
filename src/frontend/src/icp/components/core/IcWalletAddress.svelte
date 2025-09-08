@@ -12,12 +12,7 @@
 
 	<output id="ic-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: $icrcAccountIdentifierText ?? '' })}</output
-	><Copy
-		color="inherit"
-		inline
-		value={$icrcAccountIdentifierText ?? ''}
-		text={$i18n.wallet.text.address_copied}
-	/>
+	><Copy inline text={$i18n.wallet.text.address_copied} value={$icrcAccountIdentifierText ?? ''} />
 
 	<p class="break-normal pt-2 text-tertiary">
 		{$i18n.wallet.text.icp_deposits}

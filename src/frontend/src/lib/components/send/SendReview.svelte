@@ -23,7 +23,7 @@
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
+	<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
 
 	<div class="mb-4">
 		<SendReviewDestination {destination} {selectedContact} />
@@ -35,10 +35,12 @@
 
 	<slot name="info" />
 
-	<ButtonGroup slot="toolbar" testId="toolbar">
-		<ButtonBack onclick={() => dispatch('icBack')} />
-		<Button {disabled} on:click={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
-			{$i18n.send.text.send}
-		</Button>
-	</ButtonGroup>
+	{#snippet toolbar()}
+		<ButtonGroup testId="toolbar">
+			<ButtonBack onclick={() => dispatch('icBack')} />
+			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
+				{$i18n.send.text.send}
+			</Button>
+		</ButtonGroup>
+	{/snippet}
 </ContentWithToolbar>

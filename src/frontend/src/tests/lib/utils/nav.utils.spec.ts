@@ -1,3 +1,4 @@
+import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
@@ -13,9 +14,13 @@ import {
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
+	isEarningPath,
+	isNftsPath,
 	isRewardsPath,
 	isRouteActivity,
 	isRouteDappExplorer,
+	isRouteEarning,
+	isRouteNfts,
 	isRouteRewards,
 	isRouteSettings,
 	isRouteTokens,
@@ -31,6 +36,7 @@ import {
 	type RouteParams
 } from '$lib/utils/nav.utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import type { MockInstance } from 'vitest';
 
 describe('nav.utils', () => {
 	const mockGoTo = vi.fn();
@@ -169,19 +175,31 @@ describe('nav.utils', () => {
 	});
 
 	describe('loadRouteParams', () => {
+		let spyBrowser: MockInstance;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			spyBrowser = vi.spyOn(appEnvironment, 'browser', 'get');
+
+			spyBrowser.mockReturnValue(true);
+		});
+
 		it('should return undefined values if not in a browser', () => {
+			spyBrowser.mockReturnValueOnce(false);
+
 			const result = loadRouteParams({
 				url: {
 					searchParams: {
-						get: vi.fn((_) => null)
+						get: vi.fn((key) => (key === TOKEN_PARAM ? 'testToken' : null))
 					}
 				}
 			} as unknown as LoadEvent);
 
 			expect(result).toEqual({
-				[TOKEN_PARAM]: null,
-				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[TOKEN_PARAM]: undefined,
+				[NETWORK_PARAM]: undefined,
+				[URI_PARAM]: undefined
 			});
 		});
 
@@ -227,6 +245,82 @@ describe('nav.utils', () => {
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: 'testURI'
 			});
+		});
+
+		it('should handle emoji in search params', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === TOKEN_PARAM ? '💰' : null))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: '💰',
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
+		});
+
+		it('should handle correctly one missing parameter', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn((key) => (key === TOKEN_PARAM ? null : 'mock-params'))
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: 'mock-params',
+				[URI_PARAM]: 'mock-params'
+			});
+		});
+
+		it('should return all parameters as null if none are present', () => {
+			expect(
+				loadRouteParams({
+					url: {
+						searchParams: {
+							get: vi.fn(() => null)
+						}
+					}
+				} as unknown as LoadEvent)
+			).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null
+			});
+		});
+
+		it('should handle null decoded values', () => {
+			vi.stubGlobal('decodeURIComponent', () => null);
+
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((key) =>
+							key === TOKEN_PARAM
+								? 'testToken'
+								: key === URI_PARAM
+									? 'testURI'
+									: key === NETWORK_PARAM
+										? 'testNetwork'
+										: null
+						)
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: 'testNetwork',
+				[URI_PARAM]: null
+			});
+
+			vi.unstubAllGlobals();
 		});
 	});
 
@@ -334,7 +428,7 @@ describe('nav.utils', () => {
 
 		describe('isRouteTokens', () => {
 			it('should return true when route id matches ROUTE_ID_GROUP_APP exactly', () => {
-				expect(isRouteTokens(mockPage(ROUTE_ID_GROUP_APP))).toBeTruthy();
+				expect(isRouteTokens(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Tokens}`))).toBeTruthy();
 			});
 
 			it('should return true when route id matches Wallet Connect path', () => {
@@ -372,6 +466,54 @@ describe('nav.utils', () => {
 				expect(isRouteRewards(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
 			});
 		});
+
+		describe('isRouteEarning', () => {
+			it('should return true when route id matches Earning path', () => {
+				const mockPath = `${ROUTE_ID_GROUP_APP}${AppPath.Earning}`;
+
+				expect(isRouteEarning(mockPage(mockPath))).toBeTruthy();
+				expect(isRouteEarning(mockPage(mockPath.slice(0, -1)))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Earning path', () => {
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.EarningRewards}`))
+				).toBeTruthy();
+				expect(
+					isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Earning}/subroute`))
+				).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Earning path', () => {
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteEarning(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
+
+		describe('isRouteNfts', () => {
+			it('should return true when route id matches Nfts path', () => {
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}`))).toBeTruthy();
+			});
+
+			it('should return true when route id is any subroute of the Nfts path', () => {
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Nfts}/subroute`))).toBeTruthy();
+			});
+
+			it('should return false when route id does not match Nfts path', () => {
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}/wrongPath`))).toBeFalsy();
+
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}${AppPath.Settings}`))).toBeFalsy();
+
+				expect(isRouteNfts(mockPage(`${ROUTE_ID_GROUP_APP}`))).toBeFalsy();
+
+				expect(isRouteNfts(mockPage(`/anotherGroup/${AppPath.Rewards}`))).toBeFalsy();
+			});
+		});
 	});
 
 	describe('Path Matching Functions', () => {
@@ -407,11 +549,17 @@ describe('nav.utils', () => {
 
 		it('isTokensPath', () => {
 			expect(isTokensPath(withAppPrefix(AppPath.Tokens))).toBeTruthy();
-			expect(isTokensPath('/(app)/')).toBeTruthy();
 			expect(isTokensPath(withAppPrefix(AppPath.WalletConnect))).toBeTruthy();
 			expect(isTokensPath('/(app)/wc')).toBeTruthy();
 			expect(isTokensPath('/(app)/wrong')).toBeFalsy();
 			expect(isTokensPath(null)).toBeFalsy();
+		});
+
+		it('isNftsPath', () => {
+			expect(isNftsPath(withAppPrefix(AppPath.Nfts))).toBeTruthy();
+			expect(isNftsPath('/(app)/assets/nfts/subpath')).toBeFalsy();
+			expect(isNftsPath('/(app)/wrong')).toBeFalsy();
+			expect(isNftsPath(null)).toBeFalsy();
 		});
 
 		it('isRewardsPath', () => {
@@ -419,6 +567,13 @@ describe('nav.utils', () => {
 			expect(isRewardsPath('/(app)/rewards')).toBeTruthy();
 			expect(isRewardsPath('/(app)/rewards/bonus')).toBeFalsy();
 			expect(isRewardsPath(null)).toBeFalsy();
+		});
+
+		it('isEarningPath', () => {
+			expect(isEarningPath(withAppPrefix(AppPath.Earning))).toBeTruthy();
+			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
+			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
+			expect(isEarningPath(null)).toBeFalsy();
 		});
 	});
 });

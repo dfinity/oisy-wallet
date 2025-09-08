@@ -1,18 +1,21 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
-	import IconCopy from '$lib/components/icons/IconCopy.svelte';
+	import IconOisyMenu from '$lib/components/icons/IconOisyMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { emit } from '$lib/utils/events.utils';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onClick?: () => void;
+	}
+
+	let { onClick }: Props = $props();
 
 	const openReceive = () => {
-		dispatch('icReceiveTriggered');
+		onClick?.();
 		emit({ message: 'oisyReceive' });
 	};
 </script>
 
-<button on:click={openReceive} class="nav-item nav-item-condensed">
-	<IconCopy />
+<button class="nav-item nav-item-condensed" onclick={openReceive}>
+	<IconOisyMenu size="20" />
 	{$i18n.wallet.text.your_addresses}
 </button>
