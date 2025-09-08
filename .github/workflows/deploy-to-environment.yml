@@ -303,9 +303,7 @@ jobs:
           if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             echo "VITE_ALCHEMY_API_KEY=$(get VITE_ALCHEMY_API_KEY "$VITE_ALCHEMY_API_KEY_TEST_FE")" >> $GITHUB_OUTPUT
           elif [[ "$NETWORK" == "staging" ]]; then
-            {
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
-            } >> $GITHUB_OUTPUT
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING" >> $GITHUB_OUTPUT
           elif [[ "$NETWORK" == "beta" ]]; then
             {
               echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
