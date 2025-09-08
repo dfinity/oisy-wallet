@@ -152,7 +152,7 @@
 
 				const estimatedGasNft = await safeEstimateGas({ from: $ethAddress, to, data });
 
-				console.log('gas estimate', estimatedGasNft);
+				console.log('gas estimate', estimatedGasNft, feeData);
 
 				if (isNullish(estimatedGasNft)) {
 					return;
