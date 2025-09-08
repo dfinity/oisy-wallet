@@ -5,7 +5,7 @@ import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-token
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { IcrcIndexNgGetTransactions, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
-import { expect } from 'vitest';
+
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getTransactions: vi.fn()
@@ -44,7 +44,7 @@ describe('index-canister.services', () => {
 
 			await isIndexCanisterAwake(mockParams);
 
-			expect(getTransactions).toHaveBeenCalledTimes(1);
+			expect(getTransactions).toHaveBeenCalledOnce();
 			expect(getTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				indexCanisterId: mockIndexCanisterId,
@@ -99,7 +99,7 @@ describe('index-canister.services', () => {
 
 			await isIndexCanisterAwake(mockParams);
 
-			expect(balance).toHaveBeenCalledTimes(1);
+			expect(balance).toHaveBeenCalledOnce();
 			expect(balance).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				ledgerCanisterId: mockLedgerCanisterId,
