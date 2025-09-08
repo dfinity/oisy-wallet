@@ -1,4 +1,4 @@
-import { getStatus, getTransactions } from '$icp/api/icrc-index-ng.api';
+import { getStatus } from '$icp/api/icrc-index-ng.api';
 import { getBlocks } from '$icp/api/icrc-ledger.api';
 import type { IndexCanisterIdText, LedgerCanisterIdText } from '$icp/types/canister';
 import type { Identity } from '@dfinity/agent';
@@ -25,18 +25,6 @@ export const isIndexCanisterAwake = async ({
 	ledgerCanisterId: LedgerCanisterIdText;
 	indexCanisterId: IndexCanisterIdText;
 } & QueryParams): Promise<boolean> => {
-	const { balance: indexBalance, transactions } = await getTransactions({
-		identity,
-		indexCanisterId,
-		certified,
-		owner: identity.getPrincipal()
-	});
-
-	// If the Index canister has a balance or transactions, it is not sleepy (as per our experience).
-	if (indexBalance !== 0n || transactions.length > 0) {
-		return true;
-	}
-
 	const { num_blocks_synced: indexBlocks } = await getStatus({
 		identity,
 		indexCanisterId,

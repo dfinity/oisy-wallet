@@ -1,17 +1,17 @@
-import { getTransactions } from '$icp/api/icrc-index-ng.api';
-import { balance } from '$icp/api/icrc-ledger.api';
+import { getStatus } from '$icp/api/icrc-index-ng.api';
+import { getBlocks } from '$icp/api/icrc-ledger.api';
 import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { IcrcIndexNgGetTransactions, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
-import { toNullable } from '@dfinity/utils';
+import type { Status } from '@dfinity/ledger-icrc/dist/candid/icrc_index-ng';
+import type { GetBlocksResult } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
-	getTransactions: vi.fn()
+	getStatus: vi.fn()
 }));
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
-	balance: vi.fn()
+	getBlocks: vi.fn()
 }));
 
 describe('index-canister.services', () => {
@@ -22,120 +22,72 @@ describe('index-canister.services', () => {
 			indexCanisterId: mockIndexCanisterId
 		};
 
-		const mockTransactions: IcrcTransactionWithId[] = [
-			{ id: 1n, transaction: {} },
-			{ id: 2n, transaction: {} },
-			{ id: 3n, transaction: {} }
-		] as IcrcTransactionWithId[];
+		const mockTotalBlocks = 123n;
 
-		const mockGetTransactionsResponse: IcrcIndexNgGetTransactions = {
-			balance: 1000n,
-			transactions: mockTransactions,
-			oldest_tx_id: toNullable(123n)
+		const mockGetBlocksResponse: GetBlocksResult = {
+			log_length: mockTotalBlocks,
+			blocks: [],
+			archived_blocks: []
 		};
+
+		const mockIndexCanisterStatus: Status = { num_blocks_synced: mockTotalBlocks };
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			vi.mocked(getStatus).mockResolvedValue(mockIndexCanisterStatus);
+
+			vi.mocked(getBlocks).mockResolvedValue(mockGetBlocksResponse);
 		});
 
-		it('should call getTransactions with the correct parameters', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce(mockGetTransactionsResponse);
-
+		it('should call Index canister `getStatus` with the correct parameters', async () => {
 			await isIndexCanisterAwake(mockParams);
 
-			expect(getTransactions).toHaveBeenCalledOnce();
-			expect(getTransactions).toHaveBeenNthCalledWith(1, {
+			expect(getStatus).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				indexCanisterId: mockIndexCanisterId,
-				certified: true,
-				owner: mockIdentity.getPrincipal()
+				certified: true
 			});
 		});
 
-		it('should return true if Index canister balance is not zero and it has transactions', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce(mockGetTransactionsResponse);
-
-			const result = await isIndexCanisterAwake(mockParams);
-
-			expect(result).toBeTruthy();
-
-			expect(balance).not.toHaveBeenCalled();
-		});
-
-		it('should return true if Index canister balance is not zero, but it has no transactions', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce({
-				...mockGetTransactionsResponse,
-				transactions: []
-			});
-
-			const result = await isIndexCanisterAwake(mockParams);
-
-			expect(result).toBeTruthy();
-
-			expect(balance).not.toHaveBeenCalled();
-		});
-
-		it('should return true if Index canister has transactions, but balance is zero', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce({
-				...mockGetTransactionsResponse,
-				balance: 0n
-			});
-
-			const result = await isIndexCanisterAwake(mockParams);
-
-			expect(result).toBeTruthy();
-
-			expect(balance).not.toHaveBeenCalled();
-		});
-
-		it('should call `balance` if Index canister has no transactions and balance is zero', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce({
-				...mockGetTransactionsResponse,
-				balance: 0n,
-				transactions: []
-			});
-			vi.mocked(balance).mockResolvedValueOnce(0n);
-
+		it('should call Ledger canister `getBlocks` with the correct parameters', async () => {
 			await isIndexCanisterAwake(mockParams);
 
-			expect(balance).toHaveBeenCalledOnce();
-			expect(balance).toHaveBeenNthCalledWith(1, {
+			expect(getBlocks).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				ledgerCanisterId: mockLedgerCanisterId,
 				certified: true,
-				owner: mockIdentity.getPrincipal()
+				args: []
 			});
 		});
 
-		it('should return true if Ledger canister and Index canister balances match and are zero', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce({
-				...mockGetTransactionsResponse,
-				balance: 0n,
-				transactions: []
+		it('should return true if Index canister synced blocks equals Ledger canister total blocks', async () => {
+			const result = await isIndexCanisterAwake(mockParams);
+
+			expect(result).toBeTruthy();
+		});
+
+		it('should return true if Index canister synced blocks equals Ledger canister total blocks and both are zero', async () => {
+			vi.mocked(getStatus).mockResolvedValueOnce({
+				...mockIndexCanisterStatus,
+				num_blocks_synced: 0n
 			});
-			vi.mocked(balance).mockResolvedValueOnce(0n);
+			vi.mocked(getBlocks).mockResolvedValueOnce({ ...mockGetBlocksResponse, log_length: 0n });
 
 			const result = await isIndexCanisterAwake(mockParams);
 
 			expect(result).toBeTruthy();
 		});
 
-		it('should return true if Index canister balance equals Ledger canister balance', async () => {
-			vi.mocked(getTransactions).mockResolvedValueOnce(mockGetTransactionsResponse);
-			vi.mocked(balance).mockResolvedValueOnce(mockGetTransactionsResponse.balance);
-
-			const result = await isIndexCanisterAwake(mockParams);
-
-			expect(result).toBeTruthy();
-		});
-
-		it('should call `getTransactions` again if Index canister balance or transactions do not change after an interval of time', async () => {
+		it('should call `getStatus` again if Index canister synced blocks number does not match the Ledger canister total blocks', async () => {
 			vi.useFakeTimers();
 
-			vi.mocked(getTransactions)
-				.mockResolvedValueOnce({ ...mockGetTransactionsResponse, balance: 0n, transactions: [] })
-				.mockResolvedValueOnce(mockGetTransactionsResponse);
-			vi.mocked(balance).mockResolvedValueOnce(mockGetTransactionsResponse.balance);
+			vi.mocked(getStatus)
+				.mockResolvedValueOnce({
+					...mockIndexCanisterStatus,
+					num_blocks_synced: mockTotalBlocks - 1n
+				})
+				.mockResolvedValue(mockIndexCanisterStatus);
 
 			const promise = isIndexCanisterAwake(mockParams);
 
@@ -143,30 +95,30 @@ describe('index-canister.services', () => {
 
 			await promise;
 
-			expect(getTransactions).toHaveBeenCalledTimes(2);
-			expect(getTransactions).toHaveBeenNthCalledWith(1, {
+			expect(getStatus).toHaveBeenCalledTimes(2);
+			expect(getStatus).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				indexCanisterId: mockIndexCanisterId,
-				certified: true,
-				owner: mockIdentity.getPrincipal()
+				certified: true
 			});
-			expect(getTransactions).toHaveBeenNthCalledWith(2, {
+			expect(getStatus).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
 				indexCanisterId: mockIndexCanisterId,
-				certified: true,
-				owner: mockIdentity.getPrincipal()
+				certified: true
 			});
 
 			vi.useRealTimers();
 		});
 
-		it('should return true if Index canister balance or transactions change after an interval of time', async () => {
+		it('should return true if Index canister synced blocks number changes after an interval of time', async () => {
 			vi.useFakeTimers();
 
-			vi.mocked(getTransactions)
-				.mockResolvedValueOnce({ ...mockGetTransactionsResponse, balance: 0n, transactions: [] })
-				.mockResolvedValueOnce(mockGetTransactionsResponse);
-			vi.mocked(balance).mockResolvedValueOnce(mockGetTransactionsResponse.balance);
+			vi.mocked(getStatus)
+				.mockResolvedValueOnce({
+					...mockIndexCanisterStatus,
+					num_blocks_synced: mockTotalBlocks - 1n
+				})
+				.mockResolvedValue(mockIndexCanisterStatus);
 
 			const promise = isIndexCanisterAwake(mockParams);
 
@@ -179,13 +131,13 @@ describe('index-canister.services', () => {
 			vi.useRealTimers();
 		});
 
-		it('should return false if index balance stays the same after an interval of time', async () => {
+		it('should return false if Index canister synced blocks number stays the same after an interval of time', async () => {
 			vi.useFakeTimers();
 
-			vi.mocked(getTransactions)
-				.mockResolvedValueOnce({ ...mockGetTransactionsResponse, balance: 0n, transactions: [] })
-				.mockResolvedValueOnce({ ...mockGetTransactionsResponse, balance: 0n, transactions: [] });
-			vi.mocked(balance).mockResolvedValueOnce(mockGetTransactionsResponse.balance);
+			vi.mocked(getStatus).mockResolvedValue({
+				...mockIndexCanisterStatus,
+				num_blocks_synced: mockTotalBlocks - 1n
+			});
 
 			const promise = isIndexCanisterAwake(mockParams);
 
