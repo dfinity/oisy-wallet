@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました",
 			"transaction_price": "取引価格の見積もりの読み込み中にエラーが発生しました",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
