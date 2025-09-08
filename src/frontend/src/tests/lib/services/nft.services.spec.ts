@@ -1,13 +1,13 @@
-import { Network } from 'ethers/providers';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { nftStore } from '$lib/stores/nft.store';
-import { loadNfts } from '$lib/services/nft.services';
-import type { NonFungibleToken } from '$lib/types/nft';
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { loadNfts } from '$lib/services/nft.services';
+import { nftStore } from '$lib/stores/nft.store';
+import type { NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { Network } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -61,7 +61,7 @@ describe('nft.services', () => {
 			nftStore.resetAll();
 
 			vi.mocked(alchemyProviders).mockReturnValue(mockAlchemyProvider);
-		})
+		});
 
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: NonFungibleToken[] = [];
@@ -69,7 +69,7 @@ describe('nft.services', () => {
 			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
-		})
+		});
 
 		it('should load ERC721 NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc721AzukiToken];
@@ -94,14 +94,12 @@ describe('nft.services', () => {
 		it('should handle nfts loading error gracefully', async () => {
 			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
 
-			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(
-				new Error('Nfts Error')
-			);
+			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(new Error('Nfts Error'));
 
 			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
-			expect(get(nftStore)).toEqual([])
+			expect(get(nftStore)).toEqual([]);
 		});
 	});
 });
