@@ -12,15 +12,15 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
+	type IcrcAllowance,
+	type IcrcGetBlocksResult,
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
 	type IcrcAccount,
 	type IcrcBlockIndex,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
-import type { GetBlocksResult } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
@@ -304,7 +304,7 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const allowanceResponse: Allowance = {
+		const allowanceResponse: IcrcAllowance = {
 			allowance: 1_000_000n,
 			expires_at: []
 		};
@@ -483,7 +483,7 @@ describe('icrc-ledger.api', () => {
 		};
 
 		const mockTotalBlocks = 123n;
-		const mockGetBlocksResponse: GetBlocksResult = {
+		const mockGetBlocksResponse: IcrcGetBlocksResult = {
 			log_length: mockTotalBlocks,
 			blocks: [],
 			archived_blocks: []
