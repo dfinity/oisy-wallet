@@ -17,6 +17,7 @@ use crate::types::{
     agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
+    experimental_feature::UpdateExperimentalFeaturesSettingsError,
     network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
 };
@@ -333,6 +334,24 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
         match result {
             Ok(()) => UpdateUserAgreementsResult::Ok(()),
             Err(err) => UpdateUserAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateExperimentalFeaturesSettingsResult {
+    /// The user's experimental features settings were updated successfully.
+    Ok(()),
+    /// The user's experimental features settings were not updated due to an error.
+    Err(UpdateExperimentalFeaturesSettingsError),
+}
+impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
+    for UpdateExperimentalFeaturesSettingsResult
+{
+    fn from(result: Result<(), UpdateExperimentalFeaturesSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
+            Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
         }
     }
 }
