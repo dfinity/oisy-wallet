@@ -7,7 +7,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
+import type { Nft, NonFungibleToken, OwnedContract, OwnedNft } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -145,6 +145,25 @@ export class AlchemyProvider {
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
+	getNftIdsForOwner = async ({
+		address,
+		contractAddress
+	}: {
+		address: EthAddress;
+		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
+	}): Promise<OwnedNft[]> => {
+		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
+			contractAddresses: [contractAddress],
+			omitMetadata: false
+		});
+
+		return result.ownedNfts.map((ownedNft) => ({
+			id: parseNftId(parseInt(ownedNft.tokenId)),
+			balance: Number(ownedNft.balance)
+		}));
+	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
 		address,
 		token
@@ -154,8 +173,7 @@ export class AlchemyProvider {
 	}): Promise<Nft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [token.address],
-			omitMetadata: false,
-			orderBy: NftOrdering.TRANSFERTIME
+			omitMetadata: false
 		});
 
 		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
@@ -164,6 +182,7 @@ export class AlchemyProvider {
 					metadata: { attributes }
 				}
 			} = ownedNft;
+
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({
 						traitType,
@@ -178,9 +197,6 @@ export class AlchemyProvider {
 				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
 				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
 				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
-				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
-					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
-				}),
 				collection: {
 					...mapTokenToCollection(token),
 					...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
