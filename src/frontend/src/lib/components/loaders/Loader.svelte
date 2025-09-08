@@ -68,6 +68,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { NFTS_ENABLED } from '$env/nft.env';
 
 	interface Props {
 		children: Snippet;
@@ -230,7 +231,7 @@
 
 	$effect(() => {
 		if (
-			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
+			(NFTS_ENABLED && ($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized)) &&
 			nonNullish($ethAddress) &&
 			$nonFungibleTokens.length > 0
 		) {
