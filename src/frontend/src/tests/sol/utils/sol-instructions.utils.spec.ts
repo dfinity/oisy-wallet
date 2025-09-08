@@ -24,6 +24,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolParsedTransactionMessage } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { TokenInstruction } from '@solana-program/token';
 import { address, type Base58EncodedBytes, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
@@ -370,7 +371,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO,
+					value: -100n,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -682,7 +683,7 @@ describe('sol-instructions.utils', () => {
 						cumulativeBalances: { [mockSolAddress2]: 100n }
 					})
 				).resolves.toEqual({
-					value: ZERO,
+					value: -100n,
 					from: mockSolAddress,
 					to: mockSolAddress2
 				});
@@ -933,11 +934,11 @@ describe('sol-instructions.utils', () => {
 			expect(console.warn).toHaveBeenCalledTimes(2);
 			expect(console.warn).toHaveBeenNthCalledWith(
 				1,
-				`Could not map Solana instruction for program ${TOKEN_PROGRAM_ADDRESS}`
+				`Could not map Solana Token instruction of type ${TokenInstruction.InitializeAccount}`
 			);
 			expect(console.warn).toHaveBeenNthCalledWith(
 				2,
-				`Could not map Solana instruction for program ${TOKEN_PROGRAM_ADDRESS}`
+				`Could not map Solana Token instruction of type ${TokenInstruction.CloseAccount}`
 			);
 		});
 
@@ -963,7 +964,9 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
 
-			expect(console.warn).not.toHaveBeenCalled();
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
+			);
 		});
 	});
 });
