@@ -63,7 +63,7 @@
 
 	const updateFeeData = async () => {
 		try {
-			console.log(`From: ${ethAddress} - To ${destination} - Amount ${amount} - Data ${data}`);
+			console.log(`From: ${$ethAddress} - To ${destination} - Amount ${amount} - Data ${data}`);
 			if (isNullish($ethAddress)) {
 				return;
 			}
