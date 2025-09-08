@@ -1,11 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import {
-	type InfuraErc1155Provider
-} from '$eth/providers/infura-erc1155.providers';
+import type { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
 import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
-import {
-	type InfuraErc721Provider
-} from '$eth/providers/infura-erc721.providers';
+import type { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { nftStore } from '$lib/stores/nft.store';

@@ -4,7 +4,7 @@ interface OwnedNft {
 	description?: string;
 	image?: Image;
 	name?: string;
-	raw: {metadata: Metadata};
+	raw: { metadata: Metadata };
 	tokenId: string;
 	contract: Contract;
 }
@@ -16,7 +16,7 @@ interface Contract {
 	openSeaMetadata?: {
 		bannerImageUrl?: string;
 		description?: string;
-	},
+	};
 	symbol?: string;
 	tokenType: string;
 }

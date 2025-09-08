@@ -11,6 +11,7 @@ import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -22,7 +23,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -164,9 +164,9 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
-														address,
-														token
-													}: {
+		address,
+		token
+	}: {
 		address: EthAddress;
 		token: NonFungibleToken;
 	}): Promise<Nft[]> => {
@@ -176,15 +176,21 @@ export class AlchemyProvider {
 		});
 
 		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
-			const { raw: {metadata: {attributes}} } = ownedNft;
-			const mappedAttributes = nonNullish(attributes) ? attributes.map(({ trait_type : traitType, value }) => ({
-				traitType,
-				value: value.toString()
-			})) : [];
+			const {
+				raw: {
+					metadata: { attributes }
+				}
+			} = ownedNft;
+			const mappedAttributes = nonNullish(attributes)
+				? attributes.map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
 
 			const nft: Nft = {
 				id: parseNftId(parseInt(ownedNft.tokenId)),
-				...(nonNullish(ownedNft.name) && { name: ownedNft.name}),
+				...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
 				...(nonNullish(ownedNft.image?.originalUrl) && { imageUrl: ownedNft.image?.originalUrl }),
 				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
 				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
@@ -198,10 +204,10 @@ export class AlchemyProvider {
 						description: ownedNft.contract.openSeaMetadata?.description
 					})
 				}
-			}
+			};
 
 			return [...acc, nft];
-		}, [])
+		}, []);
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
