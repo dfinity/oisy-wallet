@@ -4,7 +4,7 @@ import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { Status } from '@dfinity/ledger-icrc/dist/candid/icrc_index-ng';
-import type { GetBlocksResult } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
+import type { IcrcGetBlocksResult } from '@dfinity/ledger-icrc';
 
 vi.mock('$icp/api/icrc-index-ng.api', () => ({
 	getStatus: vi.fn()
