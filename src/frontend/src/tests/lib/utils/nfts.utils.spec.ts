@@ -3,7 +3,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NftsByNetwork, NonFungibleToken, OwnedNft } from '$lib/types/nft';
+import type { Nft, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
@@ -387,9 +387,9 @@ describe('nfts.utils', () => {
 
 		it('should return nfts with updated balances', () => {
 			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2];
-			const inventory: OwnedNft[] = [
-				{ id: mockErc1155Nft1.id, balance: 5 },
-				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			const inventory: Nft[] = [
+				{ ...mockErc1155Nft1, balance: 5 },
+				{ ...mockErc1155Nft2, balance: mockErc1155Nft2.balance }
 			];
 
 			const result = getUpdatedNfts({
@@ -403,9 +403,9 @@ describe('nfts.utils', () => {
 
 		it('should return empty array if no balances have changed', () => {
 			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2];
-			const inventory: OwnedNft[] = [
-				{ id: mockErc1155Nft1.id, balance: mockErc1155Nft1.balance },
-				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			const inventory: Nft[] = [
+				{ ...mockErc1155Nft1, balance: mockErc1155Nft1.balance },
+				{ ...mockErc1155Nft2, balance: mockErc1155Nft2.balance }
 			];
 
 			const result = getUpdatedNfts({
@@ -419,9 +419,9 @@ describe('nfts.utils', () => {
 
 		it('should return empty array if no nfts are loaded yet', () => {
 			const loadedNfts: Nft[] = [];
-			const inventory: OwnedNft[] = [
-				{ id: mockErc1155Nft1.id, balance: mockErc1155Nft1.balance },
-				{ id: mockErc1155Nft2.id, balance: mockErc1155Nft2.balance }
+			const inventory: Nft[] = [
+				{ ...mockErc1155Nft1, balance: mockErc1155Nft1.balance },
+				{ ...mockErc1155Nft2, balance: mockErc1155Nft2.balance }
 			];
 
 			const result = getUpdatedNfts({
@@ -435,10 +435,10 @@ describe('nfts.utils', () => {
 
 		it('should handle different tokens and networks correctly', () => {
 			const loadedNfts = [mockErc1155Nft1, mockErc1155Nft2, mockErc1155Nft3];
-			const inventory: OwnedNft[] = [
-				{ id: mockErc1155Nft1.id, balance: 5 },
-				{ id: mockErc1155Nft2.id, balance: 5 },
-				{ id: mockErc1155Nft3.id, balance: 5 }
+			const inventory: Nft[] = [
+				{ ...mockErc1155Nft1, balance: 5 },
+				{ ...mockErc1155Nft2, balance: 5 },
+				{ ...mockErc1155Nft3, balance: 5 }
 			];
 
 			const result = getUpdatedNfts({ nfts: loadedNfts, token: DE_GODS_TOKEN, inventory });
