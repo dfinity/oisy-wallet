@@ -20,22 +20,24 @@ import { get } from 'svelte/store';
 
 export class InfuraProvider {
 	private readonly provider: InfuraProviderLib;
+	private readonly tmpnetwork: Networkish;
 
 	constructor(private readonly network: Networkish) {
 		this.provider = new InfuraProviderLib(this.network, INFURA_API_KEY);
+		this.tmpnetwork = this.network;
 	}
 
 	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => {
-		console.log('getFeeData: ', (this.network as unknown as EthereumNetwork).chainId);
+		console.log('getFeeData: ', (this.tmpnetwork as unknown as EthereumNetwork).chainId);
 		return this.provider.getFeeData();
 	};
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
 	safeEstimateGas = async (params: GetFeeData): Promise<bigint | undefined> => {
-		console.log('safeEstimateGas: ', (this.network as unknown as EthereumNetwork).chainId);
+		console.log('safeEstimateGas: ', (this.tmpnetwork as unknown as EthereumNetwork).chainId);
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
