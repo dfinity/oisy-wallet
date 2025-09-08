@@ -19,6 +19,7 @@ import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
 	AlchemySubscription,
+	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
 	type Network
@@ -174,7 +175,8 @@ export class AlchemyProvider {
 	}): Promise<Nft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [token.address],
-			omitMetadata: false
+			omitMetadata: false,
+			orderBy: NftOrdering.TRANSFERTIME
 		});
 
 		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
@@ -198,6 +200,9 @@ export class AlchemyProvider {
 				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
 				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
 				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
+				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
+					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
+				}),
 				collection: {
 					...mapTokenToCollection(token),
 					...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
