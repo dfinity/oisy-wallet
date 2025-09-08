@@ -587,6 +587,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICPアカウントID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
 				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します",
 				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します",

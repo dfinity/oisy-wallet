@@ -587,6 +587,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID de compte ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Utiliser pour tous les tokens lors de la réception depuis des portefeuilles, des utilisateurs ou d'autres applications qui prennent en charge ce format d'adresse.",
 				"use_for_icrc_deposit": "Utiliser pour recevoir des tokens ICRC-1 sur le réseau ICP, tels que SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Utiliser pour les dépôts ICP depuis les échanges ou d'autres portefeuilles qui ne prennent en charge que les ID de compte.",
