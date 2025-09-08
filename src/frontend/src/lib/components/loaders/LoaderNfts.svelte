@@ -9,7 +9,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
