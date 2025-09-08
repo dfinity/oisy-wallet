@@ -3,7 +3,6 @@
 use std::time::Duration;
 
 use candid::Principal;
-use ic_cdk::api::management_canister::{main::canister_status, provisional::CanisterIdRecord};
 use ic_cycles_ledger_client::{Account, Allowance, AllowanceArgs};
 use ic_ledger_types::Subaccount;
 use serde_bytes::ByteBuf;
@@ -30,17 +29,18 @@ use crate::utils::{
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend.
 fn get_timestamp_now_ms() -> u64 {
-    get_timestamp_ms(std::time::SystemTime::now())
-}
-
-fn get_timestamp_ms(st: std::time::SystemTime) -> u64 {
-    st.duration_since(std::time::UNIX_EPOCH)
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_else(|_| panic!("System time is before the UNIX_EPOCH"))
         .as_millis() as u64
 }
 
-fn get_timestamp_secs(st: std::time::SystemTime) -> u64 {
-    st.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()
+fn get_timestamp_ms(st: pocket_ic::Time) -> u64 {
+    (st.as_nanos_since_unix_epoch() / 1_000_000) as u64
+}
+
+fn get_timestamp_secs(st: pocket_ic::Time) -> u64 {
+    (st.as_nanos_since_unix_epoch() / 1_000_000_000) as u64
 }
 
 fn print_canister_time(pic_setup: &PicBackend) {
@@ -66,18 +66,18 @@ fn helper_is_pow_enabled() -> bool {
 
 #[allow(dead_code)]
 async fn helper_canister_balance() -> u64 {
-    // Call canister_status on the management canister to get status
-    canister_status(CanisterIdRecord {
-        canister_id: ic_cdk::id(),
-    })
-    .await
-    .expect("Failed to get status response")
-    .0
-    .cycles
-    .0
-    .try_into()
-    .expect("Failed to convert cycles into u64")
+    // Call canister_status from the management canister directly
+    let args = ic_cdk::management_canister::CanisterStatusArgs {
+        canister_id: ic_cdk::api::canister_self(),
+    };
+    
+    let result = ic_cdk::management_canister::canister_status(&args)
+        .await
+        .expect("Failed to get canister status");
+    
+    result.cycles.0.try_into().expect("Failed to convert cycles to u64")
 }
+
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend. It can be used as a blueprint for implementing the javascript function used in OISY

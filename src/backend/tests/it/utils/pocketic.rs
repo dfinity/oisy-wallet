@@ -5,11 +5,11 @@ use std::{
     fs::read,
     ops::RangeBounds,
     sync::Arc,
-    time::{Duration, UNIX_EPOCH},
+    time::{Duration},
 };
 
 use candid::{encode_one, CandidType, Principal};
-use ic_cdk::api::management_canister::bitcoin::BitcoinNetwork;
+use ic_cdk::bitcoin_canister::Network;
 use ic_cycles_ledger_client::{InitArgs, LedgerArgs};
 pub use pic_canister::PicCanisterTrait;
 use pocket_ic::{PocketIc, PocketIcBuilder};
@@ -41,7 +41,7 @@ const DEFAULT_CYCLES_LEDGER_CANISTER_ENABLED: &str = "false";
 #[derive(CandidType)]
 struct BitcoinInitConfig {
     stability_threshold: Option<u64>,
-    network: Option<BitcoinNetwork>,
+    network: Option<Network>,
     blocks_source: Option<String>,
     syncing: Option<String>,
     fees: Option<String>,
@@ -142,7 +142,7 @@ impl BackendBuilder {
     pub fn default_bitcoin_arg() -> Vec<u8> {
         let init_config = BitcoinInitConfig {
             stability_threshold: None,
-            network: Some(BitcoinNetwork::Regtest),
+            network: Some(Network::Regtest),
             blocks_source: None,
             syncing: None,
             fees: None,
@@ -343,7 +343,7 @@ impl BackendBuilder {
             .with_fiduciary_subnet()
             .build();
         // Since the timestamp of the first block starts 4 years earlier, we must enable
-        // auto-progress before deployment to avoid burning cycles for this entire duration.
+        // auto progress before deployment to avoid burning cycles for this entire duration.
         if self.auto_progress_enabled {
             pic.auto_progress();
         }
@@ -359,8 +359,8 @@ impl BackendBuilder {
 impl BackendBuilder {
     /// Enables the cycles ledger canister
     #[allow(dead_code)]
-    pub fn with_cycles_ledger(mut self, cycle_ledger_enabled: bool) -> Self {
-        self.cycles_ledger_enabled = cycle_ledger_enabled;
+    pub fn with_cycles_ledger(mut self, cycles_ledger_enabled: bool) -> Self {
+        self.cycles_ledger_enabled = cycles_ledger_enabled;
         self
     }
 
@@ -468,12 +468,9 @@ impl PicBackend {
             let caller = Principal::self_authenticating(i.to_string());
             let response = self.update::<UserProfile>(caller, "create_user_profile", ());
             let timestamp = self.pic.get_time();
-            let timestamp_nanos = timestamp
-                .duration_since(UNIX_EPOCH)
-                .expect("Time went backwards")
-                .as_nanos();
+            let timestamp_nanos = timestamp.as_nanos_since_unix_epoch();
             let expected_user = OisyUser {
-                updated_timestamp: timestamp_nanos as u64,
+                updated_timestamp: timestamp_nanos,
                 pouh_verified: false,
                 principal: caller,
             };

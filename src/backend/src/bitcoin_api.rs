@@ -1,10 +1,5 @@
 use std::{cell::RefCell, collections::HashMap};
-
-use ic_cdk::api::management_canister::bitcoin::{
-    bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, BitcoinNetwork,
-    GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Utxo,
-    UtxoFilter,
-};
+use ic_cdk::bitcoin_canister::{bitcoin_get_current_fee_percentiles, bitcoin_get_utxos, GetCurrentFeePercentilesRequest, GetUtxosRequest, GetUtxosResponse, MillisatoshiPerByte, Network, Utxo, UtxosFilter};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use shared::types::bitcoin::FEE_PERCENTILES_UPDATE_INTERVAL;
 
@@ -17,7 +12,7 @@ thread_local! {
     // We use thread_local! + RefCell for fee percentiles cache since the data is refreshed
     // regularly via timer. Heap memory provides faster access for frequent fee calculations,
     // and there's no need to persist these quickly-stale values across canister upgrades.
-    static FEE_PERCENTILES_CACHE: RefCell<HashMap<BitcoinNetwork, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
+    static FEE_PERCENTILES_CACHE: RefCell<HashMap<Network, Vec<MillisatoshiPerByte>>> = RefCell::new(HashMap::new());
 }
 
 /// Returns the UTXOs of the given bitcoin address.
@@ -25,41 +20,41 @@ thread_local! {
 /// NOTE: Relies on the `bitcoin_get_utxos` endpoint.
 /// See [IC Interface](https://internetcomputer.org/docs/current/references/ic-interface-spec/#ic-bitcoin_get_utxos)
 async fn get_utxos(
-    network: BitcoinNetwork,
+    network: Network,
     address: String,
-    filter: Option<UtxoFilter>,
+    filter: Option<UtxosFilter>,
 ) -> Result<GetUtxosResponse, String> {
-    let utxos_res = bitcoin_get_utxos(GetUtxosRequest {
+    let utxos_res = bitcoin_get_utxos(&GetUtxosRequest {
         address,
         network,
         filter,
     })
     .await
-    .map_err(|err| err.1)?;
+    .map_err(|err| format!("{err:?}"))?;
 
-    Ok(utxos_res.0)
+    Ok(utxos_res)
 }
 /// Returns all the UTXOs of a specific address.
 /// API interface returns a paginated view of the utxos but we need to get them all.
 pub async fn get_all_utxos(
-    network: BitcoinNetwork,
+    network: Network,
     address: String,
     min_confirmations: Option<u32>,
 ) -> Result<Vec<Utxo>, String> {
-    let final_min_confirmations = if network == BitcoinNetwork::Regtest {
+    let final_min_confirmations = if network == Network::Regtest {
         // Tests with Regtest fail if min_confirmations is higher than 1.
         Some(1)
     } else {
         min_confirmations
     };
-    let filter = final_min_confirmations.map(UtxoFilter::MinConfirmations);
+    let filter = final_min_confirmations.map(UtxosFilter::MinConfirmations);
     let mut utxos_response = get_utxos(network, address.clone(), filter).await?;
 
     let mut all_utxos: Vec<Utxo> = utxos_response.utxos;
     let mut next_page: Option<Vec<u8>> = utxos_response.next_page;
     while next_page.is_some() {
         utxos_response =
-            get_utxos(network, address.clone(), next_page.map(UtxoFilter::Page)).await?;
+            get_utxos(network, address.clone(), next_page.map(UtxosFilter::Page)).await?;
         all_utxos.extend(utxos_response.utxos);
         next_page = utxos_response.next_page;
     }
@@ -79,13 +74,13 @@ pub fn init_fee_percentiles_cache() {
     set_timer(std::time::Duration::from_secs(0), || {
         // Set up the recurring timer to update the data
         set_timer_interval(FEE_PERCENTILES_UPDATE_INTERVAL, || {
-            ic_cdk::spawn(async {
+            ic_cdk::futures::spawn(async {
                 let _ = update_fee_percentiles_cache().await;
             });
         });
 
         // Initialize the cache immediately (after init)
-        ic_cdk::spawn(async {
+        ic_cdk::futures::spawn(async {
             let _ = update_fee_percentiles_cache().await;
         });
     });
@@ -99,9 +94,9 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
 
     // Create an array of network types to fetch
     let networks = [
-        BitcoinNetwork::Mainnet,
-        BitcoinNetwork::Testnet,
-        BitcoinNetwork::Regtest,
+        Network::Mainnet,
+        Network::Testnet,
+        Network::Regtest,
     ];
 
     // Create a vector of futures, each fetching percentiles for a network
@@ -137,19 +132,19 @@ async fn update_fee_percentiles_cache() -> Result<(), String> {
 
 /// Internal function that actually fetches the fee percentiles from the Bitcoin canister
 async fn fetch_current_fee_percentiles(
-    network: BitcoinNetwork,
+    network: Network,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
-    let res = bitcoin_get_current_fee_percentiles(GetCurrentFeePercentilesRequest { network })
+    let res = bitcoin_get_current_fee_percentiles(&GetCurrentFeePercentilesRequest { network })
         .await
-        .map_err(|err| err.1)?;
+        .map_err(|err| format!("{err:?}"))?;
 
-    Ok(res.0)
+    Ok(res)
 }
 
 /// This function returns fee percentiles data from the in-memory cache.
 /// If the data isn't available in the cache, it falls back to default values.
 pub async fn get_current_fee_percentiles(
-    network: BitcoinNetwork,
+    network: Network,
 ) -> Result<Vec<MillisatoshiPerByte>, String> {
     // Try to get from cache first
     let cached_percentiles =
@@ -173,11 +168,11 @@ pub async fn get_current_fee_percentiles(
 
 /// Returns the default fee in millisatoshis per byte for a given Bitcoin network.
 /// This is used when actual fee data is not available from the Bitcoin API.
-fn get_default_fee_for_network(network: BitcoinNetwork) -> u64 {
+fn get_default_fee_for_network(network: Network) -> u64 {
     match network {
-        BitcoinNetwork::Mainnet => DEFAULT_MAINNET_FEE,
-        BitcoinNetwork::Testnet => DEFAULT_TESTNET_FEE,
-        BitcoinNetwork::Regtest => DEFAULT_REGTEST_FEE,
+        Network::Mainnet => DEFAULT_MAINNET_FEE,
+        Network::Testnet => DEFAULT_TESTNET_FEE,
+        Network::Regtest => DEFAULT_REGTEST_FEE,
     }
 }
 
@@ -215,7 +210,7 @@ fn generate_fee_percentiles(default_fee: u64) -> Vec<u64> {
 }
 
 // Helper function to initialize default fee percentiles for a given network
-fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
+fn initialize_default_fee_percentiles(network: Network) -> Vec<u64> {
     let default_fee = get_default_fee_for_network(network);
 
     // Generate percentiles using the helper function
@@ -234,7 +229,7 @@ fn initialize_default_fee_percentiles(network: BitcoinNetwork) -> Vec<u64> {
 }
 
 /// Returns the 50th percentile for sending fees.
-pub async fn get_fee_per_byte(network: BitcoinNetwork) -> Result<u64, String> {
+pub async fn get_fee_per_byte(network: Network) -> Result<u64, String> {
     // Get fee percentiles from previous transactions to estimate our own fee.
     let fee_percentiles = get_current_fee_percentiles(network).await?;
 
