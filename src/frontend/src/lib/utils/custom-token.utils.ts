@@ -1,18 +1,23 @@
 import type {
 	CustomToken,
-	Erc20Token,
-	Erc721Token,
+	ErcToken,
 	IcrcToken,
 	SplToken,
 	Token
 } from '$declarations/backend/backend.did';
+import type { ContractAddress } from '$eth/types/address';
+import type { EthereumChainId } from '$eth/types/network';
 import type {
-	Erc20SaveCustomToken,
-	Erc721SaveCustomToken,
+	ErcSaveCustomToken,
 	IcrcSaveCustomToken,
 	SaveCustomTokenWithKey,
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
+import type { TokenId, TokenMetadata } from '$lib/types/token';
+import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
+import { parseTokenId } from '$lib/validation/token.validation';
+import type { SolanaChainId } from '$sol/types/network';
+import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
 import { nonNullish, toNullable } from '@dfinity/utils';
 
@@ -26,22 +31,10 @@ const toIcrcCustomToken = ({
 	)
 });
 
-const toErc20CustomToken = ({
-	address: token_address,
-	chainId: chain_id,
-	decimals,
-	symbol
-}: Erc20SaveCustomToken): Erc20Token => ({
-	token_address,
-	chain_id,
-	decimals: toNullable(decimals),
-	symbol: toNullable(symbol)
-});
-
-const toErc721CustomToken = ({
+const toErcCustomToken = ({
 	address: token_address,
 	chainId: chain_id
-}: Erc721SaveCustomToken): Erc721Token => ({
+}: ErcSaveCustomToken): ErcToken => ({
 	token_address,
 	chain_id
 });
@@ -59,6 +52,8 @@ const toSplCustomToken = ({
 export const toCustomToken = ({
 	enabled,
 	version,
+	section,
+	allowExternalContentSource,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -69,11 +64,15 @@ export const toCustomToken = ({
 		}
 
 		if (networkKey === 'Erc20') {
-			return { Erc20: toErc20CustomToken(rest) };
+			return { Erc20: toErcCustomToken(rest) };
 		}
 
 		if (networkKey === 'Erc721') {
-			return { Erc721: toErc721CustomToken(rest) };
+			return { Erc721: toErcCustomToken(rest) };
+		}
+
+		if (networkKey === 'Erc1155') {
+			return { Erc1155: toErcCustomToken(rest) };
 		}
 
 		if (networkKey === 'SplMainnet') {
@@ -93,6 +92,21 @@ export const toCustomToken = ({
 	return {
 		enabled,
 		version: toNullable(version),
-		token: toCustomTokenMap()
+		token: toCustomTokenMap(),
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
+		allow_external_content_source: toNullable(allowExternalContentSource)
 	};
 };
+
+export const parseCustomTokenId = ({
+	identifier,
+	chainId
+}:
+	| {
+			identifier: ContractAddress['address'] | TokenMetadata['symbol'];
+			chainId: EthereumChainId;
+	  }
+	| {
+			identifier: SplTokenAddress | TokenMetadata['symbol'];
+			chainId: SolanaChainId['chainId'];
+	  }): TokenId => parseTokenId(`custom-token#${identifier}#${chainId}`);

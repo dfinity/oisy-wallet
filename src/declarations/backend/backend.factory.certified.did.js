@@ -226,9 +226,11 @@ export const idlFactory = ({ IDL }) => {
 	const ContactError = IDL.Variant({
 		InvalidContactData: IDL.Null,
 		CanisterMemoryNearCapacity: IDL.Null,
+		InvalidImageFormat: IDL.Null,
 		ContactNotFound: IDL.Null,
 		ImageTooLarge: IDL.Null,
 		RandomnessError: IDL.Null,
+		ImageExceedsMaxSize: IDL.Null,
 		CanisterStatusError: IDL.Null,
 		TooManyContactsWithImages: IDL.Null
 	});
@@ -251,6 +253,17 @@ export const idlFactory = ({ IDL }) => {
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
+	const UserAgreement = IDL.Record({
+		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
+		accepted: IDL.Opt(IDL.Bool),
+		last_updated_at_ms: IDL.Opt(IDL.Nat64)
+	});
+	const UserAgreements = IDL.Record({
+		license_agreement: UserAgreement,
+		privacy_policy: UserAgreement,
+		terms_of_use: UserAgreement
+	});
+	const Agreements = IDL.Record({ agreements: UserAgreements });
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -293,6 +306,7 @@ export const idlFactory = ({ IDL }) => {
 		dapp: DappSettings
 	});
 	const UserProfile = IDL.Record({
+		agreements: IDL.Opt(Agreements),
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
@@ -360,19 +374,13 @@ export const idlFactory = ({ IDL }) => {
 		headers: IDL.Vec(IDL.Tuple(IDL.Text, IDL.Text)),
 		status_code: IDL.Nat16
 	});
-	const Erc20Token = IDL.Record({
-		decimals: IDL.Opt(IDL.Nat8),
+	const ErcToken = IDL.Record({
 		token_address: IDL.Text,
-		chain_id: IDL.Nat64,
-		symbol: IDL.Opt(IDL.Text)
+		chain_id: IDL.Nat64
 	});
 	const IcrcToken = IDL.Record({
 		ledger_id: IDL.Principal,
 		index_id: IDL.Opt(IDL.Principal)
-	});
-	const Erc721Token = IDL.Record({
-		token_address: IDL.Text,
-		chain_id: IDL.Nat64
 	});
 	const SplToken = IDL.Record({
 		decimals: IDL.Opt(IDL.Nat8),
@@ -380,14 +388,18 @@ export const idlFactory = ({ IDL }) => {
 		symbol: IDL.Opt(IDL.Text)
 	});
 	const Token = IDL.Variant({
-		Erc20: Erc20Token,
+		Erc20: ErcToken,
 		Icrc: IcrcToken,
-		Erc721: Erc721Token,
+		Erc721: ErcToken,
 		SplDevnet: SplToken,
-		SplMainnet: SplToken
+		SplMainnet: SplToken,
+		Erc1155: ErcToken
 	});
+	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		allow_external_content_source: IDL.Opt(IDL.Bool),
+		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
@@ -407,13 +419,13 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
-	const SaveTestnetsSettingsError = IDL.Variant({
+	const UpdateAgreementsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: SaveTestnetsSettingsError
+		Err: UpdateAgreementsError
 	});
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
@@ -445,6 +457,10 @@ export const idlFactory = ({ IDL }) => {
 	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
+	});
+	const UpdateUserAgreementsRequest = IDL.Record({
+		agreements: UserAgreements,
+		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
@@ -502,6 +518,11 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_user_agreements: IDL.Func(
+			[UpdateUserAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],

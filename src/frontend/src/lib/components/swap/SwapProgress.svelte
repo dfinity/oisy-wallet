@@ -7,11 +7,15 @@
 	interface Props {
 		swapProgressStep?: string;
 		sendWithApproval?: boolean;
+		swapWithWithdrawing?: boolean;
+		failedSteps?: string[];
 	}
 
 	let {
 		swapProgressStep = $bindable(ProgressStepsSwap.INITIALIZATION),
-		sendWithApproval = false
+		failedSteps = $bindable([]),
+		sendWithApproval = false,
+		swapWithWithdrawing = false
 	}: Props = $props();
 
 	let steps = $state<ProgressSteps>([
@@ -44,6 +48,15 @@
 			text: $i18n.swap.text.swapping,
 			state: 'next'
 		},
+		...(swapWithWithdrawing
+			? ([
+					{
+						step: ProgressStepsSwap.WITHDRAW,
+						text: $i18n.swap.text.withdrawing,
+						state: 'next'
+					}
+				] as ProgressSteps)
+			: []),
 		{
 			step: ProgressStepsSwap.UPDATE_UI,
 			text: $i18n.swap.text.refreshing_ui,
@@ -52,4 +65,4 @@
 	]);
 </script>
 
-<InProgressWizard progressStep={swapProgressStep} {steps} />
+<InProgressWizard {failedSteps} progressStep={swapProgressStep} {steps} />

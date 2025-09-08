@@ -3,16 +3,19 @@
 import { config } from 'dotenv';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { ENV, findHtmlFiles } from './build.utils.mjs';
 
 config({ path: `.env.${ENV}` });
 
 const buildCsp = (htmlFile) => {
-	// 1. We extract the start script parsed by SvelteKit into the html file
+	// 1. We extract the start script parsed by SvelteKit into the HTML file
 	const indexHTMLWithoutStartScript = extractStartScript(htmlFile);
 	// 2. We add our custom script loader - we inject it at build time because it would throw an error when developing locally if missing
-	const indexHTMLWithScriptLoader = injectScriptLoader(indexHTMLWithoutStartScript);
+	const indexHTMLWithScriptLoader = injectScriptLoader({
+		content: indexHTMLWithoutStartScript,
+		filePath: htmlFile
+	});
 	// 3. Replace preloaders
 	const indexHTMLWithPreloaders = injectLinkPreloader(indexHTMLWithScriptLoader);
 	// 4. remove the content-security-policy tag injected by SvelteKit
@@ -27,18 +30,28 @@ const removeDefaultCspTag = (indexHtml) =>
 	indexHtml.replace('<meta http-equiv="content-security-policy" content="">', '');
 
 /**
- * We need a script loader to implement a proper Content Security Policy. See `updateCSP` doc for more information.
+ * We need a script loader to implement a proper Content Security Policy. See the `updateCSP` doc for more information.
  */
-const injectScriptLoader = (indexHtml) =>
-	indexHtml.replace(
+const injectScriptLoader = ({ content, filePath }) => {
+	// We need to provide the relative path to the script; otherwise, it will be resolved from the root at runtime.
+	// This isn't an issue if all loaders are consistent and use the same name,
+	// but it could become a problem if Svelte changes its approach, or we start hashing the script names.
+	const buildDir = join(process.cwd(), 'build');
+	const scriptName = 'main.js';
+
+	const parentFolders = relative(buildDir, dirname(filePath));
+	const loaderSrc = `${parentFolders !== '' ? `/${parentFolders}/` : ''}${scriptName}`;
+
+	return content.replace(
 		'<!-- SCRIPT_LOADER -->',
 		`<script sveltekit-loader>
       const loader = document.createElement("script");
       loader.type = "module";
-      loader.src = "main.js";
+      loader.src = "${loaderSrc}";
       document.head.appendChild(loader);
     </script>`
 	);
+};
 
 /**
  * Calculating the sh256 value for the preloaded link and whitelisting these seem not to be supported by the Content-Security-Policy.
@@ -59,7 +72,7 @@ const injectLinkPreloader = (indexHtml) => {
 		});
 	}
 
-	// 1. Inject pre-loaders dynamically after load
+	// 1. Inject pre-loaders dynamically after loading
 	const loader = `<script sveltekit-preloader>
       const links = [${links.map(({ src }) => `'${src}'`)}];
       for (const link of links) {
@@ -67,7 +80,7 @@ const injectLinkPreloader = (indexHtml) => {
           preloadLink.href = link;
           preloadLink.rel = "preload";
           preloadLink.as = "script";
-          document.head.appendChild(loader);
+          document.head.appendChild(preloadLink);
       }
     </script>`;
 
@@ -86,9 +99,9 @@ const injectLinkPreloader = (indexHtml) => {
  * Using a CSP with 'strict-dynamic' with SvelteKit breaks in Firefox.
  * Issue: https://github.com/sveltejs/kit/issues/3558
  *
- * As workaround:
- * 1. we extract the start script that is injected by SvelteKit in index.html into a separate main.js
- * 2. we remove the script content from index.html but, let the script tag as anchor
+ * As a workaround:
+ * 1. we extract the start script injected by SvelteKit in index.html into a separate main.js
+ * 2. we remove the script content from index.html but let the script tag as anchor
  * 3. we use our custom script loader to load the main.js script
  */
 const extractStartScript = (htmlFile) => {
@@ -101,12 +114,12 @@ const extractStartScript = (htmlFile) => {
 	const inlineScript = content.replace(/^\s*/gm, '');
 
 	// Each file needs its own main.js because the script that calls the SvelteKit start function contains information dedicated to the route
-	// i.e. the routeId and a particular id for the querySelector use to attach the content
+	// i.e., the routeId and a particular id for the querySelector use to attach the content
 	const folderPath = dirname(htmlFile);
 
 	// 2. Extract the SvelteKit script into a separate file
 
-	// We need to replace the document.currentScript.parentElement because the script is added to the head. SvelteKit except the <body /> element as initial parameter.
+	// We need to replace the document.currentScript.parentElement because the script is added to the head. SvelteKit except the <body /> element as an initial parameter.
 	// We also need to attach explicitly to the `window` the __sveltekit_ variables because they are not defined in the global scope but are used as global.
 	const moduleScript = inlineScript
 		.replaceAll('document.currentScript.parentElement', "document.querySelector('body')")
@@ -119,12 +132,12 @@ const extractStartScript = (htmlFile) => {
 };
 
 /**
- * Inject "Content Security Policy" (CSP) into index.html for production build
+ * Inject "Content Security Policy" (CSP) into index.html for a production build
  *
  * Note about script-src and 'strict-dynamic':
  * Chrome 40+ / Firefox 31+ / Safari 15.4+ / Edge 15+ supports 'strict-dynamic'.
  * Safari 15.4 has been released recently - March 15, 2022 - that's why we add 'unsafe-inline' to the rules for backwards compatibility.
- * Browsers that supports the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
+ * Browsers that support the 'strict-dynamic' rule will ignore these backwards directives (CSP 3).
  */
 const updateCSP = (indexHtml) => {
 	const sw = /<script[\s\S]*?>([\s\S]*?)<\/script[^\S\r\n]*[^>]*?>/gim;
@@ -188,11 +201,18 @@ const updateCSP = (indexHtml) => {
 		'https://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
 	const solanaApiConnectSrc = `${solanaRpcApiConnectSrc} ${solanaAlchemyApiConnectSrc} ${solanaQuicknodeApiConnectSrc}`;
 
+	const allConnectSrc =
+		'https://ic0.app https://icp0.io https://icp-api.io' +
+		` ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc}`;
+
+	// TODO: remove once the feature has been completed
+	const NFTS_ENABLED = process.env.VITE_NFTS_ENABLED;
+
 	const csp = `<meta
         http-equiv="Content-Security-Policy"
         content="default-src 'none';
-        connect-src 'self' https://ic0.app https://icp0.io https://icp-api.io ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc};
-        img-src 'self' data:;
+        connect-src 'self' ${NFTS_ENABLED ? 'https: wss:' : allConnectSrc};
+        img-src 'self' https: ipfs: data:;
         frame-src 'self' ${walletConnectFrameSrc} ${onramperConnectFrameSrc};
         manifest-src 'self';
         script-src 'unsafe-inline' 'strict-dynamic' ${indexHashes.join(' ')};

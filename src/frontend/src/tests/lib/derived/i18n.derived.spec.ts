@@ -3,16 +3,6 @@ import { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
 import { get } from 'svelte/store';
 
-vi.mock('idb-keyval', () => ({
-	createStore: vi.fn(() => ({
-		/* mock store implementation */
-	})),
-	set: vi.fn(),
-	get: vi.fn(),
-	del: vi.fn(),
-	update: vi.fn()
-}));
-
 describe('i18n.derived', () => {
 	describe('currentLanguage', () => {
 		beforeEach(() => {

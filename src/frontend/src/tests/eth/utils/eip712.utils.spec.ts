@@ -1,12 +1,15 @@
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import type { DeltaAuctionOrder, SignableDeltaOrderData } from '@velora-dex/sdk';
-import { Signature, TypedDataEncoder } from 'ethers';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { Signature } from 'ethers/crypto';
+import { TypedDataEncoder } from 'ethers/hash';
 
-vi.mock('ethers', () => ({
+vi.mock('ethers/hash', () => ({
 	TypedDataEncoder: {
 		hash: vi.fn()
-	},
+	}
+}));
+
+vi.mock('ethers/crypto', () => ({
 	Signature: {
 		from: vi.fn()
 	}

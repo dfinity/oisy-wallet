@@ -7,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -49,7 +50,8 @@
 		return formatCurrency({
 			value: usdValue,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		});
 	};
 </script>
@@ -64,16 +66,16 @@
 			{#if nonNullish($destinationToken) && nonNullish($swapAmountsStore)}
 				<li class="logo-button-list-item" data-testid="provider-item">
 					<SwapProviderListItem
-						on:click={() => dispatch('icSelectProvider', swap)}
-						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						amount={swap.receiveAmount}
-						destinationToken={$destinationToken}
+						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
+						destinationToken={$destinationToken as IcTokenToggleable}
+						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
 						usdBalance={getUsdBalance({
 							amount: swap.receiveAmount,
-							token: $destinationToken,
+							token: $destinationToken as IcTokenToggleable,
 							exchangeRate: $destinationTokenExchangeRate
 						})}
-						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+						on:click={() => dispatch('icSelectProvider', swap)}
 					/>
 				</li>
 			{/if}

@@ -16,10 +16,10 @@
 	{#snippet mainValue()}
 		<div class="flex flex-col">
 			<FeeDisplay
-				feeAmount={networkFee.fee}
-				symbol={getTokenDisplaySymbol(networkFee.token)}
 				decimals={networkFee.token.decimals}
 				displayExchangeRate={false}
+				feeAmount={networkFee.fee}
+				symbol={getTokenDisplaySymbol(networkFee.token)}
 			/>
 		</div>
 	{/snippet}

@@ -12,7 +12,7 @@ import {
 	POLYGON_MAINNET_NETWORK_ID
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { erc721CustomTokens } from '$eth/derived/erc721.derived';
+import { enabledErc721Tokens, erc721CustomTokens } from '$eth/derived/erc721.derived';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { userNetworks } from '$lib/derived/user-networks.derived';
@@ -131,6 +131,33 @@ describe('erc721.derived', () => {
 
 			expect(result).toEqual([
 				mockErc721CustomBaseToken,
+				mockErc721CustomBscToken,
+				mockErc721CustomPolygonToken,
+				mockErc721CustomArbitrumToken
+			]);
+		});
+	});
+
+	describe('enabledErc721Tokens', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			erc721CustomTokensStore.resetAll();
+
+			erc721CustomTokensStore.setAll([
+				{ data: mockErc721CustomEthereumToken, certified: false },
+				{ data: { ...mockErc721CustomBaseToken, enabled: false }, certified: false },
+				{ data: mockErc721CustomBscToken, certified: false },
+				{ data: mockErc721CustomPolygonToken, certified: false },
+				{ data: mockErc721CustomArbitrumToken, certified: false }
+			]);
+		});
+
+		it('should return only enabled tokens', () => {
+			const result = get(enabledErc721Tokens);
+
+			expect(result).toEqual([
+				mockErc721CustomEthereumToken,
 				mockErc721CustomBscToken,
 				mockErc721CustomPolygonToken,
 				mockErc721CustomArbitrumToken

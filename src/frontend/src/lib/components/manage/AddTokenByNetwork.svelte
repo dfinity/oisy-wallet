@@ -26,10 +26,10 @@
 	export let tokenData: Partial<AddTokenData>;
 
 	let networkName: string | undefined = network?.name;
-	$: networkName,
+	$: (networkName,
 		(network = nonNullish(networkName)
 			? $networks.find(({ name }) => name === networkName)
-			: undefined);
+			: undefined));
 
 	let isIcpNetwork = false;
 	$: isIcpNetwork = isNetworkIdICP(network?.id);
@@ -91,10 +91,10 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<form on:submit|preventDefault={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" on:submit|preventDefault={() => dispatch('icNext')} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<AddTokenByNetworkDropdown bind:networkName {availableNetworks} />
+			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
 		{/if}
 
 		{#if isIcpNetwork}

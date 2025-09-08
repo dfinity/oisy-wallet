@@ -14,6 +14,7 @@
 			"symbol": "Simbolo",
 			"decimals": "Decimali",
 			"amount": "Importo",
+			"tokenId": "",
 			"max": "Max",
 			"destination": "Destinazione",
 			"reject": "Rifiuta",
@@ -36,7 +37,8 @@
 			"currency": "Valuta"
 		},
 		"info": {
-			"test_banner": "Solo a scopo di test!"
+			"test_banner": "Solo a scopo di test!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -101,7 +103,8 @@
 		"text": {
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Decentralizzato",
-			"logout": "Logout",
+			"logout": "Esci",
+			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
 			"instant_and_private": "Accesso istantaneo e privato ovunque",
@@ -112,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
-			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta."
+			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",
@@ -158,6 +162,16 @@
 				"other_asset_control": "Ottieni informazioni sul controllo degli asset, recupero e governance nel wallet $oisy_short",
 				"sign_in": "Hai bisogno di aiuto per accedere?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Sblocca per continuare",
+			"title_part_2": "In precedenza hai bloccato il tuo wallet per tenerlo al sicuro. Riprendi da dove eri rimasto o esci.",
+			"unlock": "Sblocca",
+			"logout": "Esci",
+			"logout_clear_cash_message": "La disconnessione cancellerà tutti i dati memorizzati nella cache",
+			"learn_more": "Saperne di più"
 		}
 	},
 	"dapps": {
@@ -271,12 +285,6 @@
 				"one_liner": "DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM.",
 				"call_to_action": "Entra nel warp",
 				"description": "Curve Finance è un DEX leader, fornitore di stablecoin e piattaforma di prestito su Ethereum e catene compatibili con EVM. È noto per i suoi market maker automatizzati avanzati per stablecoin e asset volatili e per il suo sistema unico di liquidazione soft per i prestiti."
-			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.",
-				"call_to_action": "Sei invitato",
-				"description": "Crittografia e blockchain all'avanguardia si intrecciano per offrire un ambiente di gioco sicuro e trasparente per tutti.<br/><br/>Gioca con la tua scelta di asset digitali—ora ICP, con BTC, ETH, SOL e USDC in arrivo. Completamente on-chain, nessun punto di fallimento centrale. Il nostro RNG basato su blockchain garantisce un gioco dimostrabilmente equo, utilizzando la tecnologia open-source del team di ricerca e sviluppo di Dfinity."
 			},
 			"sonic": {
 				"name": "Sonic",
@@ -465,12 +473,12 @@
 		"error": {
 			"no_alchemy_config": "Nessuna configurazione Alchemy per la rete $network",
 			"no_alchemy_provider": "Nessun provider Alchemy per la rete $network",
-			"no_alchemy_erc20_provider": "Nessun provider Alchemy ERC20 per la rete $network",
 			"no_etherscan_provider": "Nessun provider Etherscan per la rete $network",
 			"no_infura_provider": "Nessun provider Infura per la rete $network",
 			"no_infura_cketh_provider": "Nessun provider Infura CkETH per la rete $network",
 			"no_infura_erc20_provider": "Nessun provider Infura ERC20 per la rete $network",
 			"no_infura_erc721_provider": "Nessun provider Infura ERC721 per la rete $network",
+			"no_infura_erc1155_provider": "Nessun provider Infura ERC1155 per la rete $network",
 			"no_infura_erc20_icp_provider": "Nessun provider Infura ERC20 ICP per la rete $network",
 			"no_solana_network": "Nessuna rete Solana per la rete $network",
 			"eth_address_unknown": "L'indirizzo ETH è sconosciuto.",
@@ -492,13 +500,15 @@
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
+			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
+			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
 			"erc20_user_tokens": "Errore durante il caricamento dei token utente ERC20.",
 			"spl_custom_tokens": "Errore durante il caricamento del token personalizzato SPL.",
-			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc20_user_token": "Errore durante l'abilitazione del token gemello ERC20.",
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
 		}
@@ -506,7 +516,7 @@
 	"hero": {
 		"text": {
 			"available_balance": "Il tuo saldo",
-			"unavailable_balance": "Valore in $ non disponibile",
+			"unavailable_balance": "Valore in $currencySymbol non disponibile",
 			"hidden_balance": "Il tuo saldo è nascosto",
 			"top_up": "Ricarica il tuo wallet per iniziare a usarlo!",
 			"learn_more_about_erc20_icp": "Scopri di più su ERC20 ICP su Ethereum.",
@@ -715,7 +725,14 @@
 			"minter_info_not_loaded": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è ancora stato caricato.",
 			"minter_info_not_certified": "Riprova tra qualche secondo, un parametro di configurazione ckETH non è stato certificato.",
 			"cketh_max_transaction_fee_missing": "Manca la fee massima di transazione per ckETH.",
-			"utxos_fee_missing": "Mancano le fee UTXO."
+			"utxos_fee_missing": "La commissione UTXO è mancante.",
+			"minimum_btc_amount": "Importo troppo piccolo. Inserisci almeno $amount BTC.",
+			"btc_insufficient_balance": "Nessun UTXO Bitcoin disponibile per la transazione",
+			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
+			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
+			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -798,9 +815,9 @@
 			"approval_fee": "Fee di approvazione",
 			"gas_fee": "Gas fee",
 			"lp_fee": "Fee LP",
-			"max_slippage_info": "Inserisci un valore tra 0% e 50%",
+			"max_slippage_info": "Inserisci un valore tra 0% e $maxSlippage%",
 			"max_slippage_warning": "Avviso di rischio: un elevato slippage può comportare perdite a causa della volatilità del mercato",
-			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il 50%",
+			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il $maxSlippage%",
 			"swap_button": "Scambia ora",
 			"swap_is_not_offered": "Questo scambio non è attualmente offerto.",
 			"executing_transaction": "Esecuzione transazione...",
@@ -818,8 +835,14 @@
 			"select": "Seleziona >",
 			"select_swap_provider": "Seleziona fornitore di scambio",
 			"open_icp_swap": "Apri il sito web ICP Swap",
+			"open_instructions_link": "Apri il link con le istruzioni",
 			"select_token": "Seleziona il token",
-			"select_network_filter": "Seleziona la rete"
+			"select_network_filter": "Seleziona la rete",
+			"withdrawing": "",
+			"network_cost": "",
+			"gasless": "",
+			"swap_fees": "",
+			"cross_chain_networks_info": ""
 		},
 		"error": {
 			"kong_not_available": "Attualmente non è disponibile uno scambio per scambiare token. Riprova più tardi.",
@@ -827,9 +850,16 @@
 			"unexpected_missing_data": "Qualcosa è andato storto durante l'avvio di una transazione di scambio.",
 			"slippage_exceeded": "$oisy_short ti protegge: la transazione è al di fuori della tua tolleranza di slippage del $maxSlippage%. Per favore, regola lo slippage massimo e riprova.",
 			"pool_not_found": "Scambio fallito. Pool non trovata.",
-			"deposit_error": "Scambio fallito. Non siamo riusciti a depositare i tuoi token nel pool. Riprova.",
+			"deposit_error": "Il deposito dei fondi per lo swap non è riuscito. Riprova oppure cambia il provider dello swap.",
 			"withdraw_failed": "Lo scambio è fallito e anche il prelievo è fallito. Controlla il tuo saldo inutilizzato e prova il prelievo manuale: ",
-			"swap_failed_withdraw_success": "Scambio fallito. I tuoi token sono stati rimborsati con successo. Puoi riprovare o aumentare la tolleranza allo slippage."
+			"swap_failed_withdraw_success": "Lo swap non è andato a buon fine e i tuoi token sono stati rimborsati con successo. Riprova oppure cambia il provider dello swap.",
+			"withdraw_failed_first_part": "",
+			"withdraw_failed_second_part": "",
+			"swap_failed_instruction_link": "queste istruzioni ",
+			"manually_withdraw_success": "",
+			"manually_withdraw_failed": "",
+			"swap_sucess_withdraw_failed": "",
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -908,7 +938,7 @@
 				"custom_tokens_not_supported": "La rete selezionata non supporta i token personalizzati."
 			},
 			"error": {
-				"loading_metadata": "Errore durante il caricamento dei metadati del token.",
+				"loading_metadata": "L'indirizzo inserito non corrisponde ad un token valido nella rete scelta.",
 				"no_metadata": "Nessun metadato per il token è fornito. Questo è inaspettato.",
 				"unexpected_ledger": "Qualcosa è andato storto durante la convalida del canister Ledger.",
 				"unexpected_index": "Qualcosa è andato storto durante la convalida del canister Index.",
@@ -973,11 +1003,11 @@
 			"invalid_contract_address": "Indirizzo del contratto non valido.",
 			"invalid_token_address": "Indirizzo del token non valido.",
 			"invalid_ledger": "Il token selezionato non è collegato a un canister Ledger ICRC.",
+			"unrecognised_erc_interface": "",
 			"no_metadata": "Nessun metadato recuperato.",
 			"unexpected": "Qualcosa è andato storto durante il salvataggio del token.",
 			"unexpected_hiding": "Qualcosa è andato storto nel nascondere il token.",
 			"already_available": "Token già disponibile.",
-			"loading_metadata": "Errore durante il caricamento dei metadati del token.",
 			"not_toggleable": "Il token non è attivabile/disattivabile, non può essere nascosto.",
 			"incomplete_metadata": "Nessun nome o simbolo è fornito nei metadati.",
 			"duplicate_metadata": "Un token con un nome o simbolo simile esiste già.",
@@ -988,7 +1018,57 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "NFT"
+			"title": "NFT",
+			"title_empty": "I tuoi NFT appariranno qui",
+			"description_empty": "Sembra che tu non abbia ancora ricevuto NFT",
+			"grouping": "",
+			"as_plain_list": "",
+			"by_collection": "",
+			"show_spam": "",
+			"show_hidden": "",
+			"sorting": "",
+			"recents_first": "",
+			"oldest_first": "",
+			"collection_atoz": "",
+			"collection_ztoa": "",
+			"collection_items_count": "",
+			"collection_address": "",
+			"token_standard": "",
+			"quantity": "",
+			"item_traits": "",
+			"collection_not_loaded": "",
+			"nft_not_loaded": "",
+			"collections": "",
+			"all_assets": "",
+			"address_copied": "",
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
+		},
+		"alt": {
+			"placeholder_image": "Nessun NFT per adesso",
+			"card": {
+				"image": "Immagine dell'NFT con token ID: $tokenId"
+			},
+			"copy_address": ""
 		}
 	},
 	"fee": {
@@ -1219,12 +1299,12 @@
 				"reward_received": "Benvenuto su $oisy_short!",
 				"reward_failed": "Il codice è scaduto",
 				"reward_received_description": "Riceverai il tuo regalo di benvenuto a breve.",
+				"brand_reward_received_description": "",
 				"reward_failed_description": "Richiedine uno nuovo e riprova"
 			},
 			"error": {
 				"loading_reward": "Errore durante il caricamento di un nuovo codice ricompensa.",
 				"loading_user_data": "Impossibile caricare i dati utente dal canister delle ricompense.",
-				"claiming_reward": "Errore durante la richiesta della ricompensa.",
 				"loading_eligibility": "Errore durante il caricamento dell'idoneità della campagna."
 			}
 		},
@@ -1277,7 +1357,14 @@
 		},
 		"avatar": {
 			"default": "Avatar predefinito",
-			"avatar_for": "Avatar per"
+			"avatar_for": "Avatar per",
+			"avatar_loading": "L'avatar si sta caricando"
+		},
+		"edit_avatar": {
+			"menu_title": "Immagine del Contatto",
+			"upload_image": "Carica",
+			"replace_image": "Cambia",
+			"remove_image": "Rimuovi"
 		},
 		"show_contact": {
 			"title": "Contatto",
@@ -1413,8 +1500,24 @@
 			"indicator": "Vai alla slide $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Cliccando su questo pulsante, accetti l'",
 			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
@@ -1433,10 +1536,31 @@
 			"entire_agreement": "<strong>10. INTERO ACCORDO E SEPARABILITÀ.</strong> Il presente Accordo di Licenza costituisce l'intero accordo tra l'Utente e DFINITY e sostituisce tutti gli accordi, le negoziazioni o altre comunicazioni precedenti tra l'Utente e DFINITY, sia orali che scritte, in relazione all'oggetto del presente. DFINITY può apportare modifiche al presente Accordo di Licenza quando vengono rese disponibili nuove versioni di $oisy_short. Nel caso in cui qualsiasi disposizione del presente Accordo di Licenza sia ritenuta non valida o inapplicabile, allora: (a) tale disposizione sarà considerata riformata nella misura strettamente necessaria per rendere tale disposizione valida e applicabile, o se non è suscettibile di tale riforma, sarà considerata separata dal presente Accordo di Licenza; e (b) la validità e l'applicabilità di tutte le altre disposizioni del presente non saranno in alcun modo influenzate o compromesse.",
 			"assignment": "<strong>11. CESSIONE.</strong> L'Utente non può cedere il presente Accordo di Licenza senza il preventivo consenso scritto di DFINITY, sia espressamente che per effetto di legge, anche in relazione a una fusione o a un cambiamento di controllo, e qualsiasi tentativo di cessione sarà nullo e privo di effetto. DFINITY può cedere il presente Accordo di Licenza senza restrizioni e senza alcun preavviso all'Utente. Fatto salvo quanto precede, il presente Accordo di Licenza sarà vincolante per le parti e i loro rispettivi successori e cessionari autorizzati.",
 			"no_waiver": "<strong>12. NESSUNA RINUNCIA.</strong> La mancata esercizio, o il ritardo nell'esercizio, di un diritto, potere o rimedio previsto nel presente Accordo di Licenza o dalla legge non costituirà una rinuncia a tale diritto, potere o rimedio. La rinuncia di DFINITY a qualsiasi obbligo o violazione del presente Accordo di Licenza non opererà come rinuncia a qualsiasi altro obbligo o successiva violazione del presente Accordo di Licenza.",
-			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese."
+			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'Accordo di Licenza di $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1492,9 +1616,17 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
-			"loading": ""
+			"send_token_succeeded": "",
+			"no_contacts_found_message": "",
+			"loading": "",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "",

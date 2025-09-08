@@ -14,6 +14,7 @@
 			"symbol": "Symbol",
 			"decimals": "Dezimalstellen",
 			"amount": "Betrag",
+			"tokenId": "Token ID",
 			"max": "Max",
 			"destination": "Ziel",
 			"reject": "Ablehnen",
@@ -36,7 +37,8 @@
 			"currency": "Währung"
 		},
 		"info": {
-			"test_banner": "Nur zu Testzwecken!"
+			"test_banner": "Nur zu Testzwecken!",
+			"test_banner_beta": "Das ist eine Beta Version, die Fehler enthalten kann. Benutze sie mit Vorsicht, weil echte Token betroffen sein können."
 		},
 		"alt": {
 			"logo": "$name-Logo",
@@ -102,6 +104,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Dezentralisiert",
 			"logout": "Abmelden",
+			"lock": "Sperren",
 			"authenticate": "Anmelden",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
 			"instant_and_private": "Sofortiger und privater Zugriff überall",
@@ -112,7 +115,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
-			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet."
+			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Keine Internet Identity.",
@@ -158,6 +162,16 @@
 				"other_asset_control": "Informationen zu Asset-Kontrolle, Wiederherstellung und Governance in $oisy_short Wallet erhalten",
 				"sign_in": "Hilfe bei der Anmeldung?"
 			}
+		}
+	},
+	"lock": {
+		"text": {
+			"title_part_1": "Deine Wallet ist gesichert",
+			"title_part_2": "Du hast deine Wallet gesperrt. Entsperre sie um fortzufahren, oder logge dich aus.",
+			"unlock": "Entsperren",
+			"logout": "Ausloggen",
+			"logout_clear_cash_message": "Ausloggen wird alle lokal gecachten Daten löschen",
+			"learn_more": "Erfahre mehr"
 		}
 	},
 	"dapps": {
@@ -272,12 +286,6 @@
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
-			"zkpoker": {
-				"name": "zkPoker",
-				"one_liner": "Modernste Kryptografie und Blockchain verflechten sich zu einer sicheren und transparenten Spielumgebung für alle.",
-				"call_to_action": "Spiele jetzt!",
-				"description": "Modernste Kryptografie und Blockchain verschmelzen zu einer sicheren und transparenten Spielumgebung für alle.<br/><br/>Spielen Sie mit den digitalen Assets Ihrer Wahl – jetzt ICP, bald auch BTC, ETH, SOL und USDC. Vollständig on-chain, keine zentralen Fehlerquellen. Unser Blockchain-basierter Zufallsgenerator (RNG) sorgt für nachweislich faires Spielen und nutzt Open-Source-Technologie des Forschungs- und Entwicklungsteams von Dfinity."
-			},
 			"sonic": {
 				"name": "Sonic",
 				"one_liner": "Schöpfen Sie das volle Potenzial von DeFi und optimiertem Handel aus. Tauschen Sie Token, verdienen Sie als Liquiditätsanbieter und nutzen Sie das führende AMM von Bitfinity EVM.",
@@ -360,7 +368,7 @@
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 3 ist aktiv 🎉",
-				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Tokens um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
+				"one_liner": "Sei aktiv und verdiene BTC — und jetzt, fürs <strong>Einladen von Freunden</strong>.<br/>Logge ein, führe Transaktionen aus und halte Token um dich für tägliche Gewinne zu qualifizieren. Lade Freunde ein und verdiene zusätzlich 10% ihrer Gewinne.",
 				"participate_title": "Sei aktiv und verdiene BTC - und jetzt auch durchs Einladen von Freunden.",
 				"description": "Erfülle einfache wöchentliche Anforderungen. Melde dich an, führe zwei Transaktionen durch und halte Token im Wert von mindestens $20, um täglich 50 BTC-Drops zu erhalten.<br/><strong>Jetzt mit Empfehlungsprämien:</strong> Lade Freunde ein um eine Wallet einzurichten und verdiene 30 Tage lang 10 % ihrer Sprinkles. Sie behalten 100 % – du verdienst zusätzlich.",
 				"campaign_href": "https://x.com/intent/post?text=Noch%20nicht%20f%C3%BCr%20%40OISY%20Sprinkles%20qualifiziert%3F%0ASie%20liefern%20%24BTC%20frei%20Haus%20-%20Tag%20ein%2C%20Tag%20aus.%0ABesuche%20OISY.com%20und%20entdecke%20es%20selber.%20%F0%9F%9A%80",
@@ -385,10 +393,10 @@
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
 				"card_title": "OISY Sprinkles: Episode 4 ist aktiv 🎉",
-				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Tokens, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
+				"one_liner": "Verdiene BTC durch Aktivität – und jetzt auch <strong>garantierte</strong> Sprinkles für Einladungen.<br/>Melde dich an, mach Transaktionen und halte Token, um dich für tägliche Drops zu qualifizieren. Lade 4 Freunde ein und erhalte direkt eine Belohnung. Top-Werber gewinnen noch mehr.",
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
-				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Tokens, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
-				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Tokens%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -425,7 +433,7 @@
 			"by": "von",
 			"dfinity_foundation": "DFINITY Foundation",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "$oisy_short Assistent"
 		},
 		"alt": {
 			"dfinity": "Zur Website der DFINITY Foundation gehen"
@@ -465,12 +473,12 @@
 		"error": {
 			"no_alchemy_config": "Keine Alchemy-Konfiguration für Netzwerk $network",
 			"no_alchemy_provider": "Kein Alchemy-Anbieter für Netzwerk $network",
-			"no_alchemy_erc20_provider": "Kein Alchemy-ERC20-Anbieter für Netzwerk $network",
 			"no_etherscan_provider": "Kein Etherscan-Anbieter für Netzwerk $network",
 			"no_infura_provider": "Kein Infura-Anbieter für Netzwerk $network",
 			"no_infura_cketh_provider": "Kein Infura CkETH-Anbieter für Netzwerk $network",
 			"no_infura_erc20_provider": "Kein Infura-ERC20-Anbieter für Netzwerk $network",
 			"no_infura_erc721_provider": "Kein Infura-ERC721-Anbieter für Netzwerk $network",
+			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
 			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
@@ -492,13 +500,15 @@
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
+			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
+			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
 			"erc20_user_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"spl_custom_tokens": "Fehler beim Laden der SPL-Benutzertoken.",
-			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc20_user_token": "Fehler beim Aktivieren des ERC20-Zwillings-Token.",
 			"icrc_custom_token": "Fehler beim Laden des benutzerdefinierten ICRC-Token.",
 			"loading_wallet_timeout": "Deine Wallet benötigt einige Anfangsdaten, die noch nicht geladen wurden. Bitte versuche es erneut.",
 			"allow_signing": "Ein Problem trat auf beim Einrichten deiner Wallet zum Signieren. Du wurdest abgemeldet. Wenn das Problem weiterhin besteht, kontaktiere den Support.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Fehler beim Laden der BTC-Wallet-Informationen.",
 			"sol_wallet_error": "Fehler beim Laden der SOL-Wallet-Informationen."
 		}
@@ -506,14 +516,14 @@
 	"hero": {
 		"text": {
 			"available_balance": "Dein Guthaben",
-			"unavailable_balance": "$ Wert ist nicht verfügbar",
+			"unavailable_balance": "$currencySymbol Wert ist nicht verfügbar",
 			"hidden_balance": "Dein Guthaben ist ausgeblendet",
 			"top_up": "Lade dein Wallet auf, um es zu nutzen!",
 			"learn_more_about_erc20_icp": "Erfahre mehr über ERC20 ICP auf Ethereum.",
 			"tooltip_toggle_balance": "Doppelklick zum Anzeigen/Ausblenden des Guthabens"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Privatsphären Modus aktivieren oder deaktivieren"
 		}
 	},
 	"settings": {
@@ -658,7 +668,7 @@
 			"sending": "Sende...",
 			"signing": "Signiere...",
 			"signing_message": "Nachricht wird signiert...",
-			"confirming": "",
+			"confirming": "Bestätigen...",
 			"network": "Netzwerk",
 			"source_network": "Quellnetzwerk",
 			"destination_network": "Zielnetzwerk",
@@ -715,7 +725,14 @@
 			"minter_info_not_loaded": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht geladen.",
 			"minter_info_not_certified": "Versuche es in ein paar Sekunden erneut; ein ckETH-Konfigurationsparameter ist noch nicht zertifiziert.",
 			"cketh_max_transaction_fee_missing": "Die maximale Transaktionsgebühr für ckETH fehlt.",
-			"utxos_fee_missing": "UTXOs-Gebühr fehlt."
+			"utxos_fee_missing": "UTXO-Gebühr fehlt.",
+			"minimum_btc_amount": "Betrag zu klein. Bitte geben Sie mindestens $amount BTC ein.",
+			"btc_insufficient_balance": "Keine Bitcoin-UTXOs für Transaktion verfügbar",
+			"btc_insufficient_balance_for_fee": "Unzureichender Bitcoin-Saldo zur Deckung der Transaktionsgebühren",
+			"btc_invalid_utxo_data": "Ungültige Bitcoin-Transaktionsdaten",
+			"btc_utxo_locked": "Bitcoin-Guthaben durch ausstehende Transaktionen gesperrt",
+			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen",
+			"pending_transactions_not_available": "Der Service für ausstehende Transaktionen ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut."
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
@@ -798,9 +815,9 @@
 			"approval_fee": "Genehmigungsgebühr",
 			"gas_fee": "Gasgebühr",
 			"lp_fee": "LP-Gebühr",
-			"max_slippage_info": "Gib einen Wert zwischen 0% und 50% ein",
+			"max_slippage_info": "Gib einen Wert zwischen 0% und $maxSlippage% ein",
 			"max_slippage_warning": "Warnung: Hohe Slippage kann durch Marktvolatilität zu Verlusten führen",
-			"max_slippage_error": "Slippage-Toleranz darf nicht 0% sein oder 50% überschreiten",
+			"max_slippage_error": "Slippage-Toleranz darf nicht 0% sein oder $maxSlippage% überschreiten",
 			"swap_button": "Jetzt tauschen",
 			"swap_is_not_offered": "Dieser Tausch ist derzeit nicht verfügbar.",
 			"executing_transaction": "Führe Transaktion aus...",
@@ -818,8 +835,14 @@
 			"select": "Auswählen >",
 			"select_swap_provider": "Tausch-Anbieter auswählen",
 			"open_icp_swap": "ICP Swap-Website öffnen",
-			"select_token": "",
-			"select_network_filter": ""
+			"open_instructions_link": "Link mit Anweisungen öffnen",
+			"select_token": "Token auswählen",
+			"select_network_filter": "Netzwerk auswählen",
+			"withdrawing": "Abheben...",
+			"network_cost": "Netzwerk Kosten",
+			"gasless": "Gasless",
+			"swap_fees": "Swap Gebühren",
+			"cross_chain_networks_info": "Du tauschst deine Token vom Netzwerk <b>$sourceNetwork</b> ins <b>$destinationNetwork</b> Netzwerk"
 		},
 		"error": {
 			"kong_not_available": "Derzeit ist kein Austausch verfügbar, um Token zu tauschen. Bitte später erneut versuchen.",
@@ -827,9 +850,16 @@
 			"unexpected_missing_data": "Beim Starten der Tauschtransaktion ist etwas schiefgelaufen.",
 			"slippage_exceeded": "$oisy_short schützt Dich: Der Handel liegt außerhalb deiner Slippage-Toleranz von $maxSlippage%. Bitte passe die maximale Slippage an und versuche es erneut.",
 			"pool_not_found": "Tausch fehlgeschlagen. Pool nicht gefunden.",
-			"deposit_error": "Tausch fehlgeschlagen. Wir konnten deine Token nicht in den Pool einzahlen. Bitte versuche es erneut.",
+			"deposit_error": "Das Senden der Token für den Tausch ist fehlgeschlagen. Please try again or change the swap provider. Versuche es erneut oder wähle einen anderen Anbieter.",
 			"withdraw_failed": "Tausch fehlgeschlagen und Rückzahlung ebenfalls fehlgeschlagen. Bitte prüfe dein ungenutztes Guthaben und versuche die manuelle Auszahlung: ",
-			"swap_failed_withdraw_success": "Tausch fehlgeschlagen. Deine Token wurden erfolgreich zurückerstattet. Du kannst es erneut versuchen oder die Slippage-Toleranz erhöhen."
+			"swap_failed_withdraw_success": "Der Tausch ist fehlgeschlagen und deine Token wurden erfolgreich zurückerstattet. Versuche es erneut oder wähle einen anderen Anbieter.",
+			"withdraw_failed_first_part": "Der Tausch ist fehlgeschlagen und deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
+			"withdraw_failed_second_part": "um sie jederzeit später von direkt von ihrer Webseite abzuheben: ",
+			"swap_failed_instruction_link": "diese Instruktionen ",
+			"manually_withdraw_success": "Die Token deines vorherigen fehlgeschlagenen Tauschs wurden erfolgreich zurückgeholt. Du kannst den Tausch erneut versuchen, oder den Tausch Provider wechseln.",
+			"manually_withdraw_failed": "Das Zuruckholen deiner Token ist fehlgeschlagen. <br> Bitte versuche es erneut, oder folge ",
+			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
+			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen."
 		}
 	},
 	"buy": {
@@ -908,7 +938,7 @@
 				"custom_tokens_not_supported": "Das ausgewählte Netzwerk unterstützt keine benutzerdefinierten Token."
 			},
 			"error": {
-				"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
+				"loading_metadata": "Die angegebene Adresse ist kein gültiges Token in der gewählten Blockchain",
 				"no_metadata": "Keine Metadaten für das Token verfügbar. Das ist unerwartet.",
 				"unexpected_ledger": "Beim Validieren des Ledger-Canisters ist etwas schiefgelaufen.",
 				"unexpected_index": "Beim Validieren des Index-Canisters ist etwas schiefgelaufen.",
@@ -973,11 +1003,11 @@
 			"invalid_contract_address": "Vertragsadresse ist ungültig.",
 			"invalid_token_address": "Token-Adresse ist ungültig.",
 			"invalid_ledger": "Das ausgewählte Token ist nicht mit einem ICRC-Ledger-Canister verknüpft.",
+			"unrecognised_erc_interface": "Unbekanntes ERC Interface.",
 			"no_metadata": "Es wurden keine Metadaten abgerufen.",
 			"unexpected": "Beim Speichern des Tokens ist etwas schiefgelaufen.",
 			"unexpected_hiding": "Beim Verbergen des Tokens ist etwas schiefgelaufen.",
 			"already_available": "Token ist bereits verfügbar.",
-			"loading_metadata": "Fehler beim Laden der Metadaten des Tokens.",
 			"not_toggleable": "Token kann nicht ausgeblendet werden.",
 			"incomplete_metadata": "Kein Name oder Symbol in den Metadaten vorhanden.",
 			"duplicate_metadata": "Ein Token mit einem ähnlichen Namen oder Symbol existiert bereits.",
@@ -988,7 +1018,57 @@
 	},
 	"nfts": {
 		"text": {
-			"title": ""
+			"title": "NFTs",
+			"title_empty": "Deine NFTs erscheinen hier",
+			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
+			"grouping": "Gruppierung",
+			"as_plain_list": "Als Liste anzeigen",
+			"by_collection": "Nach Kollektion gruppieren",
+			"show_spam": "Spam anzeigen",
+			"show_hidden": "Versteckte anzeigen",
+			"sorting": "Sortierung",
+			"recents_first": "Neue zuerst",
+			"oldest_first": "Älteste zuerst",
+			"collection_atoz": "Kollektionsname A-Z",
+			"collection_ztoa": "Kollektionsname Z-A",
+			"collection_items_count": "$count Element(e)",
+			"collection_address": "Kollektions-Contract Adresse",
+			"token_standard": "Token Standard",
+			"quantity": "Menge",
+			"item_traits": "Eigenschaften",
+			"collection_not_loaded": "Die Kollektion konnte nicht angezeigt werden weil sie noch nicht geladen wurde",
+			"nft_not_loaded": "Das NFT konnte nicht angezeigt werden weil es noch nicht geladen wurde",
+			"collections": "Kollektionen",
+			"all_assets": "Alle Assets",
+			"address_copied": "Adresse $address kopiert",
+			"spam": "Spam",
+			"not_spam": "Kein Spam",
+			"hide": "Verstecken",
+			"unhide": "Anzeigen",
+			"hidden": "Versteckt",
+			"open_explorer": "Öffne diesen Contract im Blockchain Explorer",
+			"img_consent_disabled": "Du hast diese Kollektion deaktiviert",
+			"img_consent_none": "Bild sicherheitsbedingt deaktiviert",
+			"review_button": "Prüfen",
+			"collection_name": "Kollektionsname",
+			"media_urls": "Medien URLs",
+			"display_preference": "Anzeigeeinstellung",
+			"review_preference": "Einstellung anpassen",
+			"media_enabled": "Medien aktiviert",
+			"media_disabled": "Medien deaktiviert",
+			"enable_media": "Medien aktivieren",
+			"disable_media": "Medien deaktivieren",
+			"open_in_new_tab": "In neuem Tab öffnen",
+			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
+			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
+			"learn_more": "Erfahre mehr"
+		},
+		"alt": {
+			"placeholder_image": "Noch keine NFTs",
+			"card": {
+				"image": "NFT Bild mit token ID: $tokenId"
+			},
+			"copy_address": "Diese Adresse in die Zwischenablage kopieren"
 		}
 	},
 	"fee": {
@@ -1219,12 +1299,12 @@
 				"reward_received": "Willkommen bei $oisy_short!",
 				"reward_failed": "Code ist abgelaufen",
 				"reward_received_description": "Du erhältst dein Willkommensgeschenk in Kürze.",
+				"brand_reward_received_description": "Willst du mehr verdienen? Empfehle einen Freund und verdiene an jeder Person die du empfohlen hast.",
 				"reward_failed_description": "Fordere einen neuen an und versuche es erneut"
 			},
 			"error": {
 				"loading_reward": "Fehler beim Laden eines neuen Belohnungscodes.",
 				"loading_user_data": "Fehler beim Laden der Benutzerdaten aus dem Belohnungs-Canister.",
-				"claiming_reward": "Fehler beim Einlösen der Belohnung.",
 				"loading_eligibility": "Fehler beim Laden der Kampagnenberechtigung."
 			}
 		},
@@ -1277,7 +1357,14 @@
 		},
 		"avatar": {
 			"default": "Standard-Avatar",
-			"avatar_for": "Avatar für"
+			"avatar_for": "Avatar für",
+			"avatar_loading": "Avatar wird geladen..."
+		},
+		"edit_avatar": {
+			"menu_title": "Kontakt Avatar",
+			"upload_image": "Hochladen",
+			"replace_image": "Ersetzen",
+			"remove_image": "Entfernen"
 		},
 		"show_contact": {
 			"title": "Kontakt",
@@ -1413,8 +1500,24 @@
 			"indicator": "Zur Folie $index springen"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "Überprüfen der Geschäftsbedingungen",
+			"review_updated_title": "Überprüfen der angepassten Geschäftsbedingungen",
+			"review_description": "Um OISY Wallet zu benutzen, musst du unseren Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
+			"review_updated_description": "Um OISY Wallet weiterhin zu benutzen, musst du unseren angepassten Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
+			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
+			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
+			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
+			"accept_and_continue": "Zustimmen und weiterfahren"
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "Lizenzvereinbarung",
 			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
 			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
@@ -1433,10 +1536,31 @@
 			"entire_agreement": "<strong>10. GESAMTVEREINBARUNG UND SALVATORISCHE KLAUSEL.</strong> Diese Lizenzvereinbarung stellt die gesamte Vereinbarung zwischen Dir und DFINITY dar und ersetzt alle vorherigen Vereinbarungen, Verhandlungen oder Mitteilungen zwischen Dir und DFINITY in Bezug auf den Gegenstand. DFINITY kann diese Lizenzvereinbarung ändern, wenn neue Versionen von $oisy_short verfügbar gemacht werden. Sollte eine Bestimmung dieser Lizenzvereinbarung ungültig oder undurchsetzbar sein, wird sie so weit wie nötig angepasst, um gültig und durchsetzbar zu sein, oder, wenn das nicht möglich ist, aus dieser Lizenzvereinbarung entfernt; die Gültigkeit und Durchsetzbarkeit der übrigen Bestimmungen bleibt unberührt.",
 			"assignment": "<strong>11. ABTRETUNG.</strong> Du darfst diese Lizenzvereinbarung nicht ohne vorherige schriftliche Zustimmung von DFINITY abtreten, sonst ist sie ungültig. DFINITY kann diese Lizenzvereinbarung ohne Einschränkung und ohne Benachrichtigung Dir gegenüber abtreten. Vorbehaltlich dessen bleibt diese Lizenzvereinbarung für die Parteien und deren rechtliche Nachfolger und zulässige Abtretungsempfänger verbindlich.",
 			"no_waiver": "<strong>12. KEIN VERZICHT.</strong> Der Verzicht auf Ausübung oder Verzögerung bei Ausübung eines Rechts, einer Befugnis oder eines Rechtsmittels aus dieser Lizenzvereinbarung oder gesetzlich gilt nicht als Verzicht. Der Verzicht von DFINITY auf eine Verpflichtung oder einen Verstoß gegen diese Lizenzvereinbarung gilt nicht als Verzicht auf andere Verpflichtungen oder künftige Verstöße.",
-			"english_version": "<strong>13. ENGLISCHE VERSION.</strong> Die englische Version dieser Lizenzvereinbarung ist verbindlich, falls ein Konflikt entsteht. Alle Mitteilungen und Benachrichtigungen gemäß dieser Lizenzvereinbarung müssen in Englisch erfolgen."
+			"english_version": "<strong>13. ENGLISCHE VERSION.</strong> Die englische Version dieser Lizenzvereinbarung ist verbindlich, falls ein Konflikt entsteht. Alle Mitteilungen und Benachrichtigungen gemäß dieser Lizenzvereinbarung müssen in Englisch erfolgen.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "Die Lizenzvereinbarung von $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Nutzungsbedingungen",
+			"title": "Nutzungsbedingungen",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": "Link zu den Nutzungsbedingungen"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Datenschutzrichtlinie",
+			"title": "Datenschutzrichtlinie",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": "Link zur Datenschutzrichtlinie"
 		}
 	},
 	"activity": {
@@ -1492,9 +1616,17 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
-			"loading": ""
+			"send_token_succeeded": "",
+			"no_contacts_found_message": "",
+			"loading": "",
+			"reset_chat_history": ""
 		},
 		"errors": {
 			"unknown": "",

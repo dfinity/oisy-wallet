@@ -2,6 +2,8 @@
 	import { isNullish } from '@dfinity/utils';
 	import { onDestroy, setContext } from 'svelte';
 	import { fade, type FadeParams } from 'svelte/transition';
+	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
+	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import SignerAccounts from '$lib/components/signer/SignerAccounts.svelte';
 	import SignerCallCanister from '$lib/components/signer/SignerCallCanister.svelte';
 	import SignerConsentMessage from '$lib/components/signer/SignerConsentMessage.svelte';
@@ -29,7 +31,10 @@
 
 	onDestroy(reset);
 
-	$: $authIdentity, init();
+	$effect(() => {
+		[$authIdentity];
+		init();
+	});
 
 	// We use specific fade parameters for the idle state due to the asynchronous communication between the relying party and the wallet.
 	// Because the idle state might be displayed when a client starts communication with the wallet, we add a small delay to prevent a minor glitch where the idle animation is briefly shown before the actual action is rendered.
@@ -43,18 +48,22 @@
 	{#if $authNotSignedIn}
 		<SignerSignIn />
 	{:else}
-		<SignerAccounts>
-			{#if $idle}
-				<div in:fade={fadeParams}>
-					<SignerIdle />
-				</div>
-			{:else}
-				<SignerPermissions />
+		<LoaderUserProfile>
+			<AgreementsGuard>
+				<SignerAccounts>
+					{#if $idle}
+						<div in:fade={fadeParams}>
+							<SignerIdle />
+						</div>
+					{:else}
+						<SignerPermissions />
 
-				<SignerConsentMessage />
+						<SignerConsentMessage />
 
-				<SignerCallCanister />
-			{/if}
-		</SignerAccounts>
+						<SignerCallCanister />
+					{/if}
+				</SignerAccounts>
+			</AgreementsGuard>
+		</LoaderUserProfile>
 	{/if}
 </article>

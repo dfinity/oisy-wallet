@@ -3,6 +3,7 @@ import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/n
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
+import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
@@ -16,7 +17,6 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { getIdbIcTokens, setIdbIcTokens } from '$lib/api/idb-tokens.api';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
@@ -143,8 +143,6 @@ const loadIcrcCustomTokens = async ({
 		identity,
 		certified,
 		filterTokens: ({ token }) => 'Icrc' in token,
-		setIdbTokens: setIdbIcTokens,
-		getIdbTokens: getIdbIcTokens,
 		useCache
 	});
 
@@ -165,6 +163,7 @@ const loadCustomIcrcTokensData = async ({
 	identity: OptionIdentity;
 }): Promise<IcrcCustomToken[]> => {
 	const indexedIcrcCustomTokens = {
+		...buildIndexedIcpTokens(),
 		...buildIndexedIcrcCustomTokens(),
 		...buildIndexedDip20Tokens()
 	};

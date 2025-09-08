@@ -38,12 +38,21 @@ export interface TransactionsStore<T extends TransactionTypes>
 	add: (params: TransactionsStoreParams<T>) => void;
 	prepend: (params: TransactionsStoreParams<T>) => void;
 	append: (params: TransactionsStoreParams<T>) => void;
+	update: (params: { tokenId: TokenId; transaction: CertifiedTransaction<T> }) => void;
 	cleanUp: (params: TransactionsStoreIdParams<T>) => void;
 	nullify: (tokenId: TokenId) => void;
 }
 
-export const initTransactionsStore = <T extends UiTransactionTypes>(): TransactionsStore<T> => {
-	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
+export const initTransactionsStore = <T extends TransactionTypes>(): TransactionsStore<T> => {
+	const { subscribe, update, reset, reinitialize } = initCertifiedStore<TransactionsData<T>>();
+
+	const isTransactionUi = (transaction: TransactionTypes): transaction is UiTransactionTypes =>
+		'id' in transaction;
+
+	const getIdentifier = (
+		transaction: TransactionTypes
+	): UiTransactionTypes['id'] | Transaction['hash'] =>
+		isTransactionUi(transaction) ? transaction.id : transaction.hash;
 
 	return {
 		set: ({ tokenId, transactions }: TransactionsStoreParams<T>) =>
@@ -62,7 +71,8 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: [
 					...transactions,
 					...((state ?? {})[tokenId] ?? []).filter(
-						({ data: { id } }) => !transactions.some(({ data: { id: txId } }) => txId === id)
+						({ data }) =>
+							!transactions.some(({ data: tx }) => getIdentifier(tx) === getIdentifier(data))
 					)
 				]
 			})),
@@ -72,8 +82,10 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: [
 					...((state ?? {})[tokenId] ?? []),
 					...transactions.filter(
-						({ data: { id } }) =>
-							!((state ?? {})[tokenId] ?? []).some(({ data: { id: txId } }) => txId === id)
+						({ data }) =>
+							!((state ?? {})[tokenId] ?? []).some(
+								({ data: tx }) => getIdentifier(tx) === getIdentifier(data)
+							)
 					)
 				]
 			})),
@@ -81,8 +93,24 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 			update((state) => ({
 				...(nonNullish(state) && state),
 				[tokenId]: ((state ?? {})[tokenId] ?? []).filter(
-					({ data: { id } }) => !transactionIds.includes(`${id}`)
+					({ data }) => !transactionIds.includes(`${getIdentifier(data)}`)
 				)
+			})),
+		update: ({
+			tokenId,
+			transaction
+		}: {
+			tokenId: TokenId;
+			transaction: CertifiedTransaction<T>;
+		}) =>
+			update((state) => ({
+				...(nonNullish(state) && state),
+				[tokenId]: [
+					...(state?.[tokenId] ?? []).filter(
+						({ data }) => getIdentifier(data) !== getIdentifier(transaction.data)
+					),
+					transaction
+				]
 			})),
 		nullify: (tokenId) =>
 			update((state) => ({
@@ -90,6 +118,7 @@ export const initTransactionsStore = <T extends UiTransactionTypes>(): Transacti
 				[tokenId]: null
 			})),
 		reset,
+		reinitialize,
 		subscribe
 	};
 };

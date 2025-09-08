@@ -36,10 +36,10 @@
 {#if nonNullish(valueDifference)}
 	<span
 		class="underline"
+		class:text-error-primary={valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
 		class:text-success-primary={valueDifference > SWAP_VALUE_DIFFERENCE_WARNING_VALUE}
 		class:text-warning-primary={valueDifference <= SWAP_VALUE_DIFFERENCE_WARNING_VALUE &&
 			valueDifference > SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
-		class:text-error-primary={valueDifference <= SWAP_VALUE_DIFFERENCE_ERROR_VALUE}
 	>
 		{`${valueDifference > 0 ? '+' : ''}${valueDifference.toFixed(2)}`}%
 	</span>

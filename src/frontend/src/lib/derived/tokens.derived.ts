@@ -1,23 +1,26 @@
 import { enabledBitcoinTokens } from '$btc/derived/tokens.derived';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 import { erc20Tokens } from '$eth/derived/erc20.derived';
 import { erc721Tokens } from '$eth/derived/erc721.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
-import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { icrcChainFusionDefaultTokens, sortedIcrcTokens } from '$icp/derived/icrc.derived';
+import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
+import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import { isTokenFungible } from '$lib/utils/nft.utils';
 import {
 	filterEnabledTokens,
 	sumMainnetTokensUsdBalancesPerNetwork
@@ -32,8 +35,10 @@ export const tokens: Readable<Token[]> = derived(
 	[
 		erc20Tokens,
 		erc721Tokens,
+		erc1155Tokens,
 		sortedIcrcTokens,
 		splTokens,
+		defaultIcpTokens,
 		enabledEthereumTokens,
 		enabledBitcoinTokens,
 		enabledSolanaTokens,
@@ -42,27 +47,35 @@ export const tokens: Readable<Token[]> = derived(
 	([
 		$erc20Tokens,
 		$erc721Tokens,
+		$erc1155Tokens,
 		$icrcTokens,
 		$splTokens,
+		$defaultIcpTokens,
 		$enabledEthereumTokens,
 		$enabledBitcoinTokens,
 		$enabledSolanaTokens,
 		$enabledEvmTokens
 	]) => [
-		ICP_TOKEN,
+		...$defaultIcpTokens,
 		...$enabledBitcoinTokens,
 		...$enabledEthereumTokens,
 		...$enabledSolanaTokens,
 		...$enabledEvmTokens,
 		...$erc20Tokens,
 		...$erc721Tokens,
+		...$erc1155Tokens,
 		...$icrcTokens,
 		...$splTokens
 	]
 );
 
 export const fungibleTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
-	$tokens.filter((token) => !isTokenErc721(token))
+	$tokens.filter(isTokenFungible)
+);
+
+export const nonFungibleTokens: Readable<NonFungibleToken[]> = derived(
+	[erc721Tokens, erc1155Tokens],
+	([$erc721Tokens, $erc1155Tokens]) => [...$erc721Tokens, ...$erc1155Tokens]
 );
 
 export const defaultEthereumTokens: Readable<Token[]> = derived([tokens], ([$tokens]) =>
@@ -75,6 +88,7 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 		BTC_MAINNET_TOKEN,
 		ETHEREUM_TOKEN,
 		ICP_TOKEN,
+		TESTICP_TOKEN,
 		SOLANA_TOKEN,
 		...$icrcChainFusionDefaultTokens,
 		...$defaultEthereumTokens.filter((token) => token !== ETHEREUM_TOKEN)
@@ -87,10 +101,26 @@ export const tokensToPin: Readable<TokenToPin[]> = derived(
 export const enabledTokens: Readable<Token[]> = derived([tokens], filterEnabledTokens);
 
 /**
+ * All user-enabled unique tokens symbols.
+ */
+export const enabledUniqueTokensSymbols: Readable<Token['symbol'][]> = derived(
+	[enabledTokens],
+	([$enabledTokens]) => Array.from(new Set($enabledTokens.map(({ symbol }) => symbol)))
+);
+
+/**
  * All user-enabled fungible tokens.
  */
 export const enabledFungibleTokens: Readable<Token[]> = derived(
 	[fungibleTokens],
+	filterEnabledTokens
+);
+
+/**
+ * All user-enabled non-fungible tokens
+ */
+export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
+	[nonFungibleTokens],
 	filterEnabledTokens
 );
 

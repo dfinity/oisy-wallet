@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
-	import { EXCHANGE_USD_AMOUNT_THRESHOLD } from '$lib/constants/exchange.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { usdValue } from '$lib/utils/exchange.utils';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
@@ -30,24 +30,18 @@
 	})} ${symbol}`;
 </script>
 
-<div transition:fade class="flex gap-4">
+<div class="flex gap-4" transition:fade>
 	{displayAmount}
 
 	{#if nonNullish(usdAmount)}
 		<div class="text-tertiary">
-			{#if usdAmount < EXCHANGE_USD_AMOUNT_THRESHOLD}
-				{`( < ${formatCurrency({
-					value: EXCHANGE_USD_AMOUNT_THRESHOLD,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore
-				})} )`}
-			{:else}
-				{`( ${formatCurrency({
-					value: usdAmount,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore
-				})} )`}
-			{/if}
+			{`( ${formatCurrency({
+				value: usdAmount,
+				currency: $currentCurrency,
+				exchangeRate: $currencyExchangeStore,
+				language: $currentLanguage,
+				notBelowThreshold: true
+			})} )`}
 		</div>
 	{/if}
 </div>

@@ -6,6 +6,7 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 
@@ -31,7 +32,8 @@
 		formatCurrency({
 			value: usdAmount,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		})
 	);
 </script>
@@ -39,10 +41,10 @@
 {#if nonNullish(token)}
 	<div
 		class={`relative w-1/3 rounded-xl p-2 text-center text-sm text-primary-inverted md:text-base ${amount > ZERO ? 'bg-success-primary' : 'bg-tertiary-inverted'}`}
-		class:transition={loading}
+		class:animate-pulse={loading}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
-		class:animate-pulse={loading}
+		class:transition={loading}
 		data-tid={testId}
 	>
 		{#if amount > ZERO}

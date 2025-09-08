@@ -21,6 +21,8 @@ import {
 	stringifiedNumber,
 	type Base58EncodedBytes,
 	type Blockhash,
+	type CompilableTransactionMessage,
+	type SignaturesMap,
 	type TransactionMessageBytes,
 	type UnixTimestamp
 } from '@solana/kit';
@@ -1251,5 +1253,178 @@ export const mockSolTransactionMessage: SolTransactionMessage = {
 
 export const mockSolSignedTransaction: SolSignedTransaction = {
 	messageBytes: Uint8Array.from([1, 2, 3, 4, 5, 6]) as unknown as TransactionMessageBytes,
-	signatures: Uint8Array.from([9, 8, 7, 6, 5, 4, 3, 2, 1])
+	signatures: {
+		[mockSolAddress]: Uint8Array.from([
+			173, 246, 119, 142, 238, 105, 46, 1, 187, 26, 128, 178, 141, 79, 197, 130, 141, 96, 178, 129
+		]),
+		[mockSolAddress2]: Uint8Array.from([
+			173, 246, 119, 142, 238, 105, 46, 1, 187, 26, 128, 178, 141, 79, 197, 130, 141, 96, 178, 129
+		])
+	} as SignaturesMap
 } as unknown as SolSignedTransaction;
+
+export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {
+	feePayer: {
+		address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q')
+	},
+	instructions: [
+		{
+			programAddress: address('ComputeBudget111111111111111111111111111111'),
+			data: Uint8Array.from([2, 23, 83, 2, 0])
+		},
+		{
+			programAddress: address('ComputeBudget111111111111111111111111111111'),
+			data: Uint8Array.from([3, 38, 220, 23, 0, 0, 0, 0, 0])
+		},
+		{
+			programAddress: address('11111111111111111111111111111111'),
+			accounts: [
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				},
+				{
+					address: address('ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49'),
+					addressIndex: 28,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 1
+				}
+			],
+			data: Uint8Array.from([2, 0, 0, 0, 236, 19, 0, 0, 0, 0, 0, 0])
+		},
+		{
+			programAddress: address('11111111111111111111111111111111'),
+			accounts: [
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				},
+				{
+					address: address('DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH'),
+					role: 3
+				}
+			],
+			data: Uint8Array.from([
+				0, 0, 0, 0, 240, 29, 31, 0, 0, 0, 0, 0, 165, 0, 0, 0, 0, 0, 0, 0, 6, 221, 246, 225, 215,
+				101, 161, 147, 217, 203, 225, 70, 206, 235, 121, 172, 28, 180, 133, 237, 95, 91, 55, 145,
+				58, 140, 245, 133, 126, 255, 0, 169
+			])
+		},
+		{
+			programAddress: address('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+			accounts: [
+				{
+					address: address('DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH'),
+					role: 3
+				},
+				{
+					address: address('So11111111111111111111111111111111111111112'),
+					addressIndex: 0,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 0
+				},
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				},
+				{
+					address: address('SysvarRent111111111111111111111111111111111'),
+					addressIndex: 3,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 0
+				}
+			],
+			data: Uint8Array.from([1])
+		},
+		{
+			programAddress: address('whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc'),
+			accounts: [
+				{
+					address: address('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+					role: 0
+				},
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				},
+				{
+					address: address('FpCMFDFGYotvufJ7HrFHsWEiiQCGbkLCtwHiDnh7o28Q'),
+					addressIndex: 37,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 1
+				},
+				{
+					address: address('DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH'),
+					role: 3
+				},
+				{
+					address: address('6mQ8xEaHdTikyMvvMxUctYch6dUjnKgfoeib2msyMMi1'),
+					addressIndex: 38,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 1
+				},
+				{
+					address: address('6wqnX8qdyuvshkqMyproFnbnp3XCqF6P3eqWqdT7BTGU'),
+					role: 1
+				},
+				{
+					address: address('AQ36QRk3HAe6PHqBCtKTQnYKpt2kAagq9YoeTqUPMGHx'),
+					addressIndex: 39,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 1
+				},
+				{
+					address: address('Eo4qBMHT1TBKa7mNNvu5dKfTfY7gbKP3x8Bfgdcu1UwT'),
+					addressIndex: 2,
+					lookupTableAddress: address('3JsRWUYJvaRsXfjyj7sNpPor96ubQqgigSQxR37YWNAV'),
+					role: 1
+				},
+				{
+					address: address('7VMZua7JdRXowxinQ2YzFDvNTtYHuXGnS527Dc2ixej8'),
+					addressIndex: 3,
+					lookupTableAddress: address('3JsRWUYJvaRsXfjyj7sNpPor96ubQqgigSQxR37YWNAV'),
+					role: 1
+				},
+				{
+					address: address('41osFfamtiYDmFBfDruk95afaP1VDPPTPQfNTqGrV27M'),
+					addressIndex: 4,
+					lookupTableAddress: address('3JsRWUYJvaRsXfjyj7sNpPor96ubQqgigSQxR37YWNAV'),
+					role: 1
+				},
+				{
+					address: address('923j69hYbT5Set5kYfiQr1D8jPL6z15tbfTbVLSwUWJD'),
+					addressIndex: 40,
+					lookupTableAddress: address('7Vyx1y8vG9e9Q1MedmXpopRC6ZhVaZzGcvYh5Z3Cs75i'),
+					role: 1
+				}
+			],
+			data: Uint8Array.from([
+				248, 198, 158, 145, 225, 117, 135, 200, 64, 66, 15, 0, 0, 0, 0, 0, 95, 227, 71, 0, 0, 0, 0,
+				0, 175, 51, 27, 168, 50, 127, 187, 53, 177, 196, 254, 255, 0, 0, 0, 0, 1, 0
+			])
+		},
+		{
+			programAddress: address('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'),
+			accounts: [
+				{
+					address: address('DSkZKdPXxJYtcqcUzAkpHbr4or65H1a7WmePYsKQQBGH'),
+					role: 3
+				},
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				},
+				{
+					address: address('5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q'),
+					role: 3
+				}
+			],
+			data: Uint8Array.from([9])
+		}
+	],
+	lifetimeConstraint: {
+		blockhash: blockhash('HSR6rNUUeh6Grf2mVzP6u33wEfvXeLt7rNaTqkQoFLtN'),
+		lastValidBlockHeight: 18446744073709551615n
+	},
+	version: 0
+};

@@ -11,9 +11,8 @@ import {
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import { vi } from 'vitest';
 
-const mockContactImage: ContactImage = {
+const mockContactImage: ContactImage | null = {
 	data: new Uint8Array([1, 2, 3]),
 	mime_type: { 'image/png': null }
 };
@@ -196,7 +195,8 @@ describe('manage-contacts.service', () => {
 
 			const result = await updateContact({
 				contact,
-				identity: mockIdentity
+				identity: mockIdentity,
+				image: null
 			});
 
 			expect(mockUpdateContact).toHaveBeenCalledWith(

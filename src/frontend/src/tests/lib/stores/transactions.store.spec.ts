@@ -1,7 +1,11 @@
 import { ETHEREUM_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
+import { ZERO } from '$lib/constants/app.constants';
 import { initTransactionsStore } from '$lib/stores/transactions.store';
+import type { Transaction } from '$lib/types/transaction';
+import { bn3Bi } from '$tests/mocks/balances.mock';
+import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import { get } from 'svelte/store';
 
@@ -225,6 +229,75 @@ describe('transactions.store', () => {
 					done();
 				})();
 			}));
+	});
+
+	describe('update', () => {
+		const mockTransactions = [
+			createCertifiedIcTransactionUiMock('tx1'),
+			createCertifiedIcTransactionUiMock('tx2'),
+			createCertifiedIcTransactionUiMock('tx3'),
+			createCertifiedIcTransactionUiMock('tx4'),
+			createCertifiedIcTransactionUiMock('tx5')
+		];
+
+		const updatedTransaction = {
+			...mockTransactions[0],
+			value: (mockTransactions[0].data.value ?? ZERO) + bn3Bi
+		};
+
+		const store = initTransactionsStore<IcTransactionUi>();
+
+		beforeEach(() => {
+			store.set({ tokenId, transactions: mockTransactions });
+		});
+
+		it('should update a transaction with the same id', () => {
+			store.update({ tokenId, transaction: updatedTransaction });
+
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
+
+		it('should update a transaction with the same hash', () => {
+			const mockTransactions = createMockEthCertifiedTransactions(5);
+			const store = initTransactionsStore<Transaction>();
+			store.set({ tokenId, transactions: mockTransactions });
+
+			const updatedTransaction = {
+				...mockTransactions[0],
+				value: (mockTransactions[0].data.value ?? ZERO) + bn3Bi
+			};
+
+			store.update({ tokenId, transaction: updatedTransaction });
+
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
+
+		it('should add a transaction that does not exist in the list', () => {
+			store.set({ tokenId, transactions: mockTransactions.slice(1) });
+
+			const updatedTransaction = { ...mockTransactions[0], hash: 'new-hash' };
+			store.update({ tokenId, transaction: updatedTransaction });
+
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
+
+		it('should not duplicate transactions with same id', () => {
+			store.update({ tokenId, transaction: updatedTransaction });
+
+			const state = get(store);
+
+			expect(state?.[tokenId]).toHaveLength(mockTransactions.length);
+			expect(state?.[tokenId]).toEqual([...mockTransactions.slice(1), updatedTransaction]);
+		});
 	});
 
 	describe('reset', () => {

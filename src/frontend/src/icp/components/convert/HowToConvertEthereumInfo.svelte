@@ -86,14 +86,14 @@
 		</div>
 
 		<ReceiveAddress
-			labelRef="eth-wallet-address"
 			address={$ethAddress ?? ''}
+			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
+			labelRef="eth-wallet-address"
 			network={ETHEREUM_NETWORK}
 			qrCodeAction={{
 				enabled: true,
 				ariaLabel: $i18n.wallet.text.display_wallet_address_qr
 			}}
-			copyAriaLabel={$i18n.wallet.text.wallet_address_copied}
 			on:click={() => dispatch('icQRCode')}
 		>
 			{#snippet title()}
@@ -153,8 +153,8 @@
 					<Button
 						colorStyle="secondary"
 						fullWidth
-						styleClass="mb-4 mt-3"
 						onclick={() => dispatch('icConvert')}
+						styleClass="mb-4 mt-3"
 					>
 						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 					</Button>

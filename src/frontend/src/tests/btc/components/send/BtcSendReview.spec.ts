@@ -7,7 +7,7 @@ import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { render, waitFor } from '@testing-library/svelte';
+import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('BtcSendReview', () => {
@@ -102,7 +102,7 @@ describe('BtcSendReview', () => {
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
 	});
 
-	it('should disable the next button if utxos are not available', () => {
+	it('should disable the next button if utxosFee has an error', () => {
 		mockBtcPendingSendTransactionsStatusStore();
 
 		const { getByTestId } = render(BtcSendReview, {
@@ -110,45 +110,13 @@ describe('BtcSendReview', () => {
 				...props,
 				utxosFee: {
 					...mockUtxosFee,
-					utxos: []
+					error: BtcPrepareSendError.InsufficientBalance
 				}
 			},
 			context: mockContext()
 		});
 
 		expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-	});
-
-	it('should render btc send warning message and keep button disabled if there some pending txs', async () => {
-		mockBtcPendingSendTransactionsStatusStore(
-			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.SOME
-		);
-
-		const { container, getByTestId } = render(BtcSendReview, {
-			props,
-			context: mockContext()
-		});
-
-		await waitFor(() => {
-			expect(container).toHaveTextContent(en.send.info.pending_bitcoin_transaction);
-
-			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-		});
-	});
-
-	it('should disable the next button if pending txs have not been loaded yet', async () => {
-		mockBtcPendingSendTransactionsStatusStore(
-			btcPendingSendTransactionsStatusStore.BtcPendingSentTransactionsStatus.LOADING
-		);
-
-		const { getByTestId } = render(BtcSendReview, {
-			props,
-			context: mockContext()
-		});
-
-		await waitFor(() => {
-			expect(getByTestId(buttonTestId)).toHaveAttribute('disabled');
-		});
 	});
 
 	it('should disable the next button and render insufficient funds for fee message', () => {

@@ -33,7 +33,8 @@
 			lg: '64px',
 			md: '48px',
 			sm: '40px',
-			xs: '32px'
+			xs: '32px',
+			xxs: '24px'
 		}[variant]
 	);
 
@@ -44,7 +45,7 @@
 
 <div class="relative flex">
 	{#if nonNullish(contact)}
-		<Avatar name={contact.name} {variant} />
+		<Avatar name={contact.name} image={contact.image} {variant} />
 
 		{#if nonNullish(badge)}
 			<AddressesBadge
@@ -54,11 +55,11 @@
 		{/if}
 	{:else}
 		<Img
-			src={emptyOisyLogo}
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: OISY_NAME })}
-			width={emptyOisyLogoSize}
 			height={emptyOisyLogoSize}
+			src={emptyOisyLogo}
 			testId={AVATAR_WITH_BADGE_FALLBACK_IMAGE}
+			width={emptyOisyLogoSize}
 		/>
 
 		{#if nonNullish(mappedAddress)}

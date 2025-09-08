@@ -9,7 +9,6 @@ import { emit } from '$lib/utils/events.utils';
 import * as timeoutUtils from '$lib/utils/timeout.utils';
 import { waitForMilliseconds } from '$lib/utils/timeout.utils';
 import { cleanWorkers, loadWorker, waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import { expect } from 'vitest';
 
 describe('wallet.utils', () => {
 	describe('waitAndTriggerWallet', () => {

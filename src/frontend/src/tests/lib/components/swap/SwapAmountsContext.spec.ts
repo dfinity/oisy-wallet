@@ -14,7 +14,6 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { act, render } from '@testing-library/svelte';
 import { tick, type Snippet } from 'svelte';
 import { get, readable, writable } from 'svelte/store';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const fakeSnippet: Snippet = (() => {}) as Snippet;
 
@@ -36,7 +35,9 @@ describe('SwapAmountsContext.svelte', () => {
 			render(SwapAmountsContext, {
 				props: {
 					...componentProps,
-					children: fakeSnippet
+					children: fakeSnippet,
+					isSwapAmountsLoading: false,
+					isSourceTokenIcrc2: true
 				},
 				context
 			})
@@ -115,7 +116,11 @@ describe('SwapAmountsContext.svelte', () => {
 			slippageValue: '0.1'
 		});
 
-		expect(get(store)).toBeNull();
+		expect(get(store)).toEqual({
+			amountForSwap: 15,
+			selectedProvider: undefined,
+			swaps: []
+		});
 	});
 
 	it('sets swaps when fetchSwapAmounts succeeds', async () => {

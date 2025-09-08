@@ -20,6 +20,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -126,7 +127,8 @@
 		formatCurrency({
 			value: totalRewardUsd,
 			currency: $currentCurrency,
-			exchangeRate: $currencyExchangeStore
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
 		})
 	);
 
@@ -139,10 +141,10 @@
 	<div transition:fade={SLIDE_DURATION}>
 		<div
 			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"
-			class:transition={loading}
+			class:animate-pulse={loading}
 			class:duration-500={loading}
 			class:ease-in-out={loading}
-			class:animate-pulse={loading}
+			class:transition={loading}
 			>{replacePlaceholders($i18n.rewards.text.sprinkles_earned, {
 				$noOfSprinkles: amountOfRewards.toString(),
 				$amount: amount ?? ''
@@ -151,32 +153,32 @@
 
 		<div class="flex w-full gap-2">
 			<RewardEarningsCard
-				{loading}
-				token={ckBtcToken}
 				amount={ckBtcReward}
-				usdAmount={ckBtcRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${BTC_MAINNET_TOKEN.twinTokenSymbol}`}
+				token={ckBtcToken}
+				usdAmount={ckBtcRewardUsd}
 			/>
 			<RewardEarningsCard
-				{loading}
-				token={ckUsdcToken}
 				amount={ckUsdcReward}
-				usdAmount={ckUsdcRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${USDC_TOKEN.twinTokenSymbol}`}
+				token={ckUsdcToken}
+				usdAmount={ckUsdcRewardUsd}
 			/>
 			<RewardEarningsCard
-				{loading}
-				token={ICP_TOKEN}
 				amount={icpReward}
-				usdAmount={icpRewardUsd}
+				{loading}
 				testId={`${REWARDS_EARNINGS_CARD}-${ICP_SYMBOL}`}
+				token={ICP_TOKEN}
+				usdAmount={icpRewardUsd}
 			/>
 		</div>
 
 		<div class="my-5 w-full justify-items-center text-center">
 			<Button
-				paddingSmall
 				onclick={gotoActivity}
+				paddingSmall
 				styleClass="font-semibold bg-transparent text-brand-primary-alt"
 				testId={REWARDS_EARNINGS_ACTIVITY_BUTTON}
 			>

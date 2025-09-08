@@ -1,6 +1,7 @@
 export enum QrCodeType {
 	VIP = 'vip',
-	GOLD = 'gold'
+	GOLD = 'gold',
+	CLICKBEE = 'clickbee'
 }
 
 export const asQrCodeType = (key: string) =>
