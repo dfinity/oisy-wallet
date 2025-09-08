@@ -7,12 +7,14 @@ import type { Identity } from '@dfinity/agent';
 import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
 	IcrcLedgerCanister,
+	type GetBlocksParams,
 	type IcrcAccount,
 	type IcrcBlockIndex,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
+import type { GetBlocksResult } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -200,6 +202,22 @@ export const allowance = async ({
 		account: toAccount(owner),
 		spender: toAccount(spender)
 	});
+};
+
+export const getBlocks = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId,
+	...rest
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & GetBlocksParams): Promise<GetBlocksResult> => {
+	assertNonNullish(identity);
+
+	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return getBlocks({ certified, ...rest });
 };
 
 const toAccount = ({
