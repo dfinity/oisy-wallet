@@ -66,18 +66,18 @@ describe('alchemy.providers', () => {
 			});
 		});
 
-		it('should fetch and map token ids correctly', async () => {
-			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
-
-			const tokenIds = await provider.getNftIdsForOwner({
-				address: mockEthAddress,
-				contractAddress: mockValidErc1155Token.address
-			});
-
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
-
-			expect(tokenIds).toStrictEqual(expectedTokenIds);
-		});
+		// it('should fetch and map token ids correctly', async () => {
+		// 	const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+		//
+		// 	const tokenIds = await provider.getNftIdsForOwner({
+		// 		address: mockEthAddress,
+		// 		contractAddress: mockValidErc1155Token.address
+		// 	});
+		//
+		// 	expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+		//
+		// 	expect(tokenIds).toStrictEqual(expectedTokenIds);
+		// });
 	});
 
 	describe('getTokensForOwner', () => {

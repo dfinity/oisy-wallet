@@ -1,89 +1,39 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import { etherscanProviders } from '$eth/providers/etherscan.providers';
 import {
-	infuraErc1155Providers,
 	type InfuraErc1155Provider
 } from '$eth/providers/infura-erc1155.providers';
 import type { InfuraErc165Provider } from '$eth/providers/infura-erc165.providers';
 import {
-	infuraErc721Providers,
 	type InfuraErc721Provider
 } from '$eth/providers/infura-erc721.providers';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
-import { TRACK_ETH_LOADING_NFT_IDS_ERROR } from '$lib/constants/analytics.contants';
-import { trackEvent } from '$lib/services/analytics.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { EthAddress, OptionEthAddress } from '$lib/types/address';
-import type { Nft, NftId, NftMetadata, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
-import { getNftsByNetworks, mapTokenToCollection } from '$lib/utils/nfts.utils';
+import type { Nft, NftId, NftMetadata, NonFungibleToken } from '$lib/types/nft';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
-	loadedNfts,
 	walletAddress
 }: {
 	tokens: NonFungibleToken[];
-	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
 	if (isNullish(walletAddress)) {
 		return;
 	}
 
-	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
+	for (const token of tokens) {
+		const alchemyProvider = alchemyProviders(token.network.id);
 
-	await Promise.all(
-		tokens.map((token) => {
-			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
+		const nfts = await alchemyProvider.getNftsByOwner({ address: walletAddress, token });
 
-			if (isTokenErc721(token)) {
-				const infuraErc721Provider = infuraErc721Providers(token.network.id);
-
-				return loadNftsOfToken({
-					infuraProvider: infuraErc721Provider,
-					token,
-					loadedNfts,
-					walletAddress
-				});
-			}
-			if (isTokenErc1155(token)) {
-				const infuraErc1155Provider = infuraErc1155Providers(token.network.id);
-
-				return loadNftsOfToken({
-					infuraProvider: infuraErc1155Provider,
-					token,
-					loadedNfts,
-					walletAddress
-				});
-			}
-		})
-	);
-};
-
-const loadNftsOfToken = async ({
-	infuraProvider,
-	token,
-	loadedNfts,
-	walletAddress
-}: {
-	infuraProvider: InfuraErc721Provider | InfuraErc1155Provider;
-	token: NonFungibleToken;
-	loadedNfts: Nft[];
-	walletAddress: EthAddress;
-}) => {
-	const holdersTokenIds = await loadHoldersTokenIds({
-		walletAddress,
-		token
-	});
-
-	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
-	const tokenIdsToLoad = holdersTokenIds.filter((id: NftId) => !loadedTokenIds.includes(id));
-
-	await loadNftIdsOfToken({ infuraProvider, token, tokenIds: tokenIdsToLoad, walletAddress });
+		nftStore.addAll(nfts);
+	}
 };
 
 export const loadNftIdsOfToken = async ({
@@ -287,66 +237,3 @@ const createBatches = ({
 	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
 		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
 	);
-
-const loadHoldersTokenIds = async ({
-	walletAddress,
-	token
-}: {
-	walletAddress: EthAddress;
-	token: NonFungibleToken;
-}): Promise<NftId[]> => {
-	try {
-		if (isTokenErc721(token)) {
-			const { erc721TokenInventory } = etherscanProviders(token.network.id);
-
-			return await erc721TokenInventory({
-				address: walletAddress,
-				contractAddress: token.address
-			});
-		}
-
-		if (isTokenErc1155(token)) {
-			const { getNftIdsForOwner } = alchemyProviders(token.network.id);
-
-			return (
-				await getNftIdsForOwner({
-					address: walletAddress,
-					contractAddress: token.address
-				})
-			).map(({ id }) => id);
-		}
-
-		return [];
-	} catch (err: unknown) {
-		trackEvent({
-			name: TRACK_ETH_LOADING_NFT_IDS_ERROR,
-			metadata: {
-				tokenId: `${token.id.description}`,
-				networkId: `${token.network.id.description}`,
-				standard: token.standard,
-				error: `${err}`
-			},
-			warning: `Failed to load NFT IDs: ${err}`
-		});
-
-		return [];
-	}
-};
-
-const getLoadedNfts = ({
-	token: {
-		network: { id: networkId },
-		address
-	},
-	loadedNftsByNetwork
-}: {
-	token: NonFungibleToken;
-	loadedNftsByNetwork: NftsByNetwork;
-}): Nft[] => {
-	const tokensByNetwork = loadedNftsByNetwork[networkId];
-	if (nonNullish(tokensByNetwork)) {
-		return tokensByNetwork[address.toLowerCase()] ?? [];
-	}
-
-	return [];
-};

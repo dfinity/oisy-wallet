@@ -280,11 +280,11 @@
 	{/if}
 {:else}
 	<div in:fade>
-		<LoaderCollections>
-			<LoaderNfts>
+<!--		<LoaderCollections>-->
+<!--			<LoaderNfts>-->
 				{@render children()}
-			</LoaderNfts>
-		</LoaderCollections>
+<!--			</LoaderNfts>-->
+<!--		</LoaderCollections>-->
 	</div>
 {/if}
 
