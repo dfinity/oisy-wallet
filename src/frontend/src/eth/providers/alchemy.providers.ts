@@ -18,11 +18,11 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
+	AlchemySubscription,
+	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
-	AlchemySubscription,
-	type Network,
-	NftOrdering
+	type Network
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
