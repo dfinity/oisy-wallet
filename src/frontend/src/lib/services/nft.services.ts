@@ -16,7 +16,7 @@ export const loadNfts = async ({
 	}
 
 	for (const token of tokens) {
-		const {getNftsByOwner} = alchemyProviders(token.network.id);
+		const { getNftsByOwner } = alchemyProviders(token.network.id);
 
 		let nfts: Nft[] = [];
 		try {
