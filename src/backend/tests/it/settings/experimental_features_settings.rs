@@ -75,7 +75,10 @@ fn test_update_user_experimental_feature_settings_saves_settings() {
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -127,7 +130,10 @@ fn test_update_user_experimental_feature_settings_merges_with_existing_settings(
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -158,7 +164,10 @@ fn test_update_user_experimental_feature_settings_merges_with_existing_settings(
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -210,7 +219,10 @@ fn test_update_user_experimental_feature_settings_cannot_update_wrong_version() 
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let update_user_experimental_feature_settings_arg = UpdateExperimentalFeaturesSettingsRequest {
         experimental_features: NEW_EXPERIMENTAL_FEATURES.clone(),
@@ -282,7 +294,10 @@ fn test_update_user_experimental_feature_settings_does_not_change_existing_value
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
@@ -313,7 +328,10 @@ fn test_update_user_experimental_feature_settings_does_not_change_existing_value
             update_user_experimental_feature_settings_arg,
         );
 
-    assert_eq!(update_user_experimental_feature_settings_response, Ok(Ok(())));
+    assert_eq!(
+        update_user_experimental_feature_settings_response,
+        Ok(Ok(()))
+    );
 
     let get_profile_response = pic_setup.update::<Result<UserProfile, GetUserProfileError>>(
         caller,
