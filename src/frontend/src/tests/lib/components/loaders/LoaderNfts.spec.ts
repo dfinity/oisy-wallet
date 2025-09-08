@@ -1,3 +1,4 @@
+import * as nftEnv from '$env/nft.env';
 import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import type { EtherscanProvider } from '$eth/providers/etherscan.providers';
@@ -21,7 +22,6 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import * as nftEnv from '$env/nft.env';
 
 describe('LoaderNfts', () => {
 	let etherscanProvidersSpy: MockInstance;
