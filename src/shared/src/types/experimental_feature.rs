@@ -10,9 +10,8 @@ pub struct ExperimentalFeatureSettings {
 }
 
 /// A flat list of logical experimental features.
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default, Ord, PartialOrd)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum ExperimentalFeatureSettingsFor {
-    #[default]
     AiAssistantBeta,
 }
 
@@ -23,10 +22,9 @@ pub enum ExperimentalFeatureId {
 }
 impl ExperimentalFeature for ExperimentalFeatureId {}
 
-#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
+#[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq)]
 #[repr(u64)]
 pub enum AiAssistantExperimentalFeatureId {
-    #[default]
     Beta,
 }
 impl ExperimentalFeature for AiAssistantExperimentalFeatureId {}
