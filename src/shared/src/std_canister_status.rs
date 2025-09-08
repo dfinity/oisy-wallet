@@ -9,8 +9,8 @@
 //! currently requested `CanisterStatusResultV2`.
 
 use candid::{CandidType, Deserialize, Nat, Principal};
-use ic_cdk::api::management_canister::main::{
-    canister_status, CanisterIdRecord, CanisterStatusResponse, CanisterStatusType,
+use ic_cdk::management_canister::{
+    canister_status, CanisterStatusArgs, CanisterStatusResult, CanisterStatusType,
     DefiniteCanisterSettings,
 };
 
@@ -29,11 +29,11 @@ pub struct CanisterStatusResultV2 {
     idle_cycles_burned_per_day: Nat,
 }
 
-impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
+impl TryFrom<CanisterStatusResult> for CanisterStatusResultV2 {
     type Error = &'static str;
 
-    fn try_from(value: CanisterStatusResponse) -> Result<Self, Self::Error> {
-        let CanisterStatusResponse {
+    fn try_from(value: CanisterStatusResult) -> Result<Self, Self::Error> {
+        let CanisterStatusResult {
             status,
             module_hash,
             settings,
@@ -54,7 +54,7 @@ impl TryFrom<CanisterStatusResponse> for CanisterStatusResultV2 {
             status,
             module_hash,
             controller,
-            settings: settings.try_into()?,
+            settings: DefiniteCanisterSettingsArgs::try_from(settings)?,
             memory_size,
             cycles,
             balance,
@@ -109,10 +109,10 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
 ///   it will panic if the canister has no controllers.
 pub async fn get_canister_status_v2() -> CanisterStatusResultV2 {
     let canister_id = ic_cdk::api::id(); // Own canister ID.
-    canister_status(CanisterIdRecord { canister_id })
+    canister_status(&CanisterStatusArgs { canister_id })
         .await
         .map_err(|err| format!("Failed to get status: {err:#?}"))
-        .and_then(|(canister_status_response,)| {
+        .and_then(|canister_status_response| {
             CanisterStatusResultV2::try_from(canister_status_response)
                 .map_err(|str| format!("CanisterStatusResultV2::try_from failed: {str}"))
         })
