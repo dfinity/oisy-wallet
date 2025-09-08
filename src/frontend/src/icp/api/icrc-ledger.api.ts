@@ -15,7 +15,6 @@ import {
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
-import type { GetBlocksResult } from '@dfinity/ledger-icrc/dist/candid/icrc_ledger';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
 
