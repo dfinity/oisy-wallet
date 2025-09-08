@@ -204,22 +204,6 @@ export const allowance = async ({
 	});
 };
 
-export const getBlocks = async ({
-	certified = true,
-	identity,
-	ledgerCanisterId,
-	...rest
-}: {
-	identity: OptionIdentity;
-	ledgerCanisterId: CanisterIdText;
-} & GetBlocksParams): Promise<GetBlocksResult> => {
-	assertNonNullish(identity);
-
-	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
-
-	return getBlocks({ certified, ...rest });
-};
-
 const toAccount = ({
 	owner,
 	subaccount
