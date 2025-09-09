@@ -1,17 +1,17 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-	import { loadNftsByNetwork } from '$lib/services/nft.services';
-	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { NFTS_ENABLED } from '$env/nft.env';
-	import { isNullish } from '@dfinity/utils';
 	import { ethAddress } from '$lib/derived/address.derived';
+	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { loadNftsByNetwork } from '$lib/services/nft.services';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-	import { nftStore } from '$lib/stores/nft.store';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;
@@ -59,12 +59,12 @@
 		}, new Map<NetworkId, NonFungibleToken[]>());
 
 		for (const [networkId, tokens] of tokensByNetwork) {
-			const nfts = await loadNftsByNetwork({networkId, tokens, walletAddress: $ethAddress})
+			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
 			tokens.forEach((token) => {
-				const filteredNfts = nfts.filter((nft) => {
-					return nft.collection.address === token.address && nft.collection.network === token.network
-				})
+				const filteredNfts = nfts.filter((nft) => (
+						nft.collection.address === token.address && nft.collection.network === token.network
+					));
 
 				handleRemovedNfts({ token, inventory: filteredNfts });
 
@@ -73,7 +73,7 @@
 				}
 
 				nftStore.addAll(filteredNfts);
-			})
+			});
 		}
 	};
 </script>
