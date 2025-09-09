@@ -3,8 +3,6 @@ import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
@@ -144,25 +142,6 @@ export class AlchemyProvider {
 			gasPrice: gasPrice?.toBigInt(),
 			chainId: BigInt(chainId)
 		};
-	};
-
-	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
-	getNftIdsForOwner = async ({
-		address,
-		contractAddress
-	}: {
-		address: EthAddress;
-		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
-	}): Promise<OwnedNft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: [contractAddress],
-			omitMetadata: false
-		});
-
-		return result.ownedNfts.map((ownedNft) => ({
-			id: parseNftId(parseInt(ownedNft.tokenId)),
-			balance: Number(ownedNft.balance)
-		}));
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
