@@ -62,9 +62,6 @@
 
 	const updateFeeData = async () => {
 		try {
-			console.log(
-				`From: ${$ethAddress} - To ${destination} - Amount ${amount} - Data ${data} - Token ${sendToken.name} - Sendttoken Network ${sendToken.network.name} - nft network ${sendNft?.collection.network.name}`
-			);
 			if (isNullish($ethAddress)) {
 				return;
 			}
@@ -78,7 +75,6 @@
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
-			console.log('Before SUGGESTED FEE DATA: ', (sendToken.network as EthereumNetwork).chainId);
 			const { getSuggestedFeeData } = new InfuraGasRest(
 				(sendToken.network as EthereumNetwork).chainId
 			);
@@ -149,13 +145,11 @@
 								from: $ethAddress,
 								to: destination,
 								tokenId: sendNft.id,
-								amount: 1,
+								amount: 1n,
 								data: '0x'
 							});
 
 				const estimatedGasNft = await safeEstimateGas({ from: $ethAddress, to, data });
-
-				console.log('gas estimate', estimatedGasNft, feeData);
 
 				if (isNullish(estimatedGasNft)) {
 					return;

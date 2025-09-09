@@ -64,8 +64,6 @@ export const encodeErc721SafeTransfer = ({
 		BigInt(tokenId)
 	]) as `0x${string}`;
 
-	console.log('Prepare snd erc721', encoded);
-
 	return { to: contractAddress as EthAddress, data: encoded };
 };
 
@@ -91,7 +89,6 @@ export const encodeErc1155SafeTransfer = ({
 		BigInt(amount),
 		data
 	]) as `0x${string}`;
-	console.log('Prepare snd erc1155', encoded);
 
 	return { to: contractAddress as EthAddress, data: encoded };
 };
@@ -114,26 +111,16 @@ const buildSignRequest = ({
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
 	value?: bigint;
-}): EthSignTransactionRequest => {
-	console.log(
-		'SIGN',
-		'gas: ' + gas,
-		'maxFeePerGas: ' + maxFeePerGas,
-		'maxPriorityFeePerGas: ' + maxPriorityFeePerGas,
-		'gas * maxFeePerGas: ' + gas * maxFeePerGas
-	);
-
-	return {
-		to,
-		chain_id: chainId,
-		nonce: BigInt(nonce),
-		gas: gas,
-		max_fee_per_gas: maxFeePerGas,
-		max_priority_fee_per_gas: maxPriorityFeePerGas,
-		value,
-		data: [data]
-	};
-};
+}): EthSignTransactionRequest => ({
+	to,
+	chain_id: chainId,
+	nonce: BigInt(nonce),
+	gas: gas,
+	max_fee_per_gas: maxFeePerGas,
+	max_priority_fee_per_gas: maxPriorityFeePerGas,
+	value,
+	data: [data]
+});
 
 /* ---------------- sign+send helpers ---------------- */
 

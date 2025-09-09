@@ -177,7 +177,6 @@
 	};
 
 	const selectNft = (nft: Nft) => {
-		console.log('RUN1');
 		selectedNft = nft;
 		loadTokenAndRun({
 			token: findNonFungibleToken({
@@ -186,7 +185,6 @@
 				address: nft.collection.address
 			}) as Token,
 			callback: async () => {
-				console.log('RUN2');
 				goToStep(WizardStepsSend.DESTINATION);
 			}
 		});
