@@ -75,8 +75,13 @@ export const findNftsByToken = ({
 		(nft) => nft.collection.address === tokenAddress && nft.collection.network === tokenNetwork
 	);
 
-export const findNftsByNetwork = ({nfts, networkId}: {nfts: Nft[], networkId: NetworkId}): Nft[] =>
-	nfts.filter((nft) => nft.collection.network.id === networkId)
+export const findNftsByNetwork = ({
+	nfts,
+	networkId
+}: {
+	nfts: Nft[];
+	networkId: NetworkId;
+}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
 
 export const findNewNftIds = ({
 	nfts,
