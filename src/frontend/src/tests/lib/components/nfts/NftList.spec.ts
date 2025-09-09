@@ -1,9 +1,9 @@
-import NftList from '$lib/components/nfts/NftList.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import NftListTestHost from './NftListTestHost.svelte';
 
 describe('NftList', () => {
 	const mockNfts = [
@@ -12,10 +12,10 @@ describe('NftList', () => {
 		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 	];
 
-	it('should render a list of nfts', () => {
+	it('should render a list of snippets that are passed', () => {
 		const title = 'Nfts';
 
-		const { container, getByText } = render(NftList, {
+		const { container, getByText } = render(NftListTestHost, {
 			props: {
 				title,
 				nfts: mockNfts
