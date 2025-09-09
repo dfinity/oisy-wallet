@@ -13,10 +13,11 @@
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
+		skipInitialLoad: boolean;
 		children?: Snippet;
 	}
 
-	let { children }: Props = $props();
+	let { skipInitialLoad = true, children }: Props = $props();
 
 	const handleRemovedNfts = ({
 		token,
@@ -73,6 +74,6 @@
 	};
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} skipInitialLoad>
+<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} {skipInitialLoad}>
 	{@render children?.()}
 </IntervalLoader>
