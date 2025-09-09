@@ -56,7 +56,7 @@
 	$effect(() => {
 		[sortedTokensOrGroups];
 
-		clearTimer;
+		clearTimer();
 
 		updateTokensToDisplay();
 
