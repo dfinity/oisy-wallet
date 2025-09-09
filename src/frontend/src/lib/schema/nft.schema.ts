@@ -25,18 +25,14 @@ export const NftCollectionSchema = z.object({
 	network: z.custom<Network>(),
 	standard: z.custom<TokenStandard>(),
 	bannerImageUrl: z.string().url().optional(),
-	description: z.string().optional()
+	description: z.string().optional(),
+	acquiredAt: z.date().optional()
 });
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema
-});
-
-export const OwnedNftSchema = z.object({
-	id: NftIdSchema,
-	balance: z.number()
 });
 
 export const OwnedContractSchema = z.object({

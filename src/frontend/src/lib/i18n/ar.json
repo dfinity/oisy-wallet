@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "خطأ أثناء جلب حالات سحب BTC.",
 			"transaction_price": "خطأ أثناء تحميل تقدير سعر المعاملة.",
 			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",

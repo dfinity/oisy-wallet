@@ -205,6 +205,13 @@ export interface ErcToken {
 	chain_id: bigint;
 }
 export type EthAddress = { Public: string };
+export interface ExperimentalFeatureSettings {
+	enabled: boolean;
+}
+export type ExperimentalFeatureSettingsFor = { AiAssistantBeta: null };
+export interface ExperimentalFeaturesSettings {
+	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
+}
 export type GetAllowedCyclesError = { Other: string } | { FailedToContactCyclesLedger: null };
 export interface GetAllowedCyclesResponse {
 	allowed_cycles: bigint;
@@ -314,6 +321,7 @@ export type SetUserShowTestnetsResult = { Ok: null } | { Err: UpdateAgreementsEr
 export interface Settings {
 	networks: NetworksSettings;
 	dapp: DappSettings;
+	experimental_features: ExperimentalFeaturesSettings;
 }
 export interface SplToken {
 	decimals: [] | [number];
@@ -377,6 +385,10 @@ export type TopUpCyclesLedgerResult =
 	| { Ok: TopUpCyclesLedgerResponse }
 	| { Err: TopUpCyclesLedgerError };
 export type UpdateAgreementsError = { VersionMismatch: null } | { UserNotFound: null };
+export interface UpdateExperimentalFeaturesSettingsRequest {
+	experimental_features: Array<[ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings]>;
+	current_user_version: [] | [bigint];
+}
 export interface UpdateUserAgreementsRequest {
 	agreements: UserAgreements;
 	current_user_version: [] | [bigint];
@@ -464,6 +476,10 @@ export interface _SERVICE {
 	top_up_cycles_ledger: ActorMethod<[[] | [TopUpCyclesLedgerRequest]], TopUpCyclesLedgerResult>;
 	update_contact: ActorMethod<[Contact], GetContactResult>;
 	update_user_agreements: ActorMethod<[UpdateUserAgreementsRequest], SetUserShowTestnetsResult>;
+	update_user_experimental_feature_settings: ActorMethod<
+		[UpdateExperimentalFeaturesSettingsRequest],
+		SetUserShowTestnetsResult
+	>;
 	update_user_network_settings: ActorMethod<
 		[SaveNetworksSettingsRequest],
 		SetUserShowTestnetsResult
