@@ -1,9 +1,17 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { blur } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SyncState } from '$lib/types/sync';
 
-	let indexCanisterSyncState: SyncState | undefined = undefined;
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
+
+	let indexCanisterSyncState = $state<SyncState | undefined>();
+
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
 		(indexCanisterSyncState = state);
 </script>
@@ -15,5 +23,5 @@
 		<span transition:blur>{$i18n.receive.icp.text.checking_index_canister_status}</span>
 	</div>
 {:else}
-	<slot />
+	{@render children()}
 {/if}
