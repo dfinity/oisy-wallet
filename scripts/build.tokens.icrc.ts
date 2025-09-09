@@ -39,7 +39,7 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				throw new Error(`Data is missing for token symbol ${key}.`);
 			}
 
-			const { ledgerCanisterId, indexCanisterId, ...rest } = token;
+			const { ledgerCanisterId, ...rest } = token;
 
 			if (isNullish(ledgerCanisterId)) {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
@@ -66,7 +66,6 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 					...accTokens,
 					[key]: {
 						ledgerCanisterId,
-						indexCanisterId,
 						...rest,
 						...metadata
 					}
