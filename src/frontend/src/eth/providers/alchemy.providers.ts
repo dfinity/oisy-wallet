@@ -146,9 +146,9 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
-														address,
-										 tokens
-													}: {
+		address,
+		tokens
+	}: {
 		address: EthAddress;
 		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
@@ -172,9 +172,9 @@ export class AlchemyProvider {
 
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({
-					traitType,
-					value: value.toString()
-				}))
+						traitType,
+						value: value.toString()
+					}))
 				: [];
 
 			const nft: Nft = {

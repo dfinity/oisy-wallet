@@ -1,9 +1,9 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
-import type { NetworkId } from '$lib/types/network';
 
 export const loadNfts = async ({
 	tokens,
@@ -24,18 +24,20 @@ export const loadNfts = async ({
 	}, new Map<NetworkId, NonFungibleToken[]>());
 
 	for (const [networkId, tokens] of tokensByNetwork) {
-		const existingNftsForNetwork = loadedNfts.filter((nft) => nft.collection.network.id === networkId);
+		const existingNftsForNetwork = loadedNfts.filter(
+			(nft) => nft.collection.network.id === networkId
+		);
 		if (!(existingNftsForNetwork.length > 0)) {
 			const { getNftsByOwner } = alchemyProviders(networkId);
 
-			const batches = createBatches({tokens, batchSize: 40})
+			const batches = createBatches({ tokens, batchSize: 40 });
 
 			for (const batch of batches) {
 				let nfts: Nft[] = [];
 				try {
-					nfts = await getNftsByOwner({address: walletAddress, tokens: batch})
+					nfts = await getNftsByOwner({ address: walletAddress, tokens: batch });
 				} catch (_: unknown) {
-					const tokenAddresses = batch.map((token) => token.address)
+					const tokenAddresses = batch.map((token) => token.address);
 					console.warn(
 						`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
 					);
@@ -49,9 +51,9 @@ export const loadNfts = async ({
 };
 
 const createBatches = ({
-												 tokens,
-												 batchSize
-											 }: {
+	tokens,
+	batchSize
+}: {
 	tokens: NonFungibleToken[];
 	batchSize: number;
 }): NonFungibleToken[][] =>
