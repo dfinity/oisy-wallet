@@ -18,6 +18,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
+import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 import type { UserNetworks } from '$lib/types/user-networks';
 import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
@@ -171,4 +172,9 @@ export interface UpdateContactParams {
 export interface DeleteContactParams {
 	identity: Identity;
 	contactId: bigint;
+}
+
+export interface UpdateUserExperimentalFeatureSettings {
+	experimentalFeatures: UserExperimentalFeatures;
+	currentUserVersion?: bigint;
 }

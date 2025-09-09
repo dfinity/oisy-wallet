@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
@@ -508,6 +509,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
 		}
@@ -550,7 +552,11 @@
 			"appearance_system": "系统",
 			"git_disclaimer": "仅在测试环境中显示分支和提交信息，仅用于开发目的。",
 			"git_branch_name": "分支：",
-			"git_commit_hash": "提交："
+			"git_commit_hash": "提交：",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -1040,11 +1046,27 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
-			"open_explorer": "在区块链浏览器中打开此合约",
 			"spam": "",
 			"not_spam": "",
 			"hide": "",
-			"unhide": ""
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "在区块链浏览器中打开此合约",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
@@ -1608,7 +1630,9 @@
 			"send_message_input_placeholder": "发送消息输入占位符",
 			"send_token_succeeded": "交易完成",
 			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
-			"loading": "思考中"
+			"loading": "思考中",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",

@@ -8,10 +8,13 @@
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Nft, NftCollection } from '$lib/types/nft';
+	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
 
@@ -22,6 +25,14 @@
 	);
 
 	const collection: NftCollection | undefined = $derived(collectionNfts?.[0]?.collection);
+
+	const token: NonFungibleToken | undefined = $derived(
+		findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			address: collection?.address,
+			networkId: collection?.network.id
+		})
+	);
 
 	// redirect to assets page if collection cant be loaded within 10s
 	let timeout: NodeJS.Timeout | undefined = $state();
@@ -42,16 +53,18 @@
 	});
 </script>
 
-<NftCollectionHero {collection} nfts={collectionNfts} />
+<NftCollectionHero nfts={collectionNfts} {token} />
 
-<div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
+<div class="mt-4 grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (nft.id + index)}
-			<NftCard {nft} />
+			<NftCard
+				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
+				{nft}
+			/>
 		{/each}
 	{:else}
-		<NftCardSkeleton />
-		<NftCardSkeleton />
-		<NftCardSkeleton />
+		<NftCardSkeleton times={3} />
 	{/if}
 </div>

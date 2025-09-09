@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import nflxx from '$sol/assets/nflxx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token } from '$sol/types/spl';
 
 export const NFLXX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const NFLXX_SYMBOL = 'NFLXx';
 
 export const NFLXX_TOKEN_ID: TokenId = parseTokenId(NFLXX_SYMBOL);
 
-export const NFLXX_TOKEN: RequiredSplToken = {
+export const NFLXX_TOKEN: RequiredSpl2022Token = {
 	id: NFLXX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

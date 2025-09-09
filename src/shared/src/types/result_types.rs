@@ -17,7 +17,8 @@ use crate::types::{
     agreement::UpdateAgreementsError,
     bitcoin::BtcGetFeePercentilesResponse,
     contact::{Contact, ContactError},
-    network::SetTestnetsSettingsError,
+    experimental_feature::UpdateExperimentalFeaturesSettingsError,
+    network::{SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::AddUserCredentialError,
 };
 
@@ -140,13 +141,28 @@ impl From<Result<Vec<Contact>, ContactError>> for GetContactsResult {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateUserNetworkSettingsResult {
+    /// The user's network settings were updated successfully.
+    Ok(()),
+    /// The user's network settings were not updated due to an error.
+    Err(UpdateNetworksSettingsError),
+}
+impl From<Result<(), UpdateNetworksSettingsError>> for UpdateUserNetworkSettingsResult {
+    fn from(result: Result<(), UpdateNetworksSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateUserNetworkSettingsResult::Ok(()),
+            Err(err) => UpdateUserNetworkSettingsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum SetUserShowTestnetsResult {
     /// The user's show testnets was set successfully.
     Ok(()),
     /// The user's show testnets was not set due to an error.
     Err(SetTestnetsSettingsError),
 }
-
 impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
     fn from(result: Result<(), SetTestnetsSettingsError>) -> Self {
         match result {
@@ -159,14 +175,14 @@ impl From<Result<(), SetTestnetsSettingsError>> for SetUserShowTestnetsResult {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub enum GetUserProfileResult {
     /// The user's profile was retrieved successfully.
-    Ok(UserProfile),
+    Ok(Box<UserProfile>),
     /// The user's profile was not retrieved due to an error.
     Err(GetUserProfileError),
 }
 impl From<Result<UserProfile, GetUserProfileError>> for GetUserProfileResult {
     fn from(result: Result<UserProfile, GetUserProfileError>) -> Self {
         match result {
-            Ok(profile) => GetUserProfileResult::Ok(profile),
+            Ok(profile) => GetUserProfileResult::Ok(Box::new(profile)),
             Err(err) => GetUserProfileResult::Err(err),
         }
     }
@@ -318,6 +334,24 @@ impl From<Result<(), UpdateAgreementsError>> for UpdateUserAgreementsResult {
         match result {
             Ok(()) => UpdateUserAgreementsResult::Ok(()),
             Err(err) => UpdateUserAgreementsResult::Err(err),
+        }
+    }
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum UpdateExperimentalFeaturesSettingsResult {
+    /// The user's experimental features settings were updated successfully.
+    Ok(()),
+    /// The user's experimental features settings were not updated due to an error.
+    Err(UpdateExperimentalFeaturesSettingsError),
+}
+impl From<Result<(), UpdateExperimentalFeaturesSettingsError>>
+    for UpdateExperimentalFeaturesSettingsResult
+{
+    fn from(result: Result<(), UpdateExperimentalFeaturesSettingsError>) -> Self {
+        match result {
+            Ok(()) => UpdateExperimentalFeaturesSettingsResult::Ok(()),
+            Err(err) => UpdateExperimentalFeaturesSettingsResult::Err(err),
         }
     }
 }
