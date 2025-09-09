@@ -175,6 +175,23 @@ export const transferErc721 = async ({
 	});
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
+
+	const signedTx = Transaction.from(raw);
+	console.log('SIGNED', {
+		chainId: signedTx.chainId, // should be 8453
+		gasLimit: signedTx.gasLimit.toString(), // should be 70492
+		maxFeePerGas: signedTx.maxFeePerGas?.toString(), // should be 20128422
+		maxPriorityFeePerGas: signedTx.maxPriorityFeePerGas?.toString(),
+		gasPrice: signedTx.gasPrice?.toString(), // should be undefined on type-2
+		to: signedTx.to,
+		value: signedTx.value.toString()
+	});
+	const cap = signedTx.maxFeePerGas ?? signedTx.gasPrice!;
+	console.log(
+		'capCostWei =',
+		(signedTx.gasLimit * cap).toString(),
+		'networkId: ' + networkId.toString()
+	);
 	return await sendRaw({ networkId, raw });
 };
 
