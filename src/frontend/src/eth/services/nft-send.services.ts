@@ -5,11 +5,15 @@ import { infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
+import {
+	ProgressStepsSend as ProgressStepsSendEnum,
+	type ProgressStepsSend
+} from '$lib/enums/progress-steps';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Identity } from '@dfinity/agent';
-import { Interface, Transaction } from 'ethers';
+import { Interface } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
 export interface CommonNftTransferParams {
@@ -19,6 +23,7 @@ export interface CommonNftTransferParams {
 	gas: bigint;
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
+	progress?: (step: ProgressStepsSend) => void;
 }
 
 export interface TransferErc721Params extends CommonNftTransferParams {
@@ -159,7 +164,8 @@ export const transferErc721 = async ({
 	contractAddress,
 	gas,
 	maxFeePerGas,
-	maxPriorityFeePerGas
+	maxPriorityFeePerGas,
+	progress
 }: TransferErc721Params): Promise<TransactionResponse> => {
 	console.log('TRANSFER TOKENID', tokenId);
 	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
@@ -177,23 +183,13 @@ export const transferErc721 = async ({
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
 
-	const signedTx = Transaction.from(raw);
-	console.log('SIGNED', {
-		chainId: signedTx.chainId, // should be 8453
-		gasLimit: signedTx.gasLimit.toString(), // should be 70492
-		maxFeePerGas: signedTx.maxFeePerGas?.toString(), // should be 20128422
-		maxPriorityFeePerGas: signedTx.maxPriorityFeePerGas?.toString(),
-		gasPrice: signedTx.gasPrice?.toString(), // should be undefined on type-2
-		to: signedTx.to,
-		value: signedTx.value.toString()
-	});
-	const cap = signedTx.maxFeePerGas ?? signedTx.gasPrice!;
-	console.log(
-		'capCostWei =',
-		(signedTx.gasLimit * cap).toString(),
-		'networkId: ' + networkId.toString()
-	);
-	return await sendRaw({ networkId, raw });
+	progress?.(ProgressStepsSendEnum.TRANSFER);
+
+	const result = await sendRaw({ networkId, raw });
+
+	progress?.(ProgressStepsSendEnum.TRANSFER);
+
+	return result;
 };
 
 export const transferErc1155 = async ({
@@ -207,7 +203,8 @@ export const transferErc1155 = async ({
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
-	data
+	data,
+	progress
 }: TransferErc1155Params): Promise<TransactionResponse> => {
 	const call = encodeErc1155SafeTransfer({
 		contractAddress,
@@ -230,21 +227,12 @@ export const transferErc1155 = async ({
 	});
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
-	const signedTx = Transaction.from(raw);
-	console.log('SIGNED', {
-		chainId: signedTx.chainId, // should be 8453
-		gasLimit: signedTx.gasLimit.toString(), // should be 70492
-		maxFeePerGas: signedTx.maxFeePerGas?.toString(), // should be 20128422
-		maxPriorityFeePerGas: signedTx.maxPriorityFeePerGas?.toString(),
-		gasPrice: signedTx.gasPrice?.toString(), // should be undefined on type-2
-		to: signedTx.to,
-		value: signedTx.value.toString()
-	});
-	const cap = signedTx.maxFeePerGas ?? signedTx.gasPrice!;
-	console.log(
-		'capCostWei =',
-		(signedTx.gasLimit * cap).toString(),
-		'networkId: ' + networkId.toString()
-	);
-	return await sendRaw({ networkId, raw });
+
+	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
+
+	const result = await sendRaw({ networkId, raw });
+
+	progress?.(ProgressStepsSendEnum.TRANSFER);
+
+	return result;
 };

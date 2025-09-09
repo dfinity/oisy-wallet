@@ -150,10 +150,9 @@
 			return;
 		}
 
-		// Unexpected errors
 		if (isNullish(nft)) {
 			toastsError({
-				msg: { text: "Todo: nft not passed" }
+				msg: { text: 'Todo: nft not passed' }
 			});
 			return;
 		}
@@ -169,7 +168,8 @@
 				identity: $authIdentity,
 				gas,
 				maxFeePerGas,
-				maxPriorityFeePerGas
+				maxPriorityFeePerGas,
+				progress: (step: ProgressStep) => (sendProgressStep = step)
 			});
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {

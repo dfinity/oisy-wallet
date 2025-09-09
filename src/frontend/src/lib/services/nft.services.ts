@@ -1,18 +1,19 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
-import { nftStore } from '$lib/stores/nft.store';
-import type { OptionEthAddress } from '$lib/types/address';
-import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
-import { isNullish } from '@dfinity/utils';
-import type { OptionIdentity } from '$lib/types/identity';
-import { nullishSignOut } from '$lib/services/auth.services';
-import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import type { ProgressStepsSend } from '$lib/enums/progress-steps';
+import { nullishSignOut } from '$lib/services/auth.services';
+import { nftStore } from '$lib/stores/nft.store';
+import type { OptionEthAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
+import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
-																 tokens,
-																 walletAddress
-															 }: {
+	tokens,
+	walletAddress
+}: {
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
 }) => {
@@ -37,7 +38,6 @@ export const loadNfts = async ({
 	}
 };
 
-
 export const sendNft = async ({
 	token,
 	tokenId,
@@ -46,7 +46,8 @@ export const sendNft = async ({
 	identity,
 	gas,
 	maxFeePerGas,
-	maxPriorityFeePerGas
+	maxPriorityFeePerGas,
+	progress
 }: {
 	token: NonFungibleToken;
 	tokenId: NftId;
@@ -56,6 +57,7 @@ export const sendNft = async ({
 	gas: bigint;
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
+	progress?: (step: ProgressStepsSend) => void;
 }) => {
 	console.log('TOKEN ID in service', tokenId);
 	if (isNullish(identity)) {
@@ -72,7 +74,8 @@ export const sendNft = async ({
 				identity,
 				gas,
 				maxFeePerGas,
-				maxPriorityFeePerGas
+				maxPriorityFeePerGas,
+				progress
 			});
 		} else if (isTokenErc1155(token)) {
 			tx = await transferErc1155({
@@ -85,7 +88,8 @@ export const sendNft = async ({
 				amount: 1n, // currently fixed at 1
 				gas,
 				maxFeePerGas,
-				maxPriorityFeePerGas
+				maxPriorityFeePerGas,
+				progress
 			});
 		}
 

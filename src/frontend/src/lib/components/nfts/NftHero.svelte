@@ -24,6 +24,9 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import IconSend from '$lib/components/icons/IconSend.svelte';
+	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
+	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -90,18 +93,32 @@
 
 		{#if nonNullish(normalizedNftName)}
 			<div class="my-3 w-full justify-between">
-				<div class="flex items-center gap-3">
-					<h1 class="truncate">
-						{normalizedNftName}
-					</h1>
+				<div class="flex items-center justify-between gap-3">
+					<div class="flex">
+						{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+							<NftBadgeHidden />
+						{/if}
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<NftBadgeHidden />
-					{/if}
+						{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+							<NftBadgeSpam />
+						{/if}
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
-						<NftBadgeSpam />
-					{/if}
+						<h1 class="truncate">
+							{normalizedNftName}
+						</h1>
+					</div>
+
+					<div class="flex">
+						<NftCollectionActionButton
+							colorStyle="primary"
+							label="Send"
+							onclick={() => modalStore.openSend({ id: Symbol(), data: nft })}
+						>
+							{#snippet icon()}
+								<IconSendMessage size="18" />
+							{/snippet}
+						</NftCollectionActionButton>
+					</div>
 				</div>
 			</div>
 		{:else}
@@ -109,8 +126,6 @@
 				<SkeletonText />
 			</span>
 		{/if}
-
-		<Button onclick={() => modalStore.openSend({ id: Symbol(), data: nft })}>Send</Button>
 
 		<List condensed styleClass="text-sm text-tertiary">
 			<ListItem>
