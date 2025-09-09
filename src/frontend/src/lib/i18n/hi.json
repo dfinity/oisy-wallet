@@ -552,7 +552,11 @@
 			"appearance_system": "सिस्टम",
 			"git_disclaimer": "विकास के उद्देश्य के लिए, हम केवल टेस्ट कैनिस्टर में ब्रांच और कमिट दिखाते हैं।",
 			"git_branch_name": "ब्रांच:",
-			"git_commit_hash": "कमिट:"
+			"git_commit_hash": "कमिट:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -1627,7 +1631,8 @@
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",
 			"loading": "सोच रहा है...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "क्षमा करें, LLM से प्रतिक्रिया प्राप्त करने में कुछ गलत हो गया।",
