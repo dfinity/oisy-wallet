@@ -11,6 +11,7 @@ pub mod bitcoin;
 pub mod contact;
 pub mod custom_token;
 pub mod dapp;
+pub mod experimental_feature;
 pub mod network;
 pub mod number;
 pub mod pow;
