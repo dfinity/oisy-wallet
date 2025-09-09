@@ -13,7 +13,7 @@
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
-		skipInitialLoad: boolean;
+		skipInitialLoad?: boolean;
 		children?: Snippet;
 	}
 
