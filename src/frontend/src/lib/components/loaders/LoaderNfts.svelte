@@ -1,16 +1,7 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { NFTS_ENABLED } from '$env/nft.env';
-	import { alchemyProviders } from '$eth/providers/alchemy.providers';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
-	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;

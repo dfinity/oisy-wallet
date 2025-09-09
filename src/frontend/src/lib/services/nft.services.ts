@@ -25,7 +25,7 @@ export const loadNfts = async ({
 			acc.set(networkId, []);
 		}
 
-		acc.set(networkId, [...acc.get(networkId)!, token]);
+		acc.set(networkId, [...acc.get(networkId), token]);
 
 		return acc;
 	}, new Map<NetworkId, NonFungibleToken[]>());
