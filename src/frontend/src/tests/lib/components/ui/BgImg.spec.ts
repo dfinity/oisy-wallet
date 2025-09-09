@@ -1,6 +1,6 @@
 import BgImg from '$lib/components/ui/BgImg.svelte';
-import { render } from '@testing-library/svelte';
 import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
+import { render } from '@testing-library/svelte';
 
 const IMG = 'https://example.com/pic.png';
 
