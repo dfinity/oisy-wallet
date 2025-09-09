@@ -12,5 +12,5 @@
 	isOpen={$modalSend}
 	open={(id) => modalStore.openSend({ id, data: undefined })}
 >
-	<SendModal slot="modal" {isTransactionsPage} {isNftsPage} on:nnsClose />
+	<SendModal slot="modal" {isNftsPage} {isTransactionsPage} on:nnsClose />
 </SendButtonWithModal>

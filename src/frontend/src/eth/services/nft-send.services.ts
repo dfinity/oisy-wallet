@@ -40,10 +40,10 @@ export interface TransferErc1155Params extends CommonNftTransferParams {
 	data?: `0x${string}` | string;
 }
 
-export type PreparedContractCall = {
+export interface PreparedContractCall {
 	to: EthAddress;
 	data: `0x${string}` | string;
-};
+}
 
 /* ---------------- encoders (shared) ---------------- */
 
@@ -64,7 +64,7 @@ export const encodeErc721SafeTransfer = ({
 		BigInt(tokenId)
 	]) as `0x${string}`;
 
-	return { to: contractAddress as EthAddress, data: encoded };
+	return { to: contractAddress, data: encoded };
 };
 
 export const encodeErc1155SafeTransfer = ({
@@ -90,7 +90,7 @@ export const encodeErc1155SafeTransfer = ({
 		data
 	]) as `0x${string}`;
 
-	return { to: contractAddress as EthAddress, data: encoded };
+	return { to: contractAddress, data: encoded };
 };
 
 /* ---------------- sign request builder ---------------- */
@@ -115,7 +115,7 @@ const buildSignRequest = ({
 	to,
 	chain_id: chainId,
 	nonce: BigInt(nonce),
-	gas: gas,
+	gas,
 	max_fee_per_gas: maxFeePerGas,
 	max_priority_fee_per_gas: maxPriorityFeePerGas,
 	value,

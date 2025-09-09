@@ -71,7 +71,7 @@
 		{/if}
 
 		{#if sendAction}
-			<Send {isTransactionsPage} {isNftsPage} />
+			<Send {isNftsPage} {isTransactionsPage} />
 		{/if}
 
 		{#if swapAction}

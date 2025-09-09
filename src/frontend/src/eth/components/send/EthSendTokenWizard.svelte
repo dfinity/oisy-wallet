@@ -33,17 +33,17 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { sendNft } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { sendNft } from '$lib/services/nft.services';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 
 	export let currentStep: WizardStep | undefined;
 

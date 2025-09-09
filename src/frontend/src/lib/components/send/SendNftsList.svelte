@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { selectedNetwork } from '$lib/derived/network.derived';
-	import { nftStore } from '$lib/stores/nft.store';
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import type { Nft } from '$lib/types/nft';
-	import NftList from '$lib/components/nfts/NftList.svelte';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
-	import { isDesktop } from '$lib/utils/device.utils';
 	import { IconExpandMore } from '@dfinity/gix-components';
-	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import { i18n } from '$lib/stores/i18n.store';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
+	import { isDesktop } from '$lib/utils/device.utils';
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
@@ -69,7 +69,7 @@
 {:else}
 	<NftList nfts={filteredByInput}>
 		{#snippet nftListItem({ nft })}
-			<NftCard {nft} selectable {onSelect} />
+			<NftCard {nft} {onSelect} selectable />
 		{/snippet}
 	</NftList>
 {/if}

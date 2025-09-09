@@ -3,6 +3,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
@@ -20,7 +21,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -158,7 +158,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard {nft} isHidden />
+					<NftCard isHidden {nft} />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -169,7 +169,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard {nft} isSpam />
+					<NftCard isSpam {nft} />
 				{/snippet}
 			</NftList>
 		{/if}
