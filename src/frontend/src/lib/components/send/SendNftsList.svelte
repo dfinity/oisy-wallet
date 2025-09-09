@@ -6,7 +6,6 @@
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,

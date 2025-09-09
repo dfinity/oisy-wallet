@@ -43,7 +43,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { parseNftId } from '$lib/validation/nft.validation';
 
 	export let currentStep: WizardStep | undefined;
 
