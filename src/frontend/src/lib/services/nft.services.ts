@@ -4,6 +4,7 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
+import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 export const loadNfts = async ({
 	tokens,
@@ -14,10 +15,7 @@ export const loadNfts = async ({
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
-	const tokensByNetwork = tokens.reduce((acc, token) => {
-		const networkId = token.network.id;
-		return acc.set(networkId, [...(acc.get(networkId) ?? []), token]);
-	}, new Map<NetworkId, NonFungibleToken[]>());
+	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	for (const [networkId, tokens] of tokensByNetwork) {
 		const existingNftsForNetwork = loadedNfts.filter(

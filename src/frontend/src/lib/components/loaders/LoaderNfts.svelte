@@ -12,6 +12,7 @@
 	import type { NetworkId } from '$lib/types/network';
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
+	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;
@@ -53,10 +54,7 @@
 			return;
 		}
 
-		const tokensByNetwork = $enabledNonFungibleTokens.reduce((acc, token) => {
-			const networkId = token.network.id;
-			return acc.set(networkId, [...(acc.get(networkId) ?? []), token]);
-		}, new Map<NetworkId, NonFungibleToken[]>());
+		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens)
 
 		for (const [networkId, tokens] of tokensByNetwork) {
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
