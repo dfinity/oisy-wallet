@@ -591,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
