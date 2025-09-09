@@ -20,12 +20,16 @@ export const loadNfts = async ({
 
 	for (const [networkId, tokens] of tokensByNetwork) {
 		const tokensToLoad = tokens.filter((token) => {
-			const nftsByToken = findNftsByToken({nfts: loadedNfts, token});
+			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
 			return nftsByToken.length === 0;
 		});
 
 		if (tokensToLoad.length > 0) {
-			const nfts: Nft[] = await loadNftsByNetwork({ networkId, tokens: tokensToLoad, walletAddress });
+			const nfts: Nft[] = await loadNftsByNetwork({
+				networkId,
+				tokens: tokensToLoad,
+				walletAddress
+			});
 			nftStore.addAll(nfts);
 		}
 	}
