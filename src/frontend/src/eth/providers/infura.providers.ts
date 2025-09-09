@@ -30,14 +30,14 @@ export class InfuraProvider {
 	balance = (address: EthAddress): Promise<bigint> => this.provider.getBalance(address);
 
 	getFeeData = (): Promise<FeeData> => {
-		console.log('getFeeData: ', (this.tmpnetwork as unknown as EthereumNetwork).chainId);
+		console.log('getFeeData: ', this.tmpnetwork as unknown as EthereumNetwork);
 		return this.provider.getFeeData();
 	};
 
 	estimateGas = (params: GetFeeData): Promise<bigint> => this.provider.estimateGas(params);
 
 	safeEstimateGas = async (params: GetFeeData): Promise<bigint | undefined> => {
-		console.log('safeEstimateGas: ', (this.tmpnetwork as unknown as EthereumNetwork).chainId);
+		console.log('safeEstimateGas: ', this.tmpnetwork as unknown as EthereumNetwork);
 		try {
 			return await this.estimateGas(params);
 		} catch (err: unknown) {
