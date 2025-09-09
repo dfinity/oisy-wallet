@@ -62,9 +62,10 @@
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
 			tokens.forEach((token) => {
-				const filteredNfts = nfts.filter((nft) => (
+				const filteredNfts = nfts.filter(
+					(nft) =>
 						nft.collection.address === token.address && nft.collection.network === token.network
-					));
+				);
 
 				handleRemovedNfts({ token, inventory: filteredNfts.map((nft) => nft.id) });
 
