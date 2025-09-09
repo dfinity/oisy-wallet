@@ -117,7 +117,7 @@
 		"@types/node": "^22.13.4",
 		"@vitest/coverage-v8": "^3.2.4",
 		"dotenv": "^17.1.0",
-		"fake-indexeddb": "^6.1.0",
+		"fake-indexeddb": "^6.2.2",
 		"jimp": "^1.6.0",
 		"jsdom": "^26.1.0",
 		"jsqr": "^1.4.0",
