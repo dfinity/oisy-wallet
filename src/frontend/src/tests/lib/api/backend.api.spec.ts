@@ -18,7 +18,8 @@ import {
 	setCustomToken,
 	setManyCustomTokens,
 	setManyUserTokens,
-	setUserToken
+	setUserToken,
+	updateUserExperimentalFeatureSettings
 } from '$lib/api/backend.api';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
@@ -27,12 +28,14 @@ import type {
 	AddUserCredentialParams,
 	BtcAddPendingTransactionParams,
 	BtcGetPendingTransactionParams,
-	GetUserProfileResponse
+	GetUserProfileResponse,
+	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { mockUtxo } from '$tests/mocks/btc.mock';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
 import { Principal } from '@dfinity/principal';
@@ -527,6 +530,44 @@ describe('backend.api', () => {
 			});
 
 			await expect(getPendingBtcTransactions(mockParams)).rejects.toThrow();
+		});
+	});
+
+	describe('updateUserExperimentalFeatureSettings', () => {
+		const mockParams: CanisterApiFunctionParams<UpdateUserExperimentalFeatureSettings> = {
+			...baseParams,
+			experimentalFeatures: mockUserExperimentalFeatures,
+			currentUserVersion: 1n
+		};
+
+		beforeEach(() => {
+			backendCanisterMock.updateUserExperimentalFeatureSettings.mockResolvedValue();
+		});
+
+		it('should successfully call updateUserExperimentalFeatureSettings endpoint', async () => {
+			const result = await updateUserExperimentalFeatureSettings(mockParams);
+
+			expect(result).toEqual(undefined);
+			expect(
+				backendCanisterMock.updateUserExperimentalFeatureSettings
+			).toHaveBeenCalledExactlyOnceWith({
+				experimentalFeatures: mockUserExperimentalFeatures,
+				currentUserVersion: 1n
+			});
+		});
+
+		it('should throw an error if identity is undefined', async () => {
+			await expect(
+				updateUserExperimentalFeatureSettings({ ...mockParams, identity: undefined })
+			).rejects.toThrow();
+		});
+
+		it('should throw an error if addPendingBtcTransaction throws', async () => {
+			backendCanisterMock.updateUserExperimentalFeatureSettings.mockImplementation(() => {
+				throw new Error('mock-error');
+			});
+
+			await expect(updateUserExperimentalFeatureSettings(mockParams)).rejects.toThrow();
 		});
 	});
 });
