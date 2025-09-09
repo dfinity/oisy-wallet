@@ -1,5 +1,6 @@
 import type {
 	Agreements,
+	ExperimentalFeaturesSettings,
 	NetworksSettings,
 	Settings,
 	UserProfile
@@ -31,6 +32,9 @@ export const userSettingsNetworks: Readable<NetworksSettings | undefined> = deri
 	[userSettings],
 	([$userSettings]) => $userSettings?.networks
 );
+
+export const userExperimentalFeaturesSettings: Readable<ExperimentalFeaturesSettings | undefined> =
+	derived([userSettings], ([$userSettings]) => $userSettings?.experimental_features);
 
 export const userAgreementsData: Readable<Agreements | undefined> = derived(
 	[userProfile],
