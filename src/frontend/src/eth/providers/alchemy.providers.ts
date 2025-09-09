@@ -7,7 +7,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NonFungibleToken, OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
