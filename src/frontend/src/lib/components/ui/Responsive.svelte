@@ -1,12 +1,12 @@
 <script lang="ts">
+	/*
+This component is meant to be used for cases where we want to display something for specific
+breakpoints without duplicating DOM elements.
+Usage: <Responsive up="xs" down="md">Content will be rendered between xs and md including xs and md</Responsive>
+*/
+
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Snippet, onDestroy } from 'svelte';
-	/*
-	This component is meant to be used for cases where we want to display something for specific
-	breakpoints without duplicating DOM elements.
-	Usage: <Responsive up="xs" down="md">Content will be rendered between xs and md including xs and md</Responsive>
-	*/
-
 	import { run } from 'svelte/legacy';
 	import { writable } from 'svelte/store';
 	import {

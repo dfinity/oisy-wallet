@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createBubbler, preventDefault } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	const bubble = createBubbler();
 </script>
 
 <button

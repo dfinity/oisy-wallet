@@ -9,7 +9,7 @@
 
 	interface Props {
 		token: IcrcCustomToken;
-		testIdPrefix?: any;
+		testIdPrefix?: string;
 	}
 
 	let { token, testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE }: Props = $props();

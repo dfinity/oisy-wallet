@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { createBubbler } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
+
+	const bubble = createBubbler();
 
 	interface Props {
 		dAppDescription: OisyDappDescription;

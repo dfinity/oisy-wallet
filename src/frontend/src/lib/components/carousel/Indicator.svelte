@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { createBubbler } from 'svelte/legacy';
-
-	const bubble = createBubbler();
 	import { fade } from 'svelte/transition';
 	import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	const bubble = createBubbler();
 
 	interface Props {
 		currentSlide: number;
