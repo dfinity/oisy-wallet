@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
 import { EnvAdditionalIcrcTokensSchema } from '$env/schema/env-additional-icrc-token.schema';
-import icrcTokensJson from '$env/tokens/tokens.icrc.json';
 import type { EnvAdditionalIcrcTokensWithMetadata } from '$env/types/env-icrc-additional-token';
 import type { EnvTokenSymbol } from '$env/types/env-token-common';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
-import { existsSync, writeFileSync } from 'node:fs';
+import { isNullish, jsonReplacer, jsonReviver, nonNullish } from '@dfinity/utils';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadMetadata, saveLogo } from './build.tokens.utils';
 import { ADDITIONAL_ICRC_JSON_FILE } from './constants.mjs';
@@ -21,9 +20,18 @@ interface TokensAndIcons {
 }
 
 const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
+	const icrcTokensJson = JSON.parse(
+		readFileSync(ADDITIONAL_ICRC_JSON_FILE).toString(),
+		jsonReviver
+	);
+
 	const icrcTokensParsed = EnvAdditionalIcrcTokensSchema.safeParse(icrcTokensJson);
 
-	const icrcTokens = icrcTokensParsed.success ? icrcTokensParsed.data : {};
+	if (!icrcTokensParsed.success) {
+		throw new Error(`Error parsing tokens.icrc.json: ${icrcTokensParsed.error.message}`);
+	}
+
+	const { data: icrcTokens } = icrcTokensParsed;
 
 	return await Object.entries(icrcTokens).reduce<Promise<TokensAndIcons>>(
 		async (acc, [key, token]) => {
@@ -31,16 +39,13 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 				throw new Error(`Data is missing for token symbol ${key}.`);
 			}
 
-			const { ledgerCanisterId: savedLedgerCanisterId, indexCanisterId: savedIndexCanisterId } =
-				token;
+			const { ledgerCanisterId, ...rest } = token;
 
-			if (isNullish(savedLedgerCanisterId)) {
+			if (isNullish(ledgerCanisterId)) {
 				throw new Error(`Ledger canister ID is missing for token symbol ${key}.`);
 			}
 
 			const { tokens: accTokens, icons: accIcons } = await acc;
-
-			const { ledgerCanisterId, ...rest } = token;
 
 			const metadataWithIcon = await loadMetadata(ledgerCanisterId);
 
@@ -62,9 +67,7 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 					[key]: {
 						ledgerCanisterId,
 						...rest,
-						...metadata,
-						// We override the metadata index canister ID with the one from the saved JSON, in case we want to use a particular one that is not the official one
-						indexCanisterId: savedIndexCanisterId
+						...metadata
 					}
 				},
 				icons: [
