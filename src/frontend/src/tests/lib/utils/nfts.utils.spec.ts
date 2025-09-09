@@ -7,7 +7,8 @@ import type { Nft, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft
 import {
 	filterSortByCollection,
 	findNewNftIds,
-	findNft, findNftsByToken,
+	findNft,
+	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
 	getAllowMediaForNft,
@@ -19,11 +20,11 @@ import {
 	parseMetadataResourceUrl
 } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
+import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 
 describe('nfts.utils', () => {
 	const erc721Tokens: Erc721CustomToken[] = [

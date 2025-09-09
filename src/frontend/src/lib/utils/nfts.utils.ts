@@ -65,9 +65,9 @@ export const findNft = ({
 	);
 
 export const findNftsByToken = ({
-																	nfts,
-																	token: { address: tokenAddress, network: tokenNetwork }
-																}: {
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork }
+}: {
 	nfts: Nft[];
 	token: NonFungibleToken;
 }): Nft[] =>
