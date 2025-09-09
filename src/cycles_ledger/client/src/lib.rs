@@ -2,8 +2,7 @@
 // You may want to manually adjust some of the types.
 #![allow(dead_code, unused_imports, clippy::missing_errors_doc)]
 use candid::{self, CandidType, Deserialize, Nat, Principal};
-use ic_cdk::call::{Call, CallResult, CandidDecodeFailed};
-use ic_cdk::call::CallResult as Result;
+use ic_cdk::call::{Call, CallResult, CallResult as Result, CandidDecodeFailed};
 pub use ic_cycles_ledger_types::*;
 
 pub struct CyclesLedgerService(pub Principal);
@@ -50,50 +49,42 @@ impl CyclesLedgerService {
     }
 
     pub async fn icrc_1_decimals(&self) -> Result<(u8,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_decimals")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_decimals").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_fee(&self) -> Result<(candid::Nat,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_fee")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_fee").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_metadata(&self) -> Result<(Vec<(String, MetadataValue)>,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_metadata")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_metadata").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_minting_account(&self) -> Result<(Option<Account>,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_minting_account")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_minting_account").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_name(&self) -> Result<(String,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_name")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_name").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_supported_standards(&self) -> Result<(Vec<SupportedStandard>,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_supported_standards")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_supported_standards").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_symbol(&self) -> Result<(String,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_symbol")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_symbol").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_1_total_supply(&self) -> Result<(candid::Nat,)> {
-        let response = Call::unbounded_wait(self.0, "icrc1_total_supply")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc1_total_supply").await?;
         Ok(response.candid()?)
     }
 
@@ -152,14 +143,12 @@ impl CyclesLedgerService {
     }
 
     pub async fn icrc_3_get_tip_certificate(&self) -> Result<(Option<DataCertificate>,)> {
-        let response = Call::unbounded_wait(self.0, "icrc3_get_tip_certificate")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc3_get_tip_certificate").await?;
         Ok(response.candid()?)
     }
 
     pub async fn icrc_3_supported_block_types(&self) -> Result<(Vec<SupportedBlockType>,)> {
-        let response = Call::unbounded_wait(self.0, "icrc3_supported_block_types")
-            .await?;
+        let response = Call::unbounded_wait(self.0, "icrc3_supported_block_types").await?;
         Ok(response.candid()?)
     }
 

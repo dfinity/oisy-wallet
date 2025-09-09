@@ -1,4 +1,4 @@
-use ic_cdk::api::{msg_caller};
+use ic_cdk::api::msg_caller;
 use sha2::{Digest, Sha256};
 use shared::types::pow::{
     ChallengeCompletion, ChallengeCompletionError, CreateChallengeError, StoredChallenge,

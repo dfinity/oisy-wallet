@@ -1,6 +1,6 @@
-use ic_cdk::api::msg_caller;
 use std::collections::BTreeMap;
 
+use ic_cdk::api::msg_caller;
 use shared::types::contact::{Contact, ContactError, StoredContacts};
 
 use crate::{

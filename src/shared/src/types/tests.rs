@@ -4,6 +4,7 @@ mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
     use ic_cdk::bitcoin_canister::{Network, Outpoint, Utxo};
+
     use crate::{
         types::bitcoin::{
             BtcAddPendingTransactionRequest, BtcGetPendingTransactionsRequest, PendingTransaction,

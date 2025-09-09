@@ -2,11 +2,11 @@
 use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
 use ic_cdk::{
-    api::{canister_cycle_balance, msg_caller, canister_self},
+    api::{canister_cycle_balance, canister_self, msg_caller},
     bitcoin_canister::Network,
     call::Call,
+    management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs},
 };
-use ic_cdk::management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs};
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
 };
@@ -264,18 +264,17 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
                 unreachable!("Failed to convert cycle amount to u128: {}", err)
             });
 
-        let (result,): (DepositResult,) =
-            match Call::unbounded_wait(*CYCLES_LEDGER, "deposit")
-                .with_arg(&arg)
-                .with_cycles(to_send_128)
-                .await
-                .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                    available: backend_cycles,
-                    tried_to_send: to_send.clone(),
-                }) {
-                Ok(res) => res,
-                Err(err) => return TopUpCyclesLedgerResult::Err(err),
-            };
+        let (result,): (DepositResult,) = match Call::unbounded_wait(*CYCLES_LEDGER, "deposit")
+            .with_arg(&arg)
+            .with_cycles(to_send_128)
+            .await
+            .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
+                available: backend_cycles,
+                tried_to_send: to_send.clone(),
+            }) {
+            Ok(res) => res,
+            Err(err) => return TopUpCyclesLedgerResult::Err(err),
+        };
 
         let new_ledger_balance = result.balance;
 

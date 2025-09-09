@@ -7,7 +7,10 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::{time, msg_caller}, eprintln};
+use ic_cdk::{
+    api::{msg_caller, time},
+    eprintln,
+};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -174,7 +177,9 @@ fn set_config(arg: InitArg) {
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::futures::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, || {
+        ic_cdk::futures::spawn(hourly_housekeeping_tasks())
+    });
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);

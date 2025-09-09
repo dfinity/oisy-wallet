@@ -1,5 +1,5 @@
 use candid::Principal;
-use ic_cdk::{api::{is_controller, msg_caller}};
+use ic_cdk::api::{is_controller, msg_caller};
 
 use crate::read_config;
 
