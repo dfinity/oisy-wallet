@@ -2,8 +2,8 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Nft, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
-import { isNullish, nonNullish } from '@dfinity/utils';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
@@ -41,18 +41,18 @@ export const loadNfts = async ({
 };
 
 const hasLoadedNfts = ({
-												 token: {
-													 network: { id: networkId },
-													 address
-												 },
-												 loadedNftsByNetwork
-											 }: {
+	token: {
+		network: { id: networkId },
+		address
+	},
+	loadedNftsByNetwork
+}: {
 	token: NonFungibleToken;
 	loadedNftsByNetwork: NftsByNetwork;
 }): boolean => {
 	const tokensByNetwork = loadedNftsByNetwork[networkId];
 	if (nonNullish(tokensByNetwork)) {
-		const nfts = tokensByNetwork[address.toLowerCase()] ?? []
+		const nfts = tokensByNetwork[address.toLowerCase()] ?? [];
 		return nfts.length > 0;
 	}
 
