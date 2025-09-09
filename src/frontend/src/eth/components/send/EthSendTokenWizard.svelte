@@ -297,16 +297,16 @@
 	{destination}
 	{nativeEthereumToken}
 	observe={currentStep?.name !== WizardStepsSend.SENDING}
+	sendNft={nft}
 	sendToken={$sendToken}
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
-	sendNft={nft}
 >
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<EthSendReview
-			{nft}
 			{amount}
 			{destination}
+			{nft}
 			{selectedContact}
 			on:icBack
 			on:icSend={nonNullish(nft) ? nftSend : send}

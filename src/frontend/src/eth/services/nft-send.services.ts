@@ -124,7 +124,7 @@ const buildSignRequest = ({
 
 /* ---------------- sign+send helpers ---------------- */
 
-const signWithIdentity = async ({
+const signWithIdentity = ({
 	identity,
 	transaction
 }: {
@@ -132,7 +132,7 @@ const signWithIdentity = async ({
 	transaction: EthSignTransactionRequest;
 }): Promise<string> => signTransaction({ identity, transaction });
 
-const sendRaw = async ({
+const sendRaw = ({
 	networkId,
 	raw
 }: {
@@ -154,7 +154,6 @@ export const transferErc721 = async ({
 	maxPriorityFeePerGas,
 	progress
 }: TransferErc721Params): Promise<TransactionResponse> => {
-	console.log('TRANSFER TOKENID', tokenId);
 	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
 	const { id: networkId, chainId } = sourceNetwork;
 	const nonce = await infuraProviders(networkId).getTransactionCount(from);

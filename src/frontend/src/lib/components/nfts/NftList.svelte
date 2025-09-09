@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import type { Nft } from '$lib/types/nft';
-	import type { Token } from '$lib/types/token';
 	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {

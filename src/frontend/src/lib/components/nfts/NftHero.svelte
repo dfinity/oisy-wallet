@@ -23,8 +23,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import Button from '$lib/components/ui/Button.svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
 	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 

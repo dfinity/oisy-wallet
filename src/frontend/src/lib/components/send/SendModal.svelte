@@ -37,7 +37,7 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
-	import { token as tokenStore, token } from '$lib/stores/token.store';
+	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
@@ -58,7 +58,7 @@
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import type { Nft } from '$lib/types/nft';
 	import { nonNullish } from '@dfinity/utils';
 
 	export let isTransactionsPage: boolean;
@@ -185,7 +185,7 @@
 				address: nft.collection.address
 			}) as Token,
 			callback: async () => {
-				goToStep(WizardStepsSend.DESTINATION);
+				await goToStep(WizardStepsSend.DESTINATION);
 			}
 		});
 	};

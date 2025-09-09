@@ -8,7 +8,6 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import type { MouseEventHandler } from 'svelte/elements';
 
 	interface Props {
 		nft: Nft;

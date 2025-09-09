@@ -91,7 +91,5 @@ export const sendNft = async ({
 				progress
 			});
 		}
-
-		console.log('tx', tx);
 	}
 };

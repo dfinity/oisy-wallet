@@ -11,6 +11,10 @@
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
+	import {
+		encodeErc1155SafeTransfer,
+		encodeErc721SafeTransfer
+	} from '$eth/services/nft-send.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -28,16 +32,12 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {
-		encodeErc1155SafeTransfer,
-		encodeErc721SafeTransfer
-	} from '$eth/services/nft-send.services';
-	import { type Nft } from '$lib/types/nft';
 
 	export let observe: boolean;
 	export let destination = '';
