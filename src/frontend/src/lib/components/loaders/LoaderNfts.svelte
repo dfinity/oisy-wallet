@@ -9,7 +9,6 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { NetworkId } from '$lib/types/network';
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
