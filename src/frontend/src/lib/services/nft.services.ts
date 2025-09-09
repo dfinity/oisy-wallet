@@ -62,9 +62,8 @@ export const sendNft = async ({
 	if (isNullish(identity)) {
 		await nullishSignOut();
 	} else {
-		let tx;
 		if (isTokenErc721(token)) {
-			tx = await transferErc721({
+			await transferErc721({
 				contractAddress: token.address,
 				tokenId,
 				sourceNetwork: token.network,
@@ -77,7 +76,7 @@ export const sendNft = async ({
 				progress
 			});
 		} else if (isTokenErc1155(token)) {
-			tx = await transferErc1155({
+			await transferErc1155({
 				contractAddress: token.address,
 				id: tokenId,
 				sourceNetwork: token.network,

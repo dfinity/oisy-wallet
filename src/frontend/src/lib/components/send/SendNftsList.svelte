@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Nft } from '$lib/types/nft';

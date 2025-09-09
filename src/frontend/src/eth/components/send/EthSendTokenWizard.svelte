@@ -42,7 +42,6 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { sendNft } from '$lib/services/nft.services';
-	import { parseNftId } from '$lib/validation/nft.validation';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 
 	export let currentStep: WizardStep | undefined;
