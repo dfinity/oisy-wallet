@@ -30,6 +30,4 @@ export type OwnedContract = z.infer<typeof OwnedContractSchema>;
 
 export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 
-export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
-
 export type NonFungibleToken = Erc721Token | Erc1155Token;
