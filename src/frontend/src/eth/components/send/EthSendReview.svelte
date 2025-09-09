@@ -31,7 +31,7 @@
 		isNullish($storeFeeData);
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
+<SendReview {amount} {destination} disabled={invalid} {selectedContact} {nft} on:icBack on:icSend>
 	<EthFeeDisplay slot="fee">
 		{#snippet label()}
 			<Html text={$i18n.fee.text.max_fee_eth} />
