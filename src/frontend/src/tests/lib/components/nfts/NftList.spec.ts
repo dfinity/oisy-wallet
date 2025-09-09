@@ -12,7 +12,7 @@ describe('NftList', () => {
 		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 	];
 
-	it('should render a list of snippets that are passed', () => {
+	it('should render a list of nfts', () => {
 		const title = 'Nfts';
 
 		const { container, getByText } = render(NftListTestHost, {
