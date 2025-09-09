@@ -13,6 +13,7 @@
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
+	import { findNftsByToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;
@@ -60,10 +61,7 @@
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
 			tokens.forEach((token) => {
-				const filteredNfts = nfts.filter(
-					(nft) =>
-						nft.collection.address === token.address && nft.collection.network === token.network
-				);
+				const filteredNfts = findNftsByToken({ nfts, token });
 
 				handleRemovedNfts({ token, inventory: filteredNfts.map((nft) => nft.id) });
 

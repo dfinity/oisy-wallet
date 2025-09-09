@@ -7,7 +7,7 @@ import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
-	findNft,
+	findNft, findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
 	getAllowMediaForNft,
@@ -22,6 +22,7 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 
 describe('nfts.utils', () => {
 	const mockNft1: Nft = {
@@ -137,6 +138,35 @@ describe('nfts.utils', () => {
 
 			expect(result).toBeUndefined();
 		});
+	});
+
+	describe('findNftsByToken', () => {
+		it('should return an empty array if no nfts were found', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				token: NYAN_CAT_TOKEN
+			});
+
+			expect(nfts).toHaveLength(0)
+		})
+
+		it('should return an empty array if no nfts were provided', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [],
+				token: NYAN_CAT_TOKEN
+			});
+
+			expect(nfts).toHaveLength(0)
+		})
+
+		it('should return the nfts of the given token', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN
+			});
+
+			expect(nfts).toEqual([mockNft1, mockNft2])
+		})
 	});
 
 	describe('findNewNftIds', () => {
