@@ -46,15 +46,10 @@
 			return;
 		}
 
-
-
 		scheduleRetry();
 	};
 
 	const scheduleRetry = () => {
-
-
-
 		timer = setTimeout(updateTokensToDisplay, 500);
 	};
 
