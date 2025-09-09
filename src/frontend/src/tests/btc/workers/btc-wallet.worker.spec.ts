@@ -130,10 +130,6 @@ describe('btc-wallet.worker', () => {
 	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
-		const mockPostMessageUncertified = mockPostMessage({
-			certified: false,
-			withTransactions: true
-		});
 		const mockPostMessageCertified = mockPostMessage({
 			certified: true,
 			withTransactions: false

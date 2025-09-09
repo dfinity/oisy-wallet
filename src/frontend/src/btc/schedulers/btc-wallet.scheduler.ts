@@ -185,8 +185,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		let confirmedBalance: bigint | null;
 
 		if (!certified) {
-			// Query BTC balance only if minterCanisterId and BITCOIN_CANISTER_IDS[minterCanisterId] are available
-			// These values will be there only for "mainnet", for other networks - balance on "query" will be null
 			confirmedBalance =
 				nonNullish(minterCanisterId) && BITCOIN_CANISTER_IDS[minterCanisterId]
 					? await getBalanceQuery({
