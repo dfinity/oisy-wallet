@@ -48,7 +48,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
-	export let sendNft: Nft | undefined;
+	export let sendNft: Nft | undefined = undefined;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
