@@ -1,5 +1,5 @@
 <script lang="ts">
-	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
+	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -12,11 +12,11 @@
 	const { isTransactionsPage }: Props = $props();
 </script>
 
-<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
+<ButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
 	{#snippet button(onclick)}
 		<SendButton {onclick} />
 	{/snippet}
 	{#snippet modal()}
 		<SendModal {isTransactionsPage} on:nnsClose />
 	{/snippet}
-</SendButtonWithModal>
+</ButtonWithModal>
