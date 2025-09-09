@@ -1,6 +1,4 @@
 //! Code for interacting with the chain fusion signer.
-
-
 use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
 use ic_cdk::{
@@ -278,7 +276,6 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
                 Ok(res) => res,
                 Err(err) => return TopUpCyclesLedgerResult::Err(err),
             };
-
 
         let new_ledger_balance = result.balance;
 

@@ -1,12 +1,6 @@
 //! Utilities for setting up a test environment using `PocketIC`.
 pub mod pic_canister;
-use std::{
-    env,
-    fs::read,
-    ops::RangeBounds,
-    sync::Arc,
-    time::{Duration},
-};
+use std::{env, fs::read, ops::RangeBounds, sync::Arc, time::Duration};
 
 use candid::{encode_one, CandidType, Principal};
 use ic_cdk::bitcoin_canister::Network;

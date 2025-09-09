@@ -70,14 +70,17 @@ async fn helper_canister_balance() -> u64 {
     let args = ic_cdk::management_canister::CanisterStatusArgs {
         canister_id: ic_cdk::api::canister_self(),
     };
-    
+
     let result = ic_cdk::management_canister::canister_status(&args)
         .await
         .expect("Failed to get canister status");
-    
-    result.cycles.0.try_into().expect("Failed to convert cycles to u64")
-}
 
+    result
+        .cycles
+        .0
+        .try_into()
+        .expect("Failed to convert cycles to u64")
+}
 
 // This method is emulating the solve_challenge ts function to solve the POW challenge in OISY
 // frontend. It can be used as a blueprint for implementing the javascript function used in OISY
