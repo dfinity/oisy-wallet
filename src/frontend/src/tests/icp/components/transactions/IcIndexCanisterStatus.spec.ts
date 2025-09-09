@@ -2,7 +2,7 @@ import IcIndexCanisterStatus from '$icp/components/transactions/IcIndexCanisterS
 import { emit } from '$lib/utils/events.utils';
 import en from '$tests/mocks/i18n.mock';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { cleanup, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
 describe('IcIndexCanisterStatus', () => {
@@ -13,6 +13,10 @@ describe('IcIndexCanisterStatus', () => {
 		vi.clearAllMocks();
 	});
 
+	afterEach(() => {
+		cleanup();
+	});
+
 	it('should not render the loading status by default', async () => {
 		const { queryByText, getByTestId } = render(IcIndexCanisterStatus, {
 			props: {
@@ -20,11 +24,13 @@ describe('IcIndexCanisterStatus', () => {
 			}
 		});
 
-		await tick();
+		await waitFor(() => {
+			expect(getByTestId(mockTestId)).toBeInTheDocument();
 
-		expect(getByTestId(mockTestId)).toBeInTheDocument();
-
-		expect(queryByText(en.receive.icp.text.checking_index_canister_status)).not.toBeInTheDocument();
+			expect(
+				queryByText(en.receive.icp.text.checking_index_canister_status)
+			).not.toBeInTheDocument();
+		});
 	});
 
 	it('should render the loading status if it receives a positive event oisyIndexCanisterBalanceOutOfSync', async () => {
@@ -34,11 +40,13 @@ describe('IcIndexCanisterStatus', () => {
 			}
 		});
 
-		await tick();
+		await waitFor(() => {
+			expect(getByTestId(mockTestId)).toBeInTheDocument();
 
-		expect(getByTestId(mockTestId)).toBeInTheDocument();
-
-		expect(queryByText(en.receive.icp.text.checking_index_canister_status)).not.toBeInTheDocument();
+			expect(
+				queryByText(en.receive.icp.text.checking_index_canister_status)
+			).not.toBeInTheDocument();
+		});
 
 		emit({ message: 'oisyIndexCanisterBalanceOutOfSync', detail: true });
 
@@ -66,10 +74,12 @@ describe('IcIndexCanisterStatus', () => {
 
 		emit({ message: 'oisyIndexCanisterBalanceOutOfSync', detail: false });
 
-		await tick();
+		await waitFor(() => {
+			expect(getByTestId(mockTestId)).toBeInTheDocument();
 
-		expect(getByTestId(mockTestId)).toBeInTheDocument();
-
-		expect(queryByText(en.receive.icp.text.checking_index_canister_status)).not.toBeInTheDocument();
+			expect(
+				queryByText(en.receive.icp.text.checking_index_canister_status)
+			).not.toBeInTheDocument();
+		});
 	});
 });
