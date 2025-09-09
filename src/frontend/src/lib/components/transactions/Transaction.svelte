@@ -2,8 +2,6 @@
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
 	import type { Component, Snippet } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet, Component } from 'svelte';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';

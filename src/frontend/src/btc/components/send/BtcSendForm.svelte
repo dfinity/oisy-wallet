@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import { type Snippet, getContext, onMount } from 'svelte';
+	import { getContext, type Snippet, onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
