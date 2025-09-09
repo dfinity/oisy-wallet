@@ -14,6 +14,8 @@ import {
 	MOCK_ERC721_TOKENS,
 	PUDGY_PENGUINS_TOKEN
 } from '$tests/mocks/erc721-tokens.mock';
+import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
