@@ -41,6 +41,7 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		setContext<SwapContext>(
@@ -55,7 +56,11 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
 			tokens: [],
-			filterNetwork: undefined,
+			filterNetwork:
+				nonNullish($selectedNetwork) &&
+				$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
+					? $selectedNetwork
+					: undefined,
 			filterNetworksIds: $crossChainSwapNetworksMainnetsIds
 		})
 	);
