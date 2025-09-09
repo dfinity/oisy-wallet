@@ -150,12 +150,20 @@
 			return;
 		}
 
+		// Unexpected errors
+		if (isNullish(nft)) {
+			toastsError({
+				msg: { text: "Todo: nft not passed" }
+			});
+			return;
+		}
+
 		dispatch('icNext');
 
 		try {
 			await sendNft({
 				token: $sendToken as NonFungibleToken,
-				tokenId: parseNftId(1),
+				tokenId: nft.id,
 				destination,
 				fromAddress: $ethAddress,
 				identity: $authIdentity,

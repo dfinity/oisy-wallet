@@ -161,6 +161,7 @@ export const transferErc721 = async ({
 	maxFeePerGas,
 	maxPriorityFeePerGas
 }: TransferErc721Params): Promise<TransactionResponse> => {
+	console.log('TRANSFER TOKENID', tokenId);
 	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
 	const { id: networkId, chainId } = sourceNetwork;
 	const nonce = await infuraProviders(networkId).getTransactionCount(from);

@@ -373,6 +373,7 @@ export const sendNft = async ({
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
 }) => {
+	console.log('TOKEN ID in service', tokenId);
 	if (isNullish(identity)) {
 		await nullishSignOut();
 	} else {
