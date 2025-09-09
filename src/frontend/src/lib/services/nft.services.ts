@@ -4,8 +4,8 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
-import { isNullish } from '@dfinity/utils';
 import { findNftsByNetwork } from '$lib/utils/nfts.utils';
+import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
@@ -19,7 +19,7 @@ export const loadNfts = async ({
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	for (const [networkId, tokens] of tokensByNetwork) {
-		const nftsByNetwork = findNftsByNetwork({nfts: loadedNfts, networkId})
+		const nftsByNetwork = findNftsByNetwork({ nfts: loadedNfts, networkId });
 		if (!(nftsByNetwork.length > 0)) {
 			const nfts: Nft[] = await loadNftsByNetwork({ networkId, tokens, walletAddress });
 			nftStore.addAll(nfts);
