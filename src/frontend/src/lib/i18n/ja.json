@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました",
 			"transaction_price": "取引価格の見積もりの読み込み中にエラーが発生しました",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
@@ -551,7 +552,11 @@
 			"appearance_system": "システムに従う",
 			"git_disclaimer": "開発目的のため、テストキャニスターでのみブランチとコミットを表示します",
 			"git_branch_name": "ブランチ:",
-			"git_commit_hash": "コミット:"
+			"git_commit_hash": "コミット:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -586,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICPアカウントID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
 				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します",
 				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します",
@@ -1626,7 +1632,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
 			"loading": "考え中...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",

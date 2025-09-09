@@ -110,6 +110,8 @@ jobs:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Set Environment Variables
+        run: echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}" >> $GITHUB_ENV
       - name: Test
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false

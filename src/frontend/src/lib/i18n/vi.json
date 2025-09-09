@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
@@ -551,7 +552,11 @@
 			"appearance_system": "Hệ thống",
 			"git_disclaimer": "Vì mục đích phát triển, chúng tôi chỉ hiển thị branch và commit trong các canister thử nghiệm.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -586,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
@@ -1626,7 +1632,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Xin lỗi, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong danh bạ của bạn.",
 			"loading": "Đang suy nghĩ...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",
