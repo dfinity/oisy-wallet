@@ -1,5 +1,8 @@
-import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import {
+	POLYGON_AMOY_NETWORK,
+	POLYGON_AMOY_NETWORK_ID
+} from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NftError } from '$lib/types/errors';
@@ -8,6 +11,7 @@ import {
 	filterSortByCollection,
 	findNewNftIds,
 	findNft,
+	findNftsByNetwork,
 	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
@@ -290,6 +294,35 @@ describe('nfts.utils', () => {
 			});
 
 			expect(nfts).toEqual([mockNft1, mockNft2]);
+		});
+	});
+
+	describe('findNftsByNetwork', () => {
+		it('should return an empty array if no nfts were found', () => {
+			const nfts: Nft[] = findNftsByNetwork({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				networkId: ETHEREUM_NETWORK_ID
+			});
+
+			expect(nfts).toHaveLength(0);
+		});
+
+		it('should return an empty array if no nfts were provided', () => {
+			const nfts: Nft[] = findNftsByNetwork({
+				nfts: [],
+				networkId: POLYGON_AMOY_NETWORK_ID
+			});
+
+			expect(nfts).toHaveLength(0);
+		});
+
+		it('should return the nfts of the given network', () => {
+			const nfts: Nft[] = findNftsByNetwork({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				networkId: POLYGON_AMOY_NETWORK_ID
+			});
+
+			expect(nfts).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
 	});
 
