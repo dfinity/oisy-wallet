@@ -7,10 +7,14 @@
 	import type { OptionBalance } from '$lib/types/balance';
 	import type { OptionToken } from '$lib/types/token';
 
-	export let token: OptionToken;
-	export let balance: OptionBalance;
-	export let source: string;
-	export let exchangeRate: number | undefined = undefined;
+	interface Props {
+		token: OptionToken;
+		balance: OptionBalance;
+		source: string;
+		exchangeRate?: number;
+	}
+
+	let { token, balance, source, exchangeRate = undefined }: Props = $props();
 </script>
 
 <Value element="div" ref="source">

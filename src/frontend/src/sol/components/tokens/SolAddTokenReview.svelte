@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
@@ -22,9 +23,13 @@
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
-	export let tokenAddress: SplTokenAddress | undefined;
-	export let metadata: TokenMetadata | undefined;
-	export let network: Network;
+	interface Props {
+		tokenAddress: SplTokenAddress | undefined;
+		metadata: TokenMetadata | undefined;
+		network: Network;
+	}
+
+	let { tokenAddress, metadata = $bindable(), network }: Props = $props();
 
 	onMount(async () => {
 		if (isNullish(tokenAddress)) {
@@ -97,8 +102,10 @@
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(tokenAddress) || isNullish(metadata);
+	let invalid = $state(true);
+	run(() => {
+		invalid = isNullishOrEmpty(tokenAddress) || isNullish(metadata);
+	});
 
 	const dispatch = createEventDispatcher();
 </script>

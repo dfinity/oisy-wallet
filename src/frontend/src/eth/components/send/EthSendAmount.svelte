@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -17,19 +18,28 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let insufficientFunds: boolean;
-	export let nativeEthereumToken: Token;
+	interface Props {
+		amount?: OptionAmount;
+		insufficientFunds: boolean;
+		nativeEthereumToken: Token;
+	}
+
+	let {
+		amount = $bindable(),
+		insufficientFunds = $bindable(),
+		nativeEthereumToken
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit: DisplayUnit = $state('usd');
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	let insufficientFundsError: InsufficientFundsError | undefined = undefined;
+	let insufficientFundsError: InsufficientFundsError | undefined = $state(undefined);
 
-	$: insufficientFunds = nonNullish(insufficientFundsError);
+	run(() => {
+		insufficientFunds = nonNullish(insufficientFundsError);
+	});
 
 	const {
 		feeStore: storeFeeData,
@@ -84,7 +94,7 @@
 	/**
 	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
 	 */
-	let amountSetToMax = false;
+	let amountSetToMax = $state(false);
 </script>
 
 <div class="mb-4">
@@ -101,8 +111,13 @@
 			dispatch('icTokensList');
 		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}
+			<span>{$i18n.core.text.amount}</span>
+		{/snippet}
 
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 		<svelte:fragment slot="amount-info">
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
@@ -116,7 +131,7 @@
 			{/if}
 		</svelte:fragment>
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -127,6 +142,6 @@
 					bind:amountSetToMax
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

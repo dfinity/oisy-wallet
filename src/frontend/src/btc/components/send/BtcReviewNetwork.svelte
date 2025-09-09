@@ -8,7 +8,11 @@
 	import type { NetworkId } from '$lib/types/network';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
 
-	export let networkId: NetworkId | undefined = undefined;
+	interface Props {
+		networkId?: NetworkId;
+	}
+
+	let { networkId = undefined }: Props = $props();
 </script>
 
 <ReviewNetwork

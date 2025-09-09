@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import { run, preventDefault } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
@@ -22,76 +23,107 @@
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
-	export let network: Network | undefined;
-	export let tokenData: Partial<AddTokenData>;
+	interface Props {
+		network: Network | undefined;
+		tokenData: Partial<AddTokenData>;
+	}
 
-	let networkName: string | undefined = network?.name;
-	$: (networkName,
-		(network = nonNullish(networkName)
-			? $networks.find(({ name }) => name === networkName)
-			: undefined));
+	let { network = $bindable(), tokenData = $bindable() }: Props = $props();
 
-	let isIcpNetwork = false;
-	$: isIcpNetwork = isNetworkIdICP(network?.id);
+	let networkName: string | undefined = $state(network?.name);
+	run(() => {
+		(networkName,
+			(network = nonNullish(networkName)
+				? $networks.find(({ name }) => name === networkName)
+				: undefined));
+	});
 
-	let isEthereumNetwork = false;
-	$: isEthereumNetwork = isNetworkIdEthereum(network?.id);
+	let isIcpNetwork = $state(false);
+	run(() => {
+		isIcpNetwork = isNetworkIdICP(network?.id);
+	});
 
-	let isEvmNetwork = false;
-	$: isEvmNetwork = isNetworkIdEvm(network?.id);
+	let isEthereumNetwork = $state(false);
+	run(() => {
+		isEthereumNetwork = isNetworkIdEthereum(network?.id);
+	});
 
-	let isSolanaNetwork = false;
-	$: isSolanaNetwork = isNetworkIdSolana(network?.id);
+	let isEvmNetwork = $state(false);
+	run(() => {
+		isEvmNetwork = isNetworkIdEvm(network?.id);
+	});
 
-	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } = tokenData;
+	let isSolanaNetwork = $state(false);
+	run(() => {
+		isSolanaNetwork = isNetworkIdSolana(network?.id);
+	});
+
+	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } =
+		$state(tokenData);
 
 	// Since we persist the values of relevant variables when switching networks, this ensures that
 	// only the data related to the selected network is passed.
-	$: if (isIcpNetwork) {
-		tokenData = {
-			ledgerCanisterId,
-			indexCanisterId:
-				nonNullish(indexCanisterId) && notEmptyString(indexCanisterId) ? indexCanisterId : undefined
-		};
-	} else if (isEthereumNetwork || isEvmNetwork) {
-		tokenData = { ethContractAddress };
-	} else if (isSolanaNetwork) {
-		tokenData = { splTokenAddress };
-	} else {
-		tokenData = {};
-	}
+	run(() => {
+		if (isIcpNetwork) {
+			tokenData = {
+				ledgerCanisterId,
+				indexCanisterId:
+					nonNullish(indexCanisterId) && notEmptyString(indexCanisterId)
+						? indexCanisterId
+						: undefined
+			};
+		} else if (isEthereumNetwork || isEvmNetwork) {
+			tokenData = { ethContractAddress };
+		} else if (isSolanaNetwork) {
+			tokenData = { splTokenAddress };
+		} else {
+			tokenData = {};
+		}
+	});
 
 	const dispatch = createEventDispatcher();
 
-	let invalidEth = true;
-	$: invalidEth = isNullishOrEmpty(ethContractAddress);
+	let invalidEth = $state(true);
+	run(() => {
+		invalidEth = isNullishOrEmpty(ethContractAddress);
+	});
 
-	let invalidIc = true;
-	$: invalidIc = isNullishOrEmpty(ledgerCanisterId);
+	let invalidIc = $state(true);
+	run(() => {
+		invalidIc = isNullishOrEmpty(ledgerCanisterId);
+	});
 
-	let invalidSpl = true;
-	$: invalidSpl = isNullishOrEmpty(splTokenAddress);
+	let invalidSpl = $state(true);
+	run(() => {
+		invalidSpl = isNullishOrEmpty(splTokenAddress);
+	});
 
-	let invalid = true;
-	$: invalid = isIcpNetwork
-		? invalidIc
-		: isEthereumNetwork || isEvmNetwork
-			? invalidEth
-			: isSolanaNetwork
-				? invalidSpl
-				: true;
+	let invalid = $state(true);
+	run(() => {
+		invalid = isIcpNetwork
+			? invalidIc
+			: isEthereumNetwork || isEvmNetwork
+				? invalidEth
+				: isSolanaNetwork
+					? invalidSpl
+					: true;
+	});
 
-	let enabledNetworkSelector = true;
-	$: enabledNetworkSelector = isNullish($selectedNetwork);
+	let enabledNetworkSelector = $state(true);
+	run(() => {
+		enabledNetworkSelector = isNullish($selectedNetwork);
+	});
 
-	let availableNetworks: Network[] = [];
+	let availableNetworks: Network[] = $state([]);
 	// filter out BTC networks - they do not have custom tokens
-	$: availableNetworks = (
-		$selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets
-	).filter(({ id }) => !isNetworkIdBitcoin(id));
+	run(() => {
+		availableNetworks = (
+			$selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets
+		).filter(({ id }) => !isNetworkIdBitcoin(id));
+	});
 </script>
 
-<form class="min-h-auto" method="POST" on:submit|preventDefault={() => dispatch('icNext')} in:fade>
+<form onsubmit={preventDefault(() => dispatch('icNext'))} method="POST" in:fade class="min-h-auto">
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />

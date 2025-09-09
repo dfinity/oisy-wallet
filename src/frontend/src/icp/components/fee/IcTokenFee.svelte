@@ -8,8 +8,7 @@
 	const { sendToken, sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee: bigint | undefined;
-	$: fee = ($sendToken as OptionIcToken)?.fee;
+	let fee: bigint | undefined = $derived(($sendToken as OptionIcToken)?.fee);
 </script>
 
 <FeeDisplay

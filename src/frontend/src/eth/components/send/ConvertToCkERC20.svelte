@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
@@ -14,20 +15,21 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let convertToSymbol: string;
-	$: convertToSymbol = ($pageToken as OptionErc20Token)?.twinTokenSymbol ?? '';
+	let convertToSymbol: string = $derived(($pageToken as OptionErc20Token)?.twinTokenSymbol ?? '');
 
-	let ckToken: IcCkToken | undefined;
-	$: (() => {
-		if (nonNullish(ckToken) || isNullish($pageToken)) {
-			return;
-		}
+	let ckToken: IcCkToken | undefined = $state();
+	run(() => {
+		(() => {
+			if (nonNullish(ckToken) || isNullish($pageToken)) {
+				return;
+			}
 
-		ckToken = findTwinToken({
-			tokenToPair: $pageToken,
-			tokens: $tokens
-		});
-	})();
+			ckToken = findTwinToken({
+				tokenToPair: $pageToken,
+				tokens: $tokens
+			});
+		})();
+	});
 </script>
 
 <ConvertETH
@@ -36,7 +38,9 @@
 	})}
 	nativeTokenId={$ethereumTokenId}
 >
-	<IconCkConvert slot="icon" size="24" />
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
 	<span>{convertToSymbol}</span>
 </ConvertETH>
 

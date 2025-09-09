@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -17,9 +17,19 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let destination = '';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		destination?: string;
+		cancel?: Snippet;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		destination = '',
+		cancel
+	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -28,12 +38,14 @@
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	let invalid: boolean;
-	$: invalid =
+	let invalid: boolean = $derived(
 		$insufficientFunds ||
-		$insufficientFundsForFee ||
-		invalidAmount(sendAmount) ||
-		isNullishOrEmpty(destination);
+			$insufficientFundsForFee ||
+			invalidAmount(sendAmount) ||
+			isNullishOrEmpty(destination)
+	);
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <ConvertForm
@@ -45,7 +57,7 @@
 	bind:sendAmount
 	bind:receiveAmount
 >
-	<svelte:fragment slot="message">
+	{#snippet message()}
 		{#if isTokenErc20($sourceToken) && $insufficientFundsForFee}
 			<div in:fade>
 				<MessageBox level="error"
@@ -53,7 +65,7 @@
 				>
 			</div>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
 	<EthFeeDisplay slot="fee">
 		{#snippet label()}
@@ -61,5 +73,7 @@
 		{/snippet}
 	</EthFeeDisplay>
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		{@render cancel_render?.()}
+	{/snippet}
 </ConvertForm>

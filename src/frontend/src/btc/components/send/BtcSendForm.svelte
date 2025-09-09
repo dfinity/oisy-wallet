@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { type Snippet, getContext, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -10,24 +12,52 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let destination = '';
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		amount?: OptionAmount;
+		destination?: string;
+		source: string;
+		selectedContact?: ContactUi;
+		cancel?: Snippet;
+	}
 
-	let amountError: BtcAmountAssertionError | undefined;
+	let {
+		amount = $bindable(),
+		destination = '',
+		source,
+		selectedContact = undefined,
+		cancel
+	}: Props = $props();
+
+	let amountError: BtcAmountAssertionError | undefined = $state();
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let invalidDestination = false;
-	$: invalidDestination =
-		isInvalidDestinationBtc({
-			destination,
-			networkId: $sendTokenNetworkId
-		}) || isNullishOrEmpty(destination);
+	let invalidDestination = $state(false);
+	run(() => {
+		invalidDestination =
+			isInvalidDestinationBtc({
+				destination,
+				networkId: $sendTokenNetworkId
+			}) || isNullishOrEmpty(destination);
+	});
 
 	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)
-	let invalid = true;
-	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	let invalid = $state(true);
+	run(() => {
+		invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	});
+
+	onMount(() => {
+		// This call will load the pending sent transactions for the source address in the store.
+		// This data will then be used in the review step. That's why we don't wait here.
+		loadBtcPendingSentTransactions({
+			identity: $authIdentity,
+			networkId: $sendTokenNetworkId,
+			address: source
+		});
+	});
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <SendForm
@@ -38,9 +68,13 @@
 	on:icNext
 	on:icBack
 >
-	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet amount()}
+		<BtcSendAmount bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
 	<!--	TODO: calculate and display transaction fee	-->
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		{@render cancel_render?.()}
+	{/snippet}
 </SendForm>

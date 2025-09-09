@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -39,64 +40,73 @@
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let transactions: AllTransactionUiWithCmp[];
-	$: transactions = mapAllTransactionsUi({
-		tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
-		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress,
-		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore,
-		$icTransactionsStore,
-		$ckBtcMinterInfoStore,
-		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore
+	let transactions: AllTransactionUiWithCmp[] = $derived(
+		mapAllTransactionsUi({
+			tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
+			$btcTransactions: $btcTransactionsStore,
+			$ethTransactions: $ethTransactionsStore,
+			$ckEthMinterInfo: $ckEthMinterInfoStore,
+			$ethAddress,
+			$btcStatuses: $btcStatusesStore,
+			$solTransactions: $solTransactionsStore,
+			$icTransactionsStore,
+			$ckBtcMinterInfoStore,
+			$icPendingTransactionsStore,
+			$ckBtcPendingUtxosStore
+		})
+	);
+
+	let sortedTransactions: AllTransactionUiWithCmp[] | undefined = $derived(
+		nonNullish(transactions)
+			? transactions.sort(({ transaction: a }, { transaction: b }) =>
+					sortTransactions({ transactionA: a, transactionB: b })
+				)
+			: undefined
+	);
+
+	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined = $derived(
+		nonNullish(sortedTransactions) ? groupTransactionsByDate(sortedTransactions) : undefined
+	);
+
+	let selectedBtcTransaction: BtcTransactionUi | undefined = $state();
+	let selectedBtcToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
+			mapTransactionModalData<BtcTransactionUi>({
+				$modalOpen: $modalBtcTransaction,
+				$modalStore
+			}));
 	});
 
-	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
-	$: sortedTransactions = nonNullish(transactions)
-		? transactions.sort(({ transaction: a }, { transaction: b }) =>
-				sortTransactions({ transactionA: a, transactionB: b })
-			)
-		: undefined;
+	let selectedEthTransaction: EthTransactionUi | undefined = $state();
+	let selectedEthToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedEthTransaction, token: selectedEthToken } =
+			mapTransactionModalData<EthTransactionUi>({
+				$modalOpen: $modalEthTransaction,
+				$modalStore
+			}));
+	});
 
-	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
-	$: groupedTransactions = nonNullish(sortedTransactions)
-		? groupTransactionsByDate(sortedTransactions)
-		: undefined;
+	let selectedIcTransaction: IcTransactionUi | undefined = $state();
+	let selectedIcToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedIcTransaction, token: selectedIcToken } =
+			mapTransactionModalData<IcTransactionUi>({
+				$modalOpen: $modalIcTransaction,
+				$modalStore
+			}));
+	});
 
-	let selectedBtcTransaction: BtcTransactionUi | undefined;
-	let selectedBtcToken: OptionToken;
-	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
-		mapTransactionModalData<BtcTransactionUi>({
-			$modalOpen: $modalBtcTransaction,
-			$modalStore
-		}));
-
-	let selectedEthTransaction: EthTransactionUi | undefined;
-	let selectedEthToken: OptionToken;
-	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
-		mapTransactionModalData<EthTransactionUi>({
-			$modalOpen: $modalEthTransaction,
-			$modalStore
-		}));
-
-	let selectedIcTransaction: IcTransactionUi | undefined;
-	let selectedIcToken: OptionToken;
-	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
-		mapTransactionModalData<IcTransactionUi>({
-			$modalOpen: $modalIcTransaction,
-			$modalStore
-		}));
-
-	let selectedSolTransaction: SolTransactionUi | undefined;
-	let selectedSolToken: OptionToken;
-	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
-		mapTransactionModalData<SolTransactionUi>({
-			$modalOpen: $modalSolTransaction,
-			$modalStore
-		}));
+	let selectedSolTransaction: SolTransactionUi | undefined = $state();
+	let selectedSolToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedSolTransaction, token: selectedSolToken } =
+			mapTransactionModalData<SolTransactionUi>({
+				$modalOpen: $modalSolTransaction,
+				$modalStore
+			}));
+	});
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>

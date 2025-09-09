@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -8,41 +9,50 @@
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
 
-	export let transaction: IcTransactionUi;
-	export let token: Token;
-	export let iconType: 'token' | 'transaction' = 'transaction';
+	interface Props {
+		transaction: IcTransactionUi;
+		token: Token;
+		iconType?: 'token' | 'transaction';
+	}
 
-	let type: IcTransactionType;
-	let transactionTypeLabel: string | undefined;
-	let value: bigint | undefined;
-	let timestampNanoseconds: bigint | undefined;
-	let incoming: boolean | undefined;
-	let to: string | undefined;
-	let from: string | undefined;
+	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	$: ({
-		type,
-		typeLabel: transactionTypeLabel,
-		value,
-		timestamp: timestampNanoseconds,
-		incoming,
-		to,
-		from
-	} = transaction);
+	let type: IcTransactionType = $state();
+	let transactionTypeLabel: string | undefined = $state();
+	let value: bigint | undefined = $state();
+	let timestampNanoseconds: bigint | undefined = $state();
+	let incoming: boolean | undefined = $state();
+	let to: string | undefined = $state();
+	let from: string | undefined = $state();
 
-	let pending = false;
-	$: pending = transaction?.status === 'pending';
+	run(() => {
+		({
+			type,
+			typeLabel: transactionTypeLabel,
+			value,
+			timestamp: timestampNanoseconds,
+			incoming,
+			to,
+			from
+		} = transaction);
+	});
 
-	let status: TransactionStatus;
-	$: status = pending ? 'pending' : 'confirmed';
+	let pending = $state(false);
+	run(() => {
+		pending = transaction?.status === 'pending';
+	});
 
-	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? (incoming ? value : value * -1n) : value;
+	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let timestamp: number | undefined;
-	$: timestamp = nonNullish(timestampNanoseconds)
-		? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
-		: undefined;
+	let amount: bigint | undefined = $derived(
+		nonNullish(value) ? (incoming ? value : value * -1n) : value
+	);
+
+	let timestamp: number | undefined = $derived(
+		nonNullish(timestampNanoseconds)
+			? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
+			: undefined
+	);
 
 	const modalId = Symbol();
 </script>

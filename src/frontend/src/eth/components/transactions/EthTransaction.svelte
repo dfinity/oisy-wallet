@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
@@ -10,34 +11,37 @@
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let transaction: EthTransactionUi;
-	export let token: Token;
-	export let iconType: 'token' | 'transaction' = 'transaction';
+	interface Props {
+		transaction: EthTransactionUi;
+		token: Token;
+		iconType?: 'token' | 'transaction';
+	}
 
-	let value: bigint;
-	let timestamp: number | undefined;
-	let displayTimestamp: number | undefined;
-	let type: EthTransactionType;
-	let to: string | undefined;
-	let from: string | undefined;
-	let tokenId: number | undefined;
+	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let pending: boolean;
-	$: pending = isTransactionPending(transaction);
+	let value: bigint = $state();
+	let timestamp: number | undefined = $state();
+	let displayTimestamp: number | undefined = $state();
+	let type: EthTransactionType = $state();
+	let to: string | undefined = $state();
+	let from: string | undefined = $state();
 
-	let status: TransactionStatus;
-	$: status = pending ? 'pending' : 'confirmed';
+	let pending: boolean = $derived(isTransactionPending(transaction));
 
-	$: ({ value, timestamp, displayTimestamp, type, to, from, tokenId } = transaction);
+	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let ckTokenSymbol: string;
-	$: ckTokenSymbol = isSupportedEthToken(token)
-		? token.twinTokenSymbol
-		: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
-			((token as Erc20Token | undefined)?.twinTokenSymbol ?? '');
+	run(() => {
+		({ value, timestamp, displayTimestamp, type, to, from } = transaction);
+	});
 
-	let label: string;
-	$: label =
+	let ckTokenSymbol: string = $derived(
+		isSupportedEthToken(token)
+			? token.twinTokenSymbol
+			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
+				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '')
+	);
+
+	let label: string = $derived(
 		type === 'withdraw'
 			? replacePlaceholders(
 					pending
@@ -60,13 +64,12 @@
 					)
 				: type === 'send'
 					? $i18n.send.text.send
-					: $i18n.receive.text.receive;
+					: $i18n.receive.text.receive
+	);
 
-	let amount: bigint;
-	$: amount = value * (type === 'send' || type === 'deposit' ? -1n : 1n);
+	let amount: bigint = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
 
-	let transactionDate: number | undefined;
-	$: transactionDate = timestamp ?? displayTimestamp;
+	let transactionDate: number | undefined = $derived(timestamp ?? displayTimestamp);
 
 	const modalId = Symbol();
 </script>

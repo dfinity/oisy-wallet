@@ -11,17 +11,19 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let usesIdentityHelp = false;
+	interface Props {
+		usesIdentityHelp?: boolean;
+	}
 
-	let modal: WizardModal<WizardStepsAuthHelp>;
+	let { usesIdentityHelp = false }: Props = $props();
 
-	let steps: WizardSteps<WizardStepsAuthHelp>;
-	$: steps = authHelpWizardSteps({ i18n: $i18n });
+	let modal: WizardModal<WizardStepsAuthHelp> = $state();
 
-	let currentStep: WizardStep<WizardStepsAuthHelp> | undefined;
+	let steps: WizardSteps<WizardStepsAuthHelp> = $derived(authHelpWizardSteps({ i18n: $i18n }));
 
-	let titleString: string;
-	$: titleString = currentStep?.title ?? $i18n.auth.help.text.title;
+	let currentStep: WizardStep<WizardStepsAuthHelp> | undefined = $state();
+
+	let titleString: string = $derived(currentStep?.title ?? $i18n.auth.help.text.title);
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {

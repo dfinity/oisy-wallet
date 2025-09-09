@@ -6,10 +6,19 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isInvalidDestinationSol } from '$sol/utils/sol-send.utils';
 
-	export let destination = '';
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination?: string;
+		invalidDestination?: boolean;
+		knownDestinations?: KnownDestinations | undefined;
+		networkContacts?: NetworkContacts | undefined;
+	}
+
+	let {
+		destination = $bindable(''),
+		invalidDestination = $bindable(false),
+		knownDestinations = undefined,
+		networkContacts = undefined
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 

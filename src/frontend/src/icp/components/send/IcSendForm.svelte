@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
@@ -11,24 +12,40 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		selectedContact?: ContactUi;
+		cancel?: Snippet;
+	}
+
+	let {
+		destination = '',
+		amount = $bindable(),
+		selectedContact = undefined,
+		cancel
+	}: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let amountError: IcAmountAssertionError | undefined;
+	let amountError: IcAmountAssertionError | undefined = $state();
 
-	let invalidDestination = false;
-	$: invalidDestination =
-		isNullishOrEmpty(destination) ||
-		isInvalidDestinationIc({
-			destination,
-			tokenStandard: $sendTokenStandard
-		});
+	let invalidDestination = $state(false);
+	run(() => {
+		invalidDestination =
+			isNullishOrEmpty(destination) ||
+			isInvalidDestinationIc({
+				destination,
+				tokenStandard: $sendTokenStandard
+			});
+	});
 
-	let invalid = true;
-	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	let invalid = $state(true);
+	run(() => {
+		invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	});
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <SendForm
@@ -39,9 +56,15 @@
 	on:icNext
 	on:icBack
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet amount()}
+		<IcSendAmount bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
-	<IcTokenFee slot="fee" />
+	{#snippet fee()}
+		<IcTokenFee />
+	{/snippet}
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		{@render cancel_render?.()}
+	{/snippet}
 </SendForm>

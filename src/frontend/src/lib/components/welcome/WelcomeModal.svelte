@@ -19,9 +19,9 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		<span class="text-xl">{replaceOisyPlaceholders($i18n.welcome.title)}</span>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="overflow-hidden rounded-2xl">

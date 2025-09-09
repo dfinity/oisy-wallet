@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import {
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
@@ -14,10 +15,21 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 
-	export let source: string;
-	export let amount: OptionAmount = undefined;
-	export let networkId: NetworkId | undefined = undefined;
-	export let amountError = false;
+	interface Props {
+		source: string;
+		amount?: OptionAmount;
+		networkId?: NetworkId;
+		amountError?: boolean;
+		children?: Snippet;
+	}
+
+	let {
+		source,
+		amount = undefined,
+		networkId = undefined,
+		amountError = false,
+		children
+	}: Props = $props();
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -82,7 +94,9 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	$: (amount, networkId, amountError, source, debounceEstimateFee());
+	run(() => {
+		(amount, networkId, amountError, source, debounceEstimateFee());
+	});
 </script>
 
-<slot />
+{@render children?.()}

@@ -14,13 +14,25 @@
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let customDestination = '';
-	export let convertProgressStep: string;
-	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'back';
-	export let onIcQrCodeBack: () => void;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		customDestination?: string;
+		convertProgressStep: string;
+		currentStep: WizardStep | undefined;
+		formCancelAction?: 'back' | 'close';
+		onIcQrCodeBack: () => void;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		customDestination = $bindable(''),
+		convertProgressStep = $bindable(),
+		currentStep,
+		formCancelAction = 'back',
+		onIcQrCodeBack
+	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>

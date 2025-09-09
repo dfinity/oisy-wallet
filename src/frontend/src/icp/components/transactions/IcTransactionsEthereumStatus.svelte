@@ -5,18 +5,18 @@
 	import type { SyncState } from '$lib/types/sync';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let ckEthPendingTransactionsSyncState: SyncState | undefined = undefined;
+	let ckEthPendingTransactionsSyncState: SyncState | undefined = $state(undefined);
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
 		(ckEthPendingTransactionsSyncState = state);
 
-	let ckEthMinterInfoSyncState: SyncState | undefined = undefined;
+	let ckEthMinterInfoSyncState: SyncState | undefined = $state(undefined);
 	const onSyncMinterInfoState = ({ detail: state }: CustomEvent<SyncState>) =>
 		(ckEthMinterInfoSyncState = state);
 </script>
 
 <svelte:window
-	on:oisyCkEthereumPendingTransactions={onSyncPendingState}
-	on:oisyCkEthMinterInfoStatus={onSyncMinterInfoState}
+	onoisyCkEthereumPendingTransactions={onSyncPendingState}
+	onoisyCkEthMinterInfoStatus={onSyncMinterInfoState}
 />
 
 {#if ckEthPendingTransactionsSyncState === 'in_progress' || ckEthMinterInfoSyncState === 'in_progress'}

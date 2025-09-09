@@ -5,10 +5,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
-	export let receiveProgressStep: string = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION;
+	interface Props {
+		receiveProgressStep?: string;
+	}
 
-	let steps: ProgressSteps;
-	$: steps = [
+	let { receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION }: Props = $props();
+
+	let steps: ProgressSteps = $derived([
 		{
 			step: ProgressStepsUpdateBalanceCkBtc.INITIALIZATION,
 			text: $i18n.receive.bitcoin.text.initializing,
@@ -24,7 +27,7 @@
 			text: $i18n.receive.bitcoin.text.refreshing_wallet,
 			state: 'next'
 		} as ProgressStep
-	];
+	]);
 </script>
 
 <InProgressWizard progressStep={receiveProgressStep} {steps} />

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Commitment } from '@solana/kit';
+	import { run } from 'svelte/legacy';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -8,32 +9,36 @@
 	import type { TransactionStatus } from '$lib/types/transaction';
 	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
 
-	export let transaction: SolTransactionUi;
-	export let token: Token;
-	export let iconType: 'token' | 'transaction' = 'transaction';
+	interface Props {
+		transaction: SolTransactionUi;
+		token: Token;
+		iconType?: 'token' | 'transaction';
+	}
 
-	let type: SolTransactionType;
-	let value: bigint | undefined;
-	let timestamp: bigint | undefined;
-	let status: Commitment | null;
-	let to: string | undefined;
-	let from: string | undefined;
-	let toOwner: string | undefined;
-	let fromOwner: string | undefined;
+	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	$: ({ type, value, timestamp, status, to, from, toOwner, fromOwner } = transaction);
+	let type: SolTransactionType = $state();
+	let value: bigint | undefined = $state();
+	let timestamp: bigint | undefined = $state();
+	let status: Commitment | null = $state();
+	let to: string | undefined = $state();
+	let from: string | undefined = $state();
+	let toOwner: string | undefined = $state();
+	let fromOwner: string | undefined = $state();
 
-	let label: string;
-	$: label = type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive;
+	run(() => {
+		({ type, value, timestamp, status, to, from, toOwner, fromOwner } = transaction);
+	});
 
-	let pending: boolean;
-	$: pending = status === 'processed' || isNullish(status);
+	let label: string = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let transactionStatus: TransactionStatus;
-	$: transactionStatus = pending ? 'pending' : 'confirmed';
+	let pending: boolean = $derived(status === 'processed' || isNullish(status));
 
-	let amount: bigint | undefined;
-	$: amount = nonNullish(value) ? (type === 'send' ? value * -1n : value) : value;
+	let transactionStatus: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
+
+	let amount: bigint | undefined = $derived(
+		nonNullish(value) ? (type === 'send' ? value * -1n : value) : value
+	);
 
 	const modalId = Symbol();
 </script>

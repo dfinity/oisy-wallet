@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
@@ -25,15 +25,26 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	/**
-	 * Props
-	 */
+	interface Props {
+		/**
+		 * Props
+		 */
+		currentStep: WizardStep | undefined;
+		destination?: string;
+		amount?: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		children?: Snippet;
+	}
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	let {
+		currentStep,
+		destination = $bindable(''),
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact = undefined,
+		children
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -127,9 +138,11 @@
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<IcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm {selectedContact} on:icNext on:icBack on:icTokensList bind:destination bind:amount>
-		<ButtonBack slot="cancel" onclick={back} />
+	<IcSendForm on:icNext on:icBack on:icTokensList {selectedContact} bind:destination bind:amount>
+		{#snippet cancel()}
+			<ButtonBack onclick={back} />
+		{/snippet}
 	</IcSendForm>
 {:else}
-	<slot />
+	{@render children?.()}
 {/if}

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconOpenChat from '$lib/components/icons/IconOpenChat.svelte';
@@ -18,8 +19,12 @@
 	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: OisyDappDescription;
-	$: ({
+	interface Props {
+		dAppDescription: OisyDappDescription;
+	}
+
+	let { dAppDescription }: Props = $props();
+	let {
 		id: dappId,
 		website,
 		screenshots,
@@ -32,21 +37,23 @@
 		callToAction,
 		telegram,
 		openChat
-	} = dAppDescription);
+	} = $derived(dAppDescription);
 
-	let websiteURL: Option<URL>;
-	$: try {
-		// TODO: use URL.parse
-		websiteURL = new URL(website);
-	} catch (_err: unknown) {
-		websiteURL = null;
-	}
+	let websiteURL: Option<URL> = $state();
+	run(() => {
+		try {
+			// TODO: use URL.parse
+			websiteURL = new URL(website);
+		} catch (_err: unknown) {
+			websiteURL = null;
+		}
+	});
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">
+	{#snippet title()}
 		<span class="text-center text-xl">{resolveText({ i18n: $i18n, path: dAppName })}</span>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="flex flex-col gap-6">

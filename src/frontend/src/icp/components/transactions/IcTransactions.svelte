@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -34,26 +35,28 @@
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckEthereum: boolean;
-	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
+	let ckEthereum: boolean = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
 	let additionalListener:
 		| typeof IcTransactionsBtcListeners
 		| typeof IcTransactionsCkEthereumListeners
-		| typeof IcTransactionsNoListener;
-	$: additionalListener = $tokenCkBtcLedger
-		? IcTransactionsBtcListeners
-		: ckEthereum
-			? IcTransactionsCkEthereumListeners
-			: IcTransactionsNoListener;
+		| typeof IcTransactionsNoListener = $derived(
+		$tokenCkBtcLedger
+			? IcTransactionsBtcListeners
+			: ckEthereum
+				? IcTransactionsCkEthereumListeners
+				: IcTransactionsNoListener
+	);
 
-	let selectedTransaction: IcTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<IcTransactionUi>({
-			$modalOpen: $modalIcTransaction,
-			$modalStore
-		}));
+	let selectedTransaction: IcTransactionUi | undefined = $state();
+	let selectedToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<IcTransactionUi>({
+				$modalOpen: $modalIcTransaction,
+				$modalStore
+			}));
+	});
 
 	let noTransactions = false;
 	$: noTransactions = nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null;

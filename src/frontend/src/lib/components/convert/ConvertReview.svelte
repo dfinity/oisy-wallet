@@ -1,3 +1,6 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (info-message to info_message) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (info-message to info_message) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (info-message to info_message) making the component unusable -->
 <script lang="ts">
 	import { createEventDispatcher, getContext } from 'svelte';
 	import ConvertReviewNetworks from '$lib/components/convert/ConvertReviewNetworks.svelte';

@@ -4,7 +4,7 @@
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let visible = true;
+	let visible = $state(true);
 
 	const close = () => (visible = false);
 </script>
@@ -15,7 +15,7 @@
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button aria-label={$i18n.core.text.close} on:click={close}><IconClose /></button>
+		<button onclick={close} aria-label={$i18n.core.text.close}><IconClose /></button>
 	</div>
 {:else if BETA && visible}
 	<div
@@ -23,7 +23,7 @@
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
-			<button aria-label={$i18n.core.text.close} on:click={close}>
+			<button aria-label={$i18n.core.text.close} onclick={close}>
 				<IconClose />
 			</button>
 		</WarningBanner>

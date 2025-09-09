@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { type Snippet, onDestroy, onMount, type Snippet } from 'svelte';
 
 	interface Props {
 		onLoad: () => Promise<void>;

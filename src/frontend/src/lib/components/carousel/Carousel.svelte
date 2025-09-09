@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { type Snippet, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
@@ -13,30 +14,44 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { moveSlider, extendCarouselSliderFrame } from '$lib/utils/carousel.utils';
 
-	export let autoplay = 5000;
-	export let duration = 300;
-	export let easing = 'ease-out';
-	export let styleClass: string | undefined = undefined;
-	export let controlsWidthStyleClass: string | undefined = undefined;
+	interface Props {
+		autoplay?: number;
+		duration?: number;
+		easing?: string;
+		styleClass?: string;
+		controlsWidthStyleClass?: string;
+		children?: Snippet;
+	}
+
+	let {
+		autoplay = 5000,
+		duration = 300,
+		easing = 'ease-out',
+		styleClass = undefined,
+		controlsWidthStyleClass = undefined,
+		children
+	}: Props = $props();
 
 	/**
 	 * Carousel container element variables
 	 */
-	let container: HTMLDivElement | undefined;
+	let container: HTMLDivElement | undefined = $state();
 	let containerWidth = 0;
 
 	/**
 	 * Computed slider frame element that wraps all slides
 	 */
-	let sliderFrame: HTMLDivElement | undefined;
+	let sliderFrame: HTMLDivElement | undefined = $state();
 
 	/**
 	 * Variables related to the slides
 	 */
-	let slides: Node[];
-	let currentSlide = 0;
-	let totalSlides: number;
-	$: totalSlides = slides?.length ?? 0;
+	let slides: Node[] = $state();
+	let currentSlide = $state(0);
+	let totalSlides: number = $state();
+	run(() => {
+		totalSlides = slides?.length ?? 0;
+	});
 
 	/**
 	 * Autoplay timer
@@ -273,7 +288,7 @@
 </script>
 
 <!-- Resize listener to re-calculate slide frame width -->
-<svelte:window on:resize={onResize} />
+<svelte:window onresize={onResize} />
 
 <div
 	class={`carousel-container ${styleClass ?? ''} relative overflow-hidden rounded-3xl bg-primary px-3 pb-10 pt-3 shadow-sm`}
@@ -281,9 +296,9 @@
 	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}
 >
-	<div bind:this={container} class="w-full overflow-hidden">
-		<div bind:this={sliderFrame} style="width: 9999px" class="flex" data-tid={CAROUSEL_SLIDE}>
-			<slot />
+	<div class="w-full overflow-hidden" bind:this={container}>
+		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame} style="width: 9999px">
+			{@render children?.()}
 		</div>
 	</div>
 	{#if nonNullish(slides) && slides.length > 1}

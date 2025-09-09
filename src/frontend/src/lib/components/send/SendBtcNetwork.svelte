@@ -7,7 +7,11 @@
 	} from '$env/tokens/tokens.btc.env';
 	import type { NetworkId } from '$lib/types/network';
 
-	export let networkId: NetworkId;
+	interface Props {
+		networkId: NetworkId;
+	}
+
+	let { networkId }: Props = $props();
 </script>
 
 {#if BTC_MAINNET_NETWORK_ID === networkId}

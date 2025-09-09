@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { type Snippet, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { ethTransactionsInitialized } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import {
@@ -16,6 +17,12 @@
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
+
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	let tokenIdLoaded: TokenId | undefined = undefined;
 
@@ -80,7 +87,9 @@
 		loading = false;
 	};
 
-	$: ($tokenWithFallback, $tokenNotInitialized, (async () => await load())());
+	run(() => {
+		($tokenWithFallback, $tokenNotInitialized, (async () => await load())());
+	});
 
 	const reload = async () => {
 		await load({ reload: true });
@@ -112,6 +121,6 @@
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} onLoad={reload}>
-	<slot />
+<IntervalLoader onLoad={reload} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+	{@render children?.()}
 </IntervalLoader>

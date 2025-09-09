@@ -4,7 +4,11 @@
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let steps: NonEmptyArray<StaticStep>;
+	interface Props {
+		steps: NonEmptyArray<StaticStep>;
+	}
+
+	let { steps }: Props = $props();
 </script>
 
 {#each steps as { text, state, progressLabel, step }, i (step)}

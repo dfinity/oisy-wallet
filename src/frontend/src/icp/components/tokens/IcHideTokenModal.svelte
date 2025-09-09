@@ -19,21 +19,24 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
 
-	let selectedToken: OptionIcrcCustomToken;
+	let { fromRoute }: Props = $props();
+
+	let selectedToken: OptionIcrcCustomToken = $state();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as OptionIcrcCustomToken));
 
-	let ledgerCanisterId: LedgerCanisterIdText | undefined;
-	$: ledgerCanisterId = selectedToken?.ledgerCanisterId;
+	let ledgerCanisterId: LedgerCanisterIdText | undefined = $derived(
+		selectedToken?.ledgerCanisterId
+	);
 
-	let indexCanisterId: LedgerCanisterIdText | undefined;
-	$: indexCanisterId = selectedToken?.indexCanisterId;
+	let indexCanisterId: LedgerCanisterIdText | undefined = $derived(selectedToken?.indexCanisterId);
 
-	let version: bigint | undefined;
-	$: version = selectedToken?.version;
+	let version: bigint | undefined = $derived(selectedToken?.version);
 
 	const assertHide = (): { valid: boolean } => {
 		if (isNullishOrEmpty(ledgerCanisterId)) {

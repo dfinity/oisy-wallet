@@ -14,11 +14,15 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
-	export let infoCmp:
-		| typeof ReceiveAddresses
-		| typeof IcReceiveInfoCkBTC
-		| typeof IcReceiveInfoICP
-		| typeof IcReceiveInfoIcrc;
+	interface Props {
+		infoCmp:
+			| typeof ReceiveAddresses
+			| typeof IcReceiveInfoCkBTC
+			| typeof IcReceiveInfoICP
+			| typeof IcReceiveInfoIcrc;
+	}
+
+	let { infoCmp }: Props = $props();
 
 	const steps: WizardSteps<WizardStepsReceiveAddress> = [
 		{
@@ -31,13 +35,13 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsReceiveAddress> | undefined;
-	let modal: WizardModal<WizardStepsReceiveAddress>;
+	let currentStep: WizardStep<WizardStepsReceiveAddress> | undefined = $state();
+	let modal: WizardModal<WizardStepsReceiveAddress> = $state();
 
-	let address: undefined | string;
-	let addressLabel: undefined | string;
-	let addressToken: Token | undefined;
-	let copyAriaLabel: string | undefined;
+	let address: undefined | string = $state();
+	let addressLabel: undefined | string = $state();
+	let addressToken: Token | undefined = $state();
+	let copyAriaLabel: string | undefined = $state();
 
 	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
 		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
@@ -81,6 +85,7 @@
 			on:icBack={displayAddresses}
 		/>
 	{:else}
-		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
+		{@const SvelteComponent = infoCmp}
+		<SvelteComponent on:icQRCode={displayQRCode} />
 	{/if}
 </WizardModal>

@@ -3,10 +3,15 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import IconClose from '$lib/components/icons/IconClose.svelte';
 
-	export let alertType: 'ok' | 'error';
+	interface Props {
+		alertType: 'ok' | 'error';
+	}
 
-	let icon: Component;
-	$: icon = alertType === 'error' ? IconClose : IconCheck;
+	let { alertType }: Props = $props();
+
+	let icon: Component = $derived(alertType === 'error' ? IconClose : IconCheck);
+
+	const SvelteComponent = $derived(icon);
 </script>
 
 <div class="flex justify-center pb-5 pt-8">
@@ -15,6 +20,6 @@
 		class:bg-brand-primary={alertType === 'ok'}
 		class:bg-error-primary={alertType === 'error'}
 	>
-		<svelte:component this={icon} />
+		<SvelteComponent />
 	</div>
 </div>

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import {
 		initUtxosFeeStore,
 		UTXOS_FEE_CONTEXT_KEY,
@@ -27,17 +28,19 @@
 
 	const modalId = Symbol();
 
-	let ckBtcToken: IcCkToken | undefined;
-	$: ckBtcToken = findTwinToken({
-		tokenToPair: BTC_MAINNET_TOKEN,
-		tokens: $tokens
+	let ckBtcToken: IcCkToken | undefined = $state();
+	run(() => {
+		ckBtcToken = findTwinToken({
+			tokenToPair: BTC_MAINNET_TOKEN,
+			tokens: $tokens
+		});
 	});
 
 	setContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY, {
 		store: initUtxosFeeStore()
 	});
 
-	let minterInfoLoaded = false;
+	let minterInfoLoaded = $state(false);
 
 	const openConvert = async () => {
 		// ckBtcToken is already available at this point, so the check is needed for TS-purposes only

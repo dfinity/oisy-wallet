@@ -50,19 +50,19 @@
 	];
 </script>
 
-<Modal testId={ABOUT_WHY_OISY_MODAL} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl">{replaceOisyPlaceholders($i18n.about.why_oisy.text.title)}</span>
-	</svelte:fragment>
+<Modal on:nnsClose={modalStore.close} testId={ABOUT_WHY_OISY_MODAL}>
+	{#snippet title()}
+		<span class="text-xl">{replaceOisyPlaceholders($i18n.about.why_oisy.text.title)}</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner alt={$i18n.about.why_oisy.text.title} src={CoverWhyOisy} styleClass="max-h-56" />
 
 		<div class="mt-5 flex flex-col gap-6">
-			{#each features as { title, description, icon: iconComponent } (title)}
-				<AboutFeatureItem {description} {title}>
+			{#each features as { title, description, icon: IconCmp } (title)}
+				<AboutFeatureItem {title} {description}>
 					{#snippet icon()}
-						<svelte:component this={iconComponent} />
+						<IconCmp />
 					{/snippet}
 				</AboutFeatureItem>
 			{/each}

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { type Snippet, onMount, type Snippet } from 'svelte';
 
 	interface Props {
 		innerEnd?: Snippet;
@@ -46,5 +46,8 @@
 	on:focus
 	bind:inputElement
 >
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
 	<svelte:fragment slot="inner-end">{@render innerEnd?.()}</svelte:fragment>
 </Input>

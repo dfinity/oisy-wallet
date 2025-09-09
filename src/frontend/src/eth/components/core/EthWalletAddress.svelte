@@ -9,12 +9,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = notEmptyString($ethAddress)
-		? `${getExplorerUrl({
-				network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
-			})}/address/${$ethAddress}`
-		: undefined;
+	let explorerUrl: string | undefined = $derived(
+		notEmptyString($ethAddress)
+			? `${getExplorerUrl({
+					network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
+				})}/address/${$ethAddress}`
+			: undefined
+	);
 </script>
 
 <div class="p-3">

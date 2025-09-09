@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import {
 		BTC_DECIMALS,
 		BTC_MAINNET_SYMBOL,
@@ -23,48 +24,73 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 
-	export let networkId: NetworkId | undefined = undefined;
-	export let sourceToken: Token;
-	export let sourceTokenExchangeRate: number | undefined = undefined;
-	export let totalSourceTokenFee: bigint | undefined = undefined;
-	export let totalDestinationTokenFee: bigint | undefined = undefined;
-	export let ethereumEstimateFee: bigint | undefined = undefined;
+	interface Props {
+		networkId?: NetworkId;
+		sourceToken: Token;
+		sourceTokenExchangeRate?: number;
+		totalSourceTokenFee?: bigint;
+		totalDestinationTokenFee?: bigint;
+		ethereumEstimateFee?: bigint;
+	}
+
+	let {
+		networkId = undefined,
+		sourceToken,
+		sourceTokenExchangeRate = undefined,
+		totalSourceTokenFee = $bindable(),
+		totalDestinationTokenFee = $bindable(),
+		ethereumEstimateFee = $bindable()
+	}: Props = $props();
 
 	const { store: bitcoinStoreFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 	const { store: ethereumStoreFeeData } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	let icTokenFee: bigint | undefined;
-	$: icTokenFee = (sourceToken as IcToken).fee;
+	let icTokenFee: bigint | undefined = $derived((sourceToken as IcToken).fee);
 
-	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(sourceToken);
+	let ckBTC = $state(false);
+	run(() => {
+		ckBTC = isTokenCkBtcLedger(sourceToken);
+	});
 
-	let btcNetwork = false;
-	$: btcNetwork = isNetworkIdBitcoin(networkId);
+	let btcNetwork = $state(false);
+	run(() => {
+		btcNetwork = isNetworkIdBitcoin(networkId);
+	});
 
-	let bitcoinEstimatedFee: bigint | undefined = undefined;
-	$: bitcoinEstimatedFee =
-		nonNullish($bitcoinStoreFeeData) && nonNullish($bitcoinStoreFeeData.bitcoinFee)
-			? $bitcoinStoreFeeData.bitcoinFee.bitcoin_fee + $bitcoinStoreFeeData.bitcoinFee.minter_fee
-			: undefined;
+	let bitcoinEstimatedFee: bigint | undefined = $state(undefined);
+	run(() => {
+		bitcoinEstimatedFee =
+			nonNullish($bitcoinStoreFeeData) && nonNullish($bitcoinStoreFeeData.bitcoinFee)
+				? $bitcoinStoreFeeData.bitcoinFee.bitcoin_fee + $bitcoinStoreFeeData.bitcoinFee.minter_fee
+				: undefined;
+	});
 
-	let kytFee: bigint | undefined = undefined;
-	$: kytFee =
-		ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined;
+	let kytFee: bigint | undefined = $state(undefined);
+	run(() => {
+		kytFee =
+			ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined;
+	});
 
-	let ethereumFeeToken: Token;
-	$: ethereumFeeToken = $ethereumFeeTokenCkEth ?? $ckEthereumNativeToken;
+	let ethereumFeeToken: Token = $derived($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
 
-	$: ethereumEstimateFee = $ethereumStoreFeeData?.maxTransactionFee;
+	run(() => {
+		ethereumEstimateFee = $ethereumStoreFeeData?.maxTransactionFee;
+	});
 
-	let ethereumFeeExchangeRate: number | undefined;
-	$: ethereumFeeExchangeRate = $exchanges?.[ethereumFeeToken.id]?.usd;
+	let ethereumFeeExchangeRate: number | undefined = $derived(
+		$exchanges?.[ethereumFeeToken.id]?.usd
+	);
 
-	let bitcoinFeeExchangeRate: number | undefined;
-	$: bitcoinFeeExchangeRate = $exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd;
+	let bitcoinFeeExchangeRate: number | undefined = $derived(
+		$exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd
+	);
 
-	$: totalSourceTokenFee = icTokenFee;
-	$: totalDestinationTokenFee = bitcoinEstimatedFee;
+	run(() => {
+		totalSourceTokenFee = icTokenFee;
+	});
+	run(() => {
+		totalDestinationTokenFee = bitcoinEstimatedFee;
+	});
 </script>
 
 <FeeDisplay

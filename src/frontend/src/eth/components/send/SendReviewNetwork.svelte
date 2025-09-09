@@ -12,13 +12,17 @@
 	import type { Token } from '$lib/types/token';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let token: Token;
+	interface Props {
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network | undefined;
+		token: Token;
+	}
 
-	let nativeIcp: boolean;
-	$: nativeIcp =
-		isNetworkICP(targetNetwork) && ERC20_CONTRACT_ICP.address === (token as Erc20Token)?.address;
+	let { sourceNetwork, targetNetwork = undefined, token }: Props = $props();
+
+	let nativeIcp: boolean = $derived(
+		isNetworkICP(targetNetwork) && ERC20_CONTRACT_ICP.address === (token as Erc20Token)?.address
+	);
 </script>
 
 <Value element="div" ref="source-network">

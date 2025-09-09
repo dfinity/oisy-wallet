@@ -6,7 +6,7 @@
 
 <script generics="T extends Token = Token" lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { type Snippet, onDestroy, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 	import type { TokenId } from '$lib/types/token';
@@ -51,6 +51,6 @@
 	const debounceTriggerTimer = debounce(triggerTimer, 1000);
 </script>
 
-<svelte:window on:oisyTriggerWallet={debounceTriggerTimer} />
+<svelte:window onoisyTriggerWallet={debounceTriggerTimer} />
 
 {@render children?.()}

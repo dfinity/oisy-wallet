@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import { slide } from 'svelte/transition';
 	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
@@ -28,25 +29,30 @@
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckMinterInfoAddresses: EthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
+	let ckMinterInfoAddresses: EthAddress[] = $state([]);
+	run(() => {
+		ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
+	});
 
-	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedEthTransactions.map(({ data: transaction }) =>
-		mapEthTransactionUi({
-			transaction,
-			ckMinterInfoAddresses,
-			ethAddress: $ethAddress
-		})
+	let sortedTransactionsUi: EthTransactionUi[] = $derived(
+		$sortedEthTransactions.map(({ data: transaction }) =>
+			mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				ethAddress: $ethAddress
+			})
+		)
 	);
 
-	let selectedTransaction: EthTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<EthTransactionUi>({
-			$modalOpen: $modalEthTransaction,
-			$modalStore
-		}));
+	let selectedTransaction: EthTransactionUi | undefined = $state();
+	let selectedToken: OptionToken = $state();
+	run(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<EthTransactionUi>({
+				$modalOpen: $modalEthTransaction,
+				$modalStore
+			}));
+	});
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>

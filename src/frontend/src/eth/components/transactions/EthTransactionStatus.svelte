@@ -20,7 +20,7 @@
 
 	let listener = $state<WebSocketListener | undefined>();
 
-	let currentBlockNumber = $state<number | undefined>(undefined);
+	let currentBlockNumber = $state<number | undefined>();
 
 	const loadCurrentBlockNumber = async () => {
 		try {

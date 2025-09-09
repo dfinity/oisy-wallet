@@ -10,16 +10,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	let settingsType: SettingsModalType;
-	$: settingsType = $modalSettingsData;
+	let settingsType: SettingsModalType = $derived($modalSettingsData);
 
-	let modalTitle: string;
-	$: modalTitle =
-		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
+	let modalTitle: string = $derived(
+		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : ''
+	);
 </script>
 
-<Modal testId={SETTINGS_NETWORKS_MODAL} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{modalTitle}</svelte:fragment>
+<Modal on:nnsClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>
+	{#snippet title()}
+		{modalTitle}
+	{/snippet}
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
 	<!-- to add a new type, extend the SettingsModalType enum and add a condition below -->

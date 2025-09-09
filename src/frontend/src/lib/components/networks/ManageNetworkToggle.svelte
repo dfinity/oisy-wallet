@@ -2,9 +2,13 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let checked = false;
-	export let disabled = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		checked?: boolean;
+		disabled?: boolean;
+		testId?: string;
+	}
+
+	let { checked = false, disabled = false, testId = undefined }: Props = $props();
 </script>
 
 <Toggle

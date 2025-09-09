@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import {
 		SOLANA_DEVNET_NETWORK,
 		SOLANA_LOCAL_NETWORK,
@@ -20,21 +21,26 @@
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import type { SolanaNetwork } from '$sol/types/network';
 
-	let address: OptionSolAddress;
-	let network: SolanaNetwork;
-	$: [address, network] = isNetworkIdSOLDevnet($networkId)
-		? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
-		: isNetworkIdSOLLocal($networkId)
-			? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
-			: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
+	let address: OptionSolAddress = $state();
+	let network: SolanaNetwork = $state();
+	run(() => {
+		[address, network] = isNetworkIdSOLDevnet($networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
+			: isNetworkIdSOLLocal($networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
+				: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
+	});
 
-	let explorerUrl: string | undefined;
-	$: ({ explorerUrl } = network);
+	let explorerUrl: string | undefined = $state();
+	run(() => {
+		({ explorerUrl } = network);
+	});
 
-	let explorerAddressUrl: string | undefined;
-	$: explorerAddressUrl = nonNullish(explorerUrl)
-		? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
-		: undefined;
+	let explorerAddressUrl: string | undefined = $derived(
+		nonNullish(explorerUrl)
+			? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
+			: undefined
+	);
 </script>
 
 <div class="p-3">

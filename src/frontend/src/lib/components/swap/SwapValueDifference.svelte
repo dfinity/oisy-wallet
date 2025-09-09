@@ -8,29 +8,33 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let swapAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
+	interface Props {
+		swapAmount: OptionAmount;
+		receiveAmount: number | undefined;
+	}
+
+	let { swapAmount, receiveAmount }: Props = $props();
 
 	const { sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let paidValue: number | undefined;
-	$: paidValue =
+	let paidValue: number | undefined = $derived(
 		nonNullish(swapAmount) && nonNullish($sourceTokenExchangeRate)
 			? Number(swapAmount) * $sourceTokenExchangeRate
-			: undefined;
+			: undefined
+	);
 
-	let receivedValue: number | undefined;
-	$: receivedValue =
+	let receivedValue: number | undefined = $derived(
 		nonNullish(receiveAmount) && nonNullish($destinationTokenExchangeRate)
 			? receiveAmount * $destinationTokenExchangeRate
-			: undefined;
+			: undefined
+	);
 
-	let valueDifference: number | undefined;
-	$: valueDifference =
+	let valueDifference: number | undefined = $derived(
 		nonNullish(paidValue) && nonNullish(receivedValue) && paidValue !== 0
 			? ((receivedValue - paidValue) / paidValue) * 100
-			: undefined;
+			: undefined
+	);
 </script>
 
 {#if nonNullish(valueDifference)}

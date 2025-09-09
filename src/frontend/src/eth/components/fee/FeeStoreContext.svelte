@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { type Snippet, setContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { writable } from 'svelte/store';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -10,21 +11,34 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token, TokenId } from '$lib/types/token';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children?: Snippet;
+	}
+
+	let { token, children }: Props = $props();
 
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(token.symbol);
+	run(() => {
+		feeSymbolStore.set(token.symbol);
+	});
 
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(token.id);
+	run(() => {
+		feeTokenIdStore.set(token.id);
+	});
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(token.decimals);
+	run(() => {
+		feeDecimalsStore.set(token.decimals);
+	});
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+	run(() => {
+		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+	});
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
@@ -38,4 +52,4 @@
 	);
 </script>
 
-<slot />
+{@render children?.()}

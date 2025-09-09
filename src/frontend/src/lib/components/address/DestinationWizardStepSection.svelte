@@ -1,9 +1,23 @@
 <script lang="ts">
-	export let isActive = false;
-	export let label: string;
+	import type { Snippet } from 'svelte';
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
+
+	interface Props {
+		isActive?: boolean;
+		label: string;
+		content?: Snippet;
+	}
+
+	let { isActive = false, label, content }: Props = $props();
 </script>
 
-<button class="mb-2 flex cursor-pointer items-center gap-2" aria-label={label} on:click>
+<button
+	class="mb-2 flex cursor-pointer items-center gap-2"
+	onclick={bubble('click')}
+	aria-label={label}
+>
 	<span
 		class="h-4 w-4 rounded-full border-4 shadow-sm"
 		class:bg-off-white={isActive}
@@ -16,5 +30,5 @@
 </button>
 
 {#if isActive}
-	<slot name="content" />
+	{@render content?.()}
 {/if}

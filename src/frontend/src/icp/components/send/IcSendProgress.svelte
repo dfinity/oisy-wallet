@@ -4,7 +4,11 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let sendProgressStep: string = ProgressStepsSendIc.INITIALIZATION;
+	interface Props {
+		sendProgressStep?: string;
+	}
+
+	let { sendProgressStep = ProgressStepsSendIc.INITIALIZATION }: Props = $props();
 </script>
 
 <InProgressWizard progressStep={sendProgressStep} steps={sendSteps({ i18n: $i18n })} />

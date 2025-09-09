@@ -46,7 +46,7 @@
 	});
 </script>
 
-<svelte:window on:scroll={handleScroll} on:resize={debounce(() => calcSizes(true), 250)} />
+<svelte:window onscroll={handleScroll} onresize={debounce(() => calcSizes(true), 250)} />
 
 <div bind:this={rootElement} style={`height: ${originalHeight ?? 0}px`} class="relative">
 	<!-- to avoid lower sticky headers to peek in front when using multiple, we add px-1 and add one SPACING_UNIT to the width below -->

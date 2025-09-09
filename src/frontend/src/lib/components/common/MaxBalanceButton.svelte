@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { run, preventDefault } from 'svelte/legacy';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -8,25 +9,37 @@
 	import type { Token } from '$lib/types/token';
 	import { getMaxTransactionAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	export let amount: OptionAmount;
-	export let amountSetToMax = false;
-	export let error = false;
-	export let balance: OptionBalance;
-	export let token: Token | undefined = undefined;
-	export let fee: bigint | undefined = undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountSetToMax?: boolean;
+		error?: boolean;
+		balance: OptionBalance;
+		token?: Token | undefined;
+		fee?: bigint;
+	}
 
-	let isZeroBalance: boolean;
-	$: isZeroBalance = isNullish(balance) || balance === ZERO;
+	let {
+		amount = $bindable(),
+		amountSetToMax = $bindable(false),
+		error = false,
+		balance,
+		token = undefined,
+		fee = undefined
+	}: Props = $props();
 
-	let maxAmount: string | undefined;
-	$: maxAmount = nonNullish(token)
-		? getMaxTransactionAmount({
-				balance,
-				fee,
-				tokenDecimals: token.decimals,
-				tokenStandard: token.standard
-			})
-		: undefined;
+	let isZeroBalance: boolean = $derived(isNullish(balance) || balance === ZERO);
+
+	let maxAmount: string | undefined = $state();
+	run(() => {
+		maxAmount = nonNullish(token)
+			? getMaxTransactionAmount({
+					balance,
+					fee,
+					tokenDecimals: token.decimals,
+					tokenStandard: token.standard
+				})
+			: undefined;
+	});
 
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(maxAmount)) {
@@ -45,15 +58,17 @@
 		debounce(() => setMax(), 500)();
 	};
 
-	$: (fee, debounceSetMax());
+	run(() => {
+		(fee, debounceSetMax());
+	});
 </script>
 
 <button
 	class="font-semibold text-brand-primary-alt transition-all"
+	onclick={preventDefault(setMax)}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
-	on:click|preventDefault={setMax}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)

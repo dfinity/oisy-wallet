@@ -30,14 +30,11 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let remainingTimeMilliseconds: number | undefined;
-	$: remainingTimeMilliseconds = $authRemainingTimeStore;
+	let remainingTimeMilliseconds: number | undefined = $derived($authRemainingTimeStore);
 
-	let identity: OptionIdentity;
-	$: identity = $authIdentity;
+	let identity: OptionIdentity = $derived($authIdentity);
 
-	let principal: Option<Principal>;
-	$: principal = identity?.getPrincipal();
+	let principal: Option<Principal> = $derived(identity?.getPrincipal());
 
 	const getPouhCredential = async () => {
 		if (nonNullish(identity)) {
@@ -57,29 +54,31 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">General</svelte:fragment>
+	{#snippet title()}
+		General
+	{/snippet}
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key">
+		{#snippet key()}
 			{$i18n.settings.text.principal}
-		</svelte:fragment>
-		<svelte:fragment slot="value">
+		{/snippet}
+		{#snippet value()}
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
-			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
-		</svelte:fragment>
-		<svelte:fragment slot="info">
+			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+		{/snippet}
+		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 
 	<SettingsCardItem permanentInfo>
-		<svelte:fragment slot="key">
+		{#snippet key()}
 			{$i18n.settings.text.session_duration}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="info">
+		{#snippet info()}
 			{#if nonNullish(remainingTimeMilliseconds)}
 				{$i18n.settings.text.session_expires_in}
 				{remainingTimeMilliseconds <= 0
@@ -89,16 +88,20 @@
 							i18n: $i18n.temporal.seconds_to_duration
 						})}
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
 
 <SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.networks}</svelte:fragment>
+	{#snippet title()}
+		{$i18n.settings.text.networks}
+	{/snippet}
 
 	<SettingsCardItem>
-		<svelte:fragment slot="key">{$i18n.settings.text.active_networks}</svelte:fragment>
-		<svelte:fragment slot="value">
+		{#snippet key()}
+			{$i18n.settings.text.active_networks}
+		{/snippet}
+		{#snippet value()}
 			<EnabledNetworksPreviewIcons />
 
 			<Button
@@ -108,20 +111,24 @@
 			>
 				{$i18n.core.text.edit} >
 			</Button>
-		</svelte:fragment>
-		<svelte:fragment slot="info">
+		{/snippet}
+		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
-		</svelte:fragment>
+		{/snippet}
 	</SettingsCardItem>
 </SettingsCard>
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>
-		<svelte:fragment slot="title">{$i18n.settings.text.credentials_title}</svelte:fragment>
+		{#snippet title()}
+			{$i18n.settings.text.credentials_title}
+		{/snippet}
 
 		<SettingsCardItem>
-			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
-			<svelte:fragment slot="value">
+			{#snippet key()}
+				{$i18n.settings.text.pouh_credential}
+			{/snippet}
+			{#snippet value()}
 				{#if $userHasPouhCredential}
 					<output class="mr-1.5" in:fade>
 						{$i18n.settings.text.pouh_credential_verified}
@@ -131,10 +138,10 @@
 						{$i18n.settings.text.present_pouh_credential}&hellip;
 					</Button>
 				{/if}
-			</svelte:fragment>
-			<svelte:fragment slot="info">
+			{/snippet}
+			{#snippet info()}
 				{$i18n.settings.text.pouh_credential_description}
-			</svelte:fragment>
+			{/snippet}
 		</SettingsCardItem>
 	</SettingsCard>
 {/if}

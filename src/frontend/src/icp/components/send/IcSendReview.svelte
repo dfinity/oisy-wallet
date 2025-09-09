@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
@@ -10,25 +11,35 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		selectedContact?: ContactUi;
+	}
+
+	let { destination = '', amount = undefined, selectedContact = undefined }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
-	let invalid = true;
-	$: invalid =
-		isNullish($sendTokenStandard) ||
-		isInvalidDestinationIc({
-			destination,
-			tokenStandard: $sendTokenStandard
-		}) ||
-		invalidAmount(amount);
+	let invalid = $state(true);
+	run(() => {
+		invalid =
+			isNullish($sendTokenStandard) ||
+			isInvalidDestinationIc({
+				destination,
+				tokenStandard: $sendTokenStandard
+			}) ||
+			invalidAmount(amount);
+	});
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
-	<IcTokenFee slot="fee" />
+<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={invalid}>
+	{#snippet fee()}
+		<IcTokenFee />
+	{/snippet}
 
-	<IcReviewNetwork slot="network" />
+	{#snippet network()}
+		<IcReviewNetwork />
+	{/snippet}
 </SendReview>

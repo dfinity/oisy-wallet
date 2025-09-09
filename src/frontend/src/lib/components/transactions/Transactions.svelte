@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { goto } from '$app/navigation';
 	import BtcTransactions from '$btc/components/transactions/BtcTransactions.svelte';
 	import EthTransactions from '$eth/components/transactions/EthTransactions.svelte';
@@ -26,11 +27,15 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
-	let token: OptionToken;
-	$: token = $allTokens.find(
-		(token) =>
-			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
-	);
+	let token: OptionToken = $state();
+	run(() => {
+		token = $allTokens.find(
+			(token) =>
+				token.name === $routeToken &&
+				$routeNetwork &&
+				token.network.id.description === $routeNetwork
+		);
+	});
 
 	let timer: NodeJS.Timeout | undefined;
 

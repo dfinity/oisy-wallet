@@ -4,13 +4,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 
-	let checked: boolean;
-	$: checked = $hideZeroBalances;
+	let checked: boolean = $derived($hideZeroBalances);
 
 	const toggleHide = () =>
 		hideZeroBalancesStore.set({ key: 'hide-zero-balances', value: { enabled: !checked } });
 </script>
 
-<svelte:window on:oisyToggleZeroBalances={toggleHide} />
+<svelte:window onoisyToggleZeroBalances={toggleHide} />
 
 <Toggle ariaLabel={$i18n.tokens.text.hide_zero_balances} bind:checked on:nnsToggle={toggleHide} />

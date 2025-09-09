@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -12,20 +13,36 @@
 	import type { SolAmountAssertionError } from '$sol/types/sol-send';
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let destination = '';
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		amount?: OptionAmount;
+		destination?: string;
+		selectedContact?: ContactUi;
+		cancel?: Snippet;
+	}
+
+	let {
+		amount = $bindable(),
+		destination = '',
+		selectedContact = undefined,
+		cancel
+	}: Props = $props();
 
 	const { feeDecimalsStore, feeSymbolStore, feeTokenIdStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let amountError: SolAmountAssertionError | undefined;
+	let amountError: SolAmountAssertionError | undefined = $state();
 
-	let invalidDestination = false;
-	$: invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress(destination);
+	let invalidDestination = $state(false);
+	run(() => {
+		invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress(destination);
+	});
 
-	let invalid = true;
-	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	let invalid = $state(true);
+	run(() => {
+		invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+	});
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <SendForm
@@ -36,16 +53,23 @@
 	on:icNext
 	on:icBack
 >
-	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet amount()}
+		<SolSendAmount bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
-	<SolFeeDisplay slot="fee" />
+	{#snippet fee()}
+		<SolFeeDisplay />
+	{/snippet}
 
-	<SendFeeInfo
-		slot="info"
-		decimals={$feeDecimalsStore}
-		feeSymbol={$feeSymbolStore}
-		feeTokenId={$feeTokenIdStore}
-	/>
+	{#snippet info()}
+		<SendFeeInfo
+			feeSymbol={$feeSymbolStore}
+			decimals={$feeDecimalsStore}
+			feeTokenId={$feeTokenIdStore}
+		/>
+	{/snippet}
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		{@render cancel_render?.()}
+	{/snippet}
 </SendForm>

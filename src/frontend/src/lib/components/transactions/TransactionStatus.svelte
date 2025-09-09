@@ -3,13 +3,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { TransactionStatus } from '$lib/types/transaction';
 
-	export let status: TransactionStatus;
+	interface Props {
+		status: TransactionStatus;
+	}
 
-	let pending: boolean;
-	$: pending = status === 'pending';
+	let { status }: Props = $props();
 
-	let unconfirmed: boolean;
-	$: unconfirmed = status === 'unconfirmed';
+	let pending: boolean = $derived(status === 'pending');
+
+	let unconfirmed: boolean = $derived(status === 'unconfirmed');
 </script>
 
 {#if pending || unconfirmed}

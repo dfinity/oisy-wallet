@@ -60,9 +60,9 @@
 	<Responsive down="md">
 		{#if visible}
 			<Modal on:nnsClose={close}>
-				<svelte:fragment slot="title">
+				{#snippet title()}
 					{@render title?.()}
-				</svelte:fragment>
+				{/snippet}
 
 				{@render items()}
 			</Modal>

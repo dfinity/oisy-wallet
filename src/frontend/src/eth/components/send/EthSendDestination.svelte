@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,18 +13,33 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 
-	export let token: OptionToken;
-	export let network: Network | undefined = undefined;
-	export let destination = '';
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		token: OptionToken;
+		network?: Network | undefined;
+		destination?: string;
+		invalidDestination?: boolean;
+		knownDestinations?: KnownDestinations | undefined;
+		networkContacts?: NetworkContacts | undefined;
+	}
 
-	let networkICP = false;
-	$: networkICP = isNetworkICP(network);
+	let {
+		token,
+		network = undefined,
+		destination = $bindable(''),
+		invalidDestination = $bindable(false),
+		knownDestinations = undefined,
+		networkContacts = undefined
+	}: Props = $props();
 
-	let erc20Icp = false;
-	$: erc20Icp = isErc20Icp(token);
+	let networkICP = $state(false);
+	run(() => {
+		networkICP = isNetworkICP(network);
+	});
+
+	let erc20Icp = $state(false);
+	run(() => {
+		erc20Icp = isErc20Icp(token);
+	});
 
 	const dispatch = createEventDispatcher();
 

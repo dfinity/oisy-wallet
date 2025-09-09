@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { type Snippet, createEventDispatcher } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import DestinationWizardStepSection from '$lib/components/address/DestinationWizardStepSection.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -11,18 +12,28 @@
 	import type { TokenStandard } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let tokenStandard: TokenStandard;
-	export let customDestination = '';
-	export let networkId: NetworkId | undefined = undefined;
+	interface Props {
+		tokenStandard: TokenStandard;
+		customDestination?: string;
+		networkId?: NetworkId;
+		title?: Snippet;
+	}
+
+	let {
+		tokenStandard,
+		customDestination = $bindable(''),
+		networkId = undefined,
+		title
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let activeAddressType: 'default' | 'custom' = isNullishOrEmpty(customDestination)
-		? 'default'
-		: 'custom';
+	let activeAddressType: 'default' | 'custom' = $state(
+		isNullishOrEmpty(customDestination) ? 'default' : 'custom'
+	);
 
-	let destination = customDestination;
-	let invalidDestination: boolean;
+	let destination = $state(customDestination);
+	let invalidDestination: boolean = $state();
 
 	const back = () => dispatch('icDestinationBack');
 	const apply = () => {
@@ -31,13 +42,15 @@
 		dispatch('icDestinationBack');
 	};
 
-	let disabled = true;
-	$: disabled =
-		activeAddressType !== 'default' && (isNullishOrEmpty(destination) || invalidDestination);
+	let disabled = $state(true);
+	run(() => {
+		disabled =
+			activeAddressType !== 'default' && (isNullishOrEmpty(destination) || invalidDestination);
+	});
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-4 font-bold"><slot name="title" /></div>
+	<div class="mb-4 font-bold">{@render title?.()}</div>
 
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'default'}
@@ -50,14 +63,15 @@
 		label={$i18n.convert.text.custom_destination}
 		on:click={() => (activeAddressType = 'custom')}
 	>
-		<IcSendDestination
-			slot="content"
-			{networkId}
-			{tokenStandard}
-			bind:destination
-			bind:invalidDestination
-			on:icQRCodeScan
-		/>
+		{#snippet content()}
+			<IcSendDestination
+				{tokenStandard}
+				bind:destination
+				bind:invalidDestination
+				{networkId}
+				on:icQRCodeScan
+			/>
+		{/snippet}
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}

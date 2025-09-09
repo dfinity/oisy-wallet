@@ -7,11 +7,21 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
-	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination?: string;
+		networkId?: NetworkId;
+		invalidDestination?: boolean;
+		knownDestinations?: KnownDestinations | undefined;
+		networkContacts?: NetworkContacts | undefined;
+	}
+
+	let {
+		destination = $bindable(''),
+		networkId = undefined,
+		invalidDestination = $bindable(false),
+		knownDestinations = undefined,
+		networkContacts = undefined
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 

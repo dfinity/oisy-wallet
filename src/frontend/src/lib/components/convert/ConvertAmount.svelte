@@ -5,16 +5,27 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let totalFee: bigint | undefined;
-	export let destinationTokenFee: bigint | undefined = undefined;
-	export let minFee: bigint | undefined = undefined;
-	export let ethereumEstimateFee: bigint | undefined = undefined;
-	export let exchangeValueUnit: DisplayUnit = 'usd';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		totalFee: bigint | undefined;
+		destinationTokenFee?: bigint;
+		minFee?: bigint;
+		ethereumEstimateFee?: bigint;
+		exchangeValueUnit?: DisplayUnit;
+	}
 
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		totalFee,
+		destinationTokenFee = undefined,
+		minFee = undefined,
+		ethereumEstimateFee = undefined,
+		exchangeValueUnit = $bindable('usd')
+	}: Props = $props();
+
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 </script>
 
 <div class="relative">

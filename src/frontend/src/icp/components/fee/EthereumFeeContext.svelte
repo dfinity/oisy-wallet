@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy } from 'svelte';
+	import { type Snippet, getContext, onDestroy } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
@@ -21,13 +22,22 @@
 	import { token } from '$lib/stores/token.store';
 	import type { NetworkId } from '$lib/types/network';
 
-	export let networkId: NetworkId | undefined = undefined;
+	interface Props {
+		networkId?: NetworkId;
+		children?: Snippet;
+	}
 
-	let ckEthConvert = false;
-	$: ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
+	let { networkId = undefined, children }: Props = $props();
 
-	let ckErc20Convert = false;
-	$: ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
+	let ckEthConvert = $state(false);
+	run(() => {
+		ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
+	});
+
+	let ckErc20Convert = $state(false);
+	run(() => {
+		ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
+	});
 
 	// This is the amount of ckETH to be burned to cover for the fees of the transaction eth_sendRawTransaction(destination_eth_address, amount) described in the withdrawal scheme.
 	// It will be requested to be approved using the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
@@ -36,35 +46,44 @@
 	// NOTE: the endpoint gives a timestamp of the last update too, that could come in handy.
 	// For ckETH, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/cketh.adoc#cost-of-a-withdrawal
 	// For ckERC20, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
-	let maxTransactionFeeCkEth: bigint | undefined = undefined;
-	$: maxTransactionFeeCkEth = nonNullish($tokenId)
-		? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
-		: undefined;
+	let maxTransactionFeeCkEth: bigint | undefined = $state(undefined);
+	run(() => {
+		maxTransactionFeeCkEth = nonNullish($tokenId)
+			? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
+			: undefined;
+	});
 
-	let tokenCkEth: IcToken | undefined;
-	$: tokenCkEth = $icrcTokens
-		.filter(isTokenCkEthLedger)
-		.find(
-			(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
-		);
+	let tokenCkEth: IcToken | undefined = $derived(
+		$icrcTokens
+			.filter(isTokenCkEthLedger)
+			.find(
+				(tokenCkEth) => isTokenIcrcTestnet(tokenCkEth ?? {}) === isTokenIcrcTestnet($token ?? {})
+			)
+	);
 
 	// For ckERC20, include the ckETH ledger fee for the transaction icrc2_approve(minter, tx_fee) to the ckETH ledger, described in the first step of the withdrawal scheme.
 	// For ckETH, such fee is already shown in the ckETH ledger fee section, so no need to include it here.
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
-	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = undefined;
-	$: maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
-		? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
-		: undefined;
-
-	let maxTransactionFee: bigint | undefined = undefined;
-	$: maxTransactionFee = ckEthConvert
-		? maxTransactionFeeCkEth
-		: ckErc20Convert
-			? maxTransactionFeePlusLedgerApproveCkEth
+	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = $state(undefined);
+	run(() => {
+		maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
+			? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
 			: undefined;
+	});
+
+	let maxTransactionFee: bigint | undefined = $state(undefined);
+	run(() => {
+		maxTransactionFee = ckEthConvert
+			? maxTransactionFeeCkEth
+			: ckErc20Convert
+				? maxTransactionFeePlusLedgerApproveCkEth
+				: undefined;
+	});
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-	$: store.setFee({ maxTransactionFee });
+	run(() => {
+		store.setFee({ maxTransactionFee });
+	});
 
 	const updateContext = () => {
 		if (ckEthConvert || ckErc20Convert) {
@@ -75,7 +94,9 @@
 		store.setFee(null);
 	};
 
-	$: (maxTransactionFee, updateContext());
+	run(() => {
+		(maxTransactionFee, updateContext());
+	});
 
 	const loadFee = async () => {
 		clearTimer();
@@ -97,7 +118,9 @@
 		timer = setInterval(load, 30000);
 	};
 
-	$: (networkId, (async () => await loadFee())());
+	run(() => {
+		(networkId, (async () => await loadFee())());
+	});
 
 	let timer: NodeJS.Timeout | undefined;
 
@@ -106,4 +129,4 @@
 	onDestroy(clearTimer);
 </script>
 
-<slot />
+{@render children?.()}

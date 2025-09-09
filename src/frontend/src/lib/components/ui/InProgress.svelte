@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
+	import { run } from 'svelte/legacy';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
@@ -10,13 +11,16 @@
 	export let type: 'progress' | 'static' = 'progress';
 	export let failedSteps: string[] = [];
 
-	let cmp: typeof StaticSteps | typeof ProgressStepsCmp;
-	$: cmp = type === 'static' ? StaticSteps : ProgressStepsCmp;
+	let { progressStep, steps, type = 'progress' }: Props = $props();
 
-	let dynamicSteps: ProgressSteps = [
+	let cmp: typeof StaticSteps | typeof ProgressStepsCmp = $derived(
+		type === 'static' ? StaticSteps : ProgressStepsCmp
+	);
+
+	let dynamicSteps: ProgressSteps = $state([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
-	];
+	]);
 
 	const updateSteps = () => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
@@ -36,9 +40,13 @@
 		}) as ProgressSteps;
 	};
 
-	$: (progressStep, updateSteps());
+	run(() => {
+		(progressStep, updateSteps());
+	});
+
+	const SvelteComponent = $derived(cmp);
 </script>
 
 <div class="px-2 pb-3">
-	<svelte:component this={cmp} steps={dynamicSteps} />
+	<SvelteComponent steps={dynamicSteps} />
 </div>

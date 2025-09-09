@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { type Snippet, createEventDispatcher, getContext, setContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -42,35 +43,49 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let currentStep: WizardStep | undefined;
-
 	/**
 	 * Send context store
 	 */
 
 	const { sendTokenDecimals, sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	/**
-	 * Props
-	 */
-
-	export let destination = '';
-	export let sourceNetwork: EthereumNetwork;
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
 	// Required for the fee and also to retrieve ck minter information.
-	// i.e. Ethereum or Sepolia "main" token.
-	export let nativeEthereumToken: Token;
 
-	let sendWithApproval: boolean;
-	$: sendWithApproval = shouldSendWithApproval({
-		to: destination,
-		tokenId: $sendTokenId,
-		erc20HelperContractAddress: toCkErc20HelperContractAddress(
-			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-		)
-	});
+	interface Props {
+		currentStep: WizardStep | undefined;
+		/**
+		 * Props
+		 */
+		destination?: string;
+		sourceNetwork: EthereumNetwork;
+		amount?: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		// i.e. Ethereum or Sepolia "main" token.
+		nativeEthereumToken: Token;
+		children?: Snippet;
+	}
+
+	let {
+		currentStep,
+		destination = $bindable(''),
+		sourceNetwork,
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact = undefined,
+		nativeEthereumToken,
+		children
+	}: Props = $props();
+
+	let sendWithApproval: boolean = $derived(
+		shouldSendWithApproval({
+			to: destination,
+			tokenId: $sendTokenId,
+			erc20HelperContractAddress: toCkErc20HelperContractAddress(
+				$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+			)
+		})
+	);
 
 	/**
 	 * Fee context store
@@ -79,18 +94,26 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(nativeEthereumToken.symbol);
+	run(() => {
+		feeSymbolStore.set(nativeEthereumToken.symbol);
+	});
 
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(nativeEthereumToken.id);
+	run(() => {
+		feeTokenIdStore.set(nativeEthereumToken.id);
+	});
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
+	run(() => {
+		feeDecimalsStore.set(nativeEthereumToken.decimals);
+	});
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+	run(() => {
+		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+	});
 
-	let feeContext: EthFeeContext | undefined;
+	let feeContext: EthFeeContext | undefined = $state();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -240,9 +263,11 @@
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</EthSendForm>
 	{:else}
-		<slot />
+		{@render children?.()}
 	{/if}
 </EthFeeContext>

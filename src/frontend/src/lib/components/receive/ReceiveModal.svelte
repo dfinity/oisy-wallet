@@ -27,7 +27,9 @@
 </script>
 
 <Modal on:nnsClose={modalStore.close}>
-	<ReceiveTitle slot="title" {title} />
+	{#snippet title()}
+		<ReceiveTitle {title} />
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ReceiveAddressQrCodeContent

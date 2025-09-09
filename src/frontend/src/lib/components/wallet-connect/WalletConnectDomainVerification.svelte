@@ -1,17 +1,25 @@
 <script lang="ts">
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import type { Verify } from '@walletconnect/types';
+	import { run } from 'svelte/legacy';
 	import { CONTEXT_VALIDATION_ISSCAM } from '$lib/constants/wallet-connect.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Option } from '$lib/types/utils';
 
-	export let proposal: Option<WalletKitTypes.SessionProposal>;
+	interface Props {
+		proposal: Option<WalletKitTypes.SessionProposal>;
+	}
 
-	let context: Verify.Context | undefined = undefined;
-	$: context = proposal?.verifyContext;
+	let { proposal }: Props = $props();
 
-	let validation: 'UNKNOWN' | 'VALID' | 'INVALID' | string | undefined;
-	$: validation = context?.verified.validation;
+	let context: Verify.Context | undefined = $state(undefined);
+	run(() => {
+		context = proposal?.verifyContext;
+	});
+
+	let validation: 'UNKNOWN' | 'VALID' | 'INVALID' | string | undefined = $derived(
+		context?.verified.validation
+	);
 </script>
 
 <div class="mt-6">

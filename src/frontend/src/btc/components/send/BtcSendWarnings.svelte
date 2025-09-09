@@ -5,8 +5,12 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
-	export let utxosFee: UtxosFee | undefined = undefined;
+	interface Props {
+		pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
+		utxosFee?: UtxosFee | undefined;
+	}
+
+	let { pendingTransactionsStatus, utxosFee = undefined }: Props = $props();
 </script>
 
 <!-- TODO remove this as soon as parallel BTC transactions are also enabled for BTC convert -->

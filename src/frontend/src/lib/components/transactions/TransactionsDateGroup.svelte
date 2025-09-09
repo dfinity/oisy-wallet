@@ -7,9 +7,13 @@
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 
-	export let formattedDate: string;
-	export let transactions: AllTransactionUiWithCmpNonEmptyList;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		formattedDate: string;
+		transactions: AllTransactionUiWithCmpNonEmptyList;
+		testId?: string;
+	}
+
+	let { formattedDate, transactions, testId = undefined }: Props = $props();
 </script>
 
 {#if transactions.length > 0}

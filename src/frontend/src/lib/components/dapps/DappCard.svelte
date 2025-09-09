@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { createBubbler } from 'svelte/legacy';
+
+	const bubble = createBubbler();
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -6,16 +9,20 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 
-	export let dAppDescription: OisyDappDescription;
-	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
+	interface Props {
+		dAppDescription: OisyDappDescription;
+	}
+
+	let { dAppDescription }: Props = $props();
+	let { name: dAppName, logo, oneLiner, tags } = $derived(dAppDescription);
 </script>
 
 <button
-	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}
-	on:click
+	onclick={bubble('click')}
+	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 >
 	<span class="absolute -top-5 left-4">
 		<Logo

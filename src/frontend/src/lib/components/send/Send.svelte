@@ -4,9 +4,15 @@
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let isTransactionsPage: boolean;
+	interface Props {
+		isTransactionsPage: boolean;
+	}
+
+	let { isTransactionsPage }: Props = $props();
 </script>
 
-<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
-	<SendModal slot="modal" {isTransactionsPage} on:nnsClose />
+<SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
+	{#snippet modal()}
+		<SendModal {isTransactionsPage} on:nnsClose />
+	{/snippet}
 </SendButtonWithModal>

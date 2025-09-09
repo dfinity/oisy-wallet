@@ -7,13 +7,16 @@
 	import type { Token } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let address: string;
-	export let addressToken: Token | undefined = undefined;
+	interface Props {
+		address: string;
+		addressToken?: Token | undefined;
+	}
 
-	let symbol: string | undefined;
-	$: symbol = addressToken?.symbol;
+	let { address, addressToken = undefined }: Props = $props();
 
-	let render = true;
+	let symbol: string | undefined = $derived(addressToken?.symbol);
+
+	let render = $state(true);
 
 	const rerender = debounce(() => {
 		render = false;
@@ -21,7 +24,7 @@
 	});
 </script>
 
-<svelte:window on:resize={rerender} />
+<svelte:window onresize={rerender} />
 
 <div
 	class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-[100%] rounded-xl bg-white p-4"
@@ -35,13 +38,13 @@
 			})}
 		>
 			<QRCode value={address}>
-				<svelte:fragment slot="logo">
+				{#snippet logo()}
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 							<TokenLogo data={addressToken} />
 						</div>
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</QRCode>
 		</article>
 	{/if}

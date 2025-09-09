@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
@@ -36,28 +37,42 @@
 		mapNetworkIdToBitcoinNetwork
 	} from '$lib/utils/network.utils';
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		currentStep: WizardStep | undefined;
+		destination?: string;
+		amount?: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		children?: Snippet;
+	}
+
+	let {
+		currentStep,
+		destination = $bindable(''),
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact = undefined,
+		children
+	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined;
+	let utxosFee: UtxosFee | undefined = $state(undefined);
 
-	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	let networkId: NetworkId | undefined = $state(undefined);
+	run(() => {
+		networkId = $sendToken.network.id;
+	});
 
-	let source: string;
-	$: source =
+	let source: string = $derived(
 		(isNetworkIdBTCTestnet(networkId)
 			? $btcAddressTestnet
 			: isNetworkIdBTCRegtest(networkId)
 				? $btcAddressRegtest
-				: $btcAddressMainnet) ?? '';
+				: $btcAddressMainnet) ?? ''
+	);
 
 	const dispatch = createEventDispatcher();
 
@@ -200,8 +215,10 @@
 		bind:destination
 		bind:amount
 	>
-		<ButtonBack slot="cancel" onclick={back} />
+		{#snippet cancel()}
+			<ButtonBack onclick={back} />
+		{/snippet}
 	</BtcSendForm>
 {:else}
-	<slot />
+	{@render children?.()}
 {/if}

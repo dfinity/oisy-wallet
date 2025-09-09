@@ -7,18 +7,27 @@
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
-	export let address: OptionAddress<Address>;
-	export let addressLabel: string | undefined = undefined;
-	export let addressToken: Token | undefined;
+	interface Props {
+		address: OptionAddress<Address>;
+		addressLabel?: string;
+		addressToken: Token | undefined;
+		testId?: string;
+		copyButtonTestId?: string;
+		network: Network;
+		qrCodeAction: ReceiveQRCodeAction;
+		copyAriaLabel: string; // TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
+	}
 
-	export let testId: string | undefined = undefined;
-	export let copyButtonTestId: string | undefined = undefined;
-
-	export let network: Network;
-	export let qrCodeAction: ReceiveQRCodeAction;
-	export let copyAriaLabel: string;
-
-	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
+	let {
+		address,
+		addressLabel = undefined,
+		addressToken,
+		testId = undefined,
+		copyButtonTestId = undefined,
+		network,
+		qrCodeAction,
+		copyAriaLabel
+	}: Props = $props();
 </script>
 
 <ReceiveQrCode address={address ?? ''} {addressToken} />

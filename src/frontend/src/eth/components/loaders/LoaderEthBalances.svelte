@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { type Snippet, onMount, type Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';

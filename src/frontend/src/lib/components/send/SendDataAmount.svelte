@@ -6,16 +6,26 @@
 	import type { Token } from '$lib/types/token';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let token: Token;
-	export let exchangeRate: number | undefined = undefined;
-	export let showNullishLabel = false;
+	interface Props {
+		amount?: OptionAmount;
+		token: Token;
+		exchangeRate?: number;
+		showNullishLabel?: boolean;
+	}
 
-	let bigNumberAmount: bigint;
-	$: bigNumberAmount = parseToken({
-		value: `${amount ?? 0}`,
-		unitName: token.decimals
-	});
+	let {
+		amount = undefined,
+		token,
+		exchangeRate = undefined,
+		showNullishLabel = false
+	}: Props = $props();
+
+	let bigNumberAmount: bigint = $derived(
+		parseToken({
+			value: `${amount ?? 0}`,
+			unitName: token.decimals
+		})
+	);
 </script>
 
 <Value element="div" ref="amount">

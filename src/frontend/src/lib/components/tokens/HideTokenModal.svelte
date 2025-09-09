@@ -22,10 +22,14 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
-	export let assertHide: () => { valid: boolean };
-	export let hideToken: (params: { identity: Identity }) => Promise<void>;
-	export let updateUi: (params: { identity: Identity }) => Promise<void>;
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		assertHide: () => { valid: boolean };
+		hideToken: (params: { identity: Identity }) => Promise<void>;
+		updateUi: (params: { identity: Identity }) => Promise<void>;
+		fromRoute: NavigationTarget | undefined;
+	}
+
+	let { assertHide, hideToken, updateUi, fromRoute }: Props = $props();
 
 	const hide = async () => {
 		const { valid } = assertHide();
@@ -103,10 +107,10 @@
 		} as ProgressStep
 	];
 
-	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
+	let hideProgressStep: string = $state(ProgressStepsHideToken.INITIALIZATION);
 
-	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
-	let modal: WizardModal<WizardStepsHideToken>;
+	let currentStep: WizardStep<WizardStepsHideToken> | undefined = $state();
+	let modal: WizardModal<WizardStepsHideToken> = $state();
 
 	const close = () => {
 		modalStore.close();

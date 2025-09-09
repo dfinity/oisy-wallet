@@ -9,6 +9,7 @@
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Component, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
@@ -26,11 +27,9 @@
 		permissionsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let scopes: IcrcScope[];
-	$: scopes = $payload?.requestedScopes ?? [];
+	let scopes: IcrcScope[] = $derived($payload?.requestedScopes ?? []);
 
-	let confirm: PermissionsConfirmation | undefined;
-	$: confirm = $payload?.confirm;
+	let confirm: PermissionsConfirmation | undefined = $derived($payload?.confirm);
 
 	/**
 	 * During the initial UX review, it was decided that permissions should not be permanently denied when "Rejected," but instead should be ignored.
@@ -67,8 +66,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }>;
-	$: listItems = {
+	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }> = $derived({
 		icrc27_accounts: {
 			icon: IconWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
@@ -77,16 +75,18 @@
 			icon: IconShield,
 			label: $i18n.signer.permissions.text.icrc49_call_canister
 		}
-	};
+	});
 
-	let requestAccountsPermissions = false;
-	$: requestAccountsPermissions = nonNullish(
-		scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
-	);
+	let requestAccountsPermissions = $state(false);
+	run(() => {
+		requestAccountsPermissions = nonNullish(
+			scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
+		);
+	});
 </script>
 
 {#if nonNullish($payload)}
-	<form method="POST" on:submit={onApprove} in:fade>
+	<form in:fade onsubmit={onApprove} method="POST">
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />
@@ -98,8 +98,9 @@
 				{#each scopes as { scope: { method } } (method)}
 					{@const { icon, label } = listItems[method]}
 
+					{@const SvelteComponent = icon}
 					<li class="flex items-center gap-2 break-normal pb-1.5">
-						<svelte:component this={icon} size="24" />
+						<SvelteComponent size="24" />
 						{label}
 					</li>
 				{/each}

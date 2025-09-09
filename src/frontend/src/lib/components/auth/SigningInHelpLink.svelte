@@ -5,8 +5,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let styleClass = '';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+		testId?: string;
+	}
+
+	let { styleClass = '', testId = undefined }: Props = $props();
 
 	const modalId = Symbol();
 

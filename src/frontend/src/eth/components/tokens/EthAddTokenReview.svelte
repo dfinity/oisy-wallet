@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -25,9 +26,13 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
-	export let network: Network;
+	interface Props {
+		contractAddress: string | undefined;
+		metadata: Erc20Metadata | Erc721Metadata | undefined;
+		network: Network;
+	}
+
+	let { contractAddress, metadata = $bindable(), network }: Props = $props();
 
 	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
@@ -116,8 +121,10 @@
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
+	let invalid = $state(true);
+	run(() => {
+		invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
+	});
 
 	const dispatch = createEventDispatcher();
 </script>

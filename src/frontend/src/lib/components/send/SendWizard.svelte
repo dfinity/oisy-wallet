@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
@@ -25,21 +25,31 @@
 	} from '$lib/utils/network.utils';
 	import SolSendTokenWizard from '$sol/components/send/SolSendTokenWizard.svelte';
 
-	export let destination: string;
-	export let amount: number | undefined;
-	export let sendProgressStep: string;
-	export let currentStep: WizardStep | undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination: string;
+		amount: number | undefined;
+		sendProgressStep: string;
+		currentStep: WizardStep | undefined;
+		selectedContact?: ContactUi;
+		children?: Snippet;
+	}
+
+	let {
+		destination,
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		currentStep,
+		selectedContact = undefined,
+		children
+	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fallbackEvmToken: Token | undefined;
-	$: fallbackEvmToken = $enabledEvmTokens.find(
-		({ network: { id: networkId } }) => $sendToken.network.id === networkId
+	let fallbackEvmToken: Token | undefined = $derived(
+		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
 	);
 
-	let evmNativeEthereumToken: Token | undefined;
-	$: evmNativeEthereumToken = $evmNativeToken ?? fallbackEvmToken;
+	let evmNativeEthereumToken: Token | undefined = $derived($evmNativeToken ?? fallbackEvmToken);
 </script>
 
 <SendTokenContext token={$sendToken}>
@@ -113,6 +123,6 @@
 			on:icTokensList
 		/>
 	{:else}
-		<slot />
+		{@render children?.()}
 	{/if}
 </SendTokenContext>

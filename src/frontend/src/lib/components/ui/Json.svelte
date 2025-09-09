@@ -1,11 +1,23 @@
 <script lang="ts">
+	import { run, stopPropagation } from 'svelte/legacy';
+	import Json from './Json.svelte';
 	import { isHash, stringifyJson, isPrincipal } from '$lib/utils/json.utils';
 
-	export let json: unknown | undefined = undefined;
-	export let defaultExpandedLevel = Infinity;
-	export let _key = '';
-	export let _level = 1;
-	export let _collapsed: boolean | undefined = undefined;
+	interface Props {
+		json?: unknown | undefined;
+		defaultExpandedLevel?: any;
+		_key?: string;
+		_level?: number;
+		_collapsed?: boolean | undefined;
+	}
+
+	let {
+		json = undefined,
+		defaultExpandedLevel = Infinity,
+		_key = '',
+		_level = 1,
+		_collapsed = undefined
+	}: Props = $props();
 
 	type ValueType =
 		| 'bigint'
@@ -33,18 +45,18 @@
 		return typeof value;
 	};
 
-	let valueType: ValueType;
-	let value: unknown;
-	let keyLabel: string;
-	let children: [string, unknown][];
-	let hasChildren: boolean;
-	let isExpandable: boolean;
-	let isArray: boolean;
-	let openBracket: string;
-	let closeBracket: string;
-	let root: boolean;
-	let testId: 'json' | undefined;
-	$: {
+	let valueType: ValueType = $state();
+	let value: unknown = $state();
+	let keyLabel: string = $state();
+	let children: [string, unknown][] = $state();
+	let hasChildren: boolean = $state();
+	let isExpandable: boolean = $state();
+	let isArray: boolean = $state();
+	let openBracket: string = $state();
+	let closeBracket: string = $state();
+	let root: boolean = $state();
+	let testId: 'json' | undefined = $state();
+	run(() => {
 		valueType = getValueType(json);
 		isExpandable = valueType === 'object';
 		value = isExpandable ? json : stringifyJson({ value: json });
@@ -56,20 +68,23 @@
 		closeBracket = isArray ? ']' : '}';
 		root = _level === 1;
 		testId = root ? 'json' : undefined;
-	}
+	});
 
-	let title: string | undefined;
-	$: title = valueType === 'hash' ? (json as number[]).join() : undefined;
+	let title: string | undefined = $derived(
+		valueType === 'hash' ? (json as number[]).join() : undefined
+	);
 
-	let collapsed = true;
-	$: collapsed = _collapsed ?? defaultExpandedLevel < _level;
+	let collapsed = $state(true);
+	run(() => {
+		collapsed = _collapsed ?? defaultExpandedLevel < _level;
+	});
 
 	const toggle = () => (collapsed = !collapsed);
 </script>
 
 {#if isExpandable && hasChildren}
 	{#if collapsed}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
@@ -80,12 +95,12 @@
 			data-tid={testId}
 			role="button"
 			tabindex="0"
-			on:click|stopPropagation={toggle}
+			onclick={stopPropagation(toggle)}
 			>{keyLabel}
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
 	{:else}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
@@ -96,14 +111,14 @@
 			data-tid={testId}
 			role="button"
 			tabindex="0"
-			on:click|stopPropagation={toggle}
+			onclick={stopPropagation(toggle)}
 			>{keyLabel}<span class="bracket open">{openBracket}</span></span
 		>
 		<!-- children -->
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<svelte:self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
+					<Json json={value} _key={key} {defaultExpandedLevel} _level={_level + 1} />
 				</li>
 			{/each}
 		</ul>

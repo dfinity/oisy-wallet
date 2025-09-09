@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
@@ -7,25 +8,43 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 
-	export let destination: string | null;
-	export let amount: OptionAmount = undefined;
-	export let token: Token;
-	export let exchangeRate: number | undefined = undefined;
-	export let balance: OptionBalance;
-	export let source: string;
-	export let showNullishAmountLabel = false;
+	interface Props {
+		destination: string | null;
+		amount?: OptionAmount;
+		token: Token;
+		exchangeRate?: number;
+		balance: OptionBalance;
+		source: string;
+		showNullishAmountLabel?: boolean;
+		network?: Snippet;
+		children?: Snippet;
+		fee?: Snippet;
+	}
+
+	let {
+		destination,
+		amount = undefined,
+		token,
+		exchangeRate = undefined,
+		balance,
+		source,
+		showNullishAmountLabel = false,
+		network,
+		children,
+		fee
+	}: Props = $props();
 </script>
 
 {#if nonNullish(destination)}
 	<SendDataDestination {destination} />
 {/if}
 
-<slot name="network" />
+{@render network?.()}
 
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
-<slot />
+{@render children?.()}
 
 <SendSource {balance} {exchangeRate} {source} {token} />
 
-<slot name="fee" />
+{@render fee?.()}

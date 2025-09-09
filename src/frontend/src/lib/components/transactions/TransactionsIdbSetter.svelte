@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet, untrack } from 'svelte';
+	import { type Snippet, type Snippet, untrack } from 'svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';

@@ -8,11 +8,13 @@
 </script>
 
 <ConvertNetwork token={$sourceToken}>
-	<svelte:fragment slot="label">{$i18n.convert.text.source_network}</svelte:fragment
-	></ConvertNetwork
+	{#snippet label()}
+		{$i18n.convert.text.source_network}
+	{/snippet}</ConvertNetwork
 >
 
 <ConvertNetwork token={$destinationToken}>
-	<svelte:fragment slot="label">{$i18n.convert.text.destination_network}</svelte:fragment
-	></ConvertNetwork
+	{#snippet label()}
+		{$i18n.convert.text.destination_network}
+	{/snippet}</ConvertNetwork
 >

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input as GixInput } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import type { ComponentProps, Snippet } from 'svelte';
+	import type { Snippet, ComponentProps } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ButtonPaste from '$lib/components/ui/ButtonPaste.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
@@ -31,6 +31,9 @@
 	class="base-input"
 >
 	<GixInput {...props} bind:value on:nnsInput>
+		<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
 		<svelte:fragment slot="inner-end">
 			<div class="flex items-center pl-2" bind:clientWidth={endWidth}>
 				{#if nonNullish(value) && notEmptyString(value.toString()) && showResetButton}

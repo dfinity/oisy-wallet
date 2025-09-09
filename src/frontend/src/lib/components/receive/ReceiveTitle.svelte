@@ -3,7 +3,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let title: string | undefined;
+	interface Props {
+		title: string | undefined;
+	}
+
+	let { title }: Props = $props();
 </script>
 
 {isNullish(title)

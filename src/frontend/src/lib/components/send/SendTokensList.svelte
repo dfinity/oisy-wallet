@@ -11,8 +11,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized;
+	let loading: boolean = $derived($erc20UserTokensNotInitialized);
 
 	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<Token>) => {
 		dispatch('icSendToken', token);

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext, type Snippet } from 'svelte';
+	import { type Snippet, getContext, type Snippet } from 'svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 

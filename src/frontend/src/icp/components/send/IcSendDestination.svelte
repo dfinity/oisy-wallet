@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,16 +11,27 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
-	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
-	export let tokenStandard: TokenStandard;
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination?: string;
+		networkId?: NetworkId;
+		tokenStandard: TokenStandard;
+		invalidDestination?: boolean;
+		knownDestinations?: KnownDestinations | undefined;
+		networkContacts?: NetworkContacts | undefined;
+	}
+
+	let {
+		destination = $bindable(''),
+		networkId = undefined,
+		tokenStandard,
+		invalidDestination = $bindable(false),
+		knownDestinations = undefined,
+		networkContacts = undefined
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let isInvalidDestination: () => boolean;
+	let isInvalidDestination: () => boolean = $state();
 
 	const init = () =>
 		(isInvalidDestination = (): boolean =>
@@ -32,14 +44,17 @@
 
 	const debounceValidateInit = debounce(init);
 
-	$: (destination, tokenStandard, networkId, debounceValidateInit());
+	run(() => {
+		(destination, tokenStandard, networkId, debounceValidateInit());
+	});
 
-	let inputPlaceholder: string;
-	$: inputPlaceholder = isNetworkIdEthereum(networkId)
-		? $i18n.send.placeholder.enter_eth_address
-		: isNetworkIdBitcoin(networkId)
-			? $i18n.send.placeholder.enter_recipient_address
-			: $i18n.send.placeholder.enter_wallet_address;
+	let inputPlaceholder: string = $derived(
+		isNetworkIdEthereum(networkId)
+			? $i18n.send.placeholder.enter_eth_address
+			: isNetworkIdBitcoin(networkId)
+				? $i18n.send.placeholder.enter_recipient_address
+				: $i18n.send.placeholder.enter_wallet_address
+	);
 </script>
 
 <SendInputDestination

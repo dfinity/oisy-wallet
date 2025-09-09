@@ -7,6 +7,7 @@
 	} from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { run, preventDefault } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
@@ -22,17 +23,19 @@
 		callCanisterPrompt: { reset: resetCallCanisterPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let approve: ConsentMessageApproval | undefined;
-	let reject: Rejection | undefined;
-	let consentInfo: ResultConsentInfo | undefined;
+	let approve: ConsentMessageApproval | undefined = $state();
+	let reject: Rejection | undefined = $state();
+	let consentInfo: ResultConsentInfo | undefined = $state();
 
-	$: ({ approve, reject, consentInfo } =
-		nonNullish($payload) && $payload.status === 'result'
-			? $payload
-			: { approve: undefined, reject: undefined, consentInfo: undefined });
+	run(() => {
+		({ approve, reject, consentInfo } =
+			nonNullish($payload) && $payload.status === 'result'
+				? $payload
+				: { approve: undefined, reject: undefined, consentInfo: undefined });
+	});
 
-	let loading = false;
-	let displayMessage: string | undefined;
+	let loading = $state(false);
+	let displayMessage: string | undefined = $state();
 
 	const onPayload = () => {
 		if ($payload?.status === 'loading') {
@@ -68,7 +71,9 @@
 				: undefined;
 	};
 
-	$: ($payload, onPayload());
+	run(() => {
+		($payload, onPayload());
+	});
 
 	type Text = { title: string; content: string } | undefined;
 
@@ -86,8 +91,7 @@
 		};
 	};
 
-	let text: Text;
-	$: text = mapText(displayMessage);
+	let text: Text = $derived(mapText(displayMessage));
 
 	const onApprove = () => {
 		if (isNullish(approve)) {
@@ -125,7 +129,7 @@
 {:else if nonNullish(text)}
 	{@const { title, content } = text}
 
-	<form method="POST" on:submit|preventDefault={onApprove} in:fade>
+	<form in:fade onsubmit={preventDefault(onApprove)} method="POST">
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />

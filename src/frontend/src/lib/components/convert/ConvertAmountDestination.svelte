@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
@@ -9,28 +10,40 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
-	export let sendAmount: OptionAmount = undefined;
-	export let receiveAmount: number | undefined = undefined;
-	export let destinationTokenFee: bigint | undefined = undefined;
-	export let exchangeValueUnit: DisplayUnit = 'usd';
-	export let inputUnit: DisplayUnit = 'token';
+	interface Props {
+		sendAmount?: OptionAmount;
+		receiveAmount?: number;
+		destinationTokenFee?: bigint;
+		exchangeValueUnit?: DisplayUnit;
+		inputUnit?: DisplayUnit;
+	}
+
+	let {
+		sendAmount = undefined,
+		receiveAmount = $bindable(),
+		destinationTokenFee = undefined,
+		exchangeValueUnit = $bindable('usd'),
+		inputUnit = 'token'
+	}: Props = $props();
 
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: receiveAmount = nonNullish(sendAmount)
-		? nonNullish(destinationTokenFee)
-			? Math.max(
-					Number(sendAmount) -
-						formatTokenBigintToNumber({
-							value: destinationTokenFee,
-							displayDecimals: $destinationToken.decimals,
-							unitName: $destinationToken.decimals
-						}),
-					0
-				)
-			: Number(sendAmount)
-		: undefined;
+	run(() => {
+		receiveAmount = nonNullish(sendAmount)
+			? nonNullish(destinationTokenFee)
+				? Math.max(
+						Number(sendAmount) -
+							formatTokenBigintToNumber({
+								value: destinationTokenFee,
+								displayDecimals: $destinationToken.decimals,
+								unitName: $destinationToken.decimals
+							}),
+						0
+					)
+				: Number(sendAmount)
+			: undefined;
+	});
 </script>
 
 <TokenInput
@@ -41,6 +54,9 @@
 	isSelectable={false}
 	token={$destinationToken}
 >
+	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 	<div slot="amount-info" class="text-tertiary">
 		<TokenInputAmountExchange
 			amount={receiveAmount}
@@ -50,10 +66,11 @@
 		/>
 	</div>
 
-	<TokenInputBalance
-		slot="balance"
-		balance={$destinationTokenBalance}
-		testId="convert-amount-destination-balance"
-		token={$destinationToken}
-	/>
+	{#snippet balance()}
+		<TokenInputBalance
+			testId="convert-amount-destination-balance"
+			token={$destinationToken}
+			balance={$destinationTokenBalance}
+		/>
+	{/snippet}
 </TokenInput>
