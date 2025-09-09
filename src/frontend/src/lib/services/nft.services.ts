@@ -14,10 +14,6 @@ export const loadNfts = async ({
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
-	if (isNullish(walletAddress)) {
-		return;
-	}
-
 	const tokensByNetwork = tokens.reduce((acc, token) => {
 		const networkId = token.network.id;
 		return acc.set(networkId, [...(acc.get(networkId) ?? []), token]);
@@ -43,6 +39,10 @@ export const loadNftsByNetwork = async ({
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
 }): Promise<Nft[]> => {
+	if (isNullish(walletAddress)) {
+		return [];
+	}
+
 	const { getNftsByOwner } = alchemyProviders(networkId);
 
 	const batches = createBatches({ tokens, batchSize: 40 });
