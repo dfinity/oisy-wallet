@@ -9,15 +9,17 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { Nft, NonFungibleToken, OwnedContract, OwnedNft } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
 	AlchemySubscription,
+	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
 	type Network
@@ -154,13 +156,66 @@ export class AlchemyProvider {
 	}): Promise<OwnedNft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
 			contractAddresses: [contractAddress],
-			omitMetadata: true
+			omitMetadata: false
 		});
 
 		return result.ownedNfts.map((ownedNft) => ({
 			id: parseNftId(parseInt(ownedNft.tokenId)),
 			balance: Number(ownedNft.balance)
 		}));
+	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
+	getNftsByOwner = async ({
+		address,
+		token
+	}: {
+		address: EthAddress;
+		token: NonFungibleToken;
+	}): Promise<Nft[]> => {
+		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
+			contractAddresses: [token.address],
+			omitMetadata: false,
+			orderBy: NftOrdering.TRANSFERTIME
+		});
+
+		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
+			const {
+				raw: {
+					metadata: { attributes }
+				}
+			} = ownedNft;
+
+			const mappedAttributes = nonNullish(attributes)
+				? attributes.map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
+
+			const nft: Nft = {
+				id: parseNftId(parseInt(ownedNft.tokenId)),
+				...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
+				...(nonNullish(ownedNft.image?.originalUrl) && { imageUrl: ownedNft.image?.originalUrl }),
+				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
+				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
+				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
+				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
+					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
+				}),
+				collection: {
+					...mapTokenToCollection(token),
+					...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
+						bannerImageUrl: ownedNft.contract.openSeaMetadata?.bannerImageUrl
+					}),
+					...(nonNullish(ownedNft.contract.openSeaMetadata?.description) && {
+						description: ownedNft.contract.openSeaMetadata?.description
+					})
+				}
+			};
+
+			return [...acc, nft];
+		}, []);
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
