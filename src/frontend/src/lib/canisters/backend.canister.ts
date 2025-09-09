@@ -34,10 +34,12 @@ import type {
 	GetUserProfileResponse,
 	SaveUserAgreements,
 	SaveUserNetworksSettings,
-	SetUserShowTestnetsParams
+	SetUserShowTestnetsParams,
+	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapBackendUserAgreements } from '$lib/utils/agreements.utils';
+import { mapUserExperimentalFeatures } from '$lib/utils/user-experimental-features.utils';
 import { mapUserNetworks } from '$lib/utils/user-networks.utils';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
@@ -349,5 +351,17 @@ export class BackendCanister extends Canister<BackendService> {
 			return response.Ok;
 		}
 		throw response.Err;
+	};
+
+	updateUserExperimentalFeatureSettings = async ({
+		experimentalFeatures,
+		currentUserVersion
+	}: UpdateUserExperimentalFeatureSettings): Promise<void> => {
+		const { update_user_experimental_feature_settings } = this.caller({ certified: true });
+
+		await update_user_experimental_feature_settings({
+			experimental_features: mapUserExperimentalFeatures(experimentalFeatures),
+			current_user_version: toNullable(currentUserVersion)
+		});
 	};
 }

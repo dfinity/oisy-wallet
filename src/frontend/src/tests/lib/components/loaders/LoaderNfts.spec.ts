@@ -84,7 +84,11 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
 			mockGetNftsForOwner.mockResolvedValueOnce([mockNft3]);
 
-			render(LoaderNfts);
+			render(LoaderNfts, {
+				props: {
+					skipInitialLoad: false
+				}
+			});
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -110,7 +114,11 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1, mockNft2]);
 			mockGetNftsForOwner.mockResolvedValueOnce([mockNft3]);
 
-			render(LoaderNfts);
+			render(LoaderNfts, {
+				props: {
+					skipInitialLoad: false
+				}
+			});
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -144,7 +152,11 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockNft1]);
 			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
-			render(LoaderNfts);
+			render(LoaderNfts, {
+				props: {
+					skipInitialLoad: false
+				}
+			});
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -191,7 +203,11 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([customMockNft1]);
 			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
-			render(LoaderNfts);
+			render(LoaderNfts, {
+				props: {
+					skipInitialLoad: false
+				}
+			});
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -247,7 +263,11 @@ describe('LoaderNfts', () => {
 			]);
 			mockGetNftsForOwner.mockResolvedValueOnce([{ ...customMockNft3, balance: 3 }]);
 
-			render(LoaderNfts);
+			render(LoaderNfts, {
+				props: {
+					skipInitialLoad: false
+				}
+			});
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
