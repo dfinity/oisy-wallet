@@ -17,6 +17,7 @@
 		crossChainSwapNetworksMainnets,
 		crossChainSwapNetworksMainnetsIds
 	} from '$lib/derived/cross-chain-networks.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { swappableTokens } from '$lib/derived/swap.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -41,7 +42,6 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		setContext<SwapContext>(
