@@ -1,7 +1,7 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
-import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { getNftsByNetworks } from '$lib/utils/nfts.utils';
 
