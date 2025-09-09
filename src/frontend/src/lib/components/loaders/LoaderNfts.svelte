@@ -11,8 +11,8 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NetworkId } from '$lib/types/network';
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
-	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
+	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;
@@ -54,7 +54,7 @@
 			return;
 		}
 
-		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens)
+		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
 		for (const [networkId, tokens] of tokensByNetwork) {
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });

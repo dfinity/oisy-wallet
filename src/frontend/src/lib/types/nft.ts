@@ -8,8 +8,8 @@ import type {
 	NftSchema,
 	OwnedContractSchema
 } from '$lib/schema/nft.schema';
-import type * as z from 'zod';
 import type { NetworkId } from '$lib/types/network';
+import type * as z from 'zod';
 
 export type NftId = z.infer<typeof NftIdSchema>;
 
