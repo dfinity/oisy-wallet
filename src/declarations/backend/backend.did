@@ -192,6 +192,14 @@ type DefiniteCanisterSettingsArgs = record {
 type DeleteContactResult = variant { Ok : nat64; Err : ContactError };
 type ErcToken = record { token_address : text; chain_id : nat64 };
 type EthAddress = variant { Public : text };
+type ExperimentalFeatureSettings = record { enabled : bool };
+type ExperimentalFeatureSettingsFor = variant { AiAssistantBeta };
+type ExperimentalFeaturesSettings = record {
+	experimental_features : vec record {
+		ExperimentalFeatureSettingsFor;
+		ExperimentalFeatureSettings
+	}
+};
 type GetAllowedCyclesError = variant {
 	Other : text;
 	FailedToContactCyclesLedger
@@ -288,7 +296,11 @@ type SetShowTestnetsRequest = record {
 };
 type SetTestnetsSettingsError = variant { VersionMismatch; UserNotFound };
 type SetUserShowTestnetsResult = variant { Ok; Err : UpdateAgreementsError };
-type Settings = record { networks : NetworksSettings; dapp : DappSettings };
+type Settings = record {
+	networks : NetworksSettings;
+	dapp : DappSettings;
+	experimental_features : ExperimentalFeaturesSettings
+};
 type SplToken = record {
 	decimals : opt nat8;
 	token_address : text;
@@ -346,6 +358,13 @@ type TopUpCyclesLedgerResult = variant {
 	Err : TopUpCyclesLedgerError
 };
 type UpdateAgreementsError = variant { VersionMismatch; UserNotFound };
+type UpdateExperimentalFeaturesSettingsRequest = record {
+	experimental_features : vec record {
+		ExperimentalFeatureSettingsFor;
+		ExperimentalFeatureSettings
+	};
+	current_user_version : opt nat64
+};
 type UpdateUserAgreementsRequest = record {
 	agreements : UserAgreements;
 	current_user_version : opt nat64
@@ -585,6 +604,18 @@ service : (Arg) -> {
 	update_user_agreements : (UpdateUserAgreementsRequest) -> (
 		SetUserShowTestnetsResult
 	);
+	// Updates the user's preference to enable (or disable) experimental features in the interface,
+	// merging with any existing entries.
+	//
+	// # Returns
+	// - Returns `Ok(())` if the experimental features were updated successfully, or if they were
+	// already set to the same value.
+	//
+	// # Errors
+	// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+	update_user_experimental_feature_settings : (
+		UpdateExperimentalFeaturesSettingsRequest
+	) -> (SetUserShowTestnetsResult);
 	// Updates the user's preference to enable (or disable) networks in the interface, merging with any
 	// existing settings.
 	//

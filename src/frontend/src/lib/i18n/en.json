@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
@@ -551,7 +552,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "Beta features",
+			"enable_beta_feature": "Enable beta feature",
+			"disable_beta_feature": "Disable beta feature",
+			"save_beta_feature_success": "Your beta feature settings have been updated."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -1627,7 +1632,8 @@
 			"send_token_succeeded": "Transaction completed!",
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
 			"loading": "Thinking...",
-			"reset_chat_history": "Reset chat history"
+			"reset_chat_history": "Reset chat history",
+			"feature_description": "The experimental AI Assistant allows you to manage your  assets, contacts, and setup transactions."
 		},
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",

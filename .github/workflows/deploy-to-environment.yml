@@ -35,6 +35,12 @@ on:
         type: boolean
         description: 'Force backend deployment even if no changes are detected.'
         default: false
+      env-override:
+        required: false
+        type: string
+        description: |
+          Optional .env contents (KEY=VALUE, one per line).
+          Only applied when network is test_* or audit.
   workflow_call:
     inputs:
       workflow-call:
@@ -142,7 +148,7 @@ on:
         required: true
 
 run-name: >-
-  ${{ 
+  ${{
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
@@ -237,55 +243,114 @@ jobs:
         env:
           BASE_REF: ${{ github.base_ref }}
 
-      - name: Set Output Variables Based on Network
+      - name: Set Output Variables Based on Network (with optional overrides)
         id: set-outputs
         run: |
-          if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
-            {
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_TEST_FE"
-            } >> $GITHUB_OUTPUT
-          elif [[ "$NETWORK" == "staging" ]]; then
-           {
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING"
-            } >> $GITHUB_OUTPUT
-          elif [[ "$NETWORK" == "beta" ]]; then
-            {
-              echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA"
-            } >> $GITHUB_OUTPUT
+          # Parse optional .env overrides into an associative array
+          declare -A OV
+          parse_overrides() {
+            local raw="$1"
+            # normalize CRLF
+            raw="${raw//$'\r'/}"
+            while IFS= read -r line; do
+              # skip blanks and comments
+              [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+              # allow KEY='VALUE with = inside'
+              local key val
+              key="${line%%=*}"
+              val="${line#*=}"
+              # trim spaces
+              key="$(echo "$key" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              val="$(echo "$val" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+              # strip surrounding quotes
+              if [[ "$val" =~ ^\"(.*)\"$ ]]; then val="${BASH_REMATCH[1]}"; fi
+              if [[ "$val" =~ ^\'(.*)\'$ ]]; then val="${BASH_REMATCH[1]}"; fi
+              [[ -n "$key" ]] && OV["$key"]="$val"
+            done <<< "$raw"
+          }
+
+          # Hide all override values (and raw lines) in logs
+          mask_overrides() {
+            # Mask the full raw input lines too (defense-in-depth)
+            while IFS= read -r line; do
+              [[ -n "$line" ]] && echo "::add-mask::$line"
+            done <<< "${ENV_OVERRIDE:-}"
+
+            # Mask each value
+            for v in "${OV[@]}"; do
+                [[ -n "$v" ]] && echo "::add-mask::$v"
+            done
+          }
+
+          # Only allow overrides for test_* or audit
+          if ([[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]) && [[ -n "${ENV_OVERRIDE:-}" ]]; then
+            parse_overrides "$ENV_OVERRIDE"
+            mask_overrides
+            echo "Overrides provided; applying permitted keys."
           fi
+
+          # Prefer override if present, else default
+          get() {
+            local key="$1" default="$2"
+            if [[ ${OV[$key]+isset} ]]; then
+              echo "${OV[$key]}"
+            else
+              echo "$default"
+            fi
+          }
+
+          # Select ALCHEMY per network
+          if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
+            echo "VITE_ALCHEMY_API_KEY=$(get VITE_ALCHEMY_API_KEY "$VITE_ALCHEMY_API_KEY_TEST_FE")" >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "staging" ]]; then
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING" >> $GITHUB_OUTPUT
+          elif [[ "$NETWORK" == "beta" ]]; then
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA" >> $GITHUB_OUTPUT
+          fi
+
+          # For staging/test/audit common vars default to STAGING, but allow overrides:
           if [[ "$NETWORK" == "staging" ]] || [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             {
-              echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_STAGING"
-              echo "VITE_INFURA_API_KEY=$VITE_INFURA_API_KEY_STAGING"
-              echo "VITE_QUICKNODE_API_KEY=$VITE_QUICKNODE_API_KEY_STAGING"
-              echo "VITE_WALLET_CONNECT_PROJECT_ID=$VITE_WALLET_CONNECT_PROJECT_ID_STAGING"
-              echo "VITE_COINGECKO_API_KEY=$VITE_COINGECKO_API_KEY_STAGING"
-              echo "VITE_POUH_ENABLED=$VITE_POUH_ENABLED_STAGING"
-              echo "VITE_SWAP_ACTION_ENABLED=$VITE_SWAP_ACTION_ENABLED_STAGING"
-              echo "VITE_POW_FEATURE_ENABLED=$VITE_POW_FEATURE_ENABLED_STAGING"
-              echo "VITE_ONRAMPER_API_KEY_DEV=$VITE_ONRAMPER_API_KEY_DEV_STAGING"
-              echo "VITE_ONRAMPER_API_KEY_PROD=$VITE_ONRAMPER_API_KEY_PROD_STAGING"
-              echo "VITE_PLAUSIBLE_ENABLED=$VITE_PLAUSIBLE_ENABLED_STAGING"
-              echo "VITE_ICP_SWAP_ENABLED=$VITE_ICP_SWAP_ENABLED_STAGING"
-              echo "VITE_VELORA_SWAP_ENABLED=$VITE_VELORA_SWAP_ENABLED_STAGING"
-              echo "VITE_NFTS_ENABLED=$VITE_NFTS_ENABLED_STAGING"
-              echo "VITE_FRONTEND_DERIVATION_ENABLED=$VITE_FRONTEND_DERIVATION_ENABLED_STAGING"
-              echo "VITE_FRONTEND_NEW_AGREEMENTS_ENABLED=$VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_STAGING"
-              echo "VITE_AI_ASSISTANT_CONSOLE_ENABLED=$VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING"
-              echo "VITE_AVATAR_ENABLED=$VITE_AVATAR_ENABLED_STAGING"
-              echo "VITE_LOCK_SCREEN_ENABLED=$VITE_LOCK_SCREEN_ENABLED_STAGING"
+              echo "VITE_ETHERSCAN_API_KEY=$(get VITE_ETHERSCAN_API_KEY "$VITE_ETHERSCAN_API_KEY_STAGING")"
+              echo "VITE_INFURA_API_KEY=$(get VITE_INFURA_API_KEY "$VITE_INFURA_API_KEY_STAGING")"
+              echo "VITE_QUICKNODE_API_KEY=$(get VITE_QUICKNODE_API_KEY "$VITE_QUICKNODE_API_KEY_STAGING")"
+              echo "VITE_WALLET_CONNECT_PROJECT_ID=$(get VITE_WALLET_CONNECT_PROJECT_ID "$VITE_WALLET_CONNECT_PROJECT_ID_STAGING")"
+              echo "VITE_COINGECKO_API_KEY=$(get VITE_COINGECKO_API_KEY "$VITE_COINGECKO_API_KEY_STAGING")"
+              echo "VITE_POUH_ENABLED=$(get VITE_POUH_ENABLED "$VITE_POUH_ENABLED_STAGING")"
+              echo "VITE_SWAP_ACTION_ENABLED=$(get VITE_SWAP_ACTION_ENABLED "$VITE_SWAP_ACTION_ENABLED_STAGING")"
+              echo "VITE_POW_FEATURE_ENABLED=$(get VITE_POW_FEATURE_ENABLED "$VITE_POW_FEATURE_ENABLED_STAGING")"
+              echo "VITE_ONRAMPER_API_KEY_DEV=$(get VITE_ONRAMPER_API_KEY_DEV "$VITE_ONRAMPER_API_KEY_DEV_STAGING")"
+              echo "VITE_ONRAMPER_API_KEY_PROD=$(get VITE_ONRAMPER_API_KEY_PROD "$VITE_ONRAMPER_API_KEY_PROD_STAGING")"
+              echo "VITE_PLAUSIBLE_ENABLED=$(get VITE_PLAUSIBLE_ENABLED "$VITE_PLAUSIBLE_ENABLED_STAGING")"
+              echo "VITE_ICP_SWAP_ENABLED=$(get VITE_ICP_SWAP_ENABLED "$VITE_ICP_SWAP_ENABLED_STAGING")"
+              echo "VITE_VELORA_SWAP_ENABLED=$(get VITE_VELORA_SWAP_ENABLED "$VITE_VELORA_SWAP_ENABLED_STAGING")"
+              echo "VITE_NFTS_ENABLED=$(get VITE_NFTS_ENABLED "$VITE_NFTS_ENABLED_STAGING")"
+              echo "VITE_FRONTEND_DERIVATION_ENABLED=$(get VITE_FRONTEND_DERIVATION_ENABLED "$VITE_FRONTEND_DERIVATION_ENABLED_STAGING")"
+              echo "VITE_FRONTEND_NEW_AGREEMENTS_ENABLED=$(get VITE_FRONTEND_NEW_AGREEMENTS_ENABLED "$VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_STAGING")"
+              echo "VITE_AI_ASSISTANT_CONSOLE_ENABLED=$(get VITE_AI_ASSISTANT_CONSOLE_ENABLED "$VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING")"
+              echo "VITE_AVATAR_ENABLED=$(get VITE_AVATAR_ENABLED "$VITE_AVATAR_ENABLED_STAGING")"
+              echo "VITE_LOCK_SCREEN_ENABLED=$(get VITE_LOCK_SCREEN_ENABLED "$VITE_LOCK_SCREEN_ENABLED_STAGING")"
             } >> $GITHUB_OUTPUT
-            if [[ "$NETWORK" == "staging" ]]; then
-              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" >> $GITHUB_OUTPUT
+
+            # Special handling for AUTH_ALTERNATIVE_ORIGINS:
+            # If override provided, use it as-is. Else keep your existing substitution.
+            if [[ -n "${OV[VITE_AUTH_ALTERNATIVE_ORIGINS]+x}" ]]; then
+              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=${OV[VITE_AUTH_ALTERNATIVE_ORIGINS]}" >> $GITHUB_OUTPUT
             else
-              SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
-              echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$(echo "$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" | sed "s/staging/$SUBDOMAIN/g")" >> $GITHUB_OUTPUT
+              if [[ "$NETWORK" == "staging" ]]; then
+                echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" >> $GITHUB_OUTPUT
+              else
+                SUBDOMAIN="fe${NETWORK#test_fe_}" # E.g. test_fe_1 -> fe1
+                echo "VITE_AUTH_ALTERNATIVE_ORIGINS=$(echo "$VITE_AUTH_ALTERNATIVE_ORIGINS_STAGING" | sed "s/staging/$SUBDOMAIN/g")" >> $GITHUB_OUTPUT
+              fi
             fi
+
             {
               echo "DFX_DEPLOY_KEY<<EOF"
               echo "$DFX_DEPLOY_KEY_STAGING"
               echo "EOF"
             } >> "$GITHUB_OUTPUT"
+
           elif [[ "$NETWORK" == "beta" ]]; then
             {
               echo "VITE_ETHERSCAN_API_KEY=$VITE_ETHERSCAN_API_KEY_BETA"
@@ -316,6 +381,8 @@ jobs:
             } >> "$GITHUB_OUTPUT"
           fi
         env:
+          ENV_OVERRIDE: ${{ github.event.inputs.env-override }}
+
           VITE_ETHERSCAN_API_KEY_STAGING: ${{ secrets.VITE_ETHERSCAN_API_KEY_STAGING }}
           VITE_INFURA_API_KEY_STAGING: ${{ secrets.VITE_INFURA_API_KEY_STAGING }}
           VITE_ALCHEMY_API_KEY_STAGING: ${{ secrets.VITE_ALCHEMY_API_KEY_STAGING }}
