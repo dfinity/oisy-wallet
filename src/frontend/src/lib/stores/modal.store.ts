@@ -94,7 +94,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openBtcReceive: (id: symbol) => void;
 	openSolReceive: (id: symbol) => void;
 	openReceive: (id: symbol) => void;
-	openSend: (params: SetWithDataParams<Nft | undefined>) => void;
+	openSend: (id: symbol) => void;
 	openBuy: (id: symbol) => void;
 	openSwap: (id: symbol) => void;
 	openConvertCkBTCToBTC: (id: symbol) => void;
@@ -153,7 +153,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openBtcReceive: setType('btc-receive'),
 		openSolReceive: setType('sol-receive'),
 		openReceive: setType('receive'),
-		openSend: <(params?: SetWithDataParams<Nft | undefined>) => void>setTypeWithData('send'),
+		openSend: setType('send'),
 		openBuy: setType('buy'),
 		openSwap: setType('swap'),
 		openConvertCkBTCToBTC: setType('convert-ckbtc-btc'),

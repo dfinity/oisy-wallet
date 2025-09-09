@@ -44,9 +44,6 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
-export const modalSendData: Readable<Nft | undefined> = derived(modalStore, ($modalStore) =>
-	$modalStore?.type === 'send' ? ($modalStore?.data as Nft) : undefined
-);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'

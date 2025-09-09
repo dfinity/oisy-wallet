@@ -1,15 +1,21 @@
 <script lang="ts">
-	import SendButton from '$lib/components/send/SendButton.svelte';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { Snippet } from 'svelte';
 
-	export let open: (modalId: symbol) => void;
-	export let isOpen: boolean;
+	interface Props {
+		open: (modalId: symbol) => void;
+		isOpen: boolean;
+		modal: Snippet;
+		button: Snippet<[onclick: () => void]>;
+	}
+
+	const { open, isOpen, modal, button }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
-<SendButton onclick={() => open(modalId)} />
+{@render button(() => open(modalId))}
 
 {#if isOpen && $modalStore?.id === modalId}
-	<slot name="modal" />
+	{@render modal()}
 {/if}

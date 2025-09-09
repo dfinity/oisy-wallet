@@ -8,7 +8,6 @@
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
-	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
@@ -67,7 +66,5 @@
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
 		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
-	{:else if $modalSend && nonNullish($modalSendData)}
-		<SendModal isNftsPage isTransactionsPage={false} nft={$modalSendData} />
 	{/if}
 {/if}
