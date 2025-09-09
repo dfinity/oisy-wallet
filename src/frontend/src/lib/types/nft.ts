@@ -33,5 +33,3 @@ export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
 export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 
 export type NonFungibleToken = Erc721Token | Erc1155Token;
-
-export type OptionNonFungibleToken = NonFungibleToken | undefined;
