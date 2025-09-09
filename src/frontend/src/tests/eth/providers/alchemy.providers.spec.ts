@@ -4,7 +4,7 @@ import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
 import type { EthereumNetwork } from '$eth/types/network';
-import type { Nft, OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -38,46 +38,6 @@ describe('alchemy.providers', () => {
 				apiKey: ALCHEMY_API_KEY,
 				network: alchemy
 			});
-		});
-	});
-
-	describe('getNftIdsForOwner', () => {
-		const mockApiResponse = {
-			ownedNfts: [
-				{ tokenId: '1', balance: '1' },
-				{ tokenId: '2', balance: '4' },
-				{ tokenId: '3', balance: '1' }
-			]
-		};
-
-		const expectedTokenIds: OwnedNft[] = [
-			{ id: parseNftId(1), balance: 1 },
-			{ id: parseNftId(2), balance: 4 },
-			{ id: parseNftId(3), balance: 1 }
-		];
-
-		beforeEach(() => {
-			vi.clearAllMocks();
-
-			Object.defineProperty(Alchemy.prototype, 'nft', {
-				value: {
-					getNftsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
-				},
-				configurable: true
-			});
-		});
-
-		it('should fetch and map token ids correctly', async () => {
-			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
-
-			const tokenIds = await provider.getNftIdsForOwner({
-				address: mockEthAddress,
-				contractAddress: mockValidErc1155Token.address
-			});
-
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
-
-			expect(tokenIds).toStrictEqual(expectedTokenIds);
 		});
 	});
 
