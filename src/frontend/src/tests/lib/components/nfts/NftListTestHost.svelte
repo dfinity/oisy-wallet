@@ -1,7 +1,7 @@
 <script lang="ts">
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import type { Nft } from '$lib/types/nft';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	interface Props {
 		nfts: Nft[];
