@@ -36,9 +36,9 @@ export const loadNfts = async ({
 
 export const loadNftsByNetwork = async ({
 	networkId,
-																 tokens,
-																 walletAddress
-															 }: {
+	tokens,
+	walletAddress
+}: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
@@ -50,7 +50,7 @@ export const loadNftsByNetwork = async ({
 	const nfts: Nft[] = [];
 	for (const batch of batches) {
 		try {
-			nfts.push(...await getNftsByOwner({ address: walletAddress, tokens: batch }));
+			nfts.push(...(await getNftsByOwner({ address: walletAddress, tokens: batch })));
 		} catch (_: unknown) {
 			const tokenAddresses = batch.map((token) => token.address);
 			console.warn(
@@ -60,7 +60,7 @@ export const loadNftsByNetwork = async ({
 	}
 
 	return nfts;
-}
+};
 
 const createBatches = ({
 	tokens,
