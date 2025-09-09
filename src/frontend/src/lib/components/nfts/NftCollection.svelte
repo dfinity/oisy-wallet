@@ -60,8 +60,8 @@
 		{#each collectionNfts as nft, index (nft.id + index)}
 			<NftCard
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-				{nft}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
+				{nft}
 			/>
 		{/each}
 	{:else}
