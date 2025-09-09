@@ -93,9 +93,9 @@
 			class:root
 			aria-label="Toggle"
 			data-tid={testId}
+			onclick={stopPropagation(toggle)}
 			role="button"
 			tabindex="0"
-			onclick={stopPropagation(toggle)}
 			>{keyLabel}
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
@@ -109,16 +109,15 @@
 			class:root
 			aria-label="Toggle"
 			data-tid={testId}
-			role="button"
-			tabindex="0"
 			onclick={stopPropagation(toggle)}
-			>{keyLabel}<span class="bracket open">{openBracket}</span></span
+			role="button"
+			tabindex="0">{keyLabel}<span class="bracket open">{openBracket}</span></span
 		>
 		<!-- children -->
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<Json json={value} _key={key} {defaultExpandedLevel} _level={_level + 1} />
+					<Json _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
 				</li>
 			{/each}
 		</ul>

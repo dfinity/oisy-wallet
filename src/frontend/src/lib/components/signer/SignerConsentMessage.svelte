@@ -129,7 +129,7 @@
 {:else if nonNullish(text)}
 	{@const { title, content } = text}
 
-	<form in:fade onsubmit={preventDefault(onApprove)} method="POST">
+	<form method="POST" onsubmit={preventDefault(onApprove)} in:fade>
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />

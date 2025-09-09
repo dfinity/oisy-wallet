@@ -86,7 +86,7 @@
 		</button>
 	</div>
 	<div class="h-full items-start">
-		<button class="p-1 text-tertiary" onclick={close} aria-label={$i18n.core.text.close}>
+		<button class="p-1 text-tertiary" aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose size="20" />
 		</button>
 	</div>

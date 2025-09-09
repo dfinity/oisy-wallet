@@ -28,7 +28,7 @@
 	});
 </script>
 
-<ConvertETH nativeTokenId={$ethereumTokenId} ariaLabel={$i18n.convert.text.convert_to_cketh}>
+<ConvertETH ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
 	{#snippet icon()}
 		<IconCkConvert size="24" />
 	{/snippet}

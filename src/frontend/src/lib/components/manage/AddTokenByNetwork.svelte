@@ -123,7 +123,7 @@
 	});
 </script>
 
-<form onsubmit={preventDefault(() => dispatch('icNext'))} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" onsubmit={preventDefault(() => dispatch('icNext'))} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />

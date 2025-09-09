@@ -97,6 +97,6 @@
 	});
 </script>
 
-<IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
 	{@render children?.()}
 </IntervalLoader>

@@ -7,11 +7,11 @@
 </script>
 
 <button
-	type="button"
-	data-tid="qr-code-scanner-button"
-	onclick={preventDefault(bubble('click'))}
 	class="text-brand-primary hover:text-inherit active:text-inherit"
 	aria-label={$i18n.send.text.open_qr_modal}
+	data-tid="qr-code-scanner-button"
+	onclick={preventDefault(bubble('click'))}
+	type="button"
 >
 	<IconScanLine />
 </button>

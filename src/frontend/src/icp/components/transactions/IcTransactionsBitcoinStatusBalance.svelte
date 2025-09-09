@@ -95,7 +95,7 @@
 {/if}
 
 {#if $modalReceiveBitcoin}
-	<Modal on:nnsClose={modalStore.close} disablePointerEvents={true}>
+	<Modal disablePointerEvents={true} on:nnsClose={modalStore.close}>
 		{#snippet title()}
 			{$i18n.receive.bitcoin.text.refresh_status}
 		{/snippet}

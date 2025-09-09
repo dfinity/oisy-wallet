@@ -11,7 +11,7 @@
 	let { isTransactionsPage }: Props = $props();
 </script>
 
-<SendButtonWithModal open={modalStore.openSend} isOpen={$modalSend}>
+<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
 	{#snippet modal()}
 		<SendModal {isTransactionsPage} on:nnsClose />
 	{/snippet}

@@ -69,8 +69,8 @@
 
 	{#snippet info()}
 		<SendFeeInfo
-			feeSymbol={$feeSymbolStore}
 			decimals={$feeDecimalsStore}
+			feeSymbol={$feeSymbolStore}
 			feeTokenId={$feeTokenIdStore}
 		/>
 	{/snippet}

@@ -15,8 +15,8 @@
 
 <button
 	class="mb-2 flex cursor-pointer items-center gap-2"
-	onclick={bubble('click')}
 	aria-label={label}
+	onclick={bubble('click')}
 >
 	<span
 		class="h-4 w-4 rounded-full border-4 shadow-sm"

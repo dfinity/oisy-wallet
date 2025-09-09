@@ -28,16 +28,16 @@
 	const cancel_render = $derived(cancel);
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
 	{#snippet destination()}
-		<DestinationValue token={$destinationToken} {destination} {isDestinationCustom} />
+		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken} />
 	{/snippet}
 
 	{#snippet fee()}
 		<IcTokenFees
+			networkId={$destinationToken.network.id}
 			sourceToken={$sourceToken}
 			sourceTokenExchangeRate={$sourceTokenExchangeRate}
-			networkId={$destinationToken.network.id}
 		/>
 	{/snippet}
 

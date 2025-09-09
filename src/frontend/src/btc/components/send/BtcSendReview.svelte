@@ -57,18 +57,18 @@
 	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
+<SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
 	{#snippet network()}
 		<BtcReviewNetwork networkId={$sendTokenNetworkId} />
 	{/snippet}
 
 	{#snippet fee()}
-		<BtcUtxosFee bind:utxosFee networkId={$sendTokenNetworkId} {amount} {source} />
+		<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
 	{/snippet}
 
 	{#snippet info()}
 		<div class="mt-8">
-			<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
+			<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
 		</div>
 	{/snippet}
 </SendReview>

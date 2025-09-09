@@ -15,7 +15,7 @@
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button onclick={close} aria-label={$i18n.core.text.close}><IconClose /></button>
+		<button aria-label={$i18n.core.text.close} onclick={close}><IconClose /></button>
 	</div>
 {:else if BETA && visible}
 	<div

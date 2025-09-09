@@ -26,8 +26,8 @@
 	class:icon={onlyArrow}
 	class:text-brand-primary={color === 'primary'}
 	class:text-current={color === 'current'}
-	onclick={() => back({ pop: nonNullish(fromRoute) })}
 	aria-label={$i18n.core.alt.back}
+	onclick={() => back({ pop: nonNullish(fromRoute) })}
 >
 	{#if onlyArrow}
 		<IconBackArrow />

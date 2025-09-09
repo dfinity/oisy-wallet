@@ -18,11 +18,11 @@
 </script>
 
 <button
+	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}
 	onclick={bubble('click')}
-	class="relative flex-1 rounded-lg bg-primary p-4 pt-12 shadow-sm"
 >
 	<span class="absolute -top-5 left-4">
 		<Logo

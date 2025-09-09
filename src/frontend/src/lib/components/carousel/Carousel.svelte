@@ -296,8 +296,8 @@
 	data-tid={CAROUSEL_CONTAINER}
 	out:slide={SLIDE_PARAMS}
 >
-	<div class="w-full overflow-hidden" bind:this={container}>
-		<div data-tid={CAROUSEL_SLIDE} class="flex" bind:this={sliderFrame} style="width: 9999px">
+	<div bind:this={container} class="w-full overflow-hidden">
+		<div bind:this={sliderFrame} style="width: 9999px" class="flex" data-tid={CAROUSEL_SLIDE}>
 			{@render children?.()}
 		</div>
 	</div>

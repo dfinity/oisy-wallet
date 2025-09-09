@@ -17,7 +17,7 @@
 	const cancel_render = $derived(cancel);
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
 	{#snippet fee()}
 		<BtcConvertFees />
 	{/snippet}

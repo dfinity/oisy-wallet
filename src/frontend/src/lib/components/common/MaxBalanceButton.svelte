@@ -65,10 +65,10 @@
 
 <button
 	class="font-semibold text-brand-primary-alt transition-all"
-	onclick={preventDefault(setMax)}
 	class:text-brand-primary-alt={!isZeroBalance && !error}
 	class:text-error-primary={isZeroBalance || error}
 	data-tid={MAX_BUTTON}
+	onclick={preventDefault(setMax)}
 >
 	{$i18n.core.text.max}:
 	{nonNullish(maxAmount) && nonNullish(token)

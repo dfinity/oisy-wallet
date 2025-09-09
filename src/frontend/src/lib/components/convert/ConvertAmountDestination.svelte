@@ -68,9 +68,9 @@
 
 	{#snippet balance()}
 		<TokenInputBalance
+			balance={$destinationTokenBalance}
 			testId="convert-amount-destination-balance"
 			token={$destinationToken}
-			balance={$destinationTokenBalance}
 		/>
 	{/snippet}
 </TokenInput>

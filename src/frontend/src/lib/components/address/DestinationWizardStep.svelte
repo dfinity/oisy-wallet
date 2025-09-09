@@ -65,10 +65,10 @@
 	>
 		{#snippet content()}
 			<IcSendDestination
+				{networkId}
 				{tokenStandard}
 				bind:destination
 				bind:invalidDestination
-				{networkId}
 				on:icQRCodeScan
 			/>
 		{/snippet}

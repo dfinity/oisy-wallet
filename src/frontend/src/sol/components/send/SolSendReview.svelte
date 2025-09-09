@@ -44,7 +44,7 @@
 	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
+<SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
 	{#snippet network()}
 		<ReviewNetwork sourceNetwork={networkProp} />
 	{/snippet}

@@ -35,7 +35,7 @@
 	const back = () => dispatch('icBack');
 </script>
 
-<form onsubmit={preventDefault(() => dispatch('icNext'))} method="POST">
+<form method="POST" onsubmit={preventDefault(() => dispatch('icNext'))}>
 	<ContentWithToolbar>
 		{@render amount?.()}
 

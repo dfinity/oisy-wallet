@@ -189,7 +189,7 @@
 	targetNetwork={ICP_NETWORK}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm on:icNext on:icClose bind:sendAmount bind:receiveAmount {destination}>
+		<EthConvertForm {destination} on:icNext on:icClose bind:sendAmount bind:receiveAmount>
 			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
@@ -199,7 +199,7 @@
 			{/snippet}
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview on:icConvert={convert} on:icBack {sendAmount} {receiveAmount}>
+		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack>
 			{#snippet cancel()}
 				<ButtonBack onclick={back} />
 			{/snippet}

@@ -66,7 +66,7 @@
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
-			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
 		{/snippet}
 		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}

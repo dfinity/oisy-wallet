@@ -47,7 +47,7 @@
 
 <!-- svelte-ignore a11y_interactive_supports_focus -->
 <!-- svelte-ignore a11y_click_events_have_key_events -->
-<div role="button" onclick={onClick}>
+<div onclick={onClick} role="button">
 	<Toggle
 		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}

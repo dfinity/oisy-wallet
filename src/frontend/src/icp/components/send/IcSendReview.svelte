@@ -34,7 +34,7 @@
 	});
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={invalid}>
+<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
 	{#snippet fee()}
 		<IcTokenFee />
 	{/snippet}

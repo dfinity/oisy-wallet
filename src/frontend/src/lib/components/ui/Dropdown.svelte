@@ -59,11 +59,7 @@
 
 	<Responsive down="md">
 		{#if visible}
-			<Modal on:nnsClose={close}>
-				{#snippet title()}
-					{@render title?.()}
-				{/snippet}
-
+			<Modal {title} on:nnsClose={close}>
 				{@render items()}
 			</Modal>
 		{/if}

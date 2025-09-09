@@ -17,7 +17,7 @@
 	);
 </script>
 
-<Modal on:nnsClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>
+<Modal testId={SETTINGS_NETWORKS_MODAL} on:nnsClose={modalStore.close}>
 	{#snippet title()}
 		{modalTitle}
 	{/snippet}

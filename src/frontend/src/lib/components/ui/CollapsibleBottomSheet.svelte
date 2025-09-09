@@ -41,13 +41,13 @@
 
 	{#if expanded}
 		<div class="z-14 fixed inset-0">
-			<BottomSheet on:nnsClose={() => (expanded = false)} transition>
+			<BottomSheet transition on:nnsClose={() => (expanded = false)}>
 				{#snippet header()}
 					<div class="w-full p-4">
 						<ButtonIcon
+							ariaLabel={$i18n.core.alt.close_details}
 							onclick={() => (expanded = false)}
 							styleClass="text-disabled float-right"
-							ariaLabel={$i18n.core.alt.close_details}
 						>
 							{#snippet icon()}
 								<IconClose size="24" />

@@ -147,7 +147,7 @@
 	{/snippet}
 
 	{#snippet destination()}
-		<DestinationValue token={$destinationToken} {destination} {isDestinationCustom}>
+		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken}>
 			<button
 				class="text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 				aria-label={$i18n.core.text.change}
@@ -160,12 +160,12 @@
 
 	{#snippet fee()}
 		<IcTokenFees
+			networkId={$destinationToken.network.id}
+			sourceToken={$sourceToken}
+			sourceTokenExchangeRate={$sourceTokenExchangeRate}
 			bind:totalSourceTokenFee
 			bind:totalDestinationTokenFee
 			bind:ethereumEstimateFee
-			sourceToken={$sourceToken}
-			sourceTokenExchangeRate={$sourceTokenExchangeRate}
-			networkId={$destinationToken.network.id}
 		/>
 	{/snippet}
 
