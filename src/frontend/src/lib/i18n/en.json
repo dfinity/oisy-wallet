@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",

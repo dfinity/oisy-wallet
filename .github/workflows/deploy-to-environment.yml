@@ -148,7 +148,7 @@ on:
         required: true
 
 run-name: >-
-  ${{ 
+  ${{
     github.event_name == 'push' && github.ref_type == 'branch' && 'Deploying Frontend / Backend to Staging'
     || github.event_name == 'push' && github.ref_type == 'tag' && 'Deploying Frontend / Backend to Beta'
     || github.event.inputs.canister == 'backend' && github.event.inputs.force-backend == 'true' && format('Deploying {0} to {1} and force backend = {2}', inputs.canister, inputs.network, inputs.force-backend)
@@ -275,7 +275,7 @@ jobs:
             while IFS= read -r line; do
               [[ -n "$line" ]] && echo "::add-mask::$line"
             done <<< "${ENV_OVERRIDE:-}"
-              
+
             # Mask each value
             for v in "${OV[@]}"; do
                 [[ -n "$v" ]] && echo "::add-mask::$v"
@@ -303,9 +303,9 @@ jobs:
           if [[ "$NETWORK" = test_* ]] || [[ "$NETWORK" = "audit" ]]; then
             echo "VITE_ALCHEMY_API_KEY=$(get VITE_ALCHEMY_API_KEY "$VITE_ALCHEMY_API_KEY_TEST_FE")" >> $GITHUB_OUTPUT
           elif [[ "$NETWORK" == "staging" ]]; then
-            echo "VITE_ALCHEMY_API_KEY=$(get VITE_ALCHEMY_API_KEY "$VITE_ALCHEMY_API_KEY_STAGING")" >> $GITHUB_OUTPUT
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_STAGING" >> $GITHUB_OUTPUT
           elif [[ "$NETWORK" == "beta" ]]; then
-            echo "VITE_ALCHEMY_API_KEY=$(get VITE_ALCHEMY_API_KEY "$VITE_ALCHEMY_API_KEY_BETA")" >> $GITHUB_OUTPUT
+            echo "VITE_ALCHEMY_API_KEY=$VITE_ALCHEMY_API_KEY_BETA" >> $GITHUB_OUTPUT
           fi
 
           # For staging/test/audit common vars default to STAGING, but allow overrides:
