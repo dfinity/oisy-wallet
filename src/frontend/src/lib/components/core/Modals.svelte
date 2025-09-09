@@ -30,9 +30,7 @@
 		modalNftImageConsent,
 		modalNftImageConsentData,
 		modalNftFullscreenDisplayData,
-		modalNftFullscreenDisplayOpen,
-		modalSend,
-		modalSendData
+		modalNftFullscreenDisplayOpen
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
