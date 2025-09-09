@@ -66,7 +66,7 @@
 					return nft.collection.address === token.address && nft.collection.network === token.network
 				})
 
-				handleRemovedNfts({ token, inventory: filteredNfts });
+				handleRemovedNfts({ token, inventory: filteredNfts.map((nft) => nft.id) });
 
 				if (isTokenErc1155(token)) {
 					handleUpdatedNfts({ token, inventory: nfts });
