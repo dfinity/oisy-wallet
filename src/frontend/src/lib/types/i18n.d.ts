@@ -436,6 +436,10 @@ interface I18nSettings {
 		git_disclaimer: string;
 		git_branch_name: string;
 		git_commit_hash: string;
+		beta_features: string;
+		enable_beta_feature: string;
+		disable_beta_feature: string;
+		save_beta_feature_success: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -1344,6 +1348,7 @@ interface I18nAi_assistant {
 		no_contacts_found_message: string;
 		loading: string;
 		reset_chat_history: string;
+		feature_description: string;
 	};
 	errors: { unknown: string; no_response: string };
 }
