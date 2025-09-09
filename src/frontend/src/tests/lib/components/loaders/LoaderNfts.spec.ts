@@ -137,8 +137,8 @@ describe('LoaderNfts', () => {
 				{ data: mockedEnabledApeToken, certified: false }
 			]);
 
-			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1, mockErc721Nft2]);
-			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft3]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft1, mockErc1155Nft2]);
+			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft3]);
 
 			render(LoaderNfts, {
 				props: {
