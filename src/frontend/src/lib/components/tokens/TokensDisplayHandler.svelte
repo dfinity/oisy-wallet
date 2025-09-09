@@ -50,7 +50,7 @@
 	};
 
 	const scheduleRetry = () => {
-		timer = setTimeout(updateTokensToDisplay, 200);
+		timer = setTimeout(updateTokensToDisplay, 500);
 	};
 
 	$effect(() => {
