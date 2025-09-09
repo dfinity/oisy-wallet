@@ -1,3 +1,4 @@
+use ic_cdk::api::msg_caller;
 use std::collections::BTreeMap;
 
 use shared::types::contact::{Contact, ContactError, StoredContacts};
@@ -8,7 +9,7 @@ use crate::{
 };
 
 pub async fn create_contact(request: CreateContactRequest) -> Result<Contact, ContactError> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     let current_time = time();
 
     // Generate a random ID BEFORE mutate_state, since it's an async operation

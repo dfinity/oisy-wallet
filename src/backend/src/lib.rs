@@ -7,7 +7,7 @@ use ethers_core::abi::ethereum_types::H160;
 use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
-use ic_cdk::{api::time, eprintln};
+use ic_cdk::{api::{time, msg_caller}, eprintln};
 use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
@@ -174,11 +174,11 @@ fn set_config(arg: InitArg) {
 fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
-    set_timer(immediate, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    set_timer(immediate, || ic_cdk::futures::spawn(hourly_housekeeping_tasks()));
 
     // Then periodically:
     let hour = Duration::from_secs(60 * 60);
-    let _ = set_timer_interval(hour, || ic_cdk::spawn(hourly_housekeeping_tasks()));
+    let _ = set_timer_interval(hour, || ic_cdk::futures::spawn(hourly_housekeeping_tasks()));
 }
 
 /// Runs hourly housekeeping tasks:
@@ -285,7 +285,7 @@ pub fn set_user_token(token: UserToken) {
 
     let addr = parse_eth_address(&token.contract_address);
 
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let find = |t: &UserToken| {
         t.chain_id == token.chain_id && parse_eth_address(&t.contract_address) == addr
@@ -296,7 +296,7 @@ pub fn set_user_token(token: UserToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         for token in tokens {
@@ -316,7 +316,7 @@ pub fn set_many_user_tokens(tokens: Vec<UserToken>) {
 #[allow(clippy::needless_pass_by_value)]
 pub fn remove_user_token(token_id: UserTokenId) {
     let addr = parse_eth_address(&token_id.contract_address);
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let find = |t: &UserToken| {
         t.chain_id == token_id.chain_id && parse_eth_address(&t.contract_address) == addr
@@ -328,7 +328,7 @@ pub fn remove_user_token(token_id: UserTokenId) {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_user_tokens() -> Vec<UserToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     read_state(|s| s.user_token.get(&stored_principal).unwrap_or_default().0)
 }
 
@@ -336,7 +336,7 @@ pub fn list_user_tokens() -> Vec<UserToken> {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn set_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let find = |t: &CustomToken| -> bool {
         CustomTokenId::from(&t.token) == CustomTokenId::from(&token.token)
@@ -347,7 +347,7 @@ pub fn set_custom_token(token: CustomToken) {
 
 #[update(guard = "caller_is_not_anonymous")]
 pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         for token in tokens {
@@ -364,7 +364,7 @@ pub fn set_many_custom_tokens(tokens: Vec<CustomToken>) {
 #[update(guard = "caller_is_not_anonymous")]
 #[allow(clippy::needless_pass_by_value)]
 pub fn remove_custom_token(token: CustomToken) {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         let find = |t: &CustomToken| -> bool {
@@ -378,7 +378,7 @@ pub fn remove_custom_token(token: CustomToken) {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn list_custom_tokens() -> Vec<CustomToken> {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     read_state(|s| s.custom_token.get(&stored_principal).unwrap_or_default().0)
 }
 
@@ -423,7 +423,7 @@ pub async fn btc_select_user_utxos_fee(
     async fn inner(
         params: SelectedUtxosFeeRequest,
     ) -> Result<SelectedUtxosFeeResponse, SelectedUtxosFeeError> {
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
         let source_address = btc_principal_to_p2wpkh_address(params.network, &principal)
             .await
             .map_err(|msg| SelectedUtxosFeeError::InternalError { msg })?;
@@ -499,7 +499,7 @@ pub async fn btc_add_pending_transaction(
     async fn inner(
         params: BtcAddPendingTransactionRequest,
     ) -> Result<(), BtcAddPendingTransactionError> {
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
         let current_utxos = bitcoin_api::get_all_utxos(
             params.network,
             params.address.clone(),
@@ -535,7 +535,7 @@ pub async fn btc_get_pending_transactions(
     async fn inner(
         params: BtcGetPendingTransactionsRequest,
     ) -> Result<BtcGetPendingTransactionsReponse, BtcGetPendingTransactionsError> {
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
         let now_ns = time();
 
         let current_utxos = bitcoin_api::get_all_utxos(
@@ -576,7 +576,7 @@ pub async fn btc_get_pending_transactions(
 #[allow(clippy::needless_pass_by_value)]
 #[must_use]
 pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredentialResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
     let current_time_ns = u128::from(time());
 
@@ -625,7 +625,7 @@ pub fn add_user_credential(request: AddUserCredentialRequest) -> AddUserCredenti
 pub fn update_user_network_settings(
     request: SaveNetworksSettingsRequest,
 ) -> UpdateUserNetworkSettingsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -653,7 +653,7 @@ pub fn update_user_network_settings(
 #[allow(clippy::needless_pass_by_value)] // canister methods are necessary
 #[must_use]
 pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTestnetsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -684,7 +684,7 @@ pub fn set_user_show_testnets(request: SetShowTestnetsRequest) -> SetUserShowTes
 pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHiddenDappIdResult {
     fn inner(request: AddHiddenDappIdRequest) -> Result<(), AddDappSettingsError> {
         request.check()?;
-        let user_principal = ic_cdk::caller();
+        let user_principal = msg_caller();
         let stored_principal = StoredPrincipal(user_principal);
 
         mutate_state(|s| {
@@ -714,7 +714,7 @@ pub fn add_user_hidden_dapp_id(request: AddHiddenDappIdRequest) -> AddUserHidden
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUserAgreementsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {
@@ -735,7 +735,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 #[update(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn create_user_profile() -> UserProfile {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     let user_profile: UserProfile = mutate_state(|s| {
         let mut user_profile_model =
@@ -747,7 +747,7 @@ pub fn create_user_profile() -> UserProfile {
 
     // TODO convert create_user_profile(..) to an asynchronous function and remove spawning the
     // Spawn the async task for allow_signing after returning UserProfile synchronously
-    ic_cdk::spawn(async move {
+    ic_cdk::futures::spawn(async move {
         // Upon initial user login, we have to that ensure allow_signing is called to handle
         // cases where users lack the cycles required for signer operations. To
         // guarantee correct functionality, create_user_profile(..) must be invoked
@@ -779,7 +779,7 @@ pub fn create_user_profile() -> UserProfile {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn get_user_profile() -> GetUserProfileResult {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     mutate_state(|s| {
         let user_profile_model =
@@ -826,7 +826,7 @@ pub async fn create_pow_challenge() -> CreatePowChallengeResult {
 #[query(guard = "caller_is_not_anonymous")]
 #[must_use]
 pub fn has_user_profile() -> HasUserProfileResponse {
-    let stored_principal = StoredPrincipal(ic_cdk::caller());
+    let stored_principal = StoredPrincipal(msg_caller());
 
     // candid does not support to directly return a bool
     HasUserProfileResponse {
@@ -868,7 +868,7 @@ pub async fn allow_signing(request: Option<AllowSigningRequest>) -> AllowSigning
     async fn inner(
         request: Option<AllowSigningRequest>,
     ) -> Result<AllowSigningResponse, AllowSigningError> {
-        let principal = ic_cdk::caller();
+        let principal = msg_caller();
 
         // Added for backward-compatibility to enforce old behaviour when feature flag POW_ENABLED
         // is disabled

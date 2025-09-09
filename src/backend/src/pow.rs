@@ -1,4 +1,4 @@
-use ic_cdk::api::caller;
+use ic_cdk::api::{msg_caller};
 use sha2::{Digest, Sha256};
 use shared::types::pow::{
     ChallengeCompletion, ChallengeCompletionError, CreateChallengeError, StoredChallenge,
@@ -41,7 +41,7 @@ fn get_current_time_ms() -> u64 {
 // TODO: remove this function and replace it with generate_random_u64
 async fn get_random_u64() -> Result<u64, String> {
     // Call raw_rand() and await the result
-    let (random_bytes,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
+    let random_bytes = ic_cdk::management_canister::raw_rand()
         .await
         .map_err(|e| format!("raw_rand failed:  {e:?}"))?;
 
@@ -52,7 +52,7 @@ async fn get_random_u64() -> Result<u64, String> {
         random_bytes.len()
     );
 
-    // Convert the first 4 bytes into a [u8; 4] array for conversion
+    // Convert the first 8 bytes into a [u8; 8] array for conversion
     let byte_array: [u8; 8] = random_bytes[0..8]
         .try_into()
         .map_err(|_| "Failed to convert bytes".to_string())?;
@@ -63,7 +63,7 @@ async fn get_random_u64() -> Result<u64, String> {
 }
 
 fn get_pow_challenge() -> Option<Candid<StoredChallenge>> {
-    let stored_principal = StoredPrincipal(caller());
+    let stored_principal = StoredPrincipal(msg_caller());
     read_state(|s: &State| s.pow_challenge.get(&stored_principal))
 }
 
@@ -88,7 +88,7 @@ fn format_challenge(challenge: &StoredChallenge) -> String {
 // -------------------------------------------------------------------------------------------------
 
 pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeError> {
-    let user_principal = StoredPrincipal(caller());
+    let user_principal = StoredPrincipal(msg_caller());
     if !has_user_profile(user_principal) {
         debug_println!(
             "create_pow_challenge() -> User profile missing for principal: {}",
@@ -193,7 +193,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 pub(crate) fn complete_challenge(
     nonce: u64,
 ) -> Result<ChallengeCompletion, ChallengeCompletionError> {
-    let principal = caller();
+    let principal = msg_caller();
     let stored_principal = StoredPrincipal(principal);
 
     // we reject any request from a principle without a user profile

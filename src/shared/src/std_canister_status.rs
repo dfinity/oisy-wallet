@@ -108,7 +108,7 @@ impl TryFrom<DefiniteCanisterSettings> for DefiniteCanisterSettingsArgs {
 /// - If the response cannot be converted to `CanisterStatusResultV2`.  For example, it looks as if
 ///   it will panic if the canister has no controllers.
 pub async fn get_canister_status_v2() -> CanisterStatusResultV2 {
-    let canister_id = ic_cdk::api::id(); // Own canister ID.
+    let canister_id = ic_cdk::api::canister_self(); // Own canister ID.
     canister_status(&CanisterStatusArgs { canister_id })
         .await
         .map_err(|err| format!("Failed to get status: {err:#?}"))

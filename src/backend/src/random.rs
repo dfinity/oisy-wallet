@@ -15,7 +15,7 @@ use std::{convert::TryInto, mem::size_of};
 ///   for a u64), with a descriptive error message.
 pub async fn generate_random_u64() -> Result<u64, String> {
     // Call raw_rand() and await the result
-    let (random_bytes,): (Vec<u8>,) = ic_cdk::api::management_canister::main::raw_rand()
+    let random_bytes = ic_cdk::management_canister::raw_rand()
         .await
         .map_err(|e| format!("raw_rand failed: {e:?}"))?;
 

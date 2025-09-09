@@ -1,11 +1,13 @@
 //! Code for interacting with the chain fusion signer.
+
+
 use bitcoin::{Address, CompressedPublicKey};
 use candid::{Nat, Principal};
 use ic_cdk::{
     api::{canister_cycle_balance, msg_caller, canister_self},
     bitcoin_canister::Network,
+    call::Call,
 };
-use ic_cdk::api::call::call_with_payment128;
 use ic_cdk::management_canister::{ecdsa_public_key, EcdsaCurve, EcdsaKeyId, EcdsaPublicKeyArgs};
 use ic_cycles_ledger_client::{
     Account, AllowanceArgs, ApproveArgs, CyclesLedgerService, DepositArgs, DepositResult,
@@ -265,7 +267,9 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             });
 
         let (result,): (DepositResult,) =
-            match call_with_payment128(*CYCLES_LEDGER, "deposit", (arg,), to_send_128)
+            match Call::unbounded_wait(*CYCLES_LEDGER, "deposit")
+                .with_arg(&arg)
+                .with_cycles(to_send_128)
                 .await
                 .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
                     available: backend_cycles,
