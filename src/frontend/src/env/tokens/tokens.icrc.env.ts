@@ -2,20 +2,18 @@ import { EnvAdditionalIcrcTokensSchema } from '$env/schema/env-additional-icrc-t
 import icrcTokens from '$env/tokens/tokens.icrc.json';
 
 const additionalIcrcTokensParsed = EnvAdditionalIcrcTokensSchema.safeParse(
-	EnvAdditionalIcrcTokensSchema.safeParse(
-		Object.entries(icrcTokens).reduce(
-			(
-				acc,
-				[
-					key,
-					{
-						fee: { __bigint__ },
-						...rest
-					}
-				]
-			) => ({ ...acc, [key]: { ...rest, fee: BigInt(__bigint__) } }),
-			{}
-		)
+	Object.entries(icrcTokens).reduce(
+		(
+			acc,
+			[
+				key,
+				{
+					fee: { __bigint__ },
+					...rest
+				}
+			]
+		) => ({ ...acc, [key]: { ...rest, fee: BigInt(__bigint__) } }),
+		{}
 	)
 );
 
