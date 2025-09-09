@@ -7,7 +7,7 @@ import type { Nft, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft
 import {
 	filterSortByCollection,
 	findNewNftIds,
-	findNft,
+	findNft, findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
 	getAllowMediaForNft,
@@ -259,6 +259,35 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('findNftsByToken', () => {
+		it('should return an empty array if no nfts were found', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				token: NYAN_CAT_TOKEN
+			});
+
+			expect(nfts).toHaveLength(0);
+		});
+
+		it('should return an empty array if no nfts were provided', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [],
+				token: NYAN_CAT_TOKEN
+			});
+
+			expect(nfts).toHaveLength(0);
+		});
+
+		it('should return the nfts of the given token', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				token: AZUKI_ELEMENTAL_BEANS_TOKEN
+			});
+
+			expect(nfts).toEqual([mockNft1, mockNft2]);
 		});
 	});
 
