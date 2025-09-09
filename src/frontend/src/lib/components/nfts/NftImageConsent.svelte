@@ -13,7 +13,7 @@
 		nft?: Nft;
 		children: Snippet;
 		showMessage?: boolean;
-		type: 'hero-banner' | 'card' | 'nft-display';
+		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display';
 	}
 
 	const { nft, children, showMessage = true, type }: Props = $props();
@@ -54,23 +54,25 @@
 					? $i18n.nfts.text.img_consent_none
 					: $i18n.nfts.text.img_consent_disabled}</span
 			>
-			<span
-				class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
-				class:lg:max-h-0={type === 'card'}
-				class:lg:opacity-0={type === 'card'}
-			>
-				<Button
-					colorStyle="secondary-light"
-					onclick={(e) => {
-						e.preventDefault();
-						handleConsent();
-					}}
-					paddingSmall
-					styleClass="py-1 rounded-md"
+			{#if type !== 'card-selectable'}
+				<span
+					class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
+					class:lg:max-h-0={type === 'card'}
+					class:lg:opacity-0={type === 'card'}
 				>
-					{$i18n.nfts.text.review_button}
-				</Button>
-			</span>
+					<Button
+						colorStyle="secondary-light"
+						onclick={(e) => {
+							e.preventDefault();
+							handleConsent();
+						}}
+						paddingSmall
+						styleClass="py-1 rounded-md"
+					>
+						{$i18n.nfts.text.review_button}
+					</Button>
+				</span>
+			{/if}
 		{/if}
 	</div>
 {/if}
