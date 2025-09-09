@@ -41,11 +41,6 @@ describe('TokensDisplayHandler', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.useFakeTimers();
-	});
-
-	afterEach(() => {
-		vi.useRealTimers();
 	});
 
 	it('should apply tokens immediately when animating is false', () => {
@@ -61,6 +56,8 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should defer applying while animating is true, then apply after animation stops', async () => {
+		vi.useFakeTimers();
+
 		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
 
 		const { getByTestId } = render(TokensDisplayHandlerTest, {
@@ -73,7 +70,7 @@ describe('TokensDisplayHandler', () => {
 		expect(count.textContent).toBe('0');
 
 		// Advance one retry tick (500ms) — still animating, so still deferred
-		vi.advanceTimersByTime(500);
+		await vi.advanceTimersByTimeAsync(500);
 
 		expect(count.textContent).toBe('0');
 
@@ -82,9 +79,11 @@ describe('TokensDisplayHandler', () => {
 		await fireEvent.click(stopBtn);
 
 		// The component scheduled a retry previously; advance time to let it run
-		vi.advanceTimersByTime(500);
+		await vi.advanceTimersByTimeAsync(500);
 
 		expect(count.textContent).toBe(initial.length.toString());
+
+		vi.useRealTimers();
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {
@@ -92,7 +91,7 @@ describe('TokensDisplayHandler', () => {
 		const expected: TokenUiOrGroupUi[] = initial.map((token) => ({ token }));
 
 		render(TokensDisplayHandlerTest, {
-			props: { ...props, animating: true }
+			props: { ...props, animating: false }
 		});
 
 		expect(groupTokensByTwin).toHaveBeenCalledExactlyOnceWith(initial);
