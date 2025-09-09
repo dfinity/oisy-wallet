@@ -32,7 +32,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	let originalPostMessage: unknown;
 
 	const mockBalance = 100n;
-	let mockBalanceFromTransactions = () => mockBalance;
+	const mockBalanceFromTransactions = () => mockBalance;
 	const mockOldestTxId = 4n;
 
 	const mockPostMessageStatusInProgress = {
