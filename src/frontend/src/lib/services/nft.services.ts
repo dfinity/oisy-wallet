@@ -28,27 +28,39 @@ export const loadNfts = async ({
 			(nft) => nft.collection.network.id === networkId
 		);
 		if (!(existingNftsForNetwork.length > 0)) {
-			const { getNftsByOwner } = alchemyProviders(networkId);
-
-			const batches = createBatches({ tokens, batchSize: 40 });
-
-			for (const batch of batches) {
-				let nfts: Nft[] = [];
-				try {
-					nfts = await getNftsByOwner({ address: walletAddress, tokens: batch });
-				} catch (_: unknown) {
-					const tokenAddresses = batch.map((token) => token.address);
-					console.warn(
-						`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
-					);
-					nfts = [];
-				}
-
-				nftStore.addAll(nfts);
-			}
+			const nfts: Nft[] = await loadNftsByNetwork({ networkId, tokens, walletAddress });
+			nftStore.addAll(nfts);
 		}
 	}
 };
+
+export const loadNftsByNetwork = async ({
+	networkId,
+																 tokens,
+																 walletAddress
+															 }: {
+	networkId: NetworkId;
+	tokens: NonFungibleToken[];
+	walletAddress: OptionEthAddress;
+}): Promise<Nft[]> => {
+	const { getNftsByOwner } = alchemyProviders(networkId);
+
+	const batches = createBatches({ tokens, batchSize: 40 });
+
+	const nfts: Nft[] = [];
+	for (const batch of batches) {
+		try {
+			nfts.push(...await getNftsByOwner({ address: walletAddress, tokens: batch }));
+		} catch (_: unknown) {
+			const tokenAddresses = batch.map((token) => token.address);
+			console.warn(
+				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
+			);
+		}
+	}
+
+	return nfts;
+}
 
 const createBatches = ({
 	tokens,
