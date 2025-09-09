@@ -13,11 +13,11 @@
 		nft: Nft;
 		testId?: string;
 		disabled?: boolean;
-		hidden?: boolean;
-		spam?: boolean;
+		isHidden?: boolean;
+		isSpam?: boolean;
 	}
 
-	let { nft, testId, disabled, hidden, spam }: Props = $props();
+	let { nft, testId, disabled, isHidden, isSpam }: Props = $props();
 </script>
 
 <a
@@ -45,13 +45,13 @@
 			</div>
 		</NftImageConsent>
 
-		{#if hidden}
+		{#if isHidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
 
-		{#if spam}
+		{#if isSpam}
 			<div class="absolute left-2 top-2 text-warning-primary">
 				<IconAlertOctagon size="24" />
 			</div>
