@@ -1,7 +1,6 @@
 import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
-import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import type { EthereumNetwork } from '$eth/types/network';
 import { signTransaction } from '$lib/api/signer.api';
@@ -110,16 +109,26 @@ const buildSignRequest = ({
 	maxFeePerGas: bigint;
 	maxPriorityFeePerGas: bigint;
 	value?: bigint;
-}): EthSignTransactionRequest => ({
-	to,
-	chain_id: chainId,
-	nonce: BigInt(nonce),
-	gas: gas ?? ETH_BASE_FEE,
-	max_fee_per_gas: maxFeePerGas ?? ETH_BASE_FEE,
-	max_priority_fee_per_gas: maxPriorityFeePerGas ?? ETH_BASE_FEE,
-	value,
-	data: [data]
-});
+}): EthSignTransactionRequest => {
+	console.log(
+		'SIGN',
+		'gas: ' + gas,
+		'maxFeePerGas: ' + maxFeePerGas,
+		'maxPriorityFeePerGas: ' + maxPriorityFeePerGas,
+		'gas * maxFeePerGas: ' + gas * maxFeePerGas
+	);
+
+	return {
+		to,
+		chain_id: chainId,
+		nonce: BigInt(nonce),
+		gas: gas,
+		max_fee_per_gas: maxFeePerGas,
+		max_priority_fee_per_gas: maxPriorityFeePerGas,
+		value,
+		data: [data]
+	};
+};
 
 /* ---------------- sign+send helpers ---------------- */
 
