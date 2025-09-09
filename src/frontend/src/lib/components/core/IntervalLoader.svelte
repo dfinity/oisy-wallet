@@ -9,7 +9,7 @@
 		children?: Snippet;
 	}
 
-	let { onLoad, interval, skipInitialLoad, children }: Props = $props();
+	let { onLoad, interval, skipInitialLoad = false, children }: Props = $props();
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 
