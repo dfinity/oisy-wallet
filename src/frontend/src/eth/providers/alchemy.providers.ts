@@ -146,14 +146,14 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
-		address,
-		token
-	}: {
+														address,
+										 tokens
+													}: {
 		address: EthAddress;
-		token: NonFungibleToken;
+		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: [token.address],
+			contractAddresses: tokens.map((token) => token.address),
 			omitMetadata: false,
 			orderBy: NftOrdering.TRANSFERTIME
 		});
@@ -165,11 +165,13 @@ export class AlchemyProvider {
 				}
 			} = ownedNft;
 
+			const token = tokens.find((token) => token.address === ownedNft.contract.address);
+
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({
-						traitType,
-						value: value.toString()
-					}))
+					traitType,
+					value: value.toString()
+				}))
 				: [];
 
 			const nft: Nft = {

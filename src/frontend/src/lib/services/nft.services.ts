@@ -1,9 +1,8 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
-import type { Nft, NftsByNetwork, NonFungibleToken } from '$lib/types/nft';
-import { getNftsByNetworks } from '$lib/utils/nfts.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
@@ -18,43 +17,50 @@ export const loadNfts = async ({
 		return;
 	}
 
-	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
+	const tokensByNetwork = tokens.reduce((acc, token) => {
+		const { network: { id: networkId } } = token;
 
-	for (const token of tokens) {
-		const nftsLoaded = hasLoadedNfts({ token, loadedNftsByNetwork });
-		if (!nftsLoaded) {
-			const { getNftsByOwner } = alchemyProviders(token.network.id);
+		if (!acc.has(networkId)) {
+			acc.set(networkId, []);
+		}
 
-			let nfts: Nft[] = [];
-			try {
-				nfts = await getNftsByOwner({ address: walletAddress, token });
-			} catch (_: unknown) {
-				console.warn(
-					`Failed to load NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`
-				);
-				nfts = [];
+		acc.set(networkId, [...acc.get(networkId)!, token]);
+
+		return acc;
+	}, new Map<NetworkId, NonFungibleToken[]>());
+
+	for (const [networkId, tokens] of tokensByNetwork) {
+		const existingNftsForNetwork = loadedNfts.filter((nft) => nft.collection.network.id === networkId);
+		if (!(existingNftsForNetwork.length > 0)) {
+			const { getNftsByOwner } = alchemyProviders(networkId);
+
+			const batches = createBatches({tokens, batchSize: 40})
+
+			for (const batch of batches) {
+				let nfts: Nft[] = [];
+				try {
+					nfts = await getNftsByOwner({address: walletAddress, tokens: batch})
+				} catch (_: unknown) {
+					const tokenAddresses = batch.map((token) => token.address)
+					console.warn(
+						`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
+					);
+					nfts = [];
+				}
+
+				nftStore.addAll(nfts);
 			}
-
-			nftStore.addAll(nfts);
 		}
 	}
 };
 
-const hasLoadedNfts = ({
-	token: {
-		network: { id: networkId },
-		address
-	},
-	loadedNftsByNetwork
-}: {
-	token: NonFungibleToken;
-	loadedNftsByNetwork: NftsByNetwork;
-}): boolean => {
-	const tokensByNetwork = loadedNftsByNetwork[networkId];
-	if (nonNullish(tokensByNetwork)) {
-		const nfts = tokensByNetwork[address.toLowerCase()] ?? [];
-		return nfts.length > 0;
-	}
-
-	return false;
-};
+const createBatches = ({
+												 tokens,
+												 batchSize
+											 }: {
+	tokens: NonFungibleToken[];
+	batchSize: number;
+}): NonFungibleToken[][] =>
+	Array.from({ length: Math.ceil(tokens.length / batchSize) }, (_, index) =>
+		tokens.slice(index * batchSize, (index + 1) * batchSize)
+	);
