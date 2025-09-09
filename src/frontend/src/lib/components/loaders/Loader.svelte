@@ -68,6 +68,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { nftStore } from '$lib/stores/nft.store';
 
 	interface Props {
 		children: Snippet;
@@ -223,6 +224,7 @@
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
 			tokens: $nonFungibleTokens ?? [],
+			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
 	});
