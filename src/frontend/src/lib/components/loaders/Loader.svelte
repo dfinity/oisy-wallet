@@ -224,7 +224,6 @@
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
 			tokens: $nonFungibleTokens ?? [],
-			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
 	});
