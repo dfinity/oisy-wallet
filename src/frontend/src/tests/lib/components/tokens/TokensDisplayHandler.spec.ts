@@ -2,6 +2,7 @@ import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/netwo
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+import { randomWait } from '$lib/utils/time.utils';
 import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';
 import {
@@ -56,8 +57,6 @@ describe('TokensDisplayHandler', () => {
 	});
 
 	it('should defer applying while animating is true, then apply after animation stops', async () => {
-		vi.useFakeTimers();
-
 		const initial = get(combinedDerivedSortedFungibleNetworkTokensUi);
 
 		const { getByTestId } = render(TokensDisplayHandlerTest, {
@@ -69,8 +68,7 @@ describe('TokensDisplayHandler', () => {
 
 		expect(count.textContent).toBe('0');
 
-		// Advance one retry tick (500ms) — still animating, so still deferred
-		await vi.advanceTimersByTimeAsync(500);
+		await randomWait({});
 
 		expect(count.textContent).toBe('0');
 
@@ -79,11 +77,9 @@ describe('TokensDisplayHandler', () => {
 		await fireEvent.click(stopBtn);
 
 		// The component scheduled a retry previously; advance time to let it run
-		await vi.advanceTimersByTimeAsync(500);
+		await randomWait({});
 
 		expect(count.textContent).toBe(initial.length.toString());
-
-		vi.useRealTimers();
 	});
 
 	it('should call the utils functions with the correct arguments', async () => {

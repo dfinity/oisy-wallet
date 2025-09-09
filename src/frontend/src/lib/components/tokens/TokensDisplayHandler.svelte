@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
@@ -46,22 +46,27 @@
 			return;
 		}
 
+
+
 		scheduleRetry();
 	};
 
 	const scheduleRetry = () => {
+
+
+
 		timer = setTimeout(updateTokensToDisplay, 500);
 	};
 
 	$effect(() => {
 		[sortedTokensOrGroups];
 
-		clearTimer;
-
 		updateTokensToDisplay();
 
 		return clearTimer;
 	});
+
+	onDestroy(clearTimer);
 </script>
 
 {@render children()}
