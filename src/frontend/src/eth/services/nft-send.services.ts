@@ -183,7 +183,7 @@ export const transferErc721 = async ({
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
 
-	progress?.(ProgressStepsSendEnum.TRANSFER);
+	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
 
 	const result = await sendRaw({ networkId, raw });
 
