@@ -9,7 +9,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Identity } from '@dfinity/agent';
-import { Interface } from 'ethers';
+import { Interface, Transaction } from 'ethers';
 import type { TransactionResponse } from 'ethers/providers';
 
 export interface CommonNftTransferParams {
@@ -212,5 +212,21 @@ export const transferErc1155 = async ({
 	});
 
 	const raw = await signWithIdentity({ identity, transaction: tx });
+	const signedTx = Transaction.from(raw);
+	console.log('SIGNED', {
+		chainId: signedTx.chainId, // should be 8453
+		gasLimit: signedTx.gasLimit.toString(), // should be 70492
+		maxFeePerGas: signedTx.maxFeePerGas?.toString(), // should be 20128422
+		maxPriorityFeePerGas: signedTx.maxPriorityFeePerGas?.toString(),
+		gasPrice: signedTx.gasPrice?.toString(), // should be undefined on type-2
+		to: signedTx.to,
+		value: signedTx.value.toString()
+	});
+	const cap = signedTx.maxFeePerGas ?? signedTx.gasPrice!;
+	console.log(
+		'capCostWei =',
+		(signedTx.gasLimit * cap).toString(),
+		'networkId: ' + networkId.toString()
+	);
 	return await sendRaw({ networkId, raw });
 };
