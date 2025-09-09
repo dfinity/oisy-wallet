@@ -11,6 +11,8 @@ import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import * as authUtils from '$lib/utils/auth.utils';
+import * as eventsUtils from '$lib/utils/events.utils';
+import { emit } from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
@@ -19,7 +21,7 @@ import {
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { arrayOfNumberToUint8Array, jsonReplacer } from '@dfinity/utils';
+import { arrayOfNumberToUint8Array, jsonReplacer, toNullable } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -30,7 +32,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	let originalPostMessage: unknown;
 
 	const mockBalance = 100n;
-	let mockBalanceFromTransactions = () => mockBalance;
+	const mockBalanceFromTransactions = () => mockBalance;
 	const mockOldestTxId = 4n;
 
 	const mockPostMessageStatusInProgress = {
@@ -99,6 +101,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		vi.useFakeTimers();
 
 		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+
+		vi.spyOn(eventsUtils, 'emit');
 	});
 
 	afterEach(() => {
@@ -178,6 +182,94 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 			});
 		};
 
+	const icrcAdditionalTests =
+		<PostMessageDataRequest>({
+			scheduler,
+			mockPostMessageNotCertified,
+			mockPostMessageCertified,
+			startData = undefined
+		}: {
+			scheduler: IcWalletScheduler<PostMessageDataRequest>;
+			mockPostMessageNotCertified: ReturnType<typeof mockPostMessage>;
+			mockPostMessageCertified: ReturnType<typeof mockPostMessage>;
+			startData?: PostMessageDataRequest | undefined;
+		}) =>
+		() => {
+			it('should use the balance from the Ledger canister and not from the Index canister', async () => {
+				const currentMock = spyGetTransactions.getMockImplementation();
+
+				spyGetTransactions.mockImplementation(async () => ({
+					...(await currentMock?.()),
+					balance: mockBalance + 1n
+				}));
+
+				expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+				expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+
+				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+			});
+
+			it('should use emit event oisyIndexCanisterBalanceOutOfSync with out-of-sync Index canister balance', async () => {
+				const currentMock = spyGetTransactions.getMockImplementation();
+
+				spyGetTransactions.mockImplementation(async () => ({
+					...(await currentMock?.()),
+					balance: mockBalance + 1n
+				}));
+
+				expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+				expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				// query + update = 2
+				expect(emit).toHaveBeenCalledTimes(2);
+				expect(emit).toHaveBeenNthCalledWith(1, {
+					message: 'oisyIndexCanisterBalanceOutOfSync',
+					detail: true
+				});
+				expect(emit).toHaveBeenNthCalledWith(2, {
+					message: 'oisyIndexCanisterBalanceOutOfSync',
+					detail: true
+				});
+			});
+
+			it('should use emit event oisyIndexCanisterBalanceOutOfSync with up-to-date Index canister balance', async () => {
+				const currentMock = spyGetTransactions.getMockImplementation();
+
+				spyGetTransactions.mockImplementation(async () => ({
+					...(await currentMock?.()),
+					balance: mockBalance
+				}));
+
+				expect(mockPostMessageNotCertified.data.wallet.balance.data).toBe(mockBalance);
+				expect(mockPostMessageCertified.data.wallet.balance.data).toBe(mockBalance);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				// query + update = 2
+				expect(emit).toHaveBeenCalledTimes(2);
+				expect(emit).toHaveBeenNthCalledWith(1, {
+					message: 'oisyIndexCanisterBalanceOutOfSync',
+					detail: false
+				});
+				expect(emit).toHaveBeenNthCalledWith(2, {
+					message: 'oisyIndexCanisterBalanceOutOfSync',
+					detail: false
+				});
+			});
+		};
+
 	const initWithTransactions = <PostMessageDataRequest>({
 		initScheduler,
 		transaction,
@@ -242,7 +334,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		initScheduler,
 		transaction,
 		msg,
-		startData = undefined
+		startData = undefined,
+		additionalTests = () => {}
 	}: {
 		initScheduler: (
 			data: PostMessageDataRequest | undefined
@@ -250,6 +343,12 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		transaction: IcTransactionUi;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 		startData?: PostMessageDataRequest | undefined;
+		additionalTests?: (params: {
+			scheduler: IcWalletScheduler<PostMessageDataRequest>;
+			mockPostMessageNotCertified: ReturnType<typeof mockPostMessage>;
+			mockPostMessageCertified: ReturnType<typeof mockPostMessage>;
+			startData?: PostMessageDataRequest | undefined;
+		}) => void;
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
@@ -299,23 +398,11 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(spyGetBalance).toHaveBeenCalledTimes(6);
 				});
 
-				it('should use the balance from the Ledger canister and not from the Index canister', async () => {
-					mockBalanceFromTransactions = () => mockBalance + 1n;
-
-					expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(
-						mockBalanceFromTransactions()
-					);
-					expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(
-						mockBalanceFromTransactions()
-					);
-
-					await scheduler.start(startData);
-
-					await awaitJobExecution();
-
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
-
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+				additionalTests({
+					scheduler,
+					mockPostMessageNotCertified,
+					mockPostMessageCertified,
+					startData
 				});
 			}
 		};
@@ -561,7 +648,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 									}
 								]
 							: [mockTransaction],
-						oldest_tx_id: [mockOldestTxId]
+						oldest_tx_id: toNullable(mockOldestTxId)
 					})
 				);
 			};
@@ -640,7 +727,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				msg: 'syncIcrcWallet',
 				initScheduler: initIcrcWalletScheduler,
 				transaction: mockMappedTransaction,
-				startData
+				startData,
+				additionalTests: icrcAdditionalTests
 			});
 
 			beforeEach(() => {
@@ -694,7 +782,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 									}
 								]
 							: [mockTransaction],
-						oldest_tx_id: [mockOldestTxId]
+						oldest_tx_id: toNullable(mockOldestTxId)
 					})
 				);
 			};

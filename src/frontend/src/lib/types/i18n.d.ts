@@ -471,6 +471,7 @@ interface I18nReceive {
 	icp: {
 		text: {
 			account_id: string;
+			checking_index_canister_status: string;
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
