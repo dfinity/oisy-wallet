@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store';
 	import type { Snippet } from 'svelte';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
-		open: (modalId: symbol) => void;
+		onOpen: (modalId: symbol) => void;
 		isOpen: boolean;
 		modal: Snippet;
 		button: Snippet<[onclick: () => void]>;
 	}
 
-	const { open, isOpen, modal, button }: Props = $props();
+	const { onOpen, isOpen, modal, button }: Props = $props();
 
 	const modalId = Symbol();
 </script>
 
-{@render button(() => open(modalId))}
+{@render button(() => onOpen(modalId))}
 
 {#if isOpen && $modalStore?.id === modalId}
 	{@render modal()}
