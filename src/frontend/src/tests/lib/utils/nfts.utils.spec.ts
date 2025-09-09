@@ -7,7 +7,8 @@ import type { Nft, NftId, NftsByNetwork, NonFungibleToken } from '$lib/types/nft
 import {
 	filterSortByCollection,
 	findNewNftIds,
-	findNft, findNftsByToken,
+	findNft,
+	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
 	getAllowMediaForNft,

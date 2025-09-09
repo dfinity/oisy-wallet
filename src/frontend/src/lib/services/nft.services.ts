@@ -8,7 +8,7 @@ import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
-																 loadedNfts,
+	loadedNfts,
 	walletAddress
 }: {
 	tokens: NonFungibleToken[];
@@ -29,10 +29,10 @@ export const loadNfts = async ({
 };
 
 export const loadNftsByNetwork = async ({
-																					networkId,
-																					tokens,
-																					walletAddress
-																				}: {
+	networkId,
+	tokens,
+	walletAddress
+}: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
@@ -61,9 +61,9 @@ export const loadNftsByNetwork = async ({
 };
 
 const createBatches = ({
-												 tokens,
-												 batchSize
-											 }: {
+	tokens,
+	batchSize
+}: {
 	tokens: NonFungibleToken[];
 	batchSize: number;
 }): NonFungibleToken[][] =>
