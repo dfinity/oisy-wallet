@@ -181,10 +181,9 @@ export const transferErc721 = async ({
 		maxPriorityFeePerGas
 	});
 
-	const raw = await signWithIdentity({ identity, transaction: tx });
-
 	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
 
+	const raw = await signWithIdentity({ identity, transaction: tx });
 	const result = await sendRaw({ networkId, raw });
 
 	progress?.(ProgressStepsSendEnum.TRANSFER);
@@ -225,11 +224,9 @@ export const transferErc1155 = async ({
 		maxFeePerGas,
 		maxPriorityFeePerGas
 	});
-
-	const raw = await signWithIdentity({ identity, transaction: tx });
-
 	progress?.(ProgressStepsSendEnum.SIGN_TRANSFER);
 
+	const raw = await signWithIdentity({ identity, transaction: tx });
 	const result = await sendRaw({ networkId, raw });
 
 	progress?.(ProgressStepsSendEnum.TRANSFER);
