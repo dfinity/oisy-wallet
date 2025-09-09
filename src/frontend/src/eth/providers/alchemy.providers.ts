@@ -166,6 +166,9 @@ export class AlchemyProvider {
 			} = ownedNft;
 
 			const token = tokens.find((token) => token.address === ownedNft.contract.address);
+			if (isNullish(token)) {
+				return acc;
+			}
 
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({

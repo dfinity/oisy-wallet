@@ -3,6 +3,7 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
+import type { NetworkId } from '$lib/types/network';
 
 export const loadNfts = async ({
 	tokens,
