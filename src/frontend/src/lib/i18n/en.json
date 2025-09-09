@@ -591,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP Account ID",
+				"checking_index_canister_status": "Checking transactions status...",
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",

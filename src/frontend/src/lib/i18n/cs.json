@@ -591,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID ICP Účtu",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
 				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
 				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
