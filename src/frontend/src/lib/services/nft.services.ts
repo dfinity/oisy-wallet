@@ -19,15 +19,8 @@ export const loadNfts = async ({
 	}
 
 	const tokensByNetwork = tokens.reduce((acc, token) => {
-		const { network: { id: networkId } } = token;
-
-		if (!acc.has(networkId)) {
-			acc.set(networkId, []);
-		}
-
-		acc.set(networkId, [...acc.get(networkId), token]);
-
-		return acc;
+		const networkId = token.network.id;
+		return acc.set(networkId, [...(acc.get(networkId) ?? []), token]);
 	}, new Map<NetworkId, NonFungibleToken[]>());
 
 	for (const [networkId, tokens] of tokensByNetwork) {
