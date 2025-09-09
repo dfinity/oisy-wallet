@@ -6,9 +6,16 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenFungible, isTokenNonFungible } from '$lib/utils/nft.utils';
+import { getTokensByNetwork, isTokenFungible, isTokenNonFungible } from '$lib/utils/nft.utils';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
-import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
+import {
+	AZUKI_ELEMENTAL_BEANS_TOKEN,
+	DE_GODS_TOKEN,
+	MOCK_ERC721_TOKENS,
+	PUDGY_PENGUINS_TOKEN
+} from '$tests/mocks/erc721-tokens.mock';
+import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 
 describe('nft.utils', () => {
 	describe('isTokenNonFungible', () => {
@@ -53,5 +60,36 @@ describe('nft.utils', () => {
 				expect(isTokenFungible(token)).toBeFalsy();
 			}
 		);
+	});
+
+	describe('getTokensByNetwork', () => {
+		it('should return an empty map if no tokens are provided', () => {
+			const result = getTokensByNetwork([]);
+
+			expect(result.size).toEqual(0);
+		});
+
+		it('should return the tokens grouped by networks', () => {
+			const result = getTokensByNetwork([
+				AZUKI_ELEMENTAL_BEANS_TOKEN,
+				DE_GODS_TOKEN,
+				PUDGY_PENGUINS_TOKEN
+			]);
+
+			expect(result.size).toEqual(2);
+
+			const polygonTokens = result.get(POLYGON_AMOY_NETWORK.id);
+
+			expect(polygonTokens).toBeDefined();
+			expect(polygonTokens).toHaveLength(2);
+			expect(polygonTokens).toContain(AZUKI_ELEMENTAL_BEANS_TOKEN);
+			expect(polygonTokens).toContain(DE_GODS_TOKEN);
+
+			const ethereumTokens = result.get(ETHEREUM_NETWORK.id);
+
+			expect(ethereumTokens).toBeDefined();
+			expect(ethereumTokens).toHaveLength(1);
+			expect(ethereumTokens).toContain(PUDGY_PENGUINS_TOKEN);
+		});
 	});
 });
