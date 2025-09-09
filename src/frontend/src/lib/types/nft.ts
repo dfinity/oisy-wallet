@@ -6,7 +6,7 @@ import type {
 	NftIdSchema,
 	NftMetadataSchema,
 	NftSchema,
-	OwnedContractSchema,
+	OwnedContractSchema
 } from '$lib/schema/nft.schema';
 import type { NetworkId } from '$lib/types/network';
 import type * as z from 'zod';
