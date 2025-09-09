@@ -13,7 +13,6 @@ export class InfuraGasRest {
 	getSuggestedFeeData = async (): Promise<
 		Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'>
 	> => {
-		console.log('SUGGESTED FEE DATA: ', this.chainId);
 		const url = new URL(
 			`${this.apiUrl}/${INFURA_API_KEY}/networks/${this.chainId.toString()}/suggestedGasFees`
 		);
