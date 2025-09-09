@@ -31,7 +31,7 @@ const buildIcrcTokens = async (): Promise<TokensAndIcons> => {
 		throw new Error(`Error parsing tokens.icrc.json: ${icrcTokensParsed.error.message}`);
 	}
 
-	const icrcTokens = icrcTokensParsed.data;
+	const { data: icrcTokens } = icrcTokensParsed;
 
 	return await Object.entries(icrcTokens).reduce<Promise<TokensAndIcons>>(
 		async (acc, [key, token]) => {
