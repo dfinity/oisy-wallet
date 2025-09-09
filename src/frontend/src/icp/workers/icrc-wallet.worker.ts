@@ -94,8 +94,8 @@ const getBalance = ({
  *
  * The errors raised by this function are handled directly in the scheduler.
  * If loading the transactions fails, the scheduler restarts using only the Ledger canister.
- * If loading the balance fails, the same happens, and we don't load the transactions anymore.
- * It was deemed not relevant, since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
+ * If loading the balance fails, the same happens, and we don't load the transactions any more.
+ * It was deemed not relevant since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
  *
  * @param {SchedulerJobParams<PostMessageDataRequestIcrcStrict>} params - The parameters for the function, including the identity and data.
  * @returns {Promise<GetBalanceAndTransactions>} A promise that resolves to an object containing the balance and transactions of the account.
@@ -109,9 +109,7 @@ const getBalanceAndTransactions = async (
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
 	const { balance: indexCanisterBalance, ...rest } = transactions;
 
-	if (balance !== indexCanisterBalance) {
-		emit({ message: 'oisyDiscordantIndexCanisterBalance' });
-	}
+	emit({ message: 'oisyIndexCanisterBalanceOutOfSync', detail: balance !== indexCanisterBalance });
 
 	return { ...rest, balance };
 };

@@ -2,7 +2,6 @@
 	import type { Snippet } from 'svelte';
 	import { blur } from 'svelte/transition';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { SyncState } from '$lib/types/sync';
 
 	interface Props {
 		children: Snippet;
@@ -10,15 +9,15 @@
 
 	let { children }: Props = $props();
 
-	let indexCanisterSyncState = $state<SyncState | undefined>();
+	let indexCanisterBalanceOutOfSync = $state<boolean>(false);
 
-	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
-		(indexCanisterSyncState = state);
+	const onSyncPendingState = ({ detail: state }: CustomEvent<boolean>) =>
+		(indexCanisterBalanceOutOfSync = state);
 </script>
 
-<svelte:window on:oisyDiscordantIndexCanisterBalance={onSyncPendingState} />
+<svelte:window on:oisyIndexCanisterBalanceOutOfSync={onSyncPendingState} />
 
-{#if indexCanisterSyncState === 'in_progress'}
+{#if indexCanisterBalanceOutOfSync}
 	<div class="animate-pulse text-tertiary">
 		<span transition:blur>{$i18n.receive.icp.text.checking_index_canister_status}</span>
 	</div>
