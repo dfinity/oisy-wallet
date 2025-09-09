@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount, setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
 	import SendDestinationWizardStep from '$lib/components/send/SendDestinationWizardStep.svelte';
+	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import SendQrCodeScan from '$lib/components/send/SendQrCodeScan.svelte';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
@@ -37,8 +39,10 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import { token } from '$lib/stores/token.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft } from '$lib/types/nft';
 	import type { QrResponse, QrStatus } from '$lib/types/qr-code';
 	import type { SendDestinationTab } from '$lib/types/send';
 	import type { OptionToken, Token } from '$lib/types/token';
@@ -53,13 +57,9 @@
 		isNetworkIdSOLDevnet,
 		isNetworkIdSOLLocal
 	} from '$lib/utils/network.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nftStore } from '$lib/stores/nft.store';
-	import type { Nft } from '$lib/types/nft';
-	import { nonNullish } from '@dfinity/utils';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
@@ -192,7 +192,7 @@
 
 	onMount(() => {
 		if (nonNullish(nft) && isNftsPage) {
-			selectNft(nft as Nft);
+			selectNft(nft);
 		}
 	});
 </script>
@@ -216,8 +216,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 			<SendNftsList
-				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 				onSelect={selectNft}
+				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
@@ -242,9 +242,9 @@
 			/>
 		{:else}
 			<SendWizard
-				nft={selectedNft}
 				{currentStep}
 				{destination}
+				nft={selectedNft}
 				{selectedContact}
 				bind:amount
 				bind:sendProgressStep

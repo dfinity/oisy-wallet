@@ -8,6 +8,7 @@
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
+	import SendModal from '$lib/components/send/SendModal.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
 	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
@@ -35,7 +36,6 @@
 		modalSendData
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
-	import SendModal from '$lib/components/send/SendModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
