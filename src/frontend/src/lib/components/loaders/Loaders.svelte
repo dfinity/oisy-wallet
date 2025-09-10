@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
-	import CkBTCUpdateBalanceListener from '$icp/components/core/CkBTCUpdateBalanceListener.svelte';
+	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
@@ -57,4 +57,4 @@
 </LoaderUserProfile>
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
-<CkBTCUpdateBalanceListener />
+<CkBtcUpdateBalanceListener />

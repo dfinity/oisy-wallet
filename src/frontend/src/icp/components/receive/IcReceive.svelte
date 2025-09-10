@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
-	import IcReceiveCkBTC from '$icp/components/receive/IcReceiveCkBTC.svelte';
+	import IcReceiveCkBtc from '$icp/components/receive/IcReceiveCkBtc.svelte';
 	import IcReceiveCkEthereum from '$icp/components/receive/IcReceiveCkEthereum.svelte';
-	import IcReceiveIcp from '$icp/components/receive/IcReceiveICP.svelte';
+	import IcReceiveIcp from '$icp/components/receive/IcReceiveIcp.svelte';
 	import IcReceiveIcrc from '$icp/components/receive/IcReceiveIcrc.svelte';
 	import {
 		initReceiveTokenContext,
@@ -54,7 +54,7 @@
 {#if ckEthereum}
 	<IcReceiveCkEthereum />
 {:else if ckBTC}
-	<IcReceiveCkBTC />
+	<IcReceiveCkBtc />
 {:else if icrc || dip20}
 	<IcReceiveIcrc />
 {:else}
