@@ -48,7 +48,7 @@ jobs:
           path: .eslintcache
           key: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number }}
           restore-keys: |
-            ${{ runner.os }}-eslint-
+            ${{ runner.os }}-eslint-cache-format-
       - name: Format
         run: npm run format
       - name: Check for Changes
@@ -83,6 +83,13 @@ jobs:
           persist-credentials: false
       - name: Prepare
         uses: ./.github/actions/prepare
+      - name: Restore ESLint Cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: .eslintcache
+          key: ${{ runner.os }}-eslint-cache-lint-${{ github.event.pull_request.number }}
+          restore-keys: |
+            ${{ runner.os }}-eslint-cache-lint-
       - name: Lint
         run: npm run lint -- --max-warnings 0
 
