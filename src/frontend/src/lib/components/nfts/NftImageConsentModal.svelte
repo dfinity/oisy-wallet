@@ -24,6 +24,8 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
+    import {isTokenErc1155} from "$eth/utils/erc1155.utils";
+    import {isTokenErc721} from "$eth/utils/erc721.utils";
 
 	interface Props {
 		collection: NftCollection;
@@ -62,7 +64,7 @@
 	const save = async () => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
-			if (token.standard === 'erc721') {
+			if ( isTokenErc721(  token)) {
 				await saveErc721CustomTokens({
 					tokens: [
 						{
@@ -73,7 +75,7 @@
 					],
 					identity: $authIdentity
 				});
-			} else if (token.standard === 'erc1155') {
+			} else if (isTokenErc1155( token)) {
 				await saveErc1155CustomTokens({
 					tokens: [
 						{
