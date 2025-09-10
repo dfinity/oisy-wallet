@@ -6,7 +6,7 @@ export const EnvIcrcTokenMetadataSchema = z.object({
 	symbol: z.string(),
 	fee: z.bigint(),
 	alternativeName: z.optional(z.string()),
-	url: z.optional(z.string().url())
+	url: z.optional(z.url())
 });
 
 export const EnvIcrcTokenIconSchema = z.object({
@@ -22,3 +22,18 @@ export const EnvIcTokenSchema = z.object({
 	ledgerCanisterId: z.string(),
 	indexCanisterId: z.string().optional()
 });
+
+const OptionalEnvIcrcTokenMetadataSchema = z.union([
+	EnvIcrcTokenMetadataSchema,
+	EnvIcrcTokenMetadataSchema.partial()
+]);
+
+export const EnvIcTokenWithMetadataSchema = z.intersection(
+	EnvIcTokenSchema,
+	OptionalEnvIcrcTokenMetadataSchema
+);
+
+export const OptionalEnvIcTokenWithMetadataSchema = z.union([
+	z.undefined(),
+	EnvIcTokenWithMetadataSchema
+]);
