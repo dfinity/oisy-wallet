@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "Сделайте свой первый перевод прямо сейчас!",
 			"contacts_empty_state_title": "Ваши контакты появятся здесь",
 			"contacts_empty_state_description": "Похоже, вы еще не добавили контактов",
-			"send_review_subtitle": "Вы отправляете"
+			"send_review_subtitle": "Вы отправляете",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Введите публичный адрес (0x), имя или псевдоним",
 			"enter_recipient_address": "Введите адрес получателя, имя или псевдоним",
 			"enter_wallet_address": "Введите адрес кошелька, имя или псевдоним",
-			"select_network": "Выбрать сеть"
+			"select_network": "Выбрать сеть",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Пожалуйста, подождите, пока параметры ckBTC будут сертифицированы.",

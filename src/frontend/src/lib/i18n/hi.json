@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "अब अपना पहला भेजें!",
 			"contacts_empty_state_title": "आपके संपर्क यहाँ दिखाई देंगे",
 			"contacts_empty_state_description": "ऐसा लगता है कि आपने अभी तक संपर्क नहीं जोड़े हैं",
-			"send_review_subtitle": "आप भेजते हैं"
+			"send_review_subtitle": "आप भेजते हैं",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",
-			"select_network": "नेटवर्क चुनें"
+			"select_network": "नेटवर्क चुनें",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "कृपया ckBTC पैरामीटर प्रमाणित होने तक प्रतीक्षा करें।",
