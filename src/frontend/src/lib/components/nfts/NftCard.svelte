@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -58,7 +57,7 @@
 		{/if}
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
-			{#if nonNullish(nft.balance)}
+			{#if nft.collection.standard === 'erc1155'}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
 
