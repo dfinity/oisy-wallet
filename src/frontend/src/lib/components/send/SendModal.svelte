@@ -81,8 +81,6 @@
 	let modal: WizardModal<WizardStepsSend>;
 	let selectedNft: Nft | undefined;
 
-	const dispatch = createEventDispatcher();
-
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
@@ -106,8 +104,6 @@
 	const close = () =>
 		closeModal(() => {
 			reset();
-
-			dispatch('nnsClose');
 		});
 
 	const isDisabled = ({ network: { id } }: Token): boolean =>

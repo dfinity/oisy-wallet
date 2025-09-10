@@ -591,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP 账户 ID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
 				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
 				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",

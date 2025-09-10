@@ -2,6 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -29,7 +31,7 @@
 		}
 
 		if (nonNullish(token)) {
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
 					tokens: [
@@ -41,8 +43,11 @@
 						}
 					]
 				});
+
+				return;
 			}
-			if (token.standard === 'erc1155') {
+
+			if (isTokenErc1155(token)) {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
 					tokens: [
@@ -54,6 +59,8 @@
 						}
 					]
 				});
+
+				return;
 			}
 		}
 	};

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -21,33 +22,30 @@
 
 	let { nft, testId, disabled, isHidden, isSpam, selectable, onSelect }: Props = $props();
 
-	const onClick = (e: Event) => {
-		if (disabled || selectable) {
-			e.preventDefault();
-
-			if (selectable && nonNullish(onSelect)) {
-				onSelect(nft);
-			}
+	const onClick = () => {
+		if (selectable && nonNullish(onSelect) && !disabled) {
+			onSelect(nft);
+			return;
+		}
+		if (!selectable && !disabled) {
+			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};
 </script>
 
-<a
-	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+<button
+	class="group block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
 	data-tid={testId}
-	href={selectable && nonNullish(onSelect)
-		? '#'
-		: `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`}
 	onclick={onClick}
 >
-	<div
-		class="relative aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+	<span
+		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type="card-selectable">
+		<NftImageConsent {nft} type={selectable ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -71,7 +69,7 @@
 			</div>
 		{/if}
 
-		<div class="absolute bottom-2 right-2 flex items-center gap-1">
+		<span class="absolute bottom-2 right-2 block flex items-center gap-1">
 			{#if nonNullish(nft.balance)}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
@@ -82,10 +80,10 @@
 				size="xs"
 				testId={`${testId}-network`}
 			/>
-		</div>
-	</div>
+		</span>
+	</span>
 
-	<div class="flex w-full flex-col gap-1 px-2 pb-2">
+	<span class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
@@ -94,5 +92,5 @@
 		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
 			>#{nft.id}</span
 		>
-	</div>
-</a>
+	</span>
+</button>
