@@ -53,7 +53,7 @@ export const loadNftsByNetwork = async ({
 
 	const { getNftsByOwner } = alchemyProviders(networkId);
 
-	const batches = createBatches({ tokens, batchSize: 40 });
+	const batches = createBatches<NonFungibleToken>({ items: tokens, batchSize: 40 });
 
 	const nfts: Nft[] = [];
 	for (const batch of batches) {
