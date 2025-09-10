@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { stopPropagation } from '@dfinity/gix-components';
+	import { preventDefault, stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
@@ -63,7 +63,7 @@
 				>
 					<Button
 						colorStyle="secondary-light"
-						onclick={stopPropagation(handleConsent)}
+						onclick={preventDefault(stopPropagation(handleConsent))}
 						paddingSmall
 						styleClass="py-1 rounded-md"
 					>
