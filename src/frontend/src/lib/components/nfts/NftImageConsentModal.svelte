@@ -3,6 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -62,7 +64,7 @@
 	const save = async () => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				await saveErc721CustomTokens({
 					tokens: [
 						{
@@ -73,7 +75,7 @@
 					],
 					identity: $authIdentity
 				});
-			} else if (token.standard === 'erc1155') {
+			} else if (isTokenErc1155(token)) {
 				await saveErc1155CustomTokens({
 					tokens: [
 						{

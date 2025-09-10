@@ -10,6 +10,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -147,13 +148,13 @@ export class AlchemyProvider {
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
 		address,
-		token
+		tokens
 	}: {
 		address: EthAddress;
-		token: NonFungibleToken;
+		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: [token.address],
+			contractAddresses: tokens.map((token) => token.address),
 			omitMetadata: false,
 			orderBy: NftOrdering.TRANSFERTIME
 		});
@@ -164,6 +165,17 @@ export class AlchemyProvider {
 					metadata: { attributes }
 				}
 			} = ownedNft;
+
+			const token = tokens.find(({ address, network: { id: networkId } }) =>
+				areAddressesEqual({
+					address1: address,
+					address2: ownedNft.contract.address,
+					networkId
+				})
+			);
+			if (isNullish(token)) {
+				return acc;
+			}
 
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({

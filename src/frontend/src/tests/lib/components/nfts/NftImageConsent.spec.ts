@@ -6,7 +6,7 @@ import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -29,7 +29,7 @@ describe('NftImageConsent', () => {
 
 		const { getByRole, getByText } = render(NftImageConsent, {
 			nft: nftAzuki,
-			children: createMockSnippet('children'),
+			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
 		});
@@ -51,7 +51,7 @@ describe('NftImageConsent', () => {
 
 		const { getByRole, getByText } = render(NftImageConsent, {
 			nft: nftAzuki,
-			children: createMockSnippet('children'),
+			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
 		});
@@ -73,7 +73,7 @@ describe('NftImageConsent', () => {
 
 		const { getByRole } = render(NftImageConsent, {
 			nft: nftAzuki,
-			children: createMockSnippet('children'),
+			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
 		});
@@ -93,7 +93,7 @@ describe('NftImageConsent', () => {
 
 		const { queryAllByRole, queryByText, getByTestId } = render(NftImageConsent, {
 			nft: nftAzuki,
-			children: createMockSnippet('children'),
+			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
 		});
@@ -103,7 +103,7 @@ describe('NftImageConsent', () => {
 
 		expect(queryAllByRole('button')).toHaveLength(0);
 
-		const children = getByTestId('children');
+		const children = getByTestId(mockSnippetTestId);
 
 		expect(children).toBeInTheDocument();
 	});
@@ -113,7 +113,7 @@ describe('NftImageConsent', () => {
 
 		const { queryAllByRole, queryByText } = render(NftImageConsent, {
 			nft: nftAzuki,
-			children: createMockSnippet('children'),
+			children: mockSnippet,
 			showMessage: false,
 			type: 'card'
 		});
