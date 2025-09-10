@@ -36,19 +36,19 @@
 <div class="z-4 fixed inset-0 flex h-full w-full flex-col bg-page">
 	<div class="backdrop-blur-xs fixed inset-0 -z-10 bg-overlay-page-30">
 		<Responsive up="xl">
-			{#await import(`$lib/assets/lockpage_assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
+			{#await import(`$lib/assets/lockpage-assets/lock-image-1440-${$themeStore ?? 'light'}.webp`) then { default: src1440 }}
 				<Img alt={ariaLabel} src={src1440} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 
 		<Responsive down="xl" up="sm">
-			{#await import(`$lib/assets/lockpage_assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
+			{#await import(`$lib/assets/lockpage-assets/lock-image-768-${$themeStore ?? 'light'}.webp`) then { default: src768 }}
 				<Img alt={ariaLabel} src={src768} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
 
 		<Responsive down="xs">
-			{#await import(`$lib/assets/lockpage_assets/lock-image-480-${$themeStore ?? 'light'}.webp`) then { default: src480 }}
+			{#await import(`$lib/assets/lockpage-assets/lock-image-480-${$themeStore ?? 'light'}.webp`) then { default: src480 }}
 				<Img alt={ariaLabel} src={src480} styleClass={imgStyleClass} />
 			{/await}
 		</Responsive>
