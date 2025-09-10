@@ -212,7 +212,7 @@
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 			<SendNftsList
 				onSelect={selectNft}
-				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
