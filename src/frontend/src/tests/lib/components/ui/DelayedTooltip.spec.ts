@@ -1,11 +1,11 @@
 import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { fireEvent, render, screen } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
 describe('DelayedTooltip', () => {
-	const testId = 'test-content';
-	const children = createMockSnippet(testId);
+	const testId = mockSnippetTestId;
+	const children = mockSnippet;
 
 	beforeEach(() => {
 		vi.useFakeTimers();
