@@ -226,8 +226,8 @@
 			tokens: $nonFungibleTokens ?? [],
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
-		}, 1000);
-	});
+		});
+	}, 1000);
 
 	$effect(() => {
 		if (
@@ -283,9 +283,9 @@
 {:else}
 	<div in:fade>
 		<LoaderCollections>
-			<LoaderNfts>
+<!--			<LoaderNfts>-->
 				{@render children()}
-			</LoaderNfts>
+<!--			</LoaderNfts>-->
 		</LoaderCollections>
 	</div>
 {/if}
