@@ -2,50 +2,19 @@ import type { EthSignTransactionRequest } from '$declarations/signer/signer.did'
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { infuraProviders } from '$eth/providers/infura.providers';
-import type { EthereumNetwork } from '$eth/types/network';
+import type {
+	PreparedContractCall,
+	TransferErc1155Params,
+	TransferErc721Params
+} from '$eth/types/nft-send';
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
-import {
-	ProgressStepsSend as ProgressStepsSendEnum,
-	type ProgressStepsSend
-} from '$lib/enums/progress-steps';
+import { ProgressStepsSend as ProgressStepsSendEnum } from '$lib/enums/progress-steps';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { Identity } from '@dfinity/agent';
-import { Interface } from 'ethers';
+import { Interface } from 'ethers/abi';
 import type { TransactionResponse } from 'ethers/providers';
-
-export interface CommonNftTransferParams {
-	sourceNetwork: EthereumNetwork;
-	identity: Identity;
-	from: EthAddress;
-	gas: bigint;
-	maxFeePerGas: bigint;
-	maxPriorityFeePerGas: bigint;
-	progress?: (step: ProgressStepsSend) => void;
-}
-
-export interface TransferErc721Params extends CommonNftTransferParams {
-	contractAddress: string;
-	tokenId: number;
-	to: EthAddress;
-}
-
-export interface TransferErc1155Params extends CommonNftTransferParams {
-	contractAddress: string;
-	id: number;
-	amount: bigint;
-	to: EthAddress;
-	data?: `0x${string}` | string;
-}
-
-export interface PreparedContractCall {
-	to: EthAddress;
-	data: `0x${string}` | string;
-}
-
-/* ---------------- encoders (shared) ---------------- */
 
 export const encodeErc721SafeTransfer = ({
 	contractAddress,
@@ -93,8 +62,6 @@ export const encodeErc1155SafeTransfer = ({
 	return { to: contractAddress, data: encoded };
 };
 
-/* ---------------- sign request builder ---------------- */
-
 const buildSignRequest = ({
 	call: { to, data },
 	nonce,
@@ -122,8 +89,6 @@ const buildSignRequest = ({
 	data: [data]
 });
 
-/* ---------------- sign+send helpers ---------------- */
-
 const signWithIdentity = ({
 	identity,
 	transaction
@@ -139,8 +104,6 @@ const sendRaw = ({
 	networkId: NetworkId;
 	raw: string;
 }): Promise<TransactionResponse> => infuraProviders(networkId).sendTransaction(raw);
-
-/* ---------------- public API ---------------- */
 
 export const transferErc721 = async ({
 	identity,
