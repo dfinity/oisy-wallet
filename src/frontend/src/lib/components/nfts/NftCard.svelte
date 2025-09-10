@@ -27,7 +27,7 @@
 		if (selectable && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (!disabled) {
+		if (!selectable && !disabled) {
 			goto(href);
 		}
 	};
