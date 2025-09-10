@@ -93,7 +93,7 @@ describe('batch.services', () => {
 
 	describe('createBatches', () => {
 		it('should handle empty array', () => {
-			const batches = createBatches({items: [], batchSize: 3});
+			const batches = createBatches({ items: [], batchSize: 3 });
 
 			expect(batches).toEqual([]);
 		});
@@ -102,24 +102,19 @@ describe('batch.services', () => {
 			const values = [1, 2, 3, 4, 5];
 			const batchSize = 3;
 
-			const batches = createBatches({items: values, batchSize});
+			const batches = createBatches({ items: values, batchSize });
 
 			expect(batches).toEqual([
 				[1, 2, 3],
 				[4, 5]
-			])
-		})
-
-		it('should work with different data types', () => {
-			const values = ['a', 'b', 'c', 'd', 'e'];
-			const batches = createBatches({items: values, batchSize: 2});
-
-			expect(batches).toEqual([
-				['a', 'b'],
-				['c', 'd'],
-				['e']
 			]);
 		});
 
+		it('should work with different data types', () => {
+			const values = ['a', 'b', 'c', 'd', 'e'];
+			const batches = createBatches({ items: values, batchSize: 2 });
+
+			expect(batches).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
+		});
 	});
 });
