@@ -20,9 +20,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let onBack: () => void;
-	export let onDone: () => void;
-	export let hideBack = false;
+	interface Props {
+		onBack: () => void;
+		onDone: () => void;
+		hideBack?: boolean;
+	}
+
+	let { onBack, onDone, hideBack = false }: Props = $props();
 
 	const onLegacySignIn = async () => {
 		onDone();
