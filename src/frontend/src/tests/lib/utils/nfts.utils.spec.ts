@@ -173,6 +173,18 @@ describe('nfts.utils', () => {
 
 			expect(nfts).toEqual([mockNft1, mockNft2]);
 		});
+
+		it('should return the nfts of the given token with different case', () => {
+			const nfts: Nft[] = findNftsByToken({
+				nfts: [mockNft1, mockNft2, mockNft3],
+				token: {
+					...AZUKI_ELEMENTAL_BEANS_TOKEN,
+					address: AZUKI_ELEMENTAL_BEANS_TOKEN.address.toUpperCase()
+				}
+			});
+
+			expect(nfts).toEqual([mockNft1, mockNft2]);
+		});
 	});
 
 	describe('findNftsByNetwork', () => {
