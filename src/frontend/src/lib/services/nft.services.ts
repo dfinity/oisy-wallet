@@ -4,34 +4,38 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import { getTokensByNetwork } from '$lib/utils/nft.utils';
+import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
+	loadedNfts,
 	walletAddress
 }: {
 	tokens: NonFungibleToken[];
+	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
-	if (isNullish(walletAddress)) {
-		return;
-	}
+	const tokensByNetwork = getTokensByNetwork(tokens);
 
-	for (const token of tokens) {
-		const { getNftsByOwner } = alchemyProviders(token.network.id);
+	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
+		const tokensToLoad = tokens.filter((token) => {
+			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
+			return nftsByToken.length === 0;
+		});
 
-		let nfts: Nft[] = [];
-		try {
-			nfts = await getNftsByOwner({ address: walletAddress, tokens: [token] });
-		} catch (_: unknown) {
-			console.warn(
-				`Failed to load NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`
-			);
-			nfts = [];
+		if (tokensToLoad.length > 0) {
+			const nfts: Nft[] = await loadNftsByNetwork({
+				networkId,
+				tokens: tokensToLoad,
+				walletAddress
+			});
+			nftStore.addAll(nfts);
 		}
+	});
 
-		nftStore.addAll(nfts);
-	}
+	await Promise.allSettled(promises);
 };
 
 export const loadNftsByNetwork = async ({
