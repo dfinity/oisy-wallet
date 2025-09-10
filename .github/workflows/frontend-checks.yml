@@ -50,6 +50,7 @@ jobs:
 #          restore-keys: |
 #            ${{ runner.os }}-eslint-
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        continue-on-error: true
         with:
           name: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number }}
           path: .
