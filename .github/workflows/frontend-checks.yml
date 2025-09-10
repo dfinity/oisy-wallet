@@ -50,7 +50,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-eslint-
       - name: Format
-        run: npm run format -- --cache-strategy content
+        run: npm run format
       - name: Check for Changes
         id: check_changes
         run: |
