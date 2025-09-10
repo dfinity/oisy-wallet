@@ -8,7 +8,7 @@ import {
 	IntersectionObserverActive,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
@@ -26,8 +26,6 @@ describe('SolTransactionsScroll', () => {
 	}));
 
 	const mockLastSignature = mockTransactions[mockTransactions.length - 1].signature;
-
-	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
