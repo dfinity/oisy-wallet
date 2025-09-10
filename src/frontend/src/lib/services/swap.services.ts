@@ -739,7 +739,7 @@ export const fetchVeloraDeltaSwap = async ({
 	progress(ProgressStepsSwap.SWAP);
 
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
+		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,

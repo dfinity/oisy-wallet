@@ -87,7 +87,7 @@
 		"@solana-program/token": "^0.6.0",
 		"@solana-program/token-2022": "^0.5.0",
 		"@solana/kit": "^3.0.2",
-		"@velora-dex/sdk": "^8.1.0",
+		"@velora-dex/sdk": "^9.0.0",
 		"@walletconnect/auth-client": "^2.1.2",
 		"alchemy-sdk": "3.6.3",
 		"bitcoinjs-lib": "^6.1.7",
@@ -95,7 +95,9 @@
 		"buffer": "^6.0.3",
 		"decimal.js": "^10.6.0",
 		"ethers": "^6.15.0",
+		"i": "^0.3.7",
 		"idb-keyval": "^6.2.2",
+		"npm": "^11.6.0",
 		"plausible-tracker": "^0.3.9",
 		"svelte-confetti": "^2.3.2",
 		"zod": "^3.25.75"
