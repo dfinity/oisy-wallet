@@ -14,7 +14,6 @@
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let nft: Nft | undefined;
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
