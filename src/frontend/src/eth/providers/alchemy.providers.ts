@@ -10,6 +10,7 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -24,7 +25,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import { areAddressesEqual } from '$lib/utils/address.utils';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -166,7 +166,13 @@ export class AlchemyProvider {
 				}
 			} = ownedNft;
 
-			const token = tokens.find((token) => areAddressesEqual({address1: token.address, address2: ownedNft.contract.address, networkId: token.network.id}));
+			const token = tokens.find((token) =>
+				areAddressesEqual({
+					address1: token.address,
+					address2: ownedNft.contract.address,
+					networkId: token.network.id
+				})
+			);
 			if (isNullish(token)) {
 				return acc;
 			}
