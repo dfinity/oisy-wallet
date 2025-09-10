@@ -55,7 +55,7 @@ jobs:
           name: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number }}
           path: .
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -Ra
       - name: Format
         run: npm run format
       - name: Format 2
