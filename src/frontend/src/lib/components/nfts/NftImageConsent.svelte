@@ -8,6 +8,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { preventDefault } from '@dfinity/gix-components';
 
 	interface Props {
 		nft?: Nft;
@@ -62,10 +63,7 @@
 				>
 					<Button
 						colorStyle="secondary-light"
-						onclick={(e) => {
-							e.preventDefault();
-							handleConsent();
-						}}
+						onclick={preventDefault(handleConsent)}
 						paddingSmall
 						styleClass="py-1 rounded-md"
 					>

@@ -45,7 +45,7 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type="card-selectable">
+		<NftImageConsent {nft} type={selectable ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
