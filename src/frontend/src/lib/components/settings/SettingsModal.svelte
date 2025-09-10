@@ -18,8 +18,8 @@
 		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
 </script>
 
-<Modal testId={SETTINGS_NETWORKS_MODAL} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{modalTitle}</svelte:fragment>
+<Modal testId={SETTINGS_NETWORKS_MODAL} onClose={modalStore.close}>
+	{#snippet title()}{modalTitle}{/snippet}
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
 	<!-- to add a new type, extend the SettingsModalType enum and add a condition below -->

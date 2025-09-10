@@ -50,10 +50,10 @@
 	];
 </script>
 
-<Modal testId={ABOUT_WHY_OISY_MODAL} on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl">{replaceOisyPlaceholders($i18n.about.why_oisy.text.title)}</span>
-	</svelte:fragment>
+<Modal testId={ABOUT_WHY_OISY_MODAL} onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl">{replaceOisyPlaceholders($i18n.about.why_oisy.text.title)}</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner alt={$i18n.about.why_oisy.text.title} src={CoverWhyOisy} styleClass="max-h-56" />
