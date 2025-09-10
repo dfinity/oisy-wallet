@@ -11,7 +11,7 @@ import * as providersMod from '$eth/providers/infura.providers';
 import * as signerApi from '$lib/api/signer.api';
 
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
-import { InfuraProvider } from '$eth/providers/infura.providers';
+import type { InfuraProvider } from '$eth/providers/infura.providers';
 import { ProgressStepsSend as Steps } from '$lib/enums/progress-steps';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -26,13 +26,13 @@ const TO = '0x3a1E2B9F5D7c8A4E6F2D9b1C0A7f8E4d6C5b9A2f';
 const CONTRACT_721 = '0xf60a44920D51F4264ba0a8EB164A4bC15dc34E92';
 const CONTRACT_1155 = '0xd11324e0fd7099499B4B0DC1Ad035F6Db00a3D62';
 
-beforeEach(() => {
-	vi.restoreAllMocks();
-
-	mockAuthStore();
-});
-
 describe('nft-send.services', () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+
+		mockAuthStore();
+	});
+
 	it('encodeErc721SafeTransfer encodes selector + args correctly', () => {
 		const tokenId = 47744;
 		const { to, data } = encodeErc721SafeTransfer({
@@ -65,6 +65,7 @@ describe('nft-send.services', () => {
 		expect(to).toBe(CONTRACT_1155);
 
 		const decoded = iface1155.decodeFunctionData('safeTransferFrom', data);
+
 		expect(decoded[0]).toBe(FROM);
 		expect(decoded[1]).toBe(TO);
 		expect(decoded[2]).toEqual(BigInt(tokenId));
@@ -132,7 +133,7 @@ describe('transferErc721', () => {
 
 		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
 		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
-		expect(signTransactionSpy).toHaveBeenCalledTimes(1);
+		expect(signTransactionSpy).toHaveBeenCalledOnce();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;
 
@@ -143,7 +144,7 @@ describe('transferErc721', () => {
 		expect(signedReq.max_fee_per_gas).toBe(maxFeePerGas);
 		expect(signedReq.max_priority_fee_per_gas).toBe(maxPriorityFeePerGas);
 		expect(Array.isArray(signedReq.data)).toBeTruthy();
-		expect(signedReq.data.length).toBe(1);
+		expect(signedReq.data).toHaveLength(1);
 		expect(sendTransaction).toHaveBeenCalledWith('0xsigned');
 		expect(steps).toEqual([Steps.SIGN_TRANSFER, Steps.TRANSFER]);
 		expect(result).toBe(fakeTx);
@@ -193,7 +194,7 @@ describe('transferErc1155', () => {
 
 		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
 		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
-		expect(signTransactionSpy).toHaveBeenCalledTimes(1);
+		expect(signTransactionSpy).toHaveBeenCalledOnce();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;
 
@@ -204,7 +205,7 @@ describe('transferErc1155', () => {
 		expect(signedReq.max_fee_per_gas).toBe(maxFeePerGas);
 		expect(signedReq.max_priority_fee_per_gas).toBe(maxPriorityFeePerGas);
 		expect(Array.isArray(signedReq.data)).toBeTruthy();
-		expect(signedReq.data.length).toBe(1);
+		expect(signedReq.data).toHaveLength(1);
 		expect((signedReq.data[0] as string).startsWith('0xf242432a')).toBeTruthy();
 		expect(sendTransaction).toHaveBeenCalledWith('0xsigned1155');
 		expect(steps).toEqual([Steps.SIGN_TRANSFER, Steps.TRANSFER]);
