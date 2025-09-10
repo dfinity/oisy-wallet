@@ -71,7 +71,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -149,11 +149,7 @@
 								data: '0x'
 							});
 
-				const estimatedGasNft = await safeEstimateGas({ from: $ethAddress, to, data });
-
-				if (isNullish(estimatedGasNft)) {
-					return;
-				}
+				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
 				feeStore.setFee({
 					...feeData,
