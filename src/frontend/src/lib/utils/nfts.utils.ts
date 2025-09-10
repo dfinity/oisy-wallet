@@ -4,6 +4,7 @@ import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -28,8 +29,12 @@ export const findNftsByToken = ({
 	nfts: Nft[];
 	token: NonFungibleToken;
 }): Nft[] =>
-	nfts.filter(
-		(nft) => nft.collection.address === tokenAddress && nft.collection.network === tokenNetwork
+	nfts.filter((nft) =>
+		areAddressesEqual({
+			address1: nft.collection.address,
+			address2: tokenAddress,
+			networkId: tokenNetwork.id
+		})
 	);
 
 export const findNftsByNetwork = ({
