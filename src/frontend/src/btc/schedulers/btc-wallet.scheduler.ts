@@ -2,10 +2,7 @@ import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import type {
-	BitcoinNetwork as BackendBitcoinNetwork,
-	PendingTransaction
-} from '$declarations/backend/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
@@ -23,7 +20,10 @@ import type {
 	PostMessageDataResponseError
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import {
+	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
+	mapToSignerBitcoinNetwork
+} from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
@@ -64,20 +64,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		latestBitcoinBlockHeight: undefined
 	};
 
-	/**
-	 * Convert ckBTC BitcoinNetwork type to backend BitcoinNetwork variant type
-	 */
-	private mapToBackendBitcoinNetwork(network: BitcoinNetwork): BackendBitcoinNetwork {
-		switch (network) {
-			case 'mainnet':
-				return { mainnet: null };
-			case 'testnet':
-				return { testnet: null };
-			case 'regtest':
-				return { regtest: null };
-		}
-	}
-
 	stop() {
 		this.timer.stop();
 	}
@@ -112,7 +98,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			// Get pending transactions for balance calculation
 			const pendingTransactions = await getPendingBtcTransactions({
 				identity,
-				network: this.mapToBackendBitcoinNetwork(bitcoinNetwork),
+				network: mapCkBtcBitcoinNetworkToBackendBitcoinNetwork(bitcoinNetwork),
 				address: btcAddress
 			});
 
