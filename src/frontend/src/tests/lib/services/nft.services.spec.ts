@@ -13,7 +13,7 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { Network } from 'ethers/providers';
+import { Network, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
@@ -111,19 +111,21 @@ describe('nft.services', () => {
 
 	describe('sendNft', () => {
 		const fromAddress = '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95';
-		const destination = '0x389658cb7961b6f5d0daec1cdb9df258e799acb0';
+		const toAddress = '0x389658cb7961b6f5d0daec1cdb9df258e799acb0';
 
 		const gas = 70_492n;
 		const maxFeePerGas = 5_000_000n;
 		const maxPriorityFeePerGas = 2_000_000n;
 
-		const transfer721Spy = vi.spyOn(nftSendServices, 'transferErc721').mockResolvedValue({} as any);
+		const transfer721Spy = vi
+			.spyOn(nftSendServices, 'transferErc721')
+			.mockResolvedValue({} as unknown as TransactionResponse);
 
 		const transfer1155Spy = vi
 			.spyOn(nftSendServices, 'transferErc1155')
-			.mockResolvedValue({} as any);
+			.mockResolvedValue({} as unknown as TransactionResponse);
 
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue(undefined as any);
+		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue(undefined);
 
 		const token721: NonFungibleToken = {
 			address: fromAddress,
@@ -161,7 +163,7 @@ describe('nft.services', () => {
 			await sendNft({
 				token: token721,
 				tokenId,
-				destination,
+				toAddress,
 				fromAddress,
 				identity: mockIdentity,
 				gas,
@@ -178,7 +180,7 @@ describe('nft.services', () => {
 				tokenId,
 				sourceNetwork: token721.network,
 				from: fromAddress,
-				to: destination,
+				to: toAddress,
 				identity: mockIdentity,
 				gas,
 				maxFeePerGas,
@@ -194,7 +196,7 @@ describe('nft.services', () => {
 			await sendNft({
 				token: token1155,
 				tokenId,
-				destination,
+				toAddress,
 				fromAddress,
 				identity: mockIdentity,
 				gas,
@@ -213,7 +215,7 @@ describe('nft.services', () => {
 					amount: 1n, // fixed amount
 					sourceNetwork: token1155.network,
 					from: fromAddress,
-					to: destination,
+					to: toAddress,
 					identity: mockIdentity,
 					gas,
 					maxFeePerGas,
@@ -227,7 +229,7 @@ describe('nft.services', () => {
 			await sendNft({
 				token: token721,
 				tokenId: parseNftId(42),
-				destination,
+				toAddress,
 				fromAddress,
 				identity: undefined, // nullish
 				gas,
