@@ -1,5 +1,9 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
+import {
+	btcWalletBalanceEquals,
+	type BtcTransactionUi,
+	type BtcWalletBalance
+} from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
@@ -168,7 +172,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		pendingTransactions: CertifiedData<PendingTransaction>[];
 		uncertifiedTransactions?: CertifiedData<BtcTransactionUi>[];
 	}): Promise<CertifiedData<BtcWalletBalance | null>> => {
-		let confirmedBalance: bigint | null;
+		let confirmedBalance: BtcWalletBalance['confirmed'] | null;
 
 		if (!certified) {
 			confirmedBalance =
@@ -295,8 +299,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const newBalance =
 			isNullish(this.store.balance) ||
 			// Compare balance data properly using JSON comparison for structured balance
-			JSON.stringify(this.store.balance.data, jsonReplacer) !==
-				JSON.stringify(balance.data, jsonReplacer) ||
+			!btcWalletBalanceEquals(this.store.balance.data, balance.data) ||
 			// TODO, align with sol-wallet.scheduler.ts, crash if certified changes
 			(!this.store.balance.certified && balance.certified);
 
