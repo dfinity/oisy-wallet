@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -18,11 +18,10 @@
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
+		onSelectNetwork: () => void;
 	}
 
-	let { onSelect }: Props = $props();
-
-	const dispatch = createEventDispatcher();
+	let { onSelect, onSelectNetwork }: Props = $props();
 
 	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
@@ -33,20 +32,20 @@
 			(nft) => nft?.name?.toLowerCase().includes(filter.toLowerCase()) ?? false
 		)
 	);
-	const filteredByNetwork: Nft[] = $derived(
+	const filtered: Nft[] = $derived(
 		nonNullish($filterNetwork)
 			? findNftsByNetwork({ nfts: filteredByInput, networkId: $filterNetwork.id })
 			: filteredByInput
 	);
 
-	let noNftsMatch = $derived(filteredByNetwork.length === 0);
+	let noNftsMatch = $derived(filtered.length === 0);
 </script>
 
 <div>
 	<div class="input-field condensed mb-4 flex-1">
 		<InputSearch
 			autofocus={isDesktop()}
-			placeholder={$i18n.tokens.placeholder.search_token}
+			placeholder={$i18n.send.placeholder.search_nfts}
 			showResetButton={notEmptyString(filter)}
 			bind:filter
 		/>
@@ -56,7 +55,7 @@
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-			onclick={() => dispatch('icSelectNetworkFilter')}
+			onclick={onSelectNetwork}
 		>
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
@@ -65,9 +64,12 @@
 </div>
 
 {#if noNftsMatch}
-	<EmptyState title="No NFTs found" />
+	<EmptyState
+		description={$i18n.send.text.no_nfts_found_desc}
+		title={$i18n.send.text.no_nfts_found}
+	/>
 {:else}
-	<NftList nfts={filteredByInput}>
+	<NftList nfts={filtered}>
 		{#snippet nftListItem({ nft })}
 			<NftCard {nft} {onSelect} selectable />
 		{/snippet}
