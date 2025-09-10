@@ -591,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP-Konto-ID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Für alle Token verwenden, wenn du von Wallets, Nutzern oder anderen Apps empfängst, die dieses Adressformat unterstützen.",
 				"use_for_icrc_deposit": "Für den Empfang von ICRC-1-Token im ICP-Netzwerk verwenden, z. B. SNS, ck-Token usw.",
 				"use_for_icp_deposit": "Für ICP-Einzahlungen von Börsen oder anderen Wallets verwenden, die nur Konto-IDs unterstützen.",
