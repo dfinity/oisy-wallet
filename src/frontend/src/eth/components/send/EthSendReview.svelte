@@ -18,6 +18,7 @@
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
+	export let nft: Nft | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
