@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "Hãy gửi lần đầu tiên ngay bây giờ!",
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
-			"send_review_subtitle": "Bạn gửi"
+			"send_review_subtitle": "Bạn gửi",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
-			"select_network": "Chọn mạng"
+			"select_network": "Chọn mạng",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
