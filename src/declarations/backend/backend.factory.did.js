@@ -253,6 +253,17 @@ export const idlFactory = ({ IDL }) => {
 		Ok: CreateChallengeResponse,
 		Err: CreateChallengeError
 	});
+	const UserAgreement = IDL.Record({
+		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
+		accepted: IDL.Opt(IDL.Bool),
+		last_updated_at_ms: IDL.Opt(IDL.Nat64)
+	});
+	const UserAgreements = IDL.Record({
+		license_agreement: UserAgreement,
+		privacy_policy: UserAgreement,
+		terms_of_use: UserAgreement
+	});
+	const Agreements = IDL.Record({ agreements: UserAgreements });
 	const UserCredential = IDL.Record({
 		issuer: IDL.Text,
 		verified_date_timestamp: IDL.Opt(IDL.Nat64),
@@ -290,11 +301,22 @@ export const idlFactory = ({ IDL }) => {
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
+	const ExperimentalFeatureSettingsFor = IDL.Variant({
+		AiAssistantBeta: IDL.Null
+	});
+	const ExperimentalFeatureSettings = IDL.Record({ enabled: IDL.Bool });
+	const ExperimentalFeaturesSettings = IDL.Record({
+		experimental_features: IDL.Vec(
+			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
+		)
+	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
-		dapp: DappSettings
+		dapp: DappSettings,
+		experimental_features: ExperimentalFeaturesSettings
 	});
 	const UserProfile = IDL.Record({
+		agreements: IDL.Opt(Agreements),
 		credentials: IDL.Vec(UserCredential),
 		version: IDL.Opt(IDL.Nat64),
 		settings: IDL.Opt(Settings),
@@ -383,8 +405,11 @@ export const idlFactory = ({ IDL }) => {
 		SplMainnet: SplToken,
 		Erc1155: ErcToken
 	});
+	const TokenSection = IDL.Variant({ Spam: IDL.Null, Hidden: IDL.Null });
 	const CustomToken = IDL.Record({
 		token: Token,
+		allow_external_content_source: IDL.Opt(IDL.Bool),
+		section: IDL.Opt(TokenSection),
 		version: IDL.Opt(IDL.Nat64),
 		enabled: IDL.Bool
 	});
@@ -404,13 +429,13 @@ export const idlFactory = ({ IDL }) => {
 		current_user_version: IDL.Opt(IDL.Nat64),
 		show_testnets: IDL.Bool
 	});
-	const SaveTestnetsSettingsError = IDL.Variant({
+	const UpdateAgreementsError = IDL.Variant({
 		VersionMismatch: IDL.Null,
 		UserNotFound: IDL.Null
 	});
 	const SetUserShowTestnetsResult = IDL.Variant({
 		Ok: IDL.Null,
-		Err: SaveTestnetsSettingsError
+		Err: UpdateAgreementsError
 	});
 	const Stats = IDL.Record({
 		user_profile_count: IDL.Nat64,
@@ -442,6 +467,16 @@ export const idlFactory = ({ IDL }) => {
 	const TopUpCyclesLedgerResult = IDL.Variant({
 		Ok: TopUpCyclesLedgerResponse,
 		Err: TopUpCyclesLedgerError
+	});
+	const UpdateUserAgreementsRequest = IDL.Record({
+		agreements: UserAgreements,
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
+	const UpdateExperimentalFeaturesSettingsRequest = IDL.Record({
+		experimental_features: IDL.Vec(
+			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
+		),
+		current_user_version: IDL.Opt(IDL.Nat64)
 	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
@@ -504,6 +539,16 @@ export const idlFactory = ({ IDL }) => {
 			[]
 		),
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
+		update_user_agreements: IDL.Func(
+			[UpdateUserAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
+		update_user_experimental_feature_settings: IDL.Func(
+			[UpdateExperimentalFeaturesSettingsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
 		update_user_network_settings: IDL.Func(
 			[SaveNetworksSettingsRequest],
 			[SetUserShowTestnetsResult],

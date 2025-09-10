@@ -38,7 +38,8 @@
 
 		const {
 			network: { id: networkId },
-			id: tokenId
+			id: tokenId,
+			standard
 		} = $tokenWithFallback;
 
 		// If user browser ICP transactions but switch token to Eth, due to the derived stores, the token can briefly be set to ICP while the navigation is not over.
@@ -61,9 +62,10 @@
 			? await reloadEthereumTransactions({
 					tokenId,
 					networkId,
+					standard,
 					silent: failedReloadCounter + 1 <= FAILURE_THRESHOLD
 				})
-			: await loadEthereumTransactions({ tokenId, networkId });
+			: await loadEthereumTransactions({ tokenId, networkId, standard });
 
 		if (!success) {
 			tokenIdLoaded = undefined;
@@ -110,6 +112,6 @@
 	});
 </script>
 
-<IntervalLoader onLoad={reload} interval={WALLET_TIMER_INTERVAL_MILLIS}>
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} onLoad={reload}>
 	<slot />
 </IntervalLoader>

@@ -42,7 +42,7 @@
 	{#if nonNullish(token)}
 		<ModalHero>
 			{#snippet logo()}
-				<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+				<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 			{/snippet}
 
 			{#snippet title()}
@@ -50,7 +50,7 @@
 			{/snippet}
 		</ModalHero>
 
-		<List styleClass="text-sm" condensed={false}>
+		<List condensed={false} styleClass="text-sm">
 			<ModalListItem>
 				{#snippet label()}
 					{$i18n.tokens.details.network}
@@ -70,9 +70,9 @@
 				{#snippet content()}
 					<output>{token.name}</output>
 					<Logo
-						src={token.icon}
 						alt={replacePlaceholders($i18n.core.alt.logo, { $name: token.name })}
 						color="white"
+						src={token.icon}
 					/>
 				{/snippet}
 			</ModalListItem>
@@ -96,20 +96,20 @@
 
 						{#if !isNullishOrEmpty(token.indexCanisterId)}
 							<Copy
-								value={token.indexCanisterId}
-								text={$i18n.tokens.import.text.index_canister_id_copied}
 								inline
+								text={$i18n.tokens.import.text.index_canister_id_copied}
+								value={token.indexCanisterId}
 							/>
 						{/if}
 
 						{#if nonNullish(onEditClick)}
 							<ButtonIcon
-								styleClass="inline-block align-sub"
-								onclick={onEditClick}
 								ariaLabel={$i18n.core.text.edit}
+								height="h-6"
+								onclick={onEditClick}
+								styleClass="inline-block align-sub"
 								testId={TOKEN_MODAL_INDEX_CANISTER_ID_EDIT_BUTTON}
 								width="w-6"
-								height="h-6"
 							>
 								{#snippet icon()}
 									<IconPencil />
@@ -128,8 +128,8 @@
 								<Button
 									ariaLabel={$i18n.tokens.details.missing_index_canister_id_button}
 									link
-									transparent
 									onclick={onEditClick}
+									transparent
 									type="button"
 								>
 									{$i18n.tokens.details.missing_index_canister_id_button}
@@ -177,11 +177,11 @@
 			<div class="mt-4">
 				<Button
 					ariaLabel={$i18n.tokens.text.delete_token}
-					transparent
-					styleClass="mx-auto"
 					colorStyle="error"
 					onclick={onDeleteClick}
+					styleClass="mx-auto"
 					testId={TOKEN_MODAL_CONTENT_DELETE_BUTTON}
+					transparent
 				>
 					<IconTrash />
 					{$i18n.tokens.text.delete_token}

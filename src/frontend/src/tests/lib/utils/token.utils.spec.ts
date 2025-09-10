@@ -389,7 +389,7 @@ describe('token.utils', () => {
 				it('should enable the token if user enables it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: true }
+						customToken: { ...token, enabled: true }
 					});
 
 					expect(result.enabled).toBeTruthy();
@@ -398,16 +398,16 @@ describe('token.utils', () => {
 				it('should not enable the token if user has not enabled it', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: { ...token, enabled: false }
+						customToken: { ...token, enabled: false }
 					});
 
 					expect(result.enabled).toBeFalsy();
 				});
 
-				it('should not enable the token if userToken is undefined', () => {
+				it('should not enable the token if customToken is undefined', () => {
 					const result = mapDefaultTokenToToggleable({
 						defaultToken: token,
-						userToken: undefined
+						customToken: undefined
 					});
 
 					expect(result.enabled).toBeFalsy();
@@ -434,25 +434,25 @@ describe('token.utils', () => {
 		])('$description - Default/Suggested Tokens', ({ token, setupMock }) => {
 			beforeEach(() => setupMock(token.ledgerCanisterId));
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled false', () => {
+			it('should enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
 
 				expect(result.enabled).toBeTruthy();
@@ -477,25 +477,25 @@ describe('token.utils', () => {
 				beforeEach(() => setupMock(token.ledgerCanisterId));
 			}
 
-			it('should enable the token if no userToken', () => {
-				const result = mapDefaultTokenToToggleable({ defaultToken: token, userToken: undefined });
+			it('should enable the token if no customToken', () => {
+				const result = mapDefaultTokenToToggleable({ defaultToken: token, customToken: undefined });
 
 				expect(result.enabled).toBeTruthy();
 			});
 
-			it('should not enable the token if userToken has enabled false', () => {
+			it('should not enable the token if customToken has enabled false', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: false }
+					customToken: { ...token, enabled: false }
 				});
 
 				expect(result.enabled).toBeFalsy();
 			});
 
-			it('should enable the token if userToken has enabled true', () => {
+			it('should enable the token if customToken has enabled true', () => {
 				const result = mapDefaultTokenToToggleable({
 					defaultToken: token,
-					userToken: { ...token, enabled: true }
+					customToken: { ...token, enabled: true }
 				});
 
 				expect(result.enabled).toBeTruthy();

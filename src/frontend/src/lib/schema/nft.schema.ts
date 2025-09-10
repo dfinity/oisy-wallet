@@ -1,4 +1,5 @@
-import * as z from 'zod';
+import { TokenSchema } from '$lib/schema/token.schema';
+import * as z from 'zod/v4';
 
 export const NftIdSchema = z.number().brand<'NftId'>();
 
@@ -10,15 +11,29 @@ export const NftAttributeSchema = z.object({
 export const NftMetadataSchema = z.object({
 	name: z.string().optional(),
 	id: NftIdSchema,
-	imageUrl: z.string().url().optional(),
+	imageUrl: z.url().optional(),
+	description: z.string().optional(),
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
+export const NftCollectionSchema = z.object({
+	...TokenSchema.pick({ id: true, network: true, standard: true }).shape,
+	address: z.string(),
+	name: z.string().optional(),
+	symbol: z.string().optional(),
+	bannerImageUrl: z.url().optional(),
+	description: z.string().optional(),
+	acquiredAt: z.date().optional()
+});
+
 export const NftSchema = z.object({
-	contract: z.object({
-		address: z.string(),
-		name: z.string(),
-		symbol: z.string()
-	}),
-	...NftMetadataSchema.shape
+	balance: z.number().optional(),
+	...NftMetadataSchema.shape,
+	collection: NftCollectionSchema
+});
+
+export const OwnedContractSchema = z.object({
+	...TokenSchema.pick({ standard: true }).shape,
+	address: z.string(),
+	isSpam: z.boolean()
 });

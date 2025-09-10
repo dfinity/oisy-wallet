@@ -24,29 +24,32 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { EthAddress } from '$lib/types/address';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckMinterInfoAddresses: EthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
-
-	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedEthTransactions.map(({ data: transaction }) =>
-		mapEthTransactionUi({
-			transaction,
-			ckMinterInfoAddresses,
-			ethAddress: $ethAddress
-		})
+	let ckMinterInfoAddresses = $derived(
+		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId])
 	);
 
-	let selectedTransaction: EthTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<EthTransactionUi>({
-			$modalOpen: $modalEthTransaction,
-			$modalStore
-		}));
+	let sortedTransactionsUi = $derived(
+		$sortedEthTransactions.map(({ data: transaction }) =>
+			mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				ethAddress: $ethAddress
+			})
+		)
+	);
+
+	let selectedTransaction = $state<EthTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<EthTransactionUi>({
+				$modalOpen: $modalEthTransaction,
+				$modalStore
+			}));
+	});
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
@@ -55,7 +58,7 @@
 	<EthTransactionsSkeletons>
 		{#each sortedTransactionsUi as transaction (transaction.hash)}
 			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction {transaction} token={$tokenWithFallback} />
+				<EthTransaction token={$tokenWithFallback} {transaction} />
 			</div>
 		{/each}
 
@@ -66,7 +69,7 @@
 </LoaderEthTransactions>
 
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
-	<EthTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<EthTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalEthToken}
 	<EthTokenModal fromRoute={$modalEthTokenData} />
 {/if}

@@ -28,8 +28,8 @@
 	const { testId, children }: Props = $props();
 
 	let visible = $state(false);
-	let button: HTMLButtonElement | undefined = $state();
-	let fromRoute: NavigationTarget | undefined = $state();
+	let button = $state<HTMLButtonElement | undefined>();
+	let fromRoute = $state<NavigationTarget | undefined>();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from ?? undefined;
@@ -70,7 +70,7 @@
 		visible = false;
 	};
 
-	let hideTokenLabel: string = $derived(
+	let hideTokenLabel = $derived(
 		replacePlaceholders($i18n.tokens.hide.token, {
 			$token: nonNullish($pageToken) ? getTokenDisplaySymbol($pageToken) : ''
 		})
@@ -78,17 +78,17 @@
 </script>
 
 <button
-	data-tid={`${testId}-button`}
-	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
-	onclick={() => (visible = true)}
+	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	aria-label={$i18n.tokens.alt.context_menu}
+	data-tid={`${testId}-button`}
 	disabled={$erc20UserTokensNotInitialized}
+	onclick={() => (visible = true)}
 >
 	<IconMoreVertical />
 </button>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 	<div class="flex flex-col gap-1">
 		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>

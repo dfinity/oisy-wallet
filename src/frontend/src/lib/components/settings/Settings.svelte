@@ -2,9 +2,11 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -67,7 +69,7 @@
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
-			<Copy inline value={principal?.toText() ?? ''} text={$i18n.settings.text.principal_copied} />
+			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
 		</svelte:fragment>
 		<svelte:fragment slot="info">
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
@@ -102,9 +104,9 @@
 			<EnabledNetworksPreviewIcons />
 
 			<Button
-				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 				link
 				onclick={() => openSettingsModal(SettingsModalEnum.ENABLED_NETWORKS)}
+				testId={SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON}
 			>
 				{$i18n.core.text.edit} >
 			</Button>
@@ -115,6 +117,10 @@
 	</SettingsCardItem>
 </SettingsCard>
 
+{#if AI_ASSISTANT_CONSOLE_ENABLED}
+	<SettingsExperimentalFeatures />
+{/if}
+
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>
 		<svelte:fragment slot="title">{$i18n.settings.text.credentials_title}</svelte:fragment>
@@ -123,7 +129,7 @@
 			<svelte:fragment slot="key">{$i18n.settings.text.pouh_credential}</svelte:fragment>
 			<svelte:fragment slot="value">
 				{#if $userHasPouhCredential}
-					<output in:fade class="mr-1.5">
+					<output class="mr-1.5" in:fade>
 						{$i18n.settings.text.pouh_credential_verified}
 					</output>
 				{:else}

@@ -1,5 +1,6 @@
 import type { SignableDeltaOrderData } from '@velora-dex/sdk';
-import { Signature, TypedDataEncoder } from 'ethers';
+import { Signature } from 'ethers/crypto';
+import { TypedDataEncoder } from 'ethers/hash';
 
 /**
  * Generates the EIP-712 hash of typed structured data, used for signing with `eth_signTypedData`.

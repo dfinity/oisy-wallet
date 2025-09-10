@@ -88,12 +88,12 @@
 <ContentWithToolbar>
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
-			<CkEthLoader nativeTokenId={$ethereumTokenId} isSendFlow={true}>
+			<CkEthLoader isSendFlow={true} nativeTokenId={$ethereumTokenId}>
 				<LoaderMultipleEthTransactions>
 					<EthSendDestination
-						token={$sendToken}
 						knownDestinations={$ethKnownDestinations}
 						networkContacts={$ethNetworkContacts}
+						token={$sendToken}
 						bind:destination
 						bind:invalidDestination
 						on:icQRCodeScan
@@ -112,9 +112,9 @@
 	{:else if isNetworkIdICP($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<IcSendDestination
-				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
@@ -131,12 +131,12 @@
 	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<BtcSendDestination
-				bind:destination
-				bind:invalidDestination
-				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
+				bind:destination
+				bind:invalidDestination
+				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
@@ -150,11 +150,11 @@
 	{:else if isNetworkIdSolana($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<SolSendDestination
+				knownDestinations={$solKnownDestinations}
+				networkContacts={$solNetworkContacts}
 				bind:destination
 				bind:invalidDestination
 				on:icQRCodeScan
-				knownDestinations={$solKnownDestinations}
-				networkContacts={$solNetworkContacts}
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
@@ -175,7 +175,7 @@
 				<ButtonCancel onclick={close} />
 			{/if}
 
-			<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
+			<Button {disabled} onclick={next} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
 				{$i18n.core.text.next}
 			</Button>
 		</ButtonGroup>

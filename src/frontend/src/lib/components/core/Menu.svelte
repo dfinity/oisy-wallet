@@ -3,8 +3,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import { LOCK_SCREEN_ENABLED } from '$env/lock-screen.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
+	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
@@ -48,7 +52,12 @@
 	} from '$lib/utils/nav.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 
-	let visible = $state(false);
+	interface Props {
+		visible?: boolean;
+	}
+
+	let { visible = $bindable(false) }: Props = $props();
+
 	let button = $state<HTMLButtonElement | undefined>();
 
 	let isVip = $state(false);
@@ -81,12 +90,12 @@
 </script>
 
 <ButtonIcon
-	bind:button
-	onclick={() => (visible = true)}
 	ariaLabel={$i18n.navigation.alt.menu}
-	testId={NAVIGATION_MENU_BUTTON}
 	colorStyle="tertiary-alt"
 	link={false}
+	onclick={() => (visible = true)}
+	testId={NAVIGATION_MENU_BUTTON}
+	bind:button
 >
 	{#snippet icon()}
 		<IconUser size="24" />
@@ -94,7 +103,7 @@
 	{$i18n.navigation.alt.menu}
 </ButtonIcon>
 
-<Popover bind:visible anchor={button} direction="rtl">
+<Popover anchor={button} direction="rtl" bind:visible>
 	<div
 		class="mb-1 flex max-w-80 flex-col gap-1"
 		data-tid={NAVIGATION_MENU}
@@ -103,7 +112,11 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithLicense fullWidth needHelpLink={false} licenseAlignment="center" />
+				{#if NEW_AGREEMENTS_ENABLED}
+					<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
+				{:else}
+					<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" needHelpLink={false} />
+				{/if}
 			</span>
 			<Hr />
 
@@ -117,8 +130,8 @@
 			<DocumentationLink
 				asMenuItem
 				asMenuItemCondensed
-				trackEventSource={USER_MENU_ROUTE}
 				testId={NAVIGATION_MENU_DOC_BUTTON}
+				trackEventSource={USER_MENU_ROUTE}
 			/>
 
 			<SupportLink asMenuItem asMenuItemCondensed testId={NAVIGATION_MENU_SUPPORT_BUTTON} />
@@ -130,8 +143,8 @@
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.address_book}
-				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
 				onclick={() => modalStore.openAddressBook({ id: addressModalId })}
+				testId={NAVIGATION_MENU_ADDRESS_BOOK_BUTTON}
 			>
 				<IconUsersRound size="20" />
 				{$i18n.navigation.text.address_book}
@@ -139,8 +152,8 @@
 
 			<ButtonMenu
 				ariaLabel={$i18n.navigation.alt.refer_a_friend}
-				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
 				onclick={() => modalStore.openReferralCode(referralModalId)}
+				testId={NAVIGATION_MENU_REFERRAL_BUTTON}
 			>
 				<IconShare size="20" />
 				{$i18n.navigation.text.refer_a_friend}
@@ -150,9 +163,9 @@
 				ariaLabel={$isPrivacyMode
 					? $i18n.navigation.alt.show_balances
 					: $i18n.navigation.alt.hide_balances}
-				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
 				onclick={handlePrivacyToggle}
 				tag={$i18n.shortcuts.privacy_mode}
+				testId={NAVIGATION_MENU_PRIVACY_MODE_BUTTON}
 			>
 				{#if $isPrivacyMode}
 					<IconEye />
@@ -168,8 +181,8 @@
 			{#if isVip}
 				<ButtonMenu
 					ariaLabel={$i18n.navigation.alt.vip_qr_code}
-					testId={NAVIGATION_MENU_VIP_BUTTON}
 					onclick={() => modalStore.openVipQrCode({ id: goldModalId, data: QrCodeType.VIP })}
+					testId={NAVIGATION_MENU_VIP_BUTTON}
 				>
 					<IconVipQr size="20" />
 					{$i18n.navigation.text.vip_qr_code}
@@ -179,8 +192,8 @@
 			{#if isGold}
 				<ButtonMenu
 					ariaLabel={$i18n.navigation.alt.binance_qr_code}
-					testId={NAVIGATION_MENU_GOLD_BUTTON}
 					onclick={() => modalStore.openVipQrCode({ id: vipModalId, data: QrCodeType.GOLD })}
+					testId={NAVIGATION_MENU_GOLD_BUTTON}
 				>
 					<IconBinance size="20" />
 					{$i18n.navigation.text.binance_qr_code}
@@ -207,8 +220,11 @@
 		<Hr />
 
 		<div class="flex max-w-80 flex-col gap-3 pt-3">
-			<SignOut on:icLogoutTriggered={hidePopover} />
-
+			{#if LOCK_SCREEN_ENABLED}
+				<LockOrSignOut onHidePopover={hidePopover} />
+			{:else}
+				<SignOut on:icLogoutTriggered={hidePopover} />
+			{/if}
 			<Hr />
 
 			<span class="text-center text-sm text-tertiary">

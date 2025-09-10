@@ -45,7 +45,7 @@
 
 <svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkBTCReceive} {modalId}>
+<ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
 	{#snippet modal()}
 		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
 	{/snippet}

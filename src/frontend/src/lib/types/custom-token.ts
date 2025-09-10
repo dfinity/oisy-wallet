@@ -1,6 +1,7 @@
 import type { Token as BackendToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
 import type { SplToken } from '$sol/types/spl';
@@ -31,6 +32,9 @@ export type SaveCustomTokenWithKey = UserTokenState &
 		| TokenVariant<'SplDevnet' | 'SplMainnet', SplSaveCustomToken>
 	);
 
-export type CustomToken<T extends Token> = TokenToggleable<T>;
+export type CustomToken<T extends Token> = TokenToggleable<T> & {
+	section?: CustomTokenSection;
+	allowExternalContentSource?: boolean;
+};
 
 export type LoadCustomTokenParams = QueryAndUpdateRequestParams & { useCache?: boolean };

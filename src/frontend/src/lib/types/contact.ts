@@ -12,3 +12,14 @@ export interface ContactUi extends Omit<Contact, 'addresses' | 'update_timestamp
 	updateTimestampNs: bigint;
 	image?: ContactImage | null;
 }
+
+export interface ContactAddressUiWithId extends ContactAddressUi {
+	id: string;
+	isPrincipal?: boolean;
+}
+
+export interface ExtendedAddressContactUi extends Omit<ContactUi, 'addresses'> {
+	addresses: ContactAddressUiWithId[];
+}
+
+export type ExtendedAddressContactUiMap = Record<string, ExtendedAddressContactUi>;

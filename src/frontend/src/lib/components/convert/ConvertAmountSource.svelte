@@ -84,14 +84,14 @@
 </script>
 
 <TokenInput
-	bind:amount={sendAmount}
+	{customValidate}
 	displayUnit={inputUnit}
 	exchangeRate={$sourceTokenExchangeRate}
+	isSelectable={false}
+	token={$sourceToken}
+	bind:amount={sendAmount}
 	bind:errorType
 	bind:amountSetToMax
-	token={$sourceToken}
-	isSelectable={false}
-	{customValidate}
 >
 	<div slot="amount-info" class="text-tertiary">
 		<TokenInputAmountExchange
@@ -103,14 +103,14 @@
 	</div>
 
 	<button
-		on:click|preventDefault={setMax}
 		slot="balance"
 		class="font-semibold transition-all"
+		class:animate-pulse={isNullish(maxAmount)}
 		class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
 		class:text-error-primary={isZeroBalance || nonNullish(errorType)}
 		class:text-tertiary={isNullish(maxAmount)}
-		class:animate-pulse={isNullish(maxAmount)}
 		data-tid="convert-amount-source-balance"
+		on:click|preventDefault={setMax}
 	>
 		{$i18n.convert.text.max_balance}:
 		{nonNullish(maxAmount)

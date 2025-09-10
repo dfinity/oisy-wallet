@@ -15,7 +15,27 @@ import {
 } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc721.utils', () => {
-	describe('isTokenErc721UserToken', () => {
+	describe('isTokenErc721', () => {
+		it.each(MOCK_ERC721_TOKENS)('should return true for token $name', (token) => {
+			expect(isTokenErc721(token)).toBeTruthy();
+		});
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...MOCK_ERC1155_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenErc721(token)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenErc721CustomToken', () => {
 		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
 
 		it.each(
@@ -42,29 +62,10 @@ describe('erc721.utils', () => {
 			...SUPPORTED_SOLANA_TOKENS,
 			...SPL_TOKENS,
 			...ERC20_TWIN_TOKENS,
-			...EVM_ERC20_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenErc721CustomToken(token)).toBeFalsy();
-		});
-	});
-
-	describe('isTokenErc721', () => {
-		it.each(MOCK_ERC721_TOKENS)('should return true for token $name', (token) => {
-			expect(isTokenErc721(token)).toBeTruthy();
-		});
-
-		it.each([
-			ICP_TOKEN,
-			...SUPPORTED_BITCOIN_TOKENS,
-			...SUPPORTED_ETHEREUM_TOKENS,
-			...SUPPORTED_EVM_TOKENS,
-			...SUPPORTED_SOLANA_TOKENS,
-			...SPL_TOKENS,
-			...ERC20_TWIN_TOKENS,
 			...EVM_ERC20_TOKENS,
 			...MOCK_ERC1155_TOKENS
 		])('should return false for token $name', (token) => {
-			expect(isTokenErc721(token)).toBeFalsy();
+			expect(isTokenErc721CustomToken(token)).toBeFalsy();
 		});
 	});
 });

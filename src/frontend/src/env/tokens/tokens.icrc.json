@@ -88,25 +88,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"XP": {
-		"ledgerCanisterId": "wqihv-qyaaa-aaaak-afjoa-cai",
-		"indexCanisterId": "7hwgv-uaaaa-aaaao-qjv7q-cai",
-		"decimals": 8,
-		"name": "WindogeXP",
-		"symbol": "XP",
-		"fee": {
-			"__bigint__": "100000000"
-		}
-	},
-	"EXE": {
-		"ledgerCanisterId": "rh2pm-ryaaa-aaaan-qeniq-cai",
-		"fee": {
-			"__bigint__": "100000"
-		},
-		"name": "Windoge98",
-		"symbol": "EXE",
-		"decimals": 8
-	},
 	"BOB": {
 		"ledgerCanisterId": "7pail-xaaaa-aaaas-aabmq-cai",
 		"decimals": 8,
@@ -152,15 +133,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"RSIC.OT": {
-		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai",
-		"decimals": 0,
-		"name": "RSIC•GENESIS•RUNE",
-		"symbol": "RSIC.OT",
-		"fee": {
-			"__bigint__": "10"
-		}
-	},
 	"BDC.OT": {
 		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai",
 		"decimals": 0,
@@ -187,5 +159,14 @@
 		"fee": {
 			"__bigint__": "10"
 		}
+	},
+	"SGLDT": {
+		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
+		"fee": {
+			"__bigint__": "1000"
+		},
+		"name": "sGLDT - GLDT Wrapper",
+		"symbol": "sGLDT",
+		"decimals": 8
 	}
 }

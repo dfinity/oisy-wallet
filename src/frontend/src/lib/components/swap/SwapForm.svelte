@@ -17,6 +17,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { SWAP_SLIPPAGE_INVALID_VALUE } from '$lib/constants/swap.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
@@ -36,12 +37,14 @@
 		swapAmount: OptionAmount;
 		receiveAmount: number | undefined;
 		slippageValue: OptionAmount;
+		isSwapAmountsLoading: boolean;
 	}
 
 	let {
 		swapAmount = $bindable<OptionAmount>(),
 		receiveAmount = $bindable<number | undefined>(),
-		slippageValue = $bindable<OptionAmount>()
+		slippageValue = $bindable<OptionAmount>(),
+		isSwapAmountsLoading
 	}: Props = $props();
 
 	const {
@@ -79,6 +82,14 @@
 		nonNullish(swapAmount) && nonNullish($swapAmountsStore?.amountForSwap)
 			? Number(swapAmount) !== Number($swapAmountsStore.amountForSwap)
 			: false
+	);
+
+	let showSwapNotOfferedError = $derived(
+		nonNullish($swapAmountsStore) &&
+			$swapAmountsStore.swaps.length === 0 &&
+			!isSwapAmountsLoading &&
+			nonNullish(swapAmount) &&
+			Number(swapAmount) > 0
 	);
 
 	let disableSwitchTokens = $derived(
@@ -139,13 +150,13 @@
 		<div class="relative">
 			<div class="mb-2">
 				<TokenInput
-					bind:amount={swapAmount}
+					{customValidate}
 					displayUnit={inputUnit}
 					exchangeRate={$sourceTokenExchangeRate}
+					token={$sourceToken}
+					bind:amount={swapAmount}
 					bind:errorType
 					bind:amountSetToMax
-					token={$sourceToken}
-					{customValidate}
 					on:click={() => {
 						dispatch('icShowTokensList', 'source');
 					}}
@@ -167,14 +178,20 @@
 
 					<svelte:fragment slot="balance">
 						{#if nonNullish($sourceToken)}
-							<MaxBalanceButton
-								bind:amountSetToMax
-								bind:amount={swapAmount}
-								error={nonNullish(errorType)}
-								balance={$sourceTokenBalance}
-								token={$sourceToken}
-								fee={totalFee}
-							/>
+							{#if nonNullish(sourceTokenFee)}
+								<MaxBalanceButton
+									balance={$sourceTokenBalance}
+									error={nonNullish(errorType)}
+									fee={totalFee}
+									token={$sourceToken}
+									bind:amountSetToMax
+									bind:amount={swapAmount}
+								/>
+							{:else}
+								<div class="w-14 sm:w-16">
+									<SkeletonText />
+								</div>
+							{/if}
 						{/if}
 					</svelte:fragment>
 				</TokenInput>
@@ -183,12 +200,12 @@
 			<SwapSwitchTokensButton disabled={disableSwitchTokens} on:icSwitchTokens={onTokensSwitch} />
 
 			<TokenInput
-				token={$destinationToken}
 				amount={receiveAmount}
+				disabled={true}
 				displayUnit={inputUnit}
 				exchangeRate={$destinationTokenExchangeRate}
 				loading={swapAmountsLoading}
-				disabled={true}
+				token={$destinationToken}
 				on:click={() => {
 					dispatch('icShowTokensList', 'destination');
 				}}
@@ -197,8 +214,8 @@
 
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
-						{#if $swapAmountsStore?.swaps.length === 0}
-							<div transition:slide={SLIDE_DURATION} class="text-error-primary"
+						{#if showSwapNotOfferedError}
+							<div class="text-error-primary" transition:slide={SLIDE_DURATION}
 								>{$i18n.swap.text.swap_is_not_offered}</div
 							>
 						{:else}
@@ -210,7 +227,13 @@
 									bind:displayUnit={exchangeValueUnit}
 								/>
 
-								<SwapValueDifference {swapAmount} {receiveAmount} />
+								{#if swapAmountsLoading}
+									<span class="mt-0.5 w-10">
+										<SkeletonText />
+									</span>
+								{:else}
+									<SwapValueDifference {receiveAmount} {swapAmount} />
+								{/if}
 							</div>
 						{/if}
 					{/if}
@@ -218,19 +241,19 @@
 
 				<svelte:fragment slot="balance">
 					{#if nonNullish($destinationToken)}
-						<TokenInputBalance token={$destinationToken} balance={$destinationTokenBalance} />
+						<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
 					{/if}
 				</svelte:fragment>
 			</TokenInput>
 		</div>
 
-		<SwapSlippage bind:slippageValue />
+		<SwapSlippage maxSlippageInvalidValue={SWAP_SLIPPAGE_INVALID_VALUE} bind:slippageValue />
 
 		{#if nonNullish($destinationToken) && nonNullish($sourceToken)}
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider on:icShowProviderList showSelectButton {slippageValue} />
+				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
 				<SwapFees />
 			</div>
 		{/if}

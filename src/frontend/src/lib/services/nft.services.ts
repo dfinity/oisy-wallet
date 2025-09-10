@@ -1,200 +1,71 @@
-import { etherscanProviders, type EtherscanProvider } from '$eth/providers/etherscan.providers';
-import {
-	infuraErc721Providers,
-	type InfuraErc721Provider
-} from '$eth/providers/infura-erc721.providers';
-import type { Erc721Token } from '$eth/types/erc721';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { createBatches } from '$lib/services/batch.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
-import type { Nft, NftId, NftMetadata, NftsByNetwork } from '$lib/types/nft';
-import { getNftsByNetworks } from '$lib/utils/nfts.utils';
-import { randomWait } from '$lib/utils/time.utils';
-import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import type { NetworkId } from '$lib/types/network';
+import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import { getTokensByNetwork } from '$lib/utils/nft.utils';
+import { findNftsByToken } from '$lib/utils/nfts.utils';
+import { isNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
 	loadedNfts,
 	walletAddress
 }: {
-	tokens: Erc721Token[];
+	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
-	if (isNullish(walletAddress)) {
-		return;
-	}
+	const tokensByNetwork = getTokensByNetwork(tokens);
 
-	const loadedNftsByNetwork: NftsByNetwork = getNftsByNetworks({ tokens, nfts: loadedNfts });
+	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
+		const tokensToLoad = tokens.filter((token) => {
+			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
+			return nftsByToken.length === 0;
+		});
 
-	await Promise.all(
-		tokens.map((token) => {
-			const etherscanProvider = etherscanProviders(token.network.id);
-			const infuraProvider = infuraErc721Providers(token.network.id);
-
-			const loadedNfts = getLoadedNfts({ token, loadedNftsByNetwork });
-
-			return loadNftsOfToken({
-				etherscanProvider,
-				infuraProvider,
-				token,
-				loadedNfts,
+		if (tokensToLoad.length > 0) {
+			const nfts: Nft[] = await loadNftsByNetwork({
+				networkId,
+				tokens: tokensToLoad,
 				walletAddress
 			});
-		})
-	);
+			nftStore.addAll(nfts);
+		}
+	});
+
+	await Promise.allSettled(promises);
 };
 
-const loadNftsOfToken = async ({
-	etherscanProvider,
-	infuraProvider,
-	token,
-	loadedNfts,
+export const loadNftsByNetwork = async ({
+	networkId,
+	tokens,
 	walletAddress
 }: {
-	etherscanProvider: EtherscanProvider;
-	infuraProvider: InfuraErc721Provider;
-	token: Erc721Token;
-	loadedNfts: Nft[];
-	walletAddress: string;
-}) => {
-	const holdersTokenIds = await loadHoldersTokenIds({
-		etherscanProvider,
-		walletAddress,
-		contractAddress: token.address
-	});
-
-	const loadedTokenIds: NftId[] = loadedNfts.map((nft) => nft.id);
-	const tokenIdsToLoad = holdersTokenIds.filter((id: NftId) => !loadedTokenIds.includes(id));
-
-	const tokenIdBatches = createBatches({ tokenIds: tokenIdsToLoad, batchSize: 10 });
-	for (const tokenIds of tokenIdBatches) {
-		try {
-			const nfts = await loadNftsOfBatch({ infuraProvider, token, tokenIds });
-
-			nftStore.addAll(nfts);
-		} catch (err: unknown) {
-			console.warn('Failed to load batch of nfts', err);
-		}
-	}
-};
-
-const loadNftsOfBatch = async ({
-	infuraProvider,
-	token,
-	tokenIds
-}: {
-	infuraProvider: InfuraErc721Provider;
-	token: Erc721Token;
-	tokenIds: NftId[];
+	networkId: NetworkId;
+	tokens: NonFungibleToken[];
+	walletAddress: OptionEthAddress;
 }): Promise<Nft[]> => {
-	const nftsMetadata: NftMetadata[] = await loadNftsMetadata({
-		infuraProvider,
-		contractAddress: token.address,
-		tokenIds
-	});
-
-	return nftsMetadata.map((nftMetadata) => ({
-		...nftMetadata,
-		contract: token
-	}));
-};
-
-const loadNftsMetadata = async ({
-	infuraProvider,
-	contractAddress,
-	tokenIds
-}: {
-	infuraProvider: InfuraErc721Provider;
-	contractAddress: string;
-	tokenIds: NftId[];
-}): Promise<NftMetadata[]> => {
-	const metadataPromises = tokenIds.map((tokenId) =>
-		loadNftMetadata({ infuraProvider, contractAddress, tokenId })
-	);
-	const results = await Promise.allSettled(metadataPromises);
-	return results.reduce<NftMetadata[]>((acc, result) => {
-		if (result.status !== 'fulfilled') {
-			// For development purposes, we want to see the error in the console.
-			console.warn(result.reason);
-
-			return acc;
-		}
-
-		const { value } = result;
-
-		return nonNullish(value) ? [...acc, value] : acc;
-	}, []);
-};
-
-const loadNftMetadata = async ({
-	infuraProvider,
-	contractAddress,
-	tokenId
-}: {
-	infuraProvider: InfuraErc721Provider;
-	contractAddress: string;
-	tokenId: NftId;
-}): Promise<NftMetadata> => {
-	// We want to wait for a random amount of time between 0 and 2 seconds to avoid triggering rate limits.
-	// Since we are handling batch sizes of 10, on average, we should wait for 0.2 seconds between each nft.
-	await randomWait({ min: 0, max: 2000 });
-
-	try {
-		return await infuraProvider.getNftMetadata({
-			contractAddress,
-			tokenId
-		});
-	} catch (err: unknown) {
-		console.warn('Failed to load metadata', err);
-		return { id: parseNftId(tokenId) };
-	}
-};
-
-const createBatches = ({
-	tokenIds,
-	batchSize
-}: {
-	tokenIds: NftId[];
-	batchSize: number;
-}): NftId[][] =>
-	Array.from({ length: Math.ceil(tokenIds.length / batchSize) }, (_, index) =>
-		tokenIds.slice(index * batchSize, (index + 1) * batchSize)
-	);
-
-const loadHoldersTokenIds = async ({
-	etherscanProvider,
-	walletAddress,
-	contractAddress
-}: {
-	etherscanProvider: EtherscanProvider;
-	walletAddress: string;
-	contractAddress: string;
-}): Promise<NftId[]> => {
-	try {
-		return await etherscanProvider.erc721TokenInventory({
-			address: walletAddress,
-			contractAddress
-		});
-	} catch (_: unknown) {
+	if (isNullish(walletAddress)) {
 		return [];
 	}
-};
 
-const getLoadedNfts = ({
-	token: {
-		network: { id: networkId },
-		address
-	},
-	loadedNftsByNetwork
-}: {
-	token: Erc721Token;
-	loadedNftsByNetwork: NftsByNetwork;
-}): Nft[] => {
-	const tokensByNetwork = loadedNftsByNetwork[networkId];
-	if (nonNullish(tokensByNetwork)) {
-		return tokensByNetwork[address.toLowerCase()] ?? [];
+	const { getNftsByOwner } = alchemyProviders(networkId);
+
+	const batches = createBatches<NonFungibleToken>({ items: tokens, batchSize: 40 });
+
+	const nfts: Nft[] = [];
+	for (const batch of batches) {
+		try {
+			nfts.push(...(await getNftsByOwner({ address: walletAddress, tokens: batch })));
+		} catch (_: unknown) {
+			const tokenAddresses = batch.map((token) => token.address);
+			console.warn(
+				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
+			);
+		}
 	}
 
-	return [];
+	return nfts;
 };

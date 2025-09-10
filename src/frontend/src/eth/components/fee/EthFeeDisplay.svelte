@@ -6,20 +6,26 @@
 
 	interface Props {
 		label?: Snippet;
+		isApproveNeeded?: boolean;
 	}
 
-	let { label }: Props = $props();
+	let { label, isApproveNeeded }: Props = $props();
 
 	const { maxGasFee, feeSymbolStore, feeDecimalsStore, feeExchangeRateStore }: EthFeeContext =
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+
+	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
+	const feeAmount = $derived(
+		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+	);
 </script>
 
 {#if nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
 	<FeeDisplay
-		feeAmount={$maxGasFee}
 		decimals={$feeDecimalsStore}
-		symbol={$feeSymbolStore}
 		exchangeRate={$feeExchangeRateStore}
+		{feeAmount}
 		{label}
+		symbol={$feeSymbolStore}
 	/>
 {/if}

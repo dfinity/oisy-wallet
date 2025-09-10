@@ -19,14 +19,17 @@ import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
+import {
+	estimateComputeUnitLimitFactory,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import {
 	appendTransactionMessageInstructions,
-	assertTransactionIsFullySigned,
+	assertIsFullySignedTransaction,
+	assertIsTransactionWithinSizeLimit,
 	createTransactionMessage,
-	getComputeUnitEstimateForTransactionMessageFactory,
 	lamports,
 	pipe,
 	prependTransactionMessageInstruction,
@@ -35,13 +38,13 @@ import {
 	setTransactionMessageLifetimeUsingBlockhash,
 	address as solAddress,
 	type Commitment,
-	type ITransactionMessageWithFeePayer,
 	type Rpc,
 	type RpcSubscriptions,
 	type Signature,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi,
 	type TransactionMessage,
+	type TransactionMessageWithFeePayer,
 	type TransactionPartialSigner,
 	type TransactionSigner,
 	type TransactionVersion
@@ -58,7 +61,7 @@ const setFeePayerToTransaction = ({
 }: {
 	transactionMessage: TransactionMessage;
 	feePayer: TransactionSigner;
-}): TransactionMessage & ITransactionMessageWithFeePayer =>
+}): TransactionMessage & TransactionMessageWithFeePayer =>
 	pipe(transactionMessage, (tx) => setTransactionMessageFeePayerSigner(feePayer, tx));
 
 export const setLifetimeAndFeePayerToTransaction = async ({
@@ -238,7 +241,8 @@ export const sendSignedTransaction = async ({
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
-	assertTransactionIsFullySigned(signedTransaction);
+	assertIsFullySignedTransaction(signedTransaction);
+	assertIsTransactionWithinSizeLimit(signedTransaction);
 
 	const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
 
@@ -256,7 +260,7 @@ const confirmSignedTransaction = async ({
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
-	assertTransactionIsFullySigned(signedTransaction);
+	assertIsFullySignedTransaction(signedTransaction);
 
 	const getBlockHeightExceedencePromise = createBlockHeightExceedencePromiseFactory({
 		rpc,
@@ -293,14 +297,14 @@ export const sendSol = async ({
 	source
 }: {
 	identity: OptionIdentity;
-	progress: (step: ProgressStepsSendSol) => void;
 	token: Token;
 	amount: bigint;
 	prioritizationFee: bigint;
 	destination: SolAddress;
 	source: SolAddress;
+	progress?: (step: ProgressStepsSendSol) => void;
 }): Promise<Signature> => {
-	progress(ProgressStepsSendSol.INITIALIZATION);
+	progress?.(ProgressStepsSendSol.INITIALIZATION);
 
 	const {
 		network: { id: networkId }
@@ -332,10 +336,9 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	const getComputeUnitEstimateForTransactionMessage =
-		getComputeUnitEstimateForTransactionMessageFactory({
-			rpc
-		});
+	const getComputeUnitEstimateForTransactionMessage = estimateComputeUnitLimitFactory({
+		rpc
+	});
 
 	const computeUnitsEstimate =
 		await getComputeUnitEstimateForTransactionMessage(transactionMessage);
@@ -347,20 +350,20 @@ export const sendSol = async ({
 		transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SIGN);
+	progress?.(ProgressStepsSendSol.SIGN);
 
 	const { signedTransaction, signature } = await signTransaction(
 		prioritizationFee > ZERO ? transactionMessageWithComputeUnitPrice : transactionMessage
 	);
 
-	progress(ProgressStepsSendSol.SEND);
+	progress?.(ProgressStepsSendSol.SEND);
 
 	await sendSignedTransaction({
 		rpc,
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.CONFIRM);
+	progress?.(ProgressStepsSendSol.CONFIRM);
 
 	await confirmSignedTransaction({
 		rpc,
@@ -368,7 +371,7 @@ export const sendSol = async ({
 		signedTransaction
 	});
 
-	progress(ProgressStepsSendSol.DONE);
+	progress?.(ProgressStepsSendSol.DONE);
 
 	return signature;
 };

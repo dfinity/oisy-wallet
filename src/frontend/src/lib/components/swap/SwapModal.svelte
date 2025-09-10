@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
-	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
@@ -26,6 +25,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext, initSwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
+	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
@@ -54,6 +54,7 @@
 	let receiveAmount = $state<number | undefined>();
 	let slippageValue = $state<OptionAmount>(SWAP_DEFAULT_SLIPPAGE_VALUE);
 	let swapProgressStep = $state(ProgressStepsSwap.INITIALIZATION);
+	let swapFailedProgressSteps = $state<string[]>([]);
 	let currentStep = $state<WizardStep<WizardStepsSwap> | undefined>();
 	let selectTokenType = $state<SwapSelectTokenType | undefined>();
 	let showSelectProviderModal = $state<boolean>(false);
@@ -68,7 +69,7 @@
 		setFilterQuery('');
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<IcTokenToggleable>) => {
+	const selectToken = ({ detail: token }: CustomEvent<Token>) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 		} else if (selectTokenType === 'destination') {
@@ -112,12 +113,12 @@
 </script>
 
 <WizardModal
+	bind:this={modal}
+	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
+	onClose={close}
 	{steps}
 	testId={SWAP_TOKENS_MODAL}
-	bind:this={modal}
 	bind:currentStep
-	onClose={close}
-	disablePointerEvents={currentStep?.name === WizardStepsSwap.SWAPPING || showSelectProviderModal}
 >
 	{#snippet title()}{titleString}{/snippet}
 
@@ -135,6 +136,7 @@
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
+			bind:swapFailedProgressSteps
 			on:icBack={modal.back}
 			on:icNext={modal.next}
 			on:icClose={close}

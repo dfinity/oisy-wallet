@@ -4,6 +4,7 @@
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcIndexCanisterStatus from '$icp/components/transactions/IcIndexCanisterStatus.svelte';
 	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
@@ -31,35 +32,34 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckEthereum: boolean;
-	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
+	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
-	let additionalListener:
-		| typeof IcTransactionsBtcListeners
-		| typeof IcTransactionsCkEthereumListeners
-		| typeof IcTransactionsNoListener;
-	$: additionalListener = $tokenCkBtcLedger
-		? IcTransactionsBtcListeners
-		: ckEthereum
-			? IcTransactionsCkEthereumListeners
-			: IcTransactionsNoListener;
+	let AdditionalListener = $derived(
+		$tokenCkBtcLedger
+			? IcTransactionsBtcListeners
+			: ckEthereum
+				? IcTransactionsCkEthereumListeners
+				: IcTransactionsNoListener
+	);
 
-	let selectedTransaction: IcTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<IcTransactionUi>({
-			$modalOpen: $modalIcTransaction,
-			$modalStore
-		}));
+	let selectedTransaction = $state<IcTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<IcTransactionUi>({
+				$modalOpen: $modalIcTransaction,
+				$modalStore
+			}));
+	});
 
-	let noTransactions = false;
-	$: noTransactions = nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null;
+	let noTransactions = $derived(
+		nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null
+	);
 
-	let token: Token;
-	$: token = $pageToken ?? ICP_TOKEN;
+	let token = $derived($pageToken ?? ICP_TOKEN);
 </script>
 
 <Info />
@@ -68,25 +68,23 @@
 	{$i18n.transactions.text.title}
 
 	{#snippet end()}
-		{#if $tokenCkBtcLedger}
-			<IcTransactionsBitcoinStatus />
-		{:else if ckEthereum}
-			<IcTransactionsEthereumStatus />
-		{/if}
+		<IcIndexCanisterStatus>
+			{#if $tokenCkBtcLedger}
+				<IcTransactionsBitcoinStatus />
+			{:else if ckEthereum}
+				<IcTransactionsEthereumStatus />
+			{/if}
+		</IcIndexCanisterStatus>
 	{/snippet}
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component
-		this={additionalListener}
-		{token}
-		ckEthereumNativeToken={$ckEthereumNativeToken}
-	>
+	<AdditionalListener ckEthereumNativeToken={$ckEthereumNativeToken} {token}>
 		{#if $icTransactions.length > 0}
 			<IcTransactionsScroll {token}>
 				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
 					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction transaction={transaction.data} {token} />
+						<IcTransaction {token} transaction={transaction.data} />
 					</li>
 				{/each}
 			</IcTransactionsScroll>
@@ -99,11 +97,11 @@
 		{:else if $icTransactions.length === 0}
 			<TransactionsPlaceholder />
 		{/if}
-	</svelte:component>
+	</AdditionalListener>
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
-	<IcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<IcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalIcToken}
 	<IcTokenModal fromRoute={$modalIcTokenData} />
 {/if}
