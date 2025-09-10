@@ -47,6 +47,19 @@ describe('nftStore', () => {
 
 			expect(get(nftStore)).toEqual([mockValidErc721Nft, similarNft]);
 		});
+
+		it('should not add NFT with address written in different case', () => {
+			nftStore.addAll([mockValidErc721Nft]);
+
+			const similarNft: Nft = {
+				...mockValidErc721Nft,
+				collection: { ...mockValidErc721Nft.collection, address: mockValidErc1155Nft.collection.address.toUpperCase() }
+			};
+
+			nftStore.addAll([similarNft]);
+
+			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
+		})
 	});
 
 	describe('removeSelectedNfts', () => {
@@ -109,6 +122,17 @@ describe('nftStore', () => {
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
+
+		it('should remove NFT with address written in different case', () => {
+			const similarNft: Nft = {
+				...mockNft1,
+				collection: { ...mockNft1.collection, address: mockNft1.collection.address.toUpperCase() }
+			};
+
+			nftStore.removeSelectedNfts([similarNft]);
+
+			expect(get(nftStore)).toEqual([mockNft2, mockNft3]);
+		})
 	});
 
 	describe('updateSelectedNfts', () => {
@@ -177,5 +201,17 @@ describe('nftStore', () => {
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2, mockNft3]);
 		});
+
+		it('should update NFT with address written in different case', () => {
+			const updatedNft1: Nft = {
+				...mockNft1,
+				collection: { ...mockNft1.collection, address: mockNft1.collection.address.toUpperCase() },
+				balance: 10
+			};
+
+			nftStore.updateSelectedNfts([updatedNft1]);
+
+			expect(get(nftStore)).toEqual([updatedNft1, mockNft2, mockNft3]);
+		})
 	});
 });
