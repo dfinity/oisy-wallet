@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
@@ -8,7 +9,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import { preventDefault } from '@dfinity/gix-components';
 
 	interface Props {
 		nft?: Nft;
@@ -63,7 +63,7 @@
 				>
 					<Button
 						colorStyle="secondary-light"
-						onclick={preventDefault(handleConsent)}
+						onclick={stopPropagation(handleConsent)}
 						paddingSmall
 						styleClass="py-1 rounded-md"
 					>
