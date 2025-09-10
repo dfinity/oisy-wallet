@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
@@ -508,6 +509,7 @@
 			"icrc_custom_token": "Error while loading the ICRC custom token.",
 			"loading_wallet_timeout": "Your wallet requires some initial data which has not been loaded yet. Please try again.",
 			"allow_signing": "An issue occurred while setting up your wallet for signing. You've been signed out. If the issue persists, contact support.",
+			"waiting_for_allowed_cycles_aborted": "Aborted cycles ledger preperation. Please try to login later",
 			"btc_wallet_error": "Error while loading BTC wallet information.",
 			"sol_wallet_error": "Error while loading SOL wallet information."
 		}
@@ -550,7 +552,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "Beta features",
+			"enable_beta_feature": "Enable beta feature",
+			"disable_beta_feature": "Disable beta feature",
+			"save_beta_feature_success": "Your beta feature settings have been updated."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -585,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP Account ID",
+				"checking_index_canister_status": "Checking transactions status...",
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
@@ -684,13 +691,16 @@
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
-			"send_review_subtitle": "You send"
+			"send_review_subtitle": "You send",
+			"no_nfts_found": "No NFTs found",
+			"no_nfts_found_desc": "Adjust your search or network to find your NFTs"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
-			"select_network": "Select network"
+			"select_network": "Select network",
+			"search_nfts": "Search NFTs"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -1040,11 +1050,27 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
-			"open_explorer": "Open this contract in blockchain explorer",
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"hide": "Hide",
-			"unhide": "Unhide"
+			"unhide": "Unhide",
+			"hidden": "Hidden",
+			"open_explorer": "Open this contract in blockchain explorer",
+			"img_consent_disabled": "You disabled images from this collection",
+			"img_consent_none": "Image disabled for security reasons",
+			"review_button": "Review",
+			"collection_name": "Collection name",
+			"media_urls": "Media URLs",
+			"display_preference": "Display preference",
+			"review_preference": "Review preference",
+			"media_enabled": "Media enabled",
+			"media_disabled": "Media disabled",
+			"enable_media": "Enable media",
+			"disable_media": "Disable media",
+			"open_in_new_tab": "Open in new tab",
+			"review_title": "Review media sources for \"$collectionName\"",
+			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
+			"learn_more": "Learn more"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
@@ -1609,7 +1635,9 @@
 			"send_message_input_placeholder": "What do you want to do?",
 			"send_token_succeeded": "Transaction completed!",
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
-			"loading": "Thinking..."
+			"loading": "Thinking...",
+			"reset_chat_history": "Reset chat history",
+			"feature_description": "The experimental AI Assistant allows you to manage your  assets, contacts, and setup transactions."
 		},
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",

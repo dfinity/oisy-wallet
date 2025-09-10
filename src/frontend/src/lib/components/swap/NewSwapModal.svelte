@@ -17,6 +17,7 @@
 		crossChainSwapNetworksMainnets,
 		crossChainSwapNetworksMainnetsIds
 	} from '$lib/derived/cross-chain-networks.derived';
+	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { swappableTokens } from '$lib/derived/swap.derived';
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
@@ -55,7 +56,11 @@
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
 			tokens: [],
-			filterNetwork: undefined,
+			filterNetwork:
+				nonNullish($selectedNetwork) &&
+				$crossChainSwapNetworksMainnetsIds.includes($selectedNetwork.id)
+					? $selectedNetwork
+					: undefined,
 			filterNetworksIds: $crossChainSwapNetworksMainnetsIds
 		})
 	);

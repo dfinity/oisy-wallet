@@ -1,4 +1,4 @@
-import { batch } from '$lib/services/batch.services';
+import { batch, createBatches } from '$lib/services/batch.services';
 
 describe('batch.services', () => {
 	describe('batch', () => {
@@ -88,6 +88,33 @@ describe('batch.services', () => {
 			}
 
 			expect(results).toEqual([1, 3, 4, 5]);
+		});
+	});
+
+	describe('createBatches', () => {
+		it('should handle empty array', () => {
+			const batches = createBatches({ items: [], batchSize: 3 });
+
+			expect(batches).toEqual([]);
+		});
+
+		it('should create batches of the correct size', () => {
+			const values = [1, 2, 3, 4, 5];
+			const batchSize = 3;
+
+			const batches = createBatches({ items: values, batchSize });
+
+			expect(batches).toEqual([
+				[1, 2, 3],
+				[4, 5]
+			]);
+		});
+
+		it('should work with different data types', () => {
+			const values = ['a', 'b', 'c', 'd', 'e'];
+			const batches = createBatches({ items: values, batchSize: 2 });
+
+			expect(batches).toEqual([['a', 'b'], ['c', 'd'], ['e']]);
 		});
 	});
 });

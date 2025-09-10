@@ -46,9 +46,10 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -90,7 +91,8 @@
 	);
 
 	let invalid = $derived(
-		invalidDestination ||
+		!sendEnabled ||
+			invalidDestination ||
 			notEmptyString(amountErrorMessage) ||
 			isNullish(amount) ||
 			isNullish(utxosFee) ||
@@ -253,7 +255,10 @@
 		{$i18n.send.text.send}
 	</Button>
 {:else}
-	<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+	<p
+		class="text-center text-sm text-success-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+	>
 		{$i18n.ai_assistant.text.send_token_succeeded}
 	</p>
 {/if}

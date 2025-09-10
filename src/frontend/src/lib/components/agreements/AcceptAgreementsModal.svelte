@@ -116,8 +116,7 @@
 	};
 </script>
 
-<!-- TODO: remove the close button from the modal -->
-<Modal testId={AGREEMENTS_MODAL}>
+<Modal disablePointerEvents={true} testId={AGREEMENTS_MODAL}>
 	<h4 slot="title">
 		{$noAgreementVisionedYet
 			? $i18n.agreements.text.review_title
@@ -133,7 +132,7 @@
 
 		<div
 			style="--checkbox-label-order: 1; --text-white-space: normal"
-			class="flex flex-col font-bold"
+			class="flex flex-col gap-1 font-bold"
 		>
 			{#if 'termsOfUse' in agreementsToAccept}
 				<AcceptAgreementsCheckbox

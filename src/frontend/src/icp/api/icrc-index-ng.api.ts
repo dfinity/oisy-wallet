@@ -4,7 +4,11 @@ import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import { IcrcIndexNgCanister, type IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
+import {
+	IcrcIndexNgCanister,
+	type IcrcIndexNgGetTransactions,
+	type IcrcNgStatus
+} from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
@@ -49,6 +53,20 @@ export const getLedgerId = async ({
 	return ledgerId({ certified });
 };
 
+export const getStatus = async ({
+	identity,
+	indexCanisterId,
+	certified = true
+}: {
+	identity: OptionIdentity;
+	indexCanisterId: IndexCanisterIdText;
+} & QueryParams): Promise<IcrcNgStatus> => {
+	assertNonNullish(identity);
+
+	const { status } = await indexNgCanister({ identity, indexCanisterId });
+
+	return status({ certified });
+};
 const indexNgCanister = async ({
 	identity,
 	indexCanisterId

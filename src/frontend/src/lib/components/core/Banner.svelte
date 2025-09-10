@@ -17,7 +17,7 @@
 		</span>
 		<button aria-label={$i18n.core.text.close} on:click={close}><IconClose /></button>
 	</div>
-{:else if BETA}
+{:else if BETA && visible}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>

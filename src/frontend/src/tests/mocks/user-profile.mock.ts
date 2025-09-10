@@ -1,6 +1,7 @@
 import type {
 	Agreements,
 	DappSettings,
+	ExperimentalFeaturesSettings,
 	NetworkSettings,
 	NetworkSettingsFor,
 	NetworksSettings,
@@ -26,11 +27,16 @@ export const mockNetworksSettings: NetworksSettings = {
 	testnets: { show_testnets: false }
 };
 
+export const mockExperimentalFeaturesSettings: ExperimentalFeaturesSettings = {
+	experimental_features: [[{ AiAssistantBeta: null }, { enabled: true }]]
+};
+
 export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids: [] } };
 
 export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
-	dapp: mockDappSettings
+	dapp: mockDappSettings,
+	experimental_features: mockExperimentalFeaturesSettings
 };
 
 const mockUserAgreement: UserAgreement = {
