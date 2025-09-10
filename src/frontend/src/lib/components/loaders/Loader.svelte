@@ -58,6 +58,7 @@
 	import { loadNfts } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { loading } from '$lib/stores/loader.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -223,6 +224,7 @@
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
 			tokens: $nonFungibleTokens ?? [],
+			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
 	});

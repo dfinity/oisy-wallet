@@ -7,12 +7,10 @@ import {
 } from '$lib/services/worker.exchange.services';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { currencyStore } from '$lib/stores/currency.store';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('ExchangeWorker', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	const stopExchangeTimer = vi.fn();
 	const startExchangeTimer = vi.fn();
 	const destroy = vi.fn();

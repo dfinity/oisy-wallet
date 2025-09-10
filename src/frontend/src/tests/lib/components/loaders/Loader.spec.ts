@@ -39,7 +39,7 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -127,8 +127,6 @@ vi.mock('$sol/services/spl.services', () => ({
 }));
 
 describe('Loader', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 
