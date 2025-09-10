@@ -29,12 +29,14 @@
 	const { token, nfts }: Props = $props();
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
+
+	const bannerUrl = $derived(nfts?.[0].collection.bannerImageUrl)
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
 		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
-			<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
 		</NftImageConsent>
 	</div>
 
