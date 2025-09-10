@@ -566,12 +566,15 @@ interface I18nSend {
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
 		send_review_subtitle: string;
+		no_nfts_found: string;
+		no_nfts_found_desc: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
 		select_network: string;
+		search_nfts: string;
 	};
 	info: {
 		ckbtc_certified: string;
