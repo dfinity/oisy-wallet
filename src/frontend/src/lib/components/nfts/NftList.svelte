@@ -24,7 +24,7 @@
 		{/if}
 
 		<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
-			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
+			{#each nfts as nft, index (`${nft.id}-${index}`)}
 				{@render nftListItem({ nft })}
 			{/each}
 		</div>
