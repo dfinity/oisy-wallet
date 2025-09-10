@@ -11,13 +11,16 @@
 	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
+	import SendModal from '$lib/components/send/SendModal.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { modalSend } from '$lib/derived/modal.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
@@ -25,9 +28,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import SendModal from '$lib/components/send/SendModal.svelte';
-	import { modalSend } from '$lib/derived/modal.derived';
-	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -119,7 +119,7 @@
 								</NftCollectionActionButton>
 							{/snippet}
 							{#snippet modal()}
-								<SendModal isNftsPage {nft} isTransactionsPage={false} on:nnsClose />
+								<SendModal isNftsPage isTransactionsPage={false} {nft} on:nnsClose />
 							{/snippet}
 						</ButtonWithModal>
 					</div>
