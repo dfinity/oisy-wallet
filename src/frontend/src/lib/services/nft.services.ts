@@ -4,6 +4,7 @@ import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
+import { createBatches } from '$lib/services/batch.services';
 
 export const loadNfts = async ({
 	tokens,
@@ -64,14 +65,3 @@ export const loadNftsByNetwork = async ({
 
 	return nfts;
 };
-
-const createBatches = ({
-	tokens,
-	batchSize
-}: {
-	tokens: NonFungibleToken[];
-	batchSize: number;
-}): NonFungibleToken[][] =>
-	Array.from({ length: Math.ceil(tokens.length / batchSize) }, (_, index) =>
-		tokens.slice(index * batchSize, (index + 1) * batchSize)
-	);
