@@ -14,7 +14,7 @@ import {
 	IntersectionObserverActiveInterval,
 	IntersectionObserverPassive
 } from '$tests/mocks/infinite-scroll.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render } from '@testing-library/svelte';
 
@@ -32,8 +32,6 @@ describe('IcTransactionsScroll', () => {
 	const mockTransactions: IcTransactionUi[] = createIcTransactionUiMockList(2);
 
 	const mockLastId = mockTransactions[mockTransactions.length - 1].id;
-
-	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeAll(() => {
 		Object.defineProperty(window, 'IntersectionObserver', {
