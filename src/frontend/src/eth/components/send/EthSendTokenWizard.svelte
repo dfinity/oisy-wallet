@@ -162,7 +162,7 @@
 			await sendNft({
 				token: $sendToken as NonFungibleToken,
 				tokenId: nft.id,
-				destination,
+				toAddress: destination,
 				fromAddress: $ethAddress,
 				identity: $authIdentity,
 				gas,
