@@ -69,7 +69,7 @@
 
 				nftStore.addAll(nftsByToken);
 			});
-		})
+		});
 
 		await Promise.allSettled(promises);
 	};
