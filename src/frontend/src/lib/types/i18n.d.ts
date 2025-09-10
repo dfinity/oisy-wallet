@@ -382,6 +382,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
@@ -435,6 +436,10 @@ interface I18nSettings {
 		git_disclaimer: string;
 		git_branch_name: string;
 		git_commit_hash: string;
+		beta_features: string;
+		enable_beta_feature: string;
+		disable_beta_feature: string;
+		save_beta_feature_success: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -466,6 +471,7 @@ interface I18nReceive {
 	icp: {
 		text: {
 			account_id: string;
+			checking_index_canister_status: string;
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
@@ -894,9 +900,13 @@ interface I18nNfts {
 		unhide: string;
 		hidden: string;
 		open_explorer: string;
+		img_consent_disabled: string;
+		img_consent_none: string;
+		review_button: string;
 		collection_name: string;
 		media_urls: string;
 		display_preference: string;
+		review_preference: string;
 		media_enabled: string;
 		media_disabled: string;
 		enable_media: string;
@@ -1338,6 +1348,8 @@ interface I18nAi_assistant {
 		send_token_succeeded: string;
 		no_contacts_found_message: string;
 		loading: string;
+		reset_chat_history: string;
+		feature_description: string;
 	};
 	errors: { unknown: string; no_response: string };
 }

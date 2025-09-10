@@ -1,5 +1,6 @@
 import {
 	userAgreementsData,
+	userExperimentalFeaturesSettings,
 	userProfile,
 	userProfileLoaded,
 	userProfileVersion,
@@ -8,6 +9,7 @@ import {
 } from '$lib/derived/user-profile.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import {
+	mockExperimentalFeaturesSettings,
 	mockNetworksSettings,
 	mockUserAgreements,
 	mockUserProfile,
@@ -98,6 +100,20 @@ describe('user-profile.derived', () => {
 			userProfileStore.set({ certified, profile: mockUserProfile });
 
 			expect(get(userSettingsNetworks)).toEqual(mockNetworksSettings);
+		});
+	});
+
+	describe('userExperimentalFeaturesSettings', () => {
+		it('should return undefined when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(userExperimentalFeaturesSettings)).toBeUndefined();
+		});
+
+		it('should return user settings networks if it is not nullish', () => {
+			userProfileStore.set({ certified, profile: mockUserProfile });
+
+			expect(get(userExperimentalFeaturesSettings)).toEqual(mockExperimentalFeaturesSettings);
 		});
 	});
 

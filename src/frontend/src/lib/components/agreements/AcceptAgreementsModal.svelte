@@ -132,7 +132,7 @@
 
 		<div
 			style="--checkbox-label-order: 1; --text-white-space: normal"
-			class="flex flex-col font-bold"
+			class="flex flex-col gap-1 font-bold"
 		>
 			{#if 'termsOfUse' in agreementsToAccept}
 				<AcceptAgreementsCheckbox

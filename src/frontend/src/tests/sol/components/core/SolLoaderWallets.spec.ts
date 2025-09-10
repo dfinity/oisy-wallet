@@ -8,7 +8,7 @@ import {
 import SolLoaderWallets from '$sol/components/core/SolLoaderWallets.svelte';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { initSolWalletWorker } from '$sol/services/worker.sol-wallet.services';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -19,8 +19,6 @@ vi.mock('$sol/services/worker.sol-wallet.services', () => ({
 }));
 
 describe('SolLoaderWallets', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 

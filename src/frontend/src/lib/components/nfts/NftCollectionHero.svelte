@@ -3,16 +3,17 @@
 	import { slide } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
+	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -28,11 +29,16 @@
 	const { token, nfts }: Props = $props();
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
+
+	const firstNft = $derived(nfts?.[0]);
+	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<BgImg imageUrl={nfts?.[0]?.imageUrl} size="cover" />
+		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
+			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
+		</NftImageConsent>
 	</div>
 
 	<div class="bg-primary p-4">
@@ -46,17 +52,11 @@
 					</h1>
 
 					{#if token.section === CustomTokenSection.HIDDEN}
-						<Badge
-							styleClass="pl-1 pr-2"
-							testId={NFT_HIDDEN_BADGE}
-							variant="disabled"
-							width="w-fit"
-						>
-							<div class="flex items-center gap-1">
-								<IconEyeOff size="18" />
-								{$i18n.nfts.text.hidden}
-							</div>
-						</Badge>
+						<NftBadgeHidden />
+					{/if}
+
+					{#if token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
 					{/if}
 				</div>
 
@@ -107,6 +107,16 @@
 				<span>{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(token)}
 					<span class="uppercase">{token.standard}</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.display_preference}</span>
+				{#if nonNullish(nfts?.[0])}
+					<NftImageConsentPreference nft={nfts[0]} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />

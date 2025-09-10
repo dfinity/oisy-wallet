@@ -3,9 +3,12 @@
 	import { fade } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
+	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -13,9 +16,9 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -52,12 +55,27 @@
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
-		<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass="absolute blur" />
+		<div class="absolute h-full w-full">
+			<NftImageConsent {nft} showMessage={false} type="hero-banner">
+				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
+			</NftImageConsent>
+		</div>
 
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
-					<Img src={nft?.imageUrl} />
+					<NftImageConsent {nft} type="nft-display">
+						<button
+							class="block h-auto w-auto border-0"
+							onclick={() =>
+								modalStore.openNftFullscreenDisplay({
+									id: Symbol('nft-fullscreen-display'),
+									data: nft
+								})}
+						>
+							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
+						</button>
+					</NftImageConsent>
 					<span class="absolute bottom-0 right-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
@@ -77,17 +95,11 @@
 					</h1>
 
 					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<Badge
-							styleClass="pl-1 pr-2"
-							testId={NFT_HIDDEN_BADGE}
-							variant="disabled"
-							width="w-fit"
-						>
-							<div class="flex items-center gap-1">
-								<IconEyeOff size="18" />
-								{$i18n.nfts.text.hidden}
-							</div>
-						</Badge>
+						<NftBadgeHidden />
+					{/if}
+
+					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
 					{/if}
 				</div>
 			</div>
@@ -115,6 +127,16 @@
 							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
 						/>
 					</span>
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem>
+				<span>{$i18n.nfts.text.display_preference}</span>
+				{#if nonNullish(nft)}
+					<NftImageConsentPreference {nft} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />

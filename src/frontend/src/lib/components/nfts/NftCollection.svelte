@@ -55,14 +55,16 @@
 
 <NftCollectionHero nfts={collectionNfts} {token} />
 
-<div class="mt-4 grid grid-cols-3 gap-3 gap-y-4 py-4">
+<div class="mt-4 grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
 	{#if collectionNfts.length > 0}
-		{#each collectionNfts as nft, index (nft.id + index)}
-			<NftCard hidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN} {nft} />
+		{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
+			<NftCard
+				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
+				{nft}
+			/>
 		{/each}
 	{:else}
-		<NftCardSkeleton />
-		<NftCardSkeleton />
-		<NftCardSkeleton />
+		<NftCardSkeleton times={3} />
 	{/if}
 </div>

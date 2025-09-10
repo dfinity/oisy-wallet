@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Błąd podczas pobierania statusów wypłat BTC.",
 			"transaction_price": "Błąd podczas ładowania oszacowania ceny transakcji.",
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
@@ -551,7 +552,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "Do celów deweloperskich pokazujemy gałąź i commit tylko w kanistrach testowych.",
 			"git_branch_name": "Gałąź:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -586,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Identyfikator konta ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Użyj dla wszystkich tokenów podczas odbierania z portfeli, od użytkowników lub z innych aplikacji obsługujących ten format adresu.",
 				"use_for_icrc_deposit": "Użyj do odbierania tokenów ICRC-1 w sieci ICP, takich jak SNS, tokeny ck itp.",
 				"use_for_icp_deposit": "Użyj do wpłat ICP z giełd lub innych portfeli obsługujących tylko identyfikatory kont.",
@@ -1047,9 +1053,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "Otwórz ten kontrakt w eksploratorze blockchain",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1621,7 +1631,9 @@
 			"send_message_input_placeholder": "Co chcesz zrobić?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
-			"loading": "Myślenie..."
+			"loading": "Myślenie...",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",
