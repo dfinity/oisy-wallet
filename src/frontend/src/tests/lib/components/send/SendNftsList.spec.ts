@@ -30,6 +30,7 @@ describe('SendNftsList.spec', () => {
 		}
 
 		const networkBtn = getByRole('button', { name: get(i18n).networks.chain_fusion });
+
 		expect(networkBtn).toBeInTheDocument();
 	});
 

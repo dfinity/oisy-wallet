@@ -65,8 +65,8 @@
 
 {#if noNftsMatch}
 	<EmptyState
-		title={$i18n.send.text.no_nfts_found}
 		description={$i18n.send.text.no_nfts_found_desc}
+		title={$i18n.send.text.no_nfts_found}
 	/>
 {:else}
 	<NftList nfts={filtered}>
