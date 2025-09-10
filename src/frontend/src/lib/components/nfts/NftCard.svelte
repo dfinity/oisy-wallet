@@ -7,6 +7,7 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		nft: Nft;
@@ -57,7 +58,7 @@
 		{/if}
 
 		<div class="absolute bottom-2 right-2 flex items-center gap-1">
-			{#if nft.collection.standard === 'erc1155'}
+			{#if isCollectionErc1155(nft.collection)}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
 
