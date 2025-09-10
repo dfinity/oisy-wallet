@@ -3,52 +3,9 @@ import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type {
-	Nft,
-	NftCollection,
-	NftCollectionUi,
-	NftId,
-	NftsByNetwork,
-	NonFungibleToken
-} from '$lib/types/nft';
+import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-
-export const getNftsByNetworks = ({
-	tokens,
-	nfts
-}: {
-	tokens: NonFungibleToken[];
-	nfts: Nft[];
-}): NftsByNetwork => {
-	const nftsByToken: NftsByNetwork = {};
-
-	tokens.forEach(({ address, network: { id: networkId } }) => {
-		if (isNullish(nftsByToken[networkId])) {
-			nftsByToken[networkId] = {};
-		}
-		nftsByToken[networkId][address.toLowerCase()] = [];
-	});
-
-	nfts.forEach((nft) => {
-		const {
-			collection: {
-				network: { id: networkId },
-				address
-			}
-		} = nft;
-		const normalizedAddress = address.toLowerCase();
-
-		if (
-			nonNullish(nftsByToken[networkId]) &&
-			nonNullish(nftsByToken[networkId][normalizedAddress])
-		) {
-			nftsByToken[networkId][normalizedAddress].push(nft);
-		}
-	});
-
-	return nftsByToken;
-};
 
 export const findNft = ({
 	nfts,
