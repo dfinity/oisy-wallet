@@ -2,7 +2,7 @@ import * as analytics from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import App from '$routes/+layout.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
@@ -16,8 +16,6 @@ vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => 
 });
 
 describe('App Layout', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	beforeAll(() => {
 		Object.defineProperty(window, 'matchMedia', {
 			writable: true,
