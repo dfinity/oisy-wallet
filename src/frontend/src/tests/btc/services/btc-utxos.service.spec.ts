@@ -73,6 +73,8 @@ import type { get_utxos_response } from '@dfinity/ckbtc/dist/candid/bitcoin';
 // Mock environment variables
 vi.mock('$env/networks/networks.icrc.env', () => ({
 	IC_CKBTC_MINTER_CANISTER_ID: 'rdmx6-jaaaa-aaaah-qcaiq-cai',
+	LOCAL_CKBTC_MINTER_CANISTER_ID: 'local-ckbtc-minter-canister-id',
+	STAGING_CKBTC_MINTER_CANISTER_ID: 'staging-ckbtc-minter-canister-id',
 	BITCOIN_CANISTER_IDS: {
 		'rdmx6-jaaaa-aaaah-qcaiq-cai': 'ghsi2-tqaaa-aaaan-aaaca-cai'
 	}
