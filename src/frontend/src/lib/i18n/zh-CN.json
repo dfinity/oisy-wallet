@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "现在就开始你的第一次发送吧！",
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
-			"send_review_subtitle": "你将发送"
+			"send_review_subtitle": "你将发送",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
-			"select_network": "选择网络"
+			"select_network": "选择网络",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
