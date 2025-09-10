@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "Udělejte svůj první odeslání hned!",
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
-			"send_review_subtitle": "Odesíláte"
+			"send_review_subtitle": "Odesíláte",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
-			"select_network": "Vybrat síť"
+			"select_network": "Vybrat síť",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
