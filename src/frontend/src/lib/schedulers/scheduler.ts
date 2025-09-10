@@ -1,10 +1,10 @@
+import { loadIdentity } from '$lib/api/auth-client.api';
 import type {
 	PostMessageDataError,
 	PostMessageResponse,
 	PostMessageResponseStatus
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
-import { loadIdentity } from '$lib/utils/auth.utils';
 import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 

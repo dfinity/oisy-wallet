@@ -1,9 +1,16 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
+import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import type { ProgressStepsSend } from '$lib/enums/progress-steps';
+import { nullishSignOut } from '$lib/services/auth.services';
 import { createBatches } from '$lib/services/batch.services';
 import { nftStore } from '$lib/stores/nft.store';
-import type { OptionEthAddress } from '$lib/types/address';
+import type { Address, OptionEthAddress } from '$lib/types/address';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish } from '@dfinity/utils';
@@ -68,4 +75,62 @@ export const loadNftsByNetwork = async ({
 	}
 
 	return nfts;
+};
+
+export const sendNft = async ({
+	token,
+	tokenId,
+	toAddress,
+	fromAddress,
+	identity,
+	gas,
+	maxFeePerGas,
+	maxPriorityFeePerGas,
+	progress
+}: {
+	token: NonFungibleToken;
+	tokenId: NftId;
+	toAddress: Address;
+	fromAddress: Address;
+	identity: OptionIdentity;
+	gas: bigint;
+	maxFeePerGas: bigint;
+	maxPriorityFeePerGas: bigint;
+	progress?: (step: ProgressStepsSend) => void;
+}) => {
+	if (isNullish(identity)) {
+		await nullishSignOut();
+		return;
+	}
+
+	if (isNetworkIdEthereum(token.network.id) || isNetworkIdEvm(token.network.id)) {
+		if (isTokenErc721(token)) {
+			await transferErc721({
+				contractAddress: token.address,
+				tokenId,
+				sourceNetwork: token.network,
+				from: fromAddress,
+				to: toAddress,
+				identity,
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas,
+				progress
+			});
+		} else if (isTokenErc1155(token)) {
+			await transferErc1155({
+				contractAddress: token.address,
+				id: tokenId,
+				sourceNetwork: token.network,
+				from: fromAddress,
+				to: toAddress,
+				identity,
+				amount: 1n, // currently fixed at 1
+				gas,
+				maxFeePerGas,
+				maxPriorityFeePerGas,
+				progress
+			});
+		}
+	}
 };
