@@ -44,6 +44,8 @@ jobs:
         uses: ./.github/actions/prepare
       - name: Format
         run: npm run format
+      - name: Format 2
+        run: npm run format
       - name: Check for Changes
         id: check_changes
         run: |
@@ -77,6 +79,8 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Lint
+        run: npm run lint -- --max-warnings 0
+      - name: Lint 2
         run: npm run lint -- --max-warnings 0
 
   check:
