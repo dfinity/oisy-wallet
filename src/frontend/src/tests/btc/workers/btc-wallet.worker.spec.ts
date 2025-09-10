@@ -56,7 +56,12 @@ describe('btc-wallet.worker', () => {
 			wallet: {
 				balance: {
 					certified,
-					data: mockBalance
+					data: {
+						confirmed: mockBalance,
+						unconfirmed: 0n,
+						locked: 0n,
+						total: mockBalance
+					}
 				},
 				newTransactions: JSON.stringify(
 					withTransactions
@@ -125,10 +130,6 @@ describe('btc-wallet.worker', () => {
 	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
-		const mockPostMessageUncertified = mockPostMessage({
-			certified: false,
-			withTransactions: true
-		});
 		const mockPostMessageCertified = mockPostMessage({
 			certified: true,
 			withTransactions: false
@@ -154,23 +155,22 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenCalledTimes(3);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(6);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(5);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(8);
-					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(7);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
@@ -194,6 +194,9 @@ describe('btc-wallet.worker', () => {
 
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
+
+					// Wait for the first execution to complete
+					await awaitJobExecution();
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
 					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
