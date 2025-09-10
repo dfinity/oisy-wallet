@@ -100,10 +100,13 @@ export interface BtcWalletBalance {
  * @param b - Second balance object (can be null)
  * @returns true if both objects are equal, false otherwise
  */
-export const btcWalletBalanceEquals = (
-	a: BtcWalletBalance | null,
-	b: BtcWalletBalance | null
-): boolean => {
+export const btcWalletBalanceEquals = ({
+	a,
+	b
+}: {
+	a: BtcWalletBalance | null;
+	b: BtcWalletBalance | null;
+}): boolean => {
 	// Handle null cases
 	if (a === null && b === null) {
 		return true;
