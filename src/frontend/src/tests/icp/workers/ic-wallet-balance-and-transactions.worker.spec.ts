@@ -655,7 +655,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				});
 			});
 
-			it('should use check if Index canister is awake when it is out-of-sync with the balance', async () => {
+			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {
 				const currentMock = spyGetTransactions.getMockImplementation();
 
 				spyGetTransactions.mockImplementation(async () => ({
