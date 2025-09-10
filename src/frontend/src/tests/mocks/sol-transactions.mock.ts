@@ -11,6 +11,7 @@ import type {
 	SolSignedTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
+import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import {
 	address,
@@ -21,7 +22,6 @@ import {
 	stringifiedNumber,
 	type Base58EncodedBytes,
 	type Blockhash,
-	type CompilableTransactionMessage,
 	type SignaturesMap,
 	type TransactionMessageBytes,
 	type UnixTimestamp

@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "BTC निकासी स्थिति लाते समय त्रुटइ।",
 			"transaction_price": "लेनदेन की कीमत का अनुमान लोड करते समय त्रुटि।",
 			"icrc_canisters": "ICRC कैनिस्टर लोड करते समय त्रुटि।",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc721_custom_tokens": "ERC721 कस्टम टोकन लोड करते समय त्रुटि।",
 			"erc1155_custom_tokens": "ERC1155 कस्टम टोकन लोड करते समय त्रुटि।",
@@ -551,7 +552,11 @@
 			"appearance_system": "सिस्टम",
 			"git_disclaimer": "विकास के उद्देश्य के लिए, हम केवल टेस्ट कैनिस्टर में ब्रांच और कमिट दिखाते हैं।",
 			"git_branch_name": "ब्रांच:",
-			"git_commit_hash": "कमिट:"
+			"git_commit_hash": "कमिट:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "परीक्षण नेटवर्क दिखाने या छिपाने के लिए टॉगल करें",
@@ -586,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP खाता आईडी",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "वॉलेट, उपयोगकर्ताओं या अन्य ऐप्स से प्राप्त करते समय सभी टोकन के लिए उपयोग करें जो इस पते प्रारूप का समर्थन करते हैं।",
 				"use_for_icrc_deposit": "ICP नेटवर्क में ICRC-1 टोकन प्राप्त करने के लिए उपयोग करें, जैसे SNS, ck टोकन, आदि।",
 				"use_for_icp_deposit": "एक्सचेंजों या अन्य वॉलेट से ICP जमा के लिए उपयोग करें जो केवल खाता आईडी का समर्थन करते हैं।",
@@ -685,13 +691,16 @@
 			"recently_used_empty_state_description": "अब अपना पहला भेजें!",
 			"contacts_empty_state_title": "आपके संपर्क यहाँ दिखाई देंगे",
 			"contacts_empty_state_description": "ऐसा लगता है कि आपने अभी तक संपर्क नहीं जोड़े हैं",
-			"send_review_subtitle": "आप भेजते हैं"
+			"send_review_subtitle": "आप भेजते हैं",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",
 			"enter_recipient_address": "प्राप्तकर्ता का पता, नाम या उपनाम दर्ज करें",
 			"enter_wallet_address": "वॉलेट पता, नाम या उपनाम दर्ज करें",
-			"select_network": "नेटवर्क चुनें"
+			"select_network": "नेटवर्क चुनें",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "कृपया ckBTC पैरामीटर प्रमाणित होने तक प्रतीक्षा करें।",
@@ -1626,7 +1635,8 @@
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",
 			"loading": "सोच रहा है...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "क्षमा करें, LLM से प्रतिक्रिया प्राप्त करने में कुछ गलत हो गया।",
