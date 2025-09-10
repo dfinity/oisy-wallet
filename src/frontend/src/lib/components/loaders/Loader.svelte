@@ -227,7 +227,7 @@
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
-	});
+	}, 1000);
 
 	$effect(() => {
 		if (
