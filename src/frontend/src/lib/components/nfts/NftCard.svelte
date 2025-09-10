@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -7,7 +8,6 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
-	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 
 	interface Props {
 		nft: Nft;
