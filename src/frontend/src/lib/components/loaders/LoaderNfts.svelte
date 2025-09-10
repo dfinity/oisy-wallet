@@ -59,15 +59,15 @@
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
 			tokens.forEach((token) => {
-				const filteredNfts = findNftsByToken({ nfts, token });
+				const nftsByToken = findNftsByToken({ nfts, token });
 
-				handleRemovedNfts({ token, inventory: filteredNfts.map((nft) => nft.id) });
+				handleRemovedNfts({ token, inventory: nftsByToken.map((nft) => nft.id) });
 
 				if (isTokenErc1155(token)) {
 					handleUpdatedNfts({ token, inventory: nfts });
 				}
 
-				nftStore.addAll(filteredNfts);
+				nftStore.addAll(nftsByToken);
 			});
 		}
 	};
