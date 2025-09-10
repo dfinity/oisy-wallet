@@ -66,7 +66,7 @@ describe('nft.services', () => {
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: NonFungibleToken[] = [];
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
 		});
@@ -76,7 +76,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1, mockNft2]);
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2]);
 		});
@@ -86,7 +86,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
@@ -96,7 +96,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(new Error('Nfts Error'));
 
-			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
 			expect(get(nftStore)).toEqual([]);
