@@ -6,6 +6,7 @@ import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish } from '@dfinity/utils';
+import { createBatches } from '$lib/services/batch.services';
 
 export const loadNfts = async ({
 	tokens,
@@ -52,7 +53,7 @@ export const loadNftsByNetwork = async ({
 
 	const { getNftsByOwner } = alchemyProviders(networkId);
 
-	const batches = createBatches({ tokens, batchSize: 40 });
+	const batches = createBatches<NonFungibleToken>({ items: tokens, batchSize: 40 });
 
 	const nfts: Nft[] = [];
 	for (const batch of batches) {
@@ -68,14 +69,3 @@ export const loadNftsByNetwork = async ({
 
 	return nfts;
 };
-
-const createBatches = ({
-	tokens,
-	batchSize
-}: {
-	tokens: NonFungibleToken[];
-	batchSize: number;
-}): NonFungibleToken[][] =>
-	Array.from({ length: Math.ceil(tokens.length / batchSize) }, (_, index) =>
-		tokens.slice(index * batchSize, (index + 1) * batchSize)
-	);
