@@ -17,7 +17,8 @@ export type BadgeVariant =
 	| 'success'
 	| 'outline'
 	| 'disabled'
-	| 'nft-trait';
+	| 'nft-trait'
+	| 'nft-spam';
 
 export type TagVariant =
 	| 'default'
@@ -28,7 +29,7 @@ export type TagVariant =
 	| 'success'
 	| 'outline';
 
-export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs';
+export type AvatarVariants = 'xl' | 'lg' | 'md' | 'sm' | 'xs' | 'xxs';
 
 export type ModalHeroVariant = 'default' | 'success';
 

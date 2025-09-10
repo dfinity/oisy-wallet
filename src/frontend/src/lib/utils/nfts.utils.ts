@@ -1,53 +1,12 @@
 import { NftCollectionSchema } from '$lib/schema/nft.schema';
-import type { NftListSortingType } from '$lib/stores/nft-list.store';
+import type { NftSortingType } from '$lib/stores/settings.store';
+import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
-import type {
-	Nft,
-	NftCollection,
-	NftCollectionUi,
-	NftId,
-	NftsByNetwork,
-	NonFungibleToken,
-	OwnedNft
-} from '$lib/types/nft';
+import type { NetworkId } from '$lib/types/network';
+import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-
-export const getNftsByNetworks = ({
-	tokens,
-	nfts
-}: {
-	tokens: NonFungibleToken[];
-	nfts: Nft[];
-}): NftsByNetwork => {
-	const nftsByToken: NftsByNetwork = {};
-
-	tokens.forEach(({ address, network: { id: networkId } }) => {
-		if (isNullish(nftsByToken[networkId])) {
-			nftsByToken[networkId] = {};
-		}
-		nftsByToken[networkId][address.toLowerCase()] = [];
-	});
-
-	nfts.forEach((nft) => {
-		const {
-			collection: {
-				network: { id: networkId },
-				address
-			}
-		} = nft;
-		const normalizedAddress = address.toLowerCase();
-
-		if (
-			nonNullish(nftsByToken[networkId]) &&
-			nonNullish(nftsByToken[networkId][normalizedAddress])
-		) {
-			nftsByToken[networkId][normalizedAddress].push(nft);
-		}
-	});
-
-	return nftsByToken;
-};
 
 export const findNft = ({
 	nfts,
@@ -62,6 +21,29 @@ export const findNft = ({
 		({ id, collection: { address, network } }) =>
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
+
+export const findNftsByToken = ({
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork }
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+}): Nft[] =>
+	nfts.filter((nft) =>
+		areAddressesEqual({
+			address1: nft.collection.address,
+			address2: tokenAddress,
+			networkId: tokenNetwork.id
+		})
+	);
+
+export const findNftsByNetwork = ({
+	nfts,
+	networkId
+}: {
+	nfts: Nft[];
+	networkId: NetworkId;
+}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
 
 export const findNewNftIds = ({
 	nfts,
@@ -96,7 +78,7 @@ export const getUpdatedNfts = ({
 }: {
 	nfts: Nft[];
 	token: NonFungibleToken;
-	inventory: OwnedNft[];
+	inventory: Nft[];
 }): Nft[] =>
 	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
 		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
@@ -227,7 +209,7 @@ const cmpByCollectionName =
 interface NftBaseFilterAndSortParams<T> {
 	items: T[];
 	filter?: string;
-	sort?: NftListSortingType;
+	sort?: NftSortingType;
 }
 
 interface NftFilterAndSortParams extends NftBaseFilterAndSortParams<Nft> {
@@ -270,3 +252,22 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 	return result;
 };
+
+export const findNonFungibleToken = ({
+	tokens,
+	address,
+	networkId
+}: {
+	tokens: NonFungibleToken[];
+	address: EthAddress;
+	networkId: NetworkId;
+}): NonFungibleToken | undefined =>
+	tokens.find((token) => token.address === address && token.network.id === networkId);
+
+// We offer this util so we dont mistakingly take the value from the nfts collection prop,
+// as it is not updated after updating the consent. Going through this function ensures no stale data
+export const getAllowMediaForNft = (params: {
+	tokens: NonFungibleToken[];
+	address: EthAddress;
+	networkId: NetworkId;
+}): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;

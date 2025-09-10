@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -16,6 +16,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -42,6 +43,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -54,6 +57,8 @@
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
+		onStopTriggerAmount: () => void;
+		onStartTriggerAmount: () => void;
 	}
 
 	let {
@@ -63,13 +68,15 @@
 		swapProgressStep = $bindable(),
 		currentStep,
 		isSwapAmountsLoading,
+		onStopTriggerAmount,
+		onStartTriggerAmount,
 		onShowTokensList,
 		onClose,
 		onNext,
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError } =
+	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
@@ -105,6 +112,19 @@
 		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 	});
 
+	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
+	$effect(() => {
+		receiveAmount =
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+				? formatTokenBigintToNumber({
+						value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+						unitName: $destinationToken.decimals,
+						displayDecimals: $destinationToken.decimals
+					})
+				: undefined;
+	});
+
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
@@ -119,6 +139,17 @@
 			feeExchangeRateStore,
 			evaluateFee
 		})
+	);
+
+	const isApproveNeeded = $derived<boolean>(
+		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
+			isNotDefaultEthereumToken($sourceToken)
+	);
+
+	let sourceTokenUsdValue = $derived(
+		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
+			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
+			: undefined
 	);
 
 	const swap = async () => {
@@ -157,6 +188,7 @@
 		}
 
 		onNext();
+		onStopTriggerAmount();
 
 		try {
 			failedSwapError.set(undefined);
@@ -191,18 +223,22 @@
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					usdSourceValue: sourceTokenUsdValue ?? '',
+					swapType: $swapAmountsStore.swaps[0].type ?? ''
 				}
 			});
 
-			setTimeout(() => close(), 750);
+			setTimeout(() => onClose(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_SWAP_ERROR,
 				metadata: {
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
-					dApp: $swapAmountsStore.selectedProvider.provider
+					dApp: $swapAmountsStore.selectedProvider.provider,
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					error: errorDetailToString(err) ?? ''
 				}
 			});
 
@@ -214,10 +250,9 @@
 			});
 
 			onBack();
+			onStartTriggerAmount();
 		}
 	};
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish($sourceToken)}
@@ -232,6 +267,7 @@
 	>
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapEthForm
+				{isApproveNeeded}
 				{isSwapAmountsLoading}
 				{nativeEthereumToken}
 				{onClose}
@@ -243,7 +279,9 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 			<SwapReview
-				onBack={() => dispatch('icBack')}
+				isSwapAmountsLoading={isSwapAmountsLoading &&
+					receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
+				{onBack}
 				onSwap={swap}
 				{receiveAmount}
 				{slippageValue}

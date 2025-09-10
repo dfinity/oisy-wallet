@@ -1,8 +1,14 @@
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import AiAssistantToolResults from '$lib/components/ai-assistant/AiAssistantToolResults.svelte';
-import type { ToolResult } from '$lib/types/ai-assistant';
+import { extendedAddressContacts } from '$lib/derived/contacts.derived';
+import { contactsStore } from '$lib/stores/contacts.store';
+import { ToolResultType, type ToolResult } from '$lib/types/ai-assistant';
 import type { ContactUi } from '$lib/types/contact';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('AiAssistantToolResults', () => {
 	const contacts = getMockContactsUi({
@@ -10,14 +16,18 @@ describe('AiAssistantToolResults', () => {
 		name: 'Multiple Addresses Contact',
 		addresses: [mockContactBtcAddressUi]
 	}) as unknown as ContactUi[];
+	contacts.forEach((contact) => contactsStore.addContact(contact));
 
-	it('renders known tool correctly', () => {
+	const extendedContacts = get(extendedAddressContacts);
+
+	it('renders show_contacts tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
-						type: 'show_contacts',
-						result: contacts
+						type: ToolResultType.SHOW_CONTACTS,
+						result: { contacts: Object.values(extendedContacts) }
 					}
 				]
 			}
@@ -26,9 +36,27 @@ describe('AiAssistantToolResults', () => {
 		expect(getByText(contacts[0].name)).toBeInTheDocument();
 	});
 
+	it('renders review_send_tokens tool correctly', () => {
+		const { getByText } = render(AiAssistantToolResults, {
+			props: {
+				onSendMessage: () => Promise.resolve(),
+				results: [
+					{
+						type: ToolResultType.REVIEW_SEND_TOKENS,
+						result: { amount: 1, token: ICP_TOKEN, address: mockPrincipalText }
+					}
+				]
+			}
+		});
+
+		expect(getByText(en.transaction.text.to)).toBeInTheDocument();
+		expect(getByText(mockPrincipalText)).toBeInTheDocument();
+	});
+
 	it('does not render unknown tool', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				onSendMessage: () => Promise.resolve(),
 				// @ts-expect-error Testing unknown tool type
 				results: [{ type: 'unknown_tool', result: contacts } as ToolResult]
 			}
