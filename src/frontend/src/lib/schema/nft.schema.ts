@@ -1,5 +1,4 @@
-import type { Network } from '$lib/types/network';
-import type { TokenId, TokenStandard } from '$lib/types/token';
+import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod/v4';
 
 export const NftIdSchema = z.number().brand<'NftId'>();
@@ -18,12 +17,10 @@ export const NftMetadataSchema = z.object({
 });
 
 export const NftCollectionSchema = z.object({
+	...TokenSchema.pick({ id: true, network: true, standard: true }).shape,
 	address: z.string(),
 	name: z.string().optional(),
 	symbol: z.string().optional(),
-	id: z.custom<TokenId>(),
-	network: z.custom<Network>(),
-	standard: z.custom<TokenStandard>(),
 	bannerImageUrl: z.url().optional(),
 	description: z.string().optional(),
 	acquiredAt: z.date().optional()
@@ -36,7 +33,7 @@ export const NftSchema = z.object({
 });
 
 export const OwnedContractSchema = z.object({
+	...TokenSchema.pick({ standard: true }).shape,
 	address: z.string(),
-	isSpam: z.boolean(),
-	standard: z.custom<TokenStandard>()
+	isSpam: z.boolean()
 });
