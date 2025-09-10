@@ -1,14 +1,12 @@
 import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
 import { isPrivacyMode } from '$lib/derived/settings.derived';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('ShortcutGuard', () => {
 	describe('Privacy mode', () => {
-		const mockSnippet = createMockSnippet('Mock Snippet');
-
 		const keyDownEvent = new KeyboardEvent('keydown', { key: 'p' });
 
 		beforeEach(() => {

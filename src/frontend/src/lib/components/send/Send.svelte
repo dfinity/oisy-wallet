@@ -1,6 +1,7 @@
 <script lang="ts">
-	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
+	import SendButton from '$lib/components/send/SendButton.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
+	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import { modalSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 
@@ -8,11 +9,14 @@
 		isTransactionsPage: boolean;
 	}
 
-	let { isTransactionsPage }: Props = $props();
+	const { isTransactionsPage }: Props = $props();
 </script>
 
-<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
-	{#snippet modal()}
-		<SendModal {isTransactionsPage} on:nnsClose />
+<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
+	{#snippet button(onclick)}
+		<SendButton {onclick} />
 	{/snippet}
-</SendButtonWithModal>
+	{#snippet modal()}
+		<SendModal {isTransactionsPage} />
+	{/snippet}
+</ButtonWithModal>

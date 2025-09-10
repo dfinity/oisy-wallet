@@ -163,23 +163,20 @@ export const getPendingTransactionUtxoTxIds = (address: string): string[] | null
  * outgoing transactions. These UTXOs remain on-chain but should not be available for new transactions
  * until the pending transaction is either confirmed or rejected.
  *
- * @param address - The Bitcoin address to calculate balances for
  * @param confirmedBalance - Sum of all confirmed UTXOs (from Bitcoin node/canister)
  * @param providerTransactions - Array of transaction data with confirmation status from external API (optional, null when certified=true)
+ * @param pendingTransactions - Array of pending transactions, defaults to empty array if not provided
  * @returns Structured balance object with confirmed, unconfirmed, locked, and total amounts
  */
 export const getBtcWalletBalance = ({
-	address,
 	balance,
-	providerTransactions
+	providerTransactions,
+	pendingTransactions = []
 }: {
-	address: string;
 	balance: bigint;
 	providerTransactions: CertifiedData<BtcTransactionUi>[] | null;
+	pendingTransactions?: PendingTransaction[];
 }): BtcWalletBalance => {
-	// Retrieve pending outgoing transactions from local store with safe fallback
-	const pendingTransactions = getPendingTransactions(address) ?? [];
-
 	// Calculate locked balance: UTXOs being used as inputs in pending outgoing transactions
 	// If pendingTransactions is empty (due to error or no data), locked balance will be 0
 	const lockedBalance = pendingTransactions.reduce((sum, tx) => {

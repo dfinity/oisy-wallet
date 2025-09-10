@@ -11,7 +11,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -181,17 +181,15 @@ describe('LoaderEthBalances', () => {
 	it('should not handle errors', async () => {
 		vi.mocked(loadEthBalances).mockRejectedValue(new Error('Error loading balances'));
 
-		const testId = 'test-id';
-
 		const { getByTestId } = render(LoaderEthBalances, {
 			props: {
-				children: createMockSnippet(testId)
+				children: mockSnippet
 			}
 		});
 
 		await tick();
 
-		expect(getByTestId(testId)).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 
 		expect(loadEthBalances).toHaveBeenCalledOnce();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
