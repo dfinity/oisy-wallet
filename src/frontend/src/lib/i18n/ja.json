@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "まずは最初の送金をしてみましょう！",
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです",
-			"send_review_subtitle": "以下の内容を送信します"
+			"send_review_subtitle": "以下の内容を送信します",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
-			"select_network": "ネットワークを選択"
+			"select_network": "ネットワークを選択",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "ckBTCパラメーターが認証されるまでお待ちください",
