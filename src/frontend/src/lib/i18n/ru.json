@@ -499,6 +499,7 @@
 			"btc_withdrawal_statuses": "Ошибка при получении статусов вывода BTC.",
 			"transaction_price": "Ошибка при загрузке оценки стоимости транзакции.",
 			"icrc_canisters": "Ошибка при загрузке контейнеров ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC20.",
 			"erc721_custom_tokens": "Ошибка при загрузке пользовательских токенов ERC721.",
 			"erc1155_custom_tokens": "",
@@ -551,7 +552,11 @@
 			"appearance_system": "Система",
 			"git_disclaimer": "В целях разработки мы показываем ветку и коммит только в тестовых контейнерах.",
 			"git_branch_name": "Ветка:",
-			"git_commit_hash": "Коммит:"
+			"git_commit_hash": "Коммит:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Переключить, чтобы показать или скрыть тестовые сети",
@@ -586,6 +591,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID аккаунта ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Используйте для всех токенов при получении с кошельков, пользователей или других приложений, поддерживающих этот формат адреса.",
 				"use_for_icrc_deposit": "Используйте для получения токенов ICRC-1 в сети ICP, таких как SNS, ck токены и т. д.",
 				"use_for_icp_deposit": "Используйте для депозитов ICP с бирж или других кошельков, которые поддерживают только ID аккаунтов.",
@@ -1626,7 +1632,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "",

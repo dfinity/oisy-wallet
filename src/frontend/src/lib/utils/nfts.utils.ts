@@ -9,8 +9,7 @@ import type {
 	NftCollectionUi,
 	NftId,
 	NftsByNetwork,
-	NonFungibleToken,
-	OwnedNft
+	NonFungibleToken
 } from '$lib/types/nft';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -65,6 +64,25 @@ export const findNft = ({
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
 
+export const findNftsByToken = ({
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork }
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+}): Nft[] =>
+	nfts.filter(
+		(nft) => nft.collection.address === tokenAddress && nft.collection.network === tokenNetwork
+	);
+
+export const findNftsByNetwork = ({
+	nfts,
+	networkId
+}: {
+	nfts: Nft[];
+	networkId: NetworkId;
+}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
+
 export const findNewNftIds = ({
 	nfts,
 	token,
@@ -98,7 +116,7 @@ export const getUpdatedNfts = ({
 }: {
 	nfts: Nft[];
 	token: NonFungibleToken;
-	inventory: OwnedNft[];
+	inventory: Nft[];
 }): Nft[] =>
 	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
 		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {

@@ -11,6 +11,26 @@ import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import { MOCK_ERC721_TOKENS } from '$tests/mocks/erc721-tokens.mock';
 
 describe('erc1155.utils', () => {
+	describe('isTokenErc1155', () => {
+		it.each(MOCK_ERC1155_TOKENS)('should return true for token $name', (token) => {
+			expect(isTokenErc1155(token)).toBeTruthy();
+		});
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...MOCK_ERC721_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenErc1155(token)).toBeFalsy();
+		});
+	});
+
 	describe('isTokenErc721UserToken', () => {
 		it.each(
 			MOCK_ERC1155_TOKENS.map((token) => ({
@@ -40,26 +60,6 @@ describe('erc1155.utils', () => {
 			...MOCK_ERC721_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc1155CustomToken(token)).toBeFalsy();
-		});
-	});
-
-	describe('isTokenErc1155', () => {
-		it.each(MOCK_ERC1155_TOKENS)('should return true for token $name', (token) => {
-			expect(isTokenErc1155(token)).toBeTruthy();
-		});
-
-		it.each([
-			ICP_TOKEN,
-			...SUPPORTED_BITCOIN_TOKENS,
-			...SUPPORTED_ETHEREUM_TOKENS,
-			...SUPPORTED_EVM_TOKENS,
-			...SUPPORTED_SOLANA_TOKENS,
-			...SPL_TOKENS,
-			...ERC20_TWIN_TOKENS,
-			...EVM_ERC20_TOKENS,
-			...MOCK_ERC721_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenErc1155(token)).toBeFalsy();
 		});
 	});
 });
