@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
