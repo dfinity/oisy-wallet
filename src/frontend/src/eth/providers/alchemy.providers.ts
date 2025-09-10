@@ -24,6 +24,7 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -147,13 +148,13 @@ export class AlchemyProvider {
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
 		address,
-		token
+		tokens
 	}: {
 		address: EthAddress;
-		token: NonFungibleToken;
+		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
 		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: [token.address],
+			contractAddresses: tokens.map((token) => token.address),
 			omitMetadata: false,
 			orderBy: NftOrdering.TRANSFERTIME
 		});
@@ -164,6 +165,17 @@ export class AlchemyProvider {
 					metadata: { attributes }
 				}
 			} = ownedNft;
+
+			const token = tokens.find(({ address, network: {id: networkId} }) =>
+				areAddressesEqual({
+					address1: address,
+					address2: ownedNft.contract.address,
+					networkId
+				})
+			);
+			if (isNullish(token)) {
+				return acc;
+			}
 
 			const mappedAttributes = nonNullish(attributes)
 				? attributes.map(({ trait_type: traitType, value }) => ({

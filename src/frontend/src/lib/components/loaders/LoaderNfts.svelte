@@ -2,7 +2,6 @@
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
-	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -10,7 +9,8 @@
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
-	import { findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
+	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
+	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 
 	interface Props {
 		skipInitialLoad?: boolean;
@@ -52,24 +52,22 @@
 			return;
 		}
 
-		for (const token of $enabledNonFungibleTokens) {
-			const { getNftsByOwner } = alchemyProviders(token.network.id);
+		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
-			try {
-				const nfts = await getNftsByOwner({ address: $ethAddress, token });
+		for (const [networkId, tokens] of tokensByNetwork) {
+			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
-				handleRemovedNfts({ token, inventory: nfts.map((nft) => nft.id) });
+			tokens.forEach((token) => {
+				const nftsByToken = findNftsByToken({ nfts, token });
+
+				handleRemovedNfts({ token, inventory: nftsByToken.map((nft) => nft.id) });
 
 				if (isTokenErc1155(token)) {
 					handleUpdatedNfts({ token, inventory: nfts });
 				}
 
-				nftStore.addAll(nfts);
-			} catch (_: unknown) {
-				console.warn(
-					`Failed to fetch NFTs for token: ${token.address} on network: ${token.network.id.toString()}.`
-				);
-			}
+				nftStore.addAll(nftsByToken);
+			});
 		}
 	};
 </script>
