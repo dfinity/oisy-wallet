@@ -2,6 +2,8 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -16,8 +18,6 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
-    import {isTokenErc1155} from "$eth/utils/erc1155.utils";
-    import {isTokenErc721} from "$eth/utils/erc721.utils";
 
 	interface Props {
 		token: NonFungibleToken;
@@ -31,7 +31,7 @@
 		}
 
 		if (nonNullish(token)) {
-			if ( isTokenErc721(  token)) {
+			if (isTokenErc721(token)) {
 				await saveCustomErc721Token({
 					identity: $authIdentity,
 					tokens: [
@@ -44,10 +44,10 @@
 					]
 				});
 
-                return
+				return;
 			}
 
-			if (isTokenErc1155( token)) {
+			if (isTokenErc1155(token)) {
 				await saveCustomErc1155Token({
 					identity: $authIdentity,
 					tokens: [
@@ -60,7 +60,7 @@
 					]
 				});
 
-                return
+				return;
 			}
 		}
 	};
