@@ -43,7 +43,7 @@
 	let amountOfRewards = $state(0);
 </script>
 
-<Modal testId={REWARDS_MODAL} onClose={modalStore.close}>
+<Modal onClose={modalStore.close} testId={REWARDS_MODAL}>
 	{#snippet title()}
 		<span class="text-center text-xl">
 			{resolveText({ i18n: $i18n, path: reward.title })}

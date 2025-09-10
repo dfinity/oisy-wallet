@@ -18,7 +18,7 @@
 		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
 </script>
 
-<Modal testId={SETTINGS_NETWORKS_MODAL} onClose={modalStore.close}>
+<Modal onClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>
 	{#snippet title()}{modalTitle}{/snippet}
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
