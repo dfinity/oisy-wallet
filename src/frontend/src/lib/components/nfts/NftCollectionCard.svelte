@@ -38,7 +38,7 @@
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
 
-				{#each collection.nfts as nft, index (nft.id + index)}
+				{#each collection.nfts as nft, index (`${nft.id}-${index}`)}
 					{#if index < 4 && nonNullish(nft.imageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
 							<BgImg
