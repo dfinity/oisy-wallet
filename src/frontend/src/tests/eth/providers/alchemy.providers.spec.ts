@@ -3,6 +3,7 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -42,7 +43,7 @@ describe('alchemy.providers', () => {
 	});
 
 	describe('getNftsByOwner', () => {
-		const mockApiResponse = {
+		const mockApiResponse: AlchemyProviderOwnedNfts = {
 			ownedNfts: [
 				{
 					tokenId: '1',
@@ -51,7 +52,7 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '1',
-					contract: {}
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 				},
 				{
 					tokenId: '2',
@@ -60,7 +61,7 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: {}
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 				}
 			]
 		};
@@ -92,7 +93,7 @@ describe('alchemy.providers', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should fetch and map token ids correctly', async () => {
+		it('should fetch and map nfts correctly', async () => {
 			Object.defineProperty(Alchemy.prototype, 'nft', {
 				value: {
 					getNftsForOwner: vi.fn().mockResolvedValue(mockApiResponse)
@@ -104,7 +105,7 @@ describe('alchemy.providers', () => {
 
 			const nfts = await provider.getNftsByOwner({
 				address: mockEthAddress,
-				token: mockValidErc1155Token
+				tokens: [mockValidErc1155Token]
 			});
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
@@ -119,12 +120,12 @@ describe('alchemy.providers', () => {
 							{
 								tokenId: '1',
 								raw: { metadata: {} },
-								contract: {}
+								contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 							},
 							{
 								tokenId: '2',
 								raw: { metadata: {} },
-								contract: {}
+								contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 							}
 						]
 					})
@@ -136,7 +137,7 @@ describe('alchemy.providers', () => {
 
 			const nfts = await provider.getNftsByOwner({
 				address: mockEthAddress,
-				token: mockValidErc1155Token
+				tokens: [mockValidErc1155Token]
 			});
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
@@ -168,7 +169,7 @@ describe('alchemy.providers', () => {
 			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
 
 			await expect(
-				provider.getNftsByOwner({ address: mockEthAddress, token: mockValidErc1155Token })
+				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
 			).rejects.toThrow('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
