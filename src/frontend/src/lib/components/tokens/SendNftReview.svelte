@@ -1,7 +1,7 @@
 <script lang="ts">
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
-	import type { Nft } from '$lib/types/nft';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		nft: Nft;
