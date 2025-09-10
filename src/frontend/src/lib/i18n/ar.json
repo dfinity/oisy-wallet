@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "قم بأول إرسال الآن!",
 			"contacts_empty_state_title": "ستظهر جهات اتصالك هنا",
 			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
-			"send_review_subtitle": "أنت ترسل"
+			"send_review_subtitle": "أنت ترسل",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
-			"select_network": "حدد الشبكة"
+			"select_network": "حدد الشبكة",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckBTC.",

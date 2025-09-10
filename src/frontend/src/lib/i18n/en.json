@@ -692,15 +692,15 @@
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
-            "no_nfts_found": "No NFTs found",
-            "no_nfts_found_desc": "Adjust your search or network to find your NFTs"
+			"no_nfts_found": "No NFTs found",
+			"no_nfts_found_desc": "Adjust your search or network to find your NFTs"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
 			"select_network": "Select network",
-            "search_nfts": "Search NFTs"
+			"search_nfts": "Search NFTs"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
