@@ -1,4 +1,4 @@
-name: Check repository code
+name: Check repository
 
 on:
   pull_request:
