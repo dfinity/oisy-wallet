@@ -17,6 +17,6 @@
 		<SendButton {onclick} />
 	{/snippet}
 	{#snippet modal()}
-		<SendModal {isTransactionsPage} on:nnsClose />
+		<SendModal {isTransactionsPage} />
 	{/snippet}
 </ButtonWithModal>
