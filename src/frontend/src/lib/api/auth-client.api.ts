@@ -32,7 +32,7 @@ export const loadIdentity = async (): Promise<Identity | undefined> => {
 	const authClient = await createAuthClient();
 	const authenticated = await authClient.isAuthenticated();
 
-	// Not authenticated therefore we provide no identity as a result
+	// Not authenticated, therefore, we provide no identity as a result
 	if (!authenticated) {
 		return undefined;
 	}
