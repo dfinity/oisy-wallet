@@ -14,6 +14,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Nft } from '$lib/types/nft';
 	import { isDesktop } from '$lib/utils/device.utils';
+	import { findNftsByNetwork } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
@@ -34,7 +35,7 @@
 	);
 	const filteredByNetwork: Nft[] = $derived(
 		nonNullish($filterNetwork)
-			? filteredByInput.filter((nft) => nft.collection.network.id === $filterNetwork.id)
+			? findNftsByNetwork({ nfts: filteredByInput, networkId: $filterNetwork.id })
 			: filteredByInput
 	);
 
