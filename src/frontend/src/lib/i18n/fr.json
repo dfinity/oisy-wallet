@@ -691,13 +691,16 @@
 			"recently_used_empty_state_description": "Faites votre premier envoi maintenant !",
 			"contacts_empty_state_title": "Vos contacts apparaîtront ici",
 			"contacts_empty_state_description": "Il semble que vous n'ayez pas encore ajouté de contacts",
-			"send_review_subtitle": "Vous envoyez"
+			"send_review_subtitle": "Vous envoyez",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Entrez l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Entrez l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Entrez l'adresse du portefeuille, le nom ou l'alias",
-			"select_network": "Sélectionner le réseau"
+			"select_network": "Sélectionner le réseau",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Veuillez attendre que les paramètres ckBTC aient été certifiés.",
