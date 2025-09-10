@@ -18,7 +18,7 @@ export const loadNfts = async ({
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
-	for (const [networkId, tokens] of tokensByNetwork) {
+	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
 		const tokensToLoad = tokens.filter((token) => {
 			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
 			return nftsByToken.length === 0;
@@ -32,7 +32,9 @@ export const loadNfts = async ({
 			});
 			nftStore.addAll(nfts);
 		}
-	}
+	});
+
+	await Promise.allSettled(promises);
 };
 
 export const loadNftsByNetwork = async ({
