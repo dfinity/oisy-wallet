@@ -55,7 +55,7 @@
 
 		const tokensByNetwork = getTokensByNetwork($enabledNonFungibleTokens);
 
-		for (const [networkId, tokens] of tokensByNetwork) {
+		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
 			tokens.forEach((token) => {
@@ -69,7 +69,9 @@
 
 				nftStore.addAll(nftsByToken);
 			});
-		}
+		})
+
+		await Promise.allSettled(promises);
 	};
 </script>
 
