@@ -26,8 +26,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import SendModal from '$lib/components/send/SendModal.svelte';
-	import SendButtonWithModal from '$lib/components/send/SendButtonWithModal.svelte';
 	import { modalSend } from '$lib/derived/modal.derived';
+	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -110,7 +110,7 @@
 					</div>
 
 					<div class="flex">
-						<SendButtonWithModal isOpen={$modalSend} open={modalStore.openSend}>
+						<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
 							{#snippet button(onclick)}
 								<NftCollectionActionButton colorStyle="primary" label="Send" {onclick}>
 									{#snippet icon()}
@@ -121,7 +121,7 @@
 							{#snippet modal()}
 								<SendModal isNftsPage {nft} isTransactionsPage={false} on:nnsClose />
 							{/snippet}
-						</SendButtonWithModal>
+						</ButtonWithModal>
 					</div>
 				</div>
 			</div>
