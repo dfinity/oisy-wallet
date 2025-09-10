@@ -1,9 +1,9 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionEthAddress } from '$lib/types/address';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import { isNullish } from '@dfinity/utils';
-import type { NetworkId } from '$lib/types/network';
 
 export const loadNfts = async ({
 	tokens,
@@ -34,10 +34,10 @@ export const loadNfts = async ({
 };
 
 export const loadNftsByNetwork = async ({
-																					networkId,
-																					tokens,
-																					walletAddress
-																				}: {
+	networkId,
+	tokens,
+	walletAddress
+}: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
@@ -65,9 +65,10 @@ export const loadNftsByNetwork = async ({
 	return nfts;
 };
 
-const createBatches = ({	tokens,
-												 batchSize
-											 }: {
+const createBatches = ({
+	tokens,
+	batchSize
+}: {
 	tokens: NonFungibleToken[];
 	batchSize: number;
 }): NonFungibleToken[][] =>
