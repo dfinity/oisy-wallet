@@ -11,6 +11,7 @@
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
+	import { loadNftsByNetwork } from '$lib/services/nft.services';
 
 	interface Props {
 		skipInitialLoad?: boolean;
