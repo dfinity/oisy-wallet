@@ -23,12 +23,12 @@
 	let { nft, testId, disabled, isHidden, isSpam, selectable, onSelect }: Props = $props();
 
 	const onClick = () => {
-		const href = `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`;
 		if (selectable && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
+			return;
 		}
 		if (!selectable && !disabled) {
-			goto(href);
+			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};
 </script>
