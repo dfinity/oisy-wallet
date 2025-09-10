@@ -1,6 +1,5 @@
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
-import { SwapSide, type DeltaAuctionOrder, type SignableDeltaOrderData } from '@velora-dex/sdk';
-import { SwapSideToOrderKind } from '@velora-dex/sdk/dist/methods/delta/helpers/types';
+import type { DeltaAuctionOrder, SignableDeltaOrderData } from '@velora-dex/sdk';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
 
@@ -64,7 +63,7 @@ describe('EIP - 712 utils methods', () => {
 					srcAmount: '1000000000000000000',
 					destAmount: '950000000000000000',
 					expectedAmount: '1000000000000000000',
-					kind: SwapSideToOrderKind[SwapSide.SELL],
+					kind: 0,
 					metadata: '0x',
 					deadline: 1705449600,
 					nonce: '123456789',
@@ -117,7 +116,7 @@ describe('EIP - 712 utils methods', () => {
 					srcAmount: '1000000000000000000',
 					destAmount: '950000000000000000',
 					expectedAmount: '1000000000000000000',
-					kind: SwapSideToOrderKind[SwapSide.SELL],
+					kind: 0,
 					metadata: '0x',
 					deadline: 1705449600,
 					nonce: '123456789',
@@ -275,7 +274,7 @@ describe('EIP - 712 utils methods', () => {
 					srcAmount: '1000000000000000000',
 					destAmount: '950000000000000000',
 					expectedAmount: '1000000000000000000',
-					kind: SwapSideToOrderKind[SwapSide.SELL],
+					kind: 0,
 					metadata: '0x',
 					deadline: 1705449600,
 					nonce: '123456789',
