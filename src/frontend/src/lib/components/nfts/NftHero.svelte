@@ -3,24 +3,19 @@
 	import { fade } from 'svelte/transition';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
-	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
-	import SendModal from '$lib/components/send/SendModal.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
-	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { modalSend } from '$lib/derived/modal.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
@@ -94,35 +89,18 @@
 
 		{#if nonNullish(normalizedNftName)}
 			<div class="my-3 w-full justify-between">
-				<div class="flex items-center justify-between gap-3">
-					<div class="flex">
-						{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-							<NftBadgeHidden />
-						{/if}
+				<div class="flex items-center gap-3">
+					<h1 class="truncate">
+						{normalizedNftName}
+					</h1>
 
-						{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
-							<NftBadgeSpam />
-						{/if}
+					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+						<NftBadgeHidden />
+					{/if}
 
-						<h1 class="truncate">
-							{normalizedNftName}
-						</h1>
-					</div>
-
-					<div class="flex">
-						<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
-							{#snippet button(onclick)}
-								<NftCollectionActionButton colorStyle="primary" label="Send" {onclick}>
-									{#snippet icon()}
-										<IconSendMessage size="18" />
-									{/snippet}
-								</NftCollectionActionButton>
-							{/snippet}
-							{#snippet modal()}
-								<SendModal isNftsPage isTransactionsPage={false} {nft} on:nnsClose />
-							{/snippet}
-						</ButtonWithModal>
-					</div>
+					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+						<NftBadgeSpam />
+					{/if}
 				</div>
 			</div>
 		{:else}
