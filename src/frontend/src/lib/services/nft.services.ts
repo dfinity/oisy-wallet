@@ -13,12 +13,11 @@ import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish } from '@dfinity/utils';
 
-
 export const loadNfts = async ({
-																 tokens,
-																 loadedNfts,
-																 walletAddress
-															 }: {
+	tokens,
+	loadedNfts,
+	walletAddress
+}: {
 	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
@@ -45,10 +44,10 @@ export const loadNfts = async ({
 };
 
 export const loadNftsByNetwork = async ({
-																					networkId,
-																					tokens,
-																					walletAddress
-																				}: {
+	networkId,
+	tokens,
+	walletAddress
+}: {
 	networkId: NetworkId;
 	tokens: NonFungibleToken[];
 	walletAddress: OptionEthAddress;
@@ -75,7 +74,6 @@ export const loadNftsByNetwork = async ({
 
 	return nfts;
 };
-
 
 export const sendNft = async ({
 	token,
