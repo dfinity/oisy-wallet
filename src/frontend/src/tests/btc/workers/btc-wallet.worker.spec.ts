@@ -1,11 +1,11 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import * as authClientApi from '$lib/api/auth-client.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
-import * as authUtils from '$lib/utils/auth.utils';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -97,7 +97,7 @@ describe('btc-wallet.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 
 		let mockBlockHeight = 1000;
 		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
