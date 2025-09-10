@@ -13,7 +13,7 @@ const mockNfts = [
 	{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 ];
 
-describe('NftPicker component', () => {
+describe('SendNftsList.spec', () => {
 	beforeAll(() => {
 		nftStore.addAll(mockNfts);
 	});
@@ -21,7 +21,8 @@ describe('NftPicker component', () => {
 	it('renders NFTs from the store', () => {
 		const { getByText, getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
 		});
 
 		for (const name of ['Null', 'Eins', 'Zwei']) {
@@ -35,7 +36,8 @@ describe('NftPicker component', () => {
 	it('filters by search input (bind:filter)', async () => {
 		const { getByText, queryByText, getByPlaceholderText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
 		});
 
 		const input = getByPlaceholderText(get(i18n).send.placeholder.search_nfts) as HTMLInputElement;
@@ -50,7 +52,8 @@ describe('NftPicker component', () => {
 	it('shows empty-state when no matches', async () => {
 		const { getByPlaceholderText, getByText, queryByText } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
-			filterNetwork: undefined
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
 		});
 
 		const input = getByPlaceholderText('Search NFTs') as HTMLInputElement;
@@ -63,9 +66,11 @@ describe('NftPicker component', () => {
 		expect(queryByText('Zwei')).not.toBeInTheDocument();
 	});
 
-	it('shows filtered network name when set', () => {
+	it('shows filtered network name when set', async () => {
+		const onSelectNetwork = vi.fn();
 		const { getByRole } = render(SendNftsListTestHost, {
 			onSelect: vi.fn(),
+			onSelectNetwork,
 			filterNetwork: POLYGON_AMOY_NETWORK
 		});
 
@@ -73,11 +78,19 @@ describe('NftPicker component', () => {
 
 		expect(btn).toBeInTheDocument();
 		expect(within(btn).getByText(POLYGON_AMOY_NETWORK.name)).toBeInTheDocument();
+
+		await fireEvent.click(btn);
+
+		expect(onSelectNetwork).toHaveBeenCalledOnce();
 	});
 
 	it('calls onSelect when an NFT card is clicked', async () => {
 		const onSelect = vi.fn();
-		const { getByText } = render(SendNftsListTestHost, { onSelect, filterNetwork: undefined });
+		const { getByText } = render(SendNftsListTestHost, {
+			onSelect,
+			filterNetwork: undefined,
+			onSelectNetwork: vi.fn()
+		});
 
 		const nftCard = getByText('Eins');
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext, createEventDispatcher } from 'svelte';
+	import { setContext } from 'svelte';
 	import SendNftsList from '$lib/components/send/SendNftsList.svelte';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -11,19 +11,15 @@
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
+		onSelectNetwork: () => void;
 		filterNetwork?: Network;
 	}
 
-	const { onSelect, filterNetwork }: Props = $props();
-
-	const dispatch = createEventDispatcher();
+	const { onSelect, filterNetwork, onSelectNetwork }: Props = $props();
 
 	setContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY, {
 		filterNetwork: readable(filterNetwork)
 	} as unknown as ModalTokensListContext);
 </script>
 
-<SendNftsList
-	{onSelect}
-	on:icSelectNetworkFilter={(e) => dispatch('icSelectNetworkFilter', e.detail)}
-/>
+<SendNftsList {onSelect} {onSelectNetwork} />

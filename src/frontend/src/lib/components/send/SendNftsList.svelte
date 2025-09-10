@@ -18,11 +18,10 @@
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
+		onSelectNetwork: () => void;
 	}
 
-	let { onSelect }: Props = $props();
-
-	const dispatch = createEventDispatcher();
+	let { onSelect, onSelectNetwork }: Props = $props();
 
 	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
 
@@ -56,7 +55,7 @@
 		<button
 			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
 			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
-			onclick={() => dispatch('icSelectNetworkFilter')}
+			onclick={onSelectNetwork}
 		>
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
