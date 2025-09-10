@@ -215,7 +215,7 @@ describe('nft.services', () => {
 					sourceNetwork: token1155.network,
 					from: fromAddress,
 					to: destination,
-					identity,
+					identity: mockIdentity,
 					gas,
 					maxFeePerGas,
 					maxPriorityFeePerGas,
