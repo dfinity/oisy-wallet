@@ -74,7 +74,6 @@ import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
-	type BridgePrice,
 	type DeltaAuction,
 	type DeltaPrice,
 	type OptimalRate

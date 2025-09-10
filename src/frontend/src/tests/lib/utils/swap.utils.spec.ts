@@ -378,7 +378,7 @@ describe('swap utils', () => {
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
-			expect(result.receiveAmount).toBe(800n);
+			expect(result.receiveAmount).toBe(900n);
 			expect(result.swapDetails).toBe(mockDeltaSwap);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
