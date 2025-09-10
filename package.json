@@ -35,7 +35,7 @@
 		"clippy": "./scripts/lint.rust.sh",
 		"lint": "prettier --check './**/*.{ts,js,mjs,json,scss,css,svelte,html,md,yml,did}' && eslint --cache .",
 		"format:file": "prettier --write \"${npm_config_file}\" && eslint --fix \"${npm_config_file}\"",
-		"format": "eslint --fix --cache --debug .",
+		"format": "eslint --fix --cache --cache-strategy content --debug .",
 		"format:backend": "./scripts/format.sh",
 		"generate": "scripts/generate.sh",
 		"deploy": "scripts/deploy.sh",
