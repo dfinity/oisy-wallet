@@ -53,13 +53,16 @@ describe('nftStore', () => {
 
 			const similarNft: Nft = {
 				...mockValidErc721Nft,
-				collection: { ...mockValidErc721Nft.collection, address: mockValidErc1155Nft.collection.address.toUpperCase() }
+				collection: {
+					...mockValidErc721Nft.collection,
+					address: mockValidErc1155Nft.collection.address.toUpperCase()
+				}
 			};
 
 			nftStore.addAll([similarNft]);
 
 			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
-		})
+		});
 	});
 
 	describe('removeSelectedNfts', () => {
@@ -132,7 +135,7 @@ describe('nftStore', () => {
 			nftStore.removeSelectedNfts([similarNft]);
 
 			expect(get(nftStore)).toEqual([mockNft2, mockNft3]);
-		})
+		});
 	});
 
 	describe('updateSelectedNfts', () => {
@@ -212,6 +215,6 @@ describe('nftStore', () => {
 			nftStore.updateSelectedNfts([updatedNft1]);
 
 			expect(get(nftStore)).toEqual([updatedNft1, mockNft2, mockNft3]);
-		})
+		});
 	});
 });
