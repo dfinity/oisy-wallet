@@ -1,4 +1,3 @@
-import { calculateBtcWalletBalance } from '$btc/services/wallet-btc.service';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
@@ -13,7 +12,7 @@ import type { TokenId } from '$lib/types/token';
 import { jsonReviver, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-export const syncWallet = async ({
+export const syncWallet = ({
 	data,
 	tokenId
 }: {
@@ -22,7 +21,7 @@ export const syncWallet = async ({
 }) => {
 	const {
 		wallet: {
-			balance: { certified, data: balance },
+			balance: { certified, data: btcWalletBalance },
 			newTransactions
 		}
 	} = data;
@@ -40,19 +39,7 @@ export const syncWallet = async ({
 			transactions: providerTransactions
 		});
 	}
-	if (nonNullish(balance)) {
-		/*
-		 * The calance calculation is performed here in the main thread rather than in the worker (btc-wallet.scheduler.ts)
-		 * because the pending transactions store (btcPendingSentTransactionsStore) is not accessible from the worker context.
-		 * The worker provides the confirmed balance from the Bitcoin canister, and we calculate the structured
-		 * balance (confirmed, unconfirmed, total) using newTransactions data to determine confirmation states.
-		 */
-		const btcWalletBalance = await calculateBtcWalletBalance({
-			balance,
-			tokenId,
-			loadPendingTransactions: !certified
-		});
-
+	if (nonNullish(btcWalletBalance)) {
 		balancesStore.set({
 			id: tokenId,
 			data: {
