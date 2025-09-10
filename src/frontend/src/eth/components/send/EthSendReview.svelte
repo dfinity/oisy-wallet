@@ -12,10 +12,12 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { Nft } from '$lib/types/nft';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
+	export let nft: Nft | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -25,11 +27,11 @@
 	$: invalid =
 		isNullishOrEmpty(destination) ||
 		!isEthAddress(destination) ||
-		invalidAmount(amount) ||
+		(isNullish(nft) && invalidAmount(amount)) ||
 		isNullish($storeFeeData);
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
+<SendReview {amount} {destination} disabled={invalid} {nft} {selectedContact} on:icBack on:icSend>
 	<EthFeeDisplay slot="fee">
 		{#snippet label()}
 			<Html text={$i18n.fee.text.max_fee_eth} />

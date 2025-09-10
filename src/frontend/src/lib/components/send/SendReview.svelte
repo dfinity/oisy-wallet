@@ -11,11 +11,15 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { OptionAmount } from '$lib/types/send';
+	import type { Nft } from '$lib/types/nft';
+	import { isNullish } from '@dfinity/utils';
+	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let disabled: boolean | undefined = false;
 	export let selectedContact: ContactUi | undefined = undefined;
+	export let nft: Nft | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -23,7 +27,11 @@
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+	{#if isNullish(nft)}
+		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+	{:else}
+		<SendNftReview {nft} />
+	{/if}
 
 	<div class="mb-4">
 		<SendReviewDestination {destination} {selectedContact} />
