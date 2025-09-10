@@ -24,6 +24,7 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -165,7 +166,7 @@ export class AlchemyProvider {
 				}
 			} = ownedNft;
 
-			const token = tokens.find((token) => token.address === ownedNft.contract.address);
+			const token = tokens.find((token) => areAddressesEqual({address1: token.address, address2: ownedNft.contract.address, networkId: token.network.id}));
 			if (isNullish(token)) {
 				return acc;
 			}
