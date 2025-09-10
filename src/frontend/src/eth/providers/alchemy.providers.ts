@@ -166,11 +166,11 @@ export class AlchemyProvider {
 				}
 			} = ownedNft;
 
-			const token = tokens.find((token) =>
+			const token = tokens.find(({ address, network: { id: networkId } }) =>
 				areAddressesEqual({
-					address1: token.address,
+					address1: address,
 					address2: ownedNft.contract.address,
-					networkId: token.network.id
+					networkId
 				})
 			);
 			if (isNullish(token)) {
