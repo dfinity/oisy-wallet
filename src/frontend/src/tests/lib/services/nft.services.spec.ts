@@ -173,10 +173,9 @@ describe('nft.services', () => {
 			expect(transfer721Spy).toHaveBeenCalledOnce();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
 
-			// Assert payload
 			expect(transfer721Spy).toHaveBeenCalledWith({
 				contractAddress: token721.address,
-				tokenId, // same value forwarded
+				tokenId,
 				sourceNetwork: token721.network,
 				from: fromAddress,
 				to: destination,
