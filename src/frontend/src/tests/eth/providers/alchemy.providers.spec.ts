@@ -3,6 +3,7 @@ import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/net
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
 import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -12,7 +13,6 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
-import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -52,7 +52,7 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '1',
-					contract:  { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 				},
 				{
 					tokenId: '2',
@@ -61,7 +61,7 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract:  { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 				}
 			]
 		};
