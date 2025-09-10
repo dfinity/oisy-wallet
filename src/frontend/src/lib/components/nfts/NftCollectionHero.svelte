@@ -30,7 +30,7 @@
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 
-	const bannerUrl = $derived(nfts?.[0].collection.bannerImageUrl)
+	const bannerUrl = $derived(nfts?.[0].collection.bannerImageUrl);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
