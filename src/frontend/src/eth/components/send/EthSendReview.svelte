@@ -10,6 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isEthAddress } from '$lib/utils/account.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
@@ -36,7 +37,7 @@
 	});
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
+<SendReview {amount} {destination} disabled={invalid} {nft} {selectedContact} on:icBack on:icSend>
 	<EthFeeDisplay slot="fee">
 		{#snippet label()}
 			<Html text={$i18n.fee.text.max_fee_eth} />
