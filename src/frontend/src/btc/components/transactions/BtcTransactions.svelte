@@ -23,15 +23,17 @@
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let selectedTransaction: BtcTransactionUi | undefined = $state();
-	let selectedToken: OptionToken = $state();
-	run(() => {
+	let selectedTransaction = $state<BtcTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
 		({ transaction: selectedTransaction, token: selectedToken } =
 			mapTransactionModalData<BtcTransactionUi>({
 				$modalOpen: $modalBtcTransaction,
 				$modalStore
 			}));
 	});
+
+	let token = $derived($pageToken ?? DEFAULT_BITCOIN_TOKEN);
 </script>
 
 <BtcTransactionsHeader />
