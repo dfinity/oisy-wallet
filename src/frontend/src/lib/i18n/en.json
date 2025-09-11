@@ -694,7 +694,7 @@
 			"send_review_subtitle": "You send",
 			"no_nfts_found": "No NFTs found",
 			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
-            "select_nft": "Select NFT"
+			"select_nft": "Select NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
