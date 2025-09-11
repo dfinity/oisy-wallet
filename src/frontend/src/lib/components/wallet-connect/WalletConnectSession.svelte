@@ -39,7 +39,11 @@
 		SESSION_REQUEST_SOL_SIGN_TRANSACTION
 	} from '$sol/constants/wallet-connect.constants';
 
-	export let listener: OptionWalletConnectListener;
+	interface Props {
+		listener: OptionWalletConnectListener;
+	}
+
+	let { listener = $bindable() }: Props = $props();
 
 	const modalId = Symbol();
 
@@ -56,10 +60,10 @@
 		title: $i18n.wallet_connect.text.session_proposal
 	};
 
-	let steps: WizardSteps<WizardStepsWalletConnect> = [STEP_CONNECT, STEP_REVIEW];
+	let steps =$state< WizardSteps<WizardStepsWalletConnect>>( [STEP_CONNECT, STEP_REVIEW])
 
-	let currentStep: WizardStep<WizardStepsWalletConnect> | undefined;
-	let modal: WizardModal<WizardStepsWalletConnect>;
+	let currentStep= $state<WizardStep<WizardStepsWalletConnect>| undefined>();
+	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
 	const resetAndClose = () => {
@@ -67,7 +71,7 @@
 		close();
 	};
 
-	let proposal: Option<WalletKitTypes.SessionProposal>;
+	let proposal = $state<Option<WalletKitTypes.SessionProposal>>();
 
 	const disconnect = async () => {
 		await disconnectListener();
@@ -127,17 +131,20 @@
 		}
 	};
 
-	$: ($authNotSignedIn,
-		(async () => {
-			if ($authNotSignedIn) {
-				await disconnectListener();
-			}
-		})());
+	$effect(() => {
+		if ($authNotSignedIn) {
+			disconnectListener();
+		}
+	});
 
 	const goToFirstStep = () => modal?.set?.(0);
 
 	// One try to manually sign in by entering the URL manually or scanning a QR code
 	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
+		if (isNullish(modal)) {
+			return
+		}
+
 		modal.next();
 
 		const { result } = await connect(uri);
@@ -183,11 +190,16 @@
 		await connect($walletConnectUri);
 	};
 
-	$: ($ethAddress,
-		$solAddressMainnet,
-		$walletConnectUri,
-		$loading,
-		(async () => await uriConnect())());
+
+	$effect(() => {
+		[$ethAddress,
+			$solAddressMainnet,
+			$walletConnectUri,
+			$loading]
+
+
+		uriConnect()
+	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
 		// Prevent race condition
@@ -316,7 +328,7 @@
 
 	const cancel = () => {
 		resetListener();
-		modal.back();
+		modal?.back();
 	};
 
 	const approve = async () =>
@@ -375,9 +387,12 @@
 		close();
 	};
 
-	$: walletConnectPaired.set(nonNullish(listener));
 
-	let reconnecting = true;
+	$effect(() => {
+		walletConnectPaired.set(nonNullish(listener))
+	});
+
+	let reconnecting = $state(true);
 
 	const reconnect = async () => {
 		reconnecting = true;
@@ -430,7 +445,11 @@
 		}
 	};
 
-	$: ($ethAddress, $solAddressMainnet, $loading, (async () => await reconnect())());
+	$effect(()=>{
+		[$ethAddress, $solAddressMainnet, $loading]
+
+		reconnect()
+	})
 
 	onDestroy(() => walletConnectPaired.set(false));
 
