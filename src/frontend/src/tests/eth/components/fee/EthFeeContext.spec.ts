@@ -21,7 +21,6 @@ import type { EthFeeContextProps } from '$tests/eth/components/fee/EthFeeContext
 import EthFeeContextTestHost from '$tests/eth/components/fee/EthFeeContextTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import type { Mock } from 'vitest';
 
 describe('EthFeeContext', () => {
 	const feeStore = { setFee: vi.fn() };
@@ -110,7 +109,7 @@ describe('EthFeeContext', () => {
 		render(EthFeeContextTestHost, { props: { feeStore, props: { ...baseProps, ...props } } });
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
-		vi.mocked(vi.mocked(ethUtils.isSupportedEthTokenId)).mockReturnValue(true);
+		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
 			getFeeData: () => Promise<unknown>;
@@ -134,8 +133,8 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for ckERC20 twin using getCkErc20FeeData', async () => {
-		vi.mocked(vi.mocked(tokenUtils.isSupportedErc20TwinTokenId)).mockReturnValue(true);
-		vi.mocked(vi.mocked(feeServices.getCkErc20FeeData)).mockResolvedValue(123n);
+		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId).mockReturnValue(true);
+		vi.mocked(feeServices.getCkErc20FeeData).mockResolvedValue(123n);
 
 		renderWith();
 
@@ -151,9 +150,9 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for NFT (ERC-721) by encoding and estimating gas', async () => {
-		vi.mocked(vi.mocked(ethUtils.isSupportedEthTokenId)).mockReturnValue(false);
-		vi.mocked(vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId)).mockReturnValue(false);
-		vi.mocked(vi.mocked(tokenUtils.isSupportedErc20TwinTokenId)).mockReturnValue(false);
+		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(false);
+		vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId).mockReturnValue(false);
+		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId).mockReturnValue(false);
 
 		const nft = mockValidErc721Nft;
 
