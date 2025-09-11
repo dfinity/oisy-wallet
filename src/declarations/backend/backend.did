@@ -403,6 +403,17 @@ type UserToken = record {
 type UserTokenId = record { chain_id : nat64; contract_address : text };
 type Utxo = record { height : nat32; value : nat64; outpoint : Outpoint };
 service : (Arg) -> {
+	// Creates a new proof-of-work challenge for the caller.
+	//
+	// # Errors
+	// Errors are enumerated by: `CreateChallengeError`.
+	//
+	// # Returns
+	//
+	// * `Ok(CreateChallengeResponse)` - On successful challenge creation.
+	// * `Err(CreateChallengeError)` - If challenge creation fails due to invalid parameters or
+	// internal errors.
+	__candid_method_create_pow_challenge : () -> (CreatePowChallengeResult);
 	// Adds a verifiable credential to the user profile.
 	//
 	// # Errors
