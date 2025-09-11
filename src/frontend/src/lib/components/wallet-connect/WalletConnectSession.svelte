@@ -190,15 +190,10 @@
 		await connect($walletConnectUri);
 	};
 
-
 	$effect(() => {
-		[$ethAddress,
-			$solAddressMainnet,
-			$walletConnectUri,
-			$loading]
+		[$ethAddress, $solAddressMainnet, $walletConnectUri, $loading];
 
-
-		uriConnect()
+		uriConnect();
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
@@ -387,9 +382,8 @@
 		close();
 	};
 
-
 	$effect(() => {
-		walletConnectPaired.set(nonNullish(listener))
+		walletConnectPaired.set(nonNullish(listener));
 	});
 
 	let reconnecting = $state(true);
@@ -445,11 +439,11 @@
 		}
 	};
 
-	$effect(()=>{
-		[$ethAddress, $solAddressMainnet, $loading]
+	$effect(() => {
+		[$ethAddress, $solAddressMainnet, $loading];
 
-		reconnect()
-	})
+		reconnect();
+	});
 
 	onDestroy(() => walletConnectPaired.set(false));
 
