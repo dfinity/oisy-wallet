@@ -62,7 +62,7 @@
 
 	let steps = $state<WizardSteps<WizardStepsWalletConnect>>([STEP_CONNECT, STEP_REVIEW]);
 
-	let currentStep= $state<WizardStep<WizardStepsWalletConnect>| undefined>();
+	let currentStep = $state<WizardStep<WizardStepsWalletConnect> | undefined>();
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
 
 	const close = () => modalStore.close();
