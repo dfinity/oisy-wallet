@@ -43,10 +43,10 @@
 	});
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl">{$i18n.referral.invitation.text.title}</span>
-	</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl">{$i18n.referral.invitation.text.title}</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
