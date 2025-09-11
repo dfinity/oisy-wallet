@@ -1,6 +1,8 @@
 import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import * as indexCanisterServices from '$icp/services/index-canister.services';
+import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapDip20Transaction } from '$icp/utils/dip20-transactions.utils';
@@ -9,13 +11,13 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { initDip20WalletScheduler } from '$icp/workers/dip20-wallet.worker';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
+import * as authClientApi from '$lib/api/auth-client.api';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataRequestIcp,
 	PostMessageDataRequestIcrc
 } from '$lib/types/post-message';
-import * as authUtils from '$lib/utils/auth.utils';
 import * as eventsUtils from '$lib/utils/events.utils';
 import { emit } from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
@@ -105,9 +107,11 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 
 		vi.spyOn(eventsUtils, 'emit');
+
+		vi.spyOn(indexCanisterServices, 'isIndexCanisterAwake').mockResolvedValue(true);
 	});
 
 	afterEach(() => {
@@ -649,6 +653,82 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					message: 'oisyIndexCanisterBalanceOutOfSync',
 					detail: false
 				});
+			});
+
+			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {
+				const currentMock = spyGetTransactions.getMockImplementation();
+
+				spyGetTransactions.mockImplementation(async () => ({
+					...(await currentMock?.()),
+					balance: mockBalance + 1n
+				}));
+
+				expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+				expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				// query + update = 2
+				expect(isIndexCanisterAwake).toHaveBeenCalledTimes(2);
+				expect(isIndexCanisterAwake).toHaveBeenNthCalledWith(1, {
+					ledgerCanisterId: startData.ledgerCanisterId,
+					indexCanisterId: startData.indexCanisterId,
+					identity: mockIdentity,
+					certified: false
+				});
+				expect(isIndexCanisterAwake).toHaveBeenNthCalledWith(2, {
+					ledgerCanisterId: startData.ledgerCanisterId,
+					indexCanisterId: startData.indexCanisterId,
+					identity: mockIdentity,
+					certified: true
+				});
+			});
+
+			it('should throw if the Index canister is not awake when it is out-of-sync with the balance', async () => {
+				vi.spyOn(indexCanisterServices, 'isIndexCanisterAwake').mockResolvedValue(false);
+
+				const currentMock = spyGetTransactions.getMockImplementation();
+
+				spyGetTransactions.mockImplementation(async () => ({
+					...(await currentMock?.()),
+					balance: mockBalance + 1n
+				}));
+
+				expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+				expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
+
+				await scheduler.start(startData);
+
+				await awaitJobExecution();
+
+				// query + update = 2
+				expect(isIndexCanisterAwake).toHaveBeenCalledTimes(2);
+				expect(isIndexCanisterAwake).toHaveBeenNthCalledWith(1, {
+					ledgerCanisterId: startData.ledgerCanisterId,
+					indexCanisterId: startData.indexCanisterId,
+					identity: mockIdentity,
+					certified: false
+				});
+				expect(isIndexCanisterAwake).toHaveBeenNthCalledWith(2, {
+					ledgerCanisterId: startData.ledgerCanisterId,
+					indexCanisterId: startData.indexCanisterId,
+					identity: mockIdentity,
+					certified: true
+				});
+
+				expect(postMessageMock).toHaveBeenCalledTimes(3);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(2, {
+					msg: `${msg}Error`,
+					data: {
+						error: new Error(
+							`Index canister ${startData.indexCanisterId} for Ledger canister ${startData.ledgerCanisterId} is not awake`
+						)
+					}
+				});
+				expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
 			});
 		});
 

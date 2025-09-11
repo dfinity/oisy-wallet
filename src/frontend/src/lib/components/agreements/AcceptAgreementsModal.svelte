@@ -117,11 +117,13 @@
 </script>
 
 <Modal disablePointerEvents={true} testId={AGREEMENTS_MODAL}>
-	<h4 slot="title">
-		{$noAgreementVisionedYet
-			? $i18n.agreements.text.review_title
-			: $i18n.agreements.text.review_updated_title}
-	</h4>
+	{#snippet title()}
+		<h4>
+			{$noAgreementVisionedYet
+				? $i18n.agreements.text.review_title
+				: $i18n.agreements.text.review_updated_title}
+		</h4>
+	{/snippet}
 	<ContentWithToolbar>
 		<Img src={agreementsBanner} styleClass="mb-6" />
 		<p>
