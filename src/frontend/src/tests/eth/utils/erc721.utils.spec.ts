@@ -75,8 +75,10 @@ describe('erc721.utils', () => {
 	});
 
 	describe('isCollectionErc721', () => {
-		expect(isCollectionErc721(mockValidErc721Nft.collection)).toBeTruthy();
+		it('should differentiate correctly between an ERC721 and an ERC1155 collection', () => {
+			expect(isCollectionErc721(mockValidErc721Nft.collection)).toBeTruthy();
 
-		expect(isCollectionErc721(mockValidErc1155Nft.collection)).toBeFalsy();
+			expect(isCollectionErc721(mockValidErc1155Nft.collection)).toBeFalsy();
+		});
 	});
 });
