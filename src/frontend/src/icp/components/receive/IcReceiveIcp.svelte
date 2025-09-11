@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import { page } from '$app/state';
-	import IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
+	import IcReceiveInfoIcp from '$icp/components/receive/IcReceiveInfoIcp.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
 		type ReceiveTokenContext
@@ -29,6 +29,6 @@
 
 <ReceiveButtonWithModal isOpen={$modalIcpReceive} open={openModal}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={IcReceiveInfoICP} on:nnsClose={close} />
+		<ReceiveAddressModal infoCmp={IcReceiveInfoIcp} on:nnsClose={close} />
 	{/snippet}
 </ReceiveButtonWithModal>
