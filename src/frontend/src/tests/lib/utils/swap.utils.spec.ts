@@ -37,7 +37,7 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { BridgePrice, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
+import type { Bridge, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -344,7 +344,8 @@ describe('swap utils', () => {
 				destUSDBeforeFee: '915.2',
 				partner: 'PartnerName',
 				partnerFee: 0.25,
-				hmac: 'abcd1234'
+				hmac: 'abcd1234',
+				bridge: {} as Bridge
 			};
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
@@ -356,37 +357,29 @@ describe('swap utils', () => {
 		});
 
 		it('should map BridgePrice swap result correctly', () => {
-			const mockBridgeSwap: BridgePrice = {
+			const mockDeltaSwap: DeltaPrice = {
 				srcToken: '0x123',
 				destToken: '0x456',
 				srcAmount: '1000',
-				destAmount: '850',
-				destAmountBeforeFee: '870',
-				gasCost: '60000',
-				gasCostBeforeFee: '58000',
-				gasCostUSD: '18.0',
-				gasCostUSDBeforeFee: '17.4',
+				destAmount: '900',
+				destAmountBeforeFee: '920',
+				gasCost: '50000',
+				gasCostBeforeFee: '48000',
+				gasCostUSD: '15.5',
+				gasCostUSDBeforeFee: '14.8',
 				srcUSD: '1000.0',
-				destUSD: '845.0',
-				destUSDBeforeFee: '865.0',
-				partner: 'BridgePartner',
-				partnerFee: 0.5,
-				hmac: 'bridge1234',
-				destAmountAfterBridge: '800',
-				destUSDAfterBridge: '795.0',
-				bridgeFee: '50',
-				bridgeFeeUSD: '50.0',
-				poolAddress: '0xpool123',
-				bridge: {
-					destinationChainId: 1,
-					outputToken: '0xoutput456'
-				}
+				destUSD: '895.5',
+				destUSDBeforeFee: '915.2',
+				partner: 'PartnerName',
+				partnerFee: 0.25,
+				hmac: 'abcd1234',
+				bridge: {} as Bridge
 			};
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap);
+			expect(result.receiveAmount).toBe(900n);
+			expect(result.swapDetails).toBe(mockDeltaSwap);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});
