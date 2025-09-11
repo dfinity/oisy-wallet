@@ -1,19 +1,15 @@
 import { render } from '@testing-library/svelte';
 import { readable, writable, type Writable } from 'svelte/store';
-
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
 import * as addressDerived from '$lib/derived/address.derived';
-
 import * as infuraMod from '$eth/providers/infura.providers';
 import * as infuraGasRestMod from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
-
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as networkUtils from '$lib/utils/network.utils';
-
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
