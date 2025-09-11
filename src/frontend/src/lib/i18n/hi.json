@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "ऐसा लगता है कि आपने अभी तक संपर्क नहीं जोड़े हैं",
 			"send_review_subtitle": "आप भेजते हैं",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "सार्वजनिक पता (0x), नाम या उपनाम दर्ज करें",

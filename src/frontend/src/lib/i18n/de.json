@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Es sieht so aus, als hättest du noch keine Kontakte hinzugefügt",
 			"send_review_subtitle": "Du sendest",
 			"no_nfts_found": "Keine NFTs gefunden",
-			"no_nfts_found_desc": "Passe die Suche oder das Netzwerk an um deine NFTs zu finden"
+			"no_nfts_found_desc": "Passe die Suche oder das Netzwerk an um deine NFTs zu finden",
+			"select_nft": "NFT auswählen"
 		},
 		"placeholder": {
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",

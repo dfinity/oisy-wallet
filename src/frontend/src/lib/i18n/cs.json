@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",

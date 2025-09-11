@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
 			"send_review_subtitle": "أنت ترسل",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
