@@ -129,6 +129,7 @@ describe('NftHero', () => {
 
 		waitFor(() => {
 			const modalTitle = getByTestId('modal-title');
+
 			expect(modalTitle).toHaveTextContent(get(i18n).send.text.select_nft);
 		});
 
