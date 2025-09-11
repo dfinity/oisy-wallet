@@ -60,7 +60,7 @@
 		title: $i18n.wallet_connect.text.session_proposal
 	};
 
-	let steps =$state< WizardSteps<WizardStepsWalletConnect>>( [STEP_CONNECT, STEP_REVIEW])
+	let steps = $state<WizardSteps<WizardStepsWalletConnect>>([STEP_CONNECT, STEP_REVIEW]);
 
 	let currentStep= $state<WizardStep<WizardStepsWalletConnect>| undefined>();
 	let modal = $state<WizardModal<WizardStepsWalletConnect>>();
