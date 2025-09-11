@@ -74,7 +74,6 @@ import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
-	type BridgePrice,
 	type DeltaAuction,
 	type DeltaPrice,
 	type OptimalRate
@@ -739,7 +738,7 @@ export const fetchVeloraDeltaSwap = async ({
 	progress(ProgressStepsSwap.SWAP);
 
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
+		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,

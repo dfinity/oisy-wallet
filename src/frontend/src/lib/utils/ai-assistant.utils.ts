@@ -3,11 +3,12 @@ import type {
 	AiAssistantContactUi,
 	AiAssistantContactUiMap,
 	ReviewSendTokensToolResult,
+	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
-import { nonNullish, notEmptyString } from '@dfinity/utils';
+import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -44,6 +45,46 @@ export const parseFromAiAssistantContacts = ({
 		],
 		[]
 	);
+
+export const parseShowFilteredContactsToolArguments = ({
+	filterParams,
+	extendedAddressContacts
+}: {
+	filterParams: ToolCallArgument[];
+	extendedAddressContacts: ExtendedAddressContactUiMap;
+}): ShowContactsToolResult => {
+	const addressIdsFilter = filterParams.find(({ name }) => name === 'addressIds')?.value ?? '[]';
+
+	const addressIds = JSON.parse(addressIdsFilter, jsonReplacer);
+
+	if (addressIds.length === 0) {
+		return { contacts: [] };
+	}
+
+	return Object.values(extendedAddressContacts).reduce<ShowContactsToolResult>(
+		(acc, extendedAddressContactUi) => {
+			const addresses = extendedAddressContactUi.addresses.filter(({ id: addressId }) =>
+				addressIds.includes(addressId)
+			);
+
+			if (addresses.length > 0) {
+				return {
+					...acc,
+					contacts: [
+						...acc.contacts,
+						{
+							...extendedAddressContactUi,
+							addresses
+						}
+					]
+				};
+			}
+
+			return acc;
+		},
+		{ contacts: [] }
+	);
+};
 
 export const parseReviewSendTokensToolArguments = ({
 	filterParams,

@@ -568,6 +568,7 @@ interface I18nSend {
 		send_review_subtitle: string;
 		no_nfts_found: string;
 		no_nfts_found_desc: string;
+		select_nft: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
@@ -616,6 +617,7 @@ interface I18nSend {
 		btc_utxo_locked: string;
 		btc_invalid_fee_calculation: string;
 		pending_transactions_not_available: string;
+		no_nft_selected: string;
 	};
 	error: {
 		unexpected: string;
@@ -635,6 +637,7 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		fee_calc_unsupported_standard: string;
 	};
 }
 

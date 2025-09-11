@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
 			"send_review_subtitle": "You send",
 			"no_nfts_found": "No NFTs found",
-			"no_nfts_found_desc": "Adjust your search or network to find your NFTs"
+			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
+			"select_nft": "Select NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
@@ -741,7 +742,8 @@
 			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
-			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later."
+			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later.",
+			"no_nft_selected": "No NFT has been selected for sending."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -760,7 +762,8 @@
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
 			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
-			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly."
+			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
 	"convert": {

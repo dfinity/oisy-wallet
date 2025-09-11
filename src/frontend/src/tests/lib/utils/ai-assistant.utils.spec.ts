@@ -7,6 +7,7 @@ import {
 	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments,
+	parseShowFilteredContactsToolArguments,
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
@@ -121,6 +122,40 @@ describe('ai-assistant.utils', () => {
 				contact: undefined,
 				amount: sendValue,
 				address: mockEthAddress
+			});
+		});
+	});
+
+	describe('parseShowFilteredContactsToolArguments', () => {
+		it('returns correct result when addressIds is provided', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: `["${extendedAddressContactUi.addresses[0].id}"]`,
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: [extendedAddressContactUi]
+			});
+		});
+
+		it('returns empty result when addressIds cannot be matched with existing contacts', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: '["random-id"]',
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: []
 			});
 		});
 	});
