@@ -112,7 +112,11 @@
 					<div class="flex">
 						<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
 							{#snippet button(onclick)}
-								<NftCollectionActionButton colorStyle="primary" label="Send" {onclick}>
+								<NftCollectionActionButton
+									colorStyle="primary"
+									label={$i18n.send.text.send}
+									{onclick}
+								>
 									{#snippet icon()}
 										<IconSendMessage size="18" />
 									{/snippet}
