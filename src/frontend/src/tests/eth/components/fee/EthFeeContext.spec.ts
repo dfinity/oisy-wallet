@@ -110,7 +110,7 @@ describe('EthFeeContext', () => {
 		render(EthFeeContextTestHost, { props: { feeStore, props: { ...baseProps, ...props } } });
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
-		vi.mocked(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(true);
+		vi.mocked(vi.mocked(ethUtils.isSupportedEthTokenId)).mockReturnValue(true);
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
 			getFeeData: () => Promise<unknown>;
@@ -134,8 +134,8 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for ckERC20 twin using getCkErc20FeeData', async () => {
-		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(true);
-		vi.mocked(feeServices.getCkErc20FeeData as unknown as Mock).mockResolvedValue(123n);
+		vi.mocked(vi.mocked(tokenUtils.isSupportedErc20TwinTokenId)).mockReturnValue(true);
+		vi.mocked(vi.mocked(feeServices.getCkErc20FeeData)).mockResolvedValue(123n);
 
 		renderWith();
 
@@ -151,9 +151,9 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for NFT (ERC-721) by encoding and estimating gas', async () => {
-		vi.mocked(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(false);
-		vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId as unknown as Mock).mockReturnValue(false);
-		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(false);
+		vi.mocked(vi.mocked(ethUtils.isSupportedEthTokenId)).mockReturnValue(false);
+		vi.mocked(vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId)).mockReturnValue(false);
+		vi.mocked(vi.mocked(tokenUtils.isSupportedErc20TwinTokenId)).mockReturnValue(false);
 
 		const nft = mockValidErc721Nft;
 
