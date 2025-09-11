@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getSdkError } from '@walletconnect/utils';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, untrack } from 'svelte';
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
@@ -133,7 +133,7 @@
 
 	$effect(() => {
 		if ($authNotSignedIn) {
-			disconnectListener();
+			untrack(() => disconnectListener());
 		}
 	});
 
@@ -193,7 +193,7 @@
 	$effect(() => {
 		[$ethAddress, $solAddressMainnet, $walletConnectUri, $loading];
 
-		uriConnect();
+		untrack(() => uriConnect());
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
@@ -442,12 +442,13 @@
 	$effect(() => {
 		[$ethAddress, $solAddressMainnet, $loading];
 
-		reconnect();
+		untrack(() => reconnect());
 	});
 
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
+		console.log('openWalletConnectAuth');
 		modalStore.openWalletConnectAuth(modalId);
 
 		trackEvent({
