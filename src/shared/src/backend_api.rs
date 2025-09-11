@@ -1,7 +1,7 @@
 //! Selected backend canister API signatures.
 #![allow(clippy::missing_errors_doc)] // The code is auto-generated.  Maybe `didc bind` will preserve comments in future.
 use candid::{self, Principal};
-use ic_cdk::api::call::CallResult as Result;
+use ic_cdk::call::{CallResult as Result, Call};
 
 use crate::types::Stats;
 
@@ -17,6 +17,10 @@ use crate::types::Stats;
 pub struct Service(pub Principal);
 impl Service {
     pub async fn stats(&self) -> Result<(Stats,)> {
-        ic_cdk::call(self.0, "stats", ()).await
+        Call::unbounded_wait(self.0, "stats")
+            .with_arg(())
+            .await?
+            .candid()
+            .map_err(ic_cdk::call::Error::from)
     }
 }

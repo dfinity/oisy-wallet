@@ -181,7 +181,7 @@ fn start_periodic_housekeeping_timers() {
     // Run housekeeping tasks once, immediately but asynchronously.
     let immediate = Duration::ZERO;
     set_timer(immediate, || {
-        ic_cdk::futures::spawn(hourly_housekeeping_tasks())
+        ic_cdk::futures::spawn(hourly_housekeeping_tasks());
     });
 
     // Then periodically:
@@ -750,7 +750,7 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
 pub fn update_user_experimental_feature_settings(
     request: UpdateExperimentalFeaturesSettingsRequest,
 ) -> UpdateExperimentalFeaturesSettingsResult {
-    let user_principal = ic_cdk::caller();
+    let user_principal = ic_cdk::api::msg_caller();
     let stored_principal = StoredPrincipal(user_principal);
 
     mutate_state(|s| {

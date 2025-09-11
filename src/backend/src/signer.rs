@@ -268,12 +268,12 @@ pub async fn top_up_cycles_ledger(request: TopUpCyclesLedgerRequest) -> TopUpCyc
             .with_arg(&arg)
             .with_cycles(to_send_128)
             .await
-            .map_err(|_| TopUpCyclesLedgerError::CouldNotTopUpCyclesLedger {
-                available: backend_cycles,
-                tried_to_send: to_send.clone(),
-            }) {
-            Ok(res) => res,
-            Err(err) => return TopUpCyclesLedgerResult::Err(err),
+        {
+            Ok(response) => match response.candid() {
+                Ok(result) => result,
+                Err(_) => return TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger),
+            },
+            Err(_) => return TopUpCyclesLedgerResult::Err(TopUpCyclesLedgerError::CouldNotGetBalanceFromCyclesLedger),
         };
 
         let new_ledger_balance = result.balance;
