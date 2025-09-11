@@ -12,14 +12,9 @@
 
 	let { proposal }: Props = $props();
 
-	let context: Verify.Context | undefined = $state(undefined);
-	run(() => {
-		context = proposal?.verifyContext;
-	});
+	let context = $derived(proposal?.verifyContext);
 
-	let validation: 'UNKNOWN' | 'VALID' | 'INVALID' | string | undefined = $derived(
-		context?.verified.validation
-	);
+	let validation = $derived(context?.verified.validation);
 </script>
 
 <div class="mt-6">

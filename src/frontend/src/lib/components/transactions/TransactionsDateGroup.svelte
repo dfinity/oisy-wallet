@@ -13,7 +13,7 @@
 		testId?: string;
 	}
 
-	let { formattedDate, transactions, testId = undefined }: Props = $props();
+	let { formattedDate, transactions, testId }: Props = $props();
 </script>
 
 {#if transactions.length > 0}

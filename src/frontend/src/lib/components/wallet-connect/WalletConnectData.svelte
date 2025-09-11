@@ -9,6 +9,7 @@
 		label: string;
 	}
 
+
 	let { data, label }: Props = $props();
 </script>
 

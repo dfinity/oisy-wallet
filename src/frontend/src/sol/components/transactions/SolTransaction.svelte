@@ -7,7 +7,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
-	import type { SolTransactionType, SolTransactionUi } from '$sol/types/sol-transaction';
+	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -17,28 +17,15 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let type: SolTransactionType = $state();
-	let value: bigint | undefined = $state();
-	let timestamp: bigint | undefined = $state();
-	let status: Commitment | null = $state();
-	let to: string | undefined = $state();
-	let from: string | undefined = $state();
-	let toOwner: string | undefined = $state();
-	let fromOwner: string | undefined = $state();
+	let { type, value, timestamp, status, to, from, toOwner, fromOwner } = $derived(transaction);
 
-	run(() => {
-		({ type, value, timestamp, status, to, from, toOwner, fromOwner } = transaction);
-	});
+	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let label: string = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
-
-	let pending: boolean = $derived(status === 'processed' || isNullish(status));
+	let pending = $derived(status === 'processed' || isNullish(status));
 
 	let transactionStatus: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount: bigint | undefined = $derived(
-		nonNullish(value) ? (type === 'send' ? value * -1n : value) : value
-	);
+	let amount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : value);
 
 	const modalId = Symbol();
 </script>

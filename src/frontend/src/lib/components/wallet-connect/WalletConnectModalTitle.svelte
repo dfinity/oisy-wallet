@@ -4,7 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -14,5 +14,5 @@
 	<div class="flex">
 		<IconWalletConnectBlue /><span class="hidden">{$i18n.wallet_connect.text.name}</span>
 	</div>
-	{@render children?.()}
+	{@render children()}
 </div>

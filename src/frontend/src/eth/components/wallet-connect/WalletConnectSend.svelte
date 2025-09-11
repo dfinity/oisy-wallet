@@ -4,8 +4,6 @@
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
 	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-	import type { EthereumNetwork } from '$eth/types/network';
-	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -17,21 +15,19 @@
 
 	let { listener = $bindable() }: Props = $props();
 
-	let request: WalletKitTypes.SessionRequest | undefined = $derived(
+	let request = $derived(
 		$modalWalletConnectSend
 			? ($modalStore?.data as WalletKitTypes.SessionRequest | undefined)
 			: undefined
 	);
 
-	let firstTransaction: WalletConnectEthSendTransactionParams | undefined = $derived(
-		request?.params.request.params?.[0]
-	);
+	let firstTransaction = $derived(request?.params.request.params?.[0]);
 
-	let chainId: number | undefined = $derived(
+	let chainId = $derived(
 		nonNullish(request?.params.chainId) ? EIP155_CHAINS[request.params.chainId]?.chainId : undefined
 	);
 
-	let sourceNetwork: EthereumNetwork | undefined = $derived(
+	let sourceNetwork = $derived(
 		nonNullish(chainId)
 			? [...$enabledEthereumNetworks, ...$enabledEvmNetworks].find(
 					({ chainId: cId }) => cId === BigInt(chainId)

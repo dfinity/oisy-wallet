@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 	import type { Erc20Token } from '$eth/types/erc20';
-	import type { EthTransactionType, EthTransactionUi } from '$eth/types/eth-transaction';
+	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';
 	import { isTransactionPending } from '$eth/utils/transactions.utils';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
@@ -19,29 +19,20 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let value: bigint = $state();
-	let timestamp: number | undefined = $state();
-	let displayTimestamp: number | undefined = $state();
-	let type: EthTransactionType = $state();
-	let to: string | undefined = $state();
-	let from: string | undefined = $state();
-
-	let pending: boolean = $derived(isTransactionPending(transaction));
+	let pending = $derived(isTransactionPending(transaction));
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	run(() => {
-		({ value, timestamp, displayTimestamp, type, to, from } = transaction);
-	});
+	let { value, timestamp, displayTimestamp, type, to, from, tokenId } = $derived(transaction);
 
-	let ckTokenSymbol: string = $derived(
+	let ckTokenSymbol = $derived(
 		isSupportedEthToken(token)
 			? token.twinTokenSymbol
 			: // TODO: $token could be undefined, that's why we cast as `Erc20Token | undefined`; adjust the cast once we're sure that $token is never undefined
 				((token as Erc20Token | undefined)?.twinTokenSymbol ?? '')
 	);
 
-	let label: string = $derived(
+	let label = $derived(
 		type === 'withdraw'
 			? replacePlaceholders(
 					pending
@@ -67,9 +58,9 @@
 					: $i18n.receive.text.receive
 	);
 
-	let amount: bigint = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
+	let amount = $derived(value * (type === 'send' || type === 'deposit' ? -1n : 1n));
 
-	let transactionDate: number | undefined = $derived(timestamp ?? displayTimestamp);
+	let transactionDate = $derived(timestamp ?? displayTimestamp);
 
 	const modalId = Symbol();
 </script>

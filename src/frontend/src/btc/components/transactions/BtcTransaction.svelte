@@ -3,6 +3,7 @@
 	import { run } from 'svelte/legacy';
 	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
 	import type { BtcTransactionType } from '$btc/types/btc-transaction';
+	import type { BtcTransactionUi } from '$btc/types/btc';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -16,22 +17,11 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let value: bigint | undefined = $state();
-	let timestamp: bigint | undefined = $state();
-	let status: BtcTransactionStatus = $state();
-	let type: BtcTransactionType = $state();
-	let to: string[] | undefined = $state();
-	let from: string | undefined = $state();
+	let { type, status, value, timestamp, to, from } = $derived(transaction);
 
-	run(() => {
-		({ type, status, value, timestamp, to, from } = transaction);
-	});
+	let label = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
 
-	let label: string = $derived(type === 'send' ? $i18n.send.text.send : $i18n.receive.text.receive);
-
-	let amount: bigint | undefined = $derived(
-		nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined
-	);
+	let amount = $derived(nonNullish(value) ? (type === 'send' ? value * -1n : value) : undefined);
 
 	const modalId = Symbol();
 </script>

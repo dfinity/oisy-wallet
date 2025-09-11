@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { run } from 'svelte/legacy';
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
-	import type { IcTransactionType, IcTransactionUi } from '$icp/types/ic-transaction';
+	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -17,38 +17,23 @@
 
 	let { transaction, token, iconType = 'transaction' }: Props = $props();
 
-	let type: IcTransactionType = $state();
-	let transactionTypeLabel: string | undefined = $state();
-	let value: bigint | undefined = $state();
-	let timestampNanoseconds: bigint | undefined = $state();
-	let incoming: boolean | undefined = $state();
-	let to: string | undefined = $state();
-	let from: string | undefined = $state();
+	let {
+		type,
+		typeLabel: transactionTypeLabel,
+		value,
+		timestamp: timestampNanoseconds,
+		incoming,
+		to,
+		from
+	} = $derived(transaction);
 
-	run(() => {
-		({
-			type,
-			typeLabel: transactionTypeLabel,
-			value,
-			timestamp: timestampNanoseconds,
-			incoming,
-			to,
-			from
-		} = transaction);
-	});
-
-	let pending = $state(false);
-	run(() => {
-		pending = transaction?.status === 'pending';
-	});
+	let pending = $derived(transaction?.status === 'pending');
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount: bigint | undefined = $derived(
-		nonNullish(value) ? (incoming ? value : value * -1n) : value
-	);
+	let amount = $derived(nonNullish(value) ? (incoming ? value : value * -1n) : value);
 
-	let timestamp: number | undefined = $derived(
+	let timestamp = $derived(
 		nonNullish(timestampNanoseconds)
 			? Number(timestampNanoseconds / NANO_SECONDS_IN_SECOND)
 			: undefined
