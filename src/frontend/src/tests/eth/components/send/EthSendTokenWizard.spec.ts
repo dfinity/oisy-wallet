@@ -31,28 +31,21 @@ describe('EthSendTokenWizard.spec', () => {
 	const destination = '0x1111111111111111111111111111111111111111';
 
 	let feeState: Writable<FeeStoreData>;
-
 	let feeStore: EthFeeStore;
 
 	beforeEach(() => {
 		vi.useFakeTimers();
 		vi.clearAllMocks();
 
-		// derived stores
 		vi.spyOn(addrDerived, 'ethAddress', 'get').mockReturnValue(readable(fromAddr));
 		vi.spyOn(idDerived, 'authIdentity', 'get').mockImplementation(() => readable(mockIdentity));
 		vi.spyOn(exchDerived, 'exchanges', 'get').mockReturnValue(readable({}));
-
-		// analytics + toast
 		vi.spyOn(analytics, 'trackEvent').mockImplementation(() => undefined);
 		vi.spyOn(toasts, 'toastsError').mockImplementation(() => Symbol('toast'));
-
-		// helpers
 		vi.spyOn(inputUtils, 'invalidAmount').mockReturnValue(false);
 		vi.spyOn(ckethServices, 'assertCkEthMinterInfoLoaded').mockReturnValue({ valid: true });
 		vi.spyOn(tokenUtils, 'isErc20Icp').mockReturnValue(false);
 
-		// fee store
 		feeState = writable({
 			gas: 100n,
 			maxFeePerGas: 2_000_000n,
