@@ -59,7 +59,7 @@
 
 	<Responsive down="md">
 		{#if visible}
-			<Modal {title} on:nnsClose={close}>
+			<Modal onClose={close} {title}>
 				{@render items()}
 			</Modal>
 		{/if}

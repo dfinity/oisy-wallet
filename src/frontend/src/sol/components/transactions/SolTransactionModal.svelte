@@ -90,10 +90,8 @@
 	};
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	{#snippet title()}
-		{$i18n.transaction.text.details}
-	{/snippet}
+<Modal onClose={modalStore.close}>
+	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>

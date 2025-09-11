@@ -66,7 +66,7 @@
 	<Sprinkles />
 {/if}
 
-<Modal on:nnsClose={close}>
+<Modal onClose={close}>
 	{#snippet title()}
 		<span class="text-xl"
 			>{isSuccessful

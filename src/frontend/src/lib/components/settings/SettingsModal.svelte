@@ -17,10 +17,8 @@
 	);
 </script>
 
-<Modal testId={SETTINGS_NETWORKS_MODAL} on:nnsClose={modalStore.close}>
-	{#snippet title()}
-		{modalTitle}
-	{/snippet}
+<Modal onClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>
+	{#snippet title()}{modalTitle}{/snippet}
 
 	<!-- we add an if here because theres plans to have multiple settings open as a modal -->
 	<!-- to add a new type, extend the SettingsModalType enum and add a condition below -->

@@ -95,10 +95,8 @@
 {/if}
 
 {#if $modalReceiveBitcoin}
-	<Modal disablePointerEvents={true} on:nnsClose={modalStore.close}>
-		{#snippet title()}
-			{$i18n.receive.bitcoin.text.refresh_status}
-		{/snippet}
+	<Modal disablePointerEvents={true} onClose={modalStore.close}>
+		{#snippet title()}{$i18n.receive.bitcoin.text.refresh_status}{/snippet}
 
 		<div class="stretch">
 			<IcTransactionsBitcoinStatus bind:receiveProgressStep />

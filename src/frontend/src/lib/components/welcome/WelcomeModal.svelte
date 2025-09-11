@@ -18,7 +18,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	{#snippet title()}
 		<span class="text-xl">{replaceOisyPlaceholders($i18n.welcome.title)}</span>
 	{/snippet}

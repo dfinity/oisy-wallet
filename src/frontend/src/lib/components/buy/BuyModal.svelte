@@ -6,7 +6,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	{#snippet title()}
 		{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}
 	{/snippet}

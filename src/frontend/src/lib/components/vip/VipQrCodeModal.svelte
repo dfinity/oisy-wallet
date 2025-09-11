@@ -87,7 +87,7 @@
 
 <svelte:window onvisibilitychange={onVisibilityChange} />
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	{#snippet title()}
 		<span class="text-xl"
 			>{codeType === QrCodeType.VIP

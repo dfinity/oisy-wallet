@@ -43,7 +43,7 @@
 	});
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	{#snippet title()}
 		<span class="text-xl">{$i18n.referral.invitation.text.title}</span>
 	{/snippet}

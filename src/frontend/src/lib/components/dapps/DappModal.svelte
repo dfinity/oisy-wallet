@@ -50,7 +50,7 @@
 	});
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	{#snippet title()}
 		<span class="text-center text-xl">{resolveText({ i18n: $i18n, path: dAppName })}</span>
 	{/snippet}
