@@ -760,7 +760,8 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa."
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {

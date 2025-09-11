@@ -635,6 +635,7 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		fee_calc_unsupported_standard: string;
 	};
 }
 

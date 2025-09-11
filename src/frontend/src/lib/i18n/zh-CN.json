@@ -760,7 +760,8 @@
 			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": "Solana确认失败"
+			"solana_confirmation_failed": "Solana确认失败",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
