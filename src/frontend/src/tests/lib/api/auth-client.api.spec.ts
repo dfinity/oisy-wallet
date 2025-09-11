@@ -143,7 +143,7 @@ describe('auth-client.api', () => {
 		});
 
 		it('should not create a new key when called a second time', async () => {
-			await createAuthClient();
+			await loadIdentity();
 
 			expect(AuthClient.create).toHaveBeenCalledExactlyOnceWith({
 				storage: authClientStorage,
