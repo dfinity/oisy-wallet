@@ -760,7 +760,8 @@
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
-			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně."
+			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
