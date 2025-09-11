@@ -100,7 +100,7 @@
 	);
 </script>
 
-<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
+<Modal onClose={() => (!saveLoading ? modalStore.close() : undefined)} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -164,6 +164,24 @@
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
 				<span class="flex-col justify-items-end" data-tid={`${testId}-nfts-media`}>
+					{#if nonNullish(collection.bannerImageUrl)}
+						<span class="flex">
+							<output class="text-tertiary"
+								>{shortenWithMiddleEllipsis({
+									text: collection.bannerImageUrl,
+									splitLength: 20
+								})}</output
+							>
+							<AddressActions
+								copyAddress={collection.bannerImageUrl}
+								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+									$address: collection.bannerImageUrl
+								})}
+								externalLink={collection.bannerImageUrl}
+								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+							/>
+						</span>
+					{/if}
 					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 						{#if nonNullish(nft?.imageUrl)}
 							<span class="flex">
