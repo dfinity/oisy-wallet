@@ -18,6 +18,8 @@
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
+	import { isCollectionErc721 } from '$eth/utils/erc721.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -132,22 +134,25 @@
 			}
 
 			if (nonNullish(sendNft)) {
-				const { to, data } =
-					sendNft.collection.standard === 'erc721'
-						? encodeErc721SafeTransfer({
-								contractAddress: sendNft.collection.address,
-								from: $ethAddress,
-								to: destination,
-								tokenId: sendNft.id
-							})
-						: encodeErc1155SafeTransfer({
+				const { to, data } = isCollectionErc721(sendNft.collection)
+					? encodeErc721SafeTransfer({
+							contractAddress: sendNft.collection.address,
+							from: $ethAddress,
+							to: destination,
+							tokenId: sendNft.id
+						})
+					: isCollectionErc1155(sendNft.collection)
+						? encodeErc1155SafeTransfer({
 								contractAddress: sendNft.collection.address,
 								from: $ethAddress,
 								to: destination,
 								tokenId: sendNft.id,
 								amount: 1n,
 								data: '0x'
-							});
+							})
+						: (() => {
+								throw new Error($i18n.send.error.fee_calc_unsupported_standard);
+							})();
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 

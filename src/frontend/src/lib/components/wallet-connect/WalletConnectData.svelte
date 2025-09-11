@@ -4,8 +4,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	export let data: string | undefined;
-	export let label: string;
+	interface Props {
+		data: string | undefined;
+		label: string;
+	}
+	let { data, label }: Props = $props();
 </script>
 
 {#if nonNullish(data)}
