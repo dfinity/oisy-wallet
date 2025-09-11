@@ -17,11 +17,11 @@ import * as networkUtils from '$lib/utils/network.utils';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as nftSend from '$eth/services/nft-send.services';
+import type { EthFeeContextProps } from '$tests/eth/components/fee/EthFeeContextProps';
 import EthFeeContextTestHost from '$tests/eth/components/fee/EthFeeContextTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import type { Mock } from 'vitest';
-import type { EthFeeContextProps } from './EthFeeContextTestHost.svelte';
 
 describe('EthFeeContext', () => {
 	const feeStore = { setFee: vi.fn() };
