@@ -31,7 +31,7 @@
 	export let sendProgressStep: string;
 	export let currentStep: WizardStep | undefined;
 	export let selectedContact: ContactUi | undefined = undefined;
-	export let nft: Nft | undefined;
+	export let nft: Nft | undefined = undefined;
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
