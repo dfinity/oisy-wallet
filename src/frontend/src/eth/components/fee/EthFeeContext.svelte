@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
@@ -11,6 +11,10 @@
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
+	import {
+		encodeErc1155SafeTransfer,
+		encodeErc721SafeTransfer
+	} from '$eth/services/nft-send.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -28,6 +32,7 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
@@ -43,6 +48,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
+	export let sendNft: Nft | undefined = undefined;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -65,7 +71,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -121,6 +127,33 @@
 							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
 						)
 					})
+				});
+				return;
+			}
+
+			if (nonNullish(sendNft)) {
+				const { to, data } =
+					sendNft.collection.standard === 'erc721'
+						? encodeErc721SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id
+							})
+						: encodeErc1155SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id,
+								amount: 1n,
+								data: '0x'
+							});
+
+				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
+
+				feeStore.setFee({
+					...feeData,
+					gas: estimatedGasNft
 				});
 				return;
 			}
