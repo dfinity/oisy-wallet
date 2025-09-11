@@ -56,7 +56,7 @@
 	 * Props
 	 */
 
-	export let nft: Nft | undefined;
+	export let nft: Nft | undefined = undefined;
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let amount: OptionAmount = undefined;
