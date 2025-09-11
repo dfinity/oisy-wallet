@@ -53,16 +53,7 @@ export const parseShowFilteredContactsToolArguments = ({
 	filterParams: ToolCallArgument[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
 }): ShowContactsToolResult => {
-	const { addressIdsFilter } = filterParams.reduce<{
-		addressIdsFilter: string;
-	}>(
-		(acc, { value, name }) => ({
-			addressIdsFilter: name === 'addressIds' ? value : acc.addressIdsFilter
-		}),
-		{
-			addressIdsFilter: '[]'
-		}
-	);
+	const addressIdsFilter = filterParams.find(({ name }) => name === 'addressIds')?.value ?? '[]';
 
 	const addressIds = JSON.parse(addressIdsFilter, jsonReplacer);
 
