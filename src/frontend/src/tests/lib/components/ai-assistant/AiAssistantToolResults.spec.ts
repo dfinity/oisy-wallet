@@ -23,6 +23,7 @@ describe('AiAssistantToolResults', () => {
 	it('renders show_contacts tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -39,6 +40,7 @@ describe('AiAssistantToolResults', () => {
 	it('renders review_send_tokens tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -56,6 +58,7 @@ describe('AiAssistantToolResults', () => {
 	it('does not render unknown tool', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
 				onSendMessage: () => Promise.resolve(),
 				// @ts-expect-error Testing unknown tool type
 				results: [{ type: 'unknown_tool', result: contacts } as ToolResult]
