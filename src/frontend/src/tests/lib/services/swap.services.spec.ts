@@ -420,7 +420,29 @@ describe('fetchVeloraDeltaSwap', () => {
 		poolAddress: '0xpool123',
 		bridge: {
 			destinationChainId: 1,
-			outputToken: '0xoutput456'
+			outputToken: '0xoutput456',
+			protocolSelector: 'bridge_protocol',
+			scalingFactor: 1000000,
+			protocolData: '0xprotocol_data'
+		},
+		bridgeInfo: {
+			destAmountAfterBridge: '800000000',
+			destUSDAfterBridge: '795.0',
+			bridgeFee: '50',
+			bridgeFeeUSD: '50.0',
+			poolAddress: '0xpool123',
+			protocolName: 'bridge_protocol',
+			fees: [
+				{
+					name: 'bridge_fee',
+					amount: '50',
+					amountUSD: '50.0',
+					feeToken: '0xoutput456',
+					amountInSrcToken: '50',
+					amountInUSD: '50.0'
+				}
+			],
+			estimatedTimeMs: 300000
 		},
 		// OptimalRate properties
 		blockNumber: 12345,

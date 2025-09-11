@@ -9,7 +9,7 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+	import IcTransactionsCkBtcListeners from '$icp/components/transactions/IcTransactionsCkBtcListeners.svelte';
 	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
 	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
@@ -39,7 +39,7 @@
 
 	let AdditionalListener = $derived(
 		$tokenCkBtcLedger
-			? IcTransactionsBtcListeners
+			? IcTransactionsCkBtcListeners
 			: ckEthereum
 				? IcTransactionsCkEthereumListeners
 				: IcTransactionsNoListener

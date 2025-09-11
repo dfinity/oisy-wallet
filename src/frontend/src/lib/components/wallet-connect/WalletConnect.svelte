@@ -4,7 +4,7 @@
 	import WalletConnectSign from '$lib/components/wallet-connect/WalletConnectSign.svelte';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	let listener: OptionWalletConnectListener;
+	let listener = $state<OptionWalletConnectListener | undefined>();
 </script>
 
 <WalletConnectSession bind:listener />

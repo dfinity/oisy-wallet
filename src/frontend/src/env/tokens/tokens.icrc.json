@@ -162,11 +162,11 @@
 	},
 	"SGLDT": {
 		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
-		"fee": {
-			"__bigint__": "1000"
-		},
+		"decimals": 8,
 		"name": "sGLDT - GLDT Wrapper",
 		"symbol": "sGLDT",
-		"decimals": 8
+		"fee": {
+			"__bigint__": "1000"
+		}
 	}
 }
