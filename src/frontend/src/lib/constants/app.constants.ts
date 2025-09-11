@@ -46,7 +46,7 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 				'https://id.decideai.xyz'
 	: undefined;
 
-export const BACKEND_CANISTER_ID = "jloto-byaaa-aaaap-anryq-cai"
+export const BACKEND_CANISTER_ID = 'jloto-byaaa-aaaap-anryq-cai';
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
 export const REWARDS_CANISTER_ID = LOCAL
