@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
-	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
+	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import { ckEthereumTwinToken, ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
@@ -13,7 +13,7 @@
 	let icCkToken: OptionIcCkToken = $derived($pageToken as OptionIcCkToken);
 </script>
 
-<ConvertETH
+<ConvertEth
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
@@ -23,7 +23,7 @@
 		<IconCkConvert size="24" />
 	{/snippet}
 	<span>{$ckEthereumTwinToken.symbol}</span>
-</ConvertETH>
+</ConvertEth>
 
 {#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}
 	<ConvertModal destinationToken={icCkToken.twinToken} sourceToken={icCkToken} />

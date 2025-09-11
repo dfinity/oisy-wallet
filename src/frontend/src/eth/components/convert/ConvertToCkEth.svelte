@@ -3,28 +3,24 @@
 	import { run } from 'svelte/legacy';
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
-	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
-	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
+	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let convertToSymbol: string = $derived(($pageToken as OptionErc20Token)?.twinTokenSymbol ?? '');
-
-	let ckToken: IcCkToken | undefined = $state();
+	let ckEthToken: IcCkToken | undefined = $state();
 	run(() => {
 		(() => {
-			if (nonNullish(ckToken) || isNullish($pageToken)) {
+			if (nonNullish(ckEthToken) || isNullish($pageToken)) {
 				return;
 			}
 
-			ckToken = findTwinToken({
+			ckEthToken = findTwinToken({
 				tokenToPair: $pageToken,
 				tokens: $tokens
 			});
@@ -32,20 +28,15 @@
 	});
 </script>
 
-<ConvertETH
-	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
-		$ckErc20: convertToSymbol
-	})}
-	nativeTokenId={$ethereumTokenId}
->
+<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
 	{#snippet icon()}
 		<IconCkConvert size="24" />
 	{/snippet}
-	<span>{convertToSymbol}</span>
-</ConvertETH>
+	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
+</ConvertEth>
 
-{#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
+{#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
 	<FeeStoreContext token={$ethereumToken}>
-		<ConvertModal destinationToken={ckToken} sourceToken={$pageToken} />
+		<ConvertModal destinationToken={ckEthToken} sourceToken={$ethereumToken} />
 	</FeeStoreContext>
 {/if}
