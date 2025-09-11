@@ -119,13 +119,13 @@ describe('EthSendTokenWizard.spec', () => {
 	}) =>
 		render(EthSendTokenWizard, {
 			props: {
-				currentStep: currentStep,
-				sendProgressStep: sendProgressStep,
-				nft: nft,
-				destination: destination,
-				sourceNetwork: sourceNetwork,
+				currentStep,
+				sendProgressStep,
+				nft,
+				destination,
+				sourceNetwork,
 				amount: amount ?? 1,
-				nativeEthereumToken: nativeEthereumToken
+				nativeEthereumToken
 			},
 			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
 		});
