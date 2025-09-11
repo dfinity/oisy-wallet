@@ -616,6 +616,7 @@ interface I18nSend {
 		btc_utxo_locked: string;
 		btc_invalid_fee_calculation: string;
 		pending_transactions_not_available: string;
+		no_nft_selected: string;
 	};
 	error: {
 		unexpected: string;

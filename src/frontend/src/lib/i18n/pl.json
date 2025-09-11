@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
 			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
-			"pending_transactions_not_available": ""
+			"pending_transactions_not_available": "",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",

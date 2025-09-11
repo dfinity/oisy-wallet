@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "Неверные данные транзакции Bitcoin",
 			"btc_utxo_locked": "Средства Bitcoin заблокированы ожидающими транзакциями",
 			"btc_invalid_fee_calculation": "Ошибка проверки комиссии транзакции Bitcoin",
-			"pending_transactions_not_available": "Сервис ожидающих транзакций в настоящее время недоступен. Пожалуйста, попробуйте позже."
+			"pending_transactions_not_available": "Сервис ожидающих транзакций в настоящее время недоступен. Пожалуйста, попробуйте позже.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Что-то пошло не так при отправке транзакции.",
