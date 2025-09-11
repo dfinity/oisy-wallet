@@ -134,37 +134,32 @@
 			}
 
 			if (nonNullish(sendNft)) {
-				let to: string;
-				let data: string;
+				const { to, data } = isCollectionErc721(sendNft.collection)
+					? encodeErc721SafeTransfer({
+							contractAddress: sendNft.collection.address,
+							from: $ethAddress,
+							to: destination,
+							tokenId: sendNft.id
+						})
+					: isCollectionErc1155(sendNft.collection)
+						? encodeErc1155SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id,
+								amount: 1n,
+								data: '0x'
+							})
+						: (() => {
+								throw new Error('Could not calculate fee: Unsupported collection type');
+							})();
 
-				if (isCollectionErc721(sendNft.collection)) {
-					({ to, data } = encodeErc721SafeTransfer({
-						contractAddress: sendNft.collection.address,
-						from: $ethAddress,
-						to: destination,
-						tokenId: sendNft.id
-					}));
-				}
+				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
 
-				if (isCollectionErc1155(sendNft.collection)) {
-					({ to, data } = encodeErc1155SafeTransfer({
-						contractAddress: sendNft.collection.address,
-						from: $ethAddress,
-						to: destination,
-						tokenId: sendNft.id,
-						amount: 1n,
-						data: '0x'
-					}));
-				}
-
-				if (nonNullish(to) && nonNullish(data)) {
-					const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
-
-					feeStore.setFee({
-						...feeData,
-						gas: estimatedGasNft
-					});
-				}
+				feeStore.setFee({
+					...feeData,
+					gas: estimatedGasNft
+				});
 				return;
 			}
 
