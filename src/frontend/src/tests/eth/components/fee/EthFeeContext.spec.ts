@@ -67,22 +67,28 @@ describe('EthFeeContext', () => {
 		});
 
 		vi.spyOn(infuraMod, 'infuraProviders').mockReturnValue({
-			getFeeData: async () => ({
-				gasPrice: null,
-				maxFeePerGas: 10n,
-				maxPriorityFeePerGas: 5n
-			}),
-			safeEstimateGas: async () => 0n,
-			estimateGas: async () => 0n
+			getFeeData: async () =>
+				await new Promise((resolve) =>
+					resolve({
+						gasPrice: null,
+						maxFeePerGas: 10n,
+						maxPriorityFeePerGas: 5n
+					})
+				),
+			safeEstimateGas: async () => await new Promise((resolve) => resolve(0n)),
+			estimateGas: async () => await new Promise((resolve) => resolve(0n))
 		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
 		vi.spyOn(infuraGasRestMod, 'InfuraGasRest').mockImplementation(
 			() =>
 				({
-					getSuggestedFeeData: async () => ({
-						maxFeePerGas: 12n,
-						maxPriorityFeePerGas: 7n
-					})
+					getSuggestedFeeData: async () =>
+						await new Promise((resolve) =>
+							resolve({
+								maxFeePerGas: 12n,
+								maxPriorityFeePerGas: 7n
+							})
+						)
 				}) as unknown as infuraGasRestMod.InfuraGasRest
 		);
 
@@ -104,7 +110,7 @@ describe('EthFeeContext', () => {
 		render(EthFeeContextTestHost, { props: { feeStore, props: { ...baseProps, ...props } } });
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
-		(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(true);
+		vi.mocked(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(true);
 
 		const provider = infuraMod.infuraProviders(network.id) as unknown as {
 			getFeeData: () => Promise<unknown>;
@@ -128,8 +134,8 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for ckERC20 twin using getCkErc20FeeData', async () => {
-		(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(true);
-		(feeServices.getCkErc20FeeData as unknown as Mock).mockResolvedValue(123n);
+		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(true);
+		vi.mocked(feeServices.getCkErc20FeeData as unknown as Mock).mockResolvedValue(123n);
 
 		renderWith();
 
@@ -145,9 +151,9 @@ describe('EthFeeContext', () => {
 	});
 
 	it('sets fee for NFT (ERC-721) by encoding and estimating gas', async () => {
-		(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(false);
-		(evmNativeUtils.isSupportedEvmNativeTokenId as unknown as Mock).mockReturnValue(false);
-		(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(false);
+		vi.mocked(ethUtils.isSupportedEthTokenId as unknown as Mock).mockReturnValue(false);
+		vi.mocked(evmNativeUtils.isSupportedEvmNativeTokenId as unknown as Mock).mockReturnValue(false);
+		vi.mocked(tokenUtils.isSupportedErc20TwinTokenId as unknown as Mock).mockReturnValue(false);
 
 		const nft = mockValidErc721Nft;
 
