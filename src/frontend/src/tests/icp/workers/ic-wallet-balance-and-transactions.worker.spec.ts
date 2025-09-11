@@ -2,7 +2,6 @@ import { ICP_INDEX_CANISTER_ID } from '$env/networks/networks.icp.env';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import * as indexCanisterServices from '$icp/services/index-canister.services';
-import * as authClientApi from '$lib/api/auth-client.api';
 import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
