@@ -46,7 +46,17 @@ export const POUH_ISSUER_ORIGIN = nonNullish(POUH_ISSUER_CANISTER_ID)
 				'https://id.decideai.xyz'
 	: undefined;
 
-export const BACKEND_CANISTER_ID = 'jloto-byaaa-aaaap-anryq-cai';
+export const BACKEND_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_BACKEND_CANISTER_ID
+	: TEST_FE || AUDIT || E2E
+		? (import.meta.env[`VITE_${MODE.toUpperCase()}_BACKEND_CANISTER_ID`] ??
+			import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID)
+		: STAGING
+			? import.meta.env.VITE_STAGING_BACKEND_CANISTER_ID
+			: BETA
+				? import.meta.env.VITE_BETA_BACKEND_CANISTER_ID
+				: import.meta.env.VITE_IC_BACKEND_CANISTER_ID;
+
 export const BACKEND_CANISTER_PRINCIPAL = Principal.fromText(BACKEND_CANISTER_ID);
 
 export const REWARDS_CANISTER_ID = LOCAL
