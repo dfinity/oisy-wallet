@@ -1,4 +1,4 @@
-import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
+import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import * as ckMinterInfoWorkerServices from '$icp/services/worker.ck-minter-info.services';
 import type { IcCkToken } from '$icp/types/ic-token';
@@ -9,7 +9,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-describe('ConvertToCkBTC', () => {
+describe('ConvertToCkBtc', () => {
 	const buttonId = 'convert-to-ckbtc-button';
 	const mockCkBtcToken = {
 		...mockValidIcCkToken,
@@ -47,7 +47,7 @@ describe('ConvertToCkBTC', () => {
 		const spy = mockCkMinterInfoWorkerServices();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 
@@ -60,7 +60,7 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext(true)
 		});
 
@@ -74,7 +74,7 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore(true);
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 
@@ -88,7 +88,7 @@ describe('ConvertToCkBTC', () => {
 		mockTokensStore();
 		mockIsBusyStore();
 
-		const { getByTestId } = render(ConvertToCkBTC, {
+		const { getByTestId } = render(ConvertToCkBtc, {
 			context: mockContext()
 		});
 

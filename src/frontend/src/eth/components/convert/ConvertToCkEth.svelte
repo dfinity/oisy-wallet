@@ -3,7 +3,7 @@
 	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
 	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
-	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
+	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { modalConvertToTwinTokenCkEth } from '$lib/derived/modal.derived';
@@ -25,10 +25,10 @@
 	})();
 </script>
 
-<ConvertETH ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
+<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
 	<IconCkConvert slot="icon" size="24" />
 	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
-</ConvertETH>
+</ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
 	<FeeStoreContext token={$ethereumToken}>
