@@ -151,7 +151,7 @@
 								data: '0x'
 							})
 						: (() => {
-								throw new Error('Could not calculate fee: Unsupported collection type');
+								throw new Error($i18n.send.error.fee_calc_error_unsupported_standard);
 							})();
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });

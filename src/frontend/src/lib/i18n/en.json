@@ -760,7 +760,8 @@
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
 			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
-			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly."
+			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+            "fee_calc_error_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
 	"convert": {
