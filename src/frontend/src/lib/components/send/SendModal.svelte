@@ -184,12 +184,6 @@
 			}
 		});
 	};
-
-	onMount(() => {
-		if (nonNullish(nft) && isNftsPage) {
-			selectNft(nft);
-		}
-	});
 </script>
 
 <SendTokenContext token={$token}>
