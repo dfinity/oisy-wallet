@@ -24,7 +24,6 @@ import type { WizardStep } from '@dfinity/gix-components';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { TransactionResponse } from 'ethers/providers';
 import { readable, writable, type Writable } from 'svelte/store';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('EthSendTokenWizard.spec', () => {
 	const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
