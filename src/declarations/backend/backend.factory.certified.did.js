@@ -17,21 +17,6 @@ export const idlFactory = ({ IDL }) => {
 		ic_root_key_der: IDL.Opt(IDL.Vec(IDL.Nat8))
 	});
 	const Arg = IDL.Variant({ Upgrade: IDL.Null, Init: InitArg });
-	const CreateChallengeResponse = IDL.Record({
-		difficulty: IDL.Nat32,
-		start_timestamp_ms: IDL.Nat64,
-		expiry_timestamp_ms: IDL.Nat64
-	});
-	const CreateChallengeError = IDL.Variant({
-		ChallengeInProgress: IDL.Null,
-		MissingUserProfile: IDL.Null,
-		RandomnessError: IDL.Text,
-		Other: IDL.Text
-	});
-	const CreatePowChallengeResult = IDL.Variant({
-		Ok: CreateChallengeResponse,
-		Err: CreateChallengeError
-	});
 	const ArgumentValue = IDL.Variant({ Int: IDL.Int32, String: IDL.Text });
 	const CredentialSpec = IDL.Record({
 		arguments: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Text, ArgumentValue))),

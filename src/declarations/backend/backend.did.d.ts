@@ -434,7 +434,6 @@ export interface Utxo {
 	outpoint: Outpoint;
 }
 export interface _SERVICE {
-	__candid_method_create_pow_challenge: ActorMethod<[], CreatePowChallengeResult>;
 	add_user_credential: ActorMethod<[AddUserCredentialRequest], AddUserCredentialResult>;
 	add_user_hidden_dapp_id: ActorMethod<[AddHiddenDappIdRequest], AddUserHiddenDappIdResult>;
 	allow_signing: ActorMethod<[[] | [AllowSigningRequest]], AllowSigningResult>;
