@@ -151,7 +151,7 @@
 
 		if (isNullish(nft)) {
 			toastsError({
-				msg: { text: 'Todo: nft not passed' }
+				msg: { text: $i18n.send.assertion.no_nft_selected }
 			});
 			return;
 		}
