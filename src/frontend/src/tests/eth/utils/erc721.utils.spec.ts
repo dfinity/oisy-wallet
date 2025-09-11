@@ -6,13 +6,18 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import {
+	isCollectionErc721,
+	isTokenErc721,
+	isTokenErc721CustomToken
+} from '$eth/utils/erc721.utils';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import {
 	AZUKI_ELEMENTAL_BEANS_TOKEN,
 	DE_GODS_TOKEN,
 	MOCK_ERC721_TOKENS
 } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('erc721.utils', () => {
 	describe('isTokenErc721', () => {
@@ -66,6 +71,14 @@ describe('erc721.utils', () => {
 			...MOCK_ERC1155_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc721CustomToken(token)).toBeFalsy();
+		});
+	});
+
+	describe('isCollectionErc721', () => {
+		it('should differentiate correctly between an ERC721 and an ERC1155 collection', () => {
+			expect(isCollectionErc721(mockValidErc721Nft.collection)).toBeTruthy();
+
+			expect(isCollectionErc721(mockValidErc1155Nft.collection)).toBeFalsy();
 		});
 	});
 });
