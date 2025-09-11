@@ -69,7 +69,7 @@
 		"@dfinity/candid": "^3.2.4",
 		"@dfinity/ckbtc": "^4.0.1-next-2025-09-08.1",
 		"@dfinity/cketh": "^4.0.1-next-2025-09-08.1",
-		"@dfinity/gix-components": "^8.0.0-next-2025-09-11",
+		"@dfinity/gix-components": "^8.0.0-next-2025-09-11.2",
 		"@dfinity/ledger-icp": "^6.0.0-next-2025-09-08.1",
 		"@dfinity/ledger-icrc": "^4.0.0-next-2025-09-08.1",
 		"@dfinity/oisy-wallet-signer": "^1.0.0-next-2025-09-08",
