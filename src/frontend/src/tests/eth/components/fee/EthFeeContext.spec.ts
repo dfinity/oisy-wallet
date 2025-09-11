@@ -1,22 +1,10 @@
-import { render } from '@testing-library/svelte';
-import { readable, writable, type Writable } from 'svelte/store';
-
-import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
-import * as addressDerived from '$lib/derived/address.derived';
-
+import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as infuraMod from '$eth/providers/infura.providers';
 import * as infuraGasRestMod from '$eth/rest/infura.rest';
 import * as listenerServices from '$eth/services/eth-listener.services';
 import * as feeServices from '$eth/services/fee.services';
-
-import * as ethUtils from '$eth/utils/eth.utils';
-import * as tokenUtils from '$eth/utils/token.utils';
-import * as evmNativeUtils from '$evm/utils/native-token.utils';
-import * as networkUtils from '$lib/utils/network.utils';
-
-import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as nftSend from '$eth/services/nft-send.services';
 import {
 	ETH_FEE_CONTEXT_KEY,
@@ -24,25 +12,20 @@ import {
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
 import type { EthereumNetwork } from '$eth/types/network';
+import * as ethUtils from '$eth/utils/eth.utils';
+import * as tokenUtils from '$eth/utils/token.utils';
+import * as evmNativeUtils from '$evm/utils/native-token.utils';
+import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
+import * as addressDerived from '$lib/derived/address.derived';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
 import type { OptionAmount } from '$lib/types/send';
 import type { Token, TokenId } from '$lib/types/token';
+import * as networkUtils from '$lib/utils/network.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-
-interface EthFeeContextProps {
-	observe: boolean;
-	destination: string;
-	amount: OptionAmount;
-	data: string | undefined;
-	sourceNetwork: EthereumNetwork;
-	targetNetwork: Network | undefined;
-	nativeEthereumToken: Token;
-	sendToken: Token;
-	sendTokenId: TokenId;
-	sendNft: Nft | undefined;
-}
+import { render } from '@testing-library/svelte';
+import { readable, writable, type Writable } from 'svelte/store';
 
 describe('EthFeeContext', () => {
 	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
@@ -61,7 +44,18 @@ describe('EthFeeContext', () => {
 	const destination = '0x1111111111111111111111111111111111111111';
 	const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-	const baseProps = {
+	const baseProps: {
+		observe: boolean;
+		destination: string;
+		amount: OptionAmount;
+		data: string | undefined;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork: Network | undefined;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		sendNft: Nft | undefined;
+	} = {
 		observe: true,
 		destination,
 		amount: 1,
@@ -72,7 +66,7 @@ describe('EthFeeContext', () => {
 		sendToken: ETHEREUM_TOKEN,
 		sendTokenId: ETHEREUM_TOKEN.id,
 		sendNft: undefined
-	} as EthFeeContextProps;
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
