@@ -1,38 +1,32 @@
-import { fireEvent, render } from '@testing-library/svelte';
-import { readable, writable, type Writable } from 'svelte/store';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { WizardStepsSend } from '$lib/enums/wizard-steps';
-import type { Nft, NonFungibleToken } from '$lib/types/nft';
-import type { Token } from '$lib/types/token';
-
-import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
-import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-
-// services & utilities
 import * as sendServices from '$eth/services/send.services';
+import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
+import * as feeStoreMod from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
-import * as analytics from '$lib/services/analytics.services';
-import * as nftServices from '$lib/services/nft.services';
-import * as toasts from '$lib/stores/toasts.store';
-import * as inputUtils from '$lib/utils/input.utils';
-
-// derived
+import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
-
-// fee store init used by the wizard
-import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
-import * as feeStoreMod from '$eth/stores/eth-fee.store';
+import { WizardStepsSend } from '$lib/enums/wizard-steps';
+import * as analytics from '$lib/services/analytics.services';
+import * as nftServices from '$lib/services/nft.services';
+import * as toasts from '$lib/stores/toasts.store';
+import type { Nft, NonFungibleToken } from '$lib/types/nft';
+import type { Token } from '$lib/types/token';
+import * as inputUtils from '$lib/utils/input.utils';
+import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import type { WizardStep } from '@dfinity/gix-components';
+import { fireEvent, render } from '@testing-library/svelte';
+import type { TransactionResponse } from 'ethers/providers';
+import { readable, writable, type Writable } from 'svelte/store';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-describe('EthSendTokenWizard (single host)', () => {
+describe('EthSendTokenWizard.spec', () => {
 	const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 	const destination = '0x1111111111111111111111111111111111111111';
 
@@ -77,10 +71,7 @@ describe('EthSendTokenWizard (single host)', () => {
 			minGasFee: readable(undefined)
 		}));
 
-		// services
-		vi.spyOn(sendServices, 'send').mockResolvedValue(
-			{} as unknown as import('ethers/providers').TransactionResponse
-		);
+		vi.spyOn(sendServices, 'send').mockResolvedValue({} as TransactionResponse);
 		vi.spyOn(nftServices, 'sendNft').mockResolvedValue(undefined);
 	});
 
@@ -109,7 +100,7 @@ describe('EthSendTokenWizard (single host)', () => {
 			}
 		});
 
-	it('sends fungible token via executeSend on icSend', async () => {
+	it('sends token via executeSend on icSend', async () => {
 		const { getByTestId } = renderHost({
 			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
 			nft: undefined,
@@ -121,8 +112,8 @@ describe('EthSendTokenWizard (single host)', () => {
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
-		await fireEvent.click(getByTestId('eth-review-send'));
-		await vi.runAllTimersAsync();
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
 
 		expect(sendServices.send).toHaveBeenCalledOnce();
 
@@ -156,8 +147,8 @@ describe('EthSendTokenWizard (single host)', () => {
 			sendTokenDecimals: 0
 		});
 
-		await fireEvent.click(getByTestId('eth-review-send'));
-		await vi.runAllTimersAsync();
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
 
 		expect(nftServices.sendNft).toHaveBeenCalledOnce();
 
@@ -188,10 +179,10 @@ describe('EthSendTokenWizard (single host)', () => {
 			sendTokenDecimals: ETHEREUM_TOKEN.decimals
 		});
 
-		await fireEvent.click(getByTestId('eth-review-send'));
-		await vi.runAllTimersAsync();
+		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
+		await vi.runOnlyPendingTimersAsync();
 
-		expect(toasts.toastsError).toHaveBeenCalledOnce();
+		expect(toasts.toastsError).toHaveBeenCalled();
 
 		expect(sendServices.send).not.toHaveBeenCalled();
 
