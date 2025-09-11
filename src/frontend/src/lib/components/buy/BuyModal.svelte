@@ -6,10 +6,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		>{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}</svelte:fragment
-	>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		{isOnRamperDev ? $i18n.buy.text.buy_dev : $i18n.buy.text.buy}
+	{/snippet}
 
 	<div class="stretch flex overflow-hidden">
 		<div class="w-full overflow-auto">
