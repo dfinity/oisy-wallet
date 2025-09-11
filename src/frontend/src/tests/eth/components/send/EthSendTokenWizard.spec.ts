@@ -1,22 +1,28 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 import * as sendServices from '$eth/services/send.services';
-import type { EthFeeStore, FeeStoreData } from '$eth/stores/eth-fee.store';
 import * as feeStoreMod from '$eth/stores/eth-fee.store';
+import {
+	ETH_FEE_CONTEXT_KEY,
+	type EthFeeStore,
+	type FeeStoreData
+} from '$eth/stores/eth-fee.store';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as ckethServices from '$icp-eth/services/cketh.services';
 import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import * as addrDerived from '$lib/derived/address.derived';
 import * as idDerived from '$lib/derived/auth.derived';
 import * as exchDerived from '$lib/derived/exchange.derived';
+import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import * as analytics from '$lib/services/analytics.services';
 import * as nftServices from '$lib/services/nft.services';
+import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
 import * as toasts from '$lib/stores/toasts.store';
 import type { Nft, NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
 import * as inputUtils from '$lib/utils/input.utils';
-import EthSendTokenWizardTestHost from '$tests/eth/components/send/EthSendTokenWizardTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -31,6 +37,27 @@ describe('EthSendTokenWizard.spec', () => {
 
 	let feeState: Writable<FeeStoreData>;
 	let feeStore: EthFeeStore;
+
+	const mockContext = ({
+		sendToken,
+		sendTokenId,
+		sendTokenDecimals
+	}: {
+		sendToken: Token | NonFungibleToken;
+		sendTokenId: string;
+		sendTokenDecimals: number;
+	}) =>
+		new Map([
+			[ETH_FEE_CONTEXT_KEY, { feeStore }],
+			[
+				SEND_CONTEXT_KEY,
+				{
+					sendToken: writable(sendToken),
+					sendTokenId: writable(sendTokenId),
+					sendTokenDecimals: writable(sendTokenDecimals)
+				}
+			]
+		]);
 
 	beforeEach(() => {
 		vi.useFakeTimers();
@@ -67,8 +94,20 @@ describe('EthSendTokenWizard.spec', () => {
 		vi.spyOn(nftServices, 'sendNft').mockResolvedValue(undefined);
 	});
 
-	const renderHost = (args: {
+	const renderHost = ({
+		currentStep,
+		sendProgressStep,
+		nft,
+		destination,
+		sourceNetwork,
+		amount,
+		nativeEthereumToken,
+		sendToken,
+		sendTokenId,
+		sendTokenDecimals
+	}: {
 		currentStep: WizardStep;
+		sendProgressStep: string;
 		nft?: Nft;
 		destination: string;
 		sourceNetwork: typeof ETHEREUM_NETWORK;
@@ -78,23 +117,23 @@ describe('EthSendTokenWizard.spec', () => {
 		sendTokenId: string;
 		sendTokenDecimals: number;
 	}) =>
-		render(EthSendTokenWizardTestHost, {
+		render(EthSendTokenWizard, {
 			props: {
-				currentStep: args.currentStep,
-				nft: args.nft,
-				destination: args.destination,
-				sourceNetwork: args.sourceNetwork,
-				amount: args.amount ?? 1,
-				nativeEthereumToken: args.nativeEthereumToken,
-				sendToken: args.sendToken,
-				sendTokenId: args.sendTokenId,
-				sendTokenDecimals: args.sendTokenDecimals
-			}
+				currentStep: currentStep,
+				sendProgressStep: sendProgressStep,
+				nft: nft,
+				destination: destination,
+				sourceNetwork: sourceNetwork,
+				amount: amount ?? 1,
+				nativeEthereumToken: nativeEthereumToken
+			},
+			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
 		});
 
 	it('sends token via executeSend on icSend', async () => {
 		const { getByTestId } = renderHost({
 			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
 			nft: undefined,
 			destination,
 			sourceNetwork: ETHEREUM_NETWORK,
@@ -130,6 +169,7 @@ describe('EthSendTokenWizard.spec', () => {
 
 		const { getByTestId } = renderHost({
 			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
 			nft,
 			destination,
 			sourceNetwork: ETHEREUM_NETWORK,
@@ -162,6 +202,7 @@ describe('EthSendTokenWizard.spec', () => {
 	it('shows a toast and aborts when destination is empty', async () => {
 		const { getByTestId } = renderHost({
 			currentStep: { name: WizardStepsSend.REVIEW, title: 'Review' },
+			sendProgressStep: ProgressStepsSend.INITIALIZATION,
 			nft: undefined,
 			destination: '',
 			sourceNetwork: ETHEREUM_NETWORK,
