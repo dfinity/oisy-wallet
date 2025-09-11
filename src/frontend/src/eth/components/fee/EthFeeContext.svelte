@@ -38,6 +38,8 @@
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
+	import { isCollectionErc721 } from '$eth/utils/erc721.utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -132,29 +134,37 @@
 			}
 
 			if (nonNullish(sendNft)) {
-				const { to, data } =
-					sendNft.collection.standard === 'erc721'
-						? encodeErc721SafeTransfer({
-								contractAddress: sendNft.collection.address,
-								from: $ethAddress,
-								to: destination,
-								tokenId: sendNft.id
-							})
-						: encodeErc1155SafeTransfer({
-								contractAddress: sendNft.collection.address,
-								from: $ethAddress,
-								to: destination,
-								tokenId: sendNft.id,
-								amount: 1n,
-								data: '0x'
-							});
+				let to: string;
+				let data: string;
 
-				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
+				if (isCollectionErc721(sendNft.collection)) {
+					({ to, data } = encodeErc721SafeTransfer({
+						contractAddress: sendNft.collection.address,
+						from: $ethAddress,
+						to: destination,
+						tokenId: sendNft.id
+					}));
+				}
 
-				feeStore.setFee({
-					...feeData,
-					gas: estimatedGasNft
-				});
+				if (isCollectionErc1155(sendNft.collection)) {
+					({ to, data } = encodeErc1155SafeTransfer({
+						contractAddress: sendNft.collection.address,
+						from: $ethAddress,
+						to: destination,
+						tokenId: sendNft.id,
+						amount: 1n,
+						data: '0x'
+					}));
+				}
+
+				if (nonNullish(to) && nonNullish(data)) {
+					const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
+
+					feeStore.setFee({
+						...feeData,
+						gas: estimatedGasNft
+					});
+				}
 				return;
 			}
 
