@@ -25,6 +25,8 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
+		TRACK_COUNT_ETH_NFT_SEND_ERROR,
+		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.contants';
@@ -56,7 +58,7 @@
 	 * Props
 	 */
 
-	export let nft: Nft | undefined;
+	export let nft: Nft | undefined = undefined;
 	export let destination = '';
 	export let sourceNetwork: EthereumNetwork;
 	export let amount: OptionAmount = undefined;
@@ -170,12 +172,25 @@
 				maxPriorityFeePerGas,
 				progress: (step: ProgressStep) => (sendProgressStep = step)
 			});
+
+			trackEvent({
+				name: TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+				metadata: {
+					token: $sendToken.symbol,
+					collection: nft.collection.name ?? nft.collection.address,
+					tokenId: String(nft.id),
+					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+				}
+			});
+
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
-				name: TRACK_COUNT_ETH_SEND_ERROR,
+				name: TRACK_COUNT_ETH_NFT_SEND_ERROR,
 				metadata: {
 					token: $sendToken.symbol,
+					collection: nft.collection.name ?? nft.collection.address,
+					tokenId: String(nft.id),
 					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
 				}
 			});

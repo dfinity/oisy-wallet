@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
 			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
 			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou",
-			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde."
+			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",

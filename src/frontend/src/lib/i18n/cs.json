@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "Neplatná data Bitcoin transakce",
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
-			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později."
+			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",

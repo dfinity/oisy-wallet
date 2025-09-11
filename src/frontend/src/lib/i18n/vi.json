@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
 			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
 			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
-			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau."
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",

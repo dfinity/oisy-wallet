@@ -742,7 +742,7 @@
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
 			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later.",
-            "no_nft_selected": "No NFT has been selected for sending."
+			"no_nft_selected": "No NFT has been selected for sending."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",

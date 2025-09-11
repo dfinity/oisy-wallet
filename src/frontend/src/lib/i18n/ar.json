@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "بيانات معاملة البيتكوين غير صالحة",
 			"btc_utxo_locked": "أموال البيتكوين مقفلة بواسطة المعاملات المعلقة",
 			"btc_invalid_fee_calculation": "فشل التحقق من رسوم معاملة البيتكوين",
-			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً."
+			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "حدث خطأ ما أثناء إرسال المعاملة.",
