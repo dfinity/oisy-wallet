@@ -21,7 +21,6 @@ import type { EthFeeContextProps } from '$tests/eth/components/fee/EthFeeContext
 import EthFeeContextTestHost from '$tests/eth/components/fee/EthFeeContextTestHost.svelte';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import type { Mock } from 'vitest';
 
 describe('EthFeeContext', () => {
 	const feeStore = { setFee: vi.fn() };
