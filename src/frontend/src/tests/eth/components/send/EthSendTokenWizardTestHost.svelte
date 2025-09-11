@@ -1,12 +1,12 @@
 <script lang="ts">
+	import type { WizardStep } from '@dfinity/gix-components';
 	import { setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
-	import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
-	import type { Token } from '$lib/types/token';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { EthereumNetwork } from '$eth/types/network';
-	import type { WizardStep } from '@dfinity/gix-components';
+	import { SEND_CONTEXT_KEY } from '$lib/stores/send.store';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import type { Token } from '$lib/types/token';
 
 	export let currentStep: WizardStep | undefined;
 	export let nft: Nft | undefined;
@@ -32,11 +32,11 @@
 </script>
 
 <EthSendTokenWizard
-	{currentStep}
-	{nft}
-	{destination}
-	{sourceNetwork}
 	{amount}
-	{sendProgressStep}
+	{currentStep}
+	{destination}
 	{nativeEthereumToken}
+	{nft}
+	{sendProgressStep}
+	{sourceNetwork}
 />
