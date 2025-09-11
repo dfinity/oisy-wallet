@@ -151,7 +151,7 @@
 								data: '0x'
 							})
 						: (() => {
-								throw new Error($i18n.send.error.fee_calc_error_unsupported_standard);
+								throw new Error($i18n.send.error.fee_calc_unsupported_standard);
 							})();
 
 				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
