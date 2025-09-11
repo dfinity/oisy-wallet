@@ -448,7 +448,6 @@
 	onDestroy(() => walletConnectPaired.set(false));
 
 	const openWalletConnectAuth = () => {
-		console.log('openWalletConnectAuth');
 		modalStore.openWalletConnectAuth(modalId);
 
 		trackEvent({
