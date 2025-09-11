@@ -100,7 +100,7 @@
 	);
 </script>
 
-<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
+<Modal onClose={() => (!saveLoading ? modalStore.close() : undefined)} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
