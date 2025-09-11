@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです",
 			"send_review_subtitle": "以下の内容を送信します",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",

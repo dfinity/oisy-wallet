@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Parece que você ainda não adicionou contatos",
 			"send_review_subtitle": "Você envia",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Insira endereço público (0x), nome ou alias",
