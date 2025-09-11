@@ -1,5 +1,5 @@
 import { render } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
+import { readable, writable, type Writable } from 'svelte/store';
 
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
 import * as addressDerived from '$lib/derived/address.derived';
@@ -16,14 +16,43 @@ import * as networkUtils from '$lib/utils/network.utils';
 
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 import * as nftSend from '$eth/services/nft-send.services';
-import type { EthFeeContextProps } from '$tests/eth/components/fee/EthFeeContextProps';
-import EthFeeContextTestHost from '$tests/eth/components/fee/EthFeeContextTestHost.svelte';
+import {
+	ETH_FEE_CONTEXT_KEY,
+	type EthFeeStore,
+	type FeeStoreData
+} from '$eth/stores/eth-fee.store';
+import type { EthereumNetwork } from '$eth/types/network';
+import type { Network } from '$lib/types/network';
+import type { Nft } from '$lib/types/nft';
+import type { OptionAmount } from '$lib/types/send';
+import type { Token, TokenId } from '$lib/types/token';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
+interface EthFeeContextProps {
+	observe: boolean;
+	destination: string;
+	amount: OptionAmount;
+	data: string | undefined;
+	sourceNetwork: EthereumNetwork;
+	targetNetwork: Network | undefined;
+	nativeEthereumToken: Token;
+	sendToken: Token;
+	sendTokenId: TokenId;
+	sendNft: Nft | undefined;
+}
+
 describe('EthFeeContext', () => {
-	const feeStore = { setFee: vi.fn() };
+	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
+	const setFeeMock = vi.fn((v: FeeStoreData) => feeState.set(v));
+	const feeStore: EthFeeStore = {
+		subscribe: feeState.subscribe,
+		setFee: setFeeMock
+	};
+
+	const mockContext = (fs: EthFeeStore) => new Map([[ETH_FEE_CONTEXT_KEY, { feeStore: fs }]]);
 
 	const network = ETHEREUM_NETWORK;
 
@@ -106,7 +135,7 @@ describe('EthFeeContext', () => {
 	});
 
 	const renderWith = (props: Partial<typeof baseProps> = {}) =>
-		render(EthFeeContextTestHost, { props: { feeStore, props: { ...baseProps, ...props } } });
+		render(EthFeeContext, { props: { ...baseProps, ...props }, context: mockContext(feeStore) });
 
 	it('sets fee for native ETH / EVM-native tokens using max(safeEstimateGas, getEthFeeData)', async () => {
 		vi.mocked(ethUtils.isSupportedEthTokenId).mockReturnValue(true);
