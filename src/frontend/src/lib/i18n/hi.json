@@ -741,7 +741,8 @@
 			"btc_invalid_utxo_data": "अमान्य बिटकॉइन लेनदेन डेटा",
 			"btc_utxo_locked": "बिटकॉइन फंड लंबित लेनदेन द्वारा लॉक किए गए हैं",
 			"btc_invalid_fee_calculation": "बिटकॉइन लेनदेन शुल्क सत्यापन विफल रहा",
-			"pending_transactions_not_available": "लंबित लेनदेन सेवा वर्तमान में उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।"
+			"pending_transactions_not_available": "लंबित लेनदेन सेवा वर्तमान में उपलब्ध नहीं है। कृपया बाद में पुनः प्रयास करें।",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "लेनदेन भेजते समय कुछ गलत हो गया।",
