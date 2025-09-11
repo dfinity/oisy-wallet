@@ -57,6 +57,10 @@ export const parseShowFilteredContactsToolArguments = ({
 
 	const addressIds = JSON.parse(addressIdsFilter, jsonReplacer);
 
+	if (addressIds.length === 0) {
+		return { contacts: [] };
+	}
+
 	return Object.values(extendedAddressContacts).reduce<ShowContactsToolResult>(
 		(acc, extendedAddressContactUi) => {
 			const addresses = extendedAddressContactUi.addresses.filter(({ id: addressId }) =>
