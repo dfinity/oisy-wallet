@@ -142,7 +142,7 @@
 	// One try to manually sign in by entering the URL manually or scanning a QR code
 	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
 		if (isNullish(modal)) {
-			return
+			return;
 		}
 
 		modal.next();
