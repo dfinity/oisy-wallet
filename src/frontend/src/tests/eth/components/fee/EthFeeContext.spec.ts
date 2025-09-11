@@ -31,19 +31,6 @@ import type { Token, TokenId } from '$lib/types/token';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
-interface EthFeeContextProps {
-	observe: boolean;
-	destination: string;
-	amount: OptionAmount;
-	data: string | undefined;
-	sourceNetwork: EthereumNetwork;
-	targetNetwork: Network | undefined;
-	nativeEthereumToken: Token;
-	sendToken: Token;
-	sendTokenId: TokenId;
-	sendNft: Nft | undefined;
-}
-
 describe('EthFeeContext', () => {
 	const feeState: Writable<FeeStoreData | undefined> = writable(undefined);
 	const setFeeMock = vi.fn((v: FeeStoreData) => feeState.set(v));
@@ -61,7 +48,18 @@ describe('EthFeeContext', () => {
 	const destination = '0x1111111111111111111111111111111111111111';
 	const fromAddr = '0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-	const baseProps = {
+	const baseProps: {
+		observe: boolean;
+		destination: string;
+		amount: OptionAmount;
+		data: string | undefined;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork: Network | undefined;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		sendNft: Nft | undefined;
+	} = {
 		observe: true,
 		destination,
 		amount: 1,
@@ -72,7 +70,7 @@ describe('EthFeeContext', () => {
 		sendToken: ETHEREUM_TOKEN,
 		sendTokenId: ETHEREUM_TOKEN.id,
 		sendNft: undefined
-	} as EthFeeContextProps;
+	};
 
 	beforeEach(() => {
 		vi.clearAllMocks();
