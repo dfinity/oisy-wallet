@@ -4,8 +4,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
-	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
@@ -14,7 +13,6 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -51,13 +49,7 @@
 						{token.name}
 					</h1>
 
-					{#if token.section === CustomTokenSection.HIDDEN}
-						<NftBadgeHidden />
-					{/if}
-
-					{#if token.section === CustomTokenSection.SPAM}
-						<NftBadgeSpam />
-					{/if}
+					<NftBadge {token} />
 				</div>
 
 				<NftCollectionActionButtons {token} />
