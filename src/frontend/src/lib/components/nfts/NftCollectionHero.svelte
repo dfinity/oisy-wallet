@@ -49,7 +49,7 @@
 			<div class="my-3 flex w-full justify-between gap-3">
 				<NftBadges {token} />
 
-				<h1 class="truncate">
+				<h1 class="flex-1 truncate">
 					{token.name}
 				</h1>
 
