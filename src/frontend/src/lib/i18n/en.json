@@ -9,6 +9,7 @@
 			"close": "Close",
 			"change": "Change",
 			"apply": "Apply",
+			"retry": "Retry",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",

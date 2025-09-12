@@ -1,3 +1,4 @@
+import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -30,12 +31,10 @@ import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
-	uri,
 	ethAddress,
 	solAddress,
 	cleanSlate = true
 }: {
-	uri: string;
 	ethAddress: OptionEthAddress;
 	// TODO add other networks for solana
 	solAddress: OptionSolAddress;
@@ -117,7 +116,7 @@ export const initWalletConnect = async ({
 				...(nonNullish(solAddress)
 					? {
 							solana: {
-								chains: [solMainnetNamespace],
+								chains: CAIP10_CHAINS_KEYS,
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
@@ -184,7 +183,7 @@ export const initWalletConnect = async ({
 		walletKit.getActiveSessions();
 
 	return {
-		pair: () => walletKit.core.pairing.pair({ uri }),
+		pair: (uri) => walletKit.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,

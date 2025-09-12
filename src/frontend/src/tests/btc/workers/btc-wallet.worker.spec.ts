@@ -130,6 +130,10 @@ describe('btc-wallet.worker', () => {
 	}): TestUtil => {
 		const scheduler: BtcWalletScheduler = new BtcWalletScheduler();
 
+		const mockPostMessageUncertified = mockPostMessage({
+			certified: false,
+			withTransactions: true
+		});
 		const mockPostMessageCertified = mockPostMessage({
 			certified: true,
 			withTransactions: false
@@ -155,22 +159,23 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledTimes(3);
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageCertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(5);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(6);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(7);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(8);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
