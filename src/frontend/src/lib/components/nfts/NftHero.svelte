@@ -26,6 +26,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -98,18 +99,24 @@
 					{normalizedNftName}
 				</h1>
 
-				<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
-					{#snippet button(onclick)}
-						<NftCollectionActionButton colorStyle="primary" label={$i18n.send.text.send} {onclick}>
-							{#snippet icon()}
-								<IconSendMessage size="18" />
-							{/snippet}
-						</NftCollectionActionButton>
-					{/snippet}
-					{#snippet modal()}
-						<SendModal isNftsPage isTransactionsPage={false} {nft} />
-					{/snippet}
-				</ButtonWithModal>
+				<div class="flex items-center">
+					<ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
+						{#snippet button(onclick)}
+							<NftCollectionActionButton
+								colorStyle="primary"
+								label={$i18n.send.text.send}
+								{onclick}
+							>
+								{#snippet icon()}
+									<IconSendMessage size="18" />
+								{/snippet}
+							</NftCollectionActionButton>
+						{/snippet}
+						{#snippet modal()}
+							<SendModal isNftsPage isTransactionsPage={false} {nft} />
+						{/snippet}
+					</ButtonWithModal>
+				</div>
 			</div>
 		{:else}
 			<span class="block max-w-80">
