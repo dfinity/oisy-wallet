@@ -25,10 +25,11 @@ import {
 import {
 	generateAiAssistantResponseEventMetadata,
 	parseFromAiAssistantContacts,
-	parseReviewSendTokensToolArguments
+	parseReviewSendTokensToolArguments,
+	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, isNullish, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -68,7 +69,7 @@ export const askLlm = async ({
 
 	if (nonNullish(tool_calls) && tool_calls.length > 0) {
 		for (const toolCall of tool_calls) {
-			const result = await executeTool({ toolCall, identity, requestStartTimestamp });
+			const result = executeTool({ toolCall, requestStartTimestamp });
 
 			nonNullish(result) && toolResults.push(result);
 		}
@@ -144,29 +145,28 @@ export const askLlmToFilterContacts = async ({
  * @async
  * @param {Object} params - The parameters required to launch a tool.
  * @param {Array} params.toolCall - A tool call description object returned by LLM.
- * @param {Identity} params.identity - The user's identity for authentication.
- * @returns {Promise<ChatMessageContent>} - Resolves with a tool result or undefined if tool name is unknown.
+ * @returns {ToolResult | undefined} - Returns a tool result or undefined if tool name is unknown.
  */
-export const executeTool = async ({
+export const executeTool = ({
 	toolCall,
-	identity,
 	requestStartTimestamp
 }: {
 	toolCall: ToolCall;
-	identity: Identity;
 	requestStartTimestamp: number;
-}): Promise<ToolResult | undefined> => {
+}): ToolResult | undefined => {
 	const {
 		function: { name, arguments: filterParams }
 	} = toolCall;
 
 	let result: ToolResult['result'] | undefined;
 
-	if (name === ToolResultType.SHOW_CONTACTS) {
-		result =
-			isNullish(filterParams) || filterParams.length === 0
-				? { contacts: Object.values(get(extendedAddressContactsStore)) }
-				: await askLlmToFilterContacts({ filterParams, identity });
+	if (name === ToolResultType.SHOW_ALL_CONTACTS) {
+		result = { contacts: Object.values(get(extendedAddressContactsStore)) };
+	} else if (name === ToolResultType.SHOW_FILTERED_CONTACTS) {
+		result = parseShowFilteredContactsToolArguments({
+			filterParams,
+			extendedAddressContacts: get(extendedAddressContactsStore)
+		});
 	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
 		result = parseReviewSendTokensToolArguments({
 			filterParams,
