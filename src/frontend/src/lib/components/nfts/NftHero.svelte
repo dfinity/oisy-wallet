@@ -5,7 +5,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadges from '$lib/components/nfts/NftBadges.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -92,7 +92,7 @@
 						{normalizedNftName}
 					</h1>
 
-					<NftBadges {token} />
+					<NftBadge {token} />
 				</div>
 			</div>
 		{:else}
