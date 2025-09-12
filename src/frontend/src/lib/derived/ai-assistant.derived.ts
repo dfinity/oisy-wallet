@@ -66,12 +66,12 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 						}
 					];
 				}
-				if (role === 'user' && notEmptyString(text)) {
+				if (role === 'user' && (notEmptyString(text) || notEmptyString(context))) {
 					return [
 						...acc,
 						{
 							user: {
-								content: `${text}${notEmptyString(context) ? ` CONTEXT: ${context}` : ''}`
+								content: `${notEmptyString(context) ? context : text}`
 							}
 						}
 					];
