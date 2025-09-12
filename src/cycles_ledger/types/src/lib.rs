@@ -33,7 +33,9 @@ pub struct SubnetFilter {
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub enum SubnetSelection {
+    /// Choose a random subnet that satisfies the specified properties.
     Filter(SubnetFilter),
+    /// / Choose a specific subnet
     Subnet { subnet: Principal },
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -46,7 +48,11 @@ pub struct CanisterSettings {
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct CmcCreateCanisterArgs {
+    /// Optional instructions to select on which subnet the new canister will be created on.
     pub subnet_selection: Option<SubnetSelection>,
+    /// Optional canister settings that, if set, are applied to the newly created canister.
+    /// If not specified, the caller is the controller of the canister and the other settings are
+    /// set to default values.
     pub settings: Option<CanisterSettings>,
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
@@ -71,6 +77,8 @@ pub enum CreateCanisterError {
     TemporarilyUnavailable,
     Duplicate {
         duplicate_of: candid::Nat,
+        /// If the original transaction created a canister then this field will contain the
+        /// canister id.
         canister_id: Option<Principal>,
     },
     CreatedInFuture {
@@ -128,6 +136,8 @@ pub enum CreateCanisterFromError {
     },
     Duplicate {
         duplicate_of: candid::Nat,
+        /// If the original transaction created a canister then this field will contain the
+        /// canister id.
         canister_id: Option<Principal>,
     },
     CreatedInFuture {
@@ -293,12 +303,19 @@ pub enum TransferFromError {
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct GetArchivesArgs {
+    /// The last archive seen by the client.
+    /// The ledger will return archives coming
+    /// after this one if set, otherwise it
+    /// will return the first archives.
     pub from: Option<Principal>,
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct GetArchivesResultItem {
+    /// The last block in the archive
     pub end: candid::Nat,
+    /// The id of the archive
     pub canister_id: Principal,
+    /// The first block in the archive
     pub start: candid::Nat,
 }
 pub type GetArchivesResult = Vec<GetArchivesResultItem>;
@@ -333,13 +350,19 @@ pub struct GetBlocksResultArchivedBlocksItem {
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct GetBlocksResult {
+    /// Total number of blocks in the
+    /// block log.
     pub log_length: candid::Nat,
     pub blocks: Vec<GetBlocksResultBlocksItem>,
+    /// The archived_blocks vector is always going to be empty
+    /// for this ledger because there is no archive node.
     pub archived_blocks: Vec<GetBlocksResultArchivedBlocksItem>,
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
 pub struct DataCertificate {
+    /// See https://internetcomputer.org/docs/current/references/ic-interface-spec#certification
     pub certificate: serde_bytes::ByteBuf,
+    /// CBOR encoded hash_tree
     pub hash_tree: serde_bytes::ByteBuf,
 }
 #[derive(CandidType, Deserialize, Debug, Eq, PartialEq, Clone)]
