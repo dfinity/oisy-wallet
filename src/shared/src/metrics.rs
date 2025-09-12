@@ -4,7 +4,7 @@
 use core::arch::wasm32::memory_size as wasm_memory_size;
 
 #[cfg(target_arch = "wasm32")]
-use ic_cdk::api::stable::stable_size;
+use ic_cdk::api::stable_size;
 use ic_metrics_encoder::MetricsEncoder;
 use serde_bytes::ByteBuf;
 
