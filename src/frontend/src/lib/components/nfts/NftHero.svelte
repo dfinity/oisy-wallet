@@ -113,12 +113,6 @@
 				{#if nonNullish(nft?.collection?.name)}
 					<span class="flex items-center">
 						{shortenWithMiddleEllipsis({ text: nft.collection.name })}
-						<AddressActions
-							copyAddress={nft.collection.address}
-							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-								$address: nft.collection.address
-							})}
-						/>
 					</span>
 				{:else}
 					<span class="min-w-12">
