@@ -10,18 +10,16 @@
 	}
 
 	const { token }: Props = $props();
+
+	let section = $derived(token?.section);
+
+	let Badge = $derived(
+		section === CustomTokenSection.HIDDEN
+			? NftBadgeHidden
+			: section === CustomTokenSection.SPAM
+				? NftBadgeSpam
+				: undefined
+	);
 </script>
 
-{#if nonNullish(token)}
-	{#if token.section === CustomTokenSection.HIDDEN}
-		<div class="flex items-center">
-			<NftBadgeHidden />
-		</div>
-	{/if}
-
-	{#if token.section === CustomTokenSection.SPAM}
-		<div class="flex items-center">
-			<NftBadgeSpam />
-		</div>
-	{/if}
-{/if}
+<Badge />
