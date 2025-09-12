@@ -103,7 +103,7 @@
 		proposal = null;
 	};
 
-	const initListener = async (uri: string) => {
+	const initListener = async () => {
 		await disconnectListener();
 
 		try {
@@ -117,7 +117,6 @@
 
 			// TODO add other networks for solana
 			listener = await initWalletConnect({
-				uri,
 				ethAddress: $ethAddress,
 				solAddress: $solAddressMainnet
 			});
@@ -284,7 +283,7 @@
 	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
-		await initListener(uri);
+		await initListener();
 
 		if (isNullish(listener)) {
 			return { result: 'error' };
@@ -293,7 +292,7 @@
 		attachHandlers(listener);
 
 		try {
-			await listener.pair();
+			await listener.pair(uri);
 		} catch (err: unknown) {
 			resetListener();
 
@@ -407,7 +406,6 @@
 		// Create listener, but DO NOT pair()
 		try {
 			listener = await initWalletConnect({
-				uri: '', // no URI – just init client
 				ethAddress: $ethAddress,
 				solAddress: $solAddressMainnet,
 				cleanSlate: false
