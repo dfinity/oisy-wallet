@@ -7,9 +7,10 @@
 
 	interface Props {
 		isTransactionsPage: boolean;
+		isNftsPage: boolean;
 	}
 
-	const { isTransactionsPage }: Props = $props();
+	const { isTransactionsPage, isNftsPage }: Props = $props();
 </script>
 
 <ButtonWithModal isOpen={$modalSend} onOpen={modalStore.openSend}>
@@ -17,6 +18,6 @@
 		<SendButton {onclick} />
 	{/snippet}
 	{#snippet modal()}
-		<SendModal {isTransactionsPage} />
+		<SendModal {isNftsPage} {isTransactionsPage} />
 	{/snippet}
 </ButtonWithModal>
