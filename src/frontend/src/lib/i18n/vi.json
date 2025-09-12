@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
 			"send_review_subtitle": "Bạn gửi",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
@@ -741,7 +742,8 @@
 			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
 			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
 			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
-			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau."
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -760,7 +762,8 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa."
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {

@@ -45,9 +45,9 @@ export const aiAssistantSystemMessage: Readable<chat_message_v1> = derived(
 export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 	[aiAssistantStore, aiAssistantSystemMessage],
 	([$aiAssistantStore, $aiAssistantSystemMessage]) => {
-		// Get last 100 messages from chat history
+		// Get the last 100 messages from chat history and deduct 1 slot reserved for the system message
 		const recentHistory = ($aiAssistantStore?.chatHistory ?? []).slice(
-			-MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH
+			-MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH + 1
 		);
 
 		return [
@@ -66,12 +66,12 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 						}
 					];
 				}
-				if (role === 'user' && notEmptyString(text)) {
+				if (role === 'user' && (notEmptyString(text) || notEmptyString(context))) {
 					return [
 						...acc,
 						{
 							user: {
-								content: `${text}${notEmptyString(context) ? ` CONTEXT: ${context}` : ''}`
+								content: `${notEmptyString(context) ? context : text}`
 							}
 						}
 					];

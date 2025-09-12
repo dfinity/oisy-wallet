@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Sembra che tu non abbia ancora aggiunto contatti",
 			"send_review_subtitle": "Tu invii",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
@@ -741,7 +742,8 @@
 			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
 			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
 			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
-			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -760,7 +762,8 @@
 			"unexpected_utxos_fee": "Qualcosa è andato storto durante il calcolo della fee di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
 			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
-			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente."
+			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {

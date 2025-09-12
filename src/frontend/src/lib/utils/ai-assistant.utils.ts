@@ -3,11 +3,12 @@ import type {
 	AiAssistantContactUi,
 	AiAssistantContactUiMap,
 	ReviewSendTokensToolResult,
+	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
-import { nonNullish, notEmptyString } from '@dfinity/utils';
+import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
@@ -45,6 +46,46 @@ export const parseFromAiAssistantContacts = ({
 		[]
 	);
 
+export const parseShowFilteredContactsToolArguments = ({
+	filterParams,
+	extendedAddressContacts
+}: {
+	filterParams: ToolCallArgument[];
+	extendedAddressContacts: ExtendedAddressContactUiMap;
+}): ShowContactsToolResult => {
+	const addressIdsFilter = filterParams.find(({ name }) => name === 'addressIds')?.value ?? '[]';
+
+	const addressIds = JSON.parse(addressIdsFilter, jsonReplacer);
+
+	if (addressIds.length === 0) {
+		return { contacts: [] };
+	}
+
+	return Object.values(extendedAddressContacts).reduce<ShowContactsToolResult>(
+		(acc, extendedAddressContactUi) => {
+			const addresses = extendedAddressContactUi.addresses.filter(({ id: addressId }) =>
+				addressIds.includes(addressId)
+			);
+
+			if (addresses.length > 0) {
+				return {
+					...acc,
+					contacts: [
+						...acc.contacts,
+						{
+							...extendedAddressContactUi,
+							addresses
+						}
+					]
+				};
+			}
+
+			return acc;
+		},
+		{ contacts: [] }
+	);
+};
+
 export const parseReviewSendTokensToolArguments = ({
 	filterParams,
 	tokens,
@@ -54,36 +95,42 @@ export const parseReviewSendTokensToolArguments = ({
 	tokens: Token[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
 }): ReviewSendTokensToolResult => {
-	const { addressIdFilter, amountNumberFilter, tokenSymbolFilter, addressFilter, networkIdFilter } =
-		filterParams.reduce<{
-			addressIdFilter?: string;
-			amountNumberFilter?: string;
-			tokenSymbolFilter?: string;
-			addressFilter?: string;
-			networkIdFilter?: string;
-		}>(
-			(acc, { value, name }) => ({
-				addressIdFilter: name === 'addressId' ? value : acc.addressIdFilter,
-				addressFilter: name === 'address' ? value : acc.addressFilter,
-				amountNumberFilter: name === 'amountNumber' ? value : acc.amountNumberFilter,
-				tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
-				networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
-			}),
-			{
-				addressIdFilter: undefined,
-				amountNumberFilter: undefined,
-				tokenSymbolFilter: undefined,
-				addressFilter: undefined,
-				networkIdFilter: undefined
-			}
-		);
+	const {
+		selectedContactAddressIdFilter,
+		amountNumberFilter,
+		tokenSymbolFilter,
+		addressFilter,
+		networkIdFilter
+	} = filterParams.reduce<{
+		selectedContactAddressIdFilter?: string;
+		amountNumberFilter?: string;
+		tokenSymbolFilter?: string;
+		addressFilter?: string;
+		networkIdFilter?: string;
+	}>(
+		(acc, { value, name }) => ({
+			selectedContactAddressIdFilter:
+				name === 'selectedContactAddressId' ? value : acc.selectedContactAddressIdFilter,
+			addressFilter: name === 'address' ? value : acc.addressFilter,
+			amountNumberFilter: name === 'amountNumber' ? value : acc.amountNumberFilter,
+			tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
+			networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
+		}),
+		{
+			selectedContactAddressIdFilter: undefined,
+			amountNumberFilter: undefined,
+			tokenSymbolFilter: undefined,
+			addressFilter: undefined,
+			networkIdFilter: undefined
+		}
+	);
 
 	const { contact, contactAddress } = Object.values(extendedAddressContacts).reduce<
 		Pick<ReviewSendTokensToolResult, 'contact' | 'contactAddress'>
 	>(
 		(acc, extendedAddressContactUi) => {
 			const address = extendedAddressContactUi.addresses.find(
-				({ id: addressId }) => addressId === addressIdFilter
+				({ id: addressId }) => addressId === selectedContactAddressIdFilter
 			);
 
 			if (nonNullish(address)) {
