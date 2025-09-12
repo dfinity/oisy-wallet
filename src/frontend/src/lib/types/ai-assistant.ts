@@ -44,7 +44,8 @@ export interface ReviewSendTokensToolResult {
 }
 
 export enum ToolResultType {
-	SHOW_CONTACTS = 'show_contacts',
+	SHOW_ALL_CONTACTS = 'show_all_contacts',
+	SHOW_FILTERED_CONTACTS = 'show_filtered_contacts',
 	REVIEW_SEND_TOKENS = 'review_send_tokens'
 }
 
@@ -54,7 +55,7 @@ export interface ToolResult {
 }
 
 export interface AiAssistantContactUi
-	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs'> {
+	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
 	addresses: Omit<ContactAddressUiWithId, 'address'>[];
 }
 
