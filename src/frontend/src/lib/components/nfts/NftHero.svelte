@@ -90,11 +90,11 @@
 
 		{#if nonNullish(normalizedNftName)}
 			<div class="my-3 flex w-full justify-between gap-3">
-				<NftBadges {token} />
-
-				<h1 class="flex-1 truncate">
+				<h1 class="truncate">
 					{normalizedNftName}
 				</h1>
+
+				<NftBadges {token} />
 			</div>
 		{:else}
 			<span class="block max-w-80">
