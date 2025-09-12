@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { UserConfig } from 'vite';
 import { readCanisterIds as readIds } from './env.utils';
+import { domain_for_dfx_network } from './scripts/build.utils.mjs';
 
 /**
  * Read all the locally deployed canister IDs. For example Oisy backend, ckBTC|ETH, ICP etc.
@@ -89,6 +90,7 @@ export const readCanisterIds = (params: { prefix?: string }): Record<string, str
 });
 
 export const defineViteReplacements = (): {
+	VITE_OISY_DOMAIN: string;
 	VITE_APP_VERSION: string;
 	VITE_DFX_NETWORK: string;
 	VITE_GIT_COMMIT_HASH: string;
@@ -112,6 +114,8 @@ export const defineViteReplacements = (): {
 	const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
 	return {
+		VITE_OISY_DOMAIN:
+			network === 'local' ? 'http://localhost:4943' : domain_for_dfx_network(network),
 		VITE_APP_VERSION: JSON.stringify(version),
 		VITE_DFX_NETWORK: JSON.stringify(network),
 		VITE_GIT_COMMIT_HASH: JSON.stringify(commitHash),
