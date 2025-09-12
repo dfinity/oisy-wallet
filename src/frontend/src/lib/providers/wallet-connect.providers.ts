@@ -1,3 +1,4 @@
+import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -26,7 +27,6 @@ import {
 } from '@walletconnect/jsonrpc-utils';
 import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
-import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
