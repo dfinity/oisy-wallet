@@ -22,4 +22,8 @@
 	);
 </script>
 
-<Badge />
+{#if nonNullish(Badge)}
+	<div class="flex items-center">
+		<Badge />
+	</div>
+{/if}
