@@ -23,6 +23,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftBadges from '$lib/components/nfts/NftBadges.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -89,17 +90,7 @@
 
 		{#if nonNullish(normalizedNftName)}
 			<div class="my-3 flex w-full justify-between gap-3">
-				{#if nonNullish(token) && (token.section === CustomTokenSection.HIDDEN || token.section === CustomTokenSection.SPAM)}
-					<div class="flex items-center">
-						{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-							<NftBadgeHidden />
-						{/if}
-
-						{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
-							<NftBadgeSpam />
-						{/if}
-					</div>
-				{/if}
+				<NftBadges {token}>
 
 				<h1 class="flex-1 truncate">
 					{normalizedNftName}
