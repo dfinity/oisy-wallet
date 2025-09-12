@@ -2,34 +2,28 @@ import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
-	getAiAssistantFilterContactsPrompt,
 	getAiAssistantToolsDescription
 } from '$lib/constants/ai-assistant.constants';
 import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
 } from '$lib/constants/analytics.contants';
-import { aiAssistantSystemMessage } from '$lib/derived/ai-assistant.derived';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
-import { enabledNetworksSymbols } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
 	ToolResultType,
 	type ChatMessageContent,
-	type ShowContactsToolResult,
 	type ToolCall,
-	type ToolCallArgument,
 	type ToolResult
 } from '$lib/types/ai-assistant';
 import {
 	generateAiAssistantResponseEventMetadata,
-	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
-import { fromNullable, jsonReplacer, nonNullish, toNullable } from '@dfinity/utils';
+import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -86,56 +80,6 @@ export const askLlm = async ({
 			calls: tool_calls,
 			results: toolResults
 		}
-	};
-};
-
-/**
- * Makes a call to LLM to get a semantically filtered contacts.
- *
- * @async
- * @param {Object} params - The parameters required to initiate a filter contacts LLM request.
- * @param {Identity} params.identity - The user's identity for authentication.
- * @param {Array} params.filterParams - Array of filter arguments based on which the search will be done by LLM.
- * @returns {Promise<ChatMessageContent>} - Resolves with an array of filtered contacts.
- */
-export const askLlmToFilterContacts = async ({
-	identity,
-	filterParams
-}: {
-	identity: Identity;
-	filterParams: ToolCallArgument[];
-}): Promise<ShowContactsToolResult> => {
-	const {
-		message: { content }
-	} = await llmChat({
-		request: {
-			model: AI_ASSISTANT_LLM_MODEL,
-			messages: [
-				get(aiAssistantSystemMessage),
-
-				{
-					user: {
-						content: getAiAssistantFilterContactsPrompt(JSON.stringify(filterParams))
-					}
-				}
-			],
-			tools: toNullable(
-				getAiAssistantToolsDescription({
-					enabledNetworksSymbols: get(enabledNetworksSymbols),
-					enabledTokensSymbols: get(enabledUniqueTokensSymbols)
-				})
-			)
-		},
-		identity
-	});
-
-	const data = JSON.parse(fromNullable(content) ?? '', jsonReplacer);
-
-	return {
-		contacts: parseFromAiAssistantContacts({
-			aiAssistantContacts: data?.contacts ?? [],
-			extendedAddressContacts: get(extendedAddressContactsStore)
-		})
 	};
 };
 

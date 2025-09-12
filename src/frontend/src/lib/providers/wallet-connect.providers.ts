@@ -30,12 +30,10 @@ import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
-	uri,
 	ethAddress,
 	solAddress,
 	cleanSlate = true
 }: {
-	uri: string;
 	ethAddress: OptionEthAddress;
 	// TODO add other networks for solana
 	solAddress: OptionSolAddress;
@@ -184,7 +182,7 @@ export const initWalletConnect = async ({
 		walletKit.getActiveSessions();
 
 	return {
-		pair: () => walletKit.core.pairing.pair({ uri }),
+		pair: (uri) => walletKit.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,

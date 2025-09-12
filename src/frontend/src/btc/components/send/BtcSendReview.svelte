@@ -11,6 +11,7 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import type { UtxosFee } from '$btc/types/btc-send';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
