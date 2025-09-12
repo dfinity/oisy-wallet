@@ -1,7 +1,10 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, debounce } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
-	import { BTC_UTXOS_FEE_UPDATE_INTERVAL } from '$btc/constants/btc.constants';
+	import {
+		BTC_UTXOS_FEE_UPDATE_ENABLED,
+		BTC_UTXOS_FEE_UPDATE_INTERVAL
+	} from '$btc/constants/btc.constants';
 	import { prepareBtcSend } from '$btc/services/btc-utxos.service';
 	import type { UtxosFee } from '$btc/types/btc-send';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
@@ -61,6 +64,7 @@
 		}
 	};
 
+	const debouncedPrepareBtcSend = debounce(updatePrepareBtcSend);
 	const startScheduler = () => {
 		// Stop existing scheduler if it exists
 		stopScheduler();
@@ -68,10 +72,10 @@
 
 		// Start the recurring scheduler
 		const scheduleNext = () => {
-			schedulerTimer = setTimeout(async () => {
+			schedulerTimer = setTimeout(() => {
 				// only execute next update if still active
 				if (isActive) {
-					await updatePrepareBtcSend();
+					debouncedPrepareBtcSend();
 					scheduleNext();
 				}
 			}, BTC_UTXOS_FEE_UPDATE_INTERVAL);
@@ -90,17 +94,21 @@
 		}
 	};
 
-	onMount(async () => {
+	onMount(() => {
 		if (isNullish(utxosFee)) {
-			await updatePrepareBtcSend();
+			debouncedPrepareBtcSend();
 		}
 
 		// Start the scheduler after initial load
-		startScheduler();
+		if (BTC_UTXOS_FEE_UPDATE_ENABLED) {
+			startScheduler();
+		}
 	});
 
 	onDestroy(() => {
-		stopScheduler();
+		if (BTC_UTXOS_FEE_UPDATE_ENABLED) {
+			stopScheduler();
+		}
 	});
 </script>
 

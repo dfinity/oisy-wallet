@@ -1,29 +1,30 @@
 import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
-import { askLlm, askLlmToFilterContacts, executeTool } from '$lib/services/ai-assistant.services';
+import { askLlm, executeTool } from '$lib/services/ai-assistant.services';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
-import { parseToAiAssistantContacts } from '$lib/utils/ai-assistant.utils';
 import { getMockContactsUi, mockContactBtcAddressUi } from '$tests/mocks/contacts.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { fromNullable, jsonReplacer, toNullable } from '@dfinity/utils';
+import { fromNullable, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/api/llm.api');
 
 describe('ai-assistant.services', () => {
-	const toolCall = {
+	const mockRandomUUID = 'd7775002-80bf-4208-a2f0-84225281677a';
+
+	const showFilteredContactsToolCall = {
 		id: 'test',
 		function: {
-			name: 'show_contacts',
-			arguments: [{ value: 'Btc', name: 'addressType' }]
+			name: 'show_filtered_contacts',
+			arguments: [{ name: 'addressIds', value: `["${mockRandomUUID}"]` }]
 		}
 	};
-	const noAgumentsToolCall = {
-		...toolCall,
+	const showAllContactsToolCall = {
+		id: 'test',
 		function: {
-			...toolCall.function,
+			name: 'show_all_contacts',
 			arguments: []
 		}
 	};
@@ -62,7 +63,7 @@ describe('ai-assistant.services', () => {
 			const response = {
 				message: {
 					content: toNullable(),
-					tool_calls: toNullable(noAgumentsToolCall)
+					tool_calls: toNullable(showAllContactsToolCall)
 				}
 			} as chat_response_v1;
 
@@ -77,65 +78,15 @@ describe('ai-assistant.services', () => {
 			expect(result).toStrictEqual({
 				text: fromNullable(response.message.content),
 				tool: {
-					calls: [noAgumentsToolCall],
+					calls: [showAllContactsToolCall],
 					results: [
 						{
-							result: [],
-							type: 'show_contacts'
+							result: { contacts: [] },
+							type: 'show_all_contacts'
 						}
 					]
 				}
 			});
-		});
-	});
-
-	describe('askLlmToFilterContacts', () => {
-		beforeEach(() => {
-			vi.resetAllMocks();
-
-			vi.stubGlobal('crypto', {
-				...crypto,
-				randomUUID: () => '12345678-1234-1234-1234-123456789abc'
-			});
-		});
-
-		it('returns filtered and parsed contacts', async () => {
-			const contacts = getMockContactsUi({
-				n: 1,
-				name: 'Test name',
-				addresses: [mockContactBtcAddressUi]
-			}) as unknown as ContactUi[];
-
-			contactsStore.set([...contacts]);
-
-			const storeData = get(extendedAddressContacts);
-
-			const aiAssistantContacts = parseToAiAssistantContacts(storeData);
-			const response = {
-				message: {
-					content: toNullable(
-						JSON.stringify(
-							{
-								contacts: Object.values(aiAssistantContacts).map((contact) => ({
-									...contact,
-									id: `${contact['id']}`
-								}))
-							},
-							jsonReplacer
-						)
-					),
-					tool_calls: toNullable()
-				}
-			} as chat_response_v1;
-
-			vi.mocked(llmChat).mockResolvedValue(response);
-
-			const result = await askLlmToFilterContacts({
-				identity: mockIdentity,
-				filterParams: [{ value: 'Btc', name: 'addressType' }]
-			});
-
-			expect(result).toStrictEqual([...contacts]);
 		});
 	});
 
@@ -150,30 +101,35 @@ describe('ai-assistant.services', () => {
 			contactsStore.reset();
 			vi.clearAllMocks();
 
+			vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => mockRandomUUID);
 			contactsStore.set([...contacts]);
 		});
 
-		it('parses show_contacts tool and returns all contacts if no filter params provided', async () => {
-			const result = await executeTool({
-				identity: mockIdentity,
-				toolCall: noAgumentsToolCall
+		it('parses show_all_contacts tool and returns all contacts', () => {
+			const result = executeTool({
+				toolCall: showAllContactsToolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({
-				type: 'show_contacts',
-				result: contacts
+				type: 'show_all_contacts',
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 
-		it('parses show_contacts tool and returns contacts if filter params provided', async () => {
-			const result = await executeTool({
-				identity: mockIdentity,
-				toolCall
+		it('parses show_filtered_contacts tool and returns contacts', () => {
+			const result = executeTool({
+				toolCall: showFilteredContactsToolCall,
+				requestStartTimestamp: 1000
 			});
 
 			expect(result).toEqual({
-				type: 'show_contacts',
-				result: contacts
+				type: 'show_filtered_contacts',
+				result: {
+					contacts: Object.values(get(extendedAddressContacts))
+				}
 			});
 		});
 	});

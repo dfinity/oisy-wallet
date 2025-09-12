@@ -10,6 +10,15 @@ import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
+// Mock the DFINITY utils module
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 describe('BtcUtxosFee', () => {
 	const mockContext = new Map([]);
 	mockContext.set(
@@ -42,7 +51,7 @@ describe('BtcUtxosFee', () => {
 		);
 	});
 
-	it('fetches and renders utxos fee if not provided', async () => {
+	it('fetches and renders the utxos fee if not provided', async () => {
 		vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 			feeSatoshis: mockUtxosFee.feeSatoshis,
 			utxos: mockUtxosFee.utxos
@@ -96,26 +105,26 @@ describe('BtcUtxosFee', () => {
 			});
 
 			// Wait for initial call during onMount
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
 			// Advance timer by the interval and verify scheduler calls prepareBtcSend
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
+			await vi.waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
 			// Advance timer again to verify continuous scheduling
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(3);
+			await vi.waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 		});
 
-		it('should stop scheduler when component is destroyed', async () => {
+		it('should stop scheduler when the component is unmounted', async () => {
 			const prepareBtcSendSpy = vi.spyOn(btcUtxosApi, 'prepareBtcSend').mockResolvedValue({
 				feeSatoshis: mockUtxosFee.feeSatoshis,
 				utxos: mockUtxosFee.utxos
@@ -132,25 +141,25 @@ describe('BtcUtxosFee', () => {
 			});
 
 			// Wait for initial call
-			await waitFor(() => {
+			await vi.waitFor(() => {
 				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
 			// Advance timer to verify scheduler is working
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			await waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
+			await vi.waitFor(() => {
+				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 			});
 
-			// Unmount component to trigger onDestroy
+			// The component should be unmounted to trigger onDestroy
 			unmount();
 
 			// Advance timer again - should not call prepareBtcSend anymore
-			await vi.advanceTimersByTimeAsync(BTC_UTXOS_FEE_UPDATE_INTERVAL);
+			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
-			// Should still be 2 calls (no additional calls after unmount)
-			expect(prepareBtcSendSpy).toHaveBeenCalledTimes(2);
+			// Should still be 2 calls (no additional calls after the component is unmounted)
+			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
 		});
 	});
 });

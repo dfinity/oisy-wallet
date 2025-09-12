@@ -55,7 +55,7 @@
 
 <Sprinkles type={rewardType === RewardType.JACKPOT ? 'page-jackpot' : 'page'} />
 
-<Modal on:nnsClose={modalStore.close}>
+<Modal onClose={modalStore.close}>
 	<ContentWithToolbar>
 		<Img src={imgSrc} styleClass="w-full" testId={REWARDS_STATE_MODAL_IMAGE_BANNER} />
 

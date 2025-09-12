@@ -14,6 +14,7 @@ import type {
 	SplSaveCustomToken
 } from '$lib/types/custom-token';
 import type { TokenId, TokenMetadata } from '$lib/types/token';
+import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -51,6 +52,8 @@ const toSplCustomToken = ({
 export const toCustomToken = ({
 	enabled,
 	version,
+	section,
+	allowExternalContentSource,
 	...rest
 }: SaveCustomTokenWithKey): CustomToken => {
 	const toCustomTokenMap = (): Token => {
@@ -89,7 +92,9 @@ export const toCustomToken = ({
 	return {
 		enabled,
 		version: toNullable(version),
-		token: toCustomTokenMap()
+		token: toCustomTokenMap(),
+		section: toNullable(nonNullish(section) ? mapCustomTokenSection(section) : undefined),
+		allow_external_content_source: toNullable(allowExternalContentSource)
 	};
 };
 

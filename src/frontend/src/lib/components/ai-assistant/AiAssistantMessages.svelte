@@ -10,9 +10,10 @@
 	interface Props {
 		messages: ChatMessage[];
 		loading: boolean;
+		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
 	}
 
-	let { messages, loading }: Props = $props();
+	let { messages, loading, onSendMessage }: Props = $props();
 </script>
 
 {#each messages as message, index (index)}
@@ -22,7 +23,11 @@
 		{:else if message.role === 'assistant' && nonNullish(message.data.text)}
 			<AiAssistantBotMessage content={message.data.text} />
 		{:else if message.role === 'assistant' && nonNullish(message.data.tool?.results)}
-			<AiAssistantToolResults results={message.data.tool.results} />
+			<AiAssistantToolResults
+				isLastItem={messages.length - 1 === index}
+				{onSendMessage}
+				results={message.data.tool.results}
+			/>
 		{/if}
 	</div>
 {/each}

@@ -6,16 +6,41 @@ import { SUPPORTED_ETHEREUM_TOKENS } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import {
+	isCollectionErc721,
+	isTokenErc721,
+	isTokenErc721CustomToken
+} from '$eth/utils/erc721.utils';
 import { MOCK_ERC1155_TOKENS } from '$tests/mocks/erc1155-tokens.mock';
 import {
 	AZUKI_ELEMENTAL_BEANS_TOKEN,
 	DE_GODS_TOKEN,
 	MOCK_ERC721_TOKENS
 } from '$tests/mocks/erc721-tokens.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 
 describe('erc721.utils', () => {
-	describe('isTokenErc721UserToken', () => {
+	describe('isTokenErc721', () => {
+		it.each(MOCK_ERC721_TOKENS)('should return true for token $name', (token) => {
+			expect(isTokenErc721(token)).toBeTruthy();
+		});
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS,
+			...ERC20_TWIN_TOKENS,
+			...EVM_ERC20_TOKENS,
+			...MOCK_ERC1155_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenErc721(token)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenErc721CustomToken', () => {
 		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
 
 		it.each(
@@ -49,23 +74,11 @@ describe('erc721.utils', () => {
 		});
 	});
 
-	describe('isTokenErc721', () => {
-		it.each(MOCK_ERC721_TOKENS)('should return true for token $name', (token) => {
-			expect(isTokenErc721(token)).toBeTruthy();
-		});
+	describe('isCollectionErc721', () => {
+		it('should differentiate correctly between an ERC721 and an ERC1155 collection', () => {
+			expect(isCollectionErc721(mockValidErc721Nft.collection)).toBeTruthy();
 
-		it.each([
-			ICP_TOKEN,
-			...SUPPORTED_BITCOIN_TOKENS,
-			...SUPPORTED_ETHEREUM_TOKENS,
-			...SUPPORTED_EVM_TOKENS,
-			...SUPPORTED_SOLANA_TOKENS,
-			...SPL_TOKENS,
-			...ERC20_TWIN_TOKENS,
-			...EVM_ERC20_TOKENS,
-			...MOCK_ERC1155_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenErc721(token)).toBeFalsy();
+			expect(isCollectionErc721(mockValidErc1155Nft.collection)).toBeFalsy();
 		});
 	});
 });

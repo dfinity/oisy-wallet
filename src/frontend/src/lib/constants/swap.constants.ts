@@ -14,6 +14,7 @@ export const SWAP_SLIPPAGE_VALUE_DECIMALS = 4;
 
 export const SWAP_SLIPPAGE_WARNING_VALUE = 7;
 export const SWAP_SLIPPAGE_INVALID_VALUE = 50;
+export const SWAP_SLIPPAGE_VELORA_INVALID_VALUE = 15;
 
 export const SWAP_VALUE_DIFFERENCE_WARNING_VALUE = -1;
 export const SWAP_VALUE_DIFFERENCE_ERROR_VALUE = -5;
@@ -28,6 +29,7 @@ export const SWAP_ETH_TOKEN_PLACEHOLDER = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeee
 
 export const SWAP_DELTA_TIMEOUT_MS = 5 * 60_000;
 export const SWAP_DELTA_INTERVAL_MS = 3_000;
+export const SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS = 5_000;
 
 export const OISY_DOCS_SWAP_WIDTHDRAW_FROM_ICPSWAP_LINK =
 	'https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens#manually-withdraw-funds-from-icpswap';
