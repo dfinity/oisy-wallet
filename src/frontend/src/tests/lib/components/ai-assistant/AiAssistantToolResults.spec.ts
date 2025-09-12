@@ -20,14 +20,31 @@ describe('AiAssistantToolResults', () => {
 
 	const extendedContacts = get(extendedAddressContacts);
 
-	it('renders show_contacts tool correctly', () => {
+	it('renders show_all_contacts tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
-						type: ToolResultType.SHOW_CONTACTS,
+						type: ToolResultType.SHOW_ALL_CONTACTS,
+						result: { contacts: Object.values(extendedContacts) }
+					}
+				]
+			}
+		});
+
+		expect(getByText(contacts[0].name)).toBeInTheDocument();
+	});
+
+	it('renders show_filtered_contacts tool correctly', () => {
+		const { getByText } = render(AiAssistantToolResults, {
+			props: {
+				isLastItem: false,
+				onSendMessage: () => Promise.resolve(),
+				results: [
+					{
+						type: ToolResultType.SHOW_FILTERED_CONTACTS,
 						result: { contacts: Object.values(extendedContacts) }
 					}
 				]
