@@ -7,7 +7,6 @@
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
-	import NftBadges from '$lib/components/nfts/NftBadges.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -24,6 +23,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftBadges from '$lib/components/nfts/NftBadges.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -89,12 +89,14 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(normalizedNftName)}
-			<div class="my-3 flex w-full justify-between gap-3">
-				<h1 class="truncate">
-					{normalizedNftName}
-				</h1>
+			<div class="my-3 w-full justify-between">
+				<div class="flex items-center gap-3">
+					<h1 class="truncate">
+						{normalizedNftName}
+					</h1>
 
-				<NftBadges {token} />
+					<NftBadges {token} />
+				</div>
 			</div>
 		{:else}
 			<span class="block max-w-80">
