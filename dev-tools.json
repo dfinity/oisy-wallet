@@ -13,7 +13,7 @@
 	"didc": {
 		"method": "curl",
 		"version": "0.4.0",
-		"url": "https://github.com/dfinity/candid/releases/download/2025-08-04/didc-linux64"
+		"url": "https://github.com/dfinity/candid/releases/download/2024-07-29/didc-linux64"
 	},
 	"shellcheck": {
 		"method": "apt"
