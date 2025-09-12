@@ -45,7 +45,7 @@ impl CyclesLedgerService {
         let response = Call::unbounded_wait(self.0, "icrc1_balance_of")
             .with_arg(arg0)
             .await?;
-        Ok(response.candid()?)
+        Ok((response.candid()?,))
     }
 
     pub async fn icrc_1_decimals(&self) -> Result<(u8,)> {
@@ -102,7 +102,7 @@ impl CyclesLedgerService {
         let response = Call::unbounded_wait(self.0, "icrc2_allowance")
             .with_arg(arg0)
             .await?;
-        Ok(response.candid()?)
+        Ok((response.candid()?,))
     }
 
     pub async fn icrc_2_approve(
@@ -112,7 +112,7 @@ impl CyclesLedgerService {
         let response = Call::unbounded_wait(self.0, "icrc2_approve")
             .with_arg(arg0)
             .await?;
-        Ok(response.candid()?)
+        Ok((response.candid()?,))
     }
 
     pub async fn icrc_2_transfer_from(
