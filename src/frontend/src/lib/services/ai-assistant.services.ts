@@ -134,8 +134,7 @@ export const askLlmToFilterContacts = async ({
 		contacts: parseFromAiAssistantContacts({
 			aiAssistantContacts: data?.contacts ?? [],
 			extendedAddressContacts: get(extendedAddressContactsStore)
-		}),
-		message: data?.message
+		})
 	};
 };
 

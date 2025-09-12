@@ -29,18 +29,18 @@ export const getAiAssistantSystemPrompt = ({
 			1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
 			2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
 			3. If the token is not in AVAILABLE TOKENS, do not proceed further.
-		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address" (string) are provided.
+		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" or "address" (string) are provided.
 		- If tokenSymbol maps to multiple networkIds and networkId is not specified yet, ask: "On which network would you like to send {tokenSymbol}?".
 		- Never invent a networkId that isn’t in AVAILABLE TOKENS.
 	
 	- For 'show_contacts':
 		- Use when the user specifies a contact name or wants to choose from saved contacts.
 		- When calling show_contacts, filter by the addressType (values: 'Btc', 'Eth', 'Sol', 'Icrcv2') that corresponds to the token's networkId using the mapping below.
-		- If the user confirms a selection, immediately call 'review_send_tokens' with the selected "addressId" and previously provided "amountNumber" + "tokenSymbol".
+		- If the user confirms a selection, immediately call 'review_send_tokens' with the selected "selectedContactAddressId" and previously provided "amountNumber" + "tokenSymbol".
 	
 	MEMORY & CHAINING BEHAVIOR:
-	- Always remember values from earlier in the conversation (address, addressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
-	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "addressId" from the tool result and proceed to "review_send_tokens" without asking again.
+	- Always remember values from earlier in the conversation (address, selectedContactAddressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
+	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "selectedContactAddressId" from the tool result and proceed to "review_send_tokens" without asking again.
 	
 	NETWORKID → addressType mapping:
 	- BTC → Btc
@@ -127,14 +127,14 @@ export const getAiAssistantToolsDescription = ({
 			function: {
 				name: 'review_send_tokens',
 				description: toNullable(
-					`Display an overview of the pending token transfer for user confirmation. Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address". Do NOT send tokens yourself; sending will only happen via the UI button. If one of those arguments is not available, ask the user to provide it.`
+					`Display an overview of the pending token transfer for user confirmation. Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" or "address". Do NOT send tokens yourself; sending will only happen via the UI button. If one of those arguments is not available, ask the user to provide it.`
 				),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
 						{
 							type: 'string',
-							name: 'addressId',
+							name: 'selectedContactAddressId',
 							enum: toNullable(),
 							description: toNullable(
 								'Unique ID of the address in the user’s contacts. Returned from show_contacts.'

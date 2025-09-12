@@ -135,7 +135,7 @@ describe('ai-assistant.services', () => {
 				filterParams: [{ value: 'Btc', name: 'addressType' }]
 			});
 
-			expect(result).toStrictEqual({ contacts: Object.values(storeData), message: undefined });
+			expect(result).toStrictEqual({ contacts: Object.values(storeData) });
 		});
 	});
 
