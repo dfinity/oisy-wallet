@@ -95,36 +95,42 @@ export const parseReviewSendTokensToolArguments = ({
 	tokens: Token[];
 	extendedAddressContacts: ExtendedAddressContactUiMap;
 }): ReviewSendTokensToolResult => {
-	const { addressIdFilter, amountNumberFilter, tokenSymbolFilter, addressFilter, networkIdFilter } =
-		filterParams.reduce<{
-			addressIdFilter?: string;
-			amountNumberFilter?: string;
-			tokenSymbolFilter?: string;
-			addressFilter?: string;
-			networkIdFilter?: string;
-		}>(
-			(acc, { value, name }) => ({
-				addressIdFilter: name === 'addressId' ? value : acc.addressIdFilter,
-				addressFilter: name === 'address' ? value : acc.addressFilter,
-				amountNumberFilter: name === 'amountNumber' ? value : acc.amountNumberFilter,
-				tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
-				networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
-			}),
-			{
-				addressIdFilter: undefined,
-				amountNumberFilter: undefined,
-				tokenSymbolFilter: undefined,
-				addressFilter: undefined,
-				networkIdFilter: undefined
-			}
-		);
+	const {
+		selectedContactAddressIdFilter,
+		amountNumberFilter,
+		tokenSymbolFilter,
+		addressFilter,
+		networkIdFilter
+	} = filterParams.reduce<{
+		selectedContactAddressIdFilter?: string;
+		amountNumberFilter?: string;
+		tokenSymbolFilter?: string;
+		addressFilter?: string;
+		networkIdFilter?: string;
+	}>(
+		(acc, { value, name }) => ({
+			selectedContactAddressIdFilter:
+				name === 'selectedContactAddressId' ? value : acc.selectedContactAddressIdFilter,
+			addressFilter: name === 'address' ? value : acc.addressFilter,
+			amountNumberFilter: name === 'amountNumber' ? value : acc.amountNumberFilter,
+			tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
+			networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
+		}),
+		{
+			selectedContactAddressIdFilter: undefined,
+			amountNumberFilter: undefined,
+			tokenSymbolFilter: undefined,
+			addressFilter: undefined,
+			networkIdFilter: undefined
+		}
+	);
 
 	const { contact, contactAddress } = Object.values(extendedAddressContacts).reduce<
 		Pick<ReviewSendTokensToolResult, 'contact' | 'contactAddress'>
 	>(
 		(acc, extendedAddressContactUi) => {
 			const address = extendedAddressContactUi.addresses.find(
-				({ id: addressId }) => addressId === addressIdFilter
+				({ id: addressId }) => addressId === selectedContactAddressIdFilter
 			);
 
 			if (nonNullish(address)) {
