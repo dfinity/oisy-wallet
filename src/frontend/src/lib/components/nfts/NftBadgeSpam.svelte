@@ -5,8 +5,8 @@
 	import { i18n } from '$lib/stores/i18n.store.js';
 </script>
 
-<DelayedTooltip delay={0} text={$i18n.nfts.text.spam}>
-	<span class="flex items-center text-warning-primary" data-testid={NFT_SPAM_BADGE}>
+<DelayedTooltip delay={300} text={$i18n.nfts.text.spam}>
+	<span class="flex items-center text-warning-primary" data-tid={NFT_SPAM_BADGE}>
 		<IconAlertOctagon size="24" />
 	</span>
 </DelayedTooltip>

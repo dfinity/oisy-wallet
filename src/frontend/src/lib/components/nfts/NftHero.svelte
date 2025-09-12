@@ -6,8 +6,7 @@
 	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
-	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButton from '$lib/components/nfts/NftCollectionActionButton.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
@@ -21,7 +20,6 @@
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { modalSend } from '$lib/derived/modal.derived';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -94,17 +92,7 @@
 
 		{#if nonNullish(normalizedNftName)}
 			<div class="my-3 flex w-full justify-between gap-3">
-				{#if nonNullish(token) && (token.section === CustomTokenSection.HIDDEN || token.section === CustomTokenSection.SPAM)}
-					<div class="flex items-center">
-						{#if token.section === CustomTokenSection.HIDDEN}
-							<NftBadgeHidden />
-						{/if}
-
-						{#if token.section === CustomTokenSection.SPAM}
-							<NftBadgeSpam />
-						{/if}
-					</div>
-				{/if}
+				<NftBadge {token} />
 
 				<h1 class="flex-1 truncate">
 					{normalizedNftName}
