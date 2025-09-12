@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, notEmptyString } from '@dfinity/utils';
+	import { isEmptyString } from '@dfinity/utils';
 	import AiAssistantShowContactsToolItem from '$lib/components/ai-assistant/AiAssistantShowContactsToolItem.svelte';
 	import { MAX_DISPLAYED_ADDRESSES_NUMBER } from '$lib/constants/ai-assistant.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,7 +12,7 @@
 		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
 	}
 
-	let { contacts, message, onSendMessage }: Props = $props();
+	let { contacts, onSendMessage }: Props = $props();
 
 	let allAddresses = $derived(
 		contacts.reduce<{ contact: ExtendedAddressContactUi; address: ContactAddressUiWithId }[]>(
@@ -51,7 +51,7 @@
 	{/each}
 {:else}
 	<span class="text-sm">
-		{notEmptyString(message) ? message : $i18n.ai_assistant.text.no_contacts_found_message}
+		{$i18n.ai_assistant.text.no_contacts_found_message}
 	</span>
 {/if}
 

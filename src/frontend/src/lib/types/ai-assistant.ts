@@ -33,7 +33,6 @@ export interface ToolCall {
 
 export interface ShowContactsToolResult {
 	contacts: ExtendedAddressContactUi[];
-	message?: string;
 }
 
 export interface ReviewSendTokensToolResult {
