@@ -2,9 +2,11 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -114,6 +116,10 @@
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>
+
+{#if AI_ASSISTANT_CONSOLE_ENABLED}
+	<SettingsExperimentalFeatures />
+{/if}
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>

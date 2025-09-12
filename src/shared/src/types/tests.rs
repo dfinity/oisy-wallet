@@ -307,8 +307,7 @@ mod contact_image {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 1,
-                        allow_media_source: None,
+                        chain_id: 1
                     },
                     valid: true,
                     description: "Valid Erc20Token",
@@ -318,8 +317,7 @@ mod contact_image {
                         token_address: ErcTokenId(
                             "0x12345678901234567890123456789012345678".to_string()
                         ),
-                        chain_id: 1,
-                        allow_media_source: None
+                        chain_id: 1
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too short",
@@ -327,8 +325,7 @@ mod contact_image {
                 TestVector {
                     input: ErcToken {
                         token_address: ErcTokenId("1".repeat(99)),
-                        chain_id: 1,
-                        allow_media_source: None
+                        chain_id: 1
                     },
                     valid: false,
                     description: "Erc20Token with a token address that is too long",
@@ -338,8 +335,7 @@ mod contact_image {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: u64::MAX,
-                        allow_media_source: None
+                        chain_id: u64::MAX
                     },
                     valid: true,
                     description: "Maximum chain ID",
@@ -349,33 +345,10 @@ mod contact_image {
                         token_address: ErcTokenId(
                             "0x1234567890123456789012345678901234567890".to_string()
                         ),
-                        chain_id: 0,
-                        allow_media_source: None
+                        chain_id: 0
                     },
                     valid: true,
                     description: "Minimum chain ID",
-                },
-                TestVector {
-                    input: ErcToken {
-                        token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
-                        chain_id: 0,
-                        allow_media_source: Some(true)
-                    },
-                    valid: true,
-                    description: "Erc20Token with allow_media_source set to true",
-                },
-                TestVector {
-                    input: ErcToken {
-                        token_address: ErcTokenId(
-                            "0x1234567890123456789012345678901234567890".to_string()
-                        ),
-                        chain_id: 0,
-                        allow_media_source: Some(false)
-                    },
-                    valid: true,
-                    description: "Erc20Token with allow_media_source set to false",
                 },
             ]
         );
@@ -615,6 +588,7 @@ mod user_profile {
                     updated_timestamp: 0,
                     version: None,
                     settings: None,
+                    agreements: None,
                 },
                 valid: true,
             },
@@ -626,6 +600,7 @@ mod user_profile {
                     updated_timestamp: 0,
                     version: None,
                     settings: None,
+                    agreements: None,
                 },
                 valid: false,
             },

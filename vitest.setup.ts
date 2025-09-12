@@ -48,6 +48,8 @@ Element.prototype.animate = (
 	return animation;
 };
 
+Element.prototype.scrollTo = vi.fn();
+
 vi.mock('$app/stores', () => ({
 	page: mockPage
 }));

@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import tqqqx from '$sol/assets/tqqqx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token } from '$sol/types/spl';
 
 export const TQQQX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const TQQQX_SYMBOL = 'TQQQx';
 
 export const TQQQX_TOKEN_ID: TokenId = parseTokenId(TQQQX_SYMBOL);
 
-export const TQQQX_TOKEN: RequiredSplToken = {
+export const TQQQX_TOKEN: RequiredSpl2022Token = {
 	id: TQQQX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

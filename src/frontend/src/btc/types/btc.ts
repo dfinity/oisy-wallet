@@ -95,6 +95,36 @@ export interface BtcWalletBalance {
 }
 
 /**
+ * Compares two BtcWalletBalance objects for equality
+ * @param a - First balance object (can be null)
+ * @param b - Second balance object (can be null)
+ * @returns true if both objects are equal, false otherwise
+ */
+export const btcWalletBalanceEquals = ({
+	a,
+	b
+}: {
+	a: BtcWalletBalance | null;
+	b: BtcWalletBalance | null;
+}): boolean => {
+	// Handle null cases
+	if (a === null && b === null) {
+		return true;
+	}
+	if (a === null || b === null) {
+		return false;
+	}
+
+	// Compare all balance fields
+	return (
+		a.confirmed === b.confirmed &&
+		a.unconfirmed === b.unconfirmed &&
+		a.locked === b.locked &&
+		a.total === b.total
+	);
+};
+
+/**
  * Type alias for BTC wallet balance data that can be null
  * Used in stores and components where balance might not be loaded yet
  */
