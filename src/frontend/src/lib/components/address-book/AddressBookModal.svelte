@@ -110,7 +110,7 @@
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
-	// Allow to define an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
+	// Allow defining an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
 	onMount(() => {
 		const data = modalData?.entrypoint?.type;
 
@@ -119,7 +119,7 @@
 		}
 	});
 
-	// Reset address book store on modal exit so we can start fresh the next time its opened
+	// Reset address book store on modal exit so we can start fresh the next time it's opened
 	onDestroy(() => {
 		addressBookStore.reset();
 	});
@@ -194,7 +194,7 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
-		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		// if the entrypoint was SAVE_ADDRESS, this is the last step of the flow, so we close the address book modal
 		if (
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
@@ -255,7 +255,7 @@
 
 	const handleDeleteAddress = async (index: number) => {
 		if (nonNullish(currentContact)) {
-			const addresses = currentContact.addresses.filter((a, i) => i !== index);
+			const addresses = currentContact.addresses.filter((_, i) => i !== index);
 			const contact = {
 				...currentContact,
 				addresses
