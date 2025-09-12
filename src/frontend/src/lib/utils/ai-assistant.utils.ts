@@ -1,12 +1,11 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type {
-	AiAssistantContactUi,
 	AiAssistantContactUiMap,
 	ReviewSendTokensToolResult,
 	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
-import type { ExtendedAddressContactUi, ExtendedAddressContactUiMap } from '$lib/types/contact';
+import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
 import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
@@ -25,26 +24,6 @@ export const parseToAiAssistantContacts = (
 			}
 		};
 	}, {});
-
-export const parseFromAiAssistantContacts = ({
-	aiAssistantContacts,
-	extendedAddressContacts
-}: {
-	aiAssistantContacts: AiAssistantContactUi[];
-	extendedAddressContacts: ExtendedAddressContactUiMap;
-}): ExtendedAddressContactUi[] =>
-	aiAssistantContacts.reduce<ExtendedAddressContactUi[]>(
-		(acc, { id, addresses }) => [
-			...acc,
-			{
-				...extendedAddressContacts[`${id}`],
-				addresses: extendedAddressContacts[`${id}`].addresses.filter(({ id: addressId }) =>
-					addresses.some((filteredAddress) => filteredAddress.id === addressId)
-				)
-			}
-		],
-		[]
-	);
 
 export const parseShowFilteredContactsToolArguments = ({
 	filterParams,

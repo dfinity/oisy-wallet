@@ -63,33 +63,6 @@ export const getAiAssistantSystemPrompt = ({
 	AVAILABLE CONTACTS:
 	${availableContacts}`;
 
-export const getAiAssistantFilterContactsPrompt = (
-	filterParams: string
-) => `You are a strict semantic filter engine.
-Given a list of contacts and a user query, return ONLY contacts that semantically match.
-- Use concept reasoning: e.g., "fruit" → pineapple.
-- Filter addresses by "addressType" if provided
-- If no matching contacts are found (after applying the above rules), return an empty contacts array and include a "message" field using this exact format: "It looks like you don’t have any saved contacts with a {networkName} address. You can either provide a {networkName} address directly or choose a different token." Replace {networkName} with the friendly blockchain name derived from the token (e.g., SOL → Sol, ICP → ICP).
-
-Return ONLY this JSON schema:
-{
-  "contacts": [
-    {
-    	"id": string,
-      "name": string,
-      "addresses": [
-        { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2" }
-      ]
-    }
-  ],
-  "message"?: string
-}
-
-Arguments: "${filterParams}".
-
-Do NOT include json or any Markdown.
-Do NOT include extra text.`;
-
 export const getAiAssistantToolsDescription = ({
 	enabledNetworksSymbols,
 	enabledTokensSymbols
