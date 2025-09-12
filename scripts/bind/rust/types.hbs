@@ -5,7 +5,7 @@
 //! Adapted from: <https://github.com/dfinity/candid/blob/master/rust/candid_parser/src/bindings/rust_call.hbs>
 #![allow(dead_code, unused_imports, clippy::all, clippy::missing_errors_doc)]
 use {{candid_crate}}::{self, CandidType, Deserialize, Principal};
-ic_cdk::call::CallResult
+use ic_cdk::call::CallResult;
 
 {{#if submodule}}
 /// Manually maintained methods
