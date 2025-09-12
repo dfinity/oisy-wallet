@@ -5,7 +5,6 @@ import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
 	generateAiAssistantResponseEventMetadata,
-	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments,
 	parseShowFilteredContactsToolArguments,
 	parseToAiAssistantContacts
@@ -46,17 +45,6 @@ describe('ai-assistant.utils', () => {
 			expect(parseToAiAssistantContacts(storeData)).toEqual({
 				[`${aiAssistantContact.id}`]: aiAssistantContact
 			});
-		});
-	});
-
-	describe('parseFromAiAssistantContacts', () => {
-		it('returns correct result', () => {
-			expect(
-				parseFromAiAssistantContacts({
-					aiAssistantContacts: [aiAssistantContact],
-					extendedAddressContacts: storeData
-				})
-			).toEqual(Object.values(storeData));
 		});
 	});
 
