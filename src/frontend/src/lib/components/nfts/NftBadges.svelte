@@ -6,7 +6,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
-		token: NonFungibleToken | undefined;
+		token?: NonFungibleToken;
 	}
 
 	const { token }: Props = $props();
