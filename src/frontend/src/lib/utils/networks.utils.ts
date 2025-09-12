@@ -1,5 +1,3 @@
-import { ETHEREUM_EXPLORER_URL } from '$env/explorers.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import type { EthereumNetwork } from '$eth/types/network';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
@@ -7,7 +5,7 @@ import type { UserNetworks } from '$lib/types/user-networks';
 import { isNetworkIdEthereum, isNetworkIdEvm, isNetworkIdSolana } from '$lib/utils/network.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import type { SolanaNetwork } from '$sol/types/network';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 export const defineEnabledNetworks = <T extends Network>({
 	$testnetsEnabled,
@@ -36,10 +34,7 @@ export const getContractExplorerUrl = ({
 	network: Network;
 	contractAddress: string;
 }): string | undefined => {
-	let baseUrl = (network as SolanaNetwork | EthereumNetwork)?.explorerUrl;
-	if (isNullish(baseUrl) && network.id === ETHEREUM_NETWORK_ID) {
-		baseUrl = ETHEREUM_EXPLORER_URL;
-	}
+	const baseUrl = (network as SolanaNetwork | EthereumNetwork)?.explorerUrl;
 	if (nonNullish(baseUrl)) {
 		if (isNetworkIdEthereum(network.id) || isNetworkIdEvm(network.id)) {
 			return `${baseUrl}/address/${contractAddress}`;
