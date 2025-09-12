@@ -107,8 +107,8 @@
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
-						{transactions}
 						testId={`all-transactions-date-group-${index}`}
+						{transactions}
 					/>
 				{/each}
 			</AllTransactionsScroll>

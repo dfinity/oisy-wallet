@@ -70,9 +70,9 @@
 </script>
 
 <InfiniteScroll
-	on:nnsIntersect={onIntersect}
 	disabled={allDisabledInfiniteScroll}
 	testId="your-sentinel"
+	on:nnsIntersect={onIntersect}
 >
 	{@render children?.()}
 </InfiniteScroll>
