@@ -4,7 +4,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadges from '$lib/components/nfts/NftBadges.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
@@ -44,7 +44,7 @@
 
 		{#if nonNullish(token)}
 			<div class="my-3 flex w-full justify-between gap-3">
-				<NftBadges {token} />
+				<NftBadge {token} />
 
 				<h1 class="flex-1 truncate">
 					{token.name}
