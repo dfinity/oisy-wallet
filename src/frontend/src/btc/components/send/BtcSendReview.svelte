@@ -29,12 +29,15 @@
 	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
 	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
 
+	// When BTC extension is enabled, we allow parallel transactions, so return NONE status
+	$: pendingTransactionsStatus = BTC_EXTENSION_FEATURE_FLAG_ENABLED
+		? BtcPendingSentTransactionsStatus.NONE
+		: $hasPendingTransactionsStore;
+
 	let disableSend: boolean;
-	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
+	// We want to disable send if pending transactions or UTxOs fee isn't available yet, there was an error or there are pending transactions.
 	$: disableSend =
-		(!BTC_EXTENSION_FEATURE_FLAG_ENABLED &&
-			// we do not allow parallel UTXO-locked BTC transactions when BTC extension is not enabled
-			$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE) ||
+		pendingTransactionsStatus !== BtcPendingSentTransactionsStatus.NONE ||
 		isNullish(utxosFee) ||
 		nonNullish(utxosFee?.error) ||
 		isInvalidDestinationBtc({
@@ -51,6 +54,6 @@
 
 	<div slot="info" class="mt-8">
 		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
-		<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
+		<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
 	</div>
 </SendReview>
