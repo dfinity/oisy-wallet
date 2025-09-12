@@ -24,7 +24,7 @@ export const aiAssistantChatMessages: Readable<ChatMessage[]> = derived(
 export const aiAssistantSystemMessage: Readable<chat_message_v1> = derived(
 	[extendedAddressContacts, enabledTokens],
 	([$extendedAddressContacts, $enabledTokens]) => {
-		const aiAssistantContacts = parseToAiAssistantContacts($extendedAddressContacts);
+		const aiAssistantContacts = Object.values(parseToAiAssistantContacts($extendedAddressContacts));
 		const aiEnabledTokens = $enabledTokens.map(({ name, symbol, network: { id: networkId } }) => ({
 			name,
 			symbol,
@@ -66,12 +66,12 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 						}
 					];
 				}
-				if (role === 'user' && (notEmptyString(text) || notEmptyString(context))) {
+				if (role === 'user' && notEmptyString(text)) {
 					return [
 						...acc,
 						{
 							user: {
-								content: `${notEmptyString(context) ? context : text}`
+								content: `${text}${notEmptyString(context) ? ` ${context}` : ''}`
 							}
 						}
 					];

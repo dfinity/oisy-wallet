@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ContactImage } from '$declarations/backend/backend.did';
@@ -18,6 +18,7 @@
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { addressBookWizardSteps } from '$lib/config/address-book.config';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
 		TRACK_CONTACT_CREATE_SUCCESS,
@@ -103,59 +104,13 @@
 		)
 	);
 
-	const steps: WizardSteps<AddressBookSteps> = [
-		{
-			name: AddressBookSteps.ADDRESS_BOOK,
-			title: $i18n.address_book.text.title
-		},
-		{
-			name: AddressBookSteps.SAVE_ADDRESS,
-			title: $i18n.address.save.title
-		},
-		{
-			name: AddressBookSteps.CREATE_CONTACT,
-			title: $i18n.address_book.create_contact.title
-		},
-		{
-			name: AddressBookSteps.SHOW_CONTACT,
-			title: $i18n.address_book.show_contact.title
-		},
-		{
-			name: AddressBookSteps.EDIT_CONTACT,
-			title: $i18n.address_book.edit_contact.title
-		},
-		{
-			name: AddressBookSteps.EDIT_CONTACT_NAME,
-			title: $i18n.contact.form.add_new_contact
-		},
-		{
-			name: AddressBookSteps.DELETE_CONTACT,
-			title: $i18n.contact.delete.title
-		},
-		{
-			name: AddressBookSteps.SHOW_ADDRESS,
-			// The title will be replaced with the name. No title is needed here.
-			title: ''
-		},
-		{
-			name: AddressBookSteps.EDIT_ADDRESS,
-			title: $i18n.address_book.edit_contact.title
-		},
-		{
-			name: AddressBookSteps.QR_CODE_SCAN,
-			title: $i18n.address.qr.title
-		},
-		{
-			name: AddressBookSteps.DELETE_ADDRESS,
-			title: $i18n.address.delete.title
-		}
-	];
+	const steps = $derived(addressBookWizardSteps({ i18n: $i18n }));
 
 	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
 	let modalData = $derived($modalStore?.data as AddressBookModalParams);
 
-	// Allow to define an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
+	// Allow defining an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
 	onMount(() => {
 		const data = modalData?.entrypoint?.type;
 
@@ -164,7 +119,7 @@
 		}
 	});
 
-	// Reset address book store on modal exit so we can start fresh the next time its opened
+	// Reset address book store on modal exit so we can start fresh the next time it's opened
 	onDestroy(() => {
 		addressBookStore.reset();
 	});
@@ -239,7 +194,7 @@
 			addresses
 		};
 		await callUpdateContact({ contact });
-		// if the entrypoint was SAVE_ADDRESS this is the last step of the flow, so we close the address book modal
+		// if the entrypoint was SAVE_ADDRESS, this is the last step of the flow, so we close the address book modal
 		if (
 			nonNullish(modalData?.entrypoint) &&
 			modalData.entrypoint.type === AddressBookSteps.SAVE_ADDRESS
@@ -300,7 +255,7 @@
 
 	const handleDeleteAddress = async (index: number) => {
 		if (nonNullish(currentContact)) {
-			const addresses = currentContact.addresses.filter((a, i) => i !== index);
+			const addresses = currentContact.addresses.filter((_, i) => i !== index);
 			const contact = {
 				...currentContact,
 				addresses

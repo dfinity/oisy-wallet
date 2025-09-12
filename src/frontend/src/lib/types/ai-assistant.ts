@@ -5,6 +5,7 @@ import type { Token } from '$lib/types/token';
 export interface ChatMessageContent {
 	text?: string;
 	context?: string;
+	retryable?: boolean;
 	tool?: {
 		calls: ToolCall[];
 		results: ToolResult[];
@@ -55,7 +56,7 @@ export interface ToolResult {
 }
 
 export interface AiAssistantContactUi
-	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs'> {
+	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
 	addresses: Omit<ContactAddressUiWithId, 'address'>[];
 }
 
