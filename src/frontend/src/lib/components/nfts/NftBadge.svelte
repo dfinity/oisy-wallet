@@ -10,8 +10,6 @@
 	}
 
 	const { token }: Props = $props();
-
-	let section = $derived(token?.section);
 </script>
 
 {#if nonNullish(token)}
