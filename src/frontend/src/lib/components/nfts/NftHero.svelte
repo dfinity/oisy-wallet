@@ -88,20 +88,22 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(normalizedNftName)}
-			<div class="my-3 w-full justify-between">
-				<div class="flex items-center gap-3">
-					<h1 class="truncate">
-						{normalizedNftName}
-					</h1>
+			<div class="my-3 flex w-full justify-between gap-3">
+				{#if nonNullish(token) && (token.section === CustomTokenSection.HIDDEN || token.section === CustomTokenSection.SPAM)}
+					<div class="flex items-center">
+						{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
+							<NftBadgeHidden />
+						{/if}
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<NftBadgeHidden />
-					{/if}
+						{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
+							<NftBadgeSpam />
+						{/if}
+					</div>
+				{/if}
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
-						<NftBadgeSpam />
-					{/if}
-				</div>
+				<h1 class="flex-1 truncate">
+					{normalizedNftName}
+				</h1>
 			</div>
 		{:else}
 			<span class="block max-w-80">
