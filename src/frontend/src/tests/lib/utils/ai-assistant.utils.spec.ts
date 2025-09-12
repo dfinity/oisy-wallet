@@ -63,13 +63,13 @@ describe('ai-assistant.utils', () => {
 	describe('parseReviewSendTokenToolArguments', () => {
 		const sendValue = 0.00001;
 
-		it('returns correct result when addressId is provided', () => {
+		it('returns correct result when selectedContactAddressId is provided', () => {
 			expect(
 				parseReviewSendTokensToolArguments({
 					filterParams: [
 						{
 							value: extendedAddressContactUi.addresses[0].id,
-							name: 'addressId'
+							name: 'selectedContactAddressId'
 						},
 						{
 							value: `${sendValue}`,
