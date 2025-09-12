@@ -13,13 +13,12 @@ export const parseToAiAssistantContacts = (
 	extendedAddressContacts: ExtendedAddressContactUiMap
 ): AiAssistantContactUiMap =>
 	Object.keys(extendedAddressContacts).reduce<AiAssistantContactUiMap>((acc, contactId) => {
-		const { name, id, addresses } = extendedAddressContacts[contactId];
+		const { name, addresses } = extendedAddressContacts[contactId];
 
 		return {
 			...acc,
 			[contactId]: {
 				name,
-				id,
 				addresses: addresses.map(({ address: _, ...restAddress }) => restAddress)
 			}
 		};
