@@ -53,6 +53,22 @@ vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
 
+vi.mock('@ethersproject/providers', () => {
+	const provider = vi.fn();
+	provider.prototype.getFeeData = vi.fn().mockResolvedValue({
+		lastBaseFeePerGas: null,
+		maxFeePerGas: null,
+		maxPriorityFeePerGas: null,
+		gasPrice: null
+	});
+	return {
+		InfuraProvider: provider,
+		JsonRpcProvider: provider,
+		EtherscanProvider: provider,
+		AlchemyProvider: provider
+	};
+});
+
 describe('EthConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
