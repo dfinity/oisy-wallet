@@ -4,7 +4,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { render } from '@testing-library/svelte';
 
-describe('NftBadges.spec', () => {
+describe('NftBadge', () => {
 	it('should render the hidden badge if the NFT is hidden', () => {
 		const { getByTestId } = render(NftBadge, {
 			props: {
