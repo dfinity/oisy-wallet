@@ -18,7 +18,7 @@
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { AddressBookWizardSteps } from '$lib/config/addressbook-modalsteps.config';
+	import { addressBookWizardSteps } from '$lib/config/address-book.config';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { sortedContacts } from '$lib/derived/contacts.derived';
@@ -52,7 +52,7 @@
 	let modal: WizardModal<AddressBookSteps> | undefined;
 	let editContactNameStep = $state<EditContactNameStep>();
 
-	const steps = $derived(AddressBookWizardSteps({ i18n: $i18n }));
+	const steps = $derived(addressBookWizardSteps({ i18n: $i18n }));
 
 	const modalData = $derived($modalStore?.data as AddressBookModalParams | undefined);
 
