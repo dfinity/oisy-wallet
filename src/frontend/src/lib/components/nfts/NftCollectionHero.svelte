@@ -43,12 +43,13 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(token)}
-			<div class="my-3 flex w-full justify-between gap-3">
-				<NftBadge {token} />
-
-				<h1 class="flex-1 truncate">
-					{token.name}
-				</h1>
+			<div class="my-3 flex w-full flex-col justify-between gap-3 md:flex-row">
+				<div class="flex w-full min-w-0 flex-1 items-center gap-2">
+					<NftBadge {token} />
+					<h1 class="min-w-0 truncate">
+						{token.name}
+					</h1>
+				</div>
 
 				<NftCollectionActionButtons {token} />
 			</div>
@@ -58,9 +59,19 @@
 			</span>
 		{/if}
 
-		<List condensed styleClass="text-sm text-tertiary">
+		<List condensed styleClass="text-sm text-primary">
 			<ListItem
-				><span>{$i18n.nfts.text.collection_address}</span>
+				><span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
+				{#if nonNullish(token)}
+					{shortenWithMiddleEllipsis({ text: token.name })}
+				{:else}
+					<span class="min-w-12">
+						<SkeletonText />
+					</span>
+				{/if}
+			</ListItem>
+			<ListItem
+				><span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 
 				{#if nonNullish(token)}
 					<span class="flex items-center">
@@ -84,7 +95,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.networks.network}</span>
+				<span class="text-tertiary">{$i18n.networks.network}</span>
 				{#if nonNullish(token)}
 					<NetworkWithLogo network={token.network} />
 				{:else}
@@ -94,7 +105,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.nfts.text.token_standard}</span>
+				<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(token)}
 					<span class="uppercase">{token.standard}</span>
 				{:else}
@@ -104,7 +115,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.nfts.text.display_preference}</span>
+				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
 				{#if nonNullish(nfts?.[0])}
 					<NftImageConsentPreference nft={nfts[0]} />
 				{:else}
