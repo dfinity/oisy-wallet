@@ -568,6 +568,7 @@ interface I18nSend {
 		send_review_subtitle: string;
 		no_nfts_found: string;
 		no_nfts_found_desc: string;
+		select_nft: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
