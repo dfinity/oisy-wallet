@@ -82,7 +82,7 @@
 						</button>
 					</NftImageConsent>
 					<span class="absolute bottom-0 right-0 m-2.5">
-						<NetworkLogo color="white" network={nft.colection.network} size="xs" />
+						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
 				</div>
 			</div>
