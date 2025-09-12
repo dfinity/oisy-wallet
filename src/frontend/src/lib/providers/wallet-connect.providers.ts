@@ -26,6 +26,7 @@ import {
 } from '@walletconnect/jsonrpc-utils';
 import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
+import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -115,7 +116,7 @@ export const initWalletConnect = async ({
 				...(nonNullish(solAddress)
 					? {
 							solana: {
-								chains: [solMainnetNamespace],
+								chains: CAIP10_CHAINS_KEYS,
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
