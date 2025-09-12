@@ -66,7 +66,7 @@
 
 	const steps = $derived(addressBookWizardSteps({ i18n: $i18n }));
 
-	const modalData = $derived($modalStore?.data as AddressBookModalParams | undefined);
+	let modalData = $derived($modalStore?.data as AddressBookModalParams | undefined);
 
 	let controller: ReturnType<typeof makeController> | undefined;
 	$effect(() => {
