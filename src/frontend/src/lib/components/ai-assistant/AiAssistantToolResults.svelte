@@ -7,7 +7,7 @@
 
 	interface Props {
 		results: ToolResult[];
-		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
+		onSendMessage: (params: { messageText?: string; context?: string }) => Promise<void>;
 		isLastItem: boolean;
 	}
 
