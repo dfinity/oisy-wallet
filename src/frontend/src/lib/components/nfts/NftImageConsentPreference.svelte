@@ -39,25 +39,10 @@
 	{:else}
 		{$i18n.nfts.text.media_disabled}
 	{/if}
-	<Responsive up="md">
-		<Button
-			colorStyle="secondary-light"
-			onclick={openConsentModal}
-			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
-			transparent>{$i18n.nfts.text.review_preference}</Button
-		>
-	</Responsive>
-	<Responsive down="sm">
-		<ButtonIcon
-			ariaLabel={$i18n.nfts.text.review_preference}
-			colorStyle="secondary-light"
-			onclick={openConsentModal}
-			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
-			transparent
-		>
-			{#snippet icon()}
-				<IconPenLine />
-			{/snippet}
-		</ButtonIcon>
-	</Responsive>
+	<Button
+		colorStyle="secondary-light"
+		onclick={openConsentModal}
+		styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
+		transparent>{$i18n.nfts.text.review_preference}</Button
+	>
 </span>
