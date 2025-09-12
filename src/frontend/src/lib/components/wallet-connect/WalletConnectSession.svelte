@@ -419,13 +419,9 @@
 			// Check for persisted sessions
 			const sessions = listener.getActiveSessions();
 
+			// We have no active sessions, we can disconnect the listener.
 			if (Object.keys(sessions).length === 0) {
-				walletConnectPaired.set(false);
-
 				await disconnectListener();
-			} else {
-				// We have at least one active session – consider ourselves connected
-				walletConnectPaired.set(true);
 			}
 		} catch (err: unknown) {
 			toastsError({
