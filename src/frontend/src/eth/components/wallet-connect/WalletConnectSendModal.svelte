@@ -10,14 +10,19 @@
 	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	export let request: WalletKitTypes.SessionRequest;
-	export let firstTransaction: WalletConnectEthSendTransactionParams;
-	export let sourceNetwork: EthereumNetwork;
-	export let listener: OptionWalletConnectListener;
+	interface Props {
+		request: WalletKitTypes.SessionRequest;
+		firstTransaction: WalletConnectEthSendTransactionParams;
+		sourceNetwork: EthereumNetwork;
+		listener: OptionWalletConnectListener;
+	}
 
-	let token: Token | undefined;
-	$: token = [...$enabledEthereumTokens, ...$enabledEvmTokens].find(
-		({ network: { id: networkId } }) => networkId === sourceNetwork.id
+	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
+
+	let token: Token | undefined = $derived(
+		[...$enabledEthereumTokens, ...$enabledEvmTokens].find(
+			({ network: { id: networkId } }) => networkId === sourceNetwork.id
+		)
 	);
 </script>
 

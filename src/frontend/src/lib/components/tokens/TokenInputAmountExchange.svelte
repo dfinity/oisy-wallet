@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { preventDefault } from 'svelte/legacy';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
 		TOKEN_INPUT_AMOUNT_EXCHANGE,
@@ -16,28 +17,38 @@
 	import type { Token } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let amount: OptionAmount;
-	export let exchangeRate: number | undefined;
-	export let token: Token | undefined = undefined;
-	export let displayUnit: DisplayUnit = 'usd';
-	export let disabled = false;
+	interface Props {
+		amount: OptionAmount;
+		exchangeRate: number | undefined;
+		token?: Token | undefined;
+		displayUnit?: DisplayUnit;
+		disabled?: boolean;
+	}
+
+	let {
+		amount,
+		exchangeRate,
+		token = undefined,
+		displayUnit = $bindable('usd'),
+		disabled = false
+	}: Props = $props();
 
 	const handleUnitSwitch = () => {
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
-	let formattedUSDAmount: string | undefined;
-	$: formattedUSDAmount = formatCurrency({
-		value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
-		currency: $currentCurrency,
-		exchangeRate: $currencyExchangeStore,
-		language: $currentLanguage
-	});
+	let formattedUSDAmount: string | undefined = $derived(
+		formatCurrency({
+			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
+			currency: $currentCurrency,
+			exchangeRate: $currencyExchangeStore,
+			language: $currentLanguage
+		})
+	);
 
-	let formattedTokenAmount: string | undefined;
-	$: formattedTokenAmount = nonNullish(token)
-		? `${nonNullish(amount) ? amount : 0} ${token.symbol}`
-		: '0';
+	let formattedTokenAmount: string | undefined = $derived(
+		nonNullish(token) ? `${nonNullish(amount) ? amount : 0} ${token.symbol}` : '0'
+	);
 </script>
 
 <div class="flex items-center gap-1" data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE}>
@@ -46,7 +57,7 @@
 			class:hover:cursor-default={disabled}
 			data-tid={TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON}
 			{disabled}
-			on:click|preventDefault={handleUnitSwitch}
+			onclick={preventDefault(handleUnitSwitch)}
 		>
 			<IconArrowUpDown size="14" />
 		</button>

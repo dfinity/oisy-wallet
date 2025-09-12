@@ -6,10 +6,13 @@
 	import type { OptionString } from '$lib/types/string';
 	import type { Option } from '$lib/types/utils';
 
-	export let payload: Option<PayloadOrigin>;
+	interface Props {
+		payload: Option<PayloadOrigin>;
+	}
 
-	let origin: Origin | undefined;
-	$: origin = payload?.origin;
+	let { payload }: Props = $props();
+
+	let origin: Origin | undefined = $derived(payload?.origin);
 
 	const mapHost = (origin: Origin | undefined): OptionString => {
 		if (isNullish(origin)) {
@@ -27,8 +30,7 @@
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
 
-	let host: OptionString;
-	$: host = mapHost(origin);
+	let host: OptionString = $derived(mapHost(origin));
 </script>
 
 {#if nonNullish(origin)}

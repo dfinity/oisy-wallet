@@ -7,19 +7,24 @@
 	import type { TokenFinancialData } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let balance: TokenFinancialData['balance'];
-	export let usdBalance: TokenFinancialData['usdBalance'];
-	export let nullishBalanceMessage: string | undefined = undefined;
+	interface Props {
+		balance: TokenFinancialData['balance'];
+		usdBalance: TokenFinancialData['usdBalance'];
+		nullishBalanceMessage?: string;
+	}
 
-	let exchangeBalance: string | undefined;
-	$: exchangeBalance = nonNullish(usdBalance)
-		? formatCurrency({
-				value: usdBalance,
-				currency: $currentCurrency,
-				exchangeRate: $currencyExchangeStore,
-				language: $currentLanguage
-			})
-		: undefined;
+	let { balance, usdBalance, nullishBalanceMessage = undefined }: Props = $props();
+
+	let exchangeBalance: string | undefined = $derived(
+		nonNullish(usdBalance)
+			? formatCurrency({
+					value: usdBalance,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
 </script>
 
 <output class="break-all">

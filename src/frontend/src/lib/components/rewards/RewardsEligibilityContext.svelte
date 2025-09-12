@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { onMount, setContext, type Snippet } from 'svelte';
+	import { type Snippet, onMount, setContext, type Snippet } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getCampaignEligibilities } from '$lib/services/reward.services';

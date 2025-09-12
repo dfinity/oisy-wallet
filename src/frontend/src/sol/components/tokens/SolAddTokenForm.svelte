@@ -2,7 +2,11 @@
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let tokenAddress = '';
+	interface Props {
+		tokenAddress?: string;
+	}
+
+	let { tokenAddress = $bindable('') }: Props = $props();
 </script>
 
 <label class="font-bold" for="destination">{$i18n.tokens.text.token_address}:</label>

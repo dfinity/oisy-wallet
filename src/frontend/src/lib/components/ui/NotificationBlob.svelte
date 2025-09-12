@@ -1,6 +1,13 @@
 <script lang="ts">
-	export let position: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' = 'top-left';
-	export let display = true;
+	import type { Snippet } from 'svelte';
+
+	interface Props {
+		position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
+		display?: boolean;
+		children?: Snippet;
+	}
+
+	let { position = 'top-left', display = true, children }: Props = $props();
 </script>
 
 <div class="relative">
@@ -13,5 +20,5 @@
 		class:opacity-0={!display}
 		class:opacity-100={display}
 	></div>
-	<slot />
+	{@render children?.()}
 </div>

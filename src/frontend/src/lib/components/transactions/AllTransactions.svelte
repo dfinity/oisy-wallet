@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';
@@ -14,13 +15,15 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	$: enabledTokensWithoutTransaction = $enabledFungibleNetworkTokens
-		.filter((token) => $icTransactionsStore?.[token.id] === null)
-		.map((token: TokenUi) => token as IcToken);
+	let enabledTokensWithoutTransaction = $derived(
+		$enabledFungibleNetworkTokens
+			.filter((token) => $icTransactionsStore?.[token.id] === null)
+			.map((token: TokenUi) => token as IcToken)
+	);
 
-	let tokenListWithoutCanister: string;
-	let tokenListWithUnavailableCanister: string;
-	$: {
+	let tokenListWithoutCanister: string = $state();
+	let tokenListWithUnavailableCanister: string = $state();
+	run(() => {
 		const result = enabledTokensWithoutTransaction.reduce(
 			(
 				acc: {
@@ -42,7 +45,7 @@
 
 		tokenListWithoutCanister = result.enabledTokensWithoutCanister.join(', ');
 		tokenListWithUnavailableCanister = result.enabledTokensWithUnavailableCanister.join(', ');
-	}
+	});
 </script>
 
 <div class="flex flex-col gap-5">

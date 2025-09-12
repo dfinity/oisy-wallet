@@ -8,6 +8,8 @@
 		data: string | undefined;
 		label: string;
 	}
+
+
 	let { data, label }: Props = $props();
 </script>
 

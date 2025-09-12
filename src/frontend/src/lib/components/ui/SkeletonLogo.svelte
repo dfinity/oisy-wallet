@@ -1,5 +1,9 @@
 <script lang="ts">
-	export let size: 'small' | 'big' = 'small';
+	interface Props {
+		size?: 'small' | 'big';
+	}
+
+	let { size = 'small' }: Props = $props();
 </script>
 
 <div aria-hidden="true">

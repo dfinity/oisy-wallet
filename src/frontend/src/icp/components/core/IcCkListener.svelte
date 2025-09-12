@@ -1,16 +1,28 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte';
+	import { type Snippet, onDestroy, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import type { IcCkWorker, IcCkWorkerInitResult } from '$icp/types/ck-listener';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { CanisterIdText } from '$lib/types/canister';
 	import type { Token } from '$lib/types/token';
 
-	export let initFn: IcCkWorker;
-	export let token: Token;
-	export let twinToken: Token | undefined = undefined;
-	export let minterCanisterId: CanisterIdText | undefined = undefined;
+	interface Props {
+		initFn: IcCkWorker;
+		token: Token;
+		twinToken?: Token | undefined;
+		minterCanisterId?: CanisterIdText | undefined;
+		children?: Snippet;
+	}
 
-	let worker: IcCkWorkerInitResult | undefined;
+	let {
+		initFn,
+		token,
+		twinToken = undefined,
+		minterCanisterId = undefined,
+		children
+	}: Props = $props();
+
+	let worker: IcCkWorkerInitResult | undefined = $state();
 
 	onMount(
 		async () =>
@@ -28,11 +40,13 @@
 		worker?.start();
 	};
 
-	$: (worker, syncTimer());
+	run(() => {
+		(worker, syncTimer());
+	});
 
 	const triggerTimer = () => worker?.trigger();
 </script>
 
-<svelte:window on:oisyTriggerWallet={triggerTimer} />
+<svelte:window onoisyTriggerWallet={triggerTimer} />
 
-<slot />
+{@render children?.()}

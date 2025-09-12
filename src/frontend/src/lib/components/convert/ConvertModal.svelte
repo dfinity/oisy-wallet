@@ -12,22 +12,27 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let sourceToken: Token;
-	export let destinationToken: Token;
+	interface Props {
+		sourceToken: Token;
+		destinationToken: Token;
+	}
 
-	let sendAmount: OptionAmount = undefined;
-	let receiveAmount: number | undefined = undefined;
-	let customDestination = '';
-	let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
-	let currentStep: WizardStep<WizardStepsConvertComplete> | undefined;
-	let modal: WizardModal<WizardStepsConvertComplete>;
+	let { sourceToken, destinationToken }: Props = $props();
 
-	let steps: WizardSteps<WizardStepsConvertComplete>;
-	$: steps = convertWizardSteps({
-		i18n: $i18n,
-		sourceToken: sourceToken.symbol,
-		destinationToken: destinationToken.symbol
-	});
+	let sendAmount: OptionAmount = $state(undefined);
+	let receiveAmount: number | undefined = $state(undefined);
+	let customDestination = $state('');
+	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
+	let currentStep: WizardStep<WizardStepsConvertComplete> | undefined = $state();
+	let modal: WizardModal<WizardStepsConvertComplete> = $state();
+
+	let steps: WizardSteps<WizardStepsConvertComplete> = $derived(
+		convertWizardSteps({
+			i18n: $i18n,
+			sourceToken: sourceToken.symbol,
+			destinationToken: destinationToken.symbol
+		})
+	);
 
 	const dispatch = createEventDispatcher();
 

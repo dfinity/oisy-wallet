@@ -17,7 +17,11 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute: NavigationTarget | undefined;
+	}
+
+	let { fromRoute }: Props = $props();
 
 	let selectedToken: OptionErc20UserToken;
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { isSupportedEthToken } from '$eth/utils/eth.utils';

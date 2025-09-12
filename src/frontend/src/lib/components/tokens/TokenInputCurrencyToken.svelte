@@ -1,3 +1,6 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (inner-end to inner_end) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (inner-end to inner_end) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (inner-end to inner_end) making the component unusable -->
 <script lang="ts">
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import { TOKEN_INPUT_CURRENCY_TOKEN } from '$lib/constants/test-ids.constants';

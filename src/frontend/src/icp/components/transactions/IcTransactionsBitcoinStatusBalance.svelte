@@ -15,7 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { SyncState } from '$lib/types/sync';
 
-	let receiveProgressStep: string | undefined = undefined;
+	let receiveProgressStep: string | undefined = $state(undefined);
 
 	const modalId = Symbol();
 
@@ -73,14 +73,14 @@
 		}
 	};
 
-	let ckBtcUpdateBalanceSyncState: SyncState | undefined = undefined;
+	let ckBtcUpdateBalanceSyncState: SyncState | undefined = $state(undefined);
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);
 	const onSyncState = ({ detail: state }: CustomEvent<SyncState>) => debounceUpdateSyncState(state);
 </script>
 
-<svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
+<svelte:window onoisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
 	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-tertiary">
@@ -88,8 +88,8 @@
 		</div>{:else}
 		<button
 			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
-			on:click={async () => await receive()}
-			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
+			onclick={async () => await receive()}
+			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}

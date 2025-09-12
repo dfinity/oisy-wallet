@@ -4,10 +4,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 
-	export let convertProgressStep: string = ProgressStepsConvert.INITIALIZATION;
+	interface Props {
+		convertProgressStep?: string;
+	}
 
-	let steps: ProgressSteps;
-	$: steps = [
+	let { convertProgressStep = ProgressStepsConvert.INITIALIZATION }: Props = $props();
+
+	let steps: ProgressSteps = $derived([
 		{
 			step: ProgressStepsConvert.INITIALIZATION,
 			text: $i18n.convert.text.initializing,
@@ -23,7 +26,7 @@
 			text: $i18n.convert.text.refreshing_ui,
 			state: 'next'
 		}
-	];
+	]);
 </script>
 
 <InProgressWizard progressStep={convertProgressStep} {steps} />

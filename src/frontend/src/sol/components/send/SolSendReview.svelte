@@ -21,7 +21,7 @@
 		selectedContact?: ContactUi;
 	}
 
-	const { destination = '', amount, network, selectedContact }: Props = $props();
+	const { destination = '', amount, network: networkProp, selectedContact }: Props = $props();
 
 	const {
 		feeStore: fee,
@@ -45,13 +45,17 @@
 </script>
 
 <SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
-	<ReviewNetwork slot="network" sourceNetwork={network} />
+	{#snippet network()}
+		<ReviewNetwork sourceNetwork={networkProp} />
+	{/snippet}
 
-	<SolFeeDisplay slot="fee" />
+	{#snippet fee()}
+		<SolFeeDisplay />
+	{/snippet}
 
-	<svelte:fragment slot="info">
+	{#snippet info()}
 		{#if insufficientFundsForFee}
 			<InsufficientFundsForFee testId="sol-send-form-insufficient-funds-for-fee" />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </SendReview>

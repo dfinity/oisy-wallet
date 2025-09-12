@@ -161,8 +161,13 @@
 						dispatch('icShowTokensList', 'source');
 					}}
 				>
-					<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+					{#snippet title()}
+						<span>{$i18n.tokens.text.source_token_title}</span>
+					{/snippet}
 
+					<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+					<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+					<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 					<svelte:fragment slot="amount-info">
 						{#if nonNullish($sourceToken)}
 							<div class="text-tertiary">
@@ -176,7 +181,7 @@
 						{/if}
 					</svelte:fragment>
 
-					<svelte:fragment slot="balance">
+					{#snippet balance()}
 						{#if nonNullish($sourceToken)}
 							{#if nonNullish(sourceTokenFee)}
 								<MaxBalanceButton
@@ -193,7 +198,7 @@
 								</div>
 							{/if}
 						{/if}
-					</svelte:fragment>
+					{/snippet}
 				</TokenInput>
 			</div>
 
@@ -210,8 +215,13 @@
 					dispatch('icShowTokensList', 'destination');
 				}}
 			>
-				<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
+				{#snippet title()}
+					<span>{$i18n.tokens.text.destination_token_title}</span>
+				{/snippet}
 
+				<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+				<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+				<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 				<svelte:fragment slot="amount-info">
 					{#if nonNullish($destinationToken)}
 						{#if showSwapNotOfferedError}
@@ -239,11 +249,11 @@
 					{/if}
 				</svelte:fragment>
 
-				<svelte:fragment slot="balance">
+				{#snippet balance()}
 					{#if nonNullish($destinationToken)}
 						<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</TokenInput>
 		</div>
 
