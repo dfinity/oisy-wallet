@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NonFungibleToken } from '$lib/types/nft';
 	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
 	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
 		token: NonFungibleToken | undefined;
