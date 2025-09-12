@@ -51,7 +51,6 @@
 			return nft.name.includes(`#${nft.id}`) ? nft.name : `${nft.name} #${nft.id}`;
 		}
 	});
-	console.log(nft);
 </script>
 
 <div class="relative overflow-hidden rounded-xl" in:fade>
