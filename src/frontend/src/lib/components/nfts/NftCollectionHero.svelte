@@ -47,7 +47,7 @@
 
 		{#if nonNullish(token)}
 			<div class="my-3 flex w-full justify-between gap-3">
-				<NftBadges {token}>
+				<NftBadges {token} />
 
 				<h1 class="flex-1 truncate">
 					{token.name}
