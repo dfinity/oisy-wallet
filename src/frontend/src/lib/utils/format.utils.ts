@@ -106,6 +106,18 @@ export const formatSecondsToDate = ({
 	);
 };
 
+export const formatToShortDateString = ({
+	date,
+	language
+}: {
+	date: Date;
+	language?: Languages;
+}): string =>
+	date.toLocaleDateString(language ?? Languages.ENGLISH, {
+		month: 'short',
+		year: 'numeric'
+	});
+
 export const formatNanosecondsToDate = ({
 	nanoseconds,
 	language
@@ -121,9 +133,6 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 	const date = new Date(Number(nanoseconds / NANO_SECONDS_IN_MILLISECOND));
 	return date.getTime();
 };
-
-export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
 
 const getRelativeTimeFormatter = (language?: Languages) =>
 	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
