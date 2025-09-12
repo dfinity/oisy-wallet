@@ -9,7 +9,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props extends ShowContactsToolResult {
-		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
+		onSendMessage: (params: { messageText?: string; context?: string }) => Promise<void>;
 	}
 
 	let { contacts, onSendMessage }: Props = $props();
