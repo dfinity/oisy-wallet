@@ -13,7 +13,8 @@ export class RewardsPage extends HomepageLoggedIn {
 	}
 
 	override async extendWaitForReady(): Promise<void> {
-		await this.navigateTo({ testId: NAVIGATION_ITEM_REWARDS, expectedPath: AppPath.Rewards });
+		// Navigate using the existing nav test-id but target the new Earning route.
+		await this.navigateTo({ testId: NAVIGATION_ITEM_REWARDS, expectedPath: AppPath.Earning });
 		await this.mockSelector({
 			selector: `[data-tid^="${REWARDS_ACTIVE_CAMPAIGNS_CONTAINER}-"][data-tid$="-badge"]`
 		});
