@@ -43,10 +43,10 @@
 	});
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl">{$i18n.referral.invitation.text.title}</span>
-	</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl">{$i18n.referral.invitation.text.title}</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
@@ -95,11 +95,11 @@
 			<div class="flex flex-col gap-3 sm:flex-row">
 				{$i18n.referral.invitation.text.information}
 				<ExternalLink
-					href={OISY_REFERRAL_URL}
 					ariaLabel={$i18n.referral.invitation.text.learn_more}
+					href={OISY_REFERRAL_URL}
+					iconAsLast
 					styleClass="font-semibold min-w-30"
 					testId={REFERRAL_CODE_LEARN_MORE}
-					iconAsLast
 				>
 					{$i18n.referral.invitation.text.learn_more}
 				</ExternalLink>

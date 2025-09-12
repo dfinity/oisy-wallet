@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
+	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -10,12 +12,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
 	export let destination = '';
 	export let amount: OptionAmount = undefined;
 	export let disabled: boolean | undefined = false;
 	export let selectedContact: ContactUi | undefined = undefined;
+	export let nft: Nft | undefined = undefined;
 
 	const dispatch = createEventDispatcher();
 
@@ -23,7 +27,11 @@
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
+	{#if isNullish(nft)}
+		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+	{:else}
+		<SendNftReview {nft} />
+	{/if}
 
 	<div class="mb-4">
 		<SendReviewDestination {destination} {selectedContact} />

@@ -21,9 +21,11 @@ import { listCustomTokens, listUserTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokensErc20 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
 import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
@@ -39,66 +41,6 @@ vi.mock('$eth/providers/infura-erc20.providers', () => ({
 }));
 
 describe('erc20.services', () => {
-	const mockUserTokens: UserToken[] = [
-		{
-			decimals: toNullable(18),
-			version: toNullable(1n),
-			enabled: toNullable(true),
-			chain_id: ETHEREUM_NETWORK.chainId,
-			contract_address: mockEthAddress,
-			symbol: toNullable('TTK')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(2n),
-			enabled: toNullable(),
-			chain_id: BASE_NETWORK.chainId,
-			contract_address: mockEthAddress2.toUpperCase(),
-			symbol: toNullable('TTK2')
-		},
-		{
-			decimals: toNullable(18),
-			version: toNullable(),
-			enabled: toNullable(false),
-			chain_id: POLYGON_AMOY_NETWORK.chainId,
-			contract_address: mockEthAddress3,
-			symbol: toNullable('TTK3')
-		}
-	];
-
-	const mockCustomTokens: CustomToken[] = [
-		{
-			version: toNullable(1n),
-			enabled: true,
-			token: {
-				Erc20: {
-					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress
-				}
-			}
-		},
-		{
-			version: toNullable(2n),
-			enabled: true,
-			token: {
-				Erc20: {
-					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase()
-				}
-			}
-		},
-		{
-			version: toNullable(),
-			enabled: false,
-			token: {
-				Erc20: {
-					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3
-				}
-			}
-		}
-	];
-
 	const mockMetadata1: Erc20Metadata = {
 		name: 'Test Token',
 		symbol: 'MetadataTTK',
@@ -235,7 +177,7 @@ describe('erc20.services', () => {
 			erc20CustomTokensStore.resetAll();
 
 			vi.mocked(listUserTokens).mockResolvedValue(mockUserTokens);
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) =>
 				address === mockUserTokens[0].contract_address ? mockMetadata1 : mockMetadata2
@@ -575,12 +517,12 @@ describe('erc20.services', () => {
 
 			erc20CustomTokensStore.resetAll();
 
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc20);
 
 			mockMetadata.mockImplementation(({ address }) => {
-				assert('Erc20' in mockCustomTokens[0].token);
+				assert('Erc20' in mockCustomTokensErc20[0].token);
 
-				return address === mockCustomTokens[0].token.Erc20.token_address
+				return address === mockCustomTokensErc20[0].token.Erc20.token_address
 					? mockMetadata1
 					: mockMetadata2;
 			});
@@ -613,10 +555,10 @@ describe('erc20.services', () => {
 			await loadCustomTokens({ identity: mockIdentity });
 
 			// query + update
-			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokens.length * 2);
+			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokensErc20.length * 2);
 
 			// query
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
 				assert('Erc20' in token);
 
 				const {
@@ -633,7 +575,7 @@ describe('erc20.services', () => {
 			});
 
 			// update
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
 				assert('Erc20' in token);
 
 				const {
@@ -641,10 +583,10 @@ describe('erc20.services', () => {
 				} = token;
 
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
-					index + 1 + mockCustomTokens.length,
+					index + 1 + mockCustomTokensErc20.length,
 					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokens.length, {
+				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc20.length, {
 					address: token_address
 				});
 			});
@@ -659,11 +601,16 @@ describe('erc20.services', () => {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 			assert('Erc20' in additionalCustomToken.token);
 
-			vi.mocked(listCustomTokens).mockResolvedValue([...mockCustomTokens, additionalCustomToken]);
+			vi.mocked(listCustomTokens).mockResolvedValue([
+				...mockCustomTokensErc20,
+				additionalCustomToken
+			]);
 
 			await loadCustomTokens({ identity: mockIdentity });
 
@@ -672,10 +619,10 @@ describe('erc20.services', () => {
 			});
 
 			// query + update
-			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokens.length * 2);
+			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokensErc20.length * 2);
 
 			// query
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
 				assert('Erc20' in token);
 
 				const {
@@ -692,7 +639,7 @@ describe('erc20.services', () => {
 			});
 
 			// update
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc20.forEach(({ token }, index) => {
 				assert('Erc20' in token);
 
 				const {
@@ -700,10 +647,10 @@ describe('erc20.services', () => {
 				} = token;
 
 				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
-					index + 1 + mockCustomTokens.length,
+					index + 1 + mockCustomTokensErc20.length,
 					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokens.length, {
+				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc20.length, {
 					address: token_address
 				});
 			});
@@ -734,10 +681,15 @@ describe('erc20.services', () => {
 						chain_id: ETHEREUM_NETWORK.chainId,
 						token_address: EURC_TOKEN.address
 					}
-				}
+				},
+				section: toNullable(),
+				allow_external_content_source: toNullable()
 			};
 
-			vi.mocked(listCustomTokens).mockResolvedValue([...mockCustomTokens, additionalCustomToken]);
+			vi.mocked(listCustomTokens).mockResolvedValue([
+				...mockCustomTokensErc20,
+				additionalCustomToken
+			]);
 
 			await loadCustomTokens({ identity: mockIdentity });
 
@@ -796,7 +748,7 @@ describe('erc20.services', () => {
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
-				mockCustomTokens,
+				mockCustomTokensErc20,
 				expect.any(Object)
 			);
 		});

@@ -22,10 +22,10 @@
 
 <slot name="network" />
 
-<SendDataAmount {amount} {token} {exchangeRate} showNullishLabel={showNullishAmountLabel} />
+<SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
 <slot />
 
-<SendSource {token} {balance} {source} {exchangeRate} />
+<SendSource {balance} {exchangeRate} {source} {token} />
 
 <slot name="fee" />

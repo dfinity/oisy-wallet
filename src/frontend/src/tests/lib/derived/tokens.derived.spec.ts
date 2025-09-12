@@ -24,7 +24,7 @@ import {
 	ARBITRUM_SEPOLIA_ETH_TOKEN
 } from '$env/tokens/tokens-evm/tokens-arbitrum/tokens.eth.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store';
@@ -39,7 +39,7 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appContants from '$lib/constants/app.constants';
-import { fungibleTokens, tokens } from '$lib/derived/tokens.derived';
+import { enabledUniqueTokensSymbols, fungibleTokens, tokens } from '$lib/derived/tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -149,8 +149,9 @@ describe('tokens.derived', () => {
 				{ ...mockErc20DefaultToken, enabled: false, version: undefined },
 				mockEr20UserToken,
 				{ ...mockErc721CustomToken, id: result[10].id },
-				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[11].id },
-				{ ...mockIcrcCustomToken, id: result[12].id },
+				{ ...mockErc1155CustomToken, id: result[11].id },
+				{ ...mockIcrcDefaultToken, enabled: false, version: undefined, id: result[12].id },
+				{ ...mockIcrcCustomToken, id: result[13].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
 			]);
@@ -188,6 +189,7 @@ describe('tokens.derived', () => {
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
+				TESTICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				BTC_TESTNET_TOKEN,
 				ETHEREUM_TOKEN,
@@ -211,6 +213,7 @@ describe('tokens.derived', () => {
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,
+				TESTICP_TOKEN,
 				BTC_MAINNET_TOKEN,
 				BTC_TESTNET_TOKEN,
 				BTC_REGTEST_TOKEN,
@@ -259,6 +262,21 @@ describe('tokens.derived', () => {
 				{ ...mockIcrcCustomToken, id: result[11].id },
 				{ ...mockSplDefaultToken, enabled: false, version: undefined },
 				mockSplCustomToken
+			]);
+		});
+	});
+
+	describe('enabledUniqueTokensSymbols', () => {
+		it('should return all unique enabled tokens symbols', () => {
+			const result = get(enabledUniqueTokensSymbols);
+
+			expect(result).toEqual([
+				ICP_TOKEN.symbol,
+				BTC_MAINNET_TOKEN.symbol,
+				ETHEREUM_TOKEN.symbol,
+				SOLANA_TOKEN.symbol,
+				BNB_MAINNET_TOKEN.symbol,
+				POL_MAINNET_TOKEN.symbol
 			]);
 		});
 	});

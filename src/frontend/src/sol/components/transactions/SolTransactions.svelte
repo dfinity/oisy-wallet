@@ -13,7 +13,7 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
@@ -23,16 +23,17 @@
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let selectedTransaction: SolTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<SolTransactionUi>({
-			$modalOpen: $modalSolTransaction,
-			$modalStore
-		}));
+	let selectedTransaction = $state<SolTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<SolTransactionUi>({
+				$modalOpen: $modalSolTransaction,
+				$modalStore
+			}));
+	});
 
-	let token: Token;
-	$: token = $pageToken ?? DEFAULT_SOLANA_TOKEN;
+	let token = $derived($pageToken ?? DEFAULT_SOLANA_TOKEN);
 </script>
 
 <Header>
@@ -44,7 +45,7 @@
 		<SolTransactionsScroll {token}>
 			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
 				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {transaction} {token} />
+					<SolTransaction {token} {transaction} />
 				</li>
 			{/each}
 		</SolTransactionsScroll>
@@ -54,7 +55,7 @@
 </SolTransactionsSkeletons>
 
 {#if $modalSolTransaction && nonNullish(selectedTransaction)}
-	<SolTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<SolTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalSolToken}
 	<SolTokenModal fromRoute={$modalSolTokenData} />
 {/if}

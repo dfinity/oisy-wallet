@@ -22,17 +22,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
-	import type { OptionToken } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
-	let token: OptionToken;
-	$: token = $allTokens.find(
-		(token) =>
-			token.name === $routeToken && $routeNetwork && token.network.id.description === $routeNetwork
+	let token = $derived(
+		$allTokens.find(
+			(token) =>
+				token.name === $routeToken &&
+				$routeNetwork &&
+				token.network.id.description === $routeNetwork
+		)
 	);
 
-	let timer: NodeJS.Timeout | undefined;
+	let timer = $state<NodeJS.Timeout | undefined>();
 
 	const manageTokensId = Symbol();
 
@@ -65,7 +67,7 @@
 </script>
 
 {#if $modalManageTokens}
-	<ManageTokensModal onClose={handleClose} initialSearch={token?.name}>
+	<ManageTokensModal initialSearch={token?.name} onClose={handleClose}>
 		{#snippet infoElement()}
 			<MessageBox level="info">
 				{$i18n.transactions.text.token_needs_enabling}

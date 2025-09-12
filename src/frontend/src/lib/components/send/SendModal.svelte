@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { createEventDispatcher, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
@@ -68,8 +68,6 @@
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
 	let modal: WizardModal<WizardStepsSend>;
 
-	const dispatch = createEventDispatcher();
-
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
 		initModalTokensListContext({
@@ -93,8 +91,6 @@
 	const close = () =>
 		closeModal(() => {
 			reset();
-
-			dispatch('nnsClose');
 		});
 
 	const isDisabled = ({ network: { id } }: Token): boolean =>
@@ -165,13 +161,13 @@
 
 <SendTokenContext token={$token}>
 	<WizardModal
-		{steps}
-		bind:currentStep
 		bind:this={modal}
-		onClose={close}
 		disablePointerEvents={currentStep?.name === WizardStepsSend.SENDING ||
 			currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+		onClose={close}
+		{steps}
 		testId={SEND_TOKENS_MODAL}
+		bind:currentStep
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
@@ -184,10 +180,10 @@
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 			<SendDestinationWizardStep
+				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				formCancelAction={isTransactionsPage ? 'close' : 'back'}
 				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				on:icNext={modal.next}
 				on:icClose={close}
@@ -196,10 +192,10 @@
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$token}
-				bind:destination
-				bind:amount
 				{onDecodeQrCode}
 				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				bind:destination
+				bind:amount
 			/>
 		{:else}
 			<SendWizard

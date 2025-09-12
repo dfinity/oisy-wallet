@@ -5,6 +5,7 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 
 	interface Props {
+		visible?: boolean;
 		children: Snippet;
 		title?: Snippet;
 		items: Snippet;
@@ -17,6 +18,7 @@
 	}
 
 	let {
+		visible = $bindable(false),
 		children,
 		title,
 		items,
@@ -28,28 +30,27 @@
 		testId
 	}: Props = $props();
 
-	let visible = $state(false);
 	let button: HTMLButtonElement | undefined = $state();
 
 	export const close = () => (visible = false);
 </script>
 
 <DropdownButton
-	bind:button
-	onClick={() => (visible = true)}
 	{ariaLabel}
-	{testId}
-	{disabled}
-	opened={visible}
-	fullWidth={buttonFullWidth}
 	border={buttonBorder}
+	{disabled}
+	fullWidth={buttonFullWidth}
+	onClick={() => (visible = true)}
+	opened={visible}
+	{testId}
+	bind:button
 >
 	{@render children()}
 </DropdownButton>
 
 {#if asModalOnMobile}
 	<Responsive up="1.5md">
-		<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+		<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 			{@render items()}
 		</Popover>
 	</Responsive>
@@ -58,17 +59,13 @@
 
 	<Responsive down="md">
 		{#if visible}
-			<Modal on:nnsClose={close}>
-				<svelte:fragment slot="title">
-					{@render title?.()}
-				</svelte:fragment>
-
+			<Modal onClose={close} {title}>
 				{@render items()}
 			</Modal>
 		{/if}
 	</Responsive>
 {:else}
-	<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+	<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 		{@render items()}
 	</Popover>
 {/if}

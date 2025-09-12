@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
+	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
-	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
+	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
-	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
+	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import ConvertToBtc from '$icp/components/convert/ConvertToBtc.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
@@ -55,7 +55,7 @@
 	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
 </script>
 
-<div role="toolbar" class="flex w-full justify-center pt-8">
+<div class="flex w-full justify-center pt-8" role="toolbar">
 	<HeroButtonGroup>
 		{#if $networkICP}
 			<IcReceive token={$pageTokenWithFallback} />
@@ -82,7 +82,7 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkETH />
+					<ConvertToCkEth />
 				{/if}
 			{/if}
 
@@ -90,16 +90,16 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkERC20 />
+					<ConvertToCkErc20 />
 				{/if}
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC />
+				<ConvertToBtc />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC />
+				<ConvertToCkBtc />
 			{/if}
 		{/if}
 

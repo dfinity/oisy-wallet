@@ -8,11 +8,11 @@
 </script>
 
 <svg
-	width="20"
 	style={`min-width: 20px; ${inline ? 'vertical-align: sub;' : ''}`}
+	fill="none"
 	height="18"
 	viewBox="0 0 20 18"
-	fill="none"
+	width="20"
 	xmlns="http://www.w3.org/2000/svg"
 >
 	<path

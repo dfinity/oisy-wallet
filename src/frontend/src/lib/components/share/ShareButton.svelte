@@ -14,9 +14,9 @@
 {#if canShare()}
 	<ButtonIcon
 		ariaLabel={shareAriaLabel}
+		link={false}
 		onclick={async () => await shareText(shareAriaLabel)}
 		{testId}
-		link={false}
 	>
 		{#snippet icon()}
 			<IconShareArrow size="24" />

@@ -23,6 +23,14 @@ describe('modalNetworksListStore', () => {
 		expect(get(filteredNetworks)).toEqual([ICP_NETWORK, ETHEREUM_NETWORK]);
 	});
 
+	it('should have all expected values with initial data where allowedNetworkIds are not provided', () => {
+		const { filteredNetworks } = initModalNetworksListContext({
+			networks: mockNetworks
+		});
+
+		expect(get(filteredNetworks)).toEqual(mockNetworks);
+	});
+
 	it('should return all networks when allowedNetworkIds is empty array', () => {
 		const { filteredNetworks } = initModalNetworksListContext({
 			networks: mockNetworks,

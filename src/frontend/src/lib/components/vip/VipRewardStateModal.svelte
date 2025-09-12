@@ -7,6 +7,7 @@
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
+	import successfulClickBeeReward from '$lib/assets/successful-clickbee-reward.svg';
 	import successfulVipReward from '$lib/assets/successful-vip-reward.svg';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -65,21 +66,23 @@
 	<Sprinkles />
 {/if}
 
-<Modal on:nnsClose={close}>
-	<svelte:fragment slot="title">
+<Modal onClose={close}>
+	{#snippet title()}
 		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner
 			src={isSuccessful
 				? codeType === QrCodeType.VIP
 					? successfulVipReward
-					: successfulBinanceReward
+					: codeType === QrCodeType.GOLD
+						? successfulBinanceReward
+						: successfulClickBeeReward
 				: failedVipReward}
 			styleClass="aspect-auto"
 			testId={VIP_STATE_IMAGE_BANNER}
@@ -92,18 +95,20 @@
 		>
 		<span class="block w-full text-center"
 			>{isSuccessful
-				? $i18n.vip.reward.text.reward_received_description
+				? codeType === QrCodeType.VIP
+					? $i18n.vip.reward.text.reward_received_description
+					: $i18n.vip.reward.text.brand_reward_received_description
 				: $i18n.vip.reward.text.reward_failed_description}</span
 		>
 
 		{#snippet toolbar()}
 			<Button
-				paddingSmall
 				colorStyle="secondary-light"
-				type="button"
 				fullWidth
 				onclick={close}
+				paddingSmall
 				testId={VIP_STATE_BUTTON}
+				type="button"
 			>
 				{isSuccessful ? $i18n.vip.reward.text.open_wallet : $i18n.vip.reward.text.open_wallet}
 			</Button>

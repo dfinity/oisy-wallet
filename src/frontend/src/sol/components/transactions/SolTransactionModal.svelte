@@ -5,8 +5,8 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
-	import TransactionAddressActions from '$lib/components/transactions/TransactionAddressActions.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -90,14 +90,14 @@
 	};
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>
 			{#snippet logo()}
 				{#if nonNullish(token)}
-					<TokenLogo logoSize="lg" data={token} badge={{ type: 'network' }} />
+					<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 				{/if}
 			{/snippet}
 			{#snippet subtitle()}
@@ -122,12 +122,12 @@
 
 		{#if nonNullish(toAddress) && nonNullish(fromAddress)}
 			<TransactionContactCard
-				type={type === 'receive' ? 'receive' : 'send'}
-				{to}
 				{from}
-				{toExplorerUrl}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
+				{to}
+				{toExplorerUrl}
+				type={type === 'receive' ? 'receive' : 'send'}
 			/>
 		{/if}
 
@@ -138,11 +138,11 @@
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: fromAddress })}</output>
 
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={fromAddress}
 							copyAddressText={$i18n.transaction.text.from_ata_copied}
-							explorerUrl={fromAtaExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
+							externalLink={fromAtaExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_to_block_explorer}
 						/>
 					</output>
 				</ListItem>
@@ -152,11 +152,11 @@
 					<span>{$i18n.transaction.text.to_ata}</span>
 					<output class="flex max-w-[50%] flex-row">
 						<output>{shortenWithMiddleEllipsis({ text: toAddress })}</output>
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={toAddress}
 							copyAddressText={$i18n.transaction.text.to_ata_copied}
-							explorerUrl={toAtaExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
+							externalLink={toAtaExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_from_block_explorer}
 						/>
 					</output>
 				</ListItem>
@@ -170,13 +170,13 @@
 
 					<span>
 						<output>{shortenWithMiddleEllipsis({ text: id })}</output>
-						<TransactionAddressActions
+						<AddressActions
 							copyAddress={id}
 							copyAddressText={replacePlaceholders($i18n.transaction.text.hash_copied, {
 								$hash: id
 							})}
-							explorerUrl={txExplorerUrl}
-							explorerUrlAriaLabel={$i18n.transaction.alt.open_block_explorer}
+							externalLink={txExplorerUrl}
+							externalLinkAriaLabel={$i18n.transaction.alt.open_block_explorer}
 						/>
 					</span>
 				</ListItem>

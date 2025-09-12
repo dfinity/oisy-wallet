@@ -27,7 +27,10 @@
 		modalIcTransaction,
 		modalSolTransaction
 	} from '$lib/derived/modal.derived';
-	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
+	import {
+		enabledFungibleNetworkTokens,
+		enabledNonFungibleNetworkTokens
+	} from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
@@ -39,7 +42,7 @@
 
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
-		tokens: $enabledFungibleNetworkTokens,
+		tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
 		$btcTransactions: $btcTransactionsStore,
 		$ethTransactions: $ethTransactionsStore,
 		$ckEthMinterInfo: $ckEthMinterInfoStore,
@@ -118,11 +121,11 @@
 </AllTransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedBtcTransaction)}
-	<BtcTransactionModal transaction={selectedBtcTransaction} token={selectedBtcToken} />
+	<BtcTransactionModal token={selectedBtcToken} transaction={selectedBtcTransaction} />
 {:else if $modalEthTransaction && nonNullish(selectedEthTransaction)}
-	<EthTransactionModal transaction={selectedEthTransaction} token={selectedEthToken} />
+	<EthTransactionModal token={selectedEthToken} transaction={selectedEthTransaction} />
 {:else if $modalIcTransaction && nonNullish(selectedIcTransaction)}
-	<IcTransactionModal transaction={selectedIcTransaction} token={selectedIcToken} />
+	<IcTransactionModal token={selectedIcToken} transaction={selectedIcTransaction} />
 {:else if $modalSolTransaction && nonNullish(selectedSolTransaction)}
-	<SolTransactionModal transaction={selectedSolTransaction} token={selectedSolToken} />
+	<SolTransactionModal token={selectedSolToken} transaction={selectedSolTransaction} />
 {/if}

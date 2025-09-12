@@ -3,6 +3,7 @@ import {
 	allowance,
 	approve,
 	balance,
+	getBlocks,
 	metadata,
 	transactionFee,
 	transfer
@@ -11,12 +12,13 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
 	type IcrcAccount,
+	type IcrcAllowance,
 	type IcrcBlockIndex,
+	type IcrcGetBlocksResult,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
@@ -60,8 +62,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockMetadata);
 
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith({
 				certified: true
 			});
 		});
@@ -71,8 +72,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockMetadata);
 
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.metadata).toHaveBeenCalledWith({ certified: false });
+			expect(ledgerCanisterMock.metadata).toHaveBeenCalledExactlyOnceWith({ certified: false });
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -98,8 +98,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(fee);
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledExactlyOnceWith({
 				certified: true
 			});
 		});
@@ -109,8 +108,9 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(fee);
 
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledWith({ certified: false });
+			expect(ledgerCanisterMock.transactionFee).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -141,8 +141,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(tokens).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				...account
 			});
@@ -153,8 +152,10 @@ describe('icrc-ledger.api', () => {
 
 			expect(tokens).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith({ certified: false, ...account });
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith({
+				certified: false,
+				...account
+			});
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -195,8 +196,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				created_at_time: createdAt
@@ -210,8 +210,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				created_at_time: 987_654_321n
@@ -258,8 +257,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				spender: spenderAccount,
 				expires_at: expiresAt,
@@ -274,8 +272,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.approve).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.approve).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				spender: spenderAccount,
 				expires_at: expiresAt,
@@ -307,7 +304,7 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const allowanceResponse: Allowance = {
+		const allowanceResponse: IcrcAllowance = {
 			allowance: 1_000_000n,
 			expires_at: []
 		};
@@ -327,8 +324,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -353,8 +349,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: false,
 				account: {
 					owner: ownerPrincipal,
@@ -378,8 +373,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -403,8 +397,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -428,8 +421,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -456,8 +448,7 @@ describe('icrc-ledger.api', () => {
 
 			expect(result).toEqual(allowanceResponse);
 
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.allowance).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.allowance).toHaveBeenCalledExactlyOnceWith({
 				certified: true,
 				account: {
 					owner: ownerPrincipal,
@@ -480,6 +471,52 @@ describe('icrc-ledger.api', () => {
 					identity: undefined
 				})
 			).rejects.toThrow();
+		});
+	});
+
+	describe('getBlocks', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity,
+			args: []
+		};
+
+		const mockTotalBlocks = 123n;
+		const mockGetBlocksResponse: IcrcGetBlocksResult = {
+			log_length: mockTotalBlocks,
+			blocks: [],
+			archived_blocks: []
+		};
+
+		beforeEach(() => {
+			ledgerCanisterMock.getBlocks.mockResolvedValue(mockGetBlocksResponse);
+		});
+
+		it('successfully calls getBlocks endpoint', async () => {
+			const result = await getBlocks(params);
+
+			expect(result).toEqual(mockGetBlocksResponse);
+
+			expect(ledgerCanisterMock.getBlocks).toHaveBeenCalledExactlyOnceWith({
+				certified: true,
+				args: params.args
+			});
+		});
+
+		it('successfully calls getBlocks endpoint as query', async () => {
+			const result = await getBlocks({ ...params, certified: false });
+
+			expect(result).toEqual(mockGetBlocksResponse);
+
+			expect(ledgerCanisterMock.getBlocks).toHaveBeenCalledExactlyOnceWith({
+				certified: false,
+				args: params.args
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

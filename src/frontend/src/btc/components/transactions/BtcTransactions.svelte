@@ -21,19 +21,20 @@
 	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken, Token } from '$lib/types/token';
+	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let selectedTransaction: BtcTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<BtcTransactionUi>({
-			$modalOpen: $modalBtcTransaction,
-			$modalStore
-		}));
+	let selectedTransaction = $state<BtcTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<BtcTransactionUi>({
+				$modalOpen: $modalBtcTransaction,
+				$modalStore
+			}));
+	});
 
-	let token: Token;
-	$: token = $pageToken ?? DEFAULT_BITCOIN_TOKEN;
+	let token = $derived($pageToken ?? DEFAULT_BITCOIN_TOKEN);
 </script>
 
 <BtcTransactionsHeader />
@@ -41,7 +42,7 @@
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
 	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
 		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction transaction={transaction.data} {token} />
+			<BtcTransaction {token} transaction={transaction.data} />
 		</div>
 	{/each}
 
@@ -51,7 +52,7 @@
 </TransactionsSkeletons>
 
 {#if $modalBtcTransaction && nonNullish(selectedTransaction)}
-	<BtcTransactionModal transaction={selectedTransaction} token={selectedToken} />
+	<BtcTransactionModal token={selectedToken} transaction={selectedTransaction} />
 {:else if $modalBtcToken}
 	<BtcTokenModal fromRoute={$modalBtcTokenData} />
 {/if}

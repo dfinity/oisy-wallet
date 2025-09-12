@@ -81,7 +81,9 @@ describe('VipRewardStateModal', () => {
 			expect(
 				getByText(replaceOisyPlaceholders(get(i18n).vip.reward.text.reward_received))
 			).toBeInTheDocument();
-			expect(getByText(get(i18n).vip.reward.text.reward_received_description)).toBeInTheDocument();
+			expect(
+				getByText(get(i18n).vip.reward.text.brand_reward_received_description)
+			).toBeInTheDocument();
 			expect(getByText(get(i18n).vip.reward.text.open_wallet)).toBeInTheDocument();
 		});
 

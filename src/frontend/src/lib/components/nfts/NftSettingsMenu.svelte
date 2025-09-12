@@ -1,0 +1,106 @@
+<script lang="ts">
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
+	import IconWarning from '$lib/components/icons/IconWarning.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
+	import NftsShowHiddenToggle from '$lib/components/nfts/NftsShowHiddenToggle.svelte';
+	import NftsShowSpamToggle from '$lib/components/nfts/NftsShowSpamToggle.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
+	import LogoButton from '$lib/components/ui/LogoButton.svelte';
+	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { nftGroupByCollection } from '$lib/derived/settings.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { nftGroupByCollectionStore } from '$lib/stores/settings.store';
+	import { emit } from '$lib/utils/events.utils';
+
+	let visible = $state(false);
+
+	let button = $state<HTMLButtonElement | undefined>();
+
+	const setGrouping = (grouping: boolean) => {
+		nftGroupByCollectionStore.set({ key: 'nft-group-by-collection', value: grouping });
+	};
+
+	const toggleShowHidden = () => {
+		emit({ message: 'oisyToggleShowHidden' });
+	};
+
+	const toggleShowSpam = () => {
+		emit({ message: 'oisyToggleShowSpam' });
+	};
+</script>
+
+<ButtonIcon
+	ariaLabel={$i18n.navigation.alt.menu}
+	colorStyle="muted"
+	disabled={$erc20UserTokensNotInitialized}
+	link={false}
+	onclick={() => (visible = true)}
+	styleClass={visible ? 'active' : ''}
+	bind:button
+>
+	{#snippet icon()}
+		<IconManage />
+	{/snippet}
+</ButtonIcon>
+
+<ResponsivePopover {button} bind:visible>
+	{#snippet content()}
+		<span class="mb-2 flex text-sm font-bold">{$i18n.nfts.text.grouping}</span>
+
+		<List noPadding>
+			<ListItem>
+				<ListItemButton
+					onclick={() => setGrouping(false)}
+					selectable
+					selected={!$nftGroupByCollection}
+				>
+					{$i18n.nfts.text.as_plain_list}
+				</ListItemButton>
+			</ListItem>
+			<ListItem>
+				<ListItemButton
+					onclick={() => setGrouping(true)}
+					selectable
+					selected={$nftGroupByCollection}
+				>
+					{$i18n.nfts.text.by_collection}
+				</ListItemButton>
+			</ListItem>
+		</List>
+
+		<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+
+		<List condensed noPadding>
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleShowHidden}>
+					{#snippet logo()}
+						<IconEyeOff />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.nfts.text.show_hidden}</span>
+					{/snippet}
+					{#snippet action()}
+						<NftsShowHiddenToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth onClick={toggleShowSpam}>
+					{#snippet logo()}
+						<IconWarning />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.nfts.text.show_spam}</span>
+					{/snippet}
+					{#snippet action()}
+						<NftsShowSpamToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+		</List>
+	{/snippet}
+</ResponsivePopover>

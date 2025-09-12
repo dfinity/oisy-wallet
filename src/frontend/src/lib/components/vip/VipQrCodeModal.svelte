@@ -87,14 +87,14 @@
 
 <svelte:window on:visibilitychange={onVisibilityChange} />
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl"
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl"
 			>{codeType === QrCodeType.VIP
 				? $i18n.vip.invitation.text.title
 				: $i18n.vip.invitation.text.binance_title}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">
@@ -138,12 +138,12 @@
 			<ButtonGroup>
 				<ButtonCloseModal />
 				<Button
-					paddingSmall
 					colorStyle="primary"
-					type="button"
 					fullWidth
 					onclick={regenerateCode}
+					paddingSmall
 					testId={VIP_CODE_REGENERATE_BUTTON}
+					type="button"
 				>
 					{$i18n.vip.invitation.text.generate_new_link}
 				</Button>

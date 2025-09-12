@@ -2,8 +2,8 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher } from 'svelte';
-	import type IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
-	import type IcReceiveInfoICP from '$icp/components/receive/IcReceiveInfoICP.svelte';
+	import type IcReceiveInfoCkBtc from '$icp/components/receive/IcReceiveInfoCkBtc.svelte';
+	import type IcReceiveInfoIcp from '$icp/components/receive/IcReceiveInfoIcp.svelte';
 	import type IcReceiveInfoIcrc from '$icp/components/receive/IcReceiveInfoIcrc.svelte';
 	import ReceiveAddressQrCode from '$lib/components/receive/ReceiveAddressQrCode.svelte';
 	import type ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
@@ -16,8 +16,8 @@
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
-		| typeof IcReceiveInfoCkBTC
-		| typeof IcReceiveInfoICP
+		| typeof IcReceiveInfoCkBtc
+		| typeof IcReceiveInfoIcp
 		| typeof IcReceiveInfoIcrc;
 
 	const steps: WizardSteps<WizardStepsReceiveAddress> = [
@@ -56,11 +56,11 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
 	onClose={() => dispatch('nnsClose')}
+	{steps}
 	testId={RECEIVE_TOKENS_MODAL}
+	bind:currentStep
 >
 	{#snippet title()}
 		{#if currentStep?.name === steps[1].name}
@@ -72,13 +72,13 @@
 
 	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
 		<ReceiveAddressQrCode
-			on:icBack={displayAddresses}
 			{address}
 			{addressLabel}
 			{addressToken}
+			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 			network={addressToken.network}
 			qrCodeAction={{ enabled: false }}
-			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+			on:icBack={displayAddresses}
 		/>
 	{:else}
 		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />

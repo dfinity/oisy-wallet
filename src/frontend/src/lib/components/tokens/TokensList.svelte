@@ -4,7 +4,6 @@
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
 	import NothingFoundPlaceholder from '$lib/components/tokens/NothingFoundPlaceholder.svelte';
 	import TokenCard from '$lib/components/tokens/TokenCard.svelte';
@@ -46,9 +45,9 @@
 		}
 	}, 250);
 
-	let loading: boolean = $derived($erc20UserTokensNotInitialized || isNullish(tokens));
+	let loading: boolean = $derived(isNullish(tokens));
 
-	// Default token / tokengroup list
+	// Default token / tokenGroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
@@ -63,7 +62,7 @@
 		filter: string;
 		selectedNetwork?: Network;
 	}) => {
-		// sort alphabetally and apply filter
+		// Sort alphabetically and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
@@ -71,7 +70,7 @@
 			)
 		});
 
-		// we need to reset modified tokens, since the filter has changed the selected token(s) may not be visible anymore
+		// We need to reset modified tokens; since the filter has changed, the selected token(s) may not be visible anymore
 		modifiedTokens = {};
 	};
 
@@ -118,17 +117,17 @@
 	};
 </script>
 
-<TokensDisplayHandler bind:tokens>
+<TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
 					class="overflow-hidden rounded-xl"
+					class:pointer-events-none={animating}
+					onanimationend={handleAnimationEnd}
+					onanimationstart={handleAnimationStart}
 					transition:fade
 					animate:flip={{ duration: 250 }}
-					onanimationstart={handleAnimationStart}
-					onanimationend={handleAnimationEnd}
-					class:pointer-events-none={animating}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -160,12 +159,12 @@
 						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
 						<div>
 							<Button
-								onclick={onSave}
 								disabled={saveDisabled || saveLoading}
-								paddingSmall
 								fullWidth={false}
-								styleClass="py-2"
 								loading={saveLoading}
+								onclick={onSave}
+								paddingSmall
+								styleClass="py-2"
 							>
 								{$i18n.core.text.apply}
 								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
@@ -177,11 +176,11 @@
 				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 					<div
 						class="overflow-hidden rounded-xl"
+						class:pointer-events-none={animating}
+						onanimationend={handleAnimationEnd}
+						onanimationstart={handleAnimationStart}
 						transition:fade
 						animate:flip={{ duration: 250 }}
-						onanimationstart={handleAnimationStart}
-						onanimationend={handleAnimationEnd}
-						class:pointer-events-none={animating}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
