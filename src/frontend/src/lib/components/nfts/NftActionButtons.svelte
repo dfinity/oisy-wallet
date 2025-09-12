@@ -1,13 +1,13 @@
 <script lang="ts">
-	import { modalStore } from '$lib/stores/modal.store.js';
 	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
-	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { modalSend } from '$lib/derived/modal.derived.js';
-	import type { Nft } from '$lib/types/nft';
+	import ButtonWithModal from '$lib/components/ui/ButtonWithModal.svelte';
 	import { NFT_ACTION_SEND } from '$lib/constants/test-ids.constants';
+	import { modalSend } from '$lib/derived/modal.derived.js';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store.js';
+	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		nft: Nft;

@@ -6,8 +6,10 @@
 	import IconSendMessage from '$lib/components/icons/IconSendMessage.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
+	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
+	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import SendModal from '$lib/components/send/SendModal.svelte';
@@ -26,8 +28,6 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
-	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
