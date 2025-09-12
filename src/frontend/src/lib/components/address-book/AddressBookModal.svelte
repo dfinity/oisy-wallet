@@ -18,7 +18,7 @@
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { AddressBookWizardSteps } from '$lib/config/address-book.config';
+	import { addressBookWizardSteps } from '$lib/config/address-book.config';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
 		TRACK_CONTACT_CREATE_SUCCESS,
@@ -104,7 +104,7 @@
 		)
 	);
 
-	const steps = $derived(AddressBookWizardSteps({ i18n: $i18n }));
+	const steps = $derived(addressBookWizardSteps({ i18n: $i18n }));
 
 	let currentStep: WizardStep<AddressBookSteps> | undefined = $state();
 
