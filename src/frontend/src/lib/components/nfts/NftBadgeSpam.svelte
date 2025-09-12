@@ -6,7 +6,7 @@
 </script>
 
 <DelayedTooltip text={$i18n.nfts.text.spam} delay={300}>
-	<span class="flex items-center text-warning-primary" data-testid={NFT_SPAM_BADGE}>
+	<span class="flex items-center text-warning-primary" data-tid={NFT_SPAM_BADGE}>
 		<IconAlertOctagon size="24" />
 	</span>
 </DelayedTooltip>
