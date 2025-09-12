@@ -20,12 +20,14 @@ describe('AiAssistantShowContactsTool', () => {
 
 	const extendedContacts = get(extendedAddressContacts);
 	const props = {
+		onSendMessage: () => Promise.resolve(),
 		contacts: Object.values(extendedContacts)
 	};
 
 	it('renders no contacts found message', () => {
 		const { container } = render(AiAssistantShowContactsTool, {
 			props: {
+				...props,
 				contacts: []
 			}
 		});
@@ -49,6 +51,7 @@ describe('AiAssistantShowContactsTool', () => {
 
 	it('renders addresses and more label if the addresses number is greater than the max amount', () => {
 		const newProps = {
+			...props,
 			contacts: [...props.contacts, ...props.contacts]
 		};
 		const { container } = render(AiAssistantShowContactsTool, {

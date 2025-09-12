@@ -7,6 +7,7 @@
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
 	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
@@ -109,34 +110,35 @@
 		}
 		dispatch('icNext');
 
-		// Validate UTXOs before proceeding
-		try {
-			await validateBtcSend({
-				utxosFee,
-				source,
-				amount,
-				network,
-				identity: $authIdentity
-			});
-		} catch (err: unknown) {
-			// Handle BtcValidationError with specific toastsError for each type
-			if (err instanceof BtcValidationError) {
-				utxosFee.error = err.type;
-			}
-
-			trackEvent({
-				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId?.description ?? 'unknown'}`
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+			// Validate UTXOs before proceeding
+			try {
+				await validateBtcSend({
+					utxosFee,
+					source,
+					amount,
+					network,
+					identity: $authIdentity
+				});
+			} catch (err: unknown) {
+				// Handle BtcValidationError with specific toastsError for each type
+				if (err instanceof BtcValidationError) {
+					utxosFee.error = err.type;
 				}
-			});
 
-			// go back to the previous step so the user can correct/ try again
-			dispatch('icBack');
-			return;
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
+
+				// go back to the previous step so the user can correct/ try again
+				dispatch('icBack');
+				return;
+			}
 		}
-
 		try {
 			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
@@ -193,7 +195,6 @@
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
 		{selectedContact}
-		{source}
 		on:icNext
 		on:icClose
 		on:icBack

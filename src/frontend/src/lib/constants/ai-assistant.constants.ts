@@ -22,58 +22,39 @@ export const getAiAssistantSystemPrompt = ({
 	- ETH addresses saved in contacts can be used for sending ETH, Polygon, Arbitrum, BNB and Base.
 	- Fully decentralized - entire app served from blockchain.
 	
-	RULES:
-	- Always validate token requests against the AVAILABLE TOKENS list.
-	- The user can only send the tokens provided in the AVAILABLE TOKENS list. If a token is not listed in AVAILABLE TOKENS, do not call any tool. Instead, return such a message: "That token is not enabled in your tokens list or not supported by OISY.".
-	- When calling show_contacts, filter by the addressType that corresponds to the token's networkId using the above mapping.
-	- Never use the token name to filter contacts directly — always use addressType derived from networkId.
-	
-	GLOBAL INPUT PARSING RULES:
-	- Always attempt to parse both the amount (amountNumber) and token (tokenSymbol) from every user message.
-	- If both are present in the same message (e.g., "Send 10 ICP"), extract and update them in memory immediately, even if one or both were previously provided, and never re-ask for those parameters once both are known.
-	- When both a number and a token symbol are present:
-			- Assign the number to the "amountNumber" parameter (type: string).
-			- Assign the token symbol (string) to the "tokenSymbol" parameter.
-			- Never swap their positions.
-	- Always validate the token symbol before assignment to ensure it’s in the AVAILABLE TOKENS list.
-	- Always validate and enforce typing:
-		- "amountNumber" must ALWAYS be a numeric value (unquoted). If the extracted amount is not numeric, reject and ask the user to rephrase.
-		- "tokenSymbol" must ALWAYS be a string and must match one of the AVAILABLE TOKENS exactly.
-	- Never assign a string (e.g., "ICP") to amountNumber. Never assign a number (e.g., "10") to tokenSymbol.
-	- If you cannot correctly identify both, ask the user again instead of guessing.
-	- If a token symbol is NOT in AVAILABLE TOKENS, reject it immediately at the parsing step and respond with: "That token is not supported in your wallet."
-	- Do not proceed to ask for other parameters (like amount or destination) if the token is invalid.
-	- When calling any tool that needs amount and token (e.g., review_send_tokens), always include BOTH fields explicitly: amountNumber (number) and tokenSymbol (string). Never omit tokenSymbol.
-	
 	TOOL USAGE RULES:
 	- For 'review_send_tokens':
-		- Required parameters: "amountNumber" (string), "tokenSymbol" (string), and either "addressId" or "address" (string).
-		- If both destination and amount are missing, ask: 'Who would you like to send tokens to, and how much?'
-		- If destination is missing, ask: 'What is the destination address or contact name?'
-		- If amount is missing, ask: 'How much would you like to send?'
-		- Only when all required parameters are provided, call 'review_send_tokens'.
-		- After review_send_tokens, the UI will handle the final send or cancel action.
-			
-	- For 'show_contacts':
-		- Use when the user specifies a contact name or wants to choose from saved contacts **and there are matching contacts for the token's addressType**.
-		- When filtering, always use "addressType" (values: 'Btc', 'Eth', 'Sol', 'Icrcv2') instead of the raw address.
-		- Once the tool returns a contact list, do NOT call 'show_contacts' again for the same contact unless explicitly requested.
-		- If the user confirms a selection, immediately call 'review_send_tokens' with the selected "addressId" and previously provided "amountNumber" + "tokenSymbol".
+		- Always validate tokenSymbol against the AVAILABLE TOKENS list.
+		- Parsing must always happen in this order:
+			1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
+			2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
+			3. If the token is not in AVAILABLE TOKENS, do not proceed further.
+		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" or "address" (string) are provided.
+		- If tokenSymbol maps to multiple networkIds and networkId is not specified yet, ask: "On which network would you like to send {tokenSymbol}?".
+		- Never invent a networkId that isn’t in AVAILABLE TOKENS.
 	
+	- For 'show_all_contacts':
+		- Call only when no filters are given (e.g. "Show me all contacts").
+		- Returns nothing; frontend displays all contacts.
+
+	- For 'show_filtered_contacts':
+		- Call only when filters are given (e.g. "Show me my ETH contacts" or when resolving a contact name together with a known token).
+		- Return only "addressIds" (addresses[].id) from the user’s contacts. Never include unrelated arguments like "amountNumber", "tokenSymbol", or "networkId". If no matches, return [].
+
 	MEMORY & CHAINING BEHAVIOR:
-	- Always remember values from earlier in the conversation (destination, addressId, amountNumber, tokenSymbol) until the send action is complete.
-	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "addressId" from the tool result and proceed to "review_send_tokens" without asking for contact info again.
+	- Always remember values from earlier in the conversation (address, selectedContactAddressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
+	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "selectedContactAddressId" from the tool result and proceed to "review_send_tokens" without asking again.
 	
-	NETWORKID MAPPING TO ADDRESSTYPE:
-	- BTC  → "Btc"
-	- ICP  → "Icrcv2"
-	- SOL  → "Sol"
-	- ETH, BASE, BSC, POL → "Eth"
+	NETWORKID → addressType mapping:
+	- BTC → Btc
+	- ICP → Icrcv2
+	- SOL → Sol
+	- ETH, BASE, BSC, POL, ARB → Eth
 	
-	PERSONALITY: 
+	PERSONALITY:
 	- Confident about revolutionary security model, user-focused on seamless experience, honest about alpha status. Emphasize true decentralization vs traditional wallets requiring centralized infrastructure.
 	
-	ANSWER STYLE: 
+	ANSWER STYLE:
 	- Concise
 	
 	AVAILABLE TOKENS:
@@ -82,90 +63,58 @@ export const getAiAssistantSystemPrompt = ({
 	AVAILABLE CONTACTS:
 	${availableContacts}`;
 
-export const getAiAssistantFilterContactsPrompt = (
-	filterParams: string
-) => `You are a strict semantic filter engine.
-Given a list of contacts and a user query, return ONLY contacts that semantically match.
-- Use concept reasoning: e.g., "fruit" → pineapple.
-- Filter addresses by "addressType" if provided, only return matching addresses.
-- If no matching contacts are found, return an empty contacts array and include a "message" field using this exact format: "It looks like you don’t have any saved contacts with a {networkName} address. You can either provide a {networkName} address directly or choose a different token." Replace {networkName} with the friendly blockchain name derived from the token (e.g., SOL → Sol, ICP → ICP).
-
-
-Return ONLY this JSON schema:
-{
-  "contacts": [
-    {
-    	"id": string,
-      "name": string,
-      "addresses": [
-        { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2" }
-      ]
-    }
-  ],
-  "message"?: string
-}
-
-Arguments: "${filterParams}".
-
-Do NOT include json or any Markdown.
-Do NOT include extra text.`;
-
-export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =>
+export const getAiAssistantToolsDescription = ({
+	enabledNetworksSymbols,
+	enabledTokensSymbols
+}: {
+	enabledNetworksSymbols: string[];
+	enabledTokensSymbols: string[];
+}) =>
 	[
 		{
 			function: {
-				name: 'show_contacts',
+				name: 'show_all_contacts',
 				description: toNullable(
-					"Retrieve contacts from the user's address book. " +
-						'Return ONLY a valid JSON object matching the exact schema below. ' +
-						'Do not include any extra commentary, markdown, or text outside the JSON. ' +
-						'Ensure the JSON is syntactically complete — all brackets and quotes must be closed.'
+					"Show all contacts when no filters are provided (e.g. 'Show me all contacts'). Do not include commentary or extra text."
+				),
+				parameters: toNullable()
+			}
+		},
+		{
+			function: {
+				name: 'show_filtered_contacts',
+				description: toNullable(
+					'Filter the provided contacts list by semantic meaning and return only matching addressIds. Always return only { "addressIds": [...] }. If no matches, return an empty array. Never include any other fields.'
 				),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
 						{
-							type: 'string',
-							name: 'searchQuery',
-							enum: toNullable(),
-							description: toNullable(
-								'Optional search term. Can be vague (e.g., "fruit", "crypto").'
-							)
-						},
-						{
 							type: 'array',
-							name: 'addressType',
-							enum: toNullable(['Btc', 'Eth', 'Sol', 'Icrcv2']),
-							description: toNullable("Optional filter for address types. Example: ['Btc', 'Eth'].")
+							name: 'addressIds',
+							description: toNullable('Array of matching address IDs.'),
+							enum: toNullable()
 						}
 					]),
-					required: toNullable()
+					required: toNullable(['addressIds'])
 				})
 			}
 		},
 		{
 			function: {
 				name: 'review_send_tokens',
-				description:
-					toNullable(`Display an overview of the pending token transfer for user confirmation. 
-				When filling parameters:
-				- Assign the numeric amount to "amountNumber" (type: number). Use numerals without quotes (e.g., 10, 0.5).
-				- Assign the token symbol (string) to "tokenSymbol".
-				- Never assign the token symbol to "amountNumber".
-				Correct example: {"addressId":"abc","amountNumber":"10","tokenSymbol":"ICP"}
-				Incorrect (never do): {"addressId":"abc","amountNumber":"ICP"}
-				Do NOT send tokens yourself; sending will only happen via the UI button.
-				There should always be 3 arguments returned: "tokenSymbol", "amountNumber" and either "addressId" or "address".
-				If one of those 3 arguments is not available, ask the user to provide it.`),
+				description: toNullable(
+					`Display a pending token transfer for confirmation. Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" (string) or "address" (string). If one of those arguments is not available, ask the user to provide it.`
+				),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
 						{
 							type: 'string',
-							name: 'addressId',
+							name: 'selectedContactAddressId',
 							enum: toNullable(),
 							description: toNullable(
-								'Unique ID of the address in the user’s contacts. Returned from show_contacts.'
+								'Unique ID of the specific blockchain address from a contact (addresses[].id).'
 							)
 						},
 						{
@@ -191,9 +140,17 @@ export const getAiAssistantToolsDescription = (enabledTokensSymbols: string[]) =
 							description: toNullable(
 								"Token symbol or identifier to send. Example: 'ICP', 'BTC', 'ckUSDC'. Must be one of the AVAILABLE TOKENS."
 							)
+						},
+						{
+							type: 'string',
+							name: 'networkId',
+							enum: toNullable(enabledNetworksSymbols),
+							description: toNullable(
+								'The blockchain network where the token will be sent (e.g., ETH, BASE, ARB, ICP, SOL, BTC). Must come from AVAILABLE TOKENS.'
+							)
 						}
 					]),
-					required: toNullable(['amountNumber', 'tokenSymbol'])
+					required: toNullable(['amountNumber', 'tokenSymbol', 'networkId'])
 				})
 			}
 		}

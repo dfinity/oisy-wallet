@@ -2,12 +2,10 @@
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
+	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
-	import {
-		BtcPendingSentTransactionsStatus,
-		initPendingSentTransactionsStatus
-	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import {
 		handleBtcValidationError,
 		sendBtc,
@@ -19,6 +17,7 @@
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
@@ -47,16 +46,15 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	let source = $derived(getBtcSourceAddress($sendTokenNetworkId));
-
-	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 
 	let loading = $state(false);
 
@@ -93,10 +91,10 @@
 	);
 
 	let invalid = $derived(
-		invalidDestination ||
+		!sendEnabled ||
+			invalidDestination ||
 			notEmptyString(amountErrorMessage) ||
 			isNullish(amount) ||
-			$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
 			isNullish(utxosFee) ||
 			(nonNullish(utxosFee) && utxosFee.utxos.length === 0) ||
 			nonNullish(utxosFee.error)
@@ -107,9 +105,18 @@
 			? mapNetworkIdToBitcoinNetwork($sendTokenNetworkId)
 			: undefined;
 
-		const trackingEventMetadata = {
+		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
-			network: `${$sendTokenNetworkId.description}`,
+			network: `${$sendTokenNetworkId.description}`
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -175,7 +182,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -197,7 +204,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			loading = false;
@@ -208,7 +215,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -224,6 +231,11 @@
 </div>
 
 {#if !sendCompleted}
+	<div class="mb-2">
+		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
+		<BtcSendWarnings pendingTransactionsStatus={BtcPendingSentTransactionsStatus.NONE} {utxosFee} />
+	</div>
+
 	{#if notEmptyString(amountErrorMessage) || invalidDestination}
 		<p class="mb-2 text-center text-sm text-error-primary" transition:slide={SLIDE_DURATION}>
 			{notEmptyString(amountErrorMessage)
@@ -243,7 +255,10 @@
 		{$i18n.send.text.send}
 	</Button>
 {:else}
-	<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+	<p
+		class="text-center text-sm text-success-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+	>
 		{$i18n.ai_assistant.text.send_token_succeeded}
 	</p>
 {/if}

@@ -134,6 +134,26 @@ describe('erc20.utils', () => {
 		);
 	});
 
+	describe('isTokenErc20', () => {
+		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
+			'should return true for token $name',
+			(token) => {
+				expect(isTokenErc20(token)).toBeTruthy();
+			}
+		);
+
+		it.each([
+			ICP_TOKEN,
+			...SUPPORTED_BITCOIN_TOKENS,
+			...SUPPORTED_ETHEREUM_TOKENS,
+			...SUPPORTED_EVM_TOKENS,
+			...SUPPORTED_SOLANA_TOKENS,
+			...SPL_TOKENS
+		])('should return false for token $name', (token) => {
+			expect(isTokenErc20(token)).toBeFalsy();
+		});
+	});
+
 	describe('isTokenEthereumUserToken', () => {
 		const tokens = [
 			...SUPPORTED_ETHEREUM_TOKENS,
@@ -212,26 +232,6 @@ describe('erc20.utils', () => {
 			...SPL_TOKENS
 		])('should return false for token $name', (token) => {
 			expect(isTokenErc20UserToken(token)).toBeFalsy();
-		});
-	});
-
-	describe('isTokenErc20', () => {
-		it.each([...ERC20_TWIN_TOKENS, ...EVM_ERC20_TOKENS])(
-			'should return true for token $name',
-			(token) => {
-				expect(isTokenErc20(token)).toBeTruthy();
-			}
-		);
-
-		it.each([
-			ICP_TOKEN,
-			...SUPPORTED_BITCOIN_TOKENS,
-			...SUPPORTED_ETHEREUM_TOKENS,
-			...SUPPORTED_EVM_TOKENS,
-			...SUPPORTED_SOLANA_TOKENS,
-			...SPL_TOKENS
-		])('should return false for token $name', (token) => {
-			expect(isTokenErc20(token)).toBeFalsy();
 		});
 	});
 });

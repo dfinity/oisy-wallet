@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
-	import ConvertToCkBTC from '$btc/components/convert/ConvertToCkBTC.svelte';
+	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
 	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
-	import ConvertToCkETH from '$eth/components/convert/ConvertToCkETH.svelte';
+	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
-	import ConvertToCkERC20 from '$eth/components/send/ConvertToCkERC20.svelte';
+	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
 	import { erc20UserTokensInitialized } from '$eth/derived/erc20.derived';
-	import ConvertToBTC from '$icp/components/convert/ConvertToBTC.svelte';
+	import ConvertToBtc from '$icp/components/convert/ConvertToBtc.svelte';
 	import ConvertToEthereum from '$icp/components/convert/ConvertToEthereum.svelte';
 	import IcReceive from '$icp/components/receive/IcReceive.svelte';
 	import { tokenCkBtcLedger } from '$icp/derived/ic-token.derived';
@@ -30,7 +30,7 @@
 	} from '$lib/derived/network.derived';
 	import { networkBitcoinMainnetEnabled } from '$lib/derived/networks.derived';
 	import { pageToken, pageTokenWithFallback } from '$lib/derived/page-token.derived';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 	import SolReceive from '$sol/components/receive/SolReceive.svelte';
 
@@ -45,6 +45,7 @@
 	let convertBtc = $derived($networkBitcoinMainnetEnabled && isNetworkIdBTCMainnet($networkId));
 
 	let isTransactionsPage = $derived(isRouteTransactions(page));
+	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
 		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP))
@@ -70,7 +71,7 @@
 		{/if}
 
 		{#if sendAction}
-			<Send {isTransactionsPage} />
+			<Send {isNftsPage} {isTransactionsPage} />
 		{/if}
 
 		{#if swapAction}
@@ -82,7 +83,7 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkETH />
+					<ConvertToCkEth />
 				{/if}
 			{/if}
 
@@ -90,16 +91,16 @@
 				{#if $networkICP}
 					<ConvertToEthereum />
 				{:else}
-					<ConvertToCkERC20 />
+					<ConvertToCkErc20 />
 				{/if}
 			{/if}
 
 			{#if convertCkBtc}
-				<ConvertToBTC />
+				<ConvertToBtc />
 			{/if}
 
 			{#if convertBtc}
-				<ConvertToCkBTC />
+				<ConvertToCkBtc />
 			{/if}
 		{/if}
 

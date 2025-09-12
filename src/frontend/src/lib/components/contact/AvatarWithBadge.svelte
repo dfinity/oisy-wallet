@@ -33,7 +33,8 @@
 			lg: '64px',
 			md: '48px',
 			sm: '40px',
-			xs: '32px'
+			xs: '32px',
+			xxs: '24px'
 		}[variant]
 	);
 
