@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
 	import type { ContactImage } from '$declarations/backend/backend.did';
@@ -19,6 +19,18 @@
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { addressBookWizardSteps } from '$lib/config/address-book.config';
+	import {
+		TRACK_CONTACT_CREATE_ERROR,
+		TRACK_CONTACT_CREATE_SUCCESS,
+		TRACK_CONTACT_DELETE_ERROR,
+		TRACK_CONTACT_DELETE_SUCCESS,
+		TRACK_CONTACT_UPDATE_ERROR,
+		TRACK_CONTACT_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_SUCCESS,
+		TRACK_AVATAR_UPDATE_ERROR,
+		TRACK_AVATAR_DELETE_SUCCESS,
+		TRACK_AVATAR_DELETE_ERROR
+	} from '$lib/constants/analytics.contants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { sortedContacts } from '$lib/derived/contacts.derived';
@@ -71,13 +83,15 @@
 		}
 	});
 
+  	// Allow to define an entrypoint when opening the modal. Here we listen to the modal data and go to the entrypoint step if were not already on it.
 	onMount(() => {
-		const entry = modalData?.entrypoint?.type;
-		if (nonNullish(entry) && $currentStepName !== entry) {
-			gotoStep(entry);
-		}
+		const data = modalData?.entrypoint?.type;
+    
+		if (nonNullish(data) && currentStep?.name !== data) {
+			gotoStep(data);
 	});
 
+	// Reset address book store on modal exit so we can start fresh the next time it's opened
 	onDestroy(() => {
 		addressBookStore.reset();
 	});
