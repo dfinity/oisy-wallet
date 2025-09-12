@@ -15,6 +15,7 @@
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdEthereum,
@@ -58,6 +59,7 @@
 			{currentStep}
 			{destination}
 			nativeEthereumToken={$ethereumToken}
+			{nft}
 			{selectedContact}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
@@ -73,6 +75,7 @@
 			{currentStep}
 			{destination}
 			nativeEthereumToken={evmNativeEthereumToken}
+			{nft}
 			{selectedContact}
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount

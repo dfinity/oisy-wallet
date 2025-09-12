@@ -693,7 +693,8 @@
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
 			"no_nfts_found": "",
-			"no_nfts_found_desc": ""
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
@@ -741,7 +742,8 @@
 			"btc_invalid_utxo_data": "Neplatná data Bitcoin transakce",
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
-			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později."
+			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",
@@ -760,7 +762,8 @@
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
-			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně."
+			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
