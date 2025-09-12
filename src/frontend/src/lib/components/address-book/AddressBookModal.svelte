@@ -18,7 +18,7 @@
 	import ShowContactStep from '$lib/components/address-book/ShowContactStep.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import { AddressBookWizardSteps } from '$lib/config/addressbook-modalsteps.config';
+	import { AddressBookWizardSteps } from '$lib/config/address-book.config';
 	import {
 		TRACK_CONTACT_CREATE_ERROR,
 		TRACK_CONTACT_CREATE_SUCCESS,
