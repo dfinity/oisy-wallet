@@ -44,7 +44,8 @@
 			destination,
 			networkId: $sendTokenNetworkId
 		}) ||
-		invalidAmount(amount);
+		invalidAmount(amount) ||
+		utxosFee.utxos.length === 0;
 </script>
 
 <SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
