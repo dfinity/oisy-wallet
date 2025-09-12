@@ -43,14 +43,12 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(token)}
-			<div class="my-3 flex w-full justify-between">
-				<div class="flex items-center gap-3">
-					<h1 class="truncate">
-						{token.name}
-					</h1>
+			<div class="my-3 flex w-full justify-between gap-3">
+				<NftBadge {token} />
 
-					<NftBadge {token} />
-				</div>
+				<h1 class="flex-1 truncate">
+					{token.name}
+				</h1>
 
 				<NftCollectionActionButtons {token} />
 			</div>
