@@ -32,11 +32,6 @@ export const pageNft: Readable<Nft | undefined> = derived(
 		}
 
 		// Check if route NFT is a possible number
-		try {
-			Number($routeNft);
-		} catch {
-			return;
-		}
 
 		const routeNftId = Number($routeNft);
 
