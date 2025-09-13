@@ -8,21 +8,15 @@
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
-	const [collectionId, networkId] = $derived([page.params.collectionId, page.params.networkId]);
-
-	const collectionNfts: Nft[] = $derived(
-		($nftStore ?? []).filter(
-			(c) => c.collection.address === collectionId && c.collection.network.name === networkId
-		)
-	);
+	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
 	const collection: NftCollection | undefined = $derived(collectionNfts?.[0]?.collection);
 
@@ -34,7 +28,7 @@
 		})
 	);
 
-	// redirect to assets page if collection cant be loaded within 10s
+	// Redirect to the assets' page if the collection can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
 
 	onMount(() => {

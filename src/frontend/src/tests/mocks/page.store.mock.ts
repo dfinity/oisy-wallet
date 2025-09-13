@@ -32,6 +32,7 @@ const initPageStoreMock = () => {
 			page.data = data;
 		},
 		mockDynamicRoutes: (params: { [key: string]: string }) => {
+			set({ params });
 			page.params = params;
 		},
 
