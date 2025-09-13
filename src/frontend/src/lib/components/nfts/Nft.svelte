@@ -31,7 +31,7 @@
 
 	onMount(() => {
 		timeout = setTimeout(() => {
-			if (isNullish($pageNft)) {
+			if (isNullish(nft)) {
 				goto(`${AppPath.Nfts}${page.url.search}`);
 				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}
