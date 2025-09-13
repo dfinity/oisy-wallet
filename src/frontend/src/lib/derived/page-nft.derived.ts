@@ -31,7 +31,6 @@ export const pageNft: Readable<Nft | undefined> = derived(
 			return;
 		}
 
-
 		const routeNftId = Number($routeNft);
 
 		if (isNaN(routeNftId)) {
