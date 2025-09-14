@@ -98,7 +98,9 @@ export const initWalletConnect = async ({
 		walletKit.removeListener('session_delete', callback);
 	};
 
-	const offSessionRequest = (callback: (request: WalletKitTypes.SessionRequest) =>  Promise<void>) => {
+	const offSessionRequest = (
+		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
+	) => {
 		walletKit.off('session_request', callback);
 		walletKit.removeListener('session_request', callback);
 	};
