@@ -85,12 +85,11 @@
 
 	const disconnectListener = async () => {
 		try {
-            if (isNullish(listener)) {
-                return;
-            }
+			if (isNullish(listener)) {
+				return;
+			}
 
-
-            detachHandlers(listener)
+			detachHandlers(listener);
 
 			await listener.disconnect();
 		} catch (err: unknown) {
@@ -289,13 +288,13 @@
 		listener.sessionRequest(onSessionRequest);
 	};
 
-    const detachHandlers = (listener: WalletConnectListener) => {
-        listener.offSessionProposal(onSessionProposal);
+	const detachHandlers = (listener: WalletConnectListener) => {
+		listener.offSessionProposal(onSessionProposal);
 
-        listener.offSessionDelete(onSessionDelete);
+		listener.offSessionDelete(onSessionDelete);
 
-        listener.offSessionRequest(onSessionRequest);
-    };
+		listener.offSessionRequest(onSessionRequest);
+	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener();
