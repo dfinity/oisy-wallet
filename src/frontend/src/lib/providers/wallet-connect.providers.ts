@@ -90,14 +90,17 @@ export const initWalletConnect = async ({
 
 	const offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
 		walletKit.off('session_proposal', callback);
+		walletKit.removeListener('session_proposal', callback);
 	};
 
 	const offSessionDelete = (callback: () => void) => {
 		walletKit.off('session_delete', callback);
+		walletKit.removeListener('session_delete', callback);
 	};
 
 	const offSessionRequest = (callback: (request: WalletKitTypes.SessionRequest) => void) => {
 		walletKit.off('session_request', callback);
+		walletKit.removeListener('session_request', callback);
 	};
 
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
