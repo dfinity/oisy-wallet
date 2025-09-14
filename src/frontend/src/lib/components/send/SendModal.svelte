@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { setContext } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { onMount, setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
@@ -183,6 +184,12 @@
 			}
 		});
 	};
+
+	onMount(() => {
+		if (nonNullish(nft) && isNftsPage) {
+			selectNft(nft);
+		}
+	});
 </script>
 
 <SendTokenContext token={$token}>
