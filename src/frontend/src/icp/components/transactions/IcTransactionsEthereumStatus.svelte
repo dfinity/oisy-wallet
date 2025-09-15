@@ -15,8 +15,8 @@
 </script>
 
 <svelte:window
-	on:oisyCkEthereumPendingTransactions={onSyncPendingState}
-	on:oisyCkEthMinterInfoStatus={onSyncMinterInfoState}
+	onoisyCkEthereumPendingTransactions={onSyncPendingState}
+	onoisyCkEthMinterInfoStatus={onSyncMinterInfoState}
 />
 
 {#if ckEthPendingTransactionsSyncState === 'in_progress' || ckEthMinterInfoSyncState === 'in_progress'}
