@@ -12,20 +12,16 @@ export const CAIP10_CHAINS: Record<
 	string,
 	{ chainId: string; name: string; network: SolanaNetworkType }
 > = {
-	...(nonNullish(LEGACY_SOLANA_MAINNET_CHAIN_ID) && {
-		[`solana:${LEGACY_SOLANA_MAINNET_CHAIN_ID}`]: {
-			chainId: LEGACY_SOLANA_MAINNET_CHAIN_ID,
-			name: SOLANA_MAINNET_NETWORK.name,
-			network: SolanaNetworks.mainnet
-		}
-	}),
-	...(nonNullish(LEGACY_SOLANA_DEVNET_CHAIN_ID) && {
-		[`solana:${LEGACY_SOLANA_DEVNET_CHAIN_ID}`]: {
-			chainId: LEGACY_SOLANA_DEVNET_CHAIN_ID,
-			name: SOLANA_DEVNET_NETWORK.name,
-			network: SolanaNetworks.devnet
-		}
-	}),
+	[`solana:${LEGACY_SOLANA_MAINNET_CHAIN_ID}`]: {
+		chainId: LEGACY_SOLANA_MAINNET_CHAIN_ID,
+		name: SOLANA_MAINNET_NETWORK.name,
+		network: SolanaNetworks.mainnet
+	},
+	[`solana:${LEGACY_SOLANA_DEVNET_CHAIN_ID}`]: {
+		chainId: LEGACY_SOLANA_DEVNET_CHAIN_ID,
+		name: SOLANA_DEVNET_NETWORK.name,
+		network: SolanaNetworks.devnet
+	},
 	...(nonNullish(SOLANA_MAINNET_NETWORK.chainId) && {
 		[`solana:${SOLANA_MAINNET_NETWORK.chainId}`]: {
 			chainId: SOLANA_MAINNET_NETWORK.chainId,
