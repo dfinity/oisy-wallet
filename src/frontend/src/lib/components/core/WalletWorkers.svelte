@@ -51,6 +51,6 @@
 	const debounceTriggerTimer = debounce(triggerTimer, 1000);
 </script>
 
-<svelte:window on:oisyTriggerWallet={debounceTriggerTimer} />
+<svelte:window onoisyTriggerWallet={debounceTriggerTimer} />
 
 {@render children?.()}
