@@ -1,4 +1,4 @@
-import { ethereumTokenId } from '$eth/derived/token.derived';
+import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { ethTransactionsStore, type EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -56,7 +56,7 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 	[
 		ethTransactionsStore,
 		ckEthMinterInfoStore,
-		ethereumTokenId,
+		nativeEthereumTokenId,
 		ethAddress,
 		tokens,
 		tokenWithFallback

@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumToken } from '$eth/derived/token.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
@@ -65,7 +65,7 @@
 			<AiAssistantReviewSendEthToken
 				{amount}
 				{destination}
-				nativeEthereumToken={$ethereumToken}
+				nativeEthereumToken={$nativeEthereumToken}
 				{sendEnabled}
 				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 				bind:sendCompleted
