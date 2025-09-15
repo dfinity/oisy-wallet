@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { isEmptyString } from '@dfinity/utils';
 	import AiAssistantShowContactsToolItem from '$lib/components/ai-assistant/AiAssistantShowContactsToolItem.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ShowContactsToolResult } from '$lib/types/ai-assistant';
-	import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
+	import type { ContactAddressUiWithId } from '$lib/types/contact';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -13,39 +15,29 @@
 	}
 
 	let { contacts, loading, onSendMessage }: Props = $props();
-
-	let allAddresses = $derived(
-		contacts.reduce<{ contact: ExtendedAddressContactUi; address: ContactAddressUiWithId }[]>(
-			(acc, contact) => [
-				...acc,
-				...contact.addresses.map((address) => ({
-					contact,
-					address
-				}))
-			],
-			[]
-		)
-	);
 </script>
 
-{#if allAddresses.length > 0}
+{#if contacts.length > 0}
 	<div class="mb-2 text-sm">{$i18n.ai_assistant.text.select_contact_message}</div>
 
-	{#each allAddresses as { contact, address }, index (index)}
-		<AiAssistantShowContactsToolItem
-			{address}
-			{contact}
-			onClick={async () =>
-				!loading &&
-				(await onSendMessage({
-					messageText: replacePlaceholders($i18n.ai_assistant.text.send_to_message, {
-						$contact_name: contact.name,
-						$address_info: `${isEmptyString(address.label) ? '' : `${address.label}: `}${shortenWithMiddleEllipsis({ text: address.address })}`
-					}),
-					context: `Send destination information: "selectedContactAddressId" - ${address.id}; "addressType": ${address.addressType}.`
-				}))}
-		/>
-	{/each}
+	<List noBorder noPadding>
+		{#each contacts as contact, index (index)}
+			<ListItem styleClass="mb-2 last:mb-0">
+				<AiAssistantShowContactsToolItem
+					{contact}
+					onClick={async (address: ContactAddressUiWithId) =>
+						!loading &&
+						(await onSendMessage({
+							messageText: replacePlaceholders($i18n.ai_assistant.text.send_to_message, {
+								$contact_name: contact.name,
+								$address_info: `${isEmptyString(address.label) ? '' : `${address.label}: `}${shortenWithMiddleEllipsis({ text: address.address })}`
+							}),
+							context: `Send destination information: "selectedContactAddressId" - ${address.id}; "addressType": ${address.addressType}.`
+						}))}
+				/>
+			</ListItem>
+		{/each}
+	</List>
 {:else}
 	<span class="text-sm">
 		{$i18n.ai_assistant.text.no_contacts_found_message}
