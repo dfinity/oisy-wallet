@@ -83,6 +83,7 @@ import { trackEvent } from './analytics.services';
 import { retryWithDelay } from './rest.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 
 export const fetchKongSwap = async ({
 	identity,
@@ -615,8 +616,7 @@ const fetchVeloraSwapAmount = async ({
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
 		userAddress: userEthAddress,
-		// TODO: use ENV variable when available
-		partner: 'oisy.com'
+		partner: OISY_URL_HOSTNAME
 	};
 
 	const data = await sdk.quote.getQuote(
@@ -747,8 +747,7 @@ export const fetchVeloraDeltaSwap = async ({
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
-		// TODO: use ENV variable when available
-		partner: 'oisy.com'
+		partner: OISY_URL_HOSTNAME
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
@@ -879,8 +878,7 @@ export const fetchVeloraMarketSwap = async ({
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
 		userAddress,
-		// TODO: use ENV variable when available
-		partner: 'oisy.com'
+		partner: OISY_URL_HOSTNAME
 	});
 
 	await swap({
