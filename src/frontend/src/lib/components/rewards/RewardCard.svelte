@@ -51,10 +51,13 @@
 	<div class="relative rounded-lg bg-primary p-4">
 		<article class="h-full">
 			<section>
-				<div class="flex text-start text-lg font-semibold gap-3" class:flex-col-reverse={hasNetworkBonus}>
+				<div
+					class="flex gap-3 text-start text-lg font-semibold"
+					class:flex-col-reverse={hasNetworkBonus}
+				>
 					{resolveText({ i18n: $i18n, path: reward.cardTitle })}
 
-					<div class="flex items-center gap-3 flex-wrap">
+					<div class="flex flex-wrap items-center gap-3">
 						{#if isEligible && !hasEnded}
 							<span class="inline-flex md:mx-1">
 								<Badge
