@@ -21,7 +21,8 @@ describe('AiAssistantShowContactsTool', () => {
 	const extendedContacts = get(extendedAddressContacts);
 	const props = {
 		onSendMessage: () => Promise.resolve(),
-		contacts: Object.values(extendedContacts)
+		contacts: Object.values(extendedContacts),
+		loading: false
 	};
 
 	it('renders no contacts found message', () => {
