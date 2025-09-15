@@ -13,6 +13,7 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 
 	interface Props {
 		onclick: () => void;
@@ -61,7 +62,7 @@
 						{/if}
 
 						{#if hasNetworkBonus}
-							<Img src={networkBonusDisabled1} />
+							<RewardNetworkBonus />
 						{/if}
 					</div>
 				</div>
