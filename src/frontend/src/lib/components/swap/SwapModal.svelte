@@ -108,12 +108,7 @@
 	const selectProvider = ({ detail }: CustomEvent<SwapMappedResult>) => {
 		swapAmountsStore.setSelectedProvider(detail);
 		closeSelectProviderModal();
-	};
-
-
-
-	console.log(OISY_URL, 'oisy url');
-	
+	};	
 
 	// TODO: Migrate to Svelte 5, remove legacy slot usage and use render composition instead
 </script>

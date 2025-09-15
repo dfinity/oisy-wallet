@@ -20,7 +20,7 @@ export const ENV =
 						? REQUESTED_ENV
 						: 'development';
 
-export const domain_for_dfx_network = (dfx_network) =>
+const domain_for_dfx_network = (dfx_network) =>
 	OISY_DOMAINS.frontend[dfx_network] ?? `https://${dfx_network}.oisy.com`;
 
 // The domain name, as in the browser location bar and in the web assets under .well-known/ic-domain

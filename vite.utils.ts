@@ -126,8 +126,6 @@ export const defineViteReplacements = (): {
 	const commitHash = isTestFe ? execSync('git rev-parse --short HEAD').toString().trim() : '';
 	const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
-	console.log(domain_for_dfx_network(network));
-
 	return {
 		VITE_OISY_DOMAIN: JSON.stringify(domain_for_dfx_network(network)),
 		VITE_APP_VERSION: JSON.stringify(version),
