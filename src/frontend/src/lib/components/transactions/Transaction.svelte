@@ -5,6 +5,7 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -17,8 +18,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
+	import { mapNetworkIdToAddressType } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -75,6 +79,11 @@
 		filterAddressFromContact({ contact, address: contactAddress })?.label
 	);
 
+	const network: Network | undefined = $derived(token.network);
+
+	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
+		mapNetworkIdToAddressType(network?.id)
+	);
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
@@ -92,6 +101,11 @@
 					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
 				{:else}
 					{@render children?.()}
+				{/if}
+				{#if nonNullish(network)}
+					<div class="flex">
+						<NetworkLogo addressType={networkAddressType} {network} testId="transaction-network" />
+					</div>
 				{/if}
 			</span>
 

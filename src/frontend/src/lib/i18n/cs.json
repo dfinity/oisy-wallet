@@ -9,6 +9,7 @@
 			"close": "Zavřít",
 			"change": "Změnit",
 			"apply": "Použít",
+			"retry": "",
 			"refresh": "Aktualizovat",
 			"name": "Název",
 			"symbol": "Symbol",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
@@ -551,7 +553,11 @@
 			"appearance_system": "Systém",
 			"git_disclaimer": "Pro vývojové účely zobrazujeme větev a commit pouze v testovacích kanystrech.",
 			"git_branch_name": "Větev:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID ICP Účtu",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
 				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
 				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "Udělejte svůj první odeslání hned!",
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
-			"send_review_subtitle": "Odesíláte"
+			"send_review_subtitle": "Odesíláte",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
-			"select_network": "Vybrat síť"
+			"select_network": "Vybrat síť",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "Neplatná data Bitcoin transakce",
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
-			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později."
+			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "Při výpočtu transakčního poplatku se něco pokazilo.",
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
-			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně."
+			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "Transakce dokončena!",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
 			"loading": "Přemýšlím...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",

@@ -9,6 +9,7 @@
 			"close": "閉じる",
 			"change": "変更",
 			"apply": "適用",
+			"retry": "",
 			"refresh": "再度読み込み",
 			"name": "名前",
 			"symbol": "シンボル",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "BTC引き出しステータスの取得中にエラーが発生しました",
 			"transaction_price": "取引価格の見積もりの読み込み中にエラーが発生しました",
 			"icrc_canisters": "ICRCキャニスターの読み込み中にエラーが発生しました",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "ERC20カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc721_custom_tokens": "ERC721カスタムトークンの読み込み中にエラーが発生しました。",
 			"erc1155_custom_tokens": "ERC1155カスタムトークンの読み込み中にエラーが発生しました。",
@@ -551,7 +553,11 @@
 			"appearance_system": "システムに従う",
 			"git_disclaimer": "開発目的のため、テストキャニスターでのみブランチとコミットを表示します",
 			"git_branch_name": "ブランチ:",
-			"git_commit_hash": "コミット:"
+			"git_commit_hash": "コミット:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "テストネットの表示/非表示を切り替え",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICPアカウントID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "このアドレス形式をサポートするウォレット、ユーザー、または他のアプリから受信する際に、すべてのトークンに使用します。",
 				"use_for_icrc_deposit": "ICPネットワークでICRC-1トークン（SNS、ckトークンなど）を受信する際に使用します",
 				"use_for_icp_deposit": "アカウントIDのみをサポートする取引所や他のウォレットからICPを入金する際に使用します",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "まずは最初の送金をしてみましょう！",
 			"contacts_empty_state_title": "あなたの連絡先がここに表示されます",
 			"contacts_empty_state_description": "まだ連絡先を追加していないようです",
-			"send_review_subtitle": "以下の内容を送信します"
+			"send_review_subtitle": "以下の内容を送信します",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "パブリックアドレス (0x)、名前、またはエイリアスを入力",
 			"enter_recipient_address": "受取人のアドレス、名前、またはエイリアスを入力",
 			"enter_wallet_address": "ウォレットアドレス、名前、またはエイリアスを入力",
-			"select_network": "ネットワークを選択"
+			"select_network": "ネットワークを選択",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "ckBTCパラメーターが認証されるまでお待ちください",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "無効なBitcoin取引データです",
 			"btc_utxo_locked": "保留中の取引によりBitcoin資金がロックされています",
 			"btc_invalid_fee_calculation": "Bitcoin取引手数料の検証に失敗しました",
-			"pending_transactions_not_available": "保留中の取引サービスは現在利用できません。後でもう一度お試しください。"
+			"pending_transactions_not_available": "保留中の取引サービスは現在利用できません。後でもう一度お試しください。",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "トランザクションの送信中に問題が発生しました",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "取引手数料の計算中に問題が発生しました。",
 			"unable_to_retrieve_amount": "N/A（取得できませんでした）",
 			"solana_transaction_expired": "あなたの送信トランザクションはSolanaネットワークによって処理されず、期限切れになりました。これはおそらく提供された優先手数料が不足していたためです。最新の推奨金額に更新しましたので、もう一度送信を試みてください。",
-			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。"
+			"solana_confirmation_failed": "作成したトランザクションの確認を受信できませんでした。数秒待ってから、トークンのトランザクションリストでトランザクションが正しく作成されたかどうかを確認してください。",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
 			"loading": "考え中...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "申し訳ありませんが、LLMから応答を取得中に問題が発生しました。",

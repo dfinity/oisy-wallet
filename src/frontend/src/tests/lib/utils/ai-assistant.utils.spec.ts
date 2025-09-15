@@ -5,8 +5,8 @@ import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
 	generateAiAssistantResponseEventMetadata,
-	parseFromAiAssistantContacts,
 	parseReviewSendTokensToolArguments,
+	parseShowFilteredContactsToolArguments,
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
@@ -29,7 +29,6 @@ describe('ai-assistant.utils', () => {
 	const storeData = get(extendedAddressContacts);
 	const extendedAddressContactUi = storeData[`${contactsData[0].id}`];
 	const aiAssistantContact = {
-		id: extendedAddressContactUi.id,
 		name: extendedAddressContactUi.name,
 		addresses: [
 			{
@@ -43,32 +42,21 @@ describe('ai-assistant.utils', () => {
 	describe('parseToAiAssistantContacts', () => {
 		it('returns correct result', () => {
 			expect(parseToAiAssistantContacts(storeData)).toEqual({
-				[`${aiAssistantContact.id}`]: aiAssistantContact
+				[`${extendedAddressContactUi.id}`]: aiAssistantContact
 			});
-		});
-	});
-
-	describe('parseFromAiAssistantContacts', () => {
-		it('returns correct result', () => {
-			expect(
-				parseFromAiAssistantContacts({
-					aiAssistantContacts: [aiAssistantContact],
-					extendedAddressContacts: storeData
-				})
-			).toEqual(Object.values(storeData));
 		});
 	});
 
 	describe('parseReviewSendTokenToolArguments', () => {
 		const sendValue = 0.00001;
 
-		it('returns correct result when addressId is provided', () => {
+		it('returns correct result when selectedContactAddressId is provided', () => {
 			expect(
 				parseReviewSendTokensToolArguments({
 					filterParams: [
 						{
 							value: extendedAddressContactUi.addresses[0].id,
-							name: 'addressId'
+							name: 'selectedContactAddressId'
 						},
 						{
 							value: `${sendValue}`,
@@ -121,6 +109,40 @@ describe('ai-assistant.utils', () => {
 				contact: undefined,
 				amount: sendValue,
 				address: mockEthAddress
+			});
+		});
+	});
+
+	describe('parseShowFilteredContactsToolArguments', () => {
+		it('returns correct result when addressIds is provided', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: `["${extendedAddressContactUi.addresses[0].id}"]`,
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: [extendedAddressContactUi]
+			});
+		});
+
+		it('returns empty result when addressIds cannot be matched with existing contacts', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: '["random-id"]',
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: []
 			});
 		});
 	});

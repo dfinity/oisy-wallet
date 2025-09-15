@@ -43,6 +43,7 @@ export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
 export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_ACTION_SEND = 'nft-action-send';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';

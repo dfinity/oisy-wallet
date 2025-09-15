@@ -67,4 +67,20 @@ describe('ai-assistant.store', () => {
 			chatHistory: [...defaultState.chatHistory, message]
 		});
 	});
+
+	it('should remove last message', () => {
+		aiAssistantStore.appendMessage(message);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.removeLastMessage();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: defaultState.chatHistory
+		});
+	});
 });

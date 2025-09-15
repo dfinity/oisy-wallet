@@ -33,6 +33,7 @@ use shared::{
         contact::{CreateContactRequest, UpdateContactRequest},
         custom_token::{CustomToken, CustomTokenId},
         dapp::{AddDappSettingsError, AddHiddenDappIdRequest},
+        experimental_feature::UpdateExperimentalFeaturesSettingsRequest,
         network::{SaveNetworksSettingsRequest, SetShowTestnetsRequest},
         pow::{
             AllowSigningStatus, ChallengeCompletion, CreateChallengeResponse,
@@ -44,7 +45,8 @@ use shared::{
             BtcGetPendingTransactionsResult, BtcSelectUserUtxosFeeResult, CreateContactResult,
             CreatePowChallengeResult, DeleteContactResult, GetAllowedCyclesResult,
             GetContactResult, GetContactsResult, GetUserProfileResult, SetUserShowTestnetsResult,
-            UpdateContactResult, UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
+            UpdateContactResult, UpdateExperimentalFeaturesSettingsResult,
+            UpdateUserAgreementsResult, UpdateUserNetworkSettingsResult,
         },
         signer::{
             topup::{TopUpCyclesLedgerRequest, TopUpCyclesLedgerResult},
@@ -72,7 +74,8 @@ use crate::{
     token::{add_to_user_token, remove_from_user_token},
     types::{ContactMap, PowChallengeMap},
     user_profile::{
-        add_hidden_dapp_id, set_show_testnets, update_agreements, update_network_settings,
+        add_hidden_dapp_id, set_show_testnets, update_agreements,
+        update_experimental_feature_settings, update_network_settings,
     },
 };
 
@@ -726,6 +729,36 @@ pub fn update_user_agreements(request: UpdateUserAgreementsRequest) -> UpdateUse
             stored_principal,
             request.current_user_version,
             request.agreements,
+            &mut user_profile_model,
+        )
+    })
+    .into()
+}
+
+/// Updates the user's preference to enable (or disable) experimental features in the interface,
+/// merging with any existing entries.
+///
+/// # Returns
+/// - Returns `Ok(())` if the experimental features were updated successfully, or if they were
+///   already set to the same value.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+#[update(guard = "caller_is_not_anonymous")]
+#[must_use]
+pub fn update_user_experimental_feature_settings(
+    request: UpdateExperimentalFeaturesSettingsRequest,
+) -> UpdateExperimentalFeaturesSettingsResult {
+    let user_principal = ic_cdk::caller();
+    let stored_principal = StoredPrincipal(user_principal);
+
+    mutate_state(|s| {
+        let mut user_profile_model =
+            UserProfileModel::new(&mut s.user_profile, &mut s.user_profile_updated);
+        update_experimental_feature_settings(
+            stored_principal,
+            request.current_user_version,
+            request.experimental_features,
             &mut user_profile_model,
         )
     })

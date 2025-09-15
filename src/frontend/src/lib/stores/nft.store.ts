@@ -1,4 +1,5 @@
 import type { Nft } from '$lib/types/nft';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -27,8 +28,12 @@ const initNftStore = (): NftStore => {
 						!currentNfts.some(
 							(existingNft) =>
 								existingNft.id === newNft.id &&
-								existingNft.collection.address === newNft.collection.address &&
-								existingNft.collection.network === newNft.collection.network
+								areAddressesEqual({
+									address1: existingNft.collection.address,
+									address2: newNft.collection.address,
+									networkId: existingNft.collection.network.id
+								}) &&
+								existingNft.collection.network.id === newNft.collection.network.id
 						)
 				);
 
@@ -46,8 +51,12 @@ const initNftStore = (): NftStore => {
 						!nfts.some(
 							(nftToRemove) =>
 								currentNft.id === nftToRemove.id &&
-								currentNft.collection.address == nftToRemove.collection.address &&
-								currentNft.collection.network === nftToRemove.collection.network
+								areAddressesEqual({
+									address1: currentNft.collection.address,
+									address2: nftToRemove.collection.address,
+									networkId: currentNft.collection.network.id
+								}) &&
+								currentNft.collection.network.id === nftToRemove.collection.network.id
 						)
 				);
 			});
@@ -62,8 +71,12 @@ const initNftStore = (): NftStore => {
 					const updatedNft = nfts.find(
 						(nft) =>
 							nft.id === currentNft.id &&
-							nft.collection.address === currentNft.collection.address &&
-							nft.collection.network === currentNft.collection.network
+							areAddressesEqual({
+								address1: nft.collection.address,
+								address2: currentNft.collection.address,
+								networkId: currentNft.collection.network.id
+							}) &&
+							nft.collection.network.id === currentNft.collection.network.id
 					);
 
 					return nonNullish(updatedNft) ? updatedNft : currentNft;

@@ -29,20 +29,24 @@ export const getAiAssistantSystemPrompt = ({
 			1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
 			2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
 			3. If the token is not in AVAILABLE TOKENS, do not proceed further.
-		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address" (string) are provided.
-		- If tokenSymbol maps to multiple networkIds and networkId is not specified yet, ask: "On which network would you like to send {tokenSymbol}?".
-		- Never invent a networkId that isn’t in AVAILABLE TOKENS.
+		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" (string) or "address" (string) are provided.
+		- If any argument is missing, DO NOT call the tool. Instead, explicitly ask the user for the missing value(s).
+		- If a tokenSymbol maps to exactly one networkId, automatically assign that networkId without asking the user.  
+		- If a tokenSymbol maps to multiple networkIds and networkId is missing, ask: "On which network would you like to send {tokenSymbol}?"  
 	
-	- For 'show_contacts':
-		- Use when the user specifies a contact name or wants to choose from saved contacts.
-		- When calling show_contacts, filter by the addressType (values: 'Btc', 'Eth', 'Sol', 'Icrcv2') that corresponds to the token's networkId using the mapping below.
-		- If the user confirms a selection, immediately call 'review_send_tokens' with the selected "addressId" and previously provided "amountNumber" + "tokenSymbol".
-	
+	- For 'show_all_contacts':
+		- Call only when no filters are given (e.g. "Show me all contacts").
+		- Returns nothing; frontend displays all contacts.
+
+	- For 'show_filtered_contacts':
+		- Call only when filters are given (e.g. "Show me my ETH contacts" or when resolving a contact name together with a known token).
+		- Return only "addressIds" (addresses[].id) from the user’s contacts. If no matches, return [].
+
 	MEMORY & CHAINING BEHAVIOR:
-	- Always remember values from earlier in the conversation (address, addressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
-	- If "show_contacts" was called and the user confirms a specific contact/address, you MUST reuse the "addressId" from the tool result and proceed to "review_send_tokens" without asking again.
+	- Always remember values from earlier in the conversation (address, selectedContactAddressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
+	- If user confirms a contact/address after calling show_all_contacts or show_filtered_contacts tool, that "selectedContactAddressId" will be used for "review_send_tokens" tool after all other arguments are provided by the user.
 	
-	NETWORKID → addressType mapping:
+	Network ID → addressType mapping:
 	- BTC → Btc
 	- ICP → Icrcv2
 	- SOL → Sol
@@ -60,33 +64,6 @@ export const getAiAssistantSystemPrompt = ({
 	AVAILABLE CONTACTS:
 	${availableContacts}`;
 
-export const getAiAssistantFilterContactsPrompt = (
-	filterParams: string
-) => `You are a strict semantic filter engine.
-Given a list of contacts and a user query, return ONLY contacts that semantically match.
-- Use concept reasoning: e.g., "fruit" → pineapple.
-- Filter addresses by "addressType" if provided
-- If no matching contacts are found (after applying the above rules), return an empty contacts array and include a "message" field using this exact format: "It looks like you don’t have any saved contacts with a {networkName} address. You can either provide a {networkName} address directly or choose a different token." Replace {networkName} with the friendly blockchain name derived from the token (e.g., SOL → Sol, ICP → ICP).
-
-Return ONLY this JSON schema:
-{
-  "contacts": [
-    {
-    	"id": string,
-      "name": string,
-      "addresses": [
-        { "id": string, "label"?: string, "addressType": "Btc" | "Eth" | "Sol" | "Icrcv2" }
-      ]
-    }
-  ],
-  "message"?: string
-}
-
-Arguments: "${filterParams}".
-
-Do NOT include json or any Markdown.
-Do NOT include extra text.`;
-
 export const getAiAssistantToolsDescription = ({
 	enabledNetworksSymbols,
 	enabledTokensSymbols
@@ -97,29 +74,30 @@ export const getAiAssistantToolsDescription = ({
 	[
 		{
 			function: {
-				name: 'show_contacts',
+				name: 'show_all_contacts',
 				description: toNullable(
-					"Retrieve contacts from the user's address book. Return ONLY a valid JSON object matching the exact provided schema. Do not include any extra commentary, markdown, or text outside the JSON."
+					"Show all contacts when no filters are provided (e.g. 'Show me all contacts'). Do not include commentary or extra text."
+				),
+				parameters: toNullable()
+			}
+		},
+		{
+			function: {
+				name: 'show_filtered_contacts',
+				description: toNullable(
+					'Filter the provided contacts list by semantic meaning and return only matching addressIds. Always return only { "addressIds": [...] }. If no matches, return an empty array. Never include any other fields.'
 				),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
 						{
-							type: 'string',
-							name: 'searchQuery',
-							enum: toNullable(),
-							description: toNullable(
-								'Optional search term. Can be vague (e.g., "fruit", "crypto").'
-							)
-						},
-						{
 							type: 'array',
-							name: 'addressType',
-							enum: toNullable(['Btc', 'Eth', 'Sol', 'Icrcv2']),
-							description: toNullable("Optional filter for address types. Example: ['Btc', 'Eth'].")
+							name: 'addressIds',
+							description: toNullable('Array of matching address IDs.'),
+							enum: toNullable()
 						}
 					]),
-					required: toNullable()
+					required: toNullable(['addressIds'])
 				})
 			}
 		},
@@ -127,17 +105,17 @@ export const getAiAssistantToolsDescription = ({
 			function: {
 				name: 'review_send_tokens',
 				description: toNullable(
-					`Display an overview of the pending token transfer for user confirmation. Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "addressId" or "address". Do NOT send tokens yourself; sending will only happen via the UI button. If one of those arguments is not available, ask the user to provide it.`
+					`Display a pending token transfer for confirmation. Always return 4 arguments: "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" (string) or "address" (string). If one of those arguments is not available, ask the user to provide it.`
 				),
 				parameters: toNullable({
 					type: 'object',
 					properties: toNullable([
 						{
 							type: 'string',
-							name: 'addressId',
+							name: 'selectedContactAddressId',
 							enum: toNullable(),
 							description: toNullable(
-								'Unique ID of the address in the user’s contacts. Returned from show_contacts.'
+								'Unique ID of the specific blockchain address from a contact (addresses[].id).'
 							)
 						},
 						{

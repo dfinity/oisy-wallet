@@ -9,6 +9,7 @@
 			"close": "Zamknij",
 			"change": "Zmień",
 			"apply": "Zastosuj",
+			"retry": "",
 			"refresh": "Odśwież",
 			"name": "Nazwa",
 			"symbol": "Symbol",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "Błąd podczas pobierania statusów wypłat BTC.",
 			"transaction_price": "Błąd podczas ładowania oszacowania ceny transakcji.",
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
@@ -551,7 +553,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "Do celów deweloperskich pokazujemy gałąź i commit tylko w kanistrach testowych.",
 			"git_branch_name": "Gałąź:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Identyfikator konta ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Użyj dla wszystkich tokenów podczas odbierania z portfeli, od użytkowników lub z innych aplikacji obsługujących ten format adresu.",
 				"use_for_icrc_deposit": "Użyj do odbierania tokenów ICRC-1 w sieci ICP, takich jak SNS, tokeny ck itp.",
 				"use_for_icp_deposit": "Użyj do wpłat ICP z giełd lub innych portfeli obsługujących tylko identyfikatory kont.",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "Wyślij teraz swoją pierwszą przesyłkę!",
 			"contacts_empty_state_title": "Twoje kontakty pojawią się tutaj",
 			"contacts_empty_state_description": "Wygląda na to, że nie dodałeś jeszcze żadnych kontaktów",
-			"send_review_subtitle": "Wysyłasz"
+			"send_review_subtitle": "Wysyłasz",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
-			"select_network": "Wybierz sieć"
+			"select_network": "Wybierz sieć",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Poczekaj, aż parametry ckBTC zostaną certyfikowane.",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
 			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
-			"pending_transactions_not_available": ""
+			"pending_transactions_not_available": "",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "Coś poszło nie tak podczas obliczania opłaty transakcyjnej.",
 			"unable_to_retrieve_amount": "niedostępne (nie można pobrać)",
 			"solana_transaction_expired": "Twoja transakcja wysłania nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa nie była wystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj wysłać ją ponownie.",
-			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo."
+			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
 			"loading": "Myślenie...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",

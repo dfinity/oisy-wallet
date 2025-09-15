@@ -9,6 +9,7 @@
 			"close": "Fermer",
 			"change": "Changer",
 			"apply": "Appliquer",
+			"retry": "",
 			"refresh": "Actualiser",
 			"name": "Nom",
 			"symbol": "Symbole",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "Erreur lors de la récupération des statuts de retrait BTC.",
 			"transaction_price": "Erreur lors du chargement de l'estimation du prix d'une transaction.",
 			"icrc_canisters": "Erreur lors du chargement des canisters ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC20.",
 			"erc721_custom_tokens": "Erreur lors du chargement des tokens personnalisés ERC721.",
 			"erc1155_custom_tokens": "",
@@ -551,7 +553,11 @@
 			"appearance_system": "Système",
 			"git_disclaimer": "À des fins de développement, nous affichons la branche et le commit uniquement dans les canisters de test.",
 			"git_branch_name": "Branche :",
-			"git_commit_hash": "Commit :"
+			"git_commit_hash": "Commit :",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Basculer pour afficher ou masquer les testnets",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID de compte ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Utiliser pour tous les tokens lors de la réception depuis des portefeuilles, des utilisateurs ou d'autres applications qui prennent en charge ce format d'adresse.",
 				"use_for_icrc_deposit": "Utiliser pour recevoir des tokens ICRC-1 sur le réseau ICP, tels que SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Utiliser pour les dépôts ICP depuis les échanges ou d'autres portefeuilles qui ne prennent en charge que les ID de compte.",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "Faites votre premier envoi maintenant !",
 			"contacts_empty_state_title": "Vos contacts apparaîtront ici",
 			"contacts_empty_state_description": "Il semble que vous n'ayez pas encore ajouté de contacts",
-			"send_review_subtitle": "Vous envoyez"
+			"send_review_subtitle": "Vous envoyez",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Entrez l'adresse publique (0x), le nom ou l'alias",
 			"enter_recipient_address": "Entrez l'adresse du destinataire, le nom ou l'alias",
 			"enter_wallet_address": "Entrez l'adresse du portefeuille, le nom ou l'alias",
-			"select_network": "Sélectionner le réseau"
+			"select_network": "Sélectionner le réseau",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Veuillez attendre que les paramètres ckBTC aient été certifiés.",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "Données de transaction Bitcoin invalides",
 			"btc_utxo_locked": "Les fonds Bitcoin sont verrouillés par des transactions en attente",
 			"btc_invalid_fee_calculation": "Échec de la validation des frais de transaction Bitcoin",
-			"pending_transactions_not_available": "Le service de transactions en attente n'est actuellement pas disponible. Veuillez réessayer plus tard."
+			"pending_transactions_not_available": "Le service de transactions en attente n'est actuellement pas disponible. Veuillez réessayer plus tard.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Quelque chose s'est mal passé lors de l'envoi de la transaction.",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "Quelque chose s'est mal passé lors du calcul des frais de transaction.",
 			"unable_to_retrieve_amount": "n/a (impossible de récupérer)",
 			"solana_transaction_expired": "Votre transaction d'envoi n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au dernier montant recommandé, veuillez donc réessayer de l'envoyer.",
-			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token pour voir si votre transaction a été créée correctement."
+			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "Réflexion...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Désolé, une erreur s'est produite lors de l'obtention d'une réponse du LLM.",

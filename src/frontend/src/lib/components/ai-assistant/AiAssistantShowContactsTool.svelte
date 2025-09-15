@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString, notEmptyString } from '@dfinity/utils';
+	import { isEmptyString } from '@dfinity/utils';
 	import AiAssistantShowContactsToolItem from '$lib/components/ai-assistant/AiAssistantShowContactsToolItem.svelte';
 	import { MAX_DISPLAYED_ADDRESSES_NUMBER } from '$lib/constants/ai-assistant.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -9,10 +9,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props extends ShowContactsToolResult {
-		onSendMessage: (params: { messageText: string; context?: string }) => Promise<void>;
+		onSendMessage: (params: { messageText?: string; context?: string }) => Promise<void>;
+		loading: boolean;
 	}
 
-	let { contacts, message, onSendMessage }: Props = $props();
+	let { contacts, loading, onSendMessage }: Props = $props();
 
 	let allAddresses = $derived(
 		contacts.reduce<{ contact: ExtendedAddressContactUi; address: ContactAddressUiWithId }[]>(
@@ -40,18 +41,19 @@
 			{address}
 			{contact}
 			onClick={async () =>
-				await onSendMessage({
+				!loading &&
+				(await onSendMessage({
 					messageText: replacePlaceholders($i18n.ai_assistant.text.send_to_message, {
 						$contact_name: contact.name,
 						$address_info: `${isEmptyString(address.label) ? '' : `${address.label}: `}${shortenWithMiddleEllipsis({ text: address.address })}`
 					}),
-					context: `Send destination information for the review_send_tokens tool: contact id - ${contact.id}; address id - ${address.id}; address type: ${address.addressType}.`
-				})}
+					context: `Send destination information: "selectedContactAddressId" - ${address.id}; "addressType": ${address.addressType}.`
+				}))}
 		/>
 	{/each}
 {:else}
 	<span class="text-sm">
-		{notEmptyString(message) ? message : $i18n.ai_assistant.text.no_contacts_found_message}
+		{$i18n.ai_assistant.text.no_contacts_found_message}
 	</span>
 {/if}
 
