@@ -19,10 +19,10 @@
 	interface Props {
 		fromRoute?: NavigationTarget;
 	}
-	
+
 	let { fromRoute }: Props = $props();
 
-	let selectedToken: SplCustomToken;
+	let selectedToken = $state<SplCustomToken>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as SplCustomToken));
