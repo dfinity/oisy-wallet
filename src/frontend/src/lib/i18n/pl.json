@@ -1515,17 +1515,17 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Przejrzyj warunki korzystania z usługi",
+			"review_updated_title": "Przejrzyj zaktualizowane warunki korzystania z usługi",
+			"review_description": "Zanim zaczniesz korzystać z Portfela OISY, musisz zapoznać się z naszymi Warunkami korzystania z usługi i Polityką prywatności oraz je zaakceptować. Dokumenty te wyjaśniają zasady korzystania z naszej usługi i sposób, w jaki chronimy Twoje dane.",
+			"review_updated_description": "Aby nadal korzystać z Portfela OISY, zapoznaj się z naszymi zaktualizowanymi Warunkami korzystania z usługi i Polityką prywatności oraz zaakceptuj je. Zmiany te są ważne dla zapewnienia bezpieczeństwa i zgodności naszych usług z przepisami.",
+			"reject_warning": "Aby kontynuować, musisz zaakceptować Regulamin. Możesz spróbować ponownie w dowolnym momencie.",
+			"i_have_accepted": "Przeczytałem i akceptuję",
+			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
+			"accept_and_continue": "Zaakceptuj i kontynuuj"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Wystąpił błąd podczas aktualizacji umów."
 		}
 	},
 	"license_agreement": {
@@ -1558,22 +1558,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
-			"title": "",
+			"terms_of_use": "Warunki użytkowania",
+			"title": "Warunki użytkowania",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link do warunków korzystania"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
-			"title": "",
+			"privacy_policy": "Polityka prywatności",
+			"title": "Polityka prywatności",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link do Polityka prywatności"
 		}
 	},
 	"activity": {
