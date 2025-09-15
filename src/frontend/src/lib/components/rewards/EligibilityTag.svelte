@@ -10,7 +10,7 @@
 		isEligible?: boolean;
 	}
 
-	let {testId, isEligible = false}: Props = $props();
+	let { testId, isEligible = false }: Props = $props();
 </script>
 
 <span class="inline-flex">
@@ -20,12 +20,12 @@
 		variant={isEligible ? 'eligible' : 'not-eligible'}
 	>
 		{#if isEligible}
-			<div class="flex gap-1.5 text-sm items-center">
+			<div class="flex items-center gap-1.5 text-sm">
 				<IconCircleCheck size="14" />
 				{$i18n.rewards.text.youre_eligible}
-		</div>
+			</div>
 		{:else}
-			<div class="flex gap-1.5 text-sm items-center">
+			<div class="flex items-center gap-1.5 text-sm">
 				<IconCircle size="14" />
 				{$i18n.rewards.text.not_eligible}
 			</div>
