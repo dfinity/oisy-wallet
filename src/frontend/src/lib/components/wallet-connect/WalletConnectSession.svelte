@@ -115,7 +115,6 @@
 				return;
 			}
 
-			// TODO add other networks for solana
 			listener = await initWalletConnect({
 				ethAddress: $ethAddress,
 				solAddressMainnet: $solAddressMainnet,
