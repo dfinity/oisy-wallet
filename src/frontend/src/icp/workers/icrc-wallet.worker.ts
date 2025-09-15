@@ -20,7 +20,6 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
-import { emit } from '$lib/utils/events.utils';
 import type {
 	IcrcIndexNgGetTransactions,
 	IcrcTransaction,
@@ -111,8 +110,6 @@ const getBalanceAndTransactions = async (
 	const { balance: indexCanisterBalance, ...rest } = transactions;
 
 	const indexCanisterIsOutOfSync = balance !== indexCanisterBalance;
-
-	emit({ message: 'oisyIndexCanisterBalanceOutOfSync', detail: indexCanisterIsOutOfSync });
 
 	if (indexCanisterIsOutOfSync && nonNullish(params.data)) {
 		const {

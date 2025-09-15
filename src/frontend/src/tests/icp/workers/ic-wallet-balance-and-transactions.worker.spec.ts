@@ -19,7 +19,6 @@ import type {
 	PostMessageDataRequestIcrc
 } from '$lib/types/post-message';
 import * as eventsUtils from '$lib/utils/events.utils';
-import { emit } from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
@@ -599,60 +598,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
 
 				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
-			});
-
-			it('should use emit event oisyIndexCanisterBalanceOutOfSync with out-of-sync Index canister balance', async () => {
-				const currentMock = spyGetTransactions.getMockImplementation();
-
-				spyGetTransactions.mockImplementation(async () => ({
-					...(await currentMock?.()),
-					balance: mockBalance + 1n
-				}));
-
-				expect(mockPostMessageNotCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
-				expect(mockPostMessageCertified.data.wallet.balance.data).not.toBe(mockBalance + 1n);
-
-				await scheduler.start(startData);
-
-				await awaitJobExecution();
-
-				// query + update = 2
-				expect(emit).toHaveBeenCalledTimes(2);
-				expect(emit).toHaveBeenNthCalledWith(1, {
-					message: 'oisyIndexCanisterBalanceOutOfSync',
-					detail: true
-				});
-				expect(emit).toHaveBeenNthCalledWith(2, {
-					message: 'oisyIndexCanisterBalanceOutOfSync',
-					detail: true
-				});
-			});
-
-			it('should use emit event oisyIndexCanisterBalanceOutOfSync with up-to-date Index canister balance', async () => {
-				const currentMock = spyGetTransactions.getMockImplementation();
-
-				spyGetTransactions.mockImplementation(async () => ({
-					...(await currentMock?.()),
-					balance: mockBalance
-				}));
-
-				expect(mockPostMessageNotCertified.data.wallet.balance.data).toBe(mockBalance);
-				expect(mockPostMessageCertified.data.wallet.balance.data).toBe(mockBalance);
-
-				await scheduler.start(startData);
-
-				await awaitJobExecution();
-
-				// query + update = 2
-				expect(emit).toHaveBeenCalledTimes(2);
-				expect(emit).toHaveBeenNthCalledWith(1, {
-					message: 'oisyIndexCanisterBalanceOutOfSync',
-					detail: false
-				});
-				expect(emit).toHaveBeenNthCalledWith(2, {
-					message: 'oisyIndexCanisterBalanceOutOfSync',
-					detail: false
-				});
 			});
 
 			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {
