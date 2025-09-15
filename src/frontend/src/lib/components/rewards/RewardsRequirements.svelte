@@ -17,12 +17,16 @@
 </script>
 
 {#if criteria.length > 0}
-	<div class="flex flex-col gap-2 pb-4" class:flex-row={!hasNetworkBonus} class:items-center={!hasNetworkBonus}>
+	<div
+		class="flex flex-col gap-2 pb-4"
+		class:flex-row={!hasNetworkBonus}
+		class:items-center={!hasNetworkBonus}
+	>
 		<span class="text-base font-semibold">
 			{$i18n.rewards.requirements.requirements_title}
 		</span>
 
-		<div class="flex gap-2.5 flex-wrap" class:pl-3={!hasNetworkBonus}>
+		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
 			<EligibilityTag {isEligible} />
 
 			{#if hasNetworkBonus}
