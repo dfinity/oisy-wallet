@@ -1515,17 +1515,17 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Consulta i Termini e condizioni",
+			"review_updated_title": "Rivedi i Termini e Condizioni Aggiornati",
+			"review_description": "Prima di poter utilizzare OISY Wallet, è necessario leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy. Questi documenti spiegano le regole del nostro servizio e come proteggiamo i tuoi dati.",
+			"review_updated_description": "Per continuare a utilizzare OISY Wallet, ti preghiamo di leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy aggiornati. Queste modifiche sono importanti per garantire la sicurezza e la conformità del nostro servizio.",
+			"reject_warning": "Devi accettare i Termini e Condizioni per procedere. Riprova in qualsiasi momento.",
+			"i_have_accepted": "Ho letto e accetto i",
+			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
+			"accept_and_continue": "Accetta e continua"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
 		}
 	},
 	"license_agreement": {
@@ -1558,22 +1558,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
-			"title": "",
+			"terms_of_use": "Termini di utilizzo",
+			"title": "Termini di utilizzo",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link ai termini di utilizzo"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
-			"title": "",
+			"privacy_policy": "Politica sulla riservatezza",
+			"title": "Politica sulla riservatezza",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link all'informativa sulla privacy"
 		}
 	},
 	"activity": {
