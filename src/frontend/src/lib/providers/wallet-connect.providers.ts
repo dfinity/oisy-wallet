@@ -1,6 +1,6 @@
 import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
@@ -32,12 +32,13 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
 	ethAddress,
-	solAddress,
+	solAddressMainnet,
+	solAddressDevnet,
 	cleanSlate = true
 }: {
 	ethAddress: OptionEthAddress;
-	// TODO add other networks for solana
-	solAddress: OptionSolAddress;
+	solAddressMainnet: OptionSolAddress;
+	solAddressDevnet: OptionSolAddress;
 	cleanSlate?: boolean;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
@@ -46,7 +47,7 @@ export const initWalletConnect = async ({
 	};
 
 	// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
-	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c....
+	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
 	// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
@@ -92,9 +93,6 @@ export const initWalletConnect = async ({
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
-		//TODO enable all networks of solana
-		const solMainnetNamespace = `solana:${SOLANA_MAINNET_NETWORK.chainId}`;
-
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
@@ -113,7 +111,7 @@ export const initWalletConnect = async ({
 							}
 						}
 					: {}),
-				...(nonNullish(solAddress)
+				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
 					? {
 							solana: {
 								chains: CAIP10_CHAINS_KEYS,
@@ -122,7 +120,14 @@ export const initWalletConnect = async ({
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
 								],
 								events: ['accountsChanged', 'chainChanged'],
-								accounts: [`${solMainnetNamespace}:${solAddress}`]
+								accounts: [
+									...(nonNullish(solAddressMainnet)
+										? [`solana:${SOLANA_MAINNET_NETWORK.chainId}:${solAddressMainnet}`]
+										: []),
+									...(nonNullish(solAddressDevnet)
+										? [`solana:${SOLANA_DEVNET_NETWORK.chainId}:${solAddressDevnet}`]
+										: [])
+								]
 							}
 						}
 					: {})
