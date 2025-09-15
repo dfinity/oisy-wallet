@@ -25,13 +25,13 @@
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
 
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
 	$effect(() => {
 		feeSymbolStore.set(token.symbol);
 		feeTokenIdStore.set(token.id);
 		feeDecimalsStore.set(token.decimals);
 	});
-
-	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
