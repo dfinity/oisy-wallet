@@ -16,9 +16,13 @@
 	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
 
-	let selectedToken: SplCustomToken;
+	let { fromRoute }: Props = $props();
+
+	let selectedToken = $state<SplCustomToken | undefined>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as SplCustomToken));
