@@ -15,6 +15,7 @@ import type {
 } from '$lib/types/wallet-connect';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
 import { nonNullish } from '@dfinity/utils';
@@ -119,7 +120,8 @@ export const initWalletConnect = async ({
 								chains: CAIP10_CHAINS_KEYS,
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
-									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
+									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+									SESSION_REQUEST_SOL_SIGN_MESSAGE
 								],
 								events: ['accountsChanged', 'chainChanged'],
 								accounts: [`${solMainnetNamespace}:${solAddress}`]
