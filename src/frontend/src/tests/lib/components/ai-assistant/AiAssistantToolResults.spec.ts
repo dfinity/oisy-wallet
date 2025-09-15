@@ -24,6 +24,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
+				false: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -41,6 +42,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
+				false: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -58,6 +60,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
@@ -76,6 +79,7 @@ describe('AiAssistantToolResults', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
 				isLastItem: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				// @ts-expect-error Testing unknown tool type
 				results: [{ type: 'unknown_tool', result: contacts } as ToolResult]
