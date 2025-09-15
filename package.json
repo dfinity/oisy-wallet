@@ -127,7 +127,7 @@
 		"prettier-plugin-motoko": "^0.11.3",
 		"prettier-plugin-organize-imports": "^4.2.0",
 		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.13",
+		"prettier-plugin-tailwindcss": "^0.6.14",
 		"sass": "^1.89.2",
 		"svelte": "^5.33.18",
 		"svelte-check": "^4.2.2",
