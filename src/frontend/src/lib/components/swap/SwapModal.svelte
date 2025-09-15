@@ -7,7 +7,6 @@
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
-	import { OISY_URL } from '$lib/constants/oisy.constants';
 	import { SWAP_DEFAULT_SLIPPAGE_VALUE } from '$lib/constants/swap.constants';
 	import { SWAP_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { swappableTokens } from '$lib/derived/swap.derived';
