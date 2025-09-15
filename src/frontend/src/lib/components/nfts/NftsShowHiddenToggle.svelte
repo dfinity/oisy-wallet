@@ -10,6 +10,6 @@
 		showHiddenStore.set({ key: 'show-hidden', value: { enabled: !checked } });
 </script>
 
-<svelte:window on:oisyToggleShowHidden={toggleHidden} />
+<svelte:window onoisyToggleShowHidden={toggleHidden} />
 
 <Toggle ariaLabel={$i18n.nfts.text.show_hidden} {checked} on:nnsToggle={toggleHidden} />
