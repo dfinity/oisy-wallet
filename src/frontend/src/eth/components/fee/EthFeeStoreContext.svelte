@@ -41,8 +41,6 @@
 
 	$effect(() => {
 		if (!isEthNetwork) {
-
-
 			return;
 		}
 
@@ -53,8 +51,6 @@
 
 	$effect(() => {
 		if (!isEthNetwork) {
-
-
 			return;
 		}
 
@@ -64,10 +60,7 @@
 	$effect(() => {
 		if (!isEthNetwork) {
 			reset();
-
 		}
-
-
 	});
 
 	setContext<FeeContextType>(
