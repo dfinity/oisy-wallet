@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Snippet, setContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { setContext, type Snippet } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -13,7 +13,7 @@
 
 	interface Props {
 		token: Token;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { token, children }: Props = $props();
@@ -21,22 +21,20 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	run(() => {
-		feeSymbolStore.set(token.symbol);
-	});
 
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	run(() => {
-		feeTokenIdStore.set(token.id);
-	});
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	run(() => {
+
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
+	$effect(() => {
+		feeSymbolStore.set(token.symbol);
+		feeTokenIdStore.set(token.id);
 		feeDecimalsStore.set(token.decimals);
 	});
 
-	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	run(() => {
+	$effect(() => {
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
 	});
 
@@ -52,4 +50,4 @@
 	);
 </script>
 
-{@render children?.()}
+{@render children()}
