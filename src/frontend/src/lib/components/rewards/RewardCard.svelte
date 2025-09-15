@@ -30,7 +30,7 @@
 
 	const campaignEligibility = getCampaignEligibility(reward.id);
 	const isEligible = $derived($campaignEligibility?.eligible ?? true);
-	const hasNetworkBonus = true;
+	const hasNetworkBonus = true; // TODO calculate value
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
@@ -70,7 +70,7 @@
 						{/if}
 
 						{#if hasNetworkBonus}
-							<RewardNetworkBonus />
+							<RewardNetworkBonus {isEligible} />
 						{/if}
 					</div>
 				</div>
