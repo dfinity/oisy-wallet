@@ -27,7 +27,6 @@
 	import type { SwapMappedResult, SwapSelectTokenType } from '$lib/types/swap';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
-	import { OISY_URL } from '$lib/constants/oisy.constants';
 
 	const { setSourceToken, setDestinationToken } = setContext<SwapContext>(
 		SWAP_CONTEXT_KEY,
