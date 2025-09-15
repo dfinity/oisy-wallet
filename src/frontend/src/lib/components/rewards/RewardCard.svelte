@@ -4,6 +4,7 @@
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import networkBonusDisabled1 from '$lib/assets/rewards/network-bonus-disabled-1.svg';
 	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
+	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -13,7 +14,6 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 
 	interface Props {
 		onclick: () => void;
