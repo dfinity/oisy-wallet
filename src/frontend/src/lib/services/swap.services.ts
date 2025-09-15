@@ -28,6 +28,7 @@ import {
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
 	SWAP_DELTA_INTERVAL_MS,
@@ -83,7 +84,6 @@ import { trackEvent } from './analytics.services';
 import { retryWithDelay } from './rest.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
-import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 
 export const fetchKongSwap = async ({
 	identity,
