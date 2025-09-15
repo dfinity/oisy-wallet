@@ -57,7 +57,7 @@
 
 					<div class="flex flex-wrap items-center gap-3">
 						{#if !hasEnded}
-							<EligibilityTag {isEligible} />
+							<EligibilityTag {isEligible} {testId} />
 						{/if}
 
 						{#if hasNetworkBonus}
