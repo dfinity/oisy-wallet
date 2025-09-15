@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
@@ -11,9 +11,15 @@
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
+	import {
+		encodeErc1155SafeTransfer,
+		encodeErc721SafeTransfer
+	} from '$eth/services/nft-send.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
+	import { isCollectionErc721 } from '$eth/utils/erc721.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -28,6 +34,7 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
@@ -43,6 +50,7 @@
 	export let nativeEthereumToken: Token;
 	export let sendToken: Token;
 	export let sendTokenId: TokenId;
+	export let sendNft: Nft | undefined = undefined;
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -62,11 +70,10 @@
 
 			const params: GetFeeData = {
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -108,7 +115,7 @@
 
 			const erc20GasFeeParams = {
 				contract: sendToken as Erc20Token,
-				amount: parseToken({ value: `${amount ?? '1'}` }),
+				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
 				sourceNetwork,
 				...params
 			};
@@ -122,6 +129,36 @@
 							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
 						)
 					})
+				});
+				return;
+			}
+
+			if (nonNullish(sendNft)) {
+				const { to, data } = isCollectionErc721(sendNft.collection)
+					? encodeErc721SafeTransfer({
+							contractAddress: sendNft.collection.address,
+							from: $ethAddress,
+							to: destination,
+							tokenId: sendNft.id
+						})
+					: isCollectionErc1155(sendNft.collection)
+						? encodeErc1155SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id,
+								amount: 1n,
+								data: '0x'
+							})
+						: (() => {
+								throw new Error($i18n.send.error.fee_calc_unsupported_standard);
+							})();
+
+				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
+
+				feeStore.setFee({
+					...feeData,
+					gas: estimatedGasNft
 				});
 				return;
 			}

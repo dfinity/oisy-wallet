@@ -1,5 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
-import { approve as approveToken } from '$eth/services/send.services';
+import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
@@ -74,13 +74,13 @@ import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
-	type BridgePrice,
 	type DeltaAuction,
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 import { trackEvent } from './analytics.services';
+import { retryWithDelay } from './rest.services';
 import { throwSwapError } from './swap-errors.services';
 import { autoLoadSingleToken } from './token.services';
 
@@ -214,7 +214,7 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress'> & { amount: bigint }): Promise<
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
 	SwapMappedResult[]
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
@@ -738,7 +738,7 @@ export const fetchVeloraDeltaSwap = async ({
 	progress(ProgressStepsSwap.SWAP);
 
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
+		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
@@ -848,6 +848,21 @@ export const fetchVeloraMarketSwap = async ({
 			shouldSwapWithApproval: true,
 			progress,
 			progressSteps: ProgressStepsSwap
+		});
+
+		await retryWithDelay({
+			maxRetries: 10,
+			request: async () => {
+				const currentAllowance = await erc20ContractAllowance({
+					token: sourceToken,
+					owner: userAddress,
+					spender: TokenTransferProxy,
+					networkId: sourceNetwork.id
+				});
+				if (currentAllowance < parsedSwapAmount) {
+					throw new Error(get(i18n).swap.error.unexpected);
+				}
+			}
 		});
 	}
 

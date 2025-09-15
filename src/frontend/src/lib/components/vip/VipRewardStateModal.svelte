@@ -66,14 +66,14 @@
 	<Sprinkles />
 {/if}
 
-<Modal on:nnsClose={close}>
-	<svelte:fragment slot="title">
+<Modal onClose={close}>
+	{#snippet title()}
 		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner

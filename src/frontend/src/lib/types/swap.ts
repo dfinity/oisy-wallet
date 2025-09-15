@@ -54,9 +54,9 @@ export interface ICPSwapResult {
 
 export interface FetchSwapAmountsParams {
 	identity: Identity;
-	sourceToken: IcToken | Erc20Token;
-	destinationToken: IcToken | Erc20Token;
-	amount: string | number | bigint;
+	sourceToken: Token;
+	destinationToken: Token;
+	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
 	isSourceTokenIcrc2: boolean;

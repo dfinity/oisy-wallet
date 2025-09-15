@@ -26,9 +26,11 @@ import type {
 	DeleteContactParams,
 	GetContactParams,
 	GetUserProfileResponse,
+	SaveUserAgreements,
 	SaveUserNetworksSettings,
 	SetUserShowTestnetsParams,
-	UpdateContactParams
+	UpdateContactParams,
+	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
@@ -227,6 +229,15 @@ export const updateUserNetworkSettings = async ({
 	return updateUserNetworkSettings(params);
 };
 
+export const updateUserAgreements = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<SaveUserAgreements>): Promise<void> => {
+	const { updateUserAgreements } = await backendCanister({ identity });
+
+	return updateUserAgreements(params);
+};
+
 export const getContact = async ({
 	contactId,
 	identity
@@ -264,6 +275,15 @@ export const deleteContact = async ({
 }: CanisterApiFunctionParams<DeleteContactParams>): Promise<bigint> => {
 	const { deleteContact } = await backendCanister({ identity });
 	return deleteContact(contactId);
+};
+
+export const updateUserExperimentalFeatureSettings = async ({
+	identity,
+	...params
+}: CanisterApiFunctionParams<UpdateUserExperimentalFeatureSettings>): Promise<void> => {
+	const { updateUserExperimentalFeatureSettings } = await backendCanister({ identity });
+
+	return updateUserExperimentalFeatureSettings(params);
 };
 
 const backendCanister = async ({

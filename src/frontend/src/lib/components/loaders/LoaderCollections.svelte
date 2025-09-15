@@ -21,6 +21,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
 
 	interface Props {
 		children?: Snippet;
@@ -49,7 +50,13 @@
 					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId;
+				return (
+					areAddressesEqual({
+						address1: tokenAddress,
+						address2: contract.address,
+						networkId: network.id
+					}) && tokenChainId === network.chainId
+				);
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
@@ -60,9 +67,8 @@
 				network,
 				enabled: !contract.isSpam
 			};
-			acc.push(newToken);
 
-			return acc;
+			return [...acc, newToken];
 		}, []);
 
 		if (tokens.length > 0) {
@@ -94,7 +100,13 @@
 					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
 				} = token;
 
-				return tokenAddress === contract.address && tokenChainId === network.chainId;
+				return (
+					areAddressesEqual({
+						address1: tokenAddress,
+						address2: contract.address,
+						networkId: network.id
+					}) && tokenChainId === network.chainId
+				);
 			});
 			if (nonNullish(existingToken)) {
 				return acc;
@@ -105,9 +117,8 @@
 				network,
 				enabled: !contract.isSpam
 			};
-			acc = [...acc, newToken];
 
-			return acc;
+			return [...acc, newToken];
 		}, []);
 
 		if (tokens.length > 0) {
@@ -123,10 +134,10 @@
 			return [];
 		}
 
-		const alchemyProvider = alchemyProviders(network.id);
+		const { getTokensForOwner } = alchemyProviders(network.id);
 
 		try {
-			return await alchemyProvider.getTokensForOwner($ethAddress);
+			return await getTokensForOwner($ethAddress);
 		} catch (_: unknown) {
 			return [];
 		}

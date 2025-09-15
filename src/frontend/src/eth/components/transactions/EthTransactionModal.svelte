@@ -103,8 +103,8 @@
 	);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title">{$i18n.transaction.text.details}</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}{$i18n.transaction.text.details}{/snippet}
 
 	<ContentWithToolbar>
 		<ModalHero variant={type === 'receive' ? 'success' : 'default'}>

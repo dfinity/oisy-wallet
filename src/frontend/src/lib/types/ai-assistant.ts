@@ -5,6 +5,7 @@ import type { Token } from '$lib/types/token';
 export interface ChatMessageContent {
 	text?: string;
 	context?: string;
+	retryable?: boolean;
 	tool?: {
 		calls: ToolCall[];
 		results: ToolResult[];
@@ -33,7 +34,6 @@ export interface ToolCall {
 
 export interface ShowContactsToolResult {
 	contacts: ExtendedAddressContactUi[];
-	message?: string;
 }
 
 export interface ReviewSendTokensToolResult {
@@ -44,13 +44,19 @@ export interface ReviewSendTokensToolResult {
 	address?: Address;
 }
 
+export enum ToolResultType {
+	SHOW_ALL_CONTACTS = 'show_all_contacts',
+	SHOW_FILTERED_CONTACTS = 'show_filtered_contacts',
+	REVIEW_SEND_TOKENS = 'review_send_tokens'
+}
+
 export interface ToolResult {
-	type: 'show_contacts' | 'review_send_tokens';
-	result?: ShowContactsToolResult;
+	type: ToolResultType;
+	result?: ShowContactsToolResult | ReviewSendTokensToolResult;
 }
 
 export interface AiAssistantContactUi
-	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs'> {
+	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
 	addresses: Omit<ContactAddressUiWithId, 'address'>[];
 }
 

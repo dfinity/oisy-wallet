@@ -9,6 +9,7 @@
 			"close": "Chiudi",
 			"change": "Cambia",
 			"apply": "Applica",
+			"retry": "",
 			"refresh": "Aggiorna",
 			"name": "Nome",
 			"symbol": "Simbolo",
@@ -37,7 +38,8 @@
 			"currency": "Valuta"
 		},
 		"info": {
-			"test_banner": "Solo a scopo di test!"
+			"test_banner": "Solo a scopo di test!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -114,7 +116,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
-			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta."
+			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",
@@ -497,6 +500,7 @@
 			"btc_withdrawal_statuses": "Errore durante il recupero degli stati di prelievo BTC.",
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
@@ -506,6 +510,7 @@
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
 		}
@@ -548,7 +553,11 @@
 			"appearance_system": "Sistema",
 			"git_disclaimer": "Per scopi di sviluppo, mostriamo il branch e il commit solo nei canister di test.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Attiva/disattiva per mostrare o nascondere le testnet",
@@ -583,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Account ID ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Utilizzare per tutti i token quando si riceve da wallet, utenti o altre app che supportano questo l'indirizzo in questo formato.",
 				"use_for_icrc_deposit": "Utilizzare per ricevere token ICRC-1 nella rete ICP, come SNS, ck tokens, ecc.",
 				"use_for_icp_deposit": "Utilizzare per depositi ICP da exchange o altri wallet che supportano solo gli Account ID.",
@@ -682,13 +692,17 @@
 			"recently_used_empty_state_description": "Fai il tuo primo trasferimento ora!",
 			"contacts_empty_state_title": "I tuoi contatti appariranno qui",
 			"contacts_empty_state_description": "Sembra che tu non abbia ancora aggiunto contatti",
-			"send_review_subtitle": "Tu invii"
+			"send_review_subtitle": "Tu invii",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
-			"select_network": "Seleziona rete"
+			"select_network": "Seleziona rete",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Attendere che i parametri ckBTC siano stati certificati.",
@@ -728,7 +742,9 @@
 			"btc_insufficient_balance_for_fee": "Saldo Bitcoin insufficiente per coprire le commissioni di transazione",
 			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
 			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
-			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita"
+			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -747,7 +763,8 @@
 			"unexpected_utxos_fee": "Qualcosa è andato storto durante il calcolo della fee di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
 			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
-			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente."
+			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -811,9 +828,9 @@
 			"approval_fee": "Fee di approvazione",
 			"gas_fee": "Gas fee",
 			"lp_fee": "Fee LP",
-			"max_slippage_info": "Inserisci un valore tra 0% e 50%",
+			"max_slippage_info": "Inserisci un valore tra 0% e $maxSlippage%",
 			"max_slippage_warning": "Avviso di rischio: un elevato slippage può comportare perdite a causa della volatilità del mercato",
-			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il 50%",
+			"max_slippage_error": "La tolleranza allo slippage non può essere 0% o superare il $maxSlippage%",
 			"swap_button": "Scambia ora",
 			"swap_is_not_offered": "Questo scambio non è attualmente offerto.",
 			"executing_transaction": "Esecuzione transazione...",
@@ -1037,7 +1054,27 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1476,8 +1513,24 @@
 			"indicator": "Vai alla slide $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Cliccando su questo pulsante, accetti l'",
 			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
@@ -1496,10 +1549,31 @@
 			"entire_agreement": "<strong>10. INTERO ACCORDO E SEPARABILITÀ.</strong> Il presente Accordo di Licenza costituisce l'intero accordo tra l'Utente e DFINITY e sostituisce tutti gli accordi, le negoziazioni o altre comunicazioni precedenti tra l'Utente e DFINITY, sia orali che scritte, in relazione all'oggetto del presente. DFINITY può apportare modifiche al presente Accordo di Licenza quando vengono rese disponibili nuove versioni di $oisy_short. Nel caso in cui qualsiasi disposizione del presente Accordo di Licenza sia ritenuta non valida o inapplicabile, allora: (a) tale disposizione sarà considerata riformata nella misura strettamente necessaria per rendere tale disposizione valida e applicabile, o se non è suscettibile di tale riforma, sarà considerata separata dal presente Accordo di Licenza; e (b) la validità e l'applicabilità di tutte le altre disposizioni del presente non saranno in alcun modo influenzate o compromesse.",
 			"assignment": "<strong>11. CESSIONE.</strong> L'Utente non può cedere il presente Accordo di Licenza senza il preventivo consenso scritto di DFINITY, sia espressamente che per effetto di legge, anche in relazione a una fusione o a un cambiamento di controllo, e qualsiasi tentativo di cessione sarà nullo e privo di effetto. DFINITY può cedere il presente Accordo di Licenza senza restrizioni e senza alcun preavviso all'Utente. Fatto salvo quanto precede, il presente Accordo di Licenza sarà vincolante per le parti e i loro rispettivi successori e cessionari autorizzati.",
 			"no_waiver": "<strong>12. NESSUNA RINUNCIA.</strong> La mancata esercizio, o il ritardo nell'esercizio, di un diritto, potere o rimedio previsto nel presente Accordo di Licenza o dalla legge non costituirà una rinuncia a tale diritto, potere o rimedio. La rinuncia di DFINITY a qualsiasi obbligo o violazione del presente Accordo di Licenza non opererà come rinuncia a qualsiasi altro obbligo o successiva violazione del presente Accordo di Licenza.",
-			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese."
+			"english_version": "<strong>13. VERSIONE IN INGLESE.</strong> La versione in lingua inglese del presente Accordo di Licenza sarà la versione ufficiale e prevalente in caso di conflitto. Tutte le comunicazioni e le notifiche effettuate ai sensi del presente Accordo di Licenza devono essere in lingua inglese.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "L'Accordo di Licenza di $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1555,10 +1629,18 @@
 			"action_button_contacts_title": "",
 			"action_button_contacts_subtitle": "",
 			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": ""
+			"loading": "",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "",

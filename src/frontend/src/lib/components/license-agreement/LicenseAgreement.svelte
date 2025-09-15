@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
+	import MarkdownWithSidebar from '$lib/components/ui/MarkdownWithSidebar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
@@ -23,12 +25,20 @@
 	]);
 </script>
 
-<h1 class="text-5xl">{replaceOisyPlaceholders($i18n.license_agreement.text.title)}</h1>
+{#if NEW_AGREEMENTS_ENABLED}
+	<MarkdownWithSidebar
+		stringReplacements={{ $date: 'todo' }}
+		text={replaceOisyPlaceholders($i18n.license_agreement.text.body)}
+		title={replaceOisyPlaceholders($i18n.license_agreement.text.title)}
+	/>
+{:else}
+	<h1 class="text-5xl">{replaceOisyPlaceholders($i18n.license_agreement.text.title)}</h1>
 
-<section class="mt-12">
-	{#each agreementList as agreement, index (`agreement-${index}`)}
-		<p>
-			<Html text={replaceOisyPlaceholders(agreement)} />
-		</p>
-	{/each}
-</section>
+	<section class="mt-12">
+		{#each agreementList as agreement, index (`agreement-${index}`)}
+			<p>
+				<Html text={replaceOisyPlaceholders(agreement)} />
+			</p>
+		{/each}
+	</section>
+{/if}

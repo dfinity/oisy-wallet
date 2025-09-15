@@ -9,6 +9,7 @@
 			"close": "Đóng",
 			"change": "Thay đổi",
 			"apply": "Áp dụng",
+			"retry": "",
 			"refresh": "Làm mới",
 			"name": "Tên",
 			"symbol": "Ký hiệu",
@@ -37,7 +38,8 @@
 			"currency": "Tiền tệ"
 		},
 		"info": {
-			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
+			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -114,7 +116,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn."
+			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
@@ -497,6 +500,7 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
@@ -506,6 +510,7 @@
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
 			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL."
 		}
@@ -548,7 +553,11 @@
 			"appearance_system": "Hệ thống",
 			"git_disclaimer": "Vì mục đích phát triển, chúng tôi chỉ hiển thị branch và commit trong các canister thử nghiệm.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -583,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
@@ -682,13 +692,17 @@
 			"recently_used_empty_state_description": "Hãy gửi lần đầu tiên ngay bây giờ!",
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
-			"send_review_subtitle": "Bạn gửi"
+			"send_review_subtitle": "Bạn gửi",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
-			"select_network": "Chọn mạng"
+			"select_network": "Chọn mạng",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
@@ -723,12 +737,14 @@
 			"minter_info_not_certified": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được chứng nhận.",
 			"cketh_max_transaction_fee_missing": "Phí giao dịch tối đa cho ckETH bị thiếu.",
 			"utxos_fee_missing": "Phí UTXO bị thiếu.",
-			"minimum_btc_amount": "Số tiền tối thiểu là $amount BTC.",
-			"btc_insufficient_balance": "",
-			"btc_insufficient_balance_for_fee": "",
-			"btc_invalid_utxo_data": "",
-			"btc_utxo_locked": "",
-			"btc_invalid_fee_calculation": ""
+			"minimum_btc_amount": "Số tiền quá nhỏ. Vui lòng nhập ít nhất $amount BTC.",
+			"btc_insufficient_balance": "Không có Bitcoin UTXOs khả dụng cho giao dịch",
+			"btc_insufficient_balance_for_fee": "Số dư Bitcoin không đủ để chi trả phí giao dịch",
+			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
+			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
+			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -747,7 +763,8 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa."
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -811,9 +828,9 @@
 			"approval_fee": "Phí chấp thuận",
 			"gas_fee": "Phí gas",
 			"lp_fee": "Phí LP",
-			"max_slippage_info": "Nhập giá trị từ 0% đến 50%",
+			"max_slippage_info": "Nhập giá trị từ 0% đến $maxSlippage%",
 			"max_slippage_warning": "Cảnh báo rủi ro: độ trượt cao có thể dẫn đến thua lỗ do biến động thị trường",
-			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá 50%",
+			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá $maxSlippage%",
 			"swap_button": "Hoán đổi ngay",
 			"swap_is_not_offered": "Hoán đổi này hiện không được cung cấp.",
 			"executing_transaction": "Đang thực hiện giao dịch...",
@@ -1037,7 +1054,27 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",
@@ -1476,8 +1513,24 @@
 			"indicator": "Chuyển đến trang chiếu $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "",
+			"review_updated_title": "",
+			"review_description": "",
+			"review_updated_description": "",
+			"reject_warning": "",
+			"i_have_accepted": "",
+			"i_have_accepted_updated": "",
+			"accept_and_continue": ""
+		},
+		"error": {
+			"cannot_update_user_agreements": ""
+		}
+	},
 	"license_agreement": {
 		"text": {
+			"license_agreement": "",
 			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
 			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
@@ -1496,10 +1549,31 @@
 			"entire_agreement": "<strong>10. TOÀN BỘ THỎA THUẬN VÀ TÍNH KHẢ PHÂN.</strong> Thỏa thuận cấp phép này là toàn bộ thỏa thuận giữa Bạn và DFINITY và thay thế bất kỳ và tất cả các thỏa thuận, đàm phán hoặc thông tin liên lạc trước đó giữa Bạn và DFINITY, dù bằng lời nói hay văn bản, liên quan đến vấn đề này. DFINITY có thể thực hiện các thay đổi đối với Thỏa thuận cấp phép này khi các phiên bản mới của $oisy_short được cung cấp. Trong trường hợp bất kỳ điều khoản nào của Thỏa thuận cấp phép này được coi là không hợp lệ hoặc không thể thực thi, thì: (a) điều khoản đó sẽ được coi là đã được sửa đổi trong phạm vi cần thiết để làm cho điều khoản đó hợp lệ và có thể thực thi, hoặc nếu không thể sửa đổi, sẽ được coi là tách rời khỏi Thỏa thuận cấp phép này; và (b) tính hợp lệ và khả năng thực thi của tất cả các điều khoản khác của tài liệu này sẽ không bị ảnh hưởng hoặc suy giảm dưới bất kỳ hình thức nào.",
 			"assignment": "<strong>11. CHUYỂN NHƯỢNG.</strong> Bạn không được chuyển nhượng Thỏa thuận cấp phép này mà không có sự đồng ý trước bằng văn bản của DFINITY, dù rõ ràng hay theo quy định của pháp luật, bao gồm cả việc sáp nhập hoặc thay đổi quyền kiểm soát, và bất kỳ nỗ lực chuyển nhượng nào như vậy sẽ vô hiệu. DFINITY có thể chuyển nhượng Thỏa thuận cấp phép này mà không bị hạn chế và không cần thông báo cho bạn. Theo đó, Thỏa thuận cấp phép này sẽ ràng buộc các bên và những người kế nhiệm và người được chỉ định hợp pháp của họ.",
 			"no_waiver": "<strong>12. KHÔNG TỪ BỎ.</strong> Việc không thực hiện hoặc trì hoãn thực hiện một quyền, quyền hạn hoặc biện pháp khắc phục được quy định trong Thỏa thuận cấp phép này hoặc theo luật sẽ không cấu thành việc từ bỏ quyền, quyền hạn hoặc biện pháp khắc phục đó. Việc DFINITY từ bỏ bất kỳ nghĩa vụ hoặc vi phạm nào của Thỏa thuận cấp phép này sẽ không được coi là từ bỏ bất kỳ nghĩa vụ nào khác hoặc vi phạm tiếp theo của Thỏa thuận cấp phép.",
-			"english_version": "<strong>13. PHIÊN BẢN TIẾNG ANH.</strong> Phiên bản tiếng Anh của Thỏa thuận cấp phép này sẽ là phiên bản chính thức và có giá trị chi phối của thỏa thuận nếu có bất kỳ xung đột nào phát sinh. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận cấp phép này phải bằng tiếng Anh."
+			"english_version": "<strong>13. PHIÊN BẢN TIẾNG ANH.</strong> Phiên bản tiếng Anh của Thỏa thuận cấp phép này sẽ là phiên bản chính thức và có giá trị chi phối của thỏa thuận nếu có bất kỳ xung đột nào phát sinh. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận cấp phép này phải bằng tiếng Anh.",
+			"body": ""
 		},
 		"alt": {
 			"license_agreement": "Thỏa thuận cấp phép $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": ""
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": ""
 		}
 	},
 	"activity": {
@@ -1555,10 +1629,18 @@
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
 			"send_message": "Gửi tin nhắn",
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
+			"send_token_succeeded": "",
 			"no_contacts_found_message": "Xin lỗi, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong danh bạ của bạn.",
-			"loading": "Đang suy nghĩ..."
+			"loading": "Đang suy nghĩ...",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",

@@ -5,12 +5,9 @@
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import {
-		sendBtc,
-		handleBtcValidationError,
-		validateBtcSend
-	} from '$btc/services/btc-send.services';
+	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
@@ -50,7 +47,7 @@
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined = undefined;
+	let utxosFee: UtxosFee | undefined;
 
 	let networkId: NetworkId | undefined = undefined;
 	$: networkId = $sendToken.network.id;
@@ -113,54 +110,44 @@
 		}
 		dispatch('icNext');
 
-		// Validate UTXOs before proceeding
-		try {
-			await validateBtcSend({
-				utxosFee,
-				source,
-				amount,
-				network,
-				identity: $authIdentity
-			});
-		} catch (err: unknown) {
-			// Handle BtcValidationError with specific toastsError for each type
-			if (err instanceof BtcValidationError) {
-				await handleBtcValidationError({ err });
-			}
-
-			trackEvent({
-				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId?.description ?? 'unknown'}`
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+			// Validate UTXOs before proceeding
+			try {
+				await validateBtcSend({
+					utxosFee,
+					source,
+					amount,
+					network,
+					identity: $authIdentity
+				});
+			} catch (err: unknown) {
+				// Handle BtcValidationError with specific toastsError for each type
+				if (err instanceof BtcValidationError) {
+					utxosFee.error = err.type;
 				}
-			});
 
-			toastsError({
-				msg: { text: $i18n.send.error.unexpected },
-				err
-			});
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
 
-			// go back to the previous step so the user can correct/ try again
-			dispatch('icBack');
-			return;
+				// go back to the previous step so the user can correct/ try again
+				dispatch('icBack');
+				return;
+			}
 		}
-
 		try {
+			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
 				destination,
 				amount,
 				utxosFee,
 				network,
 				source,
-				identity: $authIdentity,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
-						progress(ProgressStepsSendBtc.SEND);
-					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
-						progress(ProgressStepsSendBtc.DONE);
-					}
-				}
+				identity: $authIdentity
 			});
 
 			trackEvent({
@@ -171,7 +158,7 @@
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendBtc.DONE;
+			progress(ProgressStepsSendBtc.DONE);
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -208,7 +195,6 @@
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
 		{selectedContact}
-		{source}
 		on:icNext
 		on:icClose
 		on:icBack

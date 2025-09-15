@@ -1,3 +1,4 @@
+import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -7,7 +8,7 @@ import {
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
 import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
-import type { EthAddress, OptionSolAddress } from '$lib/types/address';
+import type { OptionEthAddress, OptionSolAddress } from '$lib/types/address';
 import type {
 	WalletConnectApproveRequestMessage,
 	WalletConnectListener
@@ -16,6 +17,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import { nonNullish } from '@dfinity/utils';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
@@ -23,19 +25,20 @@ import {
 	type ErrorResponse,
 	type JsonRpcResponse
 } from '@walletconnect/jsonrpc-utils';
+import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const initWalletConnect = async ({
-	uri,
 	ethAddress,
-	solAddress
+	solAddress,
+	cleanSlate = true
 }: {
-	uri: string;
-	ethAddress: EthAddress;
+	ethAddress: OptionEthAddress;
 	// TODO add other networks for solana
 	solAddress: OptionSolAddress;
+	cleanSlate?: boolean;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
 		const keys = Object.keys(localStorage).filter((key) => key.startsWith('wc@'));
@@ -69,8 +72,10 @@ export const initWalletConnect = async ({
 		await Promise.all(promises);
 	};
 
-	// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
-	await disconnectActiveSessions();
+	if (cleanSlate) {
+		// Some previous sessions might have not been properly closed, so we disconnect those to have a clean state.
+		await disconnectActiveSessions();
+	}
 
 	const sessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
 		walletKit.on('session_proposal', callback);
@@ -93,21 +98,25 @@ export const initWalletConnect = async ({
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
 			supportedNamespaces: {
-				eip155: {
-					chains: EIP155_CHAINS_KEYS,
-					methods: [
-						SESSION_REQUEST_ETH_SEND_TRANSACTION,
-						SESSION_REQUEST_ETH_SIGN,
-						SESSION_REQUEST_PERSONAL_SIGN,
-						SESSION_REQUEST_ETH_SIGN_V4
-					],
-					events: ['accountsChanged', 'chainChanged'],
-					accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
-				},
-				...(solAddress
+				...(nonNullish(ethAddress)
+					? {
+							eip155: {
+								chains: EIP155_CHAINS_KEYS,
+								methods: [
+									SESSION_REQUEST_ETH_SEND_TRANSACTION,
+									SESSION_REQUEST_ETH_SIGN,
+									SESSION_REQUEST_PERSONAL_SIGN,
+									SESSION_REQUEST_ETH_SIGN_V4
+								],
+								events: ['accountsChanged', 'chainChanged'],
+								accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
+							}
+						}
+					: {}),
+				...(nonNullish(solAddress)
 					? {
 							solana: {
-								chains: [solMainnetNamespace],
+								chains: CAIP10_CHAINS_KEYS,
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
@@ -170,8 +179,11 @@ export const initWalletConnect = async ({
 			response: formatJsonRpcResult(id, message)
 		});
 
+	const getActiveSessions = (): Record<string, SessionTypes.Struct> =>
+		walletKit.getActiveSessions();
+
 	return {
-		pair: () => walletKit.core.pairing.pair({ uri }),
+		pair: (uri) => walletKit.core.pairing.pair({ uri }),
 		approveSession,
 		rejectSession,
 		rejectRequest,
@@ -179,6 +191,7 @@ export const initWalletConnect = async ({
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
+		getActiveSessions,
 		disconnect: async () => {
 			const disconnectPairings = async () => {
 				const pairings = walletKit.engine.signClient.core.pairing.pairings.values;

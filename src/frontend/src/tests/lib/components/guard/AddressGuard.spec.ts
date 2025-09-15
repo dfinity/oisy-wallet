@@ -17,7 +17,7 @@ import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -31,8 +31,6 @@ import type { MockInstance } from 'vitest';
 
 describe('AddressGuard', () => {
 	let apiMock: MockInstance;
-
-	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeEach(() => {
 		vi.restoreAllMocks();
@@ -76,6 +74,10 @@ describe('AddressGuard', () => {
 				throw new CanisterInternalError('Test');
 			});
 
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
+			vi.spyOn(console, 'warn').mockImplementation(() => {});
+
 			const spySignOut = vi.spyOn(authServices, 'errorSignOut');
 
 			const spy = vi.spyOn(window.location, 'reload');
@@ -88,6 +90,10 @@ describe('AddressGuard', () => {
 				expect(spySignOut).toHaveBeenCalledOnce();
 				expect(spy).toHaveBeenCalledOnce();
 			});
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 	});
 

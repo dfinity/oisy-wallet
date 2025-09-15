@@ -1,11 +1,15 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
+	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
+	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
+	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
@@ -81,4 +85,14 @@
 
 		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 	</div>
+
+	{#if NEW_AGREEMENTS_ENABLED}
+		<Hr />
+
+		<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
+			<TermsOfUseLink />
+			<PrivacyPolicyLink />
+			<LicenseLink />
+		</div>
+	{/if}
 </Popover>

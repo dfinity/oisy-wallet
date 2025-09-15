@@ -1,11 +1,11 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import * as authClientApi from '$lib/api/auth-client.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
-import * as authUtils from '$lib/utils/auth.utils';
 import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -56,7 +56,12 @@ describe('btc-wallet.worker', () => {
 			wallet: {
 				balance: {
 					certified,
-					data: mockBalance
+					data: {
+						confirmed: mockBalance,
+						unconfirmed: 0n,
+						locked: 0n,
+						total: mockBalance
+					}
 				},
 				newTransactions: JSON.stringify(
 					withTransactions
@@ -92,9 +97,10 @@ describe('btc-wallet.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(1000);
+		let mockBlockHeight = 1000;
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
 
 		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
 
@@ -140,7 +146,8 @@ describe('btc-wallet.worker', () => {
 				// reset internal store with transactions
 				scheduler['store'] = {
 					transactions: {},
-					balance: undefined
+					balance: undefined,
+					latestBitcoinBlockHeight: undefined
 				};
 
 				scheduler.stop();
@@ -154,8 +161,8 @@ describe('btc-wallet.worker', () => {
 
 					expect(postMessageMock).toHaveBeenCalledTimes(4);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
 					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
@@ -192,6 +199,9 @@ describe('btc-wallet.worker', () => {
 
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
+
+					// Wait for the first execution to complete
+					await awaitJobExecution();
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
 					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
