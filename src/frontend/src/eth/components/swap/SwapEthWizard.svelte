@@ -79,6 +79,9 @@
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
+	/**
+	 * Fee context store
+	 */
 	const feeStore = initEthFeeStore();
 
 	let nativeEthereumToken = $derived($nativeEthereumTokenStore);
