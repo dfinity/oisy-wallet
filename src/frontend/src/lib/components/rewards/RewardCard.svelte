@@ -13,6 +13,8 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		onclick: () => void;
@@ -34,7 +36,7 @@
 
 <button class="flex flex-col" data-tid={testId} {onclick}>
 	<div class="-mb-7">
-		<div class="max-h-66 overflow-hidden rounded-2xl">
+		<div class="relative max-h-66 overflow-hidden rounded-2xl">
 			<Img
 				alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 					$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
@@ -43,6 +45,13 @@
 				src={reward.cardBanner}
 				testId={REWARDS_BANNER}
 			/>
+
+			<span class="absolute right-4 top-4">
+				<RewardDateBadge
+					date={reward.endDate}
+					testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
+				/>
+			</span>
 		</div>
 	</div>
 
