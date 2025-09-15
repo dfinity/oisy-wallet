@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -9,22 +9,59 @@
 	} from '$eth/stores/eth-fee.store';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+		children: Snippet;
+	}
+
+	let { token, children }: Props = $props();
 
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(token.symbol);
 
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(token.id);
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(token.decimals);
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+
+	let networkId = $derived(token.network.id);
+
+	let isEthNetwork = $derived(isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId));
+
+	const reset = () => {
+		feeSymbolStore.set(undefined);
+		feeTokenIdStore.set(undefined);
+		feeDecimalsStore.set(undefined);
+		feeExchangeRateStore.set(undefined);
+	};
+
+	$effect(() => {
+		if (!isEthNetwork) {
+			return;
+		}
+
+		feeSymbolStore.set(token.symbol);
+		feeTokenIdStore.set(token.id);
+		feeDecimalsStore.set(token.decimals);
+	});
+
+	$effect(() => {
+		if (!isEthNetwork) {
+			return;
+		}
+
+		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+	});
+
+	$effect(() => {
+		if (!isEthNetwork) {
+			reset();
+		}
+	});
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
@@ -38,4 +75,4 @@
 	);
 </script>
 
-<slot />
+{@render children()}
