@@ -22,9 +22,13 @@
 	import type { SplTokenAddress } from '$sol/types/spl';
 	import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 
-	export let tokenAddress: SplTokenAddress | undefined;
-	export let metadata: TokenMetadata | undefined;
-	export let network: Network;
+	interface Props {
+		tokenAddress?: SplTokenAddress;
+		metadata?: TokenMetadata;
+		network: Network;
+	}
+
+	let { tokenAddress, metadata = $bindable(), network }: Props = $props();
 
 	onMount(async () => {
 		if (isNullish(tokenAddress)) {
@@ -97,8 +101,7 @@
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(tokenAddress) || isNullish(metadata);
+	let invalid = $derived(isNullishOrEmpty(tokenAddress) || isNullish(metadata));
 
 	const dispatch = createEventDispatcher();
 </script>
