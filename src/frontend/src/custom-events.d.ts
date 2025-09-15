@@ -1,6 +1,6 @@
 // TODO: try to provide the correct types to the events
 declare module 'svelte/elements' {
-	interface HTMLAttributes<T> {
+	export interface HTMLAttributes<T> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyTriggerWallet?: (event: CustomEvent<any>) => void;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
