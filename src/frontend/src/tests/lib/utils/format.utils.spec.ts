@@ -7,7 +7,6 @@ import {
 	formatNanosecondsToDate,
 	formatSecondsToDate,
 	formatSecondsToNormalizedDate,
-	formatToShortDateString,
 	formatToken,
 	formatTokenBigintToNumber
 } from '$lib/utils/format.utils';
@@ -518,44 +517,6 @@ describe('format.utils', () => {
 			// Use a value that will overflow or convert to NaN
 			const invalid = BigInt(Number.MAX_SAFE_INTEGER) * BigInt(1_000_000_000); // Too large for Number()
 			const result = formatNanosecondsToDate({ nanoseconds: invalid });
-
-			expect(result).toBe('Invalid Date');
-		});
-	});
-
-	describe('formatToShortDateString', () => {
-		it('formats date to full month name in default (en) locale', () => {
-			const result = formatToShortDateString({
-				date: new Date('2023-01-15'),
-				i18n: {} as unknown as I18n
-			});
-
-			expect(result).toBe('January');
-		});
-
-		it('formats date to month name in German locale', () => {
-			const result = formatToShortDateString({
-				date: new Date('2023-01-15'),
-				i18n: { lang: 'de' } as unknown as I18n
-			});
-
-			expect(result).toBe('Januar');
-		});
-
-		it('formats date to month name in French locale', () => {
-			const result = formatToShortDateString({
-				date: new Date('2023-01-15'),
-				i18n: { lang: 'fr' } as unknown as I18n
-			});
-
-			expect(result).toBe('janvier');
-		});
-
-		it('handles invalid date input by returning "Invalid Date"', () => {
-			const result = formatToShortDateString({
-				date: new Date('invalid'),
-				i18n: { lang: 'en' } as unknown as I18n
-			});
 
 			expect(result).toBe('Invalid Date');
 		});
