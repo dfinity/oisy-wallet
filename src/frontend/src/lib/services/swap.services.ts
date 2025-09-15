@@ -614,7 +614,9 @@ const fetchVeloraSwapAmount = async ({
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress: userEthAddress
+		userAddress: userEthAddress,
+		// TODO: use ENV variable when available
+		partner: 'oisy.com'
 	};
 
 	const data = await sdk.quote.getQuote(
@@ -744,7 +746,9 @@ export const fetchVeloraDeltaSwap = async ({
 		destToken: destinationToken.address,
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork.chainId)
+		destChainId: Number(destinationNetwork.chainId),
+		// TODO: use ENV variable when available
+		partner: 'oisy.com'
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
@@ -874,7 +878,9 @@ export const fetchVeloraMarketSwap = async ({
 		srcAmount: swapDetails.srcAmount,
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
-		userAddress
+		userAddress,
+		// TODO: use ENV variable when available
+		partner: 'oisy.com'
 	});
 
 	await swap({
