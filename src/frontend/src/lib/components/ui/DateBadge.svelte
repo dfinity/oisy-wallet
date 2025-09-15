@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
@@ -6,18 +7,24 @@
 
 	interface Props {
 		date: Date;
+		styleClass?: string;
+		inlineStyleClass?: string;
 		prefix?: string | undefined;
 		suffix?: string | undefined;
 		testId?: string | undefined;
 		variant?: BadgeVariant;
+		children?: Snippet;
 	}
 
 	let {
 		date,
+		styleClass,
+		inlineStyleClass,
 		prefix = undefined,
 		suffix = undefined,
 		testId = undefined,
-		variant = 'default'
+		variant = 'default',
+		children
 	}: Props = $props();
 
 	const formattedDate = $derived(
@@ -25,8 +32,12 @@
 	);
 </script>
 
-<Badge {testId} {variant}>
-	{prefix ?? ''}
-	{formattedDate}
-	{suffix ?? ''}
+<Badge {styleClass} {testId} {variant}>
+	<div class={inlineStyleClass}>
+		{@render children?.()}
+
+		{prefix ?? ''}
+		{formattedDate}
+		{suffix ?? ''}
+	</div>
 </Badge>
