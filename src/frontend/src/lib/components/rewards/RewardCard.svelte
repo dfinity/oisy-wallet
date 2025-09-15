@@ -2,7 +2,6 @@
 	import { Html } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import networkBonusDisabled1 from '$lib/assets/rewards/network-bonus-disabled-1.svg';
 	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
 	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
