@@ -15,7 +15,7 @@
 		(indexCanisterBalanceOutOfSync = state);
 </script>
 
-<svelte:window on:oisyIndexCanisterBalanceOutOfSync={onSyncPendingState} />
+<svelte:window onoisyIndexCanisterBalanceOutOfSync={onSyncPendingState} />
 
 {#if indexCanisterBalanceOutOfSync}
 	<div class="animate-pulse text-tertiary">
