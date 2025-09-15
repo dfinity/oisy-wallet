@@ -5,7 +5,7 @@ import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * Ethereum/EVM native token - i.e. not ERC20.
+ * Native token - i.e. not ERC20 - for the selected Ethereum network.
  */
 export const nativeEthereumToken: Readable<RequiredTokenWithLinkedData> = derived(
 	[enabledEthereumTokens, selectedEthereumNetwork],
