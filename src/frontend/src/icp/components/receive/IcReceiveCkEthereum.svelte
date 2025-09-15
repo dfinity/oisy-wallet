@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
+	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { ethereumToken } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
@@ -45,9 +45,9 @@
 <ReceiveButtonWithModal isOpen={$modalCkETHReceive} open={openModal}>
 	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
-			<FeeStoreContext token={$ethereumToken}>
+			<EthFeeStoreContext token={$ethereumToken}>
 				<IcReceiveCkEthereumModal {destinationToken} {sourceToken} on:nnsClose={close} />
-			</FeeStoreContext>
+			</EthFeeStoreContext>
 		{/if}
 	{/snippet}
 </ReceiveButtonWithModal>
