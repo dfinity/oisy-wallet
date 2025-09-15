@@ -3,6 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import networkBonusActive1 from '$lib/assets/rewards/network-bonus-active-1.svg';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -28,7 +29,8 @@
 	);
 
 	const campaignEligibility = getCampaignEligibility(reward.id);
-	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const isEligible = $derived($campaignEligibility?.eligible ?? true);
+	const hasNetworkBonus = true;
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
@@ -49,15 +51,12 @@
 	<div class="relative rounded-lg bg-primary p-4">
 		<article class="h-full">
 			<section>
-				<div
-					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
-				>
-					<div class="mr-auto flex flex-col items-center md:flex-row">
-						<div>
-							{resolveText({ i18n: $i18n, path: reward.cardTitle })}
-						</div>
+				<div class="flex text-start text-lg font-semibold gap-3" class:flex-col-reverse={hasNetworkBonus}>
+					{resolveText({ i18n: $i18n, path: reward.cardTitle })}
+
+					<div class="flex items-center gap-3 flex-wrap">
 						{#if isEligible && !hasEnded}
-							<span class="mr-auto inline-flex md:mx-1">
+							<span class="inline-flex md:mx-1">
 								<Badge
 									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
 									variant="success"
@@ -66,14 +65,11 @@
 								</Badge>
 							</span>
 						{/if}
-					</div>
 
-					<span class="mr-auto inline-flex md:ml-auto md:mr-0">
-						<RewardDateBadge
-							date={reward.endDate}
-							testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
-						/>
-					</span>
+						{#if hasNetworkBonus}
+							<Img src={networkBonusActive1} />
+						{/if}
+					</div>
 				</div>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">
