@@ -7,6 +7,7 @@ import {
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
+import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
 import { getBalanceQuery } from '$icp/api/bitcoin.api';
 import { getBtcWalletBalance } from '$icp/utils/btc.utils';
@@ -233,7 +234,10 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
 
 		const pendingTransactionData =
-			nonNullish(identity) && shouldFetchTransactions && !certified
+			nonNullish(identity) &&
+			BTC_EXTENSION_FEATURE_FLAG_ENABLED &&
+			shouldFetchTransactions &&
+			!certified
 				? await this.loadBtcPendingTransactionsData({
 						btcAddress,
 						identity,

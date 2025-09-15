@@ -21,3 +21,5 @@ export const CAIP10_CHAINS: Record<
 		}
 	})
 };
+
+export const CAIP10_CHAINS_KEYS = Object.keys(CAIP10_CHAINS);
