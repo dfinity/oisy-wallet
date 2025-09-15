@@ -1559,7 +1559,7 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
-			"title": "Nutzungsbedingungen",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1569,7 +1569,7 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Datenschutzrichtlinie",
-			"title": "Datenschutzrichtlinie",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
