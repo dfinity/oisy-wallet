@@ -12,6 +12,7 @@ interface I18nCore {
 		close: string;
 		change: string;
 		apply: string;
+		retry: string;
 		refresh: string;
 		name: string;
 		symbol: string;
