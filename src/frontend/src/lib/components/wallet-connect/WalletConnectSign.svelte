@@ -3,7 +3,7 @@
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { CAIP10_CHAINS } from '$env/caip10-chains.env';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
-	import EthEthWalletConnectSignModal from '$eth/components/wallet-connect/EthWalletConnectSignModal.svelte';
+	import EthWalletConnectSignModal from '$eth/components/wallet-connect/EthWalletConnectSignModal.svelte';
 	import { modalWalletConnectSign } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
@@ -39,7 +39,7 @@
 
 {#if $modalWalletConnectSign && nonNullish(request)}
 	{#if nonNullish(ethChainId)}
-		<EthEthWalletConnectSignModal {request} bind:listener />
+		<EthWalletConnectSignModal {request} bind:listener />
 	{:else if nonNullish(solChainId) && nonNullish(sourceSolNetwork)}
 		<SolWalletConnectSignModal network={sourceSolNetwork} {request} bind:listener />
 	{/if}

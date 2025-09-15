@@ -5,8 +5,8 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import NftBadgeHidden from '$lib/components/nfts/NftBadgeHidden.svelte';
-	import NftBadgeSpam from '$lib/components/nfts/NftBadgeSpam.svelte';
+	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -16,7 +16,6 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -88,20 +87,16 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(normalizedNftName)}
-			<div class="my-3 w-full justify-between">
-				<div class="flex items-center gap-3">
-					<h1 class="truncate">
-						{normalizedNftName}
-					</h1>
+			<div class="my-3 flex w-full justify-between gap-3">
+				<NftBadge {token} />
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
-						<NftBadgeHidden />
-					{/if}
+				<h1 class="flex-1 truncate">
+					{normalizedNftName}
+				</h1>
 
-					{#if nonNullish(token) && token.section === CustomTokenSection.SPAM}
-						<NftBadgeSpam />
-					{/if}
-				</div>
+				{#if nonNullish(nft)}
+					<NftActionButtons {nft} />
+				{/if}
 			</div>
 		{:else}
 			<span class="block max-w-80">
