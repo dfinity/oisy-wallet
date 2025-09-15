@@ -15,6 +15,7 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
 
 	interface Props {
 		onclick: () => void;
@@ -59,12 +60,16 @@
 
 					<div class="flex flex-wrap items-center gap-3">
 						{#if isEligible && !hasEnded}
-							<span class="inline-flex md:mx-1">
+							<span class="inline-flex">
 								<Badge
+									styleClass="rounded-full py-1 pl-2 pr-3"
 									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-									variant="success"
+									variant="eligibility"
 								>
-									{$i18n.rewards.text.youre_eligible}
+									<div class="flex gap-1.5 text-sm items-center">
+										<IconCircleCheck size={14} />
+										{$i18n.rewards.text.youre_eligible}
+									</div>
 								</Badge>
 							</span>
 						{/if}

@@ -27,7 +27,8 @@
 		outline: 'border border-tertiary bg-primary',
 		disabled: 'bg-tertiary-inverted text-white',
 		'nft-trait': 'border border-secondary bg-primary',
-		'nft-spam': 'bg-warning-primary text-white'
+		'nft-spam': 'bg-warning-primary text-white',
+		'eligibility': 'bg-success-primary text-white'
 	};
 </script>
 
