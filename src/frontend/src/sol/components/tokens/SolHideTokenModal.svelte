@@ -19,7 +19,7 @@
 	interface Props {
 		fromRoute?: NavigationTarget;
 	}
-	
+
 	let { fromRoute }: Props = $props();
 
 	let selectedToken: SplCustomToken;
