@@ -10,9 +10,10 @@
 
 	interface Props extends ShowContactsToolResult {
 		onSendMessage: (params: { messageText?: string; context?: string }) => Promise<void>;
+		loading: boolean;
 	}
 
-	let { contacts, onSendMessage }: Props = $props();
+	let { contacts, loading, onSendMessage }: Props = $props();
 
 	let allAddresses = $derived(
 		contacts.reduce<{ contact: ExtendedAddressContactUi; address: ContactAddressUiWithId }[]>(
@@ -40,13 +41,14 @@
 			{address}
 			{contact}
 			onClick={async () =>
-				await onSendMessage({
+				!loading &&
+				(await onSendMessage({
 					messageText: replacePlaceholders($i18n.ai_assistant.text.send_to_message, {
 						$contact_name: contact.name,
 						$address_info: `${isEmptyString(address.label) ? '' : `${address.label}: `}${shortenWithMiddleEllipsis({ text: address.address })}`
 					}),
 					context: `Send destination information: "selectedContactAddressId" - ${address.id}; "addressType": ${address.addressType}.`
-				})}
+				}))}
 		/>
 	{/each}
 {:else}

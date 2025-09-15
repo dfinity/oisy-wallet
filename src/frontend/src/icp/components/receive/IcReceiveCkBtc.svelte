@@ -43,7 +43,7 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
+<svelte:window onoisyReceiveCkBTC={async () => await openModal(modalId)} />
 
 <ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
 	{#snippet modal()}
