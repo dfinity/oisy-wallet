@@ -5,9 +5,9 @@ import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * Ethereum (Ethereum or Sepolia) token - i.e. not ERC20.
+ * Ethereum/EVM native token - i.e. not ERC20.
  */
-export const ethereumToken: Readable<RequiredTokenWithLinkedData> = derived(
+export const nativeEthereumToken: Readable<RequiredTokenWithLinkedData> = derived(
 	[enabledEthereumTokens, selectedEthereumNetwork],
 	([$enabledEthereumTokens, $selectedEthereumNetwork]) =>
 		$enabledEthereumTokens.find(
@@ -15,4 +15,7 @@ export const ethereumToken: Readable<RequiredTokenWithLinkedData> = derived(
 		) ?? DEFAULT_ETHEREUM_TOKEN
 );
 
-export const ethereumTokenId: Readable<TokenId> = derived([ethereumToken], ([{ id }]) => id);
+export const nativeEthereumTokenId: Readable<TokenId> = derived(
+	[nativeEthereumToken],
+	([{ id }]) => id
+);

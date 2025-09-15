@@ -6,7 +6,7 @@
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumToken } from '$eth/derived/token.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -95,7 +95,7 @@
 	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $ethereumToken);
+	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $nativeEthereumToken);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
