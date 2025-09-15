@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "詳細を見る",
 			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
 			"youre_eligible": "参加資格があります！",
+			"not_eligible": "",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
 			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
