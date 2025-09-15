@@ -17,7 +17,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
@@ -29,6 +29,25 @@ import type { SessionTypes } from '@walletconnect/types';
 import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+
+let globalWalletKit: Awaited<ReturnType<typeof WalletKit.init>> | undefined;
+
+// During the initialisation of the WalletConnect object,
+// there are sometimes issues with retained values from the requestors.
+// For example, if we initialise it once to try and reconnect and then re-initialise it when really connecting,
+// some DEXes will see it fail (for example, https://magiceden.io/).
+const getWalletKit = async () => {
+	if (isNullish(globalWalletKit)) {
+		globalWalletKit = await WalletKit.init({
+			core: new Core({
+				projectId: PROJECT_ID
+			}),
+			metadata: WALLET_CONNECT_METADATA
+		});
+	}
+
+	return globalWalletKit;
+};
 
 export const initWalletConnect = async ({
 	ethAddress,
@@ -52,12 +71,7 @@ export const initWalletConnect = async ({
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
 
-	const walletKit = await WalletKit.init({
-		core: new Core({
-			projectId: PROJECT_ID
-		}),
-		metadata: WALLET_CONNECT_METADATA
-	});
+	const walletKit = await getWalletKit();
 
 	const disconnectActiveSessions = async () => {
 		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {

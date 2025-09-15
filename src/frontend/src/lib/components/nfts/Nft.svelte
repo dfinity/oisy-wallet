@@ -7,28 +7,14 @@
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import type { NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { parseNftId } from '$lib/validation/nft.validation';
 
-	const [networkId, collectionId, nftId] = $derived([
-		page.params.networkId,
-		page.params.collectionId,
-		page.params.nftId
-	]);
-
-	const nft: Nft | undefined = $derived(
-		($nftStore ?? []).find(
-			(nft) =>
-				nft.id === parseNftId(Number(nftId)) &&
-				nft.collection.address === collectionId &&
-				nft.collection.network.name === networkId
-		)
-	);
+	const nft = $derived($pageNft);
 
 	const token: NonFungibleToken | undefined = $derived(
 		nonNullish(nft) && nonNullish(nft.collection)
@@ -40,7 +26,7 @@
 			: undefined
 	);
 
-	// redirect to assets page if nft cant be loaded within 10s
+	// Redirect to the assets' page if NFT can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
 
 	onMount(() => {
