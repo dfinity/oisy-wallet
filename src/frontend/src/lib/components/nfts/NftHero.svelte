@@ -5,6 +5,7 @@
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
@@ -92,6 +93,10 @@
 				<h1 class="flex-1 truncate">
 					{normalizedNftName}
 				</h1>
+
+				{#if nonNullish(nft)}
+					<NftActionButtons {nft} />
+				{/if}
 			</div>
 		{:else}
 			<span class="block max-w-80">
