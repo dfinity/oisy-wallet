@@ -352,7 +352,8 @@
 			"not_eligible": "",
 			"ongoing": "Продолжается",
 			"ended": "Завершено ($amount)",
-			"banner_text": "Зарабатывайте ежедневные награды с OISY Sprinkles"
+			"banner_text": "Зарабатывайте ежедневные награды с OISY Sprinkles",
+			"network_bonus": ""
 		},
 		"requirements": {
 			"requirements_title": "Критерии участия",

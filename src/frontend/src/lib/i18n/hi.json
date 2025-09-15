@@ -352,7 +352,8 @@
 			"not_eligible": "",
 			"ongoing": "जारी",
 			"ended": "समाप्त ($amount)",
-			"banner_text": "OISY स्प्रिंकल्स के साथ दैनिक पुरस्कार अर्जित करें"
+			"banner_text": "OISY स्प्रिंकल्स के साथ दैनिक पुरस्कार अर्जित करें",
+			"network_bonus": ""
 		},
 		"requirements": {
 			"requirements_title": "योग्यता शर्तें",

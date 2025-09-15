@@ -352,7 +352,8 @@
 			"not_eligible": "",
 			"ongoing": "Trwa",
 			"ended": "Zakończono ($amount)",
-			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles"
+			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles",
+			"network_bonus": ""
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
