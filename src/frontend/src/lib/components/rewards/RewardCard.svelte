@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
+	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
@@ -13,8 +15,6 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		onclick: () => void;
@@ -36,7 +36,7 @@
 
 <button class="flex flex-col" data-tid={testId} {onclick}>
 	<div class="-mb-7">
-		<div class="relative max-h-66 overflow-hidden rounded-2xl">
+		<div class="max-h-66 relative overflow-hidden rounded-2xl">
 			<Img
 				alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 					$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })

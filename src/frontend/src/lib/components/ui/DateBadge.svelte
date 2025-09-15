@@ -1,9 +1,9 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		date: Date;
@@ -32,7 +32,7 @@
 	);
 </script>
 
-<Badge {testId} {variant} {styleClass}>
+<Badge {styleClass} {testId} {variant}>
 	<div class={inlineStyleClass}>
 		{@render children?.()}
 
