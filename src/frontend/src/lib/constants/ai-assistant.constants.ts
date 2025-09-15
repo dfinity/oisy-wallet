@@ -29,6 +29,9 @@ export const getAiAssistantSystemPrompt = ({
 			1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
 			2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
 			3. If the token is not in AVAILABLE TOKENS, do not proceed further.
+		- If the user wants to send tokens to a contact, find all addresses of that contact whose addressType matches the token’s networkId:
+			- If there is exactly one matching address, use it as selectedContactAddressId.
+			- If there are multiple matching addresses, call the show_filtered_contacts tool with the addressIds of all matching addresses, then wait for the user to select one before proceeding.	
 		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" (string) or "address" (string) are provided.
 		- If any argument is missing, DO NOT call the tool. Instead, explicitly ask the user for the missing value(s).
 		- If a tokenSymbol maps to exactly one networkId, automatically assign that networkId without asking the user.  
@@ -39,7 +42,7 @@ export const getAiAssistantSystemPrompt = ({
 		- Returns nothing; frontend displays all contacts.
 
 	- For 'show_filtered_contacts':
-		- Call only when filters are given (e.g. "Show me my ETH contacts" or when resolving a contact name together with a known token).
+  	- Call only when filters are given (e.g. "Show me my ETH contacts") or when resolving a contact name together with a known token.
 		- Return only "addressIds" (addresses[].id) from the user’s contacts. If no matches, return [].
 
 	MEMORY & CHAINING BEHAVIOR:
