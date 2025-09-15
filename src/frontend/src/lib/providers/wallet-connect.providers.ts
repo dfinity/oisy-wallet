@@ -31,6 +31,10 @@ const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 let globalWalletKit: Awaited<ReturnType<typeof WalletKit.init>> | undefined;
 
+// During the initialisation of the WalletConnect object,
+// there are sometimes issues with retained values from the requestors.
+// For example, if we initialise it once to try and reconnect and then re-initialise it when really connecting,
+// some DEXes will see it fail (for example, https://magiceden.io/).
 const getWalletKit = async () => {
 	if (isNullish(globalWalletKit)) {
 		globalWalletKit = await WalletKit.init({
@@ -60,7 +64,7 @@ export const initWalletConnect = async ({
 	};
 
 	// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
-	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c....
+	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
 	// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
