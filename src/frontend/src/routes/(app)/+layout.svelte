@@ -20,6 +20,7 @@
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
+	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -33,7 +34,7 @@
 	let tokensRoute = $derived(isRouteTokens(page));
 
 	let nftsRoute = $derived(isRouteNfts(page));
-	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(page.params.collectionId));
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(routeCollection));
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
