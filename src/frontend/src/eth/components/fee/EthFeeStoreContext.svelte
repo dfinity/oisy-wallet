@@ -41,7 +41,7 @@
 
 	$effect(() => {
 		if (!isEthNetwork) {
-			reset();
+
 
 			return;
 		}
@@ -53,12 +53,21 @@
 
 	$effect(() => {
 		if (!isEthNetwork) {
-			reset();
+
 
 			return;
 		}
 
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+	});
+
+	$effect(() => {
+		if (!isEthNetwork) {
+			reset();
+
+		}
+
+
 	});
 
 	setContext<FeeContextType>(
