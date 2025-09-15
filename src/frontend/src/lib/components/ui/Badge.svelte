@@ -28,7 +28,8 @@
 		disabled: 'bg-tertiary-inverted text-white',
 		'nft-trait': 'border border-secondary bg-primary',
 		'nft-spam': 'bg-warning-primary text-white',
-		'eligibility': 'bg-success-primary text-white'
+		'eligible': 'bg-success-primary text-white',
+		'not-eligible': 'bg-primary-inverted text-white opacity-16',
 	};
 </script>
 

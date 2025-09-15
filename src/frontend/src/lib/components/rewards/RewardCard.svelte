@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import networkBonusActive1 from '$lib/assets/rewards/network-bonus-active-1.svg';
-	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
+	import networkBonusDisabled1 from '$lib/assets/rewards/network-bonus-disabled-1.svg';
+	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,7 +13,6 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
-	import IconCircleCheck from '$lib/components/icons/lucide/IconCircleCheck.svelte';
 
 	interface Props {
 		onclick: () => void;
@@ -59,23 +56,12 @@
 					{resolveText({ i18n: $i18n, path: reward.cardTitle })}
 
 					<div class="flex flex-wrap items-center gap-3">
-						{#if isEligible && !hasEnded}
-							<span class="inline-flex">
-								<Badge
-									styleClass="rounded-full py-1 pl-2 pr-3"
-									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-									variant="eligibility"
-								>
-									<div class="flex gap-1.5 text-sm items-center">
-										<IconCircleCheck size={14} />
-										{$i18n.rewards.text.youre_eligible}
-									</div>
-								</Badge>
-							</span>
+						{#if !hasEnded}
+							<EligibilityTag {isEligible} />
 						{/if}
 
 						{#if hasNetworkBonus}
-							<Img src={networkBonusActive1} />
+							<Img src={networkBonusDisabled1} />
 						{/if}
 					</div>
 				</div>
