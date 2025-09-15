@@ -58,7 +58,9 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<span class="inline-flex text-lg font-semibold">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
+		<span class="inline-flex text-lg font-semibold"
+			>{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span
+		>
 
 		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 

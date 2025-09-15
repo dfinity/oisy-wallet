@@ -8,9 +8,9 @@
 		isEligible: boolean;
 	}
 
-	let {isEligible}: Props = $props();
+	let { isEligible }: Props = $props();
 
-	const networkBonusSource = $derived(isEligible ? networkBonusActive1 : networkBonusDisabled1)
+	const networkBonusSource = $derived(isEligible ? networkBonusActive1 : networkBonusDisabled1);
 </script>
 
 <Img alt={$i18n.rewards.text.network_bonus} src={networkBonusSource} />
