@@ -16,7 +16,11 @@
 	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
+	
+	let { fromRoute }: Props = $props();
 
 	let selectedToken: SplCustomToken;
 
