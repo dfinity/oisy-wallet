@@ -17,7 +17,7 @@
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
-	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
@@ -103,7 +103,7 @@
 		proposal = null;
 	};
 
-	const initListener = async (uri: string) => {
+	const initListener = async () => {
 		await disconnectListener();
 
 		try {
@@ -115,11 +115,10 @@
 				return;
 			}
 
-			// TODO add other networks for solana
 			listener = await initWalletConnect({
-				uri,
 				ethAddress: $ethAddress,
-				solAddress: $solAddressMainnet
+				solAddressMainnet: $solAddressMainnet,
+				solAddressDevnet: $solAddressDevnet
 			});
 		} catch (err: unknown) {
 			toastsError({
@@ -284,7 +283,7 @@
 	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
-		await initListener(uri);
+		await initListener();
 
 		if (isNullish(listener)) {
 			return { result: 'error' };
@@ -293,7 +292,7 @@
 		attachHandlers(listener);
 
 		try {
-			await listener.pair();
+			await listener.pair(uri);
 		} catch (err: unknown) {
 			resetListener();
 
@@ -407,9 +406,9 @@
 		// Create listener, but DO NOT pair()
 		try {
 			listener = await initWalletConnect({
-				uri: '', // no URI – just init client
 				ethAddress: $ethAddress,
-				solAddress: $solAddressMainnet,
+				solAddressMainnet: $solAddressMainnet,
+				solAddressDevnet: $solAddressDevnet,
 				cleanSlate: false
 			});
 

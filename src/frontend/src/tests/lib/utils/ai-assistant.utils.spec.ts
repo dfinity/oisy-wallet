@@ -29,7 +29,6 @@ describe('ai-assistant.utils', () => {
 	const storeData = get(extendedAddressContacts);
 	const extendedAddressContactUi = storeData[`${contactsData[0].id}`];
 	const aiAssistantContact = {
-		id: extendedAddressContactUi.id,
 		name: extendedAddressContactUi.name,
 		addresses: [
 			{
@@ -43,7 +42,7 @@ describe('ai-assistant.utils', () => {
 	describe('parseToAiAssistantContacts', () => {
 		it('returns correct result', () => {
 			expect(parseToAiAssistantContacts(storeData)).toEqual({
-				[`${aiAssistantContact.id}`]: aiAssistantContact
+				[`${extendedAddressContactUi.id}`]: aiAssistantContact
 			});
 		});
 	});
