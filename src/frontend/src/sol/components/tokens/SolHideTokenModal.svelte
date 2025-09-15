@@ -22,7 +22,7 @@
 
 	let { fromRoute }: Props = $props();
 
-	let selectedToken = $state<SplCustomToken>();
+	let selectedToken = $state<SplCustomToken | undefined>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as SplCustomToken));
