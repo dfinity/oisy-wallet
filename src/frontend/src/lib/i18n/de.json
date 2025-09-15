@@ -1525,7 +1525,7 @@
 			"accept_and_continue": "Zustimmen und weiterfahren"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
 		}
 	},
 	"license_agreement": {
