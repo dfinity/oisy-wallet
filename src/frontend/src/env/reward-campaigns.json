@@ -111,17 +111,11 @@
 				"description": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.description",
 				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.share_href"
 			},
-			"referrer": {
-				"title": "rewards.campaigns.sprinkles_s1e5.win.referrer.title",
-				"banner": "/images/rewards/airdrop-icp.svg",
-				"description": "rewards.campaigns.sprinkles_s1e5.win.referrer.description",
-				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.referrer.share_href"
-			},
-			"referee": {
-				"title": "rewards.campaigns.sprinkles_s1e5.win.referee.title",
-				"banner": "/images/rewards/airdrop-icp.svg",
-				"description": "rewards.campaigns.sprinkles_s1e5.win.referee.description",
-				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.referee.share_href"
+			"referral": {
+				"title": "rewards.campaigns.sprinkles_s1e5.win.referral.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e5.win.referral.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.referral.share_href"
 			}
 		}
 	}
