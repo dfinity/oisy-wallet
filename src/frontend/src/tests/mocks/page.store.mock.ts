@@ -36,7 +36,11 @@ const initPageStoreMock = () => {
 			page.params = params;
 		},
 
-		reset: () => set(initialStoreValue)
+		reset: () => {
+			set(initialStoreValue);
+			page.data = initialStoreValue.data;
+			page.route = initialStoreValue.route;
+		}
 	};
 };
 
