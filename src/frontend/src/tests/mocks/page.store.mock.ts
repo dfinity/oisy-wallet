@@ -19,7 +19,7 @@ const initPageStoreMock = () => {
 	return {
 		subscribe,
 		mock: (data: Partial<RouteParams>) => {
-			set({ data });
+			set({ ...page, data });
 			page.data = data;
 		},
 		mockUrl: (url: URL) => {
@@ -32,19 +32,8 @@ const initPageStoreMock = () => {
 			page.data = data;
 		},
 		mockDynamicRoutes: (params: { [key: string]: string }) => {
-			set({ params });
+			set({ ...page, params });
 			page.params = params;
-		},
-		mockWithDynamicRoutes: ({
-			data,
-			params
-		}: {
-			data: Partial<RouteParams>;
-			params: { [key: string]: string };
-		}) => {
-			set({ params, data });
-			page.params = params;
-			page.data = data;
 		},
 
 		reset: () => set(initialStoreValue)

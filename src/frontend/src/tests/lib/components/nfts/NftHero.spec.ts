@@ -116,11 +116,11 @@ describe('NftHero', () => {
 	});
 
 	it('should open the send modal in Nft send flow when send button is clicked', () => {
-		mockPage.mockWithDynamicRoutes({
-			data: { network: mockValidErc1155Nft.collection.network as unknown as OptionString },
-			params: {
-				collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-			}
+		mockPage.mock({
+			network: mockValidErc1155Nft.collection.network as unknown as OptionString
+		});
+		mockPage.mockDynamicRoutes({
+			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
 		});
 
 		const { getByTestId, getByText } = render(NftHero, {
