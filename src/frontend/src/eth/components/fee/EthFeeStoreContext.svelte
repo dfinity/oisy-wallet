@@ -41,13 +41,10 @@
 	};
 
 	$effect(() => {
-		if (!isEthNetwork) {
+		if (!isEthNetwork || isNullish(token)) {
 			return;
 		}
 
-		if (isNullish(token)) {
-			return;
-		}
 
 		feeSymbolStore.set(token.symbol);
 		feeTokenIdStore.set(token.id);
@@ -55,13 +52,9 @@
 	});
 
 	$effect(() => {
-		if (!isEthNetwork) {
-			return;
-		}
-
-		if (isNullish(token)) {
-			return;
-		}
+        if (!isEthNetwork || isNullish(token)) {
+            return;
+        }
 
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
 	});
