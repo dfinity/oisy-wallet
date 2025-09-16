@@ -1,4 +1,3 @@
-import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { basename, dirname, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
@@ -48,12 +47,6 @@ const config: UserConfig = {
 					return 'index';
 				}
 			},
-			// Polyfill Buffer for production build
-			plugins: [
-				inject({
-					modules: { Buffer: ['buffer', 'Buffer'] }
-				})
-			],
 			external: (id) => {
 				// A list of file to exclude because we parse those manually with custom scripts.
 				const filename = basename(id);
@@ -65,21 +58,6 @@ const config: UserConfig = {
 	server: {
 		proxy: {
 			'/api': 'http://localhost:4943'
-		}
-	},
-	optimizeDeps: {
-		esbuildOptions: {
-			define: {
-				global: 'globalThis'
-			},
-			plugins: [
-				{
-					name: 'fix-node-globals-polyfill',
-					setup: (build) => {
-						build.onResolve({ filter: /_virtual-process-polyfill_\.js/ }, ({ path }) => ({ path }));
-					}
-				}
-			]
 		}
 	},
 	worker: {
