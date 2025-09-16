@@ -42,7 +42,7 @@ export const getAiAssistantSystemPrompt = ({
 		- Returns nothing; frontend displays all contacts.
 
 	- For 'show_filtered_contacts':
-  	- Call only when filters are given (e.g. "Show me my ETH contacts") or when resolving a contact name together with a known token.
+		- Call only when filters are given (e.g. "Show me my ETH contacts") or when resolving a contact name together with a known token.
 		- Return only "addressIds" (addresses[].id) from the user’s contacts. If no matches, return [].
 
 	MEMORY & CHAINING BEHAVIOR:
