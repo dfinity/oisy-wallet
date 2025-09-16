@@ -1,9 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
