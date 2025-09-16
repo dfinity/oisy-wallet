@@ -98,9 +98,15 @@
 				coll.collection.id === collection.id && coll.collection.address === collection.address
 		)?.nfts ?? []
 	);
+
+	const onClose = () => {
+		if (!saveLoading) {
+			modalStore.close();
+		}
+	};
 </script>
 
-<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
+<Modal {testId} on:nnsClose={onClose}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
