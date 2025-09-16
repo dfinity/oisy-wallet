@@ -1,6 +1,3 @@
-import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
-import { render } from '@testing-library/svelte';
-import { REWARDS_NETWORK_MULTIPLIER_IMAGE } from '$lib/constants/test-ids.constants';
 import networkBonusActive1 from '$lib/assets/rewards/network-bonus-active-1.svg';
 import networkBonusActive2 from '$lib/assets/rewards/network-bonus-active-2.svg';
 import networkBonusActive3 from '$lib/assets/rewards/network-bonus-active-3.svg';
@@ -17,6 +14,9 @@ import networkBonusDisabled5 from '$lib/assets/rewards/network-bonus-disabled-5.
 import networkBonusDisabled6 from '$lib/assets/rewards/network-bonus-disabled-6.svg';
 import networkBonusDisabled7 from '$lib/assets/rewards/network-bonus-disabled-7.svg';
 import networkBonusDisabled8 from '$lib/assets/rewards/network-bonus-disabled-8.svg';
+import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
+import { REWARDS_NETWORK_MULTIPLIER_IMAGE } from '$lib/constants/test-ids.constants';
+import { render } from '@testing-library/svelte';
 
 describe('RewardNetworkBonus', () => {
 	const rewardNetworkBonusImageSelector = `img[data-tid="${REWARDS_NETWORK_MULTIPLIER_IMAGE}"]`;
@@ -29,7 +29,7 @@ describe('RewardNetworkBonus', () => {
 		5: networkBonusActive5,
 		6: networkBonusActive6,
 		7: networkBonusActive7,
-		8: networkBonusActive8,
+		8: networkBonusActive8
 	};
 
 	const expectedDisabledImages: Record<number, string> = {
@@ -40,38 +40,44 @@ describe('RewardNetworkBonus', () => {
 		5: networkBonusDisabled5,
 		6: networkBonusDisabled6,
 		7: networkBonusDisabled7,
-		8: networkBonusDisabled8,
+		8: networkBonusDisabled8
 	};
 
-	it.each([1, 2, 3, 4, 5, 6, 7, 8])('should display correct active image for multiplier %i', (multiplier) => {
-		const {container} = render(RewardNetworkBonus, {
-			props: {
-				isEligible: true,
-				multiplier
-			}
-		})
+	it.each([1, 2, 3, 4, 5, 6, 7, 8])(
+		'should display correct active image for multiplier %i',
+		(multiplier) => {
+			const { container } = render(RewardNetworkBonus, {
+				props: {
+					isEligible: true,
+					multiplier
+				}
+			});
 
-		const rewardNetworkBonusImage: HTMLImageElement | null = container.querySelector(
-			rewardNetworkBonusImageSelector
-		);
+			const rewardNetworkBonusImage: HTMLImageElement | null = container.querySelector(
+				rewardNetworkBonusImageSelector
+			);
 
-		expect(rewardNetworkBonusImage).toBeInTheDocument();
-		expect(rewardNetworkBonusImage?.src).toContain(expectedActiveImages[multiplier]);
-	});
+			expect(rewardNetworkBonusImage).toBeInTheDocument();
+			expect(rewardNetworkBonusImage?.src).toContain(expectedActiveImages[multiplier]);
+		}
+	);
 
-	it.each([1, 2, 3, 4, 5, 6, 7, 8])('should display correct disabled image for multiplier %i', (multiplier) => {
-		const {container} = render(RewardNetworkBonus, {
-			props: {
-				isEligible: false,
-				multiplier
-			}
-		})
+	it.each([1, 2, 3, 4, 5, 6, 7, 8])(
+		'should display correct disabled image for multiplier %i',
+		(multiplier) => {
+			const { container } = render(RewardNetworkBonus, {
+				props: {
+					isEligible: false,
+					multiplier
+				}
+			});
 
-		const rewardNetworkBonusImage: HTMLImageElement | null = container.querySelector(
-			rewardNetworkBonusImageSelector
-		);
+			const rewardNetworkBonusImage: HTMLImageElement | null = container.querySelector(
+				rewardNetworkBonusImageSelector
+			);
 
-		expect(rewardNetworkBonusImage).toBeInTheDocument();
-		expect(rewardNetworkBonusImage?.src).toContain(expectedDisabledImages[multiplier]);
-	});
+			expect(rewardNetworkBonusImage).toBeInTheDocument();
+			expect(rewardNetworkBonusImage?.src).toContain(expectedDisabledImages[multiplier]);
+		}
+	);
 });
