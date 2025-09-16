@@ -5,6 +5,7 @@ import NewSwapWizard from '$lib/components/swap/NewSwapWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -46,6 +47,8 @@ describe('SwapWizard', () => {
 
 	beforeEach(() => {
 		setupUserNetworksStore('allEnabled');
+
+		mockAuthStore();
 
 		const mockToken = { ...mockValidIcToken, enabled: true };
 
