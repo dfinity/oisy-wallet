@@ -10,7 +10,7 @@
 </script>
 
 <div data-tid={REWARDS_NETWORK_MULTIPLIER_IMAGE}>
-	<svg width="245" height="28" viewBox="0 0 245 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<svg fill="none" height="28" viewBox="0 0 245 28" width="245" xmlns="http://www.w3.org/2000/svg">
 		<path
 			d="M0 14C0 6.26801 6.26801 0 14 0H230.937C238.669 0 244.937 6.26801 244.937 14C244.937 21.732 238.669 28 230.937 28H14C6.26802 28 0 21.732 0 14Z"
 			fill={disabled ? 'black' : 'url(#paint0_linear_17618_27124)'}
@@ -152,9 +152,16 @@
 		{/if}
 
 		<defs>
-			<linearGradient id="paint0_linear_17618_27124" x1="0" y1="0" x2="53.9186" y2="116.447" gradientUnits="userSpaceOnUse">
-				<stop stop-color="#FB8202"/>
-				<stop offset="1" stop-color="#FEBE38"/>
+			<linearGradient
+				id="paint0_linear_17618_27124"
+				gradientUnits="userSpaceOnUse"
+				x1="0"
+				x2="53.9186"
+				y1="0"
+				y2="116.447"
+			>
+				<stop stop-color="#FB8202" />
+				<stop offset="1" stop-color="#FEBE38" />
 			</linearGradient>
 		</defs>
 	</svg>
