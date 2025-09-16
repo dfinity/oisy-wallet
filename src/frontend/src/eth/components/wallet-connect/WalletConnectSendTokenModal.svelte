@@ -7,7 +7,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -153,7 +153,7 @@
 			token: $sendToken,
 			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
-			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenId],
 			sourceNetwork,
 			targetNetwork
 		});
@@ -175,7 +175,7 @@
 		amount={amount.toString()}
 		{data}
 		{destination}
-		nativeEthereumToken={$ethereumToken}
+		nativeEthereumToken={$nativeEthereumToken}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
