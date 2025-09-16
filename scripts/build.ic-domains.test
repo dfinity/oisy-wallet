@@ -18,10 +18,13 @@ fi
 # - The URL is the one in .well-known/ic-domains, used by the Internet Computer.
 dfx_network_domains() {
   scripts/build.ic-domains.test.list | while read -r i; do
-    if [[ -d build ]]; then
-      rm -rf build
+    [[ -d build ]] && rm -rf build
+    if dfx build frontend --network "$i" >/dev/null 2>/dev/null; then
+      while IFS= read -r domain || [[ -n "$domain" ]]; do
+        [[ -z "$domain" ]] && continue
+        echo "$domain $i"
+      done < build/.well-known/ic-domains
     fi
-    dfx build frontend --network "$i" >/dev/null 2>/dev/null && cat build/.well-known/ic-domains && echo " $i"
   done
 }
 
