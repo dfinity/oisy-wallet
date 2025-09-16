@@ -1605,7 +1605,7 @@
 	"welcome": {
 		"title": "Chào mừng đến với $oisy_short!",
 		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {

@@ -1605,7 +1605,7 @@
 	"welcome": {
 		"title": "欢迎来到 $oisy_short！",
 		"subtitle": "准备好赚取收益了吗？",
-		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐 4 位朋友即可获得保证奖金。"
+		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
 	},
 	"temporal": {
 		"seconds_to_duration": {
