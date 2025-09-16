@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
-	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 
 	interface Props {
 		isEligible: boolean;
@@ -31,7 +31,7 @@
 			<EligibilityBadge {isEligible} />
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
-				<NetworkBonusImage multiplier={networkBonusMultiplier} disabled={!isEligible} />
+				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
 			{/if}
 		</div>
 	</div>
