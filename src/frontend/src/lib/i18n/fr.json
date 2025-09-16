@@ -1604,7 +1604,7 @@
 	"welcome": {
 		"title": "Bienvenue sur $oisy_short !",
 		"subtitle": "Prêt à être récompensé(e) ?",
-		"description": "Vous êtes à 2 pas de votre première récompense : Connectez-vous, détenez plus de 20 $ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez 4 amis et obtenez un bonus garanti."
+		"description": "Vous êtes à 2 pas de votre première récompense : Connectez-vous, détenez plus de 20 $ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez vos amis et obtenez un bonus à chaque fois que l'un d'eux gagne des sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
