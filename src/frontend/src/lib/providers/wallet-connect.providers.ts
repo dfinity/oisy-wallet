@@ -1,4 +1,8 @@
-import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
+import {
+	CAIP10_CHAINS_KEYS,
+	LEGACY_SOLANA_DEVNET_NAMESPACE,
+	LEGACY_SOLANA_MAINNET_NAMESPACE
+} from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
@@ -105,6 +109,23 @@ export const initWalletConnect = async ({
 		walletKit.on('session_request', callback);
 	};
 
+	const offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		walletKit.off('session_proposal', callback);
+		walletKit.removeListener('session_proposal', callback);
+	};
+
+	const offSessionDelete = (callback: () => void) => {
+		walletKit.off('session_delete', callback);
+		walletKit.removeListener('session_delete', callback);
+	};
+
+	const offSessionRequest = (
+		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
+	) => {
+		walletKit.off('session_request', callback);
+		walletKit.removeListener('session_request', callback);
+	};
+
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
@@ -138,10 +159,16 @@ export const initWalletConnect = async ({
 								events: ['accountsChanged', 'chainChanged'],
 								accounts: [
 									...(nonNullish(solAddressMainnet)
-										? [`solana:${SOLANA_MAINNET_NETWORK.chainId}:${solAddressMainnet}`]
+										? [
+												`solana:${SOLANA_MAINNET_NETWORK.chainId}:${solAddressMainnet}`,
+												`${LEGACY_SOLANA_MAINNET_NAMESPACE}:${solAddressMainnet}`
+											]
 										: []),
 									...(nonNullish(solAddressDevnet)
-										? [`solana:${SOLANA_DEVNET_NETWORK.chainId}:${solAddressDevnet}`]
+										? [
+												`solana:${SOLANA_DEVNET_NETWORK.chainId}:${solAddressDevnet}`,
+												`${LEGACY_SOLANA_DEVNET_NAMESPACE}:${solAddressDevnet}`
+											]
 										: [])
 								]
 							}
@@ -212,6 +239,9 @@ export const initWalletConnect = async ({
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
+		offSessionProposal,
+		offSessionDelete,
+		offSessionRequest,
 		getActiveSessions,
 		disconnect: async () => {
 			const disconnectPairings = async () => {

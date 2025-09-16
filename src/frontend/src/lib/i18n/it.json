@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Scopri di più",
 			"sprinkles_earned": "Hai guadagnato $noOfSprinkles sprinkles, per un totale di $amount! 🎉",
 			"youre_eligible": "Sei idoneo!",
+			"not_eligible": "",
 			"ongoing": "In corso",
 			"ended": "Terminato ($amount)",
 			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles"
@@ -423,6 +424,36 @@
 						"title": "Ottieni di più invitando",
 						"description": "Hai appena guadagnato Sprinkles - e anche la persona che ti ha invitato.<br>Invia 4 amici e guadagna 1$.<br>I primi 4 referrer vincono 200$ ciascuno.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -1515,22 +1546,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Consulta i Termini e condizioni",
+			"review_updated_title": "Rivedi i Termini e Condizioni Aggiornati",
+			"review_description": "Prima di poter utilizzare OISY Wallet, è necessario leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy. Questi documenti spiegano le regole del nostro servizio e come proteggiamo i tuoi dati.",
+			"review_updated_description": "Per continuare a utilizzare OISY Wallet, ti preghiamo di leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy aggiornati. Queste modifiche sono importanti per garantire la sicurezza e la conformità del nostro servizio.",
+			"reject_warning": "Devi accettare i Termini e Condizioni per procedere. Riprova in qualsiasi momento.",
+			"i_have_accepted": "Ho letto e accetto i",
+			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
+			"accept_and_continue": "Accetta e continua"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Accordo di Licenza",
 			"accept_terms": "Cliccando su questo pulsante, accetti l'",
 			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
@@ -1558,22 +1589,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Termini di utilizzo",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link ai termini di utilizzo"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Politica sulla riservatezza",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link all'informativa sulla privacy"
 		}
 	},
 	"activity": {
@@ -1604,7 +1635,7 @@
 	"welcome": {
 		"title": "Benvenuto in $oisy_short!",
 		"subtitle": "Pronto a guadagnare?",
-		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Invita 4 amici e ottieni un bonus garantito."
+		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Segnala i tuoi amici e ricevi un bonus ogni volta che uno di loro guadagna Sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
