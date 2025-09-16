@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
+			"not_eligible": "",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
 			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
