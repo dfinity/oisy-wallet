@@ -301,9 +301,19 @@ export const idlFactory = ({ IDL }) => {
 		hidden_dapp_ids: IDL.Vec(IDL.Text)
 	});
 	const DappSettings = IDL.Record({ dapp_carousel: DappCarouselSettings });
+	const ExperimentalFeatureSettingsFor = IDL.Variant({
+		AiAssistantBeta: IDL.Null
+	});
+	const ExperimentalFeatureSettings = IDL.Record({ enabled: IDL.Bool });
+	const ExperimentalFeaturesSettings = IDL.Record({
+		experimental_features: IDL.Vec(
+			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
+		)
+	});
 	const Settings = IDL.Record({
 		networks: NetworksSettings,
-		dapp: DappSettings
+		dapp: DappSettings,
+		experimental_features: ExperimentalFeaturesSettings
 	});
 	const UserProfile = IDL.Record({
 		agreements: IDL.Opt(Agreements),
@@ -462,6 +472,12 @@ export const idlFactory = ({ IDL }) => {
 		agreements: UserAgreements,
 		current_user_version: IDL.Opt(IDL.Nat64)
 	});
+	const UpdateExperimentalFeaturesSettingsRequest = IDL.Record({
+		experimental_features: IDL.Vec(
+			IDL.Tuple(ExperimentalFeatureSettingsFor, ExperimentalFeatureSettings)
+		),
+		current_user_version: IDL.Opt(IDL.Nat64)
+	});
 	const SaveNetworksSettingsRequest = IDL.Record({
 		networks: IDL.Vec(IDL.Tuple(NetworkSettingsFor, NetworkSettings)),
 		current_user_version: IDL.Opt(IDL.Nat64)
@@ -520,6 +536,11 @@ export const idlFactory = ({ IDL }) => {
 		update_contact: IDL.Func([Contact], [GetContactResult], []),
 		update_user_agreements: IDL.Func(
 			[UpdateUserAgreementsRequest],
+			[SetUserShowTestnetsResult],
+			[]
+		),
+		update_user_experimental_feature_settings: IDL.Func(
+			[UpdateExperimentalFeaturesSettingsRequest],
 			[SetUserShowTestnetsResult],
 			[]
 		),

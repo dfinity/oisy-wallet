@@ -59,6 +59,8 @@ describe('icrc.services', () => {
 		const mockName = 'Test';
 		const mockSymbol = 'TST';
 
+		const mockOnSuccess = vi.fn();
+
 		const mockCustomToken: CustomToken = {
 			token: {
 				Icrc: {
@@ -102,7 +104,7 @@ describe('icrc.services', () => {
 				mockCustomToken: CustomToken;
 				ledgerCanisterId: CanisterIdText;
 			}) => {
-				await loadCustomTokens({ identity: mockIdentity });
+				await loadCustomTokens({ identity: mockIdentity, onSuccess: mockOnSuccess });
 
 				const tokens = get(icrcCustomTokensStore);
 
@@ -134,6 +136,9 @@ describe('icrc.services', () => {
 						version: fromNullable(mockCustomToken.version)
 					})
 				});
+
+				// query + update
+				expect(mockOnSuccess).toHaveBeenCalledTimes(2);
 			};
 
 			it('should load custom tokens with index canister', async () => {
@@ -387,6 +392,19 @@ describe('icrc.services', () => {
 				await loadCustomTokens({ identity: mockIdentity });
 
 				expect(idbKeyval.set).not.toHaveBeenCalled();
+			});
+
+			it("should not call onSuccess if there's an error", async () => {
+				const tokens = get(icrcCustomTokensStore);
+
+				expect(tokens).toHaveLength(1);
+
+				const err = new Error('test');
+				backendCanisterMock.listCustomTokens.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(mockOnSuccess).not.toHaveBeenCalled();
 			});
 		});
 	});

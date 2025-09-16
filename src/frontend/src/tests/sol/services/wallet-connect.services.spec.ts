@@ -20,6 +20,7 @@ import { signTransaction } from '$sol/services/sol-sign.services';
 import { decode, sign } from '$sol/services/wallet-connect.services';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import * as solTransactionsUtils from '$sol/utils/sol-transactions.utils';
 import {
 	decodeTransactionMessage,
@@ -32,12 +33,7 @@ import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import {
-	addSignersToTransactionMessage,
-	type CompilableTransactionMessage,
-	type Rpc,
-	type SolanaRpcApi
-} from '@solana/kit';
+import { addSignersToTransactionMessage, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock(import('@solana/kit'), async (importOriginal) => {

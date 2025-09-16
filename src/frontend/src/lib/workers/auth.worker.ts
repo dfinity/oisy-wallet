@@ -1,7 +1,6 @@
-import { authClientStorage } from '$lib/api/auth-client.api';
+import { authClientStorage, createAuthClient } from '$lib/api/auth-client.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { createAuthClient } from '$lib/utils/auth.utils';
 import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
 

@@ -9,6 +9,7 @@
 			"close": "إغلاق",
 			"change": "تغيير",
 			"apply": "تنفيذ",
+			"retry": "",
 			"refresh": "تحديث",
 			"name": "الاسم",
 			"symbol": "الرمز",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "خطأ أثناء جلب حالات سحب BTC.",
 			"transaction_price": "خطأ أثناء تحميل تقدير سعر المعاملة.",
 			"icrc_canisters": "خطأ أثناء تحميل حاويات ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC20 المخصصة.",
 			"erc721_custom_tokens": "خطأ أثناء تحميل توكنات مستخدم ERC721 المخصصة.",
 			"erc1155_custom_tokens": "",
@@ -551,7 +553,11 @@
 			"appearance_system": "النظام",
 			"git_disclaimer": "لأغراض التطوير، نعرض الفرع و commit فقط في حاويات الاختبار.",
 			"git_branch_name": "الفرع:",
-			"git_commit_hash": "التزام:"
+			"git_commit_hash": "التزام:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "تبديل لإظهار أو إخفاء شبكات الاختبار",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "معرف حساب ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "استخدم لجميع التوكنات عند الاستلام من المحافظ، المستخدمين، أو التطبيقات الأخرى التي تدعم تنسيق العنوان هذا.",
 				"use_for_icrc_deposit": "استخدم لاستلام توكنات ICRC-1 في شبكة ICP، مثل SNS، توكنات ck، إلخ.",
 				"use_for_icp_deposit": "استخدم لإيداعات ICP من البورصات أو المحافظ الأخرى التي تدعم فقط معرفات الحساب.",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "قم بأول إرسال الآن!",
 			"contacts_empty_state_title": "ستظهر جهات اتصالك هنا",
 			"contacts_empty_state_description": "يبدو أنك لم تقم بإضافة جهات اتصال بعد",
-			"send_review_subtitle": "أنت ترسل"
+			"send_review_subtitle": "أنت ترسل",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "أدخل العنوان العام (0x)، الاسم أو الاسم المستعار",
 			"enter_recipient_address": "أدخل عنوان المستلم، الاسم أو الاسم المستعار",
 			"enter_wallet_address": "أدخل عنوان المحفظة، الاسم أو الاسم المستعار",
-			"select_network": "حدد الشبكة"
+			"select_network": "حدد الشبكة",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "يرجى الانتظار حتى يتم التصديق على معاملة ckBTC.",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "بيانات معاملة البيتكوين غير صالحة",
 			"btc_utxo_locked": "أموال البيتكوين مقفلة بواسطة المعاملات المعلقة",
 			"btc_invalid_fee_calculation": "فشل التحقق من رسوم معاملة البيتكوين",
-			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً."
+			"pending_transactions_not_available": "خدمة المعاملات المعلقة غير متاحة حالياً. يرجى المحاولة مرة أخرى لاحقاً.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "حدث خطأ ما أثناء إرسال المعاملة.",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "حدث خطأ ما أثناء حساب رسوم المعاملة.",
 			"unable_to_retrieve_amount": "غير متاح (لا يمكن استرداده)",
 			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
-			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح."
+			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "جارٍ التفكير...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "عذرًا، حدث خطأ ما في الحصول على رد من LLM.",

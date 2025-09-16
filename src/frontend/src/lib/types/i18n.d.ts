@@ -12,6 +12,7 @@ interface I18nCore {
 		close: string;
 		change: string;
 		apply: string;
+		retry: string;
 		refresh: string;
 		name: string;
 		symbol: string;
@@ -382,6 +383,7 @@ interface I18nInit {
 		btc_withdrawal_statuses: string;
 		transaction_price: string;
 		icrc_canisters: string;
+		icrc_canister_loading: string;
 		erc20_custom_tokens: string;
 		erc721_custom_tokens: string;
 		erc1155_custom_tokens: string;
@@ -435,6 +437,10 @@ interface I18nSettings {
 		git_disclaimer: string;
 		git_branch_name: string;
 		git_commit_hash: string;
+		beta_features: string;
+		enable_beta_feature: string;
+		disable_beta_feature: string;
+		save_beta_feature_success: string;
 	};
 	alt: {
 		testnets_toggle: string;
@@ -466,6 +472,7 @@ interface I18nReceive {
 	icp: {
 		text: {
 			account_id: string;
+			checking_index_canister_status: string;
 			use_for_all_tokens: string;
 			use_for_icrc_deposit: string;
 			use_for_icp_deposit: string;
@@ -560,12 +567,16 @@ interface I18nSend {
 		contacts_empty_state_title: string;
 		contacts_empty_state_description: string;
 		send_review_subtitle: string;
+		no_nfts_found: string;
+		no_nfts_found_desc: string;
+		select_nft: string;
 	};
 	placeholder: {
 		enter_eth_address: string;
 		enter_recipient_address: string;
 		enter_wallet_address: string;
 		select_network: string;
+		search_nfts: string;
 	};
 	info: {
 		ckbtc_certified: string;
@@ -607,6 +618,7 @@ interface I18nSend {
 		btc_utxo_locked: string;
 		btc_invalid_fee_calculation: string;
 		pending_transactions_not_available: string;
+		no_nft_selected: string;
 	};
 	error: {
 		unexpected: string;
@@ -626,6 +638,7 @@ interface I18nSend {
 		unable_to_retrieve_amount: string;
 		solana_transaction_expired: string;
 		solana_confirmation_failed: string;
+		fee_calc_unsupported_standard: string;
 	};
 }
 
@@ -1343,6 +1356,7 @@ interface I18nAi_assistant {
 		no_contacts_found_message: string;
 		loading: string;
 		reset_chat_history: string;
+		feature_description: string;
 	};
 	errors: { unknown: string; no_response: string };
 }

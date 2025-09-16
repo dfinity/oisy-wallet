@@ -5,10 +5,11 @@
 	interface Props {
 		onLoad: () => Promise<void>;
 		interval: number;
+		skipInitialLoad?: boolean;
 		children?: Snippet;
 	}
 
-	let { onLoad, interval, children }: Props = $props();
+	let { onLoad, interval, skipInitialLoad = false, children }: Props = $props();
 
 	let timer: NodeJS.Timeout | undefined = undefined;
 
@@ -17,7 +18,9 @@
 			return;
 		}
 
-		await onLoad();
+		if (!skipInitialLoad) {
+			await onLoad();
+		}
 
 		timer = setInterval(onLoad, interval);
 	};

@@ -55,7 +55,8 @@ const itI18n = (): I18n => ({
 });
 
 const jaI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: ja as I18n }),
+	...mergeWithFallback({ refLang: enI18n(), targetLang: 
+                        as I18n }),
 	lang: Languages.JAPANESE
 });
 

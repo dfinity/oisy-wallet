@@ -3,6 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -62,7 +64,7 @@
 	const save = async () => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				await saveErc721CustomTokens({
 					tokens: [
 						{
@@ -73,7 +75,7 @@
 					],
 					identity: $authIdentity
 				});
-			} else if (token.standard === 'erc1155') {
+			} else if (isTokenErc1155(token)) {
 				await saveErc1155CustomTokens({
 					tokens: [
 						{
@@ -98,7 +100,7 @@
 	);
 </script>
 
-<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
+<Modal onClose={() => (!saveLoading ? modalStore.close() : undefined)} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -162,6 +164,24 @@
 			<div class="flex w-full justify-between">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
 				<span class="flex-col justify-items-end" data-tid={`${testId}-nfts-media`}>
+					{#if nonNullish(collection.bannerImageUrl)}
+						<span class="flex">
+							<output class="text-tertiary"
+								>{shortenWithMiddleEllipsis({
+									text: collection.bannerImageUrl,
+									splitLength: 20
+								})}</output
+							>
+							<AddressActions
+								copyAddress={collection.bannerImageUrl}
+								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+									$address: collection.bannerImageUrl
+								})}
+								externalLink={collection.bannerImageUrl}
+								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+							/>
+						</span>
+					{/if}
 					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 						{#if nonNullish(nft?.imageUrl)}
 							<span class="flex">

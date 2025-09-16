@@ -9,6 +9,7 @@
 			"close": "关闭",
 			"change": "更改",
 			"apply": "应用",
+			"retry": "",
 			"refresh": "刷新",
 			"name": "名称",
 			"symbol": "符号",
@@ -499,6 +500,7 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
@@ -551,7 +553,11 @@
 			"appearance_system": "系统",
 			"git_disclaimer": "仅在测试环境中显示分支和提交信息，仅用于开发目的。",
 			"git_branch_name": "分支：",
-			"git_commit_hash": "提交："
+			"git_commit_hash": "提交：",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -586,6 +592,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP 账户 ID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
 				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
 				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",
@@ -685,13 +692,17 @@
 			"recently_used_empty_state_description": "现在就开始你的第一次发送吧！",
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
-			"send_review_subtitle": "你将发送"
+			"send_review_subtitle": "你将发送",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
-			"select_network": "选择网络"
+			"select_network": "选择网络",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
@@ -732,7 +743,8 @@
 			"btc_invalid_utxo_data": "无效的比特币交易数据",
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
 			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
-			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。"
+			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",
@@ -751,7 +763,8 @@
 			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": "Solana确认失败"
+			"solana_confirmation_failed": "Solana确认失败",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1626,7 +1639,8 @@
 			"send_token_succeeded": "交易完成",
 			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
 			"loading": "思考中",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",
