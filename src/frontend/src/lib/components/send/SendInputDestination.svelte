@@ -168,4 +168,8 @@
 		--focus-background-contrast: var(--color-border-error-solid);
 		--input-background-contrast: var(--color-border-error-solid);
 	}
+
+	:global(.send-input-destination div.input-field input) {
+		--input-padding-inner-end: calc(var(--spacing) * 20);
+	}
 </style>

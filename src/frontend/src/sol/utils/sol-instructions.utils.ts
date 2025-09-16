@@ -17,6 +17,7 @@ import type {
 } from '$sol/types/sol-instructions';
 import type { MappedSolTransaction, SolMappedTransaction } from '$sol/types/sol-transaction';
 import type { SplTokenAddress } from '$sol/types/spl';
+import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import { parseSolSystemInstruction } from '$sol/utils/sol-instructions-system.utils';
 import { parseSolToken2022Instruction } from '$sol/utils/sol-instructions-token-2022.utils';
@@ -364,6 +365,10 @@ const parseSolInstruction = (
 
 	if (programAddress === TOKEN_2022_PROGRAM_ADDRESS) {
 		return parseSolToken2022Instruction(instruction);
+	}
+
+	if (programAddress === ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ADDRESS) {
+		return parseSolAtaInstruction(instruction);
 	}
 
 	console.warn(`Could not parse Solana instruction for program ${programAddress}`);
