@@ -276,6 +276,7 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		not_eligible: string;
 		ongoing: string;
 		ended: string;
 		banner_text: string;
@@ -315,6 +316,20 @@ interface I18nRewards {
 				leaderboard: { title: string; description: string; share_href: string };
 				referrer: { title: string; description: string; share_href: string };
 				referee: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e5: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
+				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
 			};
 		};
 	};
