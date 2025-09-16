@@ -1,5 +1,6 @@
 import {
-	CAIP10_CHAINS_KEYS,
+	CAIP10_DEVNET_CHAINS_KEYS,
+	CAIP10_MAINNET_CHAINS_KEYS,
 	LEGACY_SOLANA_DEVNET_NAMESPACE,
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
@@ -150,7 +151,10 @@ export const initWalletConnect = async ({
 				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
 					? {
 							solana: {
-								chains: CAIP10_CHAINS_KEYS,
+								chains: [
+									...(nonNullish(solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
+								],
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
