@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "詳細を見る",
 			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
 			"youre_eligible": "参加資格があります！",
+			"not_eligible": "",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
 			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
@@ -423,6 +424,36 @@
 						"title": "紹介してもっと獲得しよう",
 						"description": "Sprinklesを獲得しました - あなたを紹介した人も同様です。<br>友達を4人紹介して1ドル獲得しましょう。<br>トップ4リファラーはそれぞれ200ドルを獲得します。",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
