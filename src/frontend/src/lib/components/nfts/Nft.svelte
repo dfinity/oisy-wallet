@@ -8,10 +8,10 @@
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageNft } from '$lib/derived/page-nft.derived';
+	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
-	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 
 	const nft = $derived($pageNft);
 
