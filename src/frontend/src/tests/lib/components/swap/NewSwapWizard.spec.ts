@@ -5,23 +5,14 @@ import NewSwapWizard from '$lib/components/swap/NewSwapWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
-import { isNetworkIdICP } from '$lib/utils/network.utils';
+import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { isNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('@dfinity/utils', async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...(actual as Record<string, unknown>),
-		isNullish: vi.fn()
-	};
-});
-
-vi.mock('$lib/utils/network.utils', () => ({
-	isNetworkIdICP: vi.fn()
+vi.mock('$lib/services/auth.services', () => ({
+	nullishSignOut: vi.fn()
 }));
 
 vi.mock('$eth/services/eth-listener.services', () => ({
@@ -56,6 +47,8 @@ describe('SwapWizard', () => {
 
 	beforeEach(() => {
 		setupUserNetworksStore('allEnabled');
+
+		mockAuthStore();
 
 		const mockToken = { ...mockValidIcToken, enabled: true };
 
@@ -97,8 +90,6 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ICP wizard when sourceToken is null', () => {
-		vi.mocked(isNullish).mockReturnValue(true);
-
 		const { container } = render(NewSwapWizard, {
 			props: defaultProps,
 			context: mockContext
@@ -108,9 +99,6 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ETH wizard when sourceToken is not ICP network', () => {
-		vi.mocked(isNullish).mockReturnValue(false);
-		vi.mocked(isNetworkIdICP).mockReturnValue(false);
-
 		const { container } = render(NewSwapWizard, {
 			props: defaultProps,
 			context: mockContext

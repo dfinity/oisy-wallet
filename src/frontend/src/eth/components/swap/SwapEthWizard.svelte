@@ -6,7 +6,7 @@
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumToken as nativeEthereumTokenStore } from '$eth/derived/token.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -17,8 +17,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
-	import { evmNativeToken } from '$evm/derived/token.derived';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -84,18 +82,9 @@
 	/**
 	 * Fee context store
 	 */
-	let fallbackEvmToken = $derived(
-		nonNullish($sourceToken)
-			? $enabledEvmTokens.find(
-					({ network: { id: networkId } }) => $sourceToken.network.id === networkId
-				)
-			: undefined
-	);
-
-	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $ethereumToken);
+	let nativeEthereumToken = $derived($nativeEthereumTokenStore);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);

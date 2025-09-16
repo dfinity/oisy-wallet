@@ -31,6 +31,7 @@
 		{:else if message.role === 'assistant' && nonNullish(message.data.tool?.results)}
 			<AiAssistantToolResults
 				isLastItem={messages.length - 1 === index}
+				{loading}
 				{onSendMessage}
 				results={message.data.tool.results}
 			/>
