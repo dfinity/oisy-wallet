@@ -1604,7 +1604,7 @@
 	"welcome": {
 		"title": "Wilkommen bei $oisy_short!",
 		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir einen Bonus jedes mal wenn einer Sprinkles bekommt."
+		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {
