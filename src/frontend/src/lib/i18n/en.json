@@ -352,8 +352,7 @@
 			"not_eligible": "Not eligible",
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)",
-			"banner_text": "Earn daily rewards with OISY Sprinkles",
-			"network_bonus": "Your network bonus"
+			"banner_text": "Earn daily rewards with OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",
