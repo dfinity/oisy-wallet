@@ -1,30 +1,28 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
+	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 
 	interface Props {
 		date: Date;
 		styleClass?: string;
-		inlineStyleClass?: string;
 		prefix?: string | undefined;
 		suffix?: string | undefined;
 		testId?: string | undefined;
 		variant?: BadgeVariant;
-		icon?: Snippet;
+		showIcon?: boolean;
 	}
 
 	let {
 		date,
 		styleClass,
-		inlineStyleClass,
 		prefix = undefined,
 		suffix = undefined,
 		testId = undefined,
 		variant = 'default',
-		icon
+		showIcon = false,
 	}: Props = $props();
 
 	const formattedDate = $derived(
@@ -33,8 +31,10 @@
 </script>
 
 <Badge {styleClass} {testId} {variant}>
-	<div class={inlineStyleClass}>
-		{@render icon?.()}
+	<div class="flex items-center gap-1.5 text-sm">
+		{#if showIcon}
+			<IconCalendarDays size="14" />
+		{/if}
 
 		{prefix ?? ''}
 		{formattedDate}
