@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Scopri di più",
 			"sprinkles_earned": "Hai guadagnato $noOfSprinkles sprinkles, per un totale di $amount! 🎉",
 			"youre_eligible": "Sei idoneo!",
+			"not_eligible": "",
 			"ongoing": "In corso",
 			"ended": "Terminato ($amount)",
 			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles"
@@ -1634,7 +1635,7 @@
 	"welcome": {
 		"title": "Benvenuto in $oisy_short!",
 		"subtitle": "Pronto a guadagnare?",
-		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Invita 4 amici e ottieni un bonus garantito."
+		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Segnala i tuoi amici e ricevi un bonus ogni volta che uno di loro guadagna Sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {

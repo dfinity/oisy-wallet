@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Dowiedz się więcej",
 			"sprinkles_earned": "Zdobyłeś $noOfSprinkles sprinkles o łącznej wartości $amount! 🎊",
 			"youre_eligible": "Jesteś uprawniony!",
+			"not_eligible": "",
 			"ongoing": "Trwa",
 			"ended": "Zakończono ($amount)",
 			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles"
@@ -1634,7 +1635,7 @@
 	"welcome": {
 		"title": "Witamy w $oisy_short!",
 		"subtitle": "Gotowy do zarabiania?",
-		"description": "Jesteś 2 kroki od swojej pierwszej nagrody: zaloguj się, trzymaj ponad 20 USD w tokenach i wykonaj 2 akcje. To wszystko, czego potrzeba, aby zacząć zarabiać Sprinkles.<br><br>Chcesz więcej? Poleć 4 znajomych i zdobądź gwarantowany bonus."
+		"description": "Jesteś 2 kroki od swojej pierwszej nagrody: zaloguj się, trzymaj ponad 20 USD w tokenach i wykonaj 2 akcje. To wszystko, czego potrzeba, aby zacząć zarabiać Sprinkles.<br><br>Chcesz więcej? Polecaj nas znajomym i zgarniaj bonus za każdym razem, gdy któryś z nich zdobędzie posypki."
 	},
 	"temporal": {
 		"seconds_to_duration": {
