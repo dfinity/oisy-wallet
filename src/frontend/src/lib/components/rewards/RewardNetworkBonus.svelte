@@ -26,7 +26,7 @@
 
 	let { isEligible, multiplier }: Props = $props();
 
-	const networkBonusAssets = {
+	const networkBonusAssets: Record<number, string> = {
 		1: { active: networkBonusActive1, disabled: networkBonusDisabled1 },
 		2: { active: networkBonusActive2, disabled: networkBonusDisabled2 },
 		3: { active: networkBonusActive3, disabled: networkBonusDisabled3 },
