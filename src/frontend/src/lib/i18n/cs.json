@@ -357,8 +357,8 @@
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
-			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
-			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
+			"min_transactions_overall": "Dokončete $transactions transakcí za posledních $days dní",
+			"min_total_assets_usd_overall": "V době vydání držte tokeny v hodnotě $$usd",
 			"hangover": "Žádná nedávná výhra (posledních $days dní)"
 		},
 		"alt": {

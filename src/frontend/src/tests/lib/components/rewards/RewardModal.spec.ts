@@ -69,7 +69,7 @@ describe('RewardModal', () => {
 		).toBeInTheDocument();
 		expect(
 			getByText(
-				replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
+				replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
 					$transactions: '3',
 					$days: '6'
 				})
@@ -77,7 +77,7 @@ describe('RewardModal', () => {
 		).toBeInTheDocument();
 		expect(
 			getByText(
-				replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
+				replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
 					$usd: '21'
 				})
 			)
@@ -120,7 +120,7 @@ describe('RewardModal', () => {
 		).not.toBeInTheDocument();
 		expect(
 			queryByText(
-				replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
+				replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
 					$transactions: '2',
 					$days: '7'
 				})
@@ -128,7 +128,7 @@ describe('RewardModal', () => {
 		).not.toBeInTheDocument();
 		expect(
 			queryByText(
-				replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
+				replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
 					$usd: '18'
 				})
 			)

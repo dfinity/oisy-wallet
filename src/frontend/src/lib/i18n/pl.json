@@ -357,8 +357,8 @@
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
-			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
-			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
+			"min_transactions_overall": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
+			"min_total_assets_usd_overall": "Posiadaj tokeny o wartości $$usd w momencie emisji",
 			"hangover": "Brak ostatniej wygranej (ostatnie $days dni)"
 		},
 		"alt": {

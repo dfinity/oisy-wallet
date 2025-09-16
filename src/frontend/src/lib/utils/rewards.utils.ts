@@ -8,8 +8,8 @@ import type {
 	CampaignEligibility,
 	HangoverCriterion,
 	MinLoginsCriterion,
-	MinTotalAssetsUsdCriterion,
-	MinTransactionsCriterion,
+	MinTotalAssetsUsdOverallCriterion, MinTotalAssetsUsdPerNetworkCriterion,
+	MinTransactionsOverallCriterion, MinTransactionsPerNetworkCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
@@ -129,27 +129,49 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
-	if ('MinTransactions' in criterion.criterion) {
-		const { duration, count } = criterion.criterion.MinTransactions;
+	if ('MinTransactionsOverall' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsOverall;
 		if ('Days' in duration) {
 			const days = duration.Days;
 			return {
 				satisfied: criterion.satisfied,
-				type: RewardCriterionType.MIN_TRANSACTIONS,
+				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
 				days,
 				count
-			} as MinTransactionsCriterion;
+			} as MinTransactionsOverallCriterion;
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
-	if ('MinTotalAssetsUsd' in criterion.criterion) {
-		const { usd } = criterion.criterion.MinTotalAssetsUsd;
+	if ('MinTransactionsPerNetwork' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsPerNetwork;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+				days,
+				count
+			} as MinTransactionsPerNetworkCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
+	if ('MinTotalAssetsUsdOverall' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdOverall;
 
 		return {
 			satisfied: criterion.satisfied,
-			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
 			usd
-		} as MinTotalAssetsUsdCriterion;
+		} as MinTotalAssetsUsdOverallCriterion;
+	}
+	if ('MinTotalAssetsUsdPerNetwork' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdPerNetwork;
+
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+			usd
+		} as MinTotalAssetsUsdPerNetworkCriterion;
 	}
 	if ('Hangover' in criterion.criterion) {
 		const { duration } = criterion.criterion.Hangover;

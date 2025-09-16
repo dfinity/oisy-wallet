@@ -507,7 +507,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier: 1n,
+								probability_active: false
 							}
 						]
 					]
@@ -527,14 +529,16 @@ describe('rewards.utils', () => {
 								days: 7n,
 								count: 5
 							}
-						]
+						],
+						probabilityMultiplier: 1,
+						probabilityActive: false
 					}
 				]);
 			});
 		});
 
-		describe('MinTransactions', () => {
-			it('should map MinTransactions criterion', () => {
+		describe('MinTransactionsOverall', () => {
+			it('should map MinTransactionsOverall criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -546,13 +550,15 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTransactions: {
+											MinTransactionsOverall: {
 												duration: { Days: 30n },
 												count: 10
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier: 1n,
+								probability_active: false
 							}
 						]
 					]
@@ -568,18 +574,20 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TRANSACTIONS,
+								type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
 								days: 30n,
 								count: 10
 							}
-						]
+						],
+						probabilityMultiplier: 1,
+						probabilityActive: false
 					}
 				]);
 			});
 		});
 
-		describe('MinTotalAssetsUsd', () => {
-			it('should map MinTotalAssetsUsd criterion', () => {
+		describe('MinTransactionsPerNetwork', () => {
+			it('should map MinTransactionsPerNetwork criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -591,12 +599,15 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTotalAssetsUsd: {
-												usd: 1000
+											MinTransactionsPerNetwork: {
+												duration: { Days: 30n },
+												count: 10
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier: 1n,
+								probability_active: false
 							}
 						]
 					]
@@ -612,10 +623,107 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
-								usd: 1000
+								type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+								days: 30n,
+								count: 10
+							}
+						],
+						probabilityMultiplier: 1,
+						probabilityActive: false
+					}
+				]);
+			});
+		});
+
+		describe('MinTotalAssetsUsdOverall', () => {
+			it('should map MinTotalAssetsUsdOverall criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTotalAssetsUsdOverall: {
+												usd: 1000
+											}
+										}
+									}
+								],
+								probability_multiplier: 1n,
+								probability_active: false
 							}
 						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+								usd: 1000
+							}
+						],
+						probabilityMultiplier: 1,
+						probabilityActive: false
+					}
+				]);
+			});
+		});
+
+		describe('MinTotalAssetsUsdPerNetwork', () => {
+			it('should map MinTotalAssetsUsdPerNetwork criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTotalAssetsUsdPerNetwork: {
+												usd: 1000
+											}
+										}
+									}
+								],
+								probability_multiplier: 1n,
+								probability_active: false
+							}
+						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+								usd: 1000
+							}
+						],
+						probabilityMultiplier: 1,
+						probabilityActive: false
 					}
 				]);
 			});
@@ -636,7 +744,9 @@ describe('rewards.utils', () => {
 										MinReferrals: { count: 5 }
 									}
 								}
-							]
+							],
+							probability_multiplier: 1n,
+							probability_active: false
 						}
 					]
 				]
@@ -654,7 +764,9 @@ describe('rewards.utils', () => {
 							satisfied: false,
 							type: RewardCriterionType.UNKNOWN
 						}
-					]
+					],
+					probabilityMultiplier: 1,
+					probabilityActive: false
 				}
 			]);
 		});
@@ -681,12 +793,14 @@ describe('rewards.utils', () => {
 								{
 									satisfied: true,
 									criterion: {
-										MinTotalAssetsUsd: {
+										MinTotalAssetsUsdOverall: {
 											usd: 1000
 										}
 									}
 								}
-							]
+							],
+							probability_multiplier: 1n,
+							probability_active: false
 						}
 					]
 				]
@@ -708,10 +822,12 @@ describe('rewards.utils', () => {
 						},
 						{
 							satisfied: true,
-							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
 							usd: 1000
 						}
-					]
+					],
+					probabilityMultiplier: 1,
+					probabilityActive: false
 				}
 			]);
 		});

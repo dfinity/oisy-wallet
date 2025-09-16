@@ -27,7 +27,9 @@ describe('RewardsEligibilityContext', () => {
 				campaignId: 'test',
 				eligible: true,
 				available: true,
-				criteria: []
+				criteria: [],
+				probabilityMultiplier: 1,
+				probabilityActive: false
 			}
 		];
 		const getCampaignEligibilitiesSpy = vi

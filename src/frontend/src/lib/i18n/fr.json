@@ -357,8 +357,8 @@
 		"requirements": {
 			"requirements_title": "Critères d'éligibilité",
 			"min_logins": "Connectez-vous $loginsx fois au cours des $days derniers jours",
-			"min_transactions": "Effectuez $transactions transactions au cours des $days derniers jours",
-			"min_total_assets_usd": "Détenez $$usd de tokens au moment de l'émission",
+			"min_transactions_overall": "Effectuez $transactions transactions au cours des $days derniers jours",
+			"min_total_assets_usd_overall": "Détenez $$usd de tokens au moment de l'émission",
 			"hangover": "Aucune victoire récente (ces $days derniers jours)"
 		},
 		"alt": {

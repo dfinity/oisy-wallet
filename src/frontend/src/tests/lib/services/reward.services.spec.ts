@@ -38,7 +38,7 @@ describe('reward-code', () => {
 
 	describe('getCampaignEligibilities', () => {
 		const campaignId = 'deuteronomy';
-		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [] };
+		const campaign: CampaignEligibility = { eligible: true, available: true, criteria: [], probability_multiplier: 1n, probability_active: false };
 		const mockEligibilityReport: EligibilityReport = {
 			campaigns: [[campaignId, campaign]]
 		};

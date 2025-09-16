@@ -8,7 +8,7 @@ import { get } from 'svelte/store';
 
 describe('RewardRequirement', () => {
 	describe('Requirements', () => {
-		it('should not render min logins requirement', () => {
+		it('should render min logins requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -30,12 +30,12 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min transactions requirement', () => {
+		it('should render min transactions overall requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TRANSACTIONS,
+						type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
 						days: 6n,
 						count: 3
 					}
@@ -44,7 +44,7 @@ describe('RewardRequirement', () => {
 
 			expect(
 				getByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
 						$transactions: '3',
 						$days: '6'
 					})
@@ -52,12 +52,34 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min total assets usd requirement', () => {
+		it('should not render min transactions per network requirement', () => {
+			const { queryByText } = render(RewardRequirement, {
+				props: {
+					criterion: {
+						satisfied: false,
+						type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+						days: 6n,
+						count: 3
+					}
+				}
+			});
+
+			expect(
+				queryByText(
+					replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
+						$transactions: '3',
+						$days: '6'
+					})
+				)
+			).not.toBeInTheDocument();
+		});
+
+		it('should render min total assets usd overall requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
 						usd: 21
 					}
 				}
@@ -65,11 +87,31 @@ describe('RewardRequirement', () => {
 
 			expect(
 				getByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
 						$usd: '21'
 					})
 				)
 			).toBeInTheDocument();
+		});
+
+		it('should render min total assets usd per network requirement', () => {
+			const { queryByText } = render(RewardRequirement, {
+				props: {
+					criterion: {
+						satisfied: false,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+						usd: 21
+					}
+				}
+			});
+
+			expect(
+				queryByText(
+					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
+						$usd: '21'
+					})
+				)
+			).not.toBeInTheDocument();
 		});
 	});
 

@@ -3,8 +3,8 @@ import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type {
 	CampaignEligibility,
 	MinLoginsCriterion,
-	MinTotalAssetsUsdCriterion,
-	MinTransactionsCriterion
+	MinTotalAssetsUsdOverallCriterion,
+	MinTransactionsOverallCriterion
 } from '$lib/types/reward';
 
 export const mockCampaignEligibilities: CampaignEligibility[] = [
@@ -21,16 +21,18 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 			} as MinLoginsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TRANSACTIONS,
+				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
 				days: 6n,
 				count: 3
-			} as MinTransactionsCriterion,
+			} as MinTransactionsOverallCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
 				usd: 21
-			} as MinTotalAssetsUsdCriterion
-		]
+			} as MinTotalAssetsUsdOverallCriterion
+		],
+		probabilityMultiplier: 2,
+		probabilityActive: false
 	},
 	{
 		campaignId: 'sprinkles_s1e5',
@@ -45,15 +47,17 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 			} as MinLoginsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TRANSACTIONS,
+				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
 				days: 7n,
 				count: 2
-			} as MinTransactionsCriterion,
+			} as MinTransactionsOverallCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
 				usd: 18
-			} as MinTotalAssetsUsdCriterion
-		]
+			} as MinTotalAssetsUsdOverallCriterion
+		],
+		probabilityMultiplier: 1,
+		probabilityActive: true
 	}
 ];

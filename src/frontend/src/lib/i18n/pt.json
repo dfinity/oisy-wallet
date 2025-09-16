@@ -357,8 +357,8 @@
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
-			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
-			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
+			"min_transactions_overall": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
+			"min_total_assets_usd_overall": "Mantenha $$usd em tokens no momento da emissão",
 			"hangover": "Não ganhou recentemente (last $days days)"
 		},
 		"alt": {
