@@ -31,7 +31,7 @@
 			</NftActionButton>
 		{/snippet}
 		{#snippet modal()}
-			<SendModal isNftsPage isTransactionsPage={false} {nft} />
+			<SendModal isNftsPage isTransactionsPage={false} />
 		{/snippet}
 	</ButtonWithModal>
 </div>

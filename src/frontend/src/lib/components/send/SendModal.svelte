@@ -127,7 +127,6 @@
 									: false;
 
 	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
-		console.log('onIcSendToken', token);
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
