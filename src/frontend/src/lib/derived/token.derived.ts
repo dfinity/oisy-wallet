@@ -17,10 +17,10 @@ import {
 	networkSolana
 } from '$lib/derived/network.derived';
 import { token } from '$lib/stores/token.store';
-import type { OptionTokenId, Token } from '$lib/types/token';
+import type { OptionTokenId, RequiredToken, Token } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
-export const defaultFallbackToken: Readable<Token> = derived(
+export const defaultFallbackToken: Readable<RequiredToken> = derived(
 	[
 		networkBitcoin,
 		networkEthereum,
