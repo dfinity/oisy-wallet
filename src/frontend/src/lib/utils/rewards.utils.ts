@@ -8,10 +8,10 @@ import type {
 	CampaignEligibility,
 	HangoverCriterion,
 	MinLoginsCriterion,
-	MinTotalAssetsUsdOverallCriterion,
 	MinTotalAssetsUsdInNetworkCriterion,
-	MinTransactionsOverallCriterion,
+	MinTotalAssetsUsdOverallCriterion,
 	MinTransactionsInNetworkCriterion,
+	MinTransactionsOverallCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
