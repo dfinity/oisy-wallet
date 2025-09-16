@@ -52,7 +52,7 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min transactions per network requirement', () => {
+		it('should not render min transactions in network requirement', () => {
 			const { queryByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -94,7 +94,7 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should render min total assets usd per network requirement', () => {
+		it('should render min total assets usd in network requirement', () => {
 			const { queryByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
