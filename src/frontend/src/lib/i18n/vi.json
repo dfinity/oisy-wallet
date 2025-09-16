@@ -9,6 +9,7 @@
 			"close": "Đóng",
 			"change": "Thay đổi",
 			"apply": "Áp dụng",
+			"retry": "",
 			"refresh": "Làm mới",
 			"name": "Tên",
 			"symbol": "Ký hiệu",
@@ -1529,7 +1530,7 @@
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Thỏa thuận cấp phép",
 			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
 			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
@@ -1557,22 +1558,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Điều khoản sử dụng",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Liên kết đến Điều khoản sử dụng"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Chính sách bảo mật",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Liên kết đến Chính sách bảo mật"
 		}
 	},
 	"activity": {

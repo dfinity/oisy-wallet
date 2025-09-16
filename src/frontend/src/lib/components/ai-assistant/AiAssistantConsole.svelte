@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
@@ -69,7 +69,7 @@
 		messageText,
 		context
 	}: {
-		messageText: string;
+		messageText?: string;
 		context?: string;
 	}) => {
 		if (isNullish($authIdentity)) {
@@ -77,10 +77,12 @@
 			return;
 		}
 
-		aiAssistantStore.appendMessage({
-			role: 'user',
-			data: { text: messageText, context }
-		});
+		if (notEmptyString(messageText)) {
+			aiAssistantStore.appendMessage({
+				role: 'user',
+				data: { text: messageText, context }
+			});
+		}
 
 		const requestStartTimestamp = Date.now();
 
@@ -103,7 +105,8 @@
 								tool
 							}
 						: {
-								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text
+								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
+								...(isNullishOrEmpty(text) && { retryable: true })
 							}
 			});
 		} catch (err: unknown) {
@@ -112,7 +115,8 @@
 			aiAssistantStore.appendMessage({
 				role: 'assistant',
 				data: {
-					text: $i18n.ai_assistant.errors.unknown
+					text: $i18n.ai_assistant.errors.unknown,
+					retryable: true
 				}
 			});
 
@@ -123,6 +127,12 @@
 		}
 
 		loading = false;
+	};
+
+	const onRetry = async () => {
+		aiAssistantStore.removeLastMessage();
+
+		await onMessageSubmit();
 	};
 
 	const onMessageSubmit = async () => {
@@ -206,7 +216,12 @@
 			</div>
 		{:else}
 			<div in:fade>
-				<AiAssistantMessages {loading} messages={messagesToDisplay} onSendMessage={sendMessage} />
+				<AiAssistantMessages
+					{loading}
+					messages={messagesToDisplay}
+					{onRetry}
+					onSendMessage={sendMessage}
+				/>
 			</div>
 		{/if}
 	</div>

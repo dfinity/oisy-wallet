@@ -9,6 +9,7 @@
 			"close": "閉じる",
 			"change": "変更",
 			"apply": "適用",
+			"retry": "",
 			"refresh": "再度読み込み",
 			"name": "名前",
 			"symbol": "シンボル",
