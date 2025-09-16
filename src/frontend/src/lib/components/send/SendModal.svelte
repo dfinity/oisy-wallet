@@ -59,10 +59,10 @@
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import { pageNft } from '$lib/derived/page-nft.derived';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
-	export let nft: Nft | undefined = undefined;
 
 	let destination = '';
 	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
@@ -74,12 +74,15 @@
 	$: steps = isTransactionsPage
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: isNftsPage
-			? sendNftsWizardSteps({ i18n: $i18n })
+			? nonNullish($pageNft)
+				? sendNftsWizardSteps({ i18n: $i18n }).slice(2)
+				: sendNftsWizardSteps({ i18n: $i18n })
 			: allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
 	let modal: WizardModal<WizardStepsSend>;
 	let selectedNft: Nft | undefined;
+	$: selectedNft = $pageNft;
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -124,6 +127,7 @@
 									: false;
 
 	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
+		console.log('onIcSendToken', token);
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -173,23 +177,21 @@
 
 	const selectNft = (nft: Nft) => {
 		selectedNft = nft;
-		loadTokenAndRun({
-			token: findNonFungibleToken({
-				tokens: $nonFungibleTokens,
-				networkId: nft.collection.network.id,
-				address: nft.collection.address
-			}) as Token,
-			callback: async () => {
-				await goToStep(WizardStepsSend.DESTINATION);
-			}
+		const token = findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			networkId: nft.collection.network.id,
+			address: nft.collection.address
 		});
-	};
-
-	onMount(() => {
-		if (nonNullish(nft) && isNftsPage) {
-			selectNft(nft);
+		if (nonNullish(token)) {
+			loadTokenAndRun({
+				token,
+				callback: async () => {
+					// eslint-disable-next-line require-await
+					goToStep(WizardStepsSend.DESTINATION);
+				}
+			});
 		}
-	});
+	};
 </script>
 
 <SendTokenContext token={$token}>
@@ -218,7 +220,9 @@
 			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
 		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
 			<SendDestinationWizardStep
-				formCancelAction={isTransactionsPage ? 'close' : 'back'}
+				formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
+					? 'close'
+					: 'back'}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
