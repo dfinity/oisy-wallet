@@ -7,6 +7,7 @@ import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -114,6 +115,10 @@ describe('NftHero', () => {
 	});
 
 	it('should open the send modal in Nft send flow when send button is clicked', () => {
+		mockPage.mockDynamicRoutes({
+			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+		});
+
 		const { getByTestId, getByText } = render(NftHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
