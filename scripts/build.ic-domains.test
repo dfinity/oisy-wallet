@@ -23,7 +23,7 @@ dfx_network_domains() {
       while IFS= read -r domain || [[ -n "$domain" ]]; do
         [[ -z "$domain" ]] && continue
         echo "$domain $i"
-      done < build/.well-known/ic-domains
+      done <build/.well-known/ic-domains
     fi
   done
 }
