@@ -330,8 +330,8 @@
 			<SolAddTokenReview
 				{network}
 				tokenAddress={splTokenAddress}
-				on:icBack={modal.back}
-				on:icSave={saveSplToken}
+				onBack={modal.back}
+				onSave={saveSplToken}
 				bind:metadata={splMetadata}
 			/>
 		{/if}

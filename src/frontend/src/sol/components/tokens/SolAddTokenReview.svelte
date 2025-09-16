@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddTokenWarning from '$lib/components/tokens/AddTokenWarning.svelte';
@@ -26,9 +26,11 @@
 		tokenAddress?: SplTokenAddress;
 		metadata?: TokenMetadata;
 		network: Network;
+		onBack: () => void;
+		onSave: () => void;
 	}
 
-	let { tokenAddress, metadata = $bindable(), network }: Props = $props();
+	let { tokenAddress, metadata = $bindable(), network, onBack, onSave }: Props = $props();
 
 	onMount(async () => {
 		if (isNullish(tokenAddress)) {
@@ -36,7 +38,7 @@
 				msg: { text: $i18n.tokens.import.error.missing_token_address }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -45,7 +47,7 @@
 				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -58,7 +60,7 @@
 				msg: { text: $i18n.tokens.error.already_available }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -74,7 +76,7 @@
 					msg: { text: $i18n.tokens.error.incomplete_metadata }
 				});
 
-				dispatch('icBack');
+				onBack();
 				return;
 			}
 
@@ -91,19 +93,17 @@
 					msg: { text: $i18n.tokens.error.duplicate_metadata }
 				});
 
-				dispatch('icBack');
+				onBack();
 				return;
 			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
-			dispatch('icBack');
+			onBack();
 		}
 	});
 
 	let invalid = $derived(isNullishOrEmpty(tokenAddress) || isNullish(metadata));
-
-	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar>
@@ -171,8 +171,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+			<ButtonBack onclick={() => onBack()} />
+			<Button disabled={invalid} onclick={() => onSave()}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>
