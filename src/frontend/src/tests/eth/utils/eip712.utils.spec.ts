@@ -22,7 +22,7 @@ const orderTypes = [
 	{ name: 'destToken', type: 'address' },
 	{ name: 'srcAmount', type: 'uint256' },
 	{ name: 'destAmount', type: 'uint256' },
-	{ name: 'expectedDestAmount', type: 'uint256' },
+	{ name: 'expectedAmount', type: 'uint256' },
 	{ name: 'deadline', type: 'uint256' },
 	{ name: 'nonce', type: 'uint256' },
 	{ name: 'permit', type: 'bytes' },
@@ -62,7 +62,9 @@ describe('EIP - 712 utils methods', () => {
 					destToken: '0x2222222222222222222222222222222222222222',
 					srcAmount: '1000000000000000000',
 					destAmount: '950000000000000000',
-					expectedDestAmount: '1000000000000000000',
+					expectedAmount: '1000000000000000000',
+					kind: 0,
+					metadata: '0x',
 					deadline: 1705449600,
 					nonce: '123456789',
 					permit: '0x',
@@ -70,8 +72,9 @@ describe('EIP - 712 utils methods', () => {
 					bridge: {
 						destinationChainId: 1,
 						outputToken: '0x5555555555555555555555555555555555555555',
-						maxRelayerFee: '0.00000001',
-						multiCallHandler: 'testmultiCallHandler'
+						protocolSelector: 'bridge_protocol',
+						scalingFactor: 1000000,
+						protocolData: '0xprotocol_data'
 					}
 				}
 			};
@@ -106,22 +109,25 @@ describe('EIP - 712 utils methods', () => {
 					]
 				},
 				data: {
-					owner: '0x1111111111111111111111111111111111111111',
-					beneficiary: '0x2222222222222222222222222222222222222222',
-					srcToken: '0x3333333333333333333333333333333333333333',
-					destToken: '0x4444444444444444444444444444444444444444',
-					srcAmount: '2000000000000000000',
-					destAmount: '1900000000000000000',
-					expectedDestAmount: '2000000000000000000',
-					deadline: 1705536000,
-					nonce: '987654321',
-					permit: '0x1234567890abcdef',
-					partnerAndFee: '50',
+					owner: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+					beneficiary: '0xabcdefabcdefabcdefabcdefabcdefabcdefabcdef',
+					srcToken: '0x1111111111111111111111111111111111111111',
+					destToken: '0x2222222222222222222222222222222222222222',
+					srcAmount: '1000000000000000000',
+					destAmount: '950000000000000000',
+					expectedAmount: '1000000000000000000',
+					kind: 0,
+					metadata: '0x',
+					deadline: 1705449600,
+					nonce: '123456789',
+					permit: '0x',
+					partnerAndFee: '0',
 					bridge: {
-						destinationChainId: 42,
+						destinationChainId: 1,
 						outputToken: '0x5555555555555555555555555555555555555555',
-						maxRelayerFee: '0.00000001',
-						multiCallHandler: 'testmultiCallHandler'
+						protocolSelector: 'bridge_protocol',
+						scalingFactor: 1000000,
+						protocolData: '0xprotocol_data'
 					}
 				}
 			};
@@ -267,7 +273,9 @@ describe('EIP - 712 utils methods', () => {
 					destToken: '0x2222222222222222222222222222222222222222',
 					srcAmount: '1000000000000000000',
 					destAmount: '950000000000000000',
-					expectedDestAmount: '1000000000000000000',
+					expectedAmount: '1000000000000000000',
+					kind: 0,
+					metadata: '0x',
 					deadline: 1705449600,
 					nonce: '123456789',
 					permit: '0x',
@@ -275,8 +283,9 @@ describe('EIP - 712 utils methods', () => {
 					bridge: {
 						destinationChainId: 1,
 						outputToken: '0x5555555555555555555555555555555555555555',
-						maxRelayerFee: '0.00000001',
-						multiCallHandler: 'testmultiCallHandler'
+						protocolSelector: 'bridge_protocol',
+						scalingFactor: 1000000,
+						protocolData: '0xprotocol_data'
 					}
 				}
 			};

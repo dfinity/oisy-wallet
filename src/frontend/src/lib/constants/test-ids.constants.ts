@@ -31,6 +31,19 @@ export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const NFT_CARD = 'nft-card';
+export const NFT_HIDDEN_BADGE = 'nft-hidden-badge';
+export const NFT_SPAM_BADGE = 'nft-hidden-badge';
+export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
+export const NFT_COLLECTION_ACTION_NOT_SPAM = 'nft-collection-action-not-spam';
+export const NFT_COLLECTION_ACTION_HIDE = 'nft-collection-action-hide';
+export const NFT_COLLECTION_ACTION_UNHIDE = 'nft-collection-action-unhide';
+export const NFT_COLLECTION_LIST_COMMON = 'nft-collection-list-common';
+export const NFT_COLLECTION_LIST_HIDDEN = 'nft-collection-list-hidden';
+export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
+export const NFT_LIST_COMMON = 'nft-list-common';
+export const NFT_LIST_HIDDEN = 'nft-list-hidden';
+export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_ACTION_SEND = 'nft-action-send';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -272,3 +285,11 @@ export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
 export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
+
+// Agreements
+export const AGREEMENTS_MODAL = 'agreements-modal';
+export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
+export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
+export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
+	'agreements-modal-checkbox-license-agreement';
+export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';

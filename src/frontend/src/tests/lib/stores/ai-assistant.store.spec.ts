@@ -10,7 +10,14 @@ describe('ai-assistant.store', () => {
 		chatHistory: []
 	};
 
+	const message = {
+		role: 'user',
+		data: { text: 'hey' }
+	} as ChatMessage;
+
 	beforeEach(() => {
+		aiAssistantStore.reset();
+
 		mockPage.reset();
 	});
 
@@ -35,17 +42,45 @@ describe('ai-assistant.store', () => {
 		expect(get(aiAssistantStore)).toStrictEqual(defaultState);
 	});
 
-	it('should append a message', () => {
-		const message = {
-			role: 'user',
-			data: { text: 'hey' }
-		} as ChatMessage;
+	it('should reset chat history', () => {
+		aiAssistantStore.appendMessage(message);
+		aiAssistantStore.open();
 
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.resetChatHistory();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: []
+		});
+	});
+
+	it('should append a message', () => {
 		aiAssistantStore.appendMessage(message);
 
 		expect(get(aiAssistantStore)).toStrictEqual({
 			...defaultState,
 			chatHistory: [...defaultState.chatHistory, message]
+		});
+	});
+
+	it('should remove last message', () => {
+		aiAssistantStore.appendMessage(message);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.removeLastMessage();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: defaultState.chatHistory
 		});
 	});
 });

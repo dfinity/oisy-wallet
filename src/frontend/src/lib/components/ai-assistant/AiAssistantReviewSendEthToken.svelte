@@ -23,6 +23,7 @@
 	import { mapAddressStartsWith0x } from '$icp-eth/utils/eth.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
@@ -55,6 +56,7 @@
 		destination: Address;
 		sourceNetwork: EthereumNetwork;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
 	}
 
 	let {
@@ -62,7 +64,8 @@
 		destination,
 		nativeEthereumToken,
 		sourceNetwork,
-		sendCompleted = $bindable()
+		sendCompleted = $bindable(),
+		sendEnabled
 	}: Props = $props();
 
 	const {
@@ -145,16 +148,26 @@
 	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
 	let invalid = $derived(
-		invalidDestination ||
+		!sendEnabled ||
+			invalidDestination ||
 			notEmptyString(insufficientFundsErrorMessage) ||
 			isNullish(amount) ||
 			isNullish($ckEthMinterInfoStore?.[nativeEthereumToken.id])
 	);
 
 	const send = async () => {
-		const trackingEventMetadata = {
+		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
-			network: `${$sendTokenNetworkId.description}`,
+			network: `${$sendTokenNetworkId.description}`
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -229,7 +242,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			sendCompleted = true;
@@ -240,7 +253,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -290,7 +303,10 @@
 			{$i18n.send.text.send}
 		</Button>
 	{:else}
-		<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+		<p
+			class="text-center text-sm text-success-primary"
+			data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+		>
 			{$i18n.ai_assistant.text.send_token_succeeded}
 		</p>
 	{/if}

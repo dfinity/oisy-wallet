@@ -24,7 +24,7 @@ export const aiAssistantChatMessages: Readable<ChatMessage[]> = derived(
 export const aiAssistantSystemMessage: Readable<chat_message_v1> = derived(
 	[extendedAddressContacts, enabledTokens],
 	([$extendedAddressContacts, $enabledTokens]) => {
-		const aiAssistantContacts = parseToAiAssistantContacts($extendedAddressContacts);
+		const aiAssistantContacts = Object.values(parseToAiAssistantContacts($extendedAddressContacts));
 		const aiEnabledTokens = $enabledTokens.map(({ name, symbol, network: { id: networkId } }) => ({
 			name,
 			symbol,
@@ -45,16 +45,16 @@ export const aiAssistantSystemMessage: Readable<chat_message_v1> = derived(
 export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 	[aiAssistantStore, aiAssistantSystemMessage],
 	([$aiAssistantStore, $aiAssistantSystemMessage]) => {
-		// Get last 100 messages from chat history
+		// Get the last 100 messages from chat history and deduct 1 slot reserved for the system message
 		const recentHistory = ($aiAssistantStore?.chatHistory ?? []).slice(
-			-MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH
+			-MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH + 1
 		);
 
 		return [
 			$aiAssistantSystemMessage,
 
 			// Parse chat messages into LLM-compatible messages
-			...recentHistory.reduce<chat_message_v1[]>((acc, { role, data: { text, tool } }) => {
+			...recentHistory.reduce<chat_message_v1[]>((acc, { role, data: { text, tool, context } }) => {
 				if (role === 'assistant') {
 					return [
 						...acc,
@@ -71,7 +71,7 @@ export const aiAssistantLlmMessages: Readable<chat_message_v1[]> = derived(
 						...acc,
 						{
 							user: {
-								content: text
+								content: `${text}${notEmptyString(context) ? ` ${context}` : ''}`
 							}
 						}
 					];

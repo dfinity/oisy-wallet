@@ -1,4 +1,4 @@
-import IcTransactionsCkBTCListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+import IcTransactionsCkBtcListeners from '$icp/components/transactions/IcTransactionsCkBtcListeners.svelte';
 import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 import {
 	isTokenCkBtcLedger,
@@ -23,7 +23,7 @@ export const mapListeners = (tokens: OptionToken[]): TokenToListener[] =>
 
 		if (isNetworkICP(token.network)) {
 			return isTokenCkBtcLedger(token)
-				? [...acc, { token, listener: IcTransactionsCkBTCListeners }]
+				? [...acc, { token, listener: IcTransactionsCkBtcListeners }]
 				: isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token)
 					? [...acc, { token, listener: IcTransactionsCkEthereumListeners }]
 					: acc;

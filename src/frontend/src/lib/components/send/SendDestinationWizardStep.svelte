@@ -8,7 +8,7 @@
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -88,7 +88,7 @@
 <ContentWithToolbar>
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
-			<CkEthLoader isSendFlow={true} nativeTokenId={$ethereumTokenId}>
+			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
 				<LoaderMultipleEthTransactions>
 					<EthSendDestination
 						knownDestinations={$ethKnownDestinations}

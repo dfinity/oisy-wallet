@@ -9,6 +9,7 @@
 			"close": "Chiudi",
 			"change": "Cambia",
 			"apply": "Applica",
+			"retry": "",
 			"refresh": "Aggiorna",
 			"name": "Nome",
 			"symbol": "Simbolo",
@@ -37,7 +38,8 @@
 			"currency": "Valuta"
 		},
 		"info": {
-			"test_banner": "Solo a scopo di test!"
+			"test_banner": "Solo a scopo di test!",
+			"test_banner_beta": ""
 		},
 		"alt": {
 			"logo": "Logo di $name",
@@ -114,7 +116,8 @@
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
-			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta."
+			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
+			"reload_and_retry": ""
 		},
 		"error": {
 			"no_internet_identity": "Nessuna Internet Identity.",
@@ -346,6 +349,7 @@
 			"carousel_slide_cta": "Scopri di più",
 			"sprinkles_earned": "Hai guadagnato $noOfSprinkles sprinkles, per un totale di $amount! 🎉",
 			"youre_eligible": "Sei idoneo!",
+			"not_eligible": "",
 			"ongoing": "In corso",
 			"ended": "Terminato ($amount)",
 			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles"
@@ -497,6 +501,7 @@
 			"btc_withdrawal_statuses": "Errore durante il recupero degli stati di prelievo BTC.",
 			"transaction_price": "Errore durante il caricamento della stima del prezzo di una transazione.",
 			"icrc_canisters": "Errore durante il caricamento dei canister ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Errore durante il caricamento del token personalizzato ERC20.",
 			"erc721_custom_tokens": "Errore durante il caricamento del token personalizzato ERC721.",
 			"erc1155_custom_tokens": "Errore durante il caricamento del token personalizzato ERC1155.",
@@ -506,6 +511,7 @@
 			"icrc_custom_token": "Errore durante il caricamento del token personalizzato ICRC.",
 			"loading_wallet_timeout": "Il tuo wallet richiede alcuni dati iniziali che non sono ancora stati caricati. Riprova.",
 			"allow_signing": "Si è verificato un problema durante la configurazione del tuo wallet per la firma. Sei stato disconnesso. Se il problema persiste, contatta il supporto.",
+			"waiting_for_allowed_cycles_aborted": "",
 			"btc_wallet_error": "Errore durante il caricamento delle informazioni del wallet BTC.",
 			"sol_wallet_error": "Errore durante il caricamento delle informazioni del wallet SOL."
 		}
@@ -548,7 +554,11 @@
 			"appearance_system": "Sistema",
 			"git_disclaimer": "Per scopi di sviluppo, mostriamo il branch e il commit solo nei canister di test.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Attiva/disattiva per mostrare o nascondere le testnet",
@@ -583,6 +593,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Account ID ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Utilizzare per tutti i token quando si riceve da wallet, utenti o altre app che supportano questo l'indirizzo in questo formato.",
 				"use_for_icrc_deposit": "Utilizzare per ricevere token ICRC-1 nella rete ICP, come SNS, ck tokens, ecc.",
 				"use_for_icp_deposit": "Utilizzare per depositi ICP da exchange o altri wallet che supportano solo gli Account ID.",
@@ -682,13 +693,17 @@
 			"recently_used_empty_state_description": "Fai il tuo primo trasferimento ora!",
 			"contacts_empty_state_title": "I tuoi contatti appariranno qui",
 			"contacts_empty_state_description": "Sembra che tu non abbia ancora aggiunto contatti",
-			"send_review_subtitle": "Tu invii"
+			"send_review_subtitle": "Tu invii",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Inserisci indirizzo pubblico (0x), nome o alias",
 			"enter_recipient_address": "Inserisci indirizzo del destinatario, nome o alias",
 			"enter_wallet_address": "Inserisci indirizzo del wallet, nome o alias",
-			"select_network": "Seleziona rete"
+			"select_network": "Seleziona rete",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Attendere che i parametri ckBTC siano stati certificati.",
@@ -729,7 +744,8 @@
 			"btc_invalid_utxo_data": "Dati della transazione Bitcoin non validi",
 			"btc_utxo_locked": "I fondi Bitcoin sono bloccati da transazioni in sospeso",
 			"btc_invalid_fee_calculation": "Convalida delle commissioni di transazione Bitcoin fallita",
-			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi."
+			"pending_transactions_not_available": "Il servizio delle transazioni in sospeso non è attualmente disponibile. Si prega di riprovare più tardi.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Qualcosa è andato storto durante l'invio della transazione.",
@@ -748,7 +764,8 @@
 			"unexpected_utxos_fee": "Qualcosa è andato storto durante il calcolo della fee di transazione.",
 			"unable_to_retrieve_amount": "n/d (impossibile recuperare)",
 			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
-			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente."
+			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1038,7 +1055,27 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
-			"open_explorer": ""
+			"spam": "",
+			"not_spam": "",
+			"hide": "",
+			"unhide": "",
+			"hidden": "",
+			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
+			"collection_name": "",
+			"media_urls": "",
+			"display_preference": "",
+			"review_preference": "",
+			"media_enabled": "",
+			"media_disabled": "",
+			"enable_media": "",
+			"disable_media": "",
+			"open_in_new_tab": "",
+			"review_title": "",
+			"review_description": "",
+			"learn_more": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1477,9 +1514,24 @@
 			"indicator": "Vai alla slide $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "Consulta i Termini e condizioni",
+			"review_updated_title": "Rivedi i Termini e Condizioni Aggiornati",
+			"review_description": "Prima di poter utilizzare OISY Wallet, è necessario leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy. Questi documenti spiegano le regole del nostro servizio e come proteggiamo i tuoi dati.",
+			"review_updated_description": "Per continuare a utilizzare OISY Wallet, ti preghiamo di leggere e accettare i nostri Termini di servizio e l'Informativa sulla privacy aggiornati. Queste modifiche sono importanti per garantire la sicurezza e la conformità del nostro servizio.",
+			"reject_warning": "Devi accettare i Termini e Condizioni per procedere. Riprova in qualsiasi momento.",
+			"i_have_accepted": "Ho letto e accetto i",
+			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
+			"accept_and_continue": "Accetta e continua"
+		},
+		"error": {
+			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
+		}
+	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Accordo di Licenza",
 			"accept_terms": "Cliccando su questo pulsante, accetti l'",
 			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
@@ -1507,22 +1559,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Termini di utilizzo",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link ai termini di utilizzo"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Politica sulla riservatezza",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link all'informativa sulla privacy"
 		}
 	},
 	"activity": {
@@ -1553,7 +1605,7 @@
 	"welcome": {
 		"title": "Benvenuto in $oisy_short!",
 		"subtitle": "Pronto a guadagnare?",
-		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Invita 4 amici e ottieni un bonus garantito."
+		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Segnala i tuoi amici e ricevi un bonus ogni volta che uno di loro guadagna Sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1587,7 +1639,9 @@
 			"send_message_input_placeholder": "",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
-			"loading": ""
+			"loading": "",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "",

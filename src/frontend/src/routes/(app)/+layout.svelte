@@ -4,7 +4,6 @@
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
-	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import AuthGuard from '$lib/components/auth/AuthGuard.svelte';
 	import LockPage from '$lib/components/auth/LockPage.svelte';
@@ -19,9 +18,9 @@
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
-	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
+	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
@@ -35,7 +34,7 @@
 	let tokensRoute = $derived(isRouteTokens(page));
 
 	let nftsRoute = $derived(isRouteNfts(page));
-	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(page.params.collectionId));
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(routeCollection));
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
@@ -101,7 +100,7 @@
 
 				<Responsive down="md">
 					<div class="z-2 fixed bottom-16 right-2 block md:hidden">
-						<AiAssistantConsoleButton size="60" styleClass="mb-2" />
+						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				</Responsive>
 
@@ -112,11 +111,7 @@
 				<Modals />
 			</AuthGuard>
 
-			{#if $aiAssistantConsoleOpen}
-				<AiAssistantConsole />
-			{:else}
-				<Footer />
-			{/if}
+			<Footer />
 		</div>
 	</div>
 {/if}

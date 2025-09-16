@@ -80,7 +80,7 @@
 	const onSyncState = ({ detail: state }: CustomEvent<SyncState>) => debounceUpdateSyncState(state);
 </script>
 
-<svelte:window on:oisyCkBtcUpdateBalance={onSyncState} />
+<svelte:window onoisyCkBtcUpdateBalance={onSyncState} />
 
 {#if nonNullish(ckBtcUpdateBalanceSyncState)}
 	{#if ckBtcUpdateBalanceSyncState === 'in_progress'}<div class="animate-pulse text-tertiary">
@@ -95,8 +95,8 @@
 {/if}
 
 {#if $modalReceiveBitcoin}
-	<Modal disablePointerEvents={true} on:nnsClose={modalStore.close}>
-		<svelte:fragment slot="title">{$i18n.receive.bitcoin.text.refresh_status}</svelte:fragment>
+	<Modal disablePointerEvents={true} onClose={modalStore.close}>
+		{#snippet title()}{$i18n.receive.bitcoin.text.refresh_status}{/snippet}
 
 		<div class="stretch">
 			<IcTransactionsBitcoinStatus bind:receiveProgressStep />

@@ -8,8 +8,16 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
-	import { erc1155CustomTokensInitialized } from '$eth/derived/erc1155.derived';
-	import { erc721CustomTokensInitialized } from '$eth/derived/erc721.derived';
+	import { NFTS_ENABLED } from '$env/nft.env';
+	import {
+		erc1155CustomTokensInitialized,
+		erc1155CustomTokensNotInitialized
+	} from '$eth/derived/erc1155.derived';
+	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
+	import {
+		erc721CustomTokensInitialized,
+		erc721CustomTokensNotInitialized
+	} from '$eth/derived/erc721.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
@@ -54,6 +62,7 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { splCustomTokensNotInitialized } from '$sol/derived/spl.derived';
 	import {
 		loadSolAddressDevnet,
 		loadSolAddressLocal,
@@ -67,7 +76,7 @@
 
 	let { children }: Props = $props();
 
-	let progressStep = $state(ProgressStepsLoader.ADDRESSES);
+	let progressStep = $state<ProgressStepsLoader>(ProgressStepsLoader.ADDRESSES);
 
 	let steps = $derived<ProgressSteps>([
 		{
@@ -96,21 +105,66 @@
 		setTimeout(() => loading.set(false), 1000);
 	});
 
+	let progressDone = $derived(progressStep === ProgressStepsLoader.DONE);
+
+	let loadErc = $derived(
+		$networkEthereumEnabled ||
+			$networkEvmMainnetEnabled ||
+			($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled))
+	);
+
+	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
+
+	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
+
+	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
+
+	let loadSpl = $derived(
+		($networkSolanaMainnetEnabled ||
+			($testnetsEnabled &&
+				($networkSolanaDevnetEnabled || (LOCAL && $networkSolanaLocalEnabled)))) &&
+			$splCustomTokensNotInitialized
+	);
+
 	const loadData = async () => {
 		// Load Erc20 and Erc721 contracts and ICRC metadata before loading balances and transactions
 		await Promise.all([
-			loadErc20Tokens({ identity: $authIdentity }),
-			loadErc721Tokens({ identity: $authIdentity }),
-			loadErc1155Tokens({ identity: $authIdentity }),
+			...(loadErc20 ? [loadErc20Tokens({ identity: $authIdentity })] : []),
+			...(loadErc721 ? [loadErc721Tokens({ identity: $authIdentity })] : []),
+			...(loadErc1155 ? [loadErc1155Tokens({ identity: $authIdentity })] : []),
 			loadIcrcTokens({ identity: $authIdentity }),
-			loadSplTokens({ identity: $authIdentity })
+			...(loadSpl ? [loadSplTokens({ identity: $authIdentity })] : [])
 		]);
 	};
+
+	$effect(() => {
+		if (loadErc20 && progressDone) {
+			loadErc20Tokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadErc721 && progressDone) {
+			loadErc721Tokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadErc1155 && progressDone) {
+			loadErc1155Tokens({ identity: $authIdentity });
+		}
+	});
+
+	$effect(() => {
+		if (loadSpl && progressDone) {
+			loadSplTokens({ identity: $authIdentity });
+		}
+	});
 
 	const progressAndLoad = async () => {
 		progressStep = ProgressStepsLoader.DONE;
 
-		// Once the address initialized, we load the data without displaying a progress step.
+		// Once the address initialised, we load the data without displaying a progress step.
 		// Instead, we use effect, placeholders and skeleton until those data are loaded.
 		await loadData();
 	};
@@ -128,7 +182,7 @@
 	const debounceLoadSolAddressLocal = debounce(loadSolAddressLocal);
 
 	$effect(() => {
-		if (progressStep === ProgressStepsLoader.DONE) {
+		if (progressDone) {
 			if (($networkEthereumEnabled || $networkEvmMainnetEnabled) && isNullish($ethAddress)) {
 				debounceLoadEthAddress();
 			}
@@ -173,10 +227,11 @@
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
-	});
+	}, 1000);
 
 	$effect(() => {
 		if (
+			NFTS_ENABLED &&
 			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
 			nonNullish($ethAddress) &&
 			$nonFungibleTokens.length > 0
