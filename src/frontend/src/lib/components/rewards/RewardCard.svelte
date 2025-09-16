@@ -34,7 +34,7 @@
 
 <button class="flex flex-col" data-tid={testId} {onclick}>
 	<div class="-mb-7">
-		<div class="max-h-66 overflow-hidden rounded-2xl">
+		<div class="max-h-66 relative overflow-hidden rounded-2xl">
 			<Img
 				alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 					$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
@@ -43,6 +43,13 @@
 				src={reward.cardBanner}
 				testId={REWARDS_BANNER}
 			/>
+
+			<span class="absolute right-4 top-4">
+				<RewardDateBadge
+					date={reward.endDate}
+					testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
+				/>
+			</span>
 		</div>
 	</div>
 
@@ -67,13 +74,6 @@
 							</span>
 						{/if}
 					</div>
-
-					<span class="mr-auto inline-flex md:ml-auto md:mr-0">
-						<RewardDateBadge
-							date={reward.endDate}
-							testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
-						/>
-					</span>
 				</div>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">
