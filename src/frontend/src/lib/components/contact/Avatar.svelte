@@ -28,7 +28,7 @@
 			md: 'text-[19.2px]', // size: 48px
 			sm: 'text-[16px]', // size: 40px
 			xs: 'text-[12.8px]', // size: 32px
-			xxs: 'text-[10px]' // size: 24px
+			xxs: 'text-[8px]' // size: 20px
 		}[variant]
 	);
 
