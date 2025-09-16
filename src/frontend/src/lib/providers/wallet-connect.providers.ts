@@ -1,5 +1,6 @@
 import {
-	CAIP10_CHAINS_KEYS,
+	CAIP10_DEVNET_CHAINS_KEYS,
+	CAIP10_MAINNET_CHAINS_KEYS,
 	LEGACY_SOLANA_DEVNET_NAMESPACE,
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
@@ -109,6 +110,23 @@ export const initWalletConnect = async ({
 		walletKit.on('session_request', callback);
 	};
 
+	const offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		walletKit.off('session_proposal', callback);
+		walletKit.removeListener('session_proposal', callback);
+	};
+
+	const offSessionDelete = (callback: () => void) => {
+		walletKit.off('session_delete', callback);
+		walletKit.removeListener('session_delete', callback);
+	};
+
+	const offSessionRequest = (
+		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
+	) => {
+		walletKit.off('session_request', callback);
+		walletKit.removeListener('session_request', callback);
+	};
+
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
 
@@ -133,7 +151,10 @@ export const initWalletConnect = async ({
 				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
 					? {
 							solana: {
-								chains: CAIP10_CHAINS_KEYS,
+								chains: [
+									...(nonNullish(solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
+								],
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
@@ -222,6 +243,9 @@ export const initWalletConnect = async ({
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
+		offSessionProposal,
+		offSessionDelete,
+		offSessionRequest,
 		getActiveSessions,
 		disconnect: async () => {
 			const disconnectPairings = async () => {
