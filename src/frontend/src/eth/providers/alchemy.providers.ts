@@ -9,7 +9,6 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
-import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -23,6 +22,7 @@ import {
 	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
+import { AlchemyProvider as AlchemyProviderLib, type TransactionResponse } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -118,32 +118,20 @@ export const initPendingTransactionsListener = ({
 };
 
 export class AlchemyProvider {
-	private readonly provider: Alchemy;
+	// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	private readonly deprecatedProvider: Alchemy;
+	private readonly provider: AlchemyProviderLib;
 
 	constructor(private readonly network: Network) {
-		this.provider = new Alchemy({
+		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
+		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 	}
 
-	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.provider.core.getTransaction(hash);
-
-		if (isNullish(transaction)) {
-			return transaction;
-		}
-
-		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
-
-		return {
-			...rest,
-			value: value.toBigInt(),
-			gasLimit: gasLimit.toBigInt(),
-			gasPrice: gasPrice?.toBigInt(),
-			chainId: BigInt(chainId)
-		};
-	};
+	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
+		this.provider.getTransaction(hash);
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({
@@ -153,11 +141,14 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: tokens.map((token) => token.address),
-			omitMetadata: false,
-			orderBy: NftOrdering.TRANSFERTIME
-		});
+		const result: AlchemyProviderOwnedNfts = await this.deprecatedProvider.nft.getNftsForOwner(
+			address,
+			{
+				contractAddresses: tokens.map((token) => token.address),
+				omitMetadata: false,
+				orderBy: NftOrdering.TRANSFERTIME
+			}
+		);
 
 		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
 			const {
@@ -211,7 +202,8 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
-		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+		const result: AlchemyProviderContracts =
+			await this.deprecatedProvider.nft.getContractsForOwner(address);
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
