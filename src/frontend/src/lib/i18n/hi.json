@@ -1560,7 +1560,7 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "उपयोग की शर्तें",
-			"title": "उपयोग की शर्तें",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1570,7 +1570,7 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "गोपनीयता नीति",
-			"title": "गोपनीयता नीति",
+			"title": "",
 			"body": ""
 		},
 		"alt": {

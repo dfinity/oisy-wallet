@@ -14,6 +14,7 @@ import { isNetworkIdICP } from '$lib/utils/network.utils';
 export interface GetFeeData {
 	from: EthAddress;
 	to: EthAddress;
+	value?: bigint;
 	data?: string;
 }
 
