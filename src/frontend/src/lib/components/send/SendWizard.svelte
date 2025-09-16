@@ -5,7 +5,7 @@
 	import BtcSendTokenWizard from '$btc/components/send/BtcSendTokenWizard.svelte';
 	import EthSendTokenWizard from '$eth/components/send/EthSendTokenWizard.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumToken } from '$eth/derived/token.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { selectedEvmNetwork } from '$evm/derived/network.derived';
 	import { evmNativeToken } from '$evm/derived/token.derived';
@@ -58,7 +58,7 @@
 		<EthSendTokenWizard
 			{currentStep}
 			{destination}
-			nativeEthereumToken={$ethereumToken}
+			nativeEthereumToken={$nativeEthereumToken}
 			{nft}
 			{selectedContact}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}

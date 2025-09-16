@@ -2,7 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { run } from 'svelte/legacy';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
@@ -36,7 +36,7 @@
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_ckerc20, {
 		$ckErc20: convertToSymbol
 	})}
-	nativeTokenId={$ethereumTokenId}
+	nativeTokenId={$nativeEthereumTokenId}
 >
 	{#snippet icon()}
 		<IconCkConvert size="24" />
@@ -45,7 +45,7 @@
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
-	<EthFeeStoreContext token={$ethereumToken}>
+	<EthFeeStoreContext token={$nativeEthereumToken}>
 		<ConvertModal destinationToken={ckToken} sourceToken={$pageToken} />
 	</EthFeeStoreContext>
 {/if}

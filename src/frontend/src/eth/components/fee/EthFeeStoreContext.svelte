@@ -10,6 +10,7 @@
 	} from '$eth/stores/eth-fee.store';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
 	interface Props {
 		token: Token;
@@ -28,14 +29,39 @@
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
+	let networkId = $derived(token.network.id);
+
+	let isEthNetwork = $derived(isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId));
+
+	const reset = () => {
+		feeSymbolStore.set(undefined);
+		feeTokenIdStore.set(undefined);
+		feeDecimalsStore.set(undefined);
+		feeExchangeRateStore.set(undefined);
+	};
+
 	$effect(() => {
+		if (!isEthNetwork) {
+			return;
+		}
+
 		feeSymbolStore.set(token.symbol);
 		feeTokenIdStore.set(token.id);
 		feeDecimalsStore.set(token.decimals);
 	});
 
 	$effect(() => {
+		if (!isEthNetwork) {
+			return;
+		}
+
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
+	});
+
+	$effect(() => {
+		if (!isEthNetwork) {
+			reset();
+		}
 	});
 
 	setContext<FeeContextType>(
