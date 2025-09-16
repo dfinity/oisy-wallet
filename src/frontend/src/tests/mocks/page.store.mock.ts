@@ -8,13 +8,20 @@ const initialStoreValue = {
 	data: resetRouteParams(),
 	route: {
 		id: null
-	}
+	},
+	params: {}
 };
 
 const initPageStoreMock = () => {
 	const { subscribe, set } = writable<Partial<Page>>(initialStoreValue);
-	page.data = initialStoreValue.data;
-	page.route = initialStoreValue.route;
+
+	const resetPageState = () => {
+		page.data = initialStoreValue.data;
+		page.route = initialStoreValue.route;
+		page.params = initialStoreValue.params;
+	};
+
+	resetPageState();
 
 	return {
 		subscribe,
@@ -36,7 +43,10 @@ const initPageStoreMock = () => {
 			page.params = params;
 		},
 
-		reset: () => set(initialStoreValue)
+		reset: () => {
+			set(initialStoreValue);
+			resetPageState();
+		}
 	};
 };
 
