@@ -1520,8 +1520,8 @@
 			"review_description": "Um OISY Wallet zu benutzen, musst du unseren Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"review_updated_description": "Um OISY Wallet weiterhin zu benutzen, musst du unseren angepassten Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
-			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
-			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
+			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
+			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
 			"accept_and_continue": "Zustimmen und weiterfahren"
 		},
 		"error": {
