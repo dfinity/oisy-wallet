@@ -11,6 +11,7 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
 	let ckEthToken: IcCkToken | undefined = $state();
