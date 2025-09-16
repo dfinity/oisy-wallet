@@ -7,7 +7,6 @@
 
 	interface Props {
 		date: Date;
-		styleClass?: string;
 		prefix?: string | undefined;
 		suffix?: string | undefined;
 		testId?: string | undefined;
@@ -17,7 +16,6 @@
 
 	let {
 		date,
-		styleClass,
 		prefix = undefined,
 		suffix = undefined,
 		testId = undefined,
@@ -30,7 +28,7 @@
 	);
 </script>
 
-<Badge {styleClass} {testId} {variant}>
+<Badge styleClass="rounded-full py-1 pl-2 pr-3" {testId} {variant}>
 	<div class="flex items-center gap-1.5 text-sm">
 		{#if showIcon}
 			<IconCalendarDays size="14" />
