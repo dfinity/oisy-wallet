@@ -28,6 +28,7 @@ import {
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
 	SWAP_DELTA_INTERVAL_MS,
@@ -614,7 +615,8 @@ const fetchVeloraSwapAmount = async ({
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress: userEthAddress
+		userAddress: userEthAddress,
+		partner: OISY_URL_HOSTNAME
 	};
 
 	const data = await sdk.quote.getQuote(
@@ -744,7 +746,8 @@ export const fetchVeloraDeltaSwap = async ({
 		destToken: destinationToken.address,
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork.chainId)
+		destChainId: Number(destinationNetwork.chainId),
+		partner: OISY_URL_HOSTNAME
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
@@ -874,7 +877,8 @@ export const fetchVeloraMarketSwap = async ({
 		srcAmount: swapDetails.srcAmount,
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
-		userAddress
+		userAddress,
+		partner: OISY_URL_HOSTNAME
 	});
 
 	await swap({
