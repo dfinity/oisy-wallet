@@ -29,8 +29,9 @@
 	);
 
 	const campaignEligibility = getCampaignEligibility(reward.id);
-	const isEligible = $derived($campaignEligibility?.eligible ?? true);
-	const hasNetworkBonus = true; // TODO calculate value
+	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityActive);
+	const networkBonusMultiplier = $derived($campaignEligibility?.probabilityMultiplier);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
@@ -69,8 +70,8 @@
 							<EligibilityBadge {isEligible} {testId} />
 						{/if}
 
-						{#if hasNetworkBonus}
-							<RewardNetworkBonus {isEligible} />
+						{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+							<RewardNetworkBonus {isEligible} multiplier={networkBonusMultiplier} />
 						{/if}
 					</div>
 				</div>

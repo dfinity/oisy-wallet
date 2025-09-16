@@ -109,7 +109,9 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			campaignId,
 			available: eligibility.available,
 			eligible: eligibility.eligible,
-			criteria
+			criteria,
+			probabilityMultiplier: eligibility.probability_multiplier,
+			probabilityActive: eligibility.probability_active
 		};
 	});
 

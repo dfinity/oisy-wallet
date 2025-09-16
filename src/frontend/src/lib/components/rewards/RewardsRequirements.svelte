@@ -5,15 +5,16 @@
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		isEligible: boolean;
+		hasNetworkBonus: boolean;
+		networkBonusMultiplier: number;
 		criteria: CampaignCriterion[];
 	}
 
-	let { isEligible, criteria }: Props = $props();
-
-	const hasNetworkBonus = true; // TODO calculate value
+	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria }: Props = $props();
 </script>
 
 {#if criteria.length > 0}
@@ -29,8 +30,8 @@
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
 			<EligibilityBadge {isEligible} />
 
-			{#if hasNetworkBonus}
-				<RewardNetworkBonus {isEligible} />
+			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+				<RewardNetworkBonus {isEligible} multiplier={networkBonusMultiplier} />
 			{/if}
 		</div>
 	</div>
