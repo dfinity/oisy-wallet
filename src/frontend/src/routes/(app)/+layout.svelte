@@ -34,7 +34,7 @@
 	let tokensRoute = $derived(isRouteTokens(page));
 
 	let nftsRoute = $derived(isRouteNfts(page));
-	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(routeCollection));
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
