@@ -7,7 +7,6 @@
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
-	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
