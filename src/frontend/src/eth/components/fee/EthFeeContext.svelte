@@ -70,7 +70,8 @@
 
 			const params: GetFeeData = {
 				to: mapAddressStartsWith0x(destination !== '' ? destination : $ethAddress),
-				from: mapAddressStartsWith0x($ethAddress)
+				from: mapAddressStartsWith0x($ethAddress),
+				...(nonNullish(amount) ? {value: parseToken({ value: `${amount}`, unitName: sendToken.decimals })} : {}),
 			};
 
 			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
