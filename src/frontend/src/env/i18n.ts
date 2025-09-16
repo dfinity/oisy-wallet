@@ -10,7 +10,7 @@ export const LANGUAGES = {
 	[Languages.GERMAN]: 'Deutsch',
 	[Languages.HINDI]: 'हिन्दी',
 	[Languages.ITALIAN]: 'Italiano',
-	[Languages.JAPANESE]: '日本語',
+	[Languages.POLISH]: 'Polski',
 	[Languages.PORTUGUESE]: 'Português',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
