@@ -329,9 +329,9 @@
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview
 				{network}
-				tokenAddress={splTokenAddress}
 				onBack={modal.back}
 				onSave={saveSplToken}
+				tokenAddress={splTokenAddress}
 				bind:metadata={splMetadata}
 			/>
 		{/if}
