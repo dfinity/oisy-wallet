@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
@@ -7,24 +7,20 @@
 
 	interface Props {
 		date: Date;
-		styleClass?: string;
-		inlineStyleClass?: string;
 		prefix?: string | undefined;
 		suffix?: string | undefined;
 		testId?: string | undefined;
 		variant?: BadgeVariant;
-		children?: Snippet;
+		showIcon?: boolean;
 	}
 
 	let {
 		date,
-		styleClass,
-		inlineStyleClass,
 		prefix = undefined,
 		suffix = undefined,
 		testId = undefined,
 		variant = 'default',
-		children
+		showIcon = false
 	}: Props = $props();
 
 	const formattedDate = $derived(
@@ -32,9 +28,11 @@
 	);
 </script>
 
-<Badge {styleClass} {testId} {variant}>
-	<div class={inlineStyleClass}>
-		{@render children?.()}
+<Badge styleClass="rounded-full py-1 pl-2 pr-3" {testId} {variant}>
+	<div class="flex items-center gap-1.5 text-sm">
+		{#if showIcon}
+			<IconCalendarDays size="14" />
+		{/if}
 
 		{prefix ?? ''}
 		{formattedDate}
