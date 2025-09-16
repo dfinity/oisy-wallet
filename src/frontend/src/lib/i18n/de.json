@@ -352,8 +352,7 @@
 			"not_eligible": "",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
-			"banner_text": "Erhalte täglich Prämien mit Sprinkles",
-			"network_bonus": ""
+			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",

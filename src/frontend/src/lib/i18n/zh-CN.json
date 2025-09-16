@@ -352,8 +352,7 @@
 			"not_eligible": "",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
-			"banner_text": "通过 OISY Sprinkles 赚取每日奖励",
-			"network_bonus": ""
+			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
 		},
 		"requirements": {
 			"requirements_title": "资格标准",

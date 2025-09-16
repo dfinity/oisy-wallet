@@ -352,8 +352,7 @@
 			"not_eligible": "",
 			"ongoing": "In corso",
 			"ended": "Terminato ($amount)",
-			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles",
-			"network_bonus": ""
+			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Criteri di eleggibilità",

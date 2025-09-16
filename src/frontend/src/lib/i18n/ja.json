@@ -352,8 +352,7 @@
 			"not_eligible": "",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
-			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう",
-			"network_bonus": ""
+			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
 		},
 		"requirements": {
 			"requirements_title": "参加基準",
