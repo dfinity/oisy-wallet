@@ -5,7 +5,6 @@
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,6 +14,7 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 
 	interface Props {
 		onclick: () => void;
@@ -71,7 +71,7 @@
 						{/if}
 
 						{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
-							<RewardNetworkBonus {isEligible} multiplier={networkBonusMultiplier} />
+							<NetworkBonusImage multiplier={networkBonusMultiplier} disabled={!isEligible} />
 						{/if}
 					</div>
 				</div>

@@ -280,7 +280,6 @@ interface I18nRewards {
 		ongoing: string;
 		ended: string;
 		banner_text: string;
-		network_bonus: string;
 	};
 	requirements: {
 		requirements_title: string;
