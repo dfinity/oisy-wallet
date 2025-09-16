@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount, setContext } from 'svelte';
+	import { setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { decodeQrCode as decodeQrCodeETH } from '$eth/utils/qr-code.utils';
@@ -28,6 +28,7 @@
 		solAddressMainnetNotLoaded
 	} from '$lib/derived/address.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pageNft } from '$lib/derived/page-nft.derived';
 	import { enabledTokens, nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsSend } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -59,7 +60,6 @@
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { pageNft } from '$lib/derived/page-nft.derived';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
@@ -184,8 +184,8 @@
 		if (nonNullish(token)) {
 			loadTokenAndRun({
 				token,
+				// eslint-disable-next-line require-await
 				callback: async () => {
-					// eslint-disable-next-line require-await
 					goToStep(WizardStepsSend.DESTINATION);
 				}
 			});
