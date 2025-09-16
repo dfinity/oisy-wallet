@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
+			"not_eligible": "",
 			"ongoing": "Em andamento",
 			"ended": "Finalizado ($amount)",
 			"banner_text": "Ganhe recompensas diárias com OISY Sprinkles"
@@ -1515,22 +1516,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Revise os Termos e Condições",
+			"review_updated_title": "Revise os Termos e Condições atualizados",
+			"review_description": "Antes de usar a Carteira OISY, você deve revisar e concordar com nossos Termos de Serviço e Política de Privacidade. Esses documentos explicam as regras do nosso serviço e como protegemos seus dados.",
+			"review_updated_description": "Para continuar usando a Carteira OISY, revise e concorde com nossos Termos de Serviço e Política de Privacidade atualizados. Essas alterações são importantes para manter nosso serviço seguro e em conformidade.",
+			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
+			"i_have_accepted": "Li e concordo com os",
+			"i_have_accepted_updated": "Li e concordo com os atualizados",
+			"accept_and_continue": "Aceite e continue"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Contrato de Licença",
 			"accept_terms": "Ao clicar neste botão, você concorda com o",
 			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
@@ -1558,22 +1559,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Termos de Uso",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link para os Termos de Uso"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Política de Privacidade",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link para a Política de Privacidade"
 		}
 	},
 	"activity": {
@@ -1604,7 +1605,7 @@
 	"welcome": {
 		"title": "Bem vindo ao $oisy_curtas!",
 		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
 	},
 	"temporal": {
 		"seconds_to_duration": {

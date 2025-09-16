@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "En savoir plus",
 			"sprinkles_earned": "Vous avez gagné $noOfSprinkles sprinkles, pour un total de $amount ! 🎉",
 			"youre_eligible": "Vous êtes éligible !",
+			"not_eligible": "",
 			"ongoing": "En cours",
 			"ended": "Terminé ($amount)",
 			"banner_text": "Gagnez des récompenses quotidiennes avec OISY Sprinkles"
@@ -1515,22 +1516,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Consulter les conditions générales",
+			"review_updated_title": "Consulter les conditions générales mises à jour",
+			"review_description": "Avant d'utiliser OISY Wallet, vous devez lire et accepter nos Conditions d'utilisation et notre Politique de confidentialité. Ces documents expliquent les règles de notre service et la manière dont nous protégeons vos données.",
+			"review_updated_description": "Pour continuer à utiliser OISY Wallet, veuillez consulter et accepter nos Conditions d'utilisation et notre Politique de confidentialité mises à jour. Ces modifications sont importantes pour garantir la sécurité et la conformité de notre service.",
+			"reject_warning": "Vous devez accepter les conditions générales pour continuer. N'hésitez pas à réessayer à tout moment.",
+			"i_have_accepted": "J'ai lu et j'accepte les",
+			"i_have_accepted_updated": "J'ai lu et j'accepte les mises à jour",
+			"accept_and_continue": "Accepter et continuer"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Une erreur s'est produite lors de la mise à jour de vos accords."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Conditions de licence",
 			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
 			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",
@@ -1558,22 +1559,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Conditions d'utilisation",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Lien vers les conditions d'utilisation"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "politique de confidentialité",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "lien vers la politique de confidentialité"
 		}
 	},
 	"activity": {
@@ -1604,7 +1605,7 @@
 	"welcome": {
 		"title": "Bienvenue sur $oisy_short !",
 		"subtitle": "Prêt à être récompensé(e) ?",
-		"description": "Vous êtes à 2 pas de votre première récompense : Connectez-vous, détenez plus de 20 $ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez 4 amis et obtenez un bonus garanti."
+		"description": "Vous êtes à 2 pas de votre première récompense : Connectez-vous, détenez plus de 20 $ et effectuez 2 actions. C'est tout ce qu'il faut pour commencer à gagner des Sprinkles.<br><br>Vous en voulez plus ? Parrainez vos amis et obtenez un bonus à chaque fois que l'un d'eux gagne des sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
