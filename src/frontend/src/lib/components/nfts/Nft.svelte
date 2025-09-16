@@ -8,23 +8,14 @@
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageNft } from '$lib/derived/page-nft.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	const nft = $derived($pageNft);
 
-	const token: NonFungibleToken | undefined = $derived(
-		nonNullish(nft) && nonNullish(nft.collection)
-			? findNonFungibleToken({
-					tokens: $nonFungibleTokens,
-					address: nft.collection.address,
-					networkId: nft.collection.network.id
-				})
-			: undefined
-	);
+	const token: NonFungibleToken | undefined = $derived($pageNonFungibleToken);
 
 	// Redirect to the assets' page if NFT can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
