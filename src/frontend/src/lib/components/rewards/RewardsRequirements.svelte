@@ -1,5 +1,5 @@
 <script lang="ts">
-	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
@@ -27,7 +27,7 @@
 		</span>
 
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
-			<EligibilityTag {isEligible} />
+			<EligibilityBadge {isEligible} />
 
 			{#if hasNetworkBonus}
 				<RewardNetworkBonus {isEligible} />

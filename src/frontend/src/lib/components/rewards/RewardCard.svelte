@@ -3,7 +3,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
-	import EligibilityTag from '$lib/components/rewards/EligibilityTag.svelte';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardNetworkBonus from '$lib/components/rewards/RewardNetworkBonus.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -66,7 +66,7 @@
 
 					<div class="flex flex-wrap items-center gap-3">
 						{#if !hasEnded}
-							<EligibilityTag {isEligible} {testId} />
+							<EligibilityBadge {isEligible} {testId} />
 						{/if}
 
 						{#if hasNetworkBonus}
