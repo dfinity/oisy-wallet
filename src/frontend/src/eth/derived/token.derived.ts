@@ -1,18 +1,24 @@
 import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
-import type { RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
+import { evmNativeToken } from '$evm/derived/token.derived';
+import { defaultFallbackToken } from '$lib/derived/token.derived';
+import type { RequiredToken, TokenId } from '$lib/types/token';
 import { derived, type Readable } from 'svelte/store';
 
 /**
- * Ethereum (Ethereum or Sepolia) token - i.e. not ERC20.
+ * Native token - i.e. not ERC20 - for the selected Ethereum/EVM network.
  */
-export const ethereumToken: Readable<RequiredTokenWithLinkedData> = derived(
-	[enabledEthereumTokens, selectedEthereumNetwork],
-	([$enabledEthereumTokens, $selectedEthereumNetwork]) =>
+export const nativeEthereumToken: Readable<RequiredToken> = derived(
+	[enabledEthereumTokens, selectedEthereumNetwork, evmNativeToken, defaultFallbackToken],
+	([$enabledEthereumTokens, $selectedEthereumNetwork, $evmNativeToken, $defaultFallbackToken]) =>
 		$enabledEthereumTokens.find(
 			({ network: { id: networkId } }) => $selectedEthereumNetwork?.id === networkId
-		) ?? DEFAULT_ETHEREUM_TOKEN
+		) ??
+		$evmNativeToken ??
+		$defaultFallbackToken
 );
 
-export const ethereumTokenId: Readable<TokenId> = derived([ethereumToken], ([{ id }]) => id);
+export const nativeEthereumTokenId: Readable<TokenId> = derived(
+	[nativeEthereumToken],
+	([{ id }]) => id
+);

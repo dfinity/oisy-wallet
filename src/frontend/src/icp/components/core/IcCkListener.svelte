@@ -33,6 +33,6 @@
 	const triggerTimer = () => worker?.trigger();
 </script>
 
-<svelte:window on:oisyTriggerWallet={triggerTimer} />
+<svelte:window onoisyTriggerWallet={triggerTimer} />
 
 <slot />
