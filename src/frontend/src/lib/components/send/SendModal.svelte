@@ -13,6 +13,7 @@
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import {
+		allSendNftsWizardSteps,
 		allSendWizardSteps,
 		sendNftsWizardSteps,
 		sendWizardStepsWithQrCodeScan
@@ -75,8 +76,8 @@
 		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 		: isNftsPage
 			? nonNullish($pageNft)
-				? sendNftsWizardSteps({ i18n: $i18n }).slice(2)
-				: sendNftsWizardSteps({ i18n: $i18n })
+				? sendNftsWizardSteps({ i18n: $i18n })
+				: allSendNftsWizardSteps({ i18n: $i18n })
 			: allSendWizardSteps({ i18n: $i18n });
 
 	let currentStep: WizardStep<WizardStepsSend> | undefined;
