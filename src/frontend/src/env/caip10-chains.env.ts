@@ -38,4 +38,12 @@ export const CAIP10_CHAINS: Record<
 	})
 };
 
-export const CAIP10_CHAINS_KEYS = Object.keys(CAIP10_CHAINS);
+const CAIP10_CHAINS_KEYS = Object.keys(CAIP10_CHAINS);
+
+export const CAIP10_MAINNET_CHAINS_KEYS = CAIP10_CHAINS_KEYS.filter(
+	(key) => CAIP10_CHAINS[key].network === SolanaNetworks.mainnet
+);
+
+export const CAIP10_DEVNET_CHAINS_KEYS = CAIP10_CHAINS_KEYS.filter(
+	(key) => CAIP10_CHAINS[key].network === SolanaNetworks.devnet
+);

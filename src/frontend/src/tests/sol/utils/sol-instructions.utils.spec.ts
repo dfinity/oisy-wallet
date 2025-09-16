@@ -11,6 +11,8 @@ import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolRpcInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
+import * as solInstructionsAtaUtils from '$sol/utils/sol-instructions-ata.utils';
+import { parseSolAtaInstruction } from '$sol/utils/sol-instructions-ata.utils';
 import * as solInstructionsComputeBudgetUtils from '$sol/utils/sol-instructions-compute-budget.utils';
 import { parseSolComputeBudgetInstruction } from '$sol/utils/sol-instructions-compute-budget.utils';
 import * as solInstructionsSystemUtils from '$sol/utils/sol-instructions-system.utils';
@@ -857,6 +859,7 @@ describe('sol-instructions.utils', () => {
 			vi.spyOn(solInstructionsSystemUtils, 'parseSolSystemInstruction');
 			vi.spyOn(solInstructionsTokenUtils, 'parseSolTokenInstruction');
 			vi.spyOn(solInstructionsToken2022Utils, 'parseSolToken2022Instruction');
+			vi.spyOn(solInstructionsAtaUtils, 'parseSolAtaInstruction');
 		});
 
 		it('should map a valid Compute Budget instruction', () => {
@@ -963,6 +966,7 @@ describe('sol-instructions.utils', () => {
 			expect(parseSolSystemInstruction).not.toHaveBeenCalled();
 			expect(parseSolTokenInstruction).not.toHaveBeenCalled();
 			expect(parseSolToken2022Instruction).not.toHaveBeenCalled();
+			expect(parseSolAtaInstruction).not.toHaveBeenCalled();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not parse Solana instruction for program ${mockInstruction1.programAddress}`
