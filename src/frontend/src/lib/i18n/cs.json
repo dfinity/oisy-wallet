@@ -1604,7 +1604,7 @@
 	"welcome": {
 		"title": "Vítejte v $oisy_short!",
 		"subtitle": "Jste připraveni vydělávat?",
-		"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte 4 přátele a získejte zaručený bonus."
+		"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte své přátele a získejte bonus pokaždé, když jeden z nich získá posypky."
 	},
 	"temporal": {
 		"seconds_to_duration": {
