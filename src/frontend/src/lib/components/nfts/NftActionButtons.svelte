@@ -7,13 +7,6 @@
 	import { modalSend } from '$lib/derived/modal.derived.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
-	import type { Nft } from '$lib/types/nft';
-
-	interface Props {
-		nft: Nft;
-	}
-
-	const { nft }: Props = $props();
 </script>
 
 <div class="flex gap-2">
