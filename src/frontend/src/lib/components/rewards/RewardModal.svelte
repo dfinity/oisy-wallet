@@ -93,7 +93,7 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {criteria} {hasNetworkBonus} {networkBonusMultiplier} {isEligible} />
+				<RewardsRequirements {criteria} {hasNetworkBonus} {isEligible} {networkBonusMultiplier} />
 			{/if}
 		{/if}
 
