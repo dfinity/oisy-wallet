@@ -106,7 +106,7 @@
 	};
 </script>
 
-<Modal {testId} on:nnsClose={onClose}>
+<Modal {testId} {onClose}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
