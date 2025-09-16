@@ -415,7 +415,7 @@ describe('page-token.derived', () => {
 			expect(get(pageNonFungibleToken)).toBeUndefined();
 		});
 
-		it('should return true if were on an Nft page', () => {
+		it('should return the nonFungibleToken if were on an Nft page', () => {
 			vi.spyOn(pageNft, 'subscribe').mockImplementation((fn) => {
 				fn(mockNft);
 				return () => {};
