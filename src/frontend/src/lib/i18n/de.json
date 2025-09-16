@@ -426,6 +426,36 @@
 						"share_href": "https://x.com/intent/post?text=Ich%20habe%20mich%20bei%20%40OISY%20angemeldet%20und%20Sprinkles%20erhalten.%20%20%0AMein%20Freund%2C%20der%20mich%20eingeladen%20hat%2C%20auch.%20Win-win.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
