@@ -67,7 +67,7 @@ export const getAiAssistantSystemPrompt = ({
 		- Using OISY Wallet:
 			- Sending Tokens - https://docs.oisy.com/using-oisy-wallet/how-tos/sending-tokens
 			- Receiving Tokens - https://docs.oisy.com/using-oisy-wallet/how-tos/receiving-tokens
-			- Managing and Adding Tokens - https://docs.oisy.com/using-oisy-wallet/how-tos/managing-and-adding-tokens
+			- Managing AVAILABLE TOKENS or Adding New Tokens - https://docs.oisy.com/using-oisy-wallet/how-tos/managing-and-adding-tokens
 			- Swapping Tokens - https://docs.oisy.com/using-oisy-wallet/how-tos/swapping-tokens	
 			- Connecting to dApps - https://docs.oisy.com/using-oisy-wallet/how-tos/connecting-to-dapps
 			- Filter and Manage Network - https://docs.oisy.com/using-oisy-wallet/how-tos/filter-and-manage-network
