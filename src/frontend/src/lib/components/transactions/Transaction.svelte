@@ -92,7 +92,7 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
-	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
+	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
@@ -113,12 +113,20 @@
 				<div>
 					{#if iconType === 'token'}
 						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} logoSize="md" {nft} />
+							<NftLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								logoSize="md"
+								{nft}
+							/>
 						{:else}
-							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}  logoSize="md" data={token} />
+							<TokenLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								data={token}
+								logoSize="md"
+							/>
 						{/if}
 					{:else}
-						<RoundedIcon icon={cardIcon} size="12" opacity={iconWithOpacity} />
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} size="16" />
 					{/if}
 				</div>
 			{/snippet}
@@ -139,7 +147,7 @@
 			{/snippet}
 			{#snippet amountDescription()}
 				{#if nonNullish(timestamp)}
-					<span data-tid="receive-tokens-modal-transaction-timestamp">
+					<span class="text-xs sm:text-sm" data-tid="receive-tokens-modal-transaction-timestamp">
 						{formatSecondsToDate({
 							seconds: Number(timestamp),
 							language: $currentLanguage,
@@ -154,35 +162,40 @@
 			{/snippet}
 
 			{#snippet description()}
-				<span class="inline-flex min-w-0 items-center gap-1 text-sm text-primary">
-					{#if type === 'send'}
-						<span class="shrink-0">{$i18n.transaction.text.to}</span>
-					{:else if type === 'receive'}
-						<span class="shrink-0">{$i18n.transaction.text.from}</span>
-					{/if}
+				<span
+					class="flex min-w-0 flex-col items-start items-center text-xs text-primary sm:flex-row sm:text-sm"
+				>
+					<span class="inline-flex min-w-0 items-center gap-1">
+						{#if type === 'send'}
+							<span class="shrink-0">{$i18n.transaction.text.to}</span>
+						{:else if type === 'receive'}
+							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{/if}
 
-					{#if nonNullish(contact)}
-						<span class="shrink-0">
-							<Avatar name={contact.name} image={contact.image} variant="xxs" />
-						</span>
-					{/if}
-
-					<span class="inline-flex min-w-0 items-center">
-						<span>
-							{#if nonNullish(contact)}
-								{contact.name}
-							{:else if nonNullish(contactAddress)}
-								{shortenWithMiddleEllipsis({ text: contactAddress })}
-							{/if}
-						</span>
-						{#if notEmptyString(addressAlias)}
-							<span class="inline-flex items-center text-tertiary">
-								<Divider />{addressAlias}
+						{#if nonNullish(contact)}
+							<span class="shrink-0">
+								<Avatar name={contact.name} image={contact.image} variant="xxs" />
 							</span>
 						{/if}
-					</span>
 
-					<TransactionStatusComponent {status} />
+						<span class="inline-flex min-w-0 items-center truncate">
+							<span class="inline-block max-w-32 truncate">
+								{#if nonNullish(contact)}
+									{contact.name}
+								{:else if nonNullish(contactAddress)}
+									{shortenWithMiddleEllipsis({ text: contactAddress })}
+								{/if}
+							</span>
+							{#if notEmptyString(addressAlias)}
+								<span class="inline-flex items-center truncate text-tertiary">
+									<Divider />{addressAlias}
+								</span>
+							{/if}
+						</span>
+					</span>
+					<span class="truncate text-tertiary">
+						<TransactionStatusComponent {status} />
+					</span>
 				</span>
 			{/snippet}
 		</Card>
