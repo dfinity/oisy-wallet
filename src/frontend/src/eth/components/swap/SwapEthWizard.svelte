@@ -214,7 +214,9 @@
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
 					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? ''
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
@@ -227,7 +229,9 @@
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
 					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					error: errorDetailToString(err) ?? ''
+					error: errorDetailToString(err) ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
