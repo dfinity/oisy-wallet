@@ -3,6 +3,7 @@ import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import type { OptionString } from '$lib/types/string';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -115,8 +116,11 @@ describe('NftHero', () => {
 	});
 
 	it('should open the send modal in Nft send flow when send button is clicked', () => {
-		mockPage.mockDynamicRoutes({
-			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+		mockPage.mockWithDynamicRoutes({
+			data: { network: mockValidErc1155Nft.collection.network as unknown as OptionString },
+			params: {
+				collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+			}
 		});
 
 		const { getByTestId, getByText } = render(NftHero, {
