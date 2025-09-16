@@ -167,7 +167,7 @@
 						</span>
 					{/if}
 
-					<span class="inline-flex min-w-0 items-center gap-1">
+					<span class="inline-flex min-w-0 items-center">
 						<span>
 							{#if nonNullish(contact)}
 								{contact.name}
@@ -176,7 +176,7 @@
 							{/if}
 						</span>
 						{#if notEmptyString(addressAlias)}
-							<span class="inline-flex items-center gap-1 text-tertiary">
+							<span class="inline-flex items-center text-tertiary">
 								<Divider />{addressAlias}
 							</span>
 						{/if}
