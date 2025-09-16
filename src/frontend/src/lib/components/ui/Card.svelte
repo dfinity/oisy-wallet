@@ -12,6 +12,7 @@
 		action?: Snippet;
 		children?: Snippet;
 		noMargin?: boolean;
+		withGap?: boolean;
 		testId?: string;
 	}
 
@@ -23,6 +24,7 @@
 		action,
 		children,
 		noMargin = false,
+		withGap = false,
 		testId
 	}: Props = $props();
 </script>
@@ -30,7 +32,7 @@
 <div class="flex items-center gap-4" class:mb-6={!noMargin} data-tid={testId}>
 	{@render icon()}
 
-	<div class="flex flex-1 flex-col justify-center">
+	<div class="flex flex-1 flex-col justify-center" class:gap-1={withGap} >
 		<div class="flex gap-1 font-bold leading-5" class:items-center={isNullish(description)}>
 			<span
 				style={nonNullish(amount) ? 'max-width: 60%' : undefined}

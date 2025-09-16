@@ -93,7 +93,7 @@
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
-		<Card noMargin>
+		<Card noMargin withGap>
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
@@ -113,12 +113,12 @@
 				<div>
 					{#if iconType === 'token'}
 						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} {nft} />
+							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} logoSize="md" {nft} />
 						{:else}
-							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
+							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}  logoSize="md" data={token} />
 						{/if}
 					{:else}
-						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+						<RoundedIcon icon={cardIcon} size="12" opacity={iconWithOpacity} />
 					{/if}
 				</div>
 			{/snippet}
@@ -154,7 +154,7 @@
 			{/snippet}
 
 			{#snippet description()}
-				<span class="inline-flex min-w-0 items-center gap-2 text-primary">
+				<span class="inline-flex min-w-0 items-center gap-1 text-sm text-primary">
 					{#if type === 'send'}
 						<span class="shrink-0">{$i18n.transaction.text.to}</span>
 					{:else if type === 'receive'}
