@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
@@ -25,13 +25,13 @@
 	})();
 </script>
 
-<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
+<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$nativeEthereumTokenId}>
 	<IconCkConvert slot="icon" size="24" />
-	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
+	<span>{$nativeEthereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
-	<EthFeeStoreContext token={$ethereumToken}>
-		<ConvertModal destinationToken={ckEthToken} sourceToken={$ethereumToken} />
+	<EthFeeStoreContext token={$nativeEthereumToken}>
+		<ConvertModal destinationToken={ckEthToken} sourceToken={$nativeEthereumToken} />
 	</EthFeeStoreContext>
 {/if}
