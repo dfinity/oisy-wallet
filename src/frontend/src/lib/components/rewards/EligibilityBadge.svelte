@@ -21,11 +21,11 @@
 	>
 		<div class="flex items-center gap-1.5 text-sm">
 			{#if isEligible}
-					<IconCircleCheck size="14" />
-					{$i18n.rewards.text.youre_eligible}
+				<IconCircleCheck size="14" />
+				{$i18n.rewards.text.youre_eligible}
 			{:else}
-					<IconCircle size="14" />
-					{$i18n.rewards.text.not_eligible}
+				<IconCircle size="14" />
+				{$i18n.rewards.text.not_eligible}
 			{/if}
 		</div>
 	</Badge>
