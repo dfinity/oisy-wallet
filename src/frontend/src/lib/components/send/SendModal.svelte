@@ -61,7 +61,6 @@
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import { pageNonFungibleToken } from '$lib/derived/page-token.derived';
 
 	export let isTransactionsPage: boolean;
 	export let isNftsPage: boolean;
@@ -178,7 +177,11 @@
 
 	const selectNft = (nft: Nft) => {
 		selectedNft = nft;
-		const token = $pageNonFungibleToken;
+		const token = findNonFungibleToken({
+			tokens: $nonFungibleTokens,
+			networkId: nft.collection.network.id,
+			address: nft.collection.address
+		});
 		if (nonNullish(token)) {
 			loadTokenAndRun({
 				token,
