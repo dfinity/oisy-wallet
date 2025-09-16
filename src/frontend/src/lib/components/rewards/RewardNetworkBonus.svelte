@@ -17,6 +17,7 @@
 	import networkBonusDisabled8 from '$lib/assets/rewards/network-bonus-disabled-8.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { REWARDS_NETWORK_MULTIPLIER_IMAGE } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		isEligible: boolean;
@@ -43,4 +44,4 @@
 	);
 </script>
 
-<Img alt={$i18n.rewards.text.network_bonus} src={networkBonusSource} />
+<Img alt={$i18n.rewards.text.network_bonus} src={networkBonusSource} testId={REWARDS_NETWORK_MULTIPLIER_IMAGE} />
