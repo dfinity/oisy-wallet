@@ -21,5 +21,7 @@
 	styleClass="rounded-full py-1 pl-2 pr-3"
 	{testId}
 >
-	<IconCalendarDays size="14" />
+	{#snippet icon()}
+		<IconCalendarDays size="14" />
+	{/snippet}
 </DateBadge>

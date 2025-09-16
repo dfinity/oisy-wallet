@@ -13,7 +13,7 @@
 		suffix?: string | undefined;
 		testId?: string | undefined;
 		variant?: BadgeVariant;
-		children?: Snippet;
+		icon?: Snippet;
 	}
 
 	let {
@@ -24,7 +24,7 @@
 		suffix = undefined,
 		testId = undefined,
 		variant = 'default',
-		children
+		icon
 	}: Props = $props();
 
 	const formattedDate = $derived(
@@ -34,7 +34,7 @@
 
 <Badge {styleClass} {testId} {variant}>
 	<div class={inlineStyleClass}>
-		{@render children?.()}
+		{@render icon?.()}
 
 		{prefix ?? ''}
 		{formattedDate}
