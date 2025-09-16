@@ -1606,7 +1606,7 @@
 	"welcome": {
 		"title": "Welcome to $oisy_short!",
 		"subtitle": "Ready to Earn?",
-		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
