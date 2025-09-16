@@ -6,7 +6,7 @@
 		tokenAddress?: string;
 	}
 
-	let { tokenAddress = $bindable('') }: Props = $props();
+	let { tokenAddress = $bindable() }: Props = $props();
 </script>
 
 <label class="font-bold" for="destination">{$i18n.tokens.text.token_address}:</label>
