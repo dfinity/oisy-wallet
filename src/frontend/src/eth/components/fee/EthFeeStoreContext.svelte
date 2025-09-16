@@ -45,16 +45,15 @@
 			return;
 		}
 
-
 		feeSymbolStore.set(token.symbol);
 		feeTokenIdStore.set(token.id);
 		feeDecimalsStore.set(token.decimals);
 	});
 
 	$effect(() => {
-        if (!isEthNetwork || isNullish(token)) {
-            return;
-        }
+		if (!isEthNetwork || isNullish(token)) {
+			return;
+		}
 
 		feeExchangeRateStore.set($exchanges?.[token.id]?.usd);
 	});
