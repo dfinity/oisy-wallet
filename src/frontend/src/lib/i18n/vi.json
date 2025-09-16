@@ -427,6 +427,36 @@
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -1606,7 +1636,7 @@
 	"welcome": {
 		"title": "Chào mừng đến với $oisy_short!",
 		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {

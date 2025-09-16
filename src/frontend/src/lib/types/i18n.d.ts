@@ -319,6 +319,20 @@ interface I18nRewards {
 				referee: { title: string; description: string; share_href: string };
 			};
 		};
+		sprinkles_s1e5: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
+				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
+			};
+		};
 	};
 }
 

@@ -19,16 +19,14 @@
 		testId={nonNullish(testId) ? `${testId}-badge` : undefined}
 		variant={isEligible ? 'eligible' : 'not-eligible'}
 	>
-		{#if isEligible}
-			<div class="flex items-center gap-1.5 text-sm">
+		<div class="flex items-center gap-1.5 text-sm">
+			{#if isEligible}
 				<IconCircleCheck size="14" />
 				{$i18n.rewards.text.youre_eligible}
-			</div>
-		{:else}
-			<div class="flex items-center gap-1.5 text-sm">
+			{:else}
 				<IconCircle size="14" />
 				{$i18n.rewards.text.not_eligible}
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</Badge>
 </span>
