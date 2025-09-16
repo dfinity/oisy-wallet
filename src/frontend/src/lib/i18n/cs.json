@@ -352,7 +352,8 @@
 			"not_eligible": "",
 			"ongoing": "Probíhá",
 			"ended": "Skončeno ($amount)",
-			"banner_text": "Získejte denní odměny s OISY Sprinkles"
+			"banner_text": "Získejte denní odměny s OISY Sprinkles",
+			"network_bonus": ""
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
