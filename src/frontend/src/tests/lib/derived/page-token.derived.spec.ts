@@ -412,6 +412,7 @@ describe('page-token.derived', () => {
 
 		it('should return undefined if not set', () => {
 			mockPage.mockDynamicRoutes({ collectionId: undefined as unknown as string });
+
 			expect(get(pageNonFungibleToken)).toBeUndefined();
 		});
 
