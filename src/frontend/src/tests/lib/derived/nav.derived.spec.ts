@@ -36,6 +36,10 @@ describe('nav.derived', () => {
 			mockPage.mock({ token: 'token-2' });
 
 			expect(get(routeToken)).toBe('token-2');
+
+			mockPage.reset();
+
+			expect(get(routeToken)).toBeNull();
 		});
 	});
 
@@ -60,6 +64,10 @@ describe('nav.derived', () => {
 			mockPage.mock({ network: 'network-2' });
 
 			expect(get(routeNetwork)).toBe('network-2');
+
+			mockPage.reset();
+
+			expect(get(routeNetwork)).toBeNull();
 		});
 	});
 
@@ -84,6 +92,10 @@ describe('nav.derived', () => {
 			mockPage.mockDynamicRoutes({ networkId: 'network-2' });
 
 			expect(get(routeNftNetwork)).toBe('network-2');
+
+			mockPage.reset();
+
+			expect(get(routeNftNetwork)).toBeUndefined();
 		});
 	});
 
@@ -108,6 +120,10 @@ describe('nav.derived', () => {
 			mockPage.mockDynamicRoutes({ collectionId: 'collection-2' });
 
 			expect(get(routeCollection)).toBe('collection-2');
+
+			mockPage.reset();
+
+			expect(get(routeCollection)).toBeUndefined();
 		});
 	});
 
@@ -132,6 +148,10 @@ describe('nav.derived', () => {
 			mockPage.mockDynamicRoutes({ nftId: 'nft-2' });
 
 			expect(get(routeNft)).toBe('nft-2');
+
+			mockPage.reset();
+
+			expect(get(routeNft)).toBeUndefined();
 		});
 	});
 });
