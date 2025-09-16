@@ -16,6 +16,6 @@
 <DateBadge
 	{date}
 	prefix={hasEnded ? $i18n.rewards.text.ended_date : $i18n.rewards.text.active_date}
-	{testId}
 	showIcon
+	{testId}
 ></DateBadge>

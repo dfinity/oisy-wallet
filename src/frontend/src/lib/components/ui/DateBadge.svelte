@@ -1,9 +1,9 @@
 <script lang="ts">
+	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { BadgeVariant } from '$lib/types/style';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
-	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 
 	interface Props {
 		date: Date;
@@ -20,7 +20,7 @@
 		suffix = undefined,
 		testId = undefined,
 		variant = 'default',
-		showIcon = false,
+		showIcon = false
 	}: Props = $props();
 
 	const formattedDate = $derived(
