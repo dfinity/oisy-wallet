@@ -5,7 +5,7 @@ import {
 	parseCreateAssociatedTokenIdempotentInstruction,
 	parseCreateAssociatedTokenInstruction,
 	parseRecoverNestedAssociatedTokenInstruction
-} from '@solana-program/token-2022';
+} from '@solana-program/token';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
 export const parseSolAtaInstruction = (
