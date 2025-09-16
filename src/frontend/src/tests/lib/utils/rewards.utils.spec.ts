@@ -586,8 +586,8 @@ describe('rewards.utils', () => {
 			});
 		});
 
-		describe('MinTransactionsPerNetwork', () => {
-			it('should map MinTransactionsPerNetwork criterion', () => {
+		describe('MinTransactionsInNetwork', () => {
+			it('should map MinTransactionsInNetwork criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -599,7 +599,7 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTransactionsPerNetwork: {
+											MinTransactionsInNetwork: {
 												duration: { Days: 30n },
 												count: 10
 											}
@@ -623,7 +623,7 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+								type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
 								days: 30n,
 								count: 10
 							}
@@ -682,8 +682,8 @@ describe('rewards.utils', () => {
 			});
 		});
 
-		describe('MinTotalAssetsUsdPerNetwork', () => {
-			it('should map MinTotalAssetsUsdPerNetwork criterion', () => {
+		describe('MinTotalAssetsUsdInNetwork', () => {
+			it('should map MinTotalAssetsUsdInNetwork criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -695,7 +695,7 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTotalAssetsUsdPerNetwork: {
+											MinTotalAssetsUsdInNetwork: {
 												usd: 1000
 											}
 										}
@@ -718,7 +718,7 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
 								usd: 1000
 							}
 						],

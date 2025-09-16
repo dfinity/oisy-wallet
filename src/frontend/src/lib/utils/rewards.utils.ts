@@ -9,9 +9,9 @@ import type {
 	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdOverallCriterion,
-	MinTotalAssetsUsdPerNetworkCriterion,
+	MinTotalAssetsUsdInNetworkCriterion,
 	MinTransactionsOverallCriterion,
-	MinTransactionsPerNetworkCriterion,
+	MinTransactionsInNetworkCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
@@ -144,16 +144,16 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
-	if ('MinTransactionsPerNetwork' in criterion.criterion) {
-		const { duration, count } = criterion.criterion.MinTransactionsPerNetwork;
+	if ('MinTransactionsInNetwork' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsInNetwork;
 		if ('Days' in duration) {
 			const days = duration.Days;
 			return {
 				satisfied: criterion.satisfied,
-				type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+				type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
 				days,
 				count
-			} as MinTransactionsPerNetworkCriterion;
+			} as MinTransactionsInNetworkCriterion;
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
@@ -166,14 +166,14 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			usd
 		} as MinTotalAssetsUsdOverallCriterion;
 	}
-	if ('MinTotalAssetsUsdPerNetwork' in criterion.criterion) {
-		const { usd } = criterion.criterion.MinTotalAssetsUsdPerNetwork;
+	if ('MinTotalAssetsUsdInNetwork' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdInNetwork;
 
 		return {
 			satisfied: criterion.satisfied,
-			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
 			usd
-		} as MinTotalAssetsUsdPerNetworkCriterion;
+		} as MinTotalAssetsUsdInNetworkCriterion;
 	}
 	if ('Hangover' in criterion.criterion) {
 		const { duration } = criterion.criterion.Hangover;

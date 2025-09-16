@@ -57,7 +57,7 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TRANSACTIONS_PER_NETWORK,
+						type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
 						days: 6n,
 						count: 3
 					}
@@ -99,7 +99,7 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_PER_NETWORK,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
 						usd: 21
 					}
 				}
