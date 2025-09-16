@@ -1,6 +1,11 @@
-import { CAIP10_CHAINS_KEYS } from '$env/caip10-chains.env';
+import {
+	CAIP10_DEVNET_CHAINS_KEYS,
+	CAIP10_MAINNET_CHAINS_KEYS,
+	LEGACY_SOLANA_DEVNET_NAMESPACE,
+	LEGACY_SOLANA_MAINNET_NAMESPACE
+} from '$env/caip10-chains.env';
 import { EIP155_CHAINS_KEYS } from '$env/eip155-chains.env';
-import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
+import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
@@ -15,9 +20,10 @@ import type {
 } from '$lib/types/wallet-connect';
 import {
 	SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
 import {
@@ -30,14 +36,34 @@ import { buildApprovedNamespaces, getSdkError } from '@walletconnect/utils';
 
 const PROJECT_ID = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
+let globalWalletKit: Awaited<ReturnType<typeof WalletKit.init>> | undefined;
+
+// During the initialisation of the WalletConnect object,
+// there are sometimes issues with retained values from the requestors.
+// For example, if we initialise it once to try and reconnect and then re-initialise it when really connecting,
+// some DEXes will see it fail (for example, https://magiceden.io/).
+const getWalletKit = async () => {
+	if (isNullish(globalWalletKit)) {
+		globalWalletKit = await WalletKit.init({
+			core: new Core({
+				projectId: PROJECT_ID
+			}),
+			metadata: WALLET_CONNECT_METADATA
+		});
+	}
+
+	return globalWalletKit;
+};
+
 export const initWalletConnect = async ({
 	ethAddress,
-	solAddress,
+	solAddressMainnet,
+	solAddressDevnet,
 	cleanSlate = true
 }: {
 	ethAddress: OptionEthAddress;
-	// TODO add other networks for solana
-	solAddress: OptionSolAddress;
+	solAddressMainnet: OptionSolAddress;
+	solAddressDevnet: OptionSolAddress;
 	cleanSlate?: boolean;
 }): Promise<WalletConnectListener> => {
 	const clearLocalStorage = () => {
@@ -46,17 +72,12 @@ export const initWalletConnect = async ({
 	};
 
 	// During testing, we frequently encountered session approval failures with Uniswap due to the following reason:
-	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c....
+	// Unexpected error while communicating with WalletConnect. / No matching key. pairing: 12345c...
 	// The issue appears to be linked to incorrect cached information used by the WalletConnect library.
 	// To address this, we clear the local storage of any WalletConnect keys to ensure the proper instantiation of a new Wec3Wallet object.
 	clearLocalStorage();
 
-	const walletKit = await WalletKit.init({
-		core: new Core({
-			projectId: PROJECT_ID
-		}),
-		metadata: WALLET_CONNECT_METADATA
-	});
+	const walletKit = await getWalletKit();
 
 	const disconnectActiveSessions = async () => {
 		const disconnectExistingSessions = async ([_key, session]: [string, { topic: string }]) => {
@@ -89,11 +110,25 @@ export const initWalletConnect = async ({
 		walletKit.on('session_request', callback);
 	};
 
+	const offSessionProposal = (callback: (proposal: WalletKitTypes.SessionProposal) => void) => {
+		walletKit.off('session_proposal', callback);
+		walletKit.removeListener('session_proposal', callback);
+	};
+
+	const offSessionDelete = (callback: () => void) => {
+		walletKit.off('session_delete', callback);
+		walletKit.removeListener('session_delete', callback);
+	};
+
+	const offSessionRequest = (
+		callback: (request: WalletKitTypes.SessionRequest) => Promise<void>
+	) => {
+		walletKit.off('session_request', callback);
+		walletKit.removeListener('session_request', callback);
+	};
+
 	const approveSession = async (proposal: WalletKitTypes.SessionProposal) => {
 		const { params } = proposal;
-
-		//TODO enable all networks of solana
-		const solMainnetNamespace = `solana:${SOLANA_MAINNET_NETWORK.chainId}`;
 
 		const namespaces = buildApprovedNamespaces({
 			proposal: params,
@@ -113,16 +148,33 @@ export const initWalletConnect = async ({
 							}
 						}
 					: {}),
-				...(nonNullish(solAddress)
+				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
 					? {
 							solana: {
-								chains: CAIP10_CHAINS_KEYS,
+								chains: [
+									...(nonNullish(solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
+								],
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
-									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION
+									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
+									SESSION_REQUEST_SOL_SIGN_MESSAGE
 								],
 								events: ['accountsChanged', 'chainChanged'],
-								accounts: [`${solMainnetNamespace}:${solAddress}`]
+								accounts: [
+									...(nonNullish(solAddressMainnet)
+										? [
+												`solana:${SOLANA_MAINNET_NETWORK.chainId}:${solAddressMainnet}`,
+												`${LEGACY_SOLANA_MAINNET_NAMESPACE}:${solAddressMainnet}`
+											]
+										: []),
+									...(nonNullish(solAddressDevnet)
+										? [
+												`solana:${SOLANA_DEVNET_NETWORK.chainId}:${solAddressDevnet}`,
+												`${LEGACY_SOLANA_DEVNET_NAMESPACE}:${solAddressDevnet}`
+											]
+										: [])
+								]
 							}
 						}
 					: {})
@@ -191,6 +243,9 @@ export const initWalletConnect = async ({
 		sessionProposal,
 		sessionDelete,
 		sessionRequest,
+		offSessionProposal,
+		offSessionDelete,
+		offSessionRequest,
 		getActiveSessions,
 		disconnect: async () => {
 			const disconnectPairings = async () => {

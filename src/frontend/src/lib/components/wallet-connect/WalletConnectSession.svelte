@@ -17,7 +17,7 @@
 	import WalletConnectModalTitle from '$lib/components/wallet-connect/WalletConnectModalTitle.svelte';
 	import WalletConnectReview from '$lib/components/wallet-connect/WalletConnectReview.svelte';
 	import { TRACK_COUNT_WALLET_CONNECT_MENU_OPEN } from '$lib/constants/analytics.contants';
-	import { ethAddress, solAddressMainnet } from '$lib/derived/address.derived';
+	import { ethAddress, solAddressDevnet, solAddressMainnet } from '$lib/derived/address.derived';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalWalletConnect, modalWalletConnectAuth } from '$lib/derived/modal.derived';
 	import { WizardStepsWalletConnect } from '$lib/enums/wizard-steps';
@@ -85,7 +85,13 @@
 
 	const disconnectListener = async () => {
 		try {
-			await listener?.disconnect();
+			if (isNullish(listener)) {
+				return;
+			}
+
+			detachHandlers(listener);
+
+			await listener.disconnect();
 		} catch (err: unknown) {
 			toastsError({
 				msg: {
@@ -115,10 +121,10 @@
 				return;
 			}
 
-			// TODO add other networks for solana
 			listener = await initWalletConnect({
 				ethAddress: $ethAddress,
-				solAddress: $solAddressMainnet
+				solAddressMainnet: $solAddressMainnet,
+				solAddressDevnet: $solAddressDevnet
 			});
 		} catch (err: unknown) {
 			toastsError({
@@ -282,6 +288,14 @@
 		listener.sessionRequest(onSessionRequest);
 	};
 
+	const detachHandlers = (listener: WalletConnectListener) => {
+		listener.offSessionProposal(onSessionProposal);
+
+		listener.offSessionDelete(onSessionDelete);
+
+		listener.offSessionRequest(onSessionRequest);
+	};
+
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
 		await initListener();
 
@@ -407,7 +421,8 @@
 		try {
 			listener = await initWalletConnect({
 				ethAddress: $ethAddress,
-				solAddress: $solAddressMainnet,
+				solAddressMainnet: $solAddressMainnet,
+				solAddressDevnet: $solAddressDevnet,
 				cleanSlate: false
 			});
 

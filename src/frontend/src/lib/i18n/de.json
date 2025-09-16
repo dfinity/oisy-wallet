@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
+			"not_eligible": "",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
 			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
@@ -423,6 +424,36 @@
 						"title": "Mehr verdienen durch Einladen",
 						"description": "Du hast gerade Sprinkles verdient – und die Person, die Dich eingeladen hat, auch.<br>Lade 4 Freunde ein und erhalte $1.<br>Die Top 4 Werber gewinnen jeweils $200.",
 						"share_href": "https://x.com/intent/post?text=Ich%20habe%20mich%20bei%20%40OISY%20angemeldet%20und%20Sprinkles%20erhalten.%20%20%0AMein%20Freund%2C%20der%20mich%20eingeladen%20hat%2C%20auch.%20Win-win.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -1521,12 +1552,12 @@
 			"review_description": "Um OISY Wallet zu benutzen, musst du unseren Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"review_updated_description": "Um OISY Wallet weiterhin zu benutzen, musst du unseren angepassten Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
-			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
-			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
+			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
+			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
 			"accept_and_continue": "Zustimmen und weiterfahren"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
 		}
 	},
 	"license_agreement": {
@@ -1560,7 +1591,7 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
-			"title": "Nutzungsbedingungen",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1570,7 +1601,7 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Datenschutzrichtlinie",
-			"title": "Datenschutzrichtlinie",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1605,7 +1636,7 @@
 	"welcome": {
 		"title": "Wilkommen bei $oisy_short!",
 		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
+		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {

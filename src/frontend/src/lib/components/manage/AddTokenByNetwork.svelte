@@ -102,7 +102,7 @@
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
-			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
+			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}

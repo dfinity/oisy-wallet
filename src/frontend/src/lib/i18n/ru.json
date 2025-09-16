@@ -349,6 +349,7 @@
 			"carousel_slide_cta": "Узнать больше",
 			"sprinkles_earned": "Вы заработали $noOfSprinkles Sprinkles, на общую сумму $amount! 🎉",
 			"youre_eligible": "Вы имеете право!",
+			"not_eligible": "",
 			"ongoing": "Продолжается",
 			"ended": "Завершено ($amount)",
 			"banner_text": "Зарабатывайте ежедневные награды с OISY Sprinkles"
@@ -423,6 +424,36 @@
 						"title": "Получите больше за приглашение",
 						"description": "Вы только что получили Sprinkles - как и тот, кто вас пригласил.<br>Пригласите 4 друзей и заработайте $1.<br>Топ-4 реферера выигрывают по $200 каждый.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
