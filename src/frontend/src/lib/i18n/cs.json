@@ -1122,7 +1122,8 @@
 			"card": {
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
-			"copy_address": "Zkopírovat tuto adresu do schránky"
+			"copy_address": "Zkopírovat tuto adresu do schránky",
+			"review_preference": ""
 		}
 	},
 	"fee": {

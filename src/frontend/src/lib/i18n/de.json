@@ -1123,7 +1123,7 @@
 				"image": "NFT Bild mit token ID: $tokenId"
 			},
 			"copy_address": "Diese Adresse in die Zwischenablage kopieren",
-            "review_preference": "Anzeigeeinstellung ändern"
+			"review_preference": "Anzeigeeinstellung ändern"
 		}
 	},
 	"fee": {

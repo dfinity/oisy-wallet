@@ -1123,7 +1123,7 @@
 				"image": "Image of NFT with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
-            "review_preference": "Change display preference"
+			"review_preference": "Change display preference"
 		}
 	},
 	"fee": {
