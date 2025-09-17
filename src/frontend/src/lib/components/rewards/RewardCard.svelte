@@ -3,6 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
@@ -13,8 +15,6 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
-	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
-	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 
 	interface Props {
 		onclick: () => void;
