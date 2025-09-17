@@ -329,6 +329,11 @@
 				"one_liner": "治理与协作相遇，激发创新。",
 				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
 			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"usdai": {
 				"name": "",
 				"one_liner": "",
@@ -1110,14 +1115,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
 			"card": {
 				"image": "图片"
 			},
-			"copy_address": "把该地址复制到粘贴版"
+			"copy_address": "把该地址复制到粘贴版",
+			"review_preference": ""
 		}
 	},
 	"fee": {

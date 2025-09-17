@@ -329,6 +329,11 @@
 				"one_liner": "Kde se správa setkává se spoluprací a podněcuje inovace.",
 				"description": "Toolkit je univerzální sada pro správu systémů SNS (Service Nervous System) a projektů na Internet Computeru. Umožňuje uživatelům bezproblémově inovovat, spolupracovat a decentralizovat - od návrhů na správu až po nasazení kanystrů."
 			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"usdai": {
 				"name": "",
 				"one_liner": "",
@@ -1110,14 +1115,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
 			"card": {
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
-			"copy_address": "Zkopírovat tuto adresu do schránky"
+			"copy_address": "Zkopírovat tuto adresu do schránky",
+			"review_preference": ""
 		}
 	},
 	"fee": {
