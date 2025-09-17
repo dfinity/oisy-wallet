@@ -72,6 +72,7 @@ export default defineConfig(
 			silent: false,
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+			isolate:false,
 			coverage: {
 				include: ['src/frontend'],
 				exclude: ['src/frontend/src/routes/**/+page.ts'],
