@@ -16,7 +16,7 @@ import type {
 	RewardResult
 } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
-import { isNullish } from '@dfinity/utils';
+import { fromNullable, isNullish } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -112,8 +112,8 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			available: eligibility.available,
 			eligible: eligibility.eligible,
 			criteria,
-			probabilityMultiplierEnabled: eligibility.probability_multiplier_enabled,
-			probabilityMultiplier: eligibility.probability_multiplier
+			probabilityMultiplierEnabled: fromNullable(eligibility.probability_multiplier_enabled),
+			probabilityMultiplier: fromNullable(eligibility.probability_multiplier)
 		};
 	});
 

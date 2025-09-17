@@ -55,8 +55,8 @@ export interface AwardFilter {
 	campaign_id: [] | [string];
 }
 export interface CampaignEligibility {
-	probability_multiplier_enabled: boolean;
-	probability_multiplier: number;
+	probability_multiplier_enabled: [] | [boolean];
+	probability_multiplier: [] | [number];
 	available: boolean;
 	eligible: boolean;
 	criteria: Array<CriterionEligibility>;
@@ -289,7 +289,7 @@ export interface UsageAndHolding {
 }
 export interface UsageAwardConfig {
 	cycle_duration: CandidDuration;
-	probability_multiplier_rules: Array<[number, Array<CriterionName>]>;
+	probability_multiplier_rules: [] | [Array<[number, Array<CriterionName>]>];
 	awards: Array<UsageAwardEvent>;
 	eligibility_criteria: UsageCriteria;
 	campaign_name: [] | [string];
