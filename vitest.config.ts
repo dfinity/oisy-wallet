@@ -75,7 +75,7 @@ export default defineConfig(
 			// maxWorkers: '75%',
 			// isolate: false,
 			// maxWorkers: '75%',
-			pool: 'threads',
+			pool: 'forks',
 			fileParallelism: true,
 			coverage: {
 				include: ['src/frontend'],
