@@ -8,7 +8,7 @@ import { get } from 'svelte/store';
 
 describe('RewardRequirement', () => {
 	describe('Requirements', () => {
-		it('should not render min logins requirement', () => {
+		it('should render min logins requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -30,7 +30,7 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min transactions requirement', () => {
+		it('should render min transactions requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
