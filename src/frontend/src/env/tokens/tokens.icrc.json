@@ -173,7 +173,10 @@
 		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
 		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
 		"fee": {
-			"__bigint__": "0"
-		}
+			"__bigint__": "10000"
+		},
+		"decimals": 8,
+		"name": "TEST ICRC1",
+		"symbol": "TICRC1"
 	}
 }
