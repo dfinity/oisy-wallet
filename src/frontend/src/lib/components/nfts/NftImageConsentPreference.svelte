@@ -41,6 +41,8 @@
 		colorStyle="secondary-light"
 		onclick={openConsentModal}
 		styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
-		transparent>{$i18n.nfts.text.review_preference}</Button
+		transparent
 	>
+		{$i18n.nfts.text.review_preference}
+	</Button>
 </span>
