@@ -256,6 +256,7 @@ interface I18nDapps {
 		};
 		toolkit: { name: string; one_liner: string; description: string };
 		altitudefi: { name: string; one_liner: string; description: string };
+		usdai: { name: string; one_liner: string; description: string };
 	};
 }
 

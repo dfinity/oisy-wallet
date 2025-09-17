@@ -289,5 +289,20 @@
 		"stats": "",
 		"logo": "/images/dapps/altitudefi-logo.svg",
 		"screenshots": ["/images/dapps/altitudefi-screenshot.webp"]
+	},
+	{
+		"id": "usdai",
+		"name": "dapps.descriptions.usdai.name",
+		"oneLiner": "dapps.descriptions.usdai.one_liner",
+		"website": "https://usd.ai/",
+		"telegram": "https://t.me/usdaiofficial",
+		"twitter": "https://x.com/USDai_Official",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.usdai.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/usdai-logo.svg",
+		"screenshots": ["/images/dapps/usdai-screenshot.webp"]
 	}
 ]
