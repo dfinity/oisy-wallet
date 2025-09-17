@@ -1669,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Trợ lý AI $oisy_short",
-			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"welcome_message": "Xin chào! 👋 Tôi là chuyên gia AI cá nhân của bạn. Tôi có thể giúp gì cho bạn?",
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",

@@ -1669,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Asystent AI $oisy_short",
-			"welcome_message": "Cześć! 👋 Jestem OISY, Twój osobisty upgrade'owany magister AI. Oto jak mogę Ci pomóc:",
+			"welcome_message": "Cześć! 👋 Jestem estem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",
