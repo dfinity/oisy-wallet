@@ -55,7 +55,7 @@
 		<ListItem>
 			<span class="text-tertiary">{$i18n.nfts.text.token_id}</span>
 			{#if nonNullish(nft?.id)}
-				{nft?.id}
+				{nft.id}
 			{:else}
 				<span class="min-w-12">
 					<SkeletonText />
