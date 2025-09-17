@@ -74,7 +74,7 @@ describe('RewardRequirement', () => {
 			).not.toBeInTheDocument();
 		});
 
-		it('should render min total assets usd overall requirement', () => {
+		it('should render min total assets usd requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
