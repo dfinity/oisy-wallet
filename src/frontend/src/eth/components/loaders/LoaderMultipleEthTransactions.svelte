@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
@@ -15,7 +16,6 @@
 	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
-	import { NFTS_ENABLED } from '$env/nft.env';
 
 	interface Props {
 		children: Snippet;
