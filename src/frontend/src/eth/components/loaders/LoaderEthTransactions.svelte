@@ -49,7 +49,7 @@
 		} = $tokenWithFallback;
 
 		// If the user's browser ICP transactions but switch token to Eth, due to the derived stores,
-        // the token can briefly be set to ICP while the navigation is not over.
+		// the token can briefly be set to ICP while the navigation is not over.
 		// This prevents the glitch load of ETH transaction with a token ID for ICP.
 		if (!isNetworkIdEthereum(networkId) && !isNetworkIdEvm(networkId)) {
 			tokenIdLoaded = undefined;
@@ -90,7 +90,7 @@
 	$effect(() => {
 		[$tokenWithFallback, $tokenNotInitialized];
 
-        load()
+		load();
 	});
 
 	const reload = async () => {
