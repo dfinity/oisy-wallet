@@ -72,8 +72,12 @@ export default defineConfig(
 			silent: false,
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+			pool: 'threads',
 			isolate: false,
-			fileParallelism: false,
+			fileParallelism: true,
+			restoreMocks: true,
+			clearMocks: true,
+			mockReset: true,
 			coverage: {
 				include: ['src/frontend'],
 				exclude: ['src/frontend/src/routes/**/+page.ts'],
