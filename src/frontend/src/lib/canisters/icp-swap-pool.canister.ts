@@ -153,4 +153,10 @@ export class ICPSwapPoolCanister extends Canister<SwapPoolService> {
 
 		throw mapIcpSwapFactoryError(response.err);
 	};
+
+	getTokenBalance = async (): Promise<{ token0: bigint; token1: bigint }> => {
+		const { getTokenBalance } = this.caller({ certified: false });
+
+		return await getTokenBalance();
+	};
 }

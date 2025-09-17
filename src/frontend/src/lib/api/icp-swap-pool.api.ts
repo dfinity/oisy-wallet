@@ -87,3 +87,14 @@ export const getPoolMetadata = async ({
 	const { getPoolMetadata } = await getPoolCanister({ identity, canisterId });
 	return getPoolMetadata();
 };
+
+export const getTokenBalance = async ({
+	identity,
+	canisterId
+}: CanisterApiFunctionParamsWithCanisterId<{ identity: Identity }>): Promise<{
+	token0: bigint;
+	token1: bigint;
+}> => {
+	const { getTokenBalance } = await getPoolCanister({ identity, canisterId });
+	return getTokenBalance();
+};
