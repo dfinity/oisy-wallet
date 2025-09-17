@@ -1123,7 +1123,8 @@
 			"card": {
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {

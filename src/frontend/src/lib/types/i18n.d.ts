@@ -941,7 +941,12 @@ interface I18nNfts {
 		learn_more: string;
 		token_id: string;
 	};
-	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
+	alt: {
+		placeholder_image: string;
+		card: { image: string };
+		copy_address: string;
+		review_preference: string;
+	};
 }
 
 interface I18nFee {

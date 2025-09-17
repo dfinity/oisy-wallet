@@ -1124,7 +1124,7 @@
 				"image": "Image of NFT with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
-            "review_preference": "Change media display preference"
+			"review_preference": "Change media display preference"
 		}
 	},
 	"fee": {

@@ -1123,7 +1123,8 @@
 			"card": {
 				"image": "图片"
 			},
-			"copy_address": "把该地址复制到粘贴版"
+			"copy_address": "把该地址复制到粘贴版",
+			"review_preference": ""
 		}
 	},
 	"fee": {

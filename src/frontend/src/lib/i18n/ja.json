@@ -1123,7 +1123,8 @@
 			"card": {
 				"image": "トークンIDが$tokenIdのNFTの画像"
 			},
-			"copy_address": "このアドレスをクリップボードにコピー"
+			"copy_address": "このアドレスをクリップボードにコピー",
+			"review_preference": ""
 		}
 	},
 	"fee": {
