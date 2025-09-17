@@ -299,16 +299,22 @@ describe('LoaderEthTransactions', () => {
 	it('should re-call the load function if it fails the first time but the token is the same', async () => {
 		mockLoadTransactions.mockResolvedValue({ success: false });
 
+		render(LoaderEthTransactions, props);
+
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
 			network: SEPOLIA_PEPE_TOKEN.network.id.description
 		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
-		render(LoaderEthTransactions, props);
+		await waitFor(() => {
+			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
+		});
 
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
+
+		await tick()
 
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
@@ -335,6 +341,8 @@ describe('LoaderEthTransactions', () => {
 
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
+
+		await tick()
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
