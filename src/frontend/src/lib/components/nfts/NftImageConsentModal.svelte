@@ -98,9 +98,15 @@
 				coll.collection.id === collection.id && coll.collection.address === collection.address
 		)?.nfts ?? []
 	);
+
+	const onClose = () => {
+		if (!saveLoading) {
+			modalStore.close();
+		}
+	};
 </script>
 
-<Modal onClose={() => (!saveLoading ? modalStore.close() : undefined)} {testId}>
+<Modal {onClose} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -127,19 +133,19 @@
 		</p>
 
 		<div class="flex flex-col gap-2 text-sm">
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span><span
 					>{shortCollectionName}</span
 				>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.networks.network}</span><span
 					><NetworkWithLogo network={collection.network} /></span
 				>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-				<span>
+				<span class="inline-flex">
 					<output data-tid={`${testId}-collectionAddress`}
 						>{shortenWithMiddleEllipsis({ text: collection.address })}</output
 					>
@@ -156,16 +162,16 @@
 					/>
 				</span>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary" data-tid={`${testId}-displayPreferences`}
 					>{$i18n.nfts.text.display_preference}</span
 				><span>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
-				<span class="flex-col justify-items-end" data-tid={`${testId}-nfts-media`}>
+				<span class="justify-items-between flex-col" data-tid={`${testId}-nfts-media`}>
 					{#if nonNullish(collection.bannerImageUrl)}
-						<span class="flex">
+						<span class="flex w-full items-start justify-start md:items-center md:justify-end">
 							<output class="text-tertiary"
 								>{shortenWithMiddleEllipsis({
 									text: collection.bannerImageUrl,
@@ -184,9 +190,9 @@
 					{/if}
 					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 						{#if nonNullish(nft?.imageUrl)}
-							<span class="flex">
+							<span class="flex w-full items-start justify-end md:items-center">
 								#{nft.id} &nbsp;
-								<output class="text-tertiary"
+								<output class="truncate text-tertiary"
 									>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 								>
 								<AddressActions
