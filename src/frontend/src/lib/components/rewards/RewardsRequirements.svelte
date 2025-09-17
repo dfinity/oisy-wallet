@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { slide } from 'svelte/transition';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
 	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
 	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
-	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { slide } from 'svelte/transition';
-	import type { RewardCampaignDescription } from '$env/types/env-reward';
 
 	interface Props {
 		isEligible: boolean;
