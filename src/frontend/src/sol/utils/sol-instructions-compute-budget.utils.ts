@@ -19,44 +19,37 @@ export const parseSolComputeBudgetInstruction = (
 	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
+	switch (decodedInstruction) {
+		case ComputeBudgetInstruction.RequestUnits:
+			return {
+				...parseRequestUnitsInstruction(instruction),
+				instructionType: ComputeBudgetInstruction.RequestUnits
+			};
+		case ComputeBudgetInstruction.RequestHeapFrame:
+			return {
+				...parseRequestHeapFrameInstruction(instruction),
+				instructionType: ComputeBudgetInstruction.RequestHeapFrame
+			};
+		case ComputeBudgetInstruction.SetComputeUnitLimit:
+			return {
+				...parseSetComputeUnitLimitInstruction(instruction),
+				instructionType: ComputeBudgetInstruction.SetComputeUnitLimit
+			};
+		case ComputeBudgetInstruction.SetComputeUnitPrice:
+			return {
+				...parseSetComputeUnitPriceInstruction(instruction),
+				instructionType: ComputeBudgetInstruction.SetComputeUnitPrice
+			};
+		case ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit:
+			return {
+				...parseSetLoadedAccountsDataSizeLimitInstruction(instruction),
+				instructionType: ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit
+			};
+		default: {
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = decodedInstruction;
 
-	if (decodedInstruction === ComputeBudgetInstruction.RequestUnits) {
-		return {
-			...parseRequestUnitsInstruction(instruction),
-			instructionType: ComputeBudgetInstruction.RequestUnits
-		};
+			return instruction;
+		}
 	}
-
-	if (decodedInstruction === ComputeBudgetInstruction.RequestHeapFrame) {
-		return {
-			...parseRequestHeapFrameInstruction(instruction),
-			instructionType: ComputeBudgetInstruction.RequestHeapFrame
-		};
-	}
-
-	if (decodedInstruction === ComputeBudgetInstruction.SetComputeUnitLimit) {
-		return {
-			...parseSetComputeUnitLimitInstruction(instruction),
-			instructionType: ComputeBudgetInstruction.SetComputeUnitLimit
-		};
-	}
-
-	if (decodedInstruction === ComputeBudgetInstruction.SetComputeUnitPrice) {
-		return {
-			...parseSetComputeUnitPriceInstruction(instruction),
-			instructionType: ComputeBudgetInstruction.SetComputeUnitPrice
-		};
-	}
-
-	if (decodedInstruction === ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit) {
-		return {
-			...parseSetLoadedAccountsDataSizeLimitInstruction(instruction),
-			instructionType: ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit
-		};
-	}
-
-	// Force compiler error on unhandled cases based on leftover types
-	const _: never = decodedInstruction;
-
-	return instruction;
 };
