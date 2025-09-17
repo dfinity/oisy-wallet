@@ -314,7 +314,7 @@ describe('LoaderEthTransactions', () => {
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
 
-		await tick()
+		await tick();
 
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
@@ -342,7 +342,7 @@ describe('LoaderEthTransactions', () => {
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
 
-		await tick()
+		await tick();
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
