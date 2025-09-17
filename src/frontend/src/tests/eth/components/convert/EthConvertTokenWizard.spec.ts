@@ -44,7 +44,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -88,9 +87,9 @@ describe('EthConvertTokenWizard', () => {
 		maxFeePerGas: 100n,
 		maxPriorityFeePerGas: 100n
 	};
-	const onBack=vi.fn()
-	const onClose=vi.fn()
-	const onNext=vi.fn()
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -101,7 +100,7 @@ describe('EthConvertTokenWizard', () => {
 		receiveAmount: sendAmount,
 		onBack,
 		onClose,
-		onNext,
+		onNext
 	};
 
 	let sendSpy: MockInstance;

@@ -38,7 +38,6 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -47,13 +46,13 @@ vi.mock('$lib/services/auth.services', () => ({
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
 
-	const onBack=vi.fn()
-	const onClose=vi.fn()
-	const onNext=vi.fn()
-	const onDestination=vi.fn()
-	const onDestinationBack=vi.fn()
-	const onIcQrCodeScan=vi.fn()
-	const onIcQrCodeBack=vi.fn()
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
+	const onDestination = vi.fn();
+	const onDestinationBack = vi.fn();
+	const onIcQrCodeScan = vi.fn();
+	const onIcQrCodeBack = vi.fn();
 
 	const props = {
 		sendAmount,
@@ -66,9 +65,10 @@ describe('ConvertWizard', () => {
 		onBack,
 		onClose,
 		onNext,
-		onDestination, onDestinationBack,
+		onDestination,
+		onDestinationBack,
 		onIcQrCodeBack,
-		onIcQrCodeScan,
+		onIcQrCodeScan
 	};
 
 	const mockContext = (sourceToken: Token) =>

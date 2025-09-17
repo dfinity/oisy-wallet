@@ -38,7 +38,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -60,9 +59,9 @@ describe('BtcConvertTokenWizard', () => {
 			[CONVERT_CONTEXT_KEY, initConvertContext({ sourceToken, destinationToken: ICP_TOKEN })],
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
-	const onBack=vi.fn()
-	const onClose=vi.fn()
-	const onNext=vi.fn()
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -73,7 +72,7 @@ describe('BtcConvertTokenWizard', () => {
 		receiveAmount: sendAmount,
 		onBack,
 		onClose,
-		onNext,
+		onNext
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
