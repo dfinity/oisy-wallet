@@ -58,7 +58,7 @@ describe('NftImageConsentPreference', () => {
 			props: { collection: nftAzuki.collection }
 		});
 
-		const btn = getByRole('button', { name: get(i18n).nfts.text.review_preference });
+		const btn = getByRole('button', { name: get(i18n).nfts.alt.review_preference });
 		assertNonNullish(btn);
 
 		await fireEvent.click(btn);
