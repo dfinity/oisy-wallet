@@ -28,7 +28,7 @@ describe('rewardStore', () => {
 				eligible: false,
 				criteria: [],
 				probabilityMultiplierEnabled: false,
-				probabilityMultiplier: 1,
+				probabilityMultiplier: 1
 			}
 		];
 
