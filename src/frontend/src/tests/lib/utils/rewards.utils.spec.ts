@@ -537,8 +537,8 @@ describe('rewards.utils', () => {
 			});
 		});
 
-		describe('MinTransactionsOverall', () => {
-			it('should map MinTransactionsOverall criterion', () => {
+		describe('MinTransactions', () => {
+			it('should map MinTransactions criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -550,7 +550,7 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTransactionsOverall: {
+											MinTransactions: {
 												duration: { Days: 30n },
 												count: 10
 											}
@@ -635,8 +635,8 @@ describe('rewards.utils', () => {
 			});
 		});
 
-		describe('MinTotalAssetsUsdOverall', () => {
-			it('should map MinTotalAssetsUsdOverall criterion', () => {
+		describe('MinTotalAssetsUsd', () => {
+			it('should map MinTotalAssetsUsd criterion', () => {
 				const report: EligibilityReport = {
 					campaigns: [
 						[
@@ -648,7 +648,7 @@ describe('rewards.utils', () => {
 									{
 										satisfied: true,
 										criterion: {
-											MinTotalAssetsUsdOverall: {
+											MinTotalAssetsUsd: {
 												usd: 1000
 											}
 										}
