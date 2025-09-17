@@ -255,6 +255,7 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
 	};
 }
 
