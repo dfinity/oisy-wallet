@@ -8,8 +8,6 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
-	import { logoSizes } from '$lib/constants/components.constants';
 
 	interface Props {
 		nft: Nft;
@@ -38,20 +36,16 @@
 	} = $derived(nft);
 </script>
 
-<div class="bg-primary/80 relative rounded-xl">
-	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
-		<NftImageConsent {nft} type="nft-logo">
-			<Logo
-				alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
-				circle={false}
-				{color}
-				{ring}
-				size={logoSize}
-				src={imageUrl ?? noNftImage}
-				{testId}
-			/>
-		</NftImageConsent>
-	</div>
+<div class="relative">
+	<Logo
+		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
+		circle={false}
+		{color}
+		{ring}
+		size={logoSize}
+		src={imageUrl ?? noNftImage}
+		{testId}
+	/>
 
 	{#if nonNullish(badge) && badge?.type === 'network'}
 		<div
