@@ -51,8 +51,7 @@
 				{$i18n.rewards.requirements.network_bonus_info}
 				<ExternalLink
 					href={reward.learnMoreHref}
-					iconVisible={false}
-					target="_blank">{$i18n.rewards.text.learn_more}</ExternalLink
+					iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
 				>
 			</span>
 		{/if}

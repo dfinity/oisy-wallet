@@ -2,7 +2,7 @@
 	import { REWARDS_NETWORK_MULTIPLIER_IMAGE } from '$lib/constants/test-ids.constants';
 
 	interface Props {
-		multiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+		multiplier: number;
 		disabled?: boolean;
 	}
 
