@@ -587,6 +587,55 @@ describe('rewards.utils', () => {
 			});
 		});
 
+		describe('MinTransactionsInNetwork', () => {
+			it('should map MinTransactionsInNetwork criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTransactionsInNetwork: {
+												duration: { Days: 30n },
+												count: 10
+											}
+										}
+									}
+								],
+								probability_multiplier_enabled: false,
+								probability_multiplier: 1
+							}
+						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+								days: 30n,
+								count: 10
+							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
+					}
+				]);
+			});
+		});
+
 		describe('MinTotalAssetsUsd', () => {
 			it('should map MinTotalAssetsUsd criterion', () => {
 				const report: EligibilityReport = {
@@ -624,6 +673,53 @@ describe('rewards.utils', () => {
 							{
 								satisfied: true,
 								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
+								usd: 1000
+							}
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
+					}
+				]);
+			});
+		});
+
+		describe('MinTotalAssetsUsdInNetwork', () => {
+			it('should map MinTotalAssetsUsdInNetwork criterion', () => {
+				const report: EligibilityReport = {
+					campaigns: [
+						[
+							'campaign1',
+							{
+								available: true,
+								eligible: true,
+								criteria: [
+									{
+										satisfied: true,
+										criterion: {
+											MinTotalAssetsUsdInNetwork: {
+												usd: 1000
+											}
+										}
+									}
+								],
+								probability_multiplier_enabled: false,
+								probability_multiplier: 1
+							}
+						]
+					]
+				};
+
+				const result = mapEligibilityReport(report);
+
+				expect(result).toEqual([
+					{
+						campaignId: 'campaign1',
+						available: true,
+						eligible: true,
+						criteria: [
+							{
+								satisfied: true,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
 								usd: 1000
 							}
 						],
@@ -704,8 +800,8 @@ describe('rewards.utils', () => {
 									}
 								}
 							],
-							probability_multiplier: 1,
-							probability_multiplier_enabled: false
+							probability_multiplier_enabled: false,
+							probability_multiplier: 1
 						}
 					]
 				]
