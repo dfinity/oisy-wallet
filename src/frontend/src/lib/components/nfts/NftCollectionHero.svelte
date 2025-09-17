@@ -107,7 +107,7 @@
 			<ListItem>
 				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
 				{#if nonNullish(nfts?.[0])}
-					<NftImageConsentPreference nft={nfts[0]} />
+					<NftImageConsentPreference collection={firstNft.collection} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />

@@ -328,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Gdzie zarządzanie spotyka się ze współpracą, aby rozpalić innowacje.",
 				"description": "Toolkit to wszechstronny pakiet do zarządzania systemami nerwowymi usług (SNS) i projektami na Internet Computer. Od propozycji zarządzania po wdrażanie kanistrów, umożliwia użytkownikom płynne wprowadzanie innowacji, współpracę i decentralizację."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1112,7 +1122,8 @@
 			"card": {
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
-			"copy_address": "Skopiuj ten adres do schowka"
+			"copy_address": "Skopiuj ten adres do schowka",
+			"review_preference": ""
 		}
 	},
 	"fee": {
