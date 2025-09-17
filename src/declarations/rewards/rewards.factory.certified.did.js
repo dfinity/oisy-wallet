@@ -66,7 +66,7 @@ export const idlFactory = ({ IDL }) => {
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
-		probability_multiplier_rules: IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName))),
+		probability_multiplier_rules: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName)))),
 		awards: IDL.Vec(UsageAwardEvent),
 		eligibility_criteria: UsageCriteria,
 		campaign_name: IDL.Opt(IDL.Text)
@@ -113,8 +113,8 @@ export const idlFactory = ({ IDL }) => {
 		criterion: Criterion
 	});
 	const CampaignEligibility = IDL.Record({
-		probability_multiplier_enabled: IDL.Bool,
-		probability_multiplier: IDL.Nat32,
+		probability_multiplier_enabled: IDL.Opt(IDL.Bool),
+		probability_multiplier: IDL.Opt(IDL.Nat32),
 		available: IDL.Bool,
 		eligible: IDL.Bool,
 		criteria: IDL.Vec(CriterionEligibility)
@@ -438,7 +438,7 @@ export const init = ({ IDL }) => {
 	const UsageCriteria = IDL.Record({ criteria: IDL.Vec(Criterion) });
 	const UsageAwardConfig = IDL.Record({
 		cycle_duration: CandidDuration,
-		probability_multiplier_rules: IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName))),
+		probability_multiplier_rules: IDL.Opt(IDL.Vec(IDL.Tuple(IDL.Nat32, IDL.Vec(CriterionName)))),
 		awards: IDL.Vec(UsageAwardEvent),
 		eligibility_criteria: UsageCriteria,
 		campaign_name: IDL.Opt(IDL.Text)
