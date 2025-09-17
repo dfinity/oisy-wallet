@@ -44,7 +44,7 @@ describe('RewardRequirement', () => {
 
 			expect(
 				getByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
 						$transactions: '3',
 						$days: '6'
 					})
@@ -66,7 +66,7 @@ describe('RewardRequirement', () => {
 
 			expect(
 				queryByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_transactions_overall, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
 						$transactions: '3',
 						$days: '6'
 					})
@@ -87,7 +87,7 @@ describe('RewardRequirement', () => {
 
 			expect(
 				getByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
 						$usd: '21'
 					})
 				)
@@ -107,7 +107,7 @@ describe('RewardRequirement', () => {
 
 			expect(
 				queryByText(
-					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd_overall, {
+					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
 						$usd: '21'
 					})
 				)

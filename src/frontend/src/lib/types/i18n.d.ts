@@ -287,8 +287,8 @@ interface I18nRewards {
 		requirements_title: string;
 		network_bonus_info: string;
 		min_logins: string;
-		min_transactions_overall: string;
-		min_total_assets_usd_overall: string;
+		min_transactions: string;
+		min_total_assets_usd: string;
 		hangover: string;
 	};
 	alt: { upcoming_campaigns: string; coming_soon: string; reward_banner: string };
