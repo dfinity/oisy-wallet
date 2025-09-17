@@ -64,7 +64,7 @@
 				<div class="flex">
 					<NftSortMenu />
 				</div>
-				<div class="flex">
+				<div class="ml-1 flex">
 					<NftSettingsMenu />
 				</div>
 			{/if}
