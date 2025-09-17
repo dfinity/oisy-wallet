@@ -51,6 +51,12 @@
 			</span>
 		{/if}
 	</ListItem>
+	{#if nonNullish(nft)}
+		<ListItem>
+			<span class="text-tertiary">{$i18n.nfts.text.token_id}</span>
+			{nft.id}
+		</ListItem>
+	{/if}
 	<ListItem>
 		<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 		{#if nonNullish(collection?.address) && nonNullish(collection?.network)}
