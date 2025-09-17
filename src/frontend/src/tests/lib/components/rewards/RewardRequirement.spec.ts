@@ -30,7 +30,7 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should render min transactions overall requirement', () => {
+		it('should render min transactions requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
