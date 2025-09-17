@@ -34,7 +34,7 @@
 			md: '48px',
 			sm: '40px',
 			xs: '32px',
-			xxs: '24px'
+			xxs: '20px'
 		}[variant]
 	);
 

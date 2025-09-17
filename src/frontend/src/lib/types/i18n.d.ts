@@ -255,6 +255,8 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
+		usdai: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -939,7 +941,12 @@ interface I18nNfts {
 		review_description: string;
 		learn_more: string;
 	};
-	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
+	alt: {
+		placeholder_image: string;
+		card: { image: string };
+		copy_address: string;
+		review_preference: string;
+	};
 }
 
 interface I18nFee {

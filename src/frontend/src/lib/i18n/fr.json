@@ -328,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Là où la gouvernance rencontre la collaboration pour stimuler l'innovation.",
 				"description": "Toolkit est une suite polyvalente pour la gestion des systèmes nerveux de service (SNS) et des projets sur l'Internet Computer. Des propositions de gouvernance au déploiement de canisters, il permet aux utilisateurs d'innover, de collaborer et de décentraliser en toute transparence."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1113,7 +1123,8 @@
 			"card": {
 				"image": "Image du NFT avec l'ID de token : $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {

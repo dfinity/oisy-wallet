@@ -272,7 +272,7 @@ const confirmSignedTransaction = async ({
 		rpcSubscriptions
 	});
 
-	return await waitForRecentTransactionConfirmation({
+	await waitForRecentTransactionConfirmation({
 		transaction: signedTransaction,
 		commitment,
 		getBlockHeightExceedencePromise,
