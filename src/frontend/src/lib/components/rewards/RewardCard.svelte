@@ -13,7 +13,9 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 
 	interface Props {
 		onclick: () => void;
@@ -29,6 +31,10 @@
 
 	const campaignEligibility = getCampaignEligibility(reward.id);
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
+	const networkBonusMultiplier = $derived(
+		normalizeNetworkMultiplier($campaignEligibility?.probabilityMultiplier ?? 1)
+	);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
@@ -57,21 +63,18 @@
 		<article class="h-full">
 			<section>
 				<div
-					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
+					class="flex gap-3 text-start text-lg font-semibold"
+					class:flex-col-reverse={hasNetworkBonus}
 				>
-					<div class="mr-auto flex flex-col items-center md:flex-row">
-						<div>
-							{resolveText({ i18n: $i18n, path: reward.cardTitle })}
-						</div>
-						{#if isEligible && !hasEnded}
-							<span class="mr-auto inline-flex md:mx-1">
-								<Badge
-									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-									variant="success"
-								>
-									{$i18n.rewards.text.youre_eligible}
-								</Badge>
-							</span>
+					{resolveText({ i18n: $i18n, path: reward.cardTitle })}
+
+					<div class="flex flex-wrap items-center gap-3">
+						{#if !hasEnded}
+							<EligibilityBadge {isEligible} {testId} />
+						{/if}
+
+						{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+							<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
 						{/if}
 					</div>
 				</div>
