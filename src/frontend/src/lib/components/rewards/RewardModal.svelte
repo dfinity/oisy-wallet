@@ -23,8 +23,7 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
-	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils.js';
+	import { getCampaignState, isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
