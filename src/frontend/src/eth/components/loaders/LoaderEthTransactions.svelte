@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet, untrack } from 'svelte';
 	import { ethTransactionsInitialized } from '$eth/derived/eth-transactions.derived';
 	import { tokenNotInitialized } from '$eth/derived/nav.derived';
 	import {
@@ -90,7 +90,7 @@
 	$effect(() => {
 		[$tokenWithFallback, $tokenNotInitialized];
 
-		load();
+		untrack(() => load());
 	});
 
 	const reload = async () => {
