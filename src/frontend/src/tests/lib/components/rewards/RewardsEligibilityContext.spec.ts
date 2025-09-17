@@ -28,8 +28,8 @@ describe('RewardsEligibilityContext', () => {
 				eligible: true,
 				available: true,
 				criteria: [],
-				probabilityMultiplier: 1,
-				probabilityActive: false
+				probabilityMultiplierEnabled: false,
+				probabilityMultiplier: 1
 			}
 		];
 		const getCampaignEligibilitiesSpy = vi

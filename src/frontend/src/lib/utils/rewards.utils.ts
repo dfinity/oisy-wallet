@@ -112,8 +112,8 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			available: eligibility.available,
 			eligible: eligibility.eligible,
 			criteria,
-			probabilityMultiplier: Number(eligibility.probability_multiplier),
-			probabilityActive: eligibility.probability_active
+			probabilityMultiplierEnabled: eligibility.probability_multiplier_enabled,
+			probabilityMultiplier: Number(eligibility.probability_multiplier)
 		};
 	});
 
