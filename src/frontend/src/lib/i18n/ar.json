@@ -368,8 +368,8 @@
 			"requirements_title": "معايير الأهلية",
 			"network_bonus_info": "",
 			"min_logins": "تسجيل الدخول $loginsx مرة في آخر $days أيام",
-			"min_transactions_overall": "أكمل $transactions معاملة في آخر $days أيام",
-			"min_total_assets_usd_overall": "احتفظ بقيمة $usd دولار من التوكنات وقت الإصدار",
+			"min_transactions": "أكمل $transactions معاملة في آخر $days أيام",
+			"min_total_assets_usd": "احتفظ بقيمة $usd دولار من التوكنات وقت الإصدار",
 			"hangover": "لا يوجد فوز حديث (آخر $days يومًا)"
 		},
 		"alt": {

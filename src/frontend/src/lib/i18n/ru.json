@@ -368,8 +368,8 @@
 			"requirements_title": "Критерии участия",
 			"network_bonus_info": "",
 			"min_logins": "Войдите $loginsx раз за последние $days дней",
-			"min_transactions_overall": "Выполните $transactions транзакций за последние $days дней",
-			"min_total_assets_usd_overall": "Храните токены на сумму $$usd на момент выпуска",
+			"min_transactions": "Выполните $transactions транзакций за последние $days дней",
+			"min_total_assets_usd": "Храните токены на сумму $$usd на момент выпуска",
 			"hangover": "Нет недавних выигрышей (за последние $days дней)"
 		},
 		"alt": {

@@ -368,8 +368,8 @@
 			"requirements_title": "Berechtigungskriterien",
 			"network_bonus_info": "",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
-			"min_transactions_overall": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
-			"min_total_assets_usd_overall": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
+			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
+			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
 			"hangover": "Kein Gewinn (in den letzten $days Tagen)"
 		},
 		"alt": {

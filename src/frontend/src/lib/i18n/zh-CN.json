@@ -368,8 +368,8 @@
 			"requirements_title": "资格标准",
 			"network_bonus_info": "",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
-			"min_transactions_overall": "最近 $days 天内完成 $transactions 笔交易",
-			"min_total_assets_usd_overall": "在发放时持有价值 $$usd 的代币",
+			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
+			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
 			"hangover": "近期无中奖记录 (最近 $days 天)"
 		},
 		"alt": {

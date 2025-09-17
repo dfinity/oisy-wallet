@@ -368,8 +368,8 @@
 			"requirements_title": "Tiêu chí đủ điều kiện",
 			"network_bonus_info": "",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
-			"min_transactions_overall": "Hoàn thành $transactions giao dịch trong $days ngày qua",
-			"min_total_assets_usd_overall": "Giữ $$usd giá trị token tại thời điểm phát hành",
+			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
+			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
 			"hangover": "Không có chiến thắng gần đây (trong $days ngày qua)"
 		},
 		"alt": {

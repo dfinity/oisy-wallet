@@ -368,8 +368,8 @@
 			"requirements_title": "Criteri di eleggibilità",
 			"network_bonus_info": "",
 			"min_logins": "Accedi $loginsx volte negli ultimi $days giorni",
-			"min_transactions_overall": "Completa $transactions transazioni negli ultimi $days giorni",
-			"min_total_assets_usd_overall": "Detieni $$usd di token al momento dell'emissione",
+			"min_transactions": "Completa $transactions transazioni negli ultimi $days giorni",
+			"min_total_assets_usd": "Detieni $$usd di token al momento dell'emissione",
 			"hangover": "Nessuna vittoria recente (ultimi $days giorni)"
 		},
 		"alt": {

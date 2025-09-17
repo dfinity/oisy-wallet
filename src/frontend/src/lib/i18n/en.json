@@ -368,8 +368,8 @@
 			"requirements_title": "Eligibility criteria",
 			"network_bonus_info": "Each network on which you hold assets gives you a reward multiplier. The more networks you use, the more rewards you get!",
 			"min_logins": "Login $loginsx in last $days days",
-			"min_transactions_overall": "Complete $transactions transactions in last $days days",
-			"min_total_assets_usd_overall": "Hold $$usd worth of tokens at the time of issuance",
+			"min_transactions": "Complete $transactions transactions in last $days days",
+			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
 			"hangover": "No recent win (last $days days)"
 		},
 		"alt": {
