@@ -22,7 +22,11 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { getCampaignState, isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
+	import {
+		getCampaignState,
+		isEndedCampaign,
+		normalizeNetworkMultiplier
+	} from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -94,7 +98,7 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {criteria} {isEligible} {hasNetworkBonus} {networkBonusMultiplier} />
+				<RewardsRequirements {criteria} {hasNetworkBonus} {isEligible} {networkBonusMultiplier} />
 			{/if}
 		{/if}
 
