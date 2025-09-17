@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
@@ -16,10 +16,16 @@
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 
-	// TODO: make it more functional
-	let tokensAlreadyLoaded: TokenId[] = [];
+	interface Props {
+		children: Snippet;
+	}
 
-	let loading = false;
+	let { children }: Props = $props();
+
+	// TODO: make it more functional
+	let tokensAlreadyLoaded = $state<TokenId[]>([]);
+
+	let loading = $state(false);
 
 	const onLoad = async () => {
 		if (loading) {
@@ -56,11 +62,11 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens,
-		$enabledErc20Tokens,
-		$enabledEvmTokens,
-		$enabledNonFungibleTokens,
-		debounceLoad());
+	$effect(() => {
+		[$enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, $enabledNonFungibleTokens];
+
+		debounceLoad();
+	});
 
 	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
@@ -93,5 +99,5 @@
 </script>
 
 <IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	<slot />
+	{@render children()}
 </IntervalLoader>
