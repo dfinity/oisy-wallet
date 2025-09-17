@@ -1116,7 +1116,8 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
