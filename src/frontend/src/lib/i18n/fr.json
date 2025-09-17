@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Critères d'éligibilité",
+			"network_bonus_info": "",
 			"min_logins": "Connectez-vous $loginsx fois au cours des $days derniers jours",
 			"min_transactions": "Effectuez $transactions transactions au cours des $days derniers jours",
 			"min_total_assets_usd": "Détenez $$usd de tokens au moment de l'émission",
