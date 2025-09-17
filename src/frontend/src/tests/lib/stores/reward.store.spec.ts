@@ -26,7 +26,9 @@ describe('rewardStore', () => {
 				campaignId: 'campaign-2',
 				available: false,
 				eligible: false,
-				criteria: []
+				criteria: [],
+				probabilityMultiplierEnabled: false,
+				probabilityMultiplier: 1,
 			}
 		];
 

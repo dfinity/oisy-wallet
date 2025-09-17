@@ -56,6 +56,8 @@ export interface CampaignEligibility {
 	available: boolean;
 	eligible: boolean;
 	criteria: CampaignCriterion[];
+	probabilityMultiplierEnabled: boolean;
+	probabilityMultiplier: number;
 }
 
 export interface CampaignCriterion {
