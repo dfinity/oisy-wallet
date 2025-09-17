@@ -355,7 +355,7 @@
 			"activity_button_text": "Verificar Atividade Recente",
 			"activity_button_text_short": "Verificar atividade",
 			"open_wallet": "Leve-me para a carteira",
-			"carousel_slide_title": "$oisy_short Sprinkles estão agora ativas!",
+			"carousel_slide_title": "$oisy_short Sprinkles episódio 5 agora ativas!",
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
@@ -373,7 +373,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Fique de olho nos próximos lançamentos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Siga-nos no X</a>, junte-se ao nosso <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou entre no nosso <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para ficar por dentro das últimas novidades.",
-			"coming_soon": "O episódio 4 de $oisy_short está chegando",
+			"coming_soon": "O episódio 6 de $oisy_short está chegando",
 			"reward_banner": "Banner da campanha $campaignName"
 		},
 		"campaigns": {
