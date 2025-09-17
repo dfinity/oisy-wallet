@@ -1,29 +1,40 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardRequirement from '$lib/components/rewards/RewardRequirement.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
 
 	interface Props {
 		isEligible: boolean;
+		hasNetworkBonus: boolean;
+		networkBonusMultiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		criteria: CampaignCriterion[];
 	}
 
-	let { isEligible, criteria }: Props = $props();
+	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria }: Props = $props();
 </script>
 
 {#if criteria.length > 0}
-	<span class="text-base font-semibold">
-		{$i18n.rewards.requirements.requirements_title}
-	</span>
-	{#if isEligible}
-		<span class="inline-flex pl-3">
-			<Badge variant="success">
-				{$i18n.rewards.text.youre_eligible}
-			</Badge>
+	<div
+		class="flex flex-col gap-2 pb-4"
+		class:flex-row={!hasNetworkBonus}
+		class:items-center={!hasNetworkBonus}
+	>
+		<span class="text-base font-semibold">
+			{$i18n.rewards.requirements.requirements_title}
 		</span>
-	{/if}
+
+		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
+			<EligibilityBadge {isEligible} />
+
+			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
+			{/if}
+		</div>
+	</div>
 	<ul class="list-none">
 		{#each criteria as criterion, i (criterion)}
 			<li class="flex gap-2 pt-1">
