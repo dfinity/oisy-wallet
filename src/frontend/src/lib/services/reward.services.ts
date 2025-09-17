@@ -58,7 +58,13 @@ export const getCampaignEligibilities = async (params: {
 			certified: false
 		});
 
-		return mapEligibilityReport(eligibilityReport);
+		console.log(eligibilityReport);
+
+		const wusch = mapEligibilityReport(eligibilityReport);
+
+		console.log(wusch);
+
+		return wusch;
 	} catch (err: unknown) {
 		const { vip } = get(i18n);
 		toastsError({
