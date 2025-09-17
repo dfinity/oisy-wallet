@@ -25,6 +25,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import * as nftEnv from '$env/nft.env';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
@@ -130,6 +131,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc1155CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.setAll(mockErc1155CertifiedCustomTokens);
+
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	afterEach(() => {
