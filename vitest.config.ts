@@ -77,7 +77,7 @@ export default defineConfig(
 			// isolate: false,
 			// fileParallelism: true,
 			fileParallelism: true,
-			pool:'vmThreads',
+			pool: 'vmThreads',
 			coverage: {
 				include: ['src/frontend'],
 				exclude: ['src/frontend/src/routes/**/+page.ts'],
