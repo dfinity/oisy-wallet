@@ -37,6 +37,7 @@
 		{$i18n.nfts.text.media_disabled}
 	{/if}
 	<Button
+		ariaLabel={$i18n.nfts.alt.review_preference}
 		colorStyle="secondary-light"
 		onclick={openConsentModal}
 		styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
