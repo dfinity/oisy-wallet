@@ -70,12 +70,21 @@ export interface MinLoginsCriterion extends CampaignCriterion {
 	count: number;
 }
 
-export interface MinTransactionsCriterion extends CampaignCriterion {
+export interface MinTransactionsOverallCriterion extends CampaignCriterion {
 	days: bigint;
 	count: number;
 }
 
-export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
+export interface MinTransactionsInNetworkCriterion extends CampaignCriterion {
+	days: bigint;
+	count: number;
+}
+
+export interface MinTotalAssetsUsdOverallCriterion extends CampaignCriterion {
+	usd: number;
+}
+
+export interface MinTotalAssetsUsdInNetworkCriterion extends CampaignCriterion {
 	usd: number;
 }
 
