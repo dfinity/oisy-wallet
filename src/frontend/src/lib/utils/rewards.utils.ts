@@ -8,8 +8,8 @@ import type {
 	CampaignEligibility,
 	HangoverCriterion,
 	MinLoginsCriterion,
-	MinTotalAssetsUsdCriterion,
-	MinTransactionsCriterion,
+	MinTotalAssetsUsdCriterion, MinTotalAssetsUsdInNetworkCriterion,
+	MinTransactionsCriterion, MinTransactionsInNetworkCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
@@ -142,6 +142,19 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
+	if ('MinTransactionsInNetwork' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsInNetwork;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+				days,
+				count
+			} as MinTransactionsInNetworkCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
 	if ('MinTotalAssetsUsd' in criterion.criterion) {
 		const { usd } = criterion.criterion.MinTotalAssetsUsd;
 
@@ -150,6 +163,15 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
 		} as MinTotalAssetsUsdCriterion;
+	}
+	if ('MinTotalAssetsUsdInNetwork' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdInNetwork;
+
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+			usd
+		} as MinTotalAssetsUsdInNetworkCriterion;
 	}
 	if ('Hangover' in criterion.criterion) {
 		const { duration } = criterion.criterion.Hangover;
