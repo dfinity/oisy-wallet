@@ -50,7 +50,13 @@ export interface AnyToken {
 	token_symbol: string;
 	wraps: [] | [string];
 }
+export interface AwardFilter {
+	award_name: [] | [string];
+	campaign_id: [] | [string];
+}
 export interface CampaignEligibility {
+	probability_multiplier_enabled: boolean;
+	probability_multiplier: number;
 	available: boolean;
 	eligible: boolean;
 	criteria: Array<CriterionEligibility>;
@@ -75,12 +81,19 @@ export interface Config {
 	vip_campaigns: [] | [Array<[string, VipConfig]>];
 	readonly_admins: Array<Principal>;
 	oisy_canister: [] | [Principal];
+	s1e4_referral_config: [] | [S1E4ReferralConfig];
 }
 export type Criterion =
 	| {
 			MinTransactions: { duration: CandidDuration; count: number };
 	  }
 	| { MinReferrals: { count: number } }
+	| {
+			MinTransactionsInNetwork: {
+				duration: CandidDuration;
+				count: number;
+			};
+	  }
 	| {
 			MinLogins: {
 				duration: CandidDuration;
@@ -89,19 +102,43 @@ export type Criterion =
 			};
 	  }
 	| { MinTotalAssetsUsd: { usd: number } }
-	| { Hangover: { duration: CandidDuration } }
+	| { MinTotalAssetsUsdInNetwork: { usd: number } }
+	| {
+			Hangover: {
+				duration: CandidDuration;
+				inhibitors: [] | [Array<AwardFilter>];
+			};
+	  }
 	| { MinTokens: { count: number } }
-	| { MinEligibleReferrals: { count: number; campaign_name: string } }
-	| { EligibleForCampaign: { campaign_name: string } };
+	| { EligibleForUsageAward: null };
 export interface CriterionEligibility {
 	satisfied: boolean;
 	criterion: Criterion;
 }
+export type CriterionName =
+	| { MinTransactions: null }
+	| { MinReferrals: null }
+	| { MinTransactionsInNetwork: null }
+	| { MinLogins: null }
+	| { MinTotalAssetsUsd: null }
+	| { MinTotalAssetsUsdInNetwork: null }
+	| { Hangover: null }
+	| { MinTokens: null }
+	| { EligibleForUsageAward: null };
 export type EligibilityError = { NotAuthorized: null };
 export interface EligibilityReport {
 	campaigns: Array<[string, CampaignEligibility]>;
 }
 export type EligibilityResponse = { Ok: EligibilityReport } | { Err: EligibilityError };
+export interface HoldingsPopcontestRequest {
+	to: [] | [number];
+	from: [] | [number];
+}
+export interface HoldingsPopcontestResponse {
+	to: [] | [number];
+	from: [] | [number];
+	entries: Array<UserSnapshot>;
+}
 export interface LastActivityHistogram {
 	older: number;
 	unknown: number;
@@ -142,6 +179,16 @@ export interface PublicSprinkleInfo {
 	n_sprinkled_users: bigint;
 	ledger: Principal;
 }
+export interface RefereeConfig {
+	referees_per_referrer: number;
+	awards: Array<TokenConfig>;
+	criteria: Array<Criterion>;
+}
+export interface ReferrerConfig {
+	referrers_per_event: number;
+	awards: Array<TokenConfig>;
+	criteria: Array<Criterion>;
+}
 export interface ReferrerInfo {
 	referral_code: number;
 	num_referrals: [] | [number];
@@ -153,6 +200,17 @@ export interface RewardInfo {
 	amount: bigint;
 	campaign_id: string;
 	campaign_name: [] | [string];
+}
+export interface S1E4ReferralConfig {
+	referrer: ReferrerConfig;
+	cycle_duration: CandidDuration;
+	events_per_cycle: number;
+	campaign_id: string;
+	referee: RefereeConfig;
+}
+export interface S1E4ReferrerInfo {
+	unrewarded_referees: Array<Principal>;
+	referrals_count: number;
 }
 export type SetReferrerError =
 	| { SelfReferral: null }
@@ -231,6 +289,7 @@ export interface UsageAndHolding {
 }
 export interface UsageAwardConfig {
 	cycle_duration: CandidDuration;
+	probability_multiplier_rules: Array<[number, Array<CriterionName>]>;
 	awards: Array<UsageAwardEvent>;
 	eligibility_criteria: UsageCriteria;
 	campaign_name: [] | [string];
@@ -249,6 +308,7 @@ export interface UsageAwardState {
 	referred_by: [] | [number];
 	last_activity_ns: [] | [bigint];
 	referrer_info: [] | [ReferrerInfo];
+	s1e4_referrer_info: [] | [S1E4ReferrerInfo];
 }
 export interface UsageAwardStats {
 	user_count: bigint;
@@ -309,10 +369,13 @@ export interface _SERVICE {
 	claim_usage_award: ActorMethod<[UsageAwardEvent, Principal], undefined>;
 	claim_vip_reward: ActorMethod<[VipReward], [ClaimVipRewardResponse, [] | [ClaimedVipReward]]>;
 	config: ActorMethod<[], Config>;
+	configure_referral: ActorMethod<[S1E4ReferralConfig], undefined>;
 	configure_usage_awards: ActorMethod<[UsageAwardConfig], undefined>;
 	configure_vip: ActorMethod<[VipConfig], undefined>;
 	configure_vips: ActorMethod<[Array<[string, VipConfig]>], undefined>;
 	eligible: ActorMethod<[[] | [Principal]], EligibilityResponse>;
+	grant_usage_award: ActorMethod<[UsageAwardEvent, [] | [Principal]], undefined>;
+	holdings_popcontest: ActorMethod<[HoldingsPopcontestRequest], HoldingsPopcontestResponse>;
 	last_activity_histogram: ActorMethod<
 		[LastActivityHistogramRequest],
 		LastActivityHistogramResponse
@@ -322,9 +385,11 @@ export interface _SERVICE {
 	referrer_info_for: ActorMethod<[Principal], [] | [ReferrerInfo]>;
 	register_airdrop_recipient: ActorMethod<[UserSnapshot], undefined>;
 	register_snapshot_for: ActorMethod<[Principal, UserSnapshot], undefined>;
+	s1e4_eligible_referrers: ActorMethod<[], Array<[Principal, Array<Principal>]>>;
 	set_referrer: ActorMethod<[number], SetReferrerResponse>;
 	stats_by: ActorMethod<[StatsKeyType], StatsResponse>;
 	stats_usage_vs_holding: ActorMethod<[], UsageVsHoldingStats>;
+	trigger_s1e4_referrer_award_event: ActorMethod<[], undefined>;
 	trigger_usage_award_event: ActorMethod<[UsageAwardEvent], undefined>;
 	usage_stats: ActorMethod<[], UsageAwardStats>;
 	usage_winners: ActorMethod<[[] | [UsageWinnersRequest]], UsageWinnersResponse>;
