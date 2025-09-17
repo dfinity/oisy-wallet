@@ -329,6 +329,11 @@
 				"one_liner": "ガバナンスとコラボレーションが出会い、イノベーションを促進する場所。",
 				"description": "Toolkitは、Internet Computer上のサービス神経システム（SNS）とプロジェクトを管理するための多機能スイートです。ガバナンス提案からキャニスターのデプロイまで、ユーザーがシームレスにイノベーション、コラボレーション、分散化を行えるようにします。"
 			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"usdai": {
 				"name": "",
 				"one_liner": "",
@@ -1118,7 +1123,8 @@
 			"card": {
 				"image": "トークンIDが$tokenIdのNFTの画像"
 			},
-			"copy_address": "このアドレスをクリップボードにコピー"
+			"copy_address": "このアドレスをクリップボードにコピー",
+			"review_preference": ""
 		}
 	},
 	"fee": {
