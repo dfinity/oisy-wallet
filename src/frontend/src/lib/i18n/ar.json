@@ -328,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "حيث تلتقي الحوكمة بالتعاون لإشعال الابتكار.",
 				"description": "Toolkit هي مجموعة أدوات متعددة الاستخدامات لإدارة أنظمة الخدمة العصبية (SNS) والمشاريع على Internet Computer. من مقترحات الحوكمة إلى نشر الحاويات، فإنه يمكّن المستخدمين من الابتكار والتعاون واللامركزية بسلاسة."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1112,7 +1122,8 @@
 			"card": {
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {

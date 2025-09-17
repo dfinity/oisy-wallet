@@ -96,7 +96,7 @@
 				</div>
 
 				{#if nonNullish(nft)}
-					<NftActionButtons {nft} />
+					<NftActionButtons />
 				{/if}
 			</div>
 		{:else}
@@ -132,7 +132,7 @@
 			<ListItem>
 				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
 				{#if nonNullish(nft)}
-					<NftImageConsentPreference {nft} />
+					<NftImageConsentPreference collection={nft.collection} />
 				{:else}
 					<span class="min-w-12">
 						<SkeletonText />
