@@ -9,7 +9,7 @@ import type {
 import type { Token } from '$lib/types/token';
 import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { FeeData } from 'ethers/providers';
+import type { TransactionResponse as EthersTransactionResponse, FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
 import type * as z from 'zod/v4';
 
@@ -33,6 +33,10 @@ export type Transaction = Omit<EthersTransaction, 'data' | 'from'> &
 		displayTimestamp?: number;
 		tokenId?: number;
 	};
+
+export type TransactionResponse = Transaction &
+	Pick<EthersTransactionResponse, 'wait'> &
+	Pick<EthersTransaction, 'data'>;
 
 export type TransactionFeeData = Pick<FeeData, 'maxFeePerGas' | 'maxPriorityFeePerGas'> & {
 	gas: bigint;

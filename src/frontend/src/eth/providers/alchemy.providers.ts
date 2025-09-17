@@ -9,6 +9,7 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
+import type { TransactionResponse } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -22,7 +23,7 @@ import {
 	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
-import { AlchemyProvider as AlchemyProviderLib, type TransactionResponse } from 'ethers/providers';
+import { AlchemyProvider as AlchemyProviderLib } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -130,8 +131,22 @@ export class AlchemyProvider {
 		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 	}
 
-	getTransaction = (hash: string): Promise<TransactionResponse | null> =>
-		this.provider.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponse | null> => {
+		const transaction = await this.provider.getTransaction(hash);
+
+		if (isNullish(transaction)) {
+			return transaction;
+		}
+
+		const { to, blockNumber, wait, ...rest } = transaction;
+
+		return {
+			...rest,
+			...(nonNullish(to) && { to }),
+			...(nonNullish(blockNumber) && { blockNumber }),
+			wait
+		};
+	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
 	getNftsByOwner = async ({

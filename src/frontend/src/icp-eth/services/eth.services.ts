@@ -23,11 +23,12 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
+import type { TransactionResponse } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { Log, TransactionResponse } from 'ethers/providers';
+import type { Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const loadCkEthereumPendingTransactions = async ({
@@ -146,7 +147,7 @@ const loadPendingTransactions = async ({
 
 		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore, we reset the store.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20; therefore, we reset the store.
 		// This can be useful if there were previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
