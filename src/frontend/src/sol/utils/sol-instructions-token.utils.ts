@@ -37,133 +37,184 @@ export const parseSolTokenInstruction = (
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifyTokenInstruction(instruction);
-	switch (decodedInstruction) {
-		case TokenInstruction.InitializeMint:
-			return {
-				...parseInitializeMintInstruction(instruction),
-				instructionType: TokenInstruction.InitializeMint
-			};
-		case TokenInstruction.InitializeAccount:
-			return {
-				...parseInitializeAccountInstruction(instruction),
-				instructionType: TokenInstruction.InitializeAccount
-			};
-		case TokenInstruction.InitializeMultisig:
-			return {
-				...parseInitializeMultisigInstruction(instruction),
-				instructionType: TokenInstruction.InitializeMultisig
-			};
-		case TokenInstruction.Transfer:
-			return {
-				...parseTransferInstruction(instruction),
-				instructionType: TokenInstruction.Transfer
-			};
-		case TokenInstruction.Approve:
-			return {
-				...parseApproveInstruction(instruction),
-				instructionType: TokenInstruction.Approve
-			};
-		case TokenInstruction.Revoke:
-			return {
-				...parseRevokeInstruction(instruction),
-				instructionType: TokenInstruction.Revoke
-			};
-		case TokenInstruction.SetAuthority:
-			return {
-				...parseSetAuthorityInstruction(instruction),
-				instructionType: TokenInstruction.SetAuthority
-			};
-		case TokenInstruction.MintTo:
-			return {
-				...parseMintToInstruction(instruction),
-				instructionType: TokenInstruction.MintTo
-			};
-		case TokenInstruction.Burn:
-			return {
-				...parseBurnInstruction(instruction),
-				instructionType: TokenInstruction.Burn
-			};
-		case TokenInstruction.CloseAccount:
-			return {
-				...parseCloseAccountInstruction(instruction),
-				instructionType: TokenInstruction.CloseAccount
-			};
-		case TokenInstruction.FreezeAccount:
-			return {
-				...parseFreezeAccountInstruction(instruction),
-				instructionType: TokenInstruction.FreezeAccount
-			};
-		case TokenInstruction.ThawAccount:
-			return {
-				...parseThawAccountInstruction(instruction),
-				instructionType: TokenInstruction.ThawAccount
-			};
-		case TokenInstruction.TransferChecked:
-			return {
-				...parseTransferCheckedInstruction(instruction),
-				instructionType: TokenInstruction.TransferChecked
-			};
-		case TokenInstruction.ApproveChecked:
-			return {
-				...parseApproveCheckedInstruction(instruction),
-				instructionType: TokenInstruction.ApproveChecked
-			};
-		case TokenInstruction.MintToChecked:
-			return {
-				...parseMintToCheckedInstruction(instruction),
-				instructionType: TokenInstruction.MintToChecked
-			};
-		case TokenInstruction.BurnChecked:
-			return {
-				...parseBurnCheckedInstruction(instruction),
-				instructionType: TokenInstruction.BurnChecked
-			};
-		case TokenInstruction.InitializeAccount2:
-			return {
-				...parseInitializeAccount2Instruction(instruction),
-				instructionType: TokenInstruction.InitializeAccount2
-			};
-		case TokenInstruction.SyncNative:
-			return {
-				...parseSyncNativeInstruction(instruction),
-				instructionType: TokenInstruction.SyncNative
-			};
-		case TokenInstruction.InitializeAccount3:
-			return {
-				...parseInitializeAccount3Instruction(instruction),
-				instructionType: TokenInstruction.InitializeAccount3
-			};
-		case TokenInstruction.InitializeMultisig2:
-			return {
-				...parseInitializeMultisig2Instruction(instruction),
-				instructionType: TokenInstruction.InitializeMultisig2
-			};
-		case TokenInstruction.InitializeMint2:
-			return {
-				...parseInitializeMint2Instruction(instruction),
-				instructionType: TokenInstruction.InitializeMint2
-			};
-		case TokenInstruction.GetAccountDataSize:
-			return {
-				...parseGetAccountDataSizeInstruction(instruction),
-				instructionType: TokenInstruction.GetAccountDataSize
-			};
-		case TokenInstruction.InitializeImmutableOwner:
-			return {
-				...parseInitializeImmutableOwnerInstruction(instruction),
-				instructionType: TokenInstruction.InitializeImmutableOwner
-			};
-		case TokenInstruction.AmountToUiAmount:
-			return {
-				...parseAmountToUiAmountInstruction(instruction),
-				instructionType: TokenInstruction.AmountToUiAmount
-			};
-		case TokenInstruction.UiAmountToAmount:
-			return {
-				...parseUiAmountToAmountInstruction(instruction),
-				instructionType: TokenInstruction.UiAmountToAmount
-			};
-		default:
-			return instruction;
+
+	if (decodedInstruction === TokenInstruction.InitializeMint) {
+		return {
+			...parseInitializeMintInstruction(instruction),
+			instructionType: TokenInstruction.InitializeMint
+		};
 	}
+
+	if (decodedInstruction === TokenInstruction.InitializeAccount) {
+		return {
+			...parseInitializeAccountInstruction(instruction),
+			instructionType: TokenInstruction.InitializeAccount
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeMultisig) {
+		return {
+			...parseInitializeMultisigInstruction(instruction),
+			instructionType: TokenInstruction.InitializeMultisig
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.Transfer) {
+		return {
+			...parseTransferInstruction(instruction),
+			instructionType: TokenInstruction.Transfer
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.Approve) {
+		return {
+			...parseApproveInstruction(instruction),
+			instructionType: TokenInstruction.Approve
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.Revoke) {
+		return {
+			...parseRevokeInstruction(instruction),
+			instructionType: TokenInstruction.Revoke
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.SetAuthority) {
+		return {
+			...parseSetAuthorityInstruction(instruction),
+			instructionType: TokenInstruction.SetAuthority
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.MintTo) {
+		return {
+			...parseMintToInstruction(instruction),
+			instructionType: TokenInstruction.MintTo
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.Burn) {
+		return {
+			...parseBurnInstruction(instruction),
+			instructionType: TokenInstruction.Burn
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.CloseAccount) {
+		return {
+			...parseCloseAccountInstruction(instruction),
+			instructionType: TokenInstruction.CloseAccount
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.FreezeAccount) {
+		return {
+			...parseFreezeAccountInstruction(instruction),
+			instructionType: TokenInstruction.FreezeAccount
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.ThawAccount) {
+		return {
+			...parseThawAccountInstruction(instruction),
+			instructionType: TokenInstruction.ThawAccount
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.TransferChecked) {
+		return {
+			...parseTransferCheckedInstruction(instruction),
+			instructionType: TokenInstruction.TransferChecked
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.ApproveChecked) {
+		return {
+			...parseApproveCheckedInstruction(instruction),
+			instructionType: TokenInstruction.ApproveChecked
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.MintToChecked) {
+		return {
+			...parseMintToCheckedInstruction(instruction),
+			instructionType: TokenInstruction.MintToChecked
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.BurnChecked) {
+		return {
+			...parseBurnCheckedInstruction(instruction),
+			instructionType: TokenInstruction.BurnChecked
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeAccount2) {
+		return {
+			...parseInitializeAccount2Instruction(instruction),
+			instructionType: TokenInstruction.InitializeAccount2
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.SyncNative) {
+		return {
+			...parseSyncNativeInstruction(instruction),
+			instructionType: TokenInstruction.SyncNative
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeAccount3) {
+		return {
+			...parseInitializeAccount3Instruction(instruction),
+			instructionType: TokenInstruction.InitializeAccount3
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeMultisig2) {
+		return {
+			...parseInitializeMultisig2Instruction(instruction),
+			instructionType: TokenInstruction.InitializeMultisig2
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeMint2) {
+		return {
+			...parseInitializeMint2Instruction(instruction),
+			instructionType: TokenInstruction.InitializeMint2
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.GetAccountDataSize) {
+		return {
+			...parseGetAccountDataSizeInstruction(instruction),
+			instructionType: TokenInstruction.GetAccountDataSize
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.InitializeImmutableOwner) {
+		return {
+			...parseInitializeImmutableOwnerInstruction(instruction),
+			instructionType: TokenInstruction.InitializeImmutableOwner
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.AmountToUiAmount) {
+		return {
+			...parseAmountToUiAmountInstruction(instruction),
+			instructionType: TokenInstruction.AmountToUiAmount
+		};
+	}
+
+	if (decodedInstruction === TokenInstruction.UiAmountToAmount) {
+		return {
+			...parseUiAmountToAmountInstruction(instruction),
+			instructionType: TokenInstruction.UiAmountToAmount
+		};
+	}
+
+	// Force compiler error on unhandled cases based on leftover types
+	const _: never = decodedInstruction;
+
+	return instruction;
 };
