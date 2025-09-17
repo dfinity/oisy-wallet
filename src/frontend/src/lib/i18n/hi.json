@@ -328,6 +328,16 @@
 				"name": "टूलकिट",
 				"one_liner": "जहाँ शासन नवाचार को प्रज्वलित करने के लिए सहयोग से मिलता है।",
 				"description": "टूलकिट इंटरनेट कंप्यूटर पर सेवा तंत्रिका प्रणाली (SNS) और परियोजनाओं के प्रबंधन के लिए एक बहुमुखी सूट है। शासन प्रस्तावों से लेकर कैनिस्टर परिनियोजन तक, यह उपयोगकर्ताओं को सहज रूप से नवाचार, सहयोग और विकेन्द्रीकरण करने में सक्षम बनाता है।"
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -356,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "योग्यता शर्तें",
+			"network_bonus_info": "",
 			"min_logins": "पिछले $days दिनों में $loginsx बार लॉगिन करें",
 			"min_transactions": "पिछले $days दिनों में $transactions लेनदेन पूरे करें",
 			"min_total_assets_usd": "जारी होने के समय $$usd मूल्य के टोकन रखें",
@@ -1105,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
 			"card": {
 				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
 			},
-			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें"
+			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
+			"review_preference": ""
 		}
 	},
 	"fee": {

@@ -328,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "治理与协作相遇，激发创新。",
 				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -356,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "资格标准",
+			"network_bonus_info": "",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
 			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
 			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
@@ -1105,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
 			"card": {
 				"image": "图片"
 			},
-			"copy_address": "把该地址复制到粘贴版"
+			"copy_address": "把该地址复制到粘贴版",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1655,18 +1668,18 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "标题",
-			"welcome_message": "欢迎信息",
-			"action_button_contacts_title": "联系人标题按钮",
-			"action_button_contacts_subtitle": "联系人副标题按钮",
-			"action_button_contacts_prompt": "联系人提示按钮",
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
 			"action_button_send_tokens_title": "发送资产",
 			"action_button_send_tokens_subtitle": "设置发送于几秒钟后",
 			"action_button_send_tokens_prompt": "我想发送代币",
 			"select_contact_message": "选择一个联系人来开启发送过程",
 			"send_to_message": "发给 $contact_name（$address_info）",
 			"send_message": "发送消息",
-			"send_message_input_placeholder": "发送消息输入占位符",
+			"send_message_input_placeholder": "",
 			"send_token_succeeded": "交易完成",
 			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
 			"loading": "思考中",

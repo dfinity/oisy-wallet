@@ -54,6 +54,11 @@ type AnyToken = record {
 	wraps : opt text
 };
 
+type AwardFilter = record {
+	campaign_id : opt text;
+	award_name : opt text
+};
+
 ///
 type CampaignEligibility = record {
 	///
@@ -63,6 +68,10 @@ type CampaignEligibility = record {
 	///
 	criteria : vec CriterionEligibility;
 	///
+	probability_multiplier : opt nat32;
+	///
+	probability_multiplier_enabled : opt bool
+
 };
 /// A span of time.
 type CandidDuration = variant {
@@ -100,15 +109,27 @@ type Config = record {
 	/// Admin principals that have privileges to _read_ configuration and internal status.
 	readonly_admins : vec principal;
 	/// Oisy canister to fetch users from
-	oisy_canister : opt principal
+	oisy_canister : opt principal;
+	/// S1E4 referral rewards configuration.
+	s1e4_referral_config : opt S1E4ReferralConfig
 };
 /// A requirement that a user must satisfy to be eligible for an airdrop.
 type Criterion = variant {
-	/// The user must have made at least this many transactions.
-	MinTransactions : record { count : nat32; duration : CandidDuration };
 	/// The user must have made at least this many successful referrals.
 	MinReferrals : record { count : nat32 };
-	/// The user must have logged in a certain number of times recently.
+	/// The user must hold total assets of at least `n` USD across all networks.
+	MinTotalAssetsUsd : record { usd : nat32 };
+	/// The user must hold total assets of at least `n` USD per network.
+	MinTotalAssetsUsdInNetwork : record { usd : nat32 };
+	/// The user must have made at least `n` transactions across all networks.
+	MinTransactions : record { count : nat32; duration : CandidDuration };
+	/// The user must have made at least `n` transactions per network.
+	MinTransactionsInNetwork : record {
+		count : nat32;
+		duration : CandidDuration
+	};
+	/// The user must have logged in at least `n` times recently, where recently
+	/// is defined by the duration.
 	MinLogins : record {
 		/// "recent" is defined by this duration.
 		duration : CandidDuration;
@@ -117,19 +138,16 @@ type Criterion = variant {
 		/// The assumed session length.
 		session_duration : opt CandidDuration
 	};
-	/// The minimum total assets at the last valuation.
-	MinTotalAssetsUsd : record { usd : nat32 };
 	/// The minimum number of distinct tokens that the user must hold.
 	MinTokens : record { count : nat32 };
 	/// The minimum time since the user's last sprinkles award.
 	Hangover : record {
 		/// The time that must pass before a sprinkled user can be eligible again.
-		duration : CandidDuration
+		duration : CandidDuration;
+		/// Matching awards that prevent eligibility.  By default, any award will prevent eligibility.
+		inhibitors : opt vec AwardFilter
 	};
-	/// The user must be eligible for this campaign.
-	EligibleForCampaign : record { campaign_name : text };
-	/// The user must have made at least this many referrals.
-	MinEligibleReferrals : record { count : nat32; campaign_name : text }
+	EligibleForUsageAward
 };
 /// Whether a user satisfies a given criterion.
 type CriterionEligibility = record {
@@ -164,6 +182,12 @@ type EligibilityResponse = variant {
 	///
 	Err : EligibilityError;
 	///
+};
+type HoldingsPopcontestRequest = record { to : opt nat8; from : opt nat8 };
+type HoldingsPopcontestResponse = record {
+	to : opt nat8;
+	from : opt nat8;
+	entries : vec UserSnapshot
 };
 type LastActivityHistogram = record {
 	older : nat32;
@@ -238,6 +262,22 @@ type ReferrerInfo = record {
 	/// The number of times the referral code has been used.
 	num_referrals : opt nat32
 };
+type RefereeConfig = record {
+	referees_per_referrer : nat32;
+	awards : vec TokenConfig;
+	criteria : vec Criterion
+};
+type ReferrerConfig = record {
+	referrers_per_event : nat32;
+	awards : vec TokenConfig;
+	criteria : vec Criterion
+};
+type S1E4ReferrerInfo = record {
+	/// The number of referrals in S1E4 only.
+	referrals_count : nat32;
+	/// Unrewarded s1e4 referrees.
+	unrewarded_referees : vec principal
+};
 type RewardInfo = record {
 	/// The name of the reward
 	name : opt text;
@@ -251,6 +291,13 @@ type RewardInfo = record {
 	timestamp : nat64;
 	/// The amount of tokens awarded.
 	amount : nat
+};
+type S1E4ReferralConfig = record {
+	referrer : ReferrerConfig;
+	cycle_duration : CandidDuration;
+	events_per_cycle : nat32;
+	campaign_id : text;
+	referee : RefereeConfig
 };
 /// Possible errors for `set_referrer()`
 type SetReferrerError = variant {
@@ -379,12 +426,28 @@ type UsageAndHolding = record {
 	// Time of last recorded activity.
 	last_activity_ns : opt nat64
 };
+/// Names of criteria for use in probability multiplier rules
+type CriterionName = variant {
+	MinReferrals;
+	MinTotalAssetsUsd;
+	MinTotalAssetsUsdInNetwork;
+	MinTransactions;
+	MinTransactionsInNetwork;
+	MinLogins;
+	MinTokens;
+	Hangover;
+	EligibleForUsageAward
+};
+
 type UsageAwardConfig = record {
 	cycle_duration : CandidDuration;
 	awards : vec UsageAwardEvent;
 	eligibility_criteria : UsageCriteria;
 	/// The campaign the award is associated with.
-	campaign_name : opt text
+	campaign_name : opt text;
+	/// Rules for probability multipliers based on satisfied criteria.
+	/// Maps multiplier values to lists of criterion names that must be satisfied.
+	probability_multiplier_rules : opt vec record { nat32; vec CriterionName }
 };
 type UsageAwardEvent = record {
 	name : text;
@@ -403,6 +466,8 @@ type UsageAwardState = record {
 	referred_by : opt nat32;
 	/// User's code for inviting others to the platform, and referral stats.
 	referrer_info : opt ReferrerInfo;
+	/// Referrer info for s1e4.
+	s1e4_referrer_info : opt S1E4ReferrerInfo;
 	/// The time of the first activity.
 	first_activity_ns : opt nat64;
 	/// The time of the last activity.
@@ -484,6 +549,8 @@ service : (opt Config) -> {
 	claim_vip_reward : (VipReward) -> (ClaimVipRewardResponse, opt ClaimedVipReward);
 	/// Retrieves the current configuration of the canister.
 	config : () -> (Config) query;
+	/// Configures S1E4 referral rewards.
+	configure_referral : (S1E4ReferralConfig) -> ();
 	/// Configures bonuses for using & holding assets in Oisy.
 	configure_usage_awards : (UsageAwardConfig) -> ();
 	/// Configures VIP rewards
@@ -492,6 +559,14 @@ service : (opt Config) -> {
 	configure_vips : (vec record { text; VipConfig }) -> ();
 	/// Eligibility of the caller or specified principal for airdrops.
 	eligible : (opt principal) -> (EligibilityResponse) query;
+	/// Grants the provided award event.  This is normally done automatically.
+	/// It can be useful to be able to make a payment directly when testing how
+	/// awards are displayed in the GUI.
+	grant_usage_award : (UsageAwardEvent, opt principal) -> ();
+	/// Which tokens are beloved in what amounts?
+	holdings_popcontest : (HoldingsPopcontestRequest) -> (
+		HoldingsPopcontestResponse
+	) query;
 	/// A histogram of when users were last active
 	last_activity_histogram : (LastActivityHistogramRequest) -> (
 		LastActivityHistogramResponse
@@ -505,6 +580,7 @@ service : (opt Config) -> {
 	/// Provides a user's account IDs for airdrop.
 	register_airdrop_recipient : (UserSnapshot) -> ();
 	register_snapshot_for : (principal, UserSnapshot) -> ();
+	s1e4_eligible_referrers : () -> (vec record { principal; vec principal }) query;
 	/// Sets the caller's referrer.
 	set_referrer : (nat32) -> (SetReferrerResponse);
 	stats_by : (StatsKeyType) -> (StatsResponse) query;
@@ -512,6 +588,8 @@ service : (opt Config) -> {
 	/// Runs the provided award event.  This is normally done automatically.  It can be useful
 	/// to trigger an event directly when testing.
 	trigger_usage_award_event : (UsageAwardEvent) -> ();
+	/// Triggers the S1E4 referrer award event.
+	trigger_s1e4_referrer_award_event : () -> ();
 	/// Aggregate usage stats.
 	usage_stats : () -> (UsageAwardStats) query;
 	/// Finds winners

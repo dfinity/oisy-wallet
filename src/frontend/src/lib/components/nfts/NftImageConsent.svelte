@@ -14,7 +14,7 @@
 		nft?: Nft;
 		children: Snippet;
 		showMessage?: boolean;
-		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display';
+		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
 	}
 
 	const { nft, children, showMessage = true, type }: Props = $props();
@@ -50,12 +50,14 @@
 	>
 		{#if showMessage && !isLoading}
 			<span class="text-tertiary"><IconShieldHalftone /></span>
-			<span class="max-w-40 text-sm text-tertiary"
-				>{isNullish(hasConsent)
-					? $i18n.nfts.text.img_consent_none
-					: $i18n.nfts.text.img_consent_disabled}</span
-			>
-			{#if type !== 'card-selectable'}
+			{#if type !== 'nft-logo'}
+				<span class="max-w-40 text-sm text-tertiary"
+					>{isNullish(hasConsent)
+						? $i18n.nfts.text.img_consent_none
+						: $i18n.nfts.text.img_consent_disabled}</span
+				>
+			{/if}
+			{#if type !== 'card-selectable' && type !== 'nft-logo'}
 				<span
 					class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
 					class:lg:max-h-0={type === 'card'}

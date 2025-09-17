@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import * as nftEnv from '$env/nft.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import {
 	ETHEREUM_TOKEN,
@@ -20,6 +21,7 @@ import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock'
 import { createMockErc20UserTokens } from '$tests/mocks/erc20-tokens.mock';
 import { createMockErc721CustomTokens } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
@@ -103,6 +105,8 @@ describe('LoaderMultipleEthTransactions', () => {
 		...mockErc1155CustomTokens
 	];
 
+	const props = { children: mockSnippet };
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
@@ -127,6 +131,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc1155CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.setAll(mockErc1155CertifiedCustomTokens);
+
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	afterEach(() => {
@@ -137,7 +143,7 @@ describe('LoaderMultipleEthTransactions', () => {
 
 	describe('on mount', () => {
 		it('should sync balances from the IDB cache', async () => {
-			render(LoaderMultipleEthTransactions);
+			render(LoaderMultipleEthTransactions, props);
 
 			await tick();
 
@@ -157,7 +163,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		it('should not sync balances from the IDB cache if not signed in', async () => {
 			mockAuthStore(null);
 
-			render(LoaderMultipleEthTransactions);
+			render(LoaderMultipleEthTransactions, props);
 
 			await tick();
 
@@ -167,7 +173,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		it('should sync balances from the IDB cache only for tokens that have not been initialized', async () => {
 			ethTransactionsStore.set({ tokenId: allExpectedTokens[0].id, transactions: [] });
 
-			render(LoaderMultipleEthTransactions);
+			render(LoaderMultipleEthTransactions, props);
 
 			await tick();
 
@@ -186,7 +192,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	});
 
 	it('should load transactions for all Ethereum and Sepolia tokens (native and ERC20) when testnets flag is enabled', async () => {
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -204,7 +210,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	it('should not load transactions multiple times for the same list if the stores do not change', async () => {
 		setupTestnetsStore('enabled');
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -235,7 +241,7 @@ describe('LoaderMultipleEthTransactions', () => {
 	it('should not load transactions for testnet tokens when testnets flag is disabled', async () => {
 		setupTestnetsStore('disabled');
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -261,7 +267,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('onlyTestnets');
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -293,7 +299,7 @@ describe('LoaderMultipleEthTransactions', () => {
 			start: 2
 		});
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -337,7 +343,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		const mockLoadEthereumTransactions = vi.mocked(loadEthereumTransactions);
 		mockLoadEthereumTransactions.mockResolvedValue({ success: true });
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
@@ -412,7 +418,7 @@ describe('LoaderMultipleEthTransactions', () => {
 			.mockResolvedValueOnce({ success: false })
 			.mockResolvedValue({ success: true });
 
-		render(LoaderMultipleEthTransactions);
+		render(LoaderMultipleEthTransactions, props);
 
 		await vi.advanceTimersByTimeAsync(timeout);
 
