@@ -1,11 +1,16 @@
 import IconSend from '$lib/components/icons/IconSend.svelte';
 import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 
 describe('NftLogo', () => {
+	beforeAll(() => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
+
 	it('should render the main logo', () => {
 		const { getByTestId, getByAltText } = render(NftLogo, {
 			props: {
