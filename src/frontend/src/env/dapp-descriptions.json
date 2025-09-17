@@ -272,5 +272,22 @@
 		"stats": "",
 		"logo": "/images/dapps/toolkit-logo-inv.svg",
 		"screenshots": ["/images/dapps/toolkit-screenshot.webp"]
+	},
+	{
+		"id": "altitudefi",
+		"name": "dapps.descriptions.altitudefi.name",
+		"oneLiner": "dapps.descriptions.altitudefi.one_liner",
+		"website": "https://www.altitude.fi/",
+		"twitter": "https://twitter.com/AltitudeFi_",
+		"discord": "twitter": "https://twitter.com/AltitudeFi_",
+		"telegram": "https://t.me/altitude_fi",
+		"medium": "https://medium.com/@altitude_labs_ltd",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.altitudefi.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/altitudefi-logo.svg",
+		"screenshots": ["/images/dapps/altitudefi-screenshot.webp"]
 	}
 ]
