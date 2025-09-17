@@ -27,6 +27,13 @@
 
 	let loading = $state(false);
 
+	let tokens = $derived([
+		...$enabledEthereumTokens,
+		...$enabledErc20Tokens,
+		...$enabledEvmTokens,
+		...$enabledNonFungibleTokens
+	]);
+
 	const onLoad = async () => {
 		if (loading) {
 			return;
@@ -34,24 +41,7 @@
 
 		loading = true;
 
-		if (
-			isNullish($enabledEthereumTokens) ||
-			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledEvmTokens) ||
-			isNullish($enabledNonFungibleTokens)
-		) {
-			return;
-		}
-
-		const loader = batchLoadTransactions({
-			tokens: [
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			],
-			tokensAlreadyLoaded
-		});
+		const loader = batchLoadTransactions({ tokens, tokensAlreadyLoaded });
 
 		for await (const results of loader) {
 			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
@@ -63,7 +53,7 @@
 	const debounceLoad = debounce(onLoad, 1000);
 
 	$effect(() => {
-		[$enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, $enabledNonFungibleTokens];
+		[tokens];
 
 		debounceLoad();
 	});
@@ -76,12 +66,7 @@
 		}
 
 		await Promise.allSettled(
-			[
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			].map(async ({ id: tokenId, network: { id: networkId } }) => {
+			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
 					return;
 				}
