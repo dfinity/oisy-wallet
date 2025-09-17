@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
+			"network_bonus_info": "",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
