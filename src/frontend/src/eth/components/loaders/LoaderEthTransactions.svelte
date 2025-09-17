@@ -89,7 +89,7 @@
 	$effect(() => {
 		[$tokenWithFallback, $tokenNotInitialized];
 
-		load();
+        (async () => await load())()
 	});
 
 	const reload = async () => {
