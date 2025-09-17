@@ -167,7 +167,6 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 };
 
-
 export const normalizeNetworkMultiplier = (value: number): 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 => {
 	if (![1, 2, 3, 4, 5, 6, 7, 8].includes(value)) {
 		return 1;

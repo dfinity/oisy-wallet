@@ -11,7 +11,8 @@ import {
 	isOngoingCampaign,
 	isUpcomingCampaign,
 	loadRewardResult,
-	mapEligibilityReport, normalizeNetworkMultiplier
+	mapEligibilityReport,
+	normalizeNetworkMultiplier
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
@@ -738,16 +739,19 @@ describe('rewards.utils', () => {
 	});
 
 	describe('normalizeNetworkMultiplier', () => {
-		it.each([1, 2, 3, 4, 5, 6, 7, 8])('should return correct network multiplier for input %i', (input) => {
-			const result = normalizeNetworkMultiplier(input);
+		it.each([1, 2, 3, 4, 5, 6, 7, 8])(
+			'should return correct network multiplier for input %i',
+			(input) => {
+				const result = normalizeNetworkMultiplier(input);
 
-			expect(result).toEqual(input);
-		});
+				expect(result).toEqual(input);
+			}
+		);
 
 		it('should return default value for not supported values', () => {
 			const result = normalizeNetworkMultiplier(22);
 
 			expect(result).toEqual(1);
-		})
+		});
 	});
 });
