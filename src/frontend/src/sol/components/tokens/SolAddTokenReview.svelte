@@ -172,7 +172,7 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			<ButtonBack onclick={() => onBack()} />
-			<Button disabled={invalid} onclick={() => onSave()}>
+			<Button disabled={invalid} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>
