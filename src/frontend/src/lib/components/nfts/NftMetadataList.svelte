@@ -24,9 +24,6 @@
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
-
-	const collectionAddress = $derived(collection?.address);
-	const collectionNetwork = $derived(collection?.network);
 </script>
 
 <List condensed styleClass="text-sm text-primary">
