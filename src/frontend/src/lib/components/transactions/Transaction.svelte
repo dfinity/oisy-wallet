@@ -111,20 +111,18 @@
 
 			{#snippet icon()}
 				<div>
-					{#if iconType === 'token'}
-						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo
-								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
-								logoSize="md"
-								{nft}
-							/>
-						{:else}
-							<TokenLogo
-								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
-								data={token}
-								logoSize="md"
-							/>
-						{/if}
+					{#if isTokenNonFungible(token) && nonNullish(nft)}
+						<NftLogo
+							badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+							logoSize="md"
+							{nft}
+						/>
+					{:else if iconType === 'token'}
+						<TokenLogo
+							badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+							data={token}
+							logoSize="md"
+						/>
 					{:else}
 						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} size="16" />
 					{/if}
