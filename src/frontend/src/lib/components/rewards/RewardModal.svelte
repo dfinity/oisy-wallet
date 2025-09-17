@@ -23,6 +23,7 @@
 	} from '$lib/stores/reward.store';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils.js';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -37,7 +38,7 @@
 	const campaignEligibility = getCampaignEligibility(reward.id);
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
-	const networkBonusMultiplier = $derived($campaignEligibility?.probabilityMultiplier ?? 1);
+	const networkBonusMultiplier = $derived(normalizeNetworkMultiplier($campaignEligibility?.probabilityMultiplier ?? 1));
 	const criteria = $derived($campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
