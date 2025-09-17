@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { updateUserExperimentalFeatureSettings } from '$lib/api/backend.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_CHATBOT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
@@ -49,7 +51,8 @@
 	const labelsByFeatureId: Record<ExperimentalFeatureId, Record<string, string>> = {
 		AiAssistantBeta: {
 			title: replaceOisyPlaceholders($i18n.ai_assistant.text.title),
-			description: $i18n.ai_assistant.text.feature_description
+			description: $i18n.ai_assistant.text.feature_description,
+			learnMore: OISY_CHATBOT_DOCS_URL
 		}
 	};
 </script>
@@ -81,7 +84,17 @@
 				/>
 			</svelte:fragment>
 			<svelte:fragment slot="info">
-				{labelsByFeatureId[feature].description}
+				<span>
+					{labelsByFeatureId[feature].description}
+
+					{#if nonNullish(labelsByFeatureId[feature].learnMore)}
+						<ExternalLink
+							ariaLabel={$i18n.rewards.text.learn_more}
+							href={labelsByFeatureId[feature].learnMore}
+							iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+						>
+					{/if}
+				</span>
 			</svelte:fragment>
 		</SettingsCardItem>
 	{/each}
