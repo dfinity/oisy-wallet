@@ -68,9 +68,10 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
-		</div>
+		<span class="inline-flex text-lg font-semibold"
+			>{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span
+		>
+
 		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 
 		{#if !hasEnded}
