@@ -68,9 +68,9 @@ type CampaignEligibility = record {
 	///
 	criteria : vec CriterionEligibility;
 	///
-	probability_multiplier : nat32;
+	probability_multiplier : opt nat32;
 	///
-	probability_multiplier_enabled : bool
+	probability_multiplier_enabled : opt bool
 
 };
 /// A span of time.
@@ -447,7 +447,7 @@ type UsageAwardConfig = record {
 	campaign_name : opt text;
 	/// Rules for probability multipliers based on satisfied criteria.
 	/// Maps multiplier values to lists of criterion names that must be satisfied.
-	probability_multiplier_rules : vec record { nat32; vec CriterionName }
+	probability_multiplier_rules : opt vec record { nat32; vec CriterionName }
 };
 type UsageAwardEvent = record {
 	name : text;
