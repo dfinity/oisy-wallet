@@ -4,28 +4,28 @@
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { NftCollection } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
-		nft: Nft;
+		collection: NftCollection;
 	}
 
-	const { nft }: Props = $props();
+	const { collection }: Props = $props();
 
 	const hasConsent = $derived(
-		nonNullish(nft)
+		nonNullish(collection)
 			? getAllowMediaForNft({
 					tokens: $nonFungibleTokens,
-					networkId: nft.collection.network.id,
-					address: nft.collection.address
+					networkId: collection.network.id,
+					address: collection.address
 				})
 			: false
 	);
 
 	const openConsentModal = () => {
-		if (nonNullish(nft)) {
-			modalStore.openNftImageConsent({ id: Symbol(), data: nft.collection });
+		if (nonNullish(collection)) {
+			modalStore.openNftImageConsent({ id: Symbol(), data: collection });
 		}
 	};
 </script>

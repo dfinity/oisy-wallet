@@ -1,23 +1,16 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
-	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
-	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -59,71 +52,6 @@
 			</span>
 		{/if}
 
-		<List condensed styleClass="text-sm text-primary">
-			<ListItem
-				><span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
-				{#if nonNullish(token)}
-					{shortenWithMiddleEllipsis({ text: token.name })}
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem
-				><span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-
-				{#if nonNullish(token)}
-					<span class="flex items-center">
-						<output>{shortenWithMiddleEllipsis({ text: token.address })}</output>
-						<AddressActions
-							copyAddress={token.address}
-							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-								$address: token.address
-							})}
-							externalLink={getContractExplorerUrl({
-								network: token.network,
-								contractAddress: token.address
-							})}
-							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
-						/>
-					</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.networks.network}</span>
-				{#if nonNullish(token)}
-					<NetworkWithLogo network={token.network} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
-				{#if nonNullish(token)}
-					<span class="uppercase">{token.standard}</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
-				{#if nonNullish(nfts?.[0])}
-					<NftImageConsentPreference nft={nfts[0]} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-		</List>
+		<NftMetadataList {token} />
 	</div>
 </div>
