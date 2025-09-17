@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
+			"network_bonus_info": "",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
 			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
 			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
