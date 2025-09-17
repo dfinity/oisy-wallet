@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -51,16 +51,10 @@
 			</span>
 		{/if}
 	</ListItem>
-	{#if isNullish(token)}
+	{#if nonNullish(nft)}
 		<ListItem>
 			<span class="text-tertiary">{$i18n.nfts.text.token_id}</span>
-			{#if nonNullish(nft?.id)}
-				{nft.id}
-			{:else}
-				<span class="min-w-12">
-					<SkeletonText />
-				</span>
-			{/if}
+			{nft.id}
 		</ListItem>
 	{/if}
 	<ListItem>
