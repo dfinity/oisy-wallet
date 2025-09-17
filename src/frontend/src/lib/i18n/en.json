@@ -1682,7 +1682,7 @@
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
 			"loading": "Thinking...",
 			"reset_chat_history": "Reset chat history",
-			"feature_description": "The AI Assistant allows you to ask about generic crypto topics, get help about specific OISY features, and to send tokens. Note that no sensitive data like your or your contacts addresses are sent to the assistant, and that all transactions must be confirmed by the user.<br/>The feature is still in beta status, and we are rolling out new features on a regular basis. Read more here: https://docs.oisy.com/using-oisy-wallet/chatbot"
+			"feature_description": "The AI Assistant allows you to ask about generic crypto topics, get help about specific OISY features, and to send tokens. Note that no sensitive data like your or your contacts addresses are sent to the assistant, and that all transactions must be confirmed by the user. The feature is still in beta status, and we are rolling out new features on a regular basis. Read more here: https://docs.oisy.com/using-oisy-wallet/chatbot. <a href=\"https://x.com/oisy\" target=\"_blank\">Read more...</a>"
 		},
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
