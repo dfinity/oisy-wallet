@@ -285,6 +285,7 @@ interface I18nRewards {
 	};
 	requirements: {
 		requirements_title: string;
+		network_bonus_info: string;
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
