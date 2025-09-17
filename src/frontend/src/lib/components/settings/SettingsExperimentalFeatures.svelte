@@ -4,6 +4,8 @@
 	import { updateUserExperimentalFeatureSettings } from '$lib/api/backend.api';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_CHATBOT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
@@ -16,8 +18,6 @@
 	} from '$lib/types/user-experimental-features';
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
-	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { OISY_CHATBOT_DOCS_URL } from '$lib/constants/oisy.constants';
 
 	const features: ExperimentalFeatureId[] = ['AiAssistantBeta'];
 
