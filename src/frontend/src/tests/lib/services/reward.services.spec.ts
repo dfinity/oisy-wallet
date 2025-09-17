@@ -42,8 +42,8 @@ describe('reward-code', () => {
 			eligible: true,
 			available: true,
 			criteria: [],
-			probability_multiplier_enabled: false,
-			probability_multiplier: 1
+			probability_multiplier_enabled: [false],
+			probability_multiplier: [1]
 		};
 		const mockEligibilityReport: EligibilityReport = {
 			campaigns: [[campaignId, campaign]]
