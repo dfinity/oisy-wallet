@@ -25,73 +25,100 @@ export const parseSolSystemInstruction = (
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifySystemInstruction(instruction);
-	switch (decodedInstruction) {
-		case SystemInstruction.CreateAccount:
-			return {
-				...parseCreateAccountInstruction(instruction),
-				instructionType: SystemInstruction.CreateAccount
-			};
-		case SystemInstruction.Assign:
-			return {
-				...parseAssignInstruction(instruction),
-				instructionType: SystemInstruction.Assign
-			};
-		case SystemInstruction.TransferSol:
-			return {
-				...parseTransferSolInstruction(instruction),
-				instructionType: SystemInstruction.TransferSol
-			};
-		case SystemInstruction.CreateAccountWithSeed:
-			return {
-				...parseCreateAccountWithSeedInstruction(instruction),
-				instructionType: SystemInstruction.CreateAccountWithSeed
-			};
-		case SystemInstruction.AdvanceNonceAccount:
-			return {
-				...parseAdvanceNonceAccountInstruction(instruction),
-				instructionType: SystemInstruction.AdvanceNonceAccount
-			};
-		case SystemInstruction.WithdrawNonceAccount:
-			return {
-				...parseWithdrawNonceAccountInstruction(instruction),
-				instructionType: SystemInstruction.WithdrawNonceAccount
-			};
-		case SystemInstruction.InitializeNonceAccount:
-			return {
-				...parseInitializeNonceAccountInstruction(instruction),
-				instructionType: SystemInstruction.InitializeNonceAccount
-			};
-		case SystemInstruction.AuthorizeNonceAccount:
-			return {
-				...parseAuthorizeNonceAccountInstruction(instruction),
-				instructionType: SystemInstruction.AuthorizeNonceAccount
-			};
-		case SystemInstruction.Allocate:
-			return {
-				...parseAllocateInstruction(instruction),
-				instructionType: SystemInstruction.Allocate
-			};
-		case SystemInstruction.AllocateWithSeed:
-			return {
-				...parseAllocateWithSeedInstruction(instruction),
-				instructionType: SystemInstruction.AllocateWithSeed
-			};
-		case SystemInstruction.AssignWithSeed:
-			return {
-				...parseAssignWithSeedInstruction(instruction),
-				instructionType: SystemInstruction.AssignWithSeed
-			};
-		case SystemInstruction.TransferSolWithSeed:
-			return {
-				...parseTransferSolWithSeedInstruction(instruction),
-				instructionType: SystemInstruction.TransferSolWithSeed
-			};
-		case SystemInstruction.UpgradeNonceAccount:
-			return {
-				...parseUpgradeNonceAccountInstruction(instruction),
-				instructionType: SystemInstruction.UpgradeNonceAccount
-			};
-		default:
-			return instruction;
+
+	if (decodedInstruction === SystemInstruction.CreateAccount) {
+		return {
+			...parseCreateAccountInstruction(instruction),
+			instructionType: SystemInstruction.CreateAccount
+		};
 	}
+
+	if (decodedInstruction === SystemInstruction.Assign) {
+		return {
+			...parseAssignInstruction(instruction),
+			instructionType: SystemInstruction.Assign
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.TransferSol) {
+		return {
+			...parseTransferSolInstruction(instruction),
+			instructionType: SystemInstruction.TransferSol
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.CreateAccountWithSeed) {
+		return {
+			...parseCreateAccountWithSeedInstruction(instruction),
+			instructionType: SystemInstruction.CreateAccountWithSeed
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.AdvanceNonceAccount) {
+		return {
+			...parseAdvanceNonceAccountInstruction(instruction),
+			instructionType: SystemInstruction.AdvanceNonceAccount
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.WithdrawNonceAccount) {
+		return {
+			...parseWithdrawNonceAccountInstruction(instruction),
+			instructionType: SystemInstruction.WithdrawNonceAccount
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.InitializeNonceAccount) {
+		return {
+			...parseInitializeNonceAccountInstruction(instruction),
+			instructionType: SystemInstruction.InitializeNonceAccount
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.AuthorizeNonceAccount) {
+		return {
+			...parseAuthorizeNonceAccountInstruction(instruction),
+			instructionType: SystemInstruction.AuthorizeNonceAccount
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.Allocate) {
+		return {
+			...parseAllocateInstruction(instruction),
+			instructionType: SystemInstruction.Allocate
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.AllocateWithSeed) {
+		return {
+			...parseAllocateWithSeedInstruction(instruction),
+			instructionType: SystemInstruction.AllocateWithSeed
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.AssignWithSeed) {
+		return {
+			...parseAssignWithSeedInstruction(instruction),
+			instructionType: SystemInstruction.AssignWithSeed
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.TransferSolWithSeed) {
+		return {
+			...parseTransferSolWithSeedInstruction(instruction),
+			instructionType: SystemInstruction.TransferSolWithSeed
+		};
+	}
+
+	if (decodedInstruction === SystemInstruction.UpgradeNonceAccount) {
+		return {
+			...parseUpgradeNonceAccountInstruction(instruction),
+			instructionType: SystemInstruction.UpgradeNonceAccount
+		};
+	}
+
+	// Force compiler error on unhandled cases based on leftover types
+	const _: never = decodedInstruction;
+
+	return instruction;
 };
