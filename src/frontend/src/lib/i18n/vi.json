@@ -1122,7 +1122,8 @@
 			"card": {
 				"image": "Ảnh của NFT với token ID: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {
