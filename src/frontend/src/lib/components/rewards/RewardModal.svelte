@@ -34,7 +34,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
-	const campaignEligibility = getCampaignEligibility(reward.id);
+	const campaignEligibility = $derived(getCampaignEligibility(reward.id));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const criteria = $derived($campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
