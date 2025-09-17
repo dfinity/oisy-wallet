@@ -9,9 +9,9 @@ import type {
 	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdInNetworkCriterion,
-	MinTotalAssetsUsdOverallCriterion,
+	MinTotalAssetsUsdCriterion,
 	MinTransactionsInNetworkCriterion,
-	MinTransactionsOverallCriterion,
+	MinTransactionsCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
@@ -131,16 +131,16 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
-	if ('MinTransactionsOverall' in criterion.criterion) {
-		const { duration, count } = criterion.criterion.MinTransactionsOverall;
+	if ('MinTransactions' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactions;
 		if ('Days' in duration) {
 			const days = duration.Days;
 			return {
 				satisfied: criterion.satisfied,
-				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
 				days,
 				count
-			} as MinTransactionsOverallCriterion;
+			} as MinTransactionsCriterion;
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
@@ -157,14 +157,14 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
-	if ('MinTotalAssetsUsdOverall' in criterion.criterion) {
-		const { usd } = criterion.criterion.MinTotalAssetsUsdOverall;
+	if ('MinTotalAssetsUsd' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsd;
 
 		return {
 			satisfied: criterion.satisfied,
-			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
-		} as MinTotalAssetsUsdOverallCriterion;
+		} as MinTotalAssetsUsdCriterion;
 	}
 	if ('MinTotalAssetsUsdInNetwork' in criterion.criterion) {
 		const { usd } = criterion.criterion.MinTotalAssetsUsdInNetwork;

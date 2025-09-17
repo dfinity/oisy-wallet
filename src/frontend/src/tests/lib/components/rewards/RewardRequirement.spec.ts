@@ -35,7 +35,7 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
+						type: RewardCriterionType.MIN_TRANSACTIONS,
 						days: 6n,
 						count: 3
 					}
@@ -79,7 +79,7 @@ describe('RewardRequirement', () => {
 				props: {
 					criterion: {
 						satisfied: false,
-						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 						usd: 21
 					}
 				}

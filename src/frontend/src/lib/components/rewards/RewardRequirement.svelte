@@ -7,8 +7,8 @@
 		CampaignCriterion,
 		HangoverCriterion,
 		MinLoginsCriterion,
-		MinTotalAssetsUsdOverallCriterion,
-		MinTransactionsOverallCriterion
+		MinTotalAssetsUsdCriterion,
+		MinTransactionsCriterion
 	} from '$lib/types/reward';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -28,16 +28,16 @@
 				$days: minLoginCriterion.days.toString()
 			});
 		}
-		if (RewardCriterionType.MIN_TRANSACTIONS_OVERALL === criterion.type) {
-			const minTransactionsCriterion = criterion as MinTransactionsOverallCriterion;
+		if (RewardCriterionType.MIN_TRANSACTIONS === criterion.type) {
+			const minTransactionsCriterion = criterion as MinTransactionsCriterion;
 
 			return replacePlaceholders($i18n.rewards.requirements.min_transactions_overall, {
 				$transactions: minTransactionsCriterion.count.toString(),
 				$days: minTransactionsCriterion.days.toString()
 			});
 		}
-		if (RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL === criterion.type) {
-			const minTotalAssetsUsdCriterion = criterion as MinTotalAssetsUsdOverallCriterion;
+		if (RewardCriterionType.MIN_TOTAL_ASSETS_USD === criterion.type) {
+			const minTotalAssetsUsdCriterion = criterion as MinTotalAssetsUsdCriterion;
 
 			return replacePlaceholders($i18n.rewards.requirements.min_total_assets_usd_overall, {
 				$usd: minTotalAssetsUsdCriterion.usd.toString()

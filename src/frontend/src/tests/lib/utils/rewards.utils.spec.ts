@@ -574,7 +574,7 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
+								type: RewardCriterionType.MIN_TRANSACTIONS,
 								days: 30n,
 								count: 10
 							}
@@ -671,7 +671,7 @@ describe('rewards.utils', () => {
 						criteria: [
 							{
 								satisfied: true,
-								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 								usd: 1000
 							}
 						],
@@ -822,7 +822,7 @@ describe('rewards.utils', () => {
 						},
 						{
 							satisfied: true,
-							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 							usd: 1000
 						}
 					],

@@ -3,8 +3,8 @@ import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import type {
 	CampaignEligibility,
 	MinLoginsCriterion,
-	MinTotalAssetsUsdOverallCriterion,
-	MinTransactionsOverallCriterion
+	MinTotalAssetsUsdCriterion,
+	MinTransactionsCriterion
 } from '$lib/types/reward';
 
 export const mockCampaignEligibilities: CampaignEligibility[] = [
@@ -21,15 +21,15 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 			} as MinLoginsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
 				days: 6n,
 				count: 3
-			} as MinTransactionsOverallCriterion,
+			} as MinTransactionsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 				usd: 21
-			} as MinTotalAssetsUsdOverallCriterion
+			} as MinTotalAssetsUsdCriterion
 		],
 		probabilityMultiplierEnabled: false,
 		probabilityMultiplier: 1
@@ -47,15 +47,15 @@ export const mockCampaignEligibilities: CampaignEligibility[] = [
 			} as MinLoginsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TRANSACTIONS_OVERALL,
+				type: RewardCriterionType.MIN_TRANSACTIONS,
 				days: 7n,
 				count: 2
-			} as MinTransactionsOverallCriterion,
+			} as MinTransactionsCriterion,
 			{
 				satisfied: false,
-				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_OVERALL,
+				type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 				usd: 18
-			} as MinTotalAssetsUsdOverallCriterion
+			} as MinTotalAssetsUsdCriterion
 		],
 		probabilityMultiplierEnabled: false,
 		probabilityMultiplier: 1
