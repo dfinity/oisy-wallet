@@ -793,7 +793,7 @@ describe('rewards.utils', () => {
 								{
 									satisfied: true,
 									criterion: {
-										MinTotalAssetsUsdOverall: {
+										MinTotalAssetsUsd: {
 											usd: 1000
 										}
 									}

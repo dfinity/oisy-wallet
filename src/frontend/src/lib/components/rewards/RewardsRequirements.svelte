@@ -40,7 +40,7 @@
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
 				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
 
-				<button class="p-0.5 text-tertiary" on:click={() => (infoExpanded = !infoExpanded)}>
+				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
 					<IconHelp size="18" />
 				</button>
 			{/if}
@@ -50,7 +50,6 @@
 			<span class="mt-1 w-full text-sm text-tertiary" transition:slide>
 				{$i18n.rewards.requirements.network_bonus_info}
 				<ExternalLink
-					class="no-underline"
 					href={reward.learnMoreHref}
 					iconVisible={false}
 					target="_blank">{$i18n.rewards.text.learn_more}</ExternalLink

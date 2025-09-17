@@ -31,7 +31,7 @@
 	const campaignEligibility = getCampaignEligibility(reward.id);
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
-	const networkBonusMultiplier = $derived($campaignEligibility?.probabilityMultiplier);
+	const networkBonusMultiplier = $derived($campaignEligibility?.probabilityMultiplier ?? 1);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
