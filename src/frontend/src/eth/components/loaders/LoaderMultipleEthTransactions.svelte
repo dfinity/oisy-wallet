@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
@@ -31,7 +32,7 @@
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
 		...$enabledEvmTokens,
-		...$enabledNonFungibleTokens
+		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
 	]);
 
 	const onLoad = async () => {
