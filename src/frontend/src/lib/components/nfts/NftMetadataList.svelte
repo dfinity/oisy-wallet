@@ -12,7 +12,9 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft?: Nft;
@@ -23,6 +25,16 @@
 
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
+	);
+
+	const tokenByNft = $derived(
+		nonNullish(collection)
+			? findNonFungibleToken({
+					tokens: $nonFungibleTokens,
+					address: collection.address,
+					networkId: collection.network.id
+				})
+			: undefined
 	);
 </script>
 
@@ -92,7 +104,7 @@
 			</span>
 		{/if}
 	</ListItem>
-	{#if collection?.standard === 'erc1155' && nonNullish(nft?.balance)}
+	{#if nonNullish(tokenByNft) && isTokenErc1155(tokenByNft) && nonNullish(nft?.balance)}
 		<ListItem
 			><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"
 				>{nft.balance}</span
