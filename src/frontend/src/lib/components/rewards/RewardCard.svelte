@@ -62,7 +62,7 @@
 	</div>
 
 	<div class="relative rounded-lg bg-primary p-5">
-		<article class="h-full flex flex-col gap-3">
+		<article class="flex h-full flex-col gap-3">
 			<section>
 				<div
 					class="flex gap-3 text-start text-lg font-semibold"
@@ -86,7 +86,7 @@
 				</p>
 			</section>
 
-			<section class="flex mt-3">
+			<section class="mt-3 flex">
 				<div
 					class="rounded-xl bg-brand-primary px-3 py-2 font-semibold text-primary-inverted"
 					data-tid={REWARDS_STATUS_BUTTON}
