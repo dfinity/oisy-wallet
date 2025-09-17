@@ -49,10 +49,8 @@
 		{#if infoExpanded}
 			<span class="mt-1 w-full text-sm text-tertiary" transition:slide>
 				{$i18n.rewards.requirements.network_bonus_info}
-				<ExternalLink
-					href={reward.learnMoreHref}
-					iconVisible={false}
-					target="_blank">{$i18n.rewards.text.learn_more}</ExternalLink
+				<ExternalLink href={reward.learnMoreHref} iconVisible={false} target="_blank"
+					>{$i18n.rewards.text.learn_more}</ExternalLink
 				>
 			</span>
 		{/if}
