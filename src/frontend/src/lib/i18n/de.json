@@ -344,7 +344,7 @@
 	"rewards": {
 		"text": {
 			"title": "Prämien",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
+			"upcoming_campaigns": "Zukünftige Episoden",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
 			"share": "Teilen auf X",
@@ -355,7 +355,7 @@
 			"activity_button_text": "Letzte Aktivität prüfen",
 			"activity_button_text_short": "Aktivität prüfen",
 			"open_wallet": "Zur Wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 ist jetzt aktiv!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 ist jetzt aktiv!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
@@ -373,7 +373,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
-			"coming_soon": "$oisy_short Folge 4 erscheint bald",
+			"coming_soon": "$oisy_short Folge 6 erscheint bald",
 			"reward_banner": "Banner der Kampagne $campaignName"
 		},
 		"campaigns": {
