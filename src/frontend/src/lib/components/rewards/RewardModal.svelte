@@ -14,6 +14,7 @@
 		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_SHARE
 	} from '$lib/constants/analytics.contants';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -22,7 +23,11 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
+	import {
+		getCampaignState,
+		isEndedCampaign,
+		normalizeNetworkMultiplier
+	} from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -36,6 +41,12 @@
 
 	const campaignEligibility = $derived(getCampaignEligibility(reward.id));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
+	const networkBonusMultiplier = $derived(
+		normalizeNetworkMultiplier(
+			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
+		)
+	);
 	const criteria = $derived($campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
@@ -90,7 +101,7 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {criteria} {isEligible} />
+				<RewardsRequirements {criteria} {hasNetworkBonus} {isEligible} {networkBonusMultiplier} />
 			{/if}
 		{/if}
 
