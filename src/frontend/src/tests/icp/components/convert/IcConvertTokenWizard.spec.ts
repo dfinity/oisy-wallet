@@ -89,7 +89,6 @@ describe('IcConvertTokenWizard', () => {
 		onDestination, onDestinationBack,
 		onIcQrCodeBack,
 		onIcQrCodeScan,
-		children: mockSnippet
 	};
 	let sendSpy: MockInstance;
 

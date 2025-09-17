@@ -69,7 +69,6 @@ describe('ConvertWizard', () => {
 		onDestination, onDestinationBack,
 		onIcQrCodeBack,
 		onIcQrCodeScan,
-		children: mockSnippet
 	};
 
 	const mockContext = (sourceToken: Token) =>

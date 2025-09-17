@@ -74,7 +74,6 @@ describe('BtcConvertTokenWizard', () => {
 		onBack,
 		onClose,
 		onNext,
-		children: mockSnippet
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });

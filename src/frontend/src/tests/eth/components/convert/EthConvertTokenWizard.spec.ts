@@ -102,7 +102,6 @@ describe('EthConvertTokenWizard', () => {
 		onBack,
 		onClose,
 		onNext,
-		children: mockSnippet
 	};
 
 	let sendSpy: MockInstance;
