@@ -77,7 +77,7 @@
 			icon={badge.icon}
 			paddingClass="p-1"
 			positionClass="absolute"
-			size="16"
+			size="12"
 			styleClass="-bottom-1 -right-1"
 			testId="icon-badge"
 		/>

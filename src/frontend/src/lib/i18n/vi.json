@@ -328,6 +328,11 @@
 				"name": "Toolkit",
 				"one_liner": "Một sự đổi mới trong quản trị DAO",
 				"description": "Toolkit là bộ công cụ đa năng để quản lý các Service Nervous Systems (SNS) và dự án trên Internet Computer. Từ các đề xuất quản trị đến việc triển khai canister, nó trao quyền cho người dùng để đổi mới, hợp tác và phân quyền một cách liền mạch"
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},

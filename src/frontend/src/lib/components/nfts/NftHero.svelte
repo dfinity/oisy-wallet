@@ -87,15 +87,16 @@
 		<BreadcrumbNavigation items={breadcrumbItems} />
 
 		{#if nonNullish(normalizedNftName)}
-			<div class="my-3 flex w-full justify-between gap-3">
-				<NftBadge {token} />
-
-				<h1 class="flex-1 truncate">
-					{normalizedNftName}
-				</h1>
+			<div class="my-3 flex w-full flex-col justify-between gap-3 md:flex-row">
+				<div class="flex w-full min-w-0 flex-1 items-center gap-2">
+					<NftBadge {token} />
+					<h1 class="min-w-0 truncate">
+						{normalizedNftName}
+					</h1>
+				</div>
 
 				{#if nonNullish(nft)}
-					<NftActionButtons {nft} />
+					<NftActionButtons />
 				{/if}
 			</div>
 		{:else}
@@ -104,9 +105,9 @@
 			</span>
 		{/if}
 
-		<List condensed styleClass="text-sm text-tertiary">
+		<List condensed styleClass="text-sm text-primary">
 			<ListItem>
-				<span>{$i18n.nfts.text.collection_address}</span>
+				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
 				{#if nonNullish(nft)}
 					<span class="flex items-center">
 						<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
@@ -129,7 +130,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.nfts.text.display_preference}</span>
+				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
 				{#if nonNullish(nft)}
 					<NftImageConsentPreference {nft} />
 				{:else}
@@ -139,7 +140,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.networks.network}</span>
+				<span class="text-tertiary">{$i18n.networks.network}</span>
 				{#if nonNullish(nft)}
 					<NetworkWithLogo network={nft.collection.network} />
 				{:else}
@@ -149,7 +150,7 @@
 				{/if}
 			</ListItem>
 			<ListItem>
-				<span>{$i18n.nfts.text.token_standard}</span>
+				<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
 				{#if nonNullish(nft)}
 					<span class="uppercase">{nft.collection.standard}</span>
 				{:else}
@@ -160,12 +161,13 @@
 			</ListItem>
 			{#if nft?.collection.standard === 'erc1155'}
 				<ListItem
-					><span>{$i18n.nfts.text.quantity}</span><span class="uppercase">{nft.balance}</span
+					><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"
+						>{nft.balance}</span
 					></ListItem
 				>
 			{/if}
 			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
-				<ListItem>{$i18n.nfts.text.item_traits}</ListItem>
+				<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
 				<div class="mt-2 flex flex-wrap gap-2">
 					{#each nft.attributes as trait, index (trait.value + index)}
 						<div class="flex">
