@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID } from '$env/networks/networks.eth.env';
+import * as nftEnv from '$env/nft.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import {
 	ETHEREUM_TOKEN,
@@ -25,7 +26,6 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
-import * as nftEnv from '$env/nft.env';
 
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
