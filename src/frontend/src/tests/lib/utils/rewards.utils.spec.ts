@@ -507,7 +507,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: false,
+								probability_multiplier: 1
 							}
 						]
 					]
@@ -527,7 +529,9 @@ describe('rewards.utils', () => {
 								days: 7n,
 								count: 5
 							}
-						]
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -552,7 +556,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: false,
+								probability_multiplier: 1
 							}
 						]
 					]
@@ -572,7 +578,9 @@ describe('rewards.utils', () => {
 								days: 30n,
 								count: 10
 							}
-						]
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -596,7 +604,9 @@ describe('rewards.utils', () => {
 											}
 										}
 									}
-								]
+								],
+								probability_multiplier_enabled: false,
+								probability_multiplier: 1
 							}
 						]
 					]
@@ -615,7 +625,9 @@ describe('rewards.utils', () => {
 								type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 								usd: 1000
 							}
-						]
+						],
+						probabilityMultiplierEnabled: false,
+						probabilityMultiplier: 1
 					}
 				]);
 			});
@@ -636,7 +648,9 @@ describe('rewards.utils', () => {
 										MinReferrals: { count: 5 }
 									}
 								}
-							]
+							],
+							probability_multiplier_enabled: false,
+							probability_multiplier: 1
 						}
 					]
 				]
@@ -654,7 +668,9 @@ describe('rewards.utils', () => {
 							satisfied: false,
 							type: RewardCriterionType.UNKNOWN
 						}
-					]
+					],
+					probabilityMultiplierEnabled: false,
+					probabilityMultiplier: 1
 				}
 			]);
 		});
@@ -686,7 +702,9 @@ describe('rewards.utils', () => {
 										}
 									}
 								}
-							]
+							],
+							probability_multiplier: 1,
+							probability_multiplier_enabled: false
 						}
 					]
 				]
@@ -711,7 +729,9 @@ describe('rewards.utils', () => {
 							type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 							usd: 1000
 						}
-					]
+					],
+					probabilityMultiplierEnabled: false,
+					probabilityMultiplier: 1
 				}
 			]);
 		});
