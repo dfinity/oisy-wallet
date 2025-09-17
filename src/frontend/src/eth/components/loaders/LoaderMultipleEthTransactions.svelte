@@ -15,6 +15,7 @@
 	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
+	import { NFTS_ENABLED } from '$env/nft.env';
 
 	interface Props {
 		children: Snippet;
@@ -31,7 +32,7 @@
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
 		...$enabledEvmTokens,
-		...$enabledNonFungibleTokens
+		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
 	]);
 
 	const onLoad = async () => {
