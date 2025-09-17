@@ -329,6 +329,11 @@
 				"one_liner": "Gdzie zarządzanie spotyka się ze współpracą, aby rozpalić innowacje.",
 				"description": "Toolkit to wszechstronny pakiet do zarządzania systemami nerwowymi usług (SNS) i projektami na Internet Computer. Od propozycji zarządzania po wdrażanie kanistrów, umożliwia użytkownikom płynne wprowadzanie innowacji, współpracę i decentralizację."
 			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"usdai": {
 				"name": "",
 				"one_liner": "",
@@ -361,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
+			"network_bonus_info": "",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
 			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
 			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
@@ -1110,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Jeszcze brak NFT",
 			"card": {
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
-			"copy_address": "Skopiuj ten adres do schowka"
+			"copy_address": "Skopiuj ten adres do schowka",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1661,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Asystent AI $oisy_short",
-			"welcome_message": "Cześć! 👋 Jestem OISY, Twój osobisty upgrade'owany magister AI. Oto jak mogę Ci pomóc:",
+			"welcome_message": "Cześć! 👋 Jestem estem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",

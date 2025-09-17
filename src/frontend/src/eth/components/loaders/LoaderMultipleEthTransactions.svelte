@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { onMount, type Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
@@ -18,15 +18,22 @@
 	import type { TokenId } from '$lib/types/token';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
 
 	// TODO: make it more functional
-	let tokensAlreadyLoaded: TokenId[] = [];
+	let tokensAlreadyLoaded = $state<TokenId[]>([]);
 
-	let loading = false;
+	let loading = $state(false);
+
+	let tokens = $derived([
+		...$enabledEthereumTokens,
+		...$enabledErc20Tokens,
+		...$enabledEvmTokens,
+		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
+	]);
 
 	const onLoad = async () => {
 		if (loading) {
@@ -35,24 +42,7 @@
 
 		loading = true;
 
-		if (
-			isNullish($enabledEthereumTokens) ||
-			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledEvmTokens) ||
-			isNullish($enabledNonFungibleTokens)
-		) {
-			return;
-		}
-
-		const loader = batchLoadTransactions({
-			tokens: [
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			],
-			tokensAlreadyLoaded
-		});
+		const loader = batchLoadTransactions({ tokens, tokensAlreadyLoaded });
 
 		for await (const results of loader) {
 			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
@@ -63,8 +53,10 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	run(() => {
-		($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad());
+	$effect(() => {
+		[tokens];
+
+		debounceLoad();
 	});
 
 	onMount(async () => {
@@ -75,12 +67,7 @@
 		}
 
 		await Promise.allSettled(
-			[
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			].map(async ({ id: tokenId, network: { id: networkId } }) => {
+			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
 					return;
 				}
@@ -98,5 +85,5 @@
 </script>
 
 <IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
+	{@render children()}
 </IntervalLoader>

@@ -329,6 +329,11 @@
 				"one_liner": "Где управление встречается с сотрудничеством для разжигания инноваций.",
 				"description": "Toolkit - это универсальный набор инструментов для управления Сервисными Нервными Системами (SNS) и проектами на Internet Computer. От предложений по управлению до развертывания канистров, он дает пользователям возможность беспрепятственно внедрять инновации, сотрудничать и децентрализовать."
 			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"usdai": {
 				"name": "",
 				"one_liner": "",
@@ -361,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Критерии участия",
+			"network_bonus_info": "",
 			"min_logins": "Войдите $loginsx раз за последние $days дней",
 			"min_transactions": "Выполните $transactions транзакций за последние $days дней",
 			"min_total_assets_usd": "Храните токены на сумму $$usd на момент выпуска",
@@ -1110,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Пока нет NFT",
 			"card": {
 				"image": "Изображение NFT с ID токена: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {

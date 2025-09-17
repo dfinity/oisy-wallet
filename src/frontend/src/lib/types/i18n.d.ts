@@ -255,6 +255,7 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
 		usdai: { name: string; one_liner: string; description: string };
 	};
 }
@@ -284,6 +285,7 @@ interface I18nRewards {
 	};
 	requirements: {
 		requirements_title: string;
+		network_bonus_info: string;
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
@@ -938,8 +940,14 @@ interface I18nNfts {
 		review_title: string;
 		review_description: string;
 		learn_more: string;
+		token_id: string;
 	};
-	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
+	alt: {
+		placeholder_image: string;
+		card: { image: string };
+		copy_address: string;
+		review_preference: string;
+	};
 }
 
 interface I18nFee {
