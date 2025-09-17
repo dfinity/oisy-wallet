@@ -43,6 +43,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { evmNativeToken } from '$evm/derived/token.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -84,7 +85,7 @@
 	 */
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived($nativeEthereumTokenStore);
+	let nativeEthereumToken = $derived($evmNativeToken ?? $nativeEthereumTokenStore);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
