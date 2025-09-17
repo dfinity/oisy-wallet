@@ -73,7 +73,7 @@ export default defineConfig(
 			setupFiles: ['./vitest.setup.ts'],
 			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			// isolate: false,
-			maxWorkers: '75%',
+			maxWorkers: '100%',
 			pool: 'threads',
 			fileParallelism: true,
 			coverage: {
