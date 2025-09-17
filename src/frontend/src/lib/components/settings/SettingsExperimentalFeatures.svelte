@@ -5,7 +5,7 @@
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { OISY_CHATBOT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { OISY_AI_ASSISTANT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
@@ -52,7 +52,7 @@
 		AiAssistantBeta: {
 			title: replaceOisyPlaceholders($i18n.ai_assistant.text.title),
 			description: $i18n.ai_assistant.text.feature_description,
-			learnMore: OISY_CHATBOT_DOCS_URL
+			learnMore: OISY_AI_ASSISTANT_DOCS_URL
 		}
 	};
 </script>
