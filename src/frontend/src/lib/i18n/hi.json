@@ -1122,7 +1122,8 @@
 			"card": {
 				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
 			},
-			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें"
+			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
+			"review_preference": ""
 		}
 	},
 	"fee": {
