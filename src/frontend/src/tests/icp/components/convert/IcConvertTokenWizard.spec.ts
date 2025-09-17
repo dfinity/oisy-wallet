@@ -37,6 +37,7 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 
 vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
@@ -66,6 +67,14 @@ describe('IcConvertTokenWizard', () => {
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
+	const onBack=vi.fn()
+	const onClose=vi.fn()
+	const onNext=vi.fn()
+	const onDestination=vi.fn()
+	const onDestinationBack=vi.fn()
+	const onIcQrCodeScan=vi.fn()
+	const onIcQrCodeBack=vi.fn()
+
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -73,7 +82,14 @@ describe('IcConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext,
+		onDestination, onDestinationBack,
+		onIcQrCodeBack,
+		onIcQrCodeScan,
+		children: mockSnippet
 	};
 	let sendSpy: MockInstance;
 
