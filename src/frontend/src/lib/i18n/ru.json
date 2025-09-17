@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Критерии участия",
+			"network_bonus_info": "",
 			"min_logins": "Войдите $loginsx раз за последние $days дней",
 			"min_transactions": "Выполните $transactions транзакций за последние $days дней",
 			"min_total_assets_usd": "Храните токены на сумму $$usd на момент выпуска",
