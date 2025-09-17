@@ -15,23 +15,30 @@ export const parseSolAtaInstruction = (
 	assertIsInstructionWithAccounts(instruction);
 
 	const decodedInstruction = identifyAssociatedTokenInstruction(instruction);
-	switch (decodedInstruction) {
-		case AssociatedTokenInstruction.CreateAssociatedToken:
-			return {
-				...parseCreateAssociatedTokenInstruction(instruction),
-				instructionType: AssociatedTokenInstruction.CreateAssociatedToken
-			};
-		case AssociatedTokenInstruction.CreateAssociatedTokenIdempotent:
-			return {
-				...parseCreateAssociatedTokenIdempotentInstruction(instruction),
-				instructionType: AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
-			};
-		case AssociatedTokenInstruction.RecoverNestedAssociatedToken:
-			return {
-				...parseRecoverNestedAssociatedTokenInstruction(instruction),
-				instructionType: AssociatedTokenInstruction.RecoverNestedAssociatedToken
-			};
-		default:
-			return instruction;
+
+	if (decodedInstruction === AssociatedTokenInstruction.CreateAssociatedToken) {
+		return {
+			...parseCreateAssociatedTokenInstruction(instruction),
+			instructionType: AssociatedTokenInstruction.CreateAssociatedToken
+		};
 	}
+
+	if (decodedInstruction === AssociatedTokenInstruction.CreateAssociatedTokenIdempotent) {
+		return {
+			...parseCreateAssociatedTokenIdempotentInstruction(instruction),
+			instructionType: AssociatedTokenInstruction.CreateAssociatedTokenIdempotent
+		};
+	}
+
+	if (decodedInstruction === AssociatedTokenInstruction.RecoverNestedAssociatedToken) {
+		return {
+			...parseRecoverNestedAssociatedTokenInstruction(instruction),
+			instructionType: AssociatedTokenInstruction.RecoverNestedAssociatedToken
+		};
+	}
+
+	// Force compiler error on unhandled cases based on leftover types
+	const _: never = decodedInstruction;
+
+	return instruction;
 };
