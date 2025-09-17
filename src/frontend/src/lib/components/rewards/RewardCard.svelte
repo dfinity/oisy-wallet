@@ -7,6 +7,7 @@
 	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -15,7 +16,6 @@
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
-	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 
 	interface Props {
 		onclick: () => void;
@@ -33,7 +33,9 @@
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
 	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
 	const networkBonusMultiplier = $derived(
-		normalizeNetworkMultiplier($campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT)
+		normalizeNetworkMultiplier(
+			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
+		)
 	);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
