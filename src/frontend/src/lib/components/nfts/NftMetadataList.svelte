@@ -34,7 +34,7 @@
 					address: collection.address,
 					networkId: collection.network.id
 				})
-			: undefined
+			: token
 	);
 </script>
 
