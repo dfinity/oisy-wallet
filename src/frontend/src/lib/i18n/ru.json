@@ -1122,7 +1122,8 @@
 			"card": {
 				"image": "Изображение NFT с ID токена: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {

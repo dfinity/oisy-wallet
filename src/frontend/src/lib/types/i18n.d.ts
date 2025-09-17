@@ -940,7 +940,12 @@ interface I18nNfts {
 		review_description: string;
 		learn_more: string;
 	};
-	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
+	alt: {
+		placeholder_image: string;
+		card: { image: string };
+		copy_address: string;
+		review_preference: string;
+	};
 }
 
 interface I18nFee {
