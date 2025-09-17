@@ -6,15 +6,22 @@
 	import { REWARDS_REQUIREMENTS_STATUS } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { CampaignCriterion } from '$lib/types/reward';
+	import IconHelp from '$lib/components/icons/lucide/IconHelp.svelte';
+	import { slide } from 'svelte/transition';
+	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 
 	interface Props {
 		isEligible: boolean;
 		hasNetworkBonus: boolean;
 		networkBonusMultiplier: number;
 		criteria: CampaignCriterion[];
+		reward: RewardCampaignDescription;
 	}
 
-	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria }: Props = $props();
+	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria, reward }: Props = $props();
+
+	let infoExpanded = $state(false);
 </script>
 
 {#if criteria.length > 0}
@@ -32,8 +39,22 @@
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
 				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
+
+				<button
+					class="p-0.5 text-tertiary"
+					on:click={() => (infoExpanded = !infoExpanded)}
+				>
+					<IconHelp size="18" />
+				</button>
 			{/if}
 		</div>
+
+		{#if infoExpanded}
+			<span class="mt-1 w-full text-sm text-tertiary" transition:slide>
+				{$i18n.rewards.requirements.network_bonus_info}
+				<ExternalLink href={reward.learnMoreHref} target="_blank" class="no-underline" iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink>
+			</span>
+		{/if}
 	</div>
 
 	<ul class="list-none">
