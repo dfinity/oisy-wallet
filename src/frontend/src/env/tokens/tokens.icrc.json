@@ -168,5 +168,12 @@
 		"fee": {
 			"__bigint__": "1000"
 		}
+	},
+	"TESTICRC1": {
+		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
+		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
+		"fee": {
+			"__bigint__": "0"
+		}
 	}
 }
