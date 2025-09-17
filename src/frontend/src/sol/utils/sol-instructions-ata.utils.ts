@@ -31,7 +31,11 @@ export const parseSolAtaInstruction = (
 				...parseRecoverNestedAssociatedTokenInstruction(instruction),
 				instructionType: AssociatedTokenInstruction.RecoverNestedAssociatedToken
 			};
-		default:
+		default: {
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = decodedInstruction;
+
 			return instruction;
+		}
 	}
 };
