@@ -3,13 +3,13 @@
 	import type { Component } from 'svelte';
 	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
-	import { logoSizes } from '$lib/constants/components.constants';
 
 	interface Props {
 		nft: Nft;
