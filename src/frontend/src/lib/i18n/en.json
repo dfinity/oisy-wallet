@@ -328,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Where governance meets collaboration to ignite innovation.",
 				"description": "Toolkit is a versatile suite for managing Service Nervous Systems (SNS) and projects on the Internet Computer. From governance proposals to canister deployment, it empowers users to innovate, collaborate, and decentralize seamlessly."
+			},
+			"altitudefi": {
+				"name": "Altitude",
+				"one_liner": "Altitude actively manages users’ debt and collateral in real-time, optimizing capital efficiency.",
+				"description": "DeFi loans are typically over-collateralized and capital-inefficient, Altitude is a non-custodial protocol that optimizes DeFi loans. Altitude actively manages users’ debt and collateral in real-time, optimizing capital efficiency."
+			},
+			"usdai": {
+				"name": "USD.AI",
+				"one_liner": "A synthetic‑dollar protocol backing USDai with income‑generating AI compute infrastructure and offering yield via sUSDai.",
+				"description": "USD.AI is a synthetic dollar protocol backed by income-generating AI compute infrastructure, creating a decentralized stablecoin called USDai. Users can hold or stake USDai to earn sUSDai, a yield-bearing version that reflects protocol earnings. The system is designed to create a composable, productive, and decentralized alternative to fiat-backed stablecoins."
 			}
 		}
 	},
