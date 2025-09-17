@@ -356,6 +356,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
+			"network_bonus_info": "",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions_overall": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd_overall": "Mantenha $$usd em tokens no momento da emissão",
