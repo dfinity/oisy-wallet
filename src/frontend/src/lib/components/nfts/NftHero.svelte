@@ -22,6 +22,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -105,81 +106,6 @@
 			</span>
 		{/if}
 
-		<List condensed styleClass="text-sm text-primary">
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-				{#if nonNullish(nft)}
-					<span class="flex items-center">
-						<output>{shortenWithMiddleEllipsis({ text: nft.collection.address })}</output>
-						<AddressActions
-							copyAddress={nft.collection.address}
-							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-								$address: nft.collection.address
-							})}
-							externalLink={getContractExplorerUrl({
-								network: nft.collection.network,
-								contractAddress: nft.collection.address
-							})}
-							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
-						/>
-					</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
-				{#if nonNullish(nft)}
-					<NftImageConsentPreference collection={nft.collection} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.networks.network}</span>
-				{#if nonNullish(nft)}
-					<NetworkWithLogo network={nft.collection.network} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
-				{#if nonNullish(nft)}
-					<span class="uppercase">{nft.collection.standard}</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			{#if nft?.collection.standard === 'erc1155'}
-				<ListItem
-					><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"
-						>{nft.balance}</span
-					></ListItem
-				>
-			{/if}
-			{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
-				<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
-				<div class="mt-2 flex flex-wrap gap-2">
-					{#each nft.attributes as trait, index (trait.value + index)}
-						<div class="flex">
-							<Badge variant="nft-trait"
-								><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span
-									class="font-bold text-primary">{trait.value}</span
-								></Badge
-							>
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</List>
+		<NftMetadataList {nft} />
 	</div>
 </div>

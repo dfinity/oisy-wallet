@@ -18,6 +18,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
+	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -59,61 +60,6 @@
 			</span>
 		{/if}
 
-		<List condensed styleClass="text-sm text-primary">
-			<ListItem
-				><span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-
-				{#if nonNullish(token)}
-					<span class="flex items-center">
-						<output>{shortenWithMiddleEllipsis({ text: token.address })}</output>
-						<AddressActions
-							copyAddress={token.address}
-							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-								$address: token.address
-							})}
-							externalLink={getContractExplorerUrl({
-								network: token.network,
-								contractAddress: token.address
-							})}
-							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
-						/>
-					</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.networks.network}</span>
-				{#if nonNullish(token)}
-					<NetworkWithLogo network={token.network} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
-				{#if nonNullish(token)}
-					<span class="uppercase">{token.standard}</span>
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-			<ListItem>
-				<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
-				{#if nonNullish(nfts?.[0])}
-					<NftImageConsentPreference collection={firstNft.collection} />
-				{:else}
-					<span class="min-w-12">
-						<SkeletonText />
-					</span>
-				{/if}
-			</ListItem>
-		</List>
+		<NftMetadataList {token} />
 	</div>
 </div>
