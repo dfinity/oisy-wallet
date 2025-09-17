@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -7,14 +8,13 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { findNonFungibleToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft?: Nft;
