@@ -452,8 +452,6 @@ export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
 
-const TESTICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.TESTICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
 
 const TESTICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.TESTICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
