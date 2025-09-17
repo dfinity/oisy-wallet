@@ -4,13 +4,13 @@
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;

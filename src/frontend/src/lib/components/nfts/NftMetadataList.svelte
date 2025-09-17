@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
+	import AddressActions from '$lib/components/ui/AddressActions.svelte';
+	import Badge from '$lib/components/ui/Badge.svelte';
+	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
-	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
-	import AddressActions from '$lib/components/ui/AddressActions.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
