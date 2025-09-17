@@ -101,9 +101,7 @@ describe('sol-instructions-system.utils', () => {
 		});
 
 		it('should parse a CreateAccountWithSeed instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.CreateAccountWithSeed
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.CreateAccountWithSeed);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.CreateAccountWithSeed
@@ -115,9 +113,7 @@ describe('sol-instructions-system.utils', () => {
 		});
 
 		it('should parse an AdvanceNonceAccount instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.AdvanceNonceAccount
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.AdvanceNonceAccount);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.AdvanceNonceAccount
@@ -127,9 +123,7 @@ describe('sol-instructions-system.utils', () => {
 		});
 
 		it('should parse a WithdrawNonceAccount instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.WithdrawNonceAccount
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.WithdrawNonceAccount);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.WithdrawNonceAccount
@@ -147,19 +141,21 @@ describe('sol-instructions-system.utils', () => {
 				instructionType: SystemInstruction.InitializeNonceAccount
 			});
 
-			expect(parseInitializeNonceAccountInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+			expect(parseInitializeNonceAccountInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
 		});
 
 		it('should parse an AuthorizeNonceAccount instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.AuthorizeNonceAccount
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.AuthorizeNonceAccount);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.AuthorizeNonceAccount
 			});
 
-			expect(parseAuthorizeNonceAccountInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
+			expect(parseAuthorizeNonceAccountInstruction).toHaveBeenCalledExactlyOnceWith(
+				mockInstruction
+			);
 		});
 
 		it('should parse an Allocate instruction', () => {
@@ -193,9 +189,7 @@ describe('sol-instructions-system.utils', () => {
 		});
 
 		it('should parse a TransferSolWithSeed instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.TransferSolWithSeed
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.TransferSolWithSeed);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.TransferSolWithSeed
@@ -205,9 +199,7 @@ describe('sol-instructions-system.utils', () => {
 		});
 
 		it('should parse an UpgradeNonceAccount instruction', () => {
-			vi.mocked(identifySystemInstruction).mockReturnValue(
-				SystemInstruction.UpgradeNonceAccount
-			);
+			vi.mocked(identifySystemInstruction).mockReturnValue(SystemInstruction.UpgradeNonceAccount);
 
 			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual({
 				instructionType: SystemInstruction.UpgradeNonceAccount
