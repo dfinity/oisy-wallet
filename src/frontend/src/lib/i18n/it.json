@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Criteri di eleggibilità",
+			"network_bonus_info": "",
 			"min_logins": "Accedi $loginsx volte negli ultimi $days giorni",
 			"min_transactions": "Completa $transactions transazioni negli ultimi $days giorni",
 			"min_total_assets_usd": "Detieni $$usd di token al momento dell'emissione",
@@ -1115,7 +1116,8 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",

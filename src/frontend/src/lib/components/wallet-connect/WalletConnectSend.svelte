@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { EIP155_CHAINS } from '$env/eip155-chains.env';
-	import WalletConnectSendModal from '$eth/components/wallet-connect/WalletConnectSendModal.svelte';
+	import EthWalletConnectSendModal from '$eth/components/wallet-connect/EthWalletConnectSendModal.svelte';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { modalWalletConnectSend } from '$lib/derived/modal.derived';
@@ -37,5 +37,5 @@
 </script>
 
 {#if $modalWalletConnectSend && nonNullish(request) && nonNullish(firstTransaction) && nonNullish(sourceNetwork)}
-	<WalletConnectSendModal {firstTransaction} {request} {sourceNetwork} bind:listener />
+	<EthWalletConnectSendModal {firstTransaction} {request} {sourceNetwork} bind:listener />
 {/if}

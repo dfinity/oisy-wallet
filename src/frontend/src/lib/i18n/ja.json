@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "参加基準",
+			"network_bonus_info": "",
 			"min_logins": "過去$days日間に$loginsx回以上ログイン",
 			"min_transactions": "過去$days日間に$transactions件以上のトランザクションを完了",
 			"min_total_assets_usd": "発行時点で$$usd相当のトークンを保有",
@@ -1115,7 +1116,8 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",

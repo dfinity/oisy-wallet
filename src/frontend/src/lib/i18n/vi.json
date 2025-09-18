@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
+			"network_bonus_info": "",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
@@ -1115,7 +1116,8 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",
@@ -1667,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Trợ lý AI $oisy_short",
-			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"welcome_message": "Xin chào! 👋 Tôi là chuyên gia AI cá nhân của bạn. Tôi có thể giúp gì cho bạn?",
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
