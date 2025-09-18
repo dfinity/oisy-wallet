@@ -1,6 +1,6 @@
-// Hoisted holder for values used/assigned inside the vi.mock factory
 import { toNullable } from '@dfinity/utils';
 
+// Hoisted holder for values used/assigned inside the vi.mock factory
 interface TxEntry {
 	txid: unknown;
 	utxos?: Array<{
