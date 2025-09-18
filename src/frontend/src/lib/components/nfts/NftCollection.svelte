@@ -56,6 +56,7 @@
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
+				testId="card-link"
 			/>
 		{/each}
 	{:else}
