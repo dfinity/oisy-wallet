@@ -109,8 +109,8 @@
 						? {
 								amount1: amount,
 								amount: amount.toString(),
-								amountBigint: BigInt(amount.toString()),
-								parseAMount: parseToken({ value: amount.toString(), unitName: 'ether' }),
+								// amountBigint: BigInt(amount.toString()),
+								parseAMount: parseToken({ value: amount.toString(), unitName: sendToken.decimals }),
 								parsedUnits: parseUnits(amount.toString())
 							}
 						: 'nullish'
@@ -120,7 +120,9 @@
 					? undefined
 					: await safeEstimateGas({
 							...params,
-							...(nonNullish(amount) ? { value: parseUnits(amount.toString()) } : {}),
+							...(nonNullish(amount)
+								? { value: parseToken({ value: amount.toString(), unitName: sendToken.decimals }) }
+								: {}),
 							data
 						});
 
