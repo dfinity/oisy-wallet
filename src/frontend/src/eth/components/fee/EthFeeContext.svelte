@@ -106,7 +106,9 @@
 					? undefined
 					: await safeEstimateGas({
 							...params,
-							...(nonNullish(amount) ? { value: BigInt(amount.toString()) } : {}),
+							...(nonNullish(amount)
+								? { value: parseToken({ value: amount.toString(), unitName: sendToken.decimals }) }
+								: {}),
 							data
 						});
 
