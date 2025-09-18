@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
+			"network_bonus_info": "",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
 			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
 			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",

@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "资格标准",
+			"network_bonus_info": "",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
 			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
 			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
