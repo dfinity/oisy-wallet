@@ -20,9 +20,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { mapNetworkIdToAddressType } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -81,9 +79,6 @@
 
 	const network: Network | undefined = $derived(token.network);
 
-	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
-		mapNetworkIdToAddressType(network?.id)
-	);
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
@@ -104,7 +99,7 @@
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
-						<NetworkLogo addressType={networkAddressType} {network} testId="transaction-network" />
+						<NetworkLogo {network} testId="transaction-network" transparent />
 					</div>
 				{/if}
 			</span>
