@@ -21,7 +21,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { nftStore } from '$lib/stores/nft.store';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -175,6 +174,4 @@
 			</NftList>
 		{/if}
 	{/if}
-
-	<NftCard nft={$nftStore?.[0]} />
 </NftsDisplayHandler>
