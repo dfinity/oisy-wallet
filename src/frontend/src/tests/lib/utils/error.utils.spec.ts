@@ -260,7 +260,7 @@ describe('error.utils', () => {
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual(expected);
+			expect(result).toStrictEqual(expected);
 		});
 
 		it('should return a parsed object removing the unnecessary keys', () => {
@@ -276,7 +276,7 @@ describe('error.utils', () => {
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual(expected);
+			expect(result).toStrictEqual(expected);
 		});
 
 		it('should handle missing error details', () => {
@@ -300,7 +300,7 @@ describe('error.utils', () => {
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual(expected);
+			expect(result).toStrictEqual(expected);
 		});
 
 		it('should ignore empty error keys', () => {
@@ -315,30 +315,7 @@ describe('error.utils', () => {
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual(expected);
-		});
-	});
-
-	describe('mapIcErrorMetadata', () => {
-		it('should return an empty object if input is nullish', () => {
-			expect(mapIcErrorMetadata(null)).toBeUndefined();
-			expect(mapIcErrorMetadata(undefined)).toBeUndefined();
-		});
-
-		it('should return a parsed object if the input is an error object', () => {
-			const errorMsg = `Call failed: \n message: fail\n 'Error code': abc123\n token: secret\n "Reject message": "This is a reject message"\n code: 500`;
-			const expected = {
-				message: 'fail',
-				'Error code': 'abc123',
-				token: 'secret',
-				'Reject message': 'This is a reject message',
-				code: '500'
-			};
-			const error = new Error(JSON.stringify(errorMsg));
-
-			const result = parseIcErrorMessage(error);
-
-			expect(result).toEqual(expected);
+			expect(result).toStrictEqual(expected);
 		});
 
 		it('should return a parsed object if the input is an error object with HTTP details', () => {
@@ -401,7 +378,71 @@ Call context:
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toEqual(expected);
+			expect(result).toStrictEqual(expected);
+		});
+
+		it('should blajh', () => {
+			const errorMsg = `ProtocolError: Request timed out after 300000 msec
+  Request ID: 2e8db657c9244dead2ac4cf239227a9538e26803d2b966834ab43660ba46bb5b
+  Request status: processing
+
+    at ot.fromCode (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:10:556)
+    at https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:1343
+    at https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:1545
+    at async G3 (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:2700)
+    at async a (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:6505)
+    at async https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:100811
+    at async yR.loadBtcBalance (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:127833)
+    at async yR.loadWalletData (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:128465)
+    at async Promise.allSettled (index 1)
+    at async xs (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:7953)`;
+			const expected = {
+				'Request status': 'processing'
+			};
+			const error = new Error(JSON.stringify(errorMsg));
+
+			const result = parseIcErrorMessage(error);
+
+			expect(result).toStrictEqual(expected);
+		});
+
+		it('should....', () => {
+			const errorMsg = `Error: Index canister 72uqs-pqaaa-aaaak-aes7a-cai for Ledger canister pcj6u-uaaaa-aaaak-aewnq-cai is not awake
+    at uu.QO [as getBalanceAndTransactions] (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:207403)
+    at async Promise.allSettled (index 0)
+    at async xs (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:7953)
+    at async https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:166984
+    at async ma.executeJob (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:122663)
+    at async a (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:122301)`;
+
+			const error = new Error(JSON.stringify(errorMsg));
+
+			const result = parseIcErrorMessage(error);
+
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('mapIcErrorMetadata', () => {
+		it('should return an empty object if input is nullish', () => {
+			expect(mapIcErrorMetadata(null)).toBeUndefined();
+			expect(mapIcErrorMetadata(undefined)).toBeUndefined();
+		});
+
+		it('should return a parsed object if the input is an error object', () => {
+			const errorMsg = `Call failed: \n message: fail\n 'Error code': abc123\n token: secret\n "Reject message": "This is a reject message"\n code: 500`;
+			const expected = {
+				message: 'fail',
+				'Error code': 'abc123',
+				token: 'secret',
+				'Reject message': 'This is a reject message',
+				code: '500'
+			};
+			const error = new Error(JSON.stringify(errorMsg));
+
+			const result = parseIcErrorMessage(error);
+
+			expect(result).toStrictEqual(expected);
 		});
 
 		it('removes keys from object error', () => {
