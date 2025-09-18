@@ -17,6 +17,8 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import { evmNativeToken } from '$evm/derived/token.derived';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -43,8 +45,6 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import { evmNativeToken } from '$evm/derived/token.derived';
-	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
