@@ -15,7 +15,8 @@
 	import {
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
-		WizardStepsReceive
+		WizardStepsReceive,
+		WizardStepsSend
 	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -58,9 +59,7 @@
 			dispatch('nnsClose');
 		});
 
-	const goToStep = (
-		stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive
-	) => {
+	const goToStep = (stepName: WizardStepsReceiveComplete) => {
 		if (nonNullish(modal)) {
 			goToWizardStep({
 				modal,
@@ -116,7 +115,7 @@
 					qrCodeAction={{ enabled: false }}
 					on:icBack={modal?.back}
 				/>
-			{:else}
+			{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 				<IcReceiveInfoCkEthereum
 					on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
 					on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
