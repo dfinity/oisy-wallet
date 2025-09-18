@@ -13,16 +13,12 @@ export const nativeEthereumToken: Readable<RequiredToken | undefined> = derived(
 	([$enabledEthereumTokens, $selectedEthereumNetwork, $evmNativeToken]) =>
 		$enabledEthereumTokens.find(
 			({ network: { id: networkId } }) => $selectedEthereumNetwork?.id === networkId
-		) ??
-		$evmNativeToken
+		) ?? $evmNativeToken
 );
-
 
 export const nativeEthereumTokenWithFallback: Readable<RequiredToken> = derived(
 	[nativeEthereumToken, defaultFallbackToken],
-	([$nativeEthereumToken, $defaultFallbackToken]) =>
-		$nativeEthereumToken ??
-		$defaultFallbackToken
+	([$nativeEthereumToken, $defaultFallbackToken]) => $nativeEthereumToken ?? $defaultFallbackToken
 );
 
 export const nativeEthereumTokenId: Readable<TokenId> = derived(

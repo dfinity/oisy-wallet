@@ -46,7 +46,13 @@ export const initConvertContext = (convertData: ConvertData): ConvertContext => 
 	);
 
 	const balanceForFee = derived(
-		[sourceToken, balancesStore, nativeEthereumTokenWithFallback, ethereumFeeTokenCkEth, ckEthereumNativeToken],
+		[
+			sourceToken,
+			balancesStore,
+			nativeEthereumTokenWithFallback,
+			ethereumFeeTokenCkEth,
+			ckEthereumNativeToken
+		],
 		([
 			$sourceToken,
 			$balancesStore,

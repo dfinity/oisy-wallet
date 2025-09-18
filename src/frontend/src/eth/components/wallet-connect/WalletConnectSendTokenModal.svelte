@@ -7,7 +7,10 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import { nativeEthereumTokenWithFallback, nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,

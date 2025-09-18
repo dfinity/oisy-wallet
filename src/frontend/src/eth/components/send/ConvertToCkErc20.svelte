@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { nativeEthereumTokenWithFallback, nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
