@@ -16,7 +16,7 @@
 	let { network, size = 'xxs', color = 'off-white', testId, transparent = false }: Props = $props();
 </script>
 
-{#if transparent && network.iconTransparent}
+{#if transparent && nonNullish(network.iconTransparent)}
 	<div class="block" data-tid={`${testId}-transparent-container`}>
 		<Logo
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
