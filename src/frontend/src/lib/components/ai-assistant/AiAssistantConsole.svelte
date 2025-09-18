@@ -7,8 +7,8 @@
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
 	import IconOisy from '$lib/components/icons/IconOisy.svelte';
 	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
+	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
 	import {
 		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
 		AI_ASSISTANT_MESSAGE_SENT
@@ -196,7 +196,7 @@
 						title={$i18n.ai_assistant.text.action_button_contacts_title}
 					>
 						{#snippet icon()}
-							<IconSend />
+							<IconUserSquare />
 						{/snippet}
 					</AiAssistantActionButton>
 					<AiAssistantActionButton
@@ -209,7 +209,7 @@
 						title={$i18n.ai_assistant.text.action_button_send_tokens_title}
 					>
 						{#snippet icon()}
-							<IconlySend />
+							<IconSend size="24" />
 						{/snippet}
 					</AiAssistantActionButton>
 				</div>
