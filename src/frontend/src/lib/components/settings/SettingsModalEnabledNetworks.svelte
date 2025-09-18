@@ -126,16 +126,18 @@
 	<List condensed={false} styleClass="mb-8" variant="styled">
 		{#each SUPPORTED_MAINNET_NETWORKS as network (network.id)}
 			<ListItem>
-				<span class="flex">
-					<NetworkLogo {network} size="xxs" />
-					<span class="ml-2 flex">{network.name}</span>
-				</span>
-				<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
-				<ManageNetworkToggle
-					checked={enabledNetworks[network.id]?.enabled ?? false}
-					disabled={isNetworkIdICP(network.id)}
-					on:nnsToggle={() => toggleNetwork(network)}
-				/>
+				<div class="flex w-full justify-between">
+					<span class="flex">
+						<NetworkLogo {network} size="xxs" />
+						<span class="ml-2 flex">{network.name}</span>
+					</span>
+					<!-- We disable the ICP toggle, for simplicity in other components and implications we dont allow disabling ICP -->
+					<ManageNetworkToggle
+						checked={enabledNetworks[network.id]?.enabled ?? false}
+						disabled={isNetworkIdICP(network.id)}
+						on:nnsToggle={() => toggleNetwork(network)}
+					/>
+				</div>
 			</ListItem>
 		{/each}
 	</List>
@@ -148,16 +150,18 @@
 		<List condensed={false} variant="styled">
 			{#each SUPPORTED_TESTNET_NETWORKS as network (network.id)}
 				<ListItem>
-					<span class="flex">
-						<NetworkLogo {network} size="xxs" />
-						<span class="ml-2 flex">{network.name}</span>
-					</span>
-					<ManageNetworkToggle
-						checked={enabledNetworks[network.id]?.enabled ?? false}
-						disabled={isNetworkIdICP(network.id)}
-						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
-						on:nnsToggle={() => toggleNetwork(network)}
-					/>
+					<div class="flex w-full justify-between">
+						<span class="flex">
+							<NetworkLogo {network} size="xxs" />
+							<span class="ml-2 flex">{network.name}</span>
+						</span>
+						<ManageNetworkToggle
+							checked={enabledNetworks[network.id]?.enabled ?? false}
+							disabled={isNetworkIdICP(network.id)}
+							testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
+							on:nnsToggle={() => toggleNetwork(network)}
+						/>
+					</div>
 				</ListItem>
 			{/each}
 		</List>
