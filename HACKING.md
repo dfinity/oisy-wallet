@@ -350,7 +350,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	explorerUrl: BSC_EXPLORER_URL,
 	providers: {
 		infura: 'bnb',
-		alchemy: Network.BNB_MAINNET,
+		alchemy: 'bnb',
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },

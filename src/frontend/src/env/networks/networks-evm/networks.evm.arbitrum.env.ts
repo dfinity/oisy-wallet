@@ -30,7 +30,8 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	explorerUrl: ARBITRUM_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum',
-		alchemy: Network.ARB_MAINNET,
+		alchemy: 'arbitrum',
+		alchemyDeprecated: Network.ARB_MAINNET,
 		alchemyJsonRpcUrl: 'https://arb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'arbitrum-one' },
@@ -53,7 +54,8 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum-sepolia',
-		alchemy: Network.ARB_SEPOLIA,
+		alchemy: 'arbitrum-sepolia',
+		alchemyDeprecated: Network.ARB_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://arb-sepolia.g.alchemy.com/v2'
 	}
 };
