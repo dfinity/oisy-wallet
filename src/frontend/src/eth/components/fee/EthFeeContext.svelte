@@ -40,6 +40,7 @@
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import { parseUnits } from 'ethers/utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -118,7 +119,7 @@
 					: await safeEstimateGas({
 							...params,
 							...(nonNullish(amount)
-								? { value: parseToken({ value: amount.toString(), unitName: sendToken.decimals }) }
+								? { value: parseUnits(amount.toString()) }
 								: {}),
 							data
 						});
