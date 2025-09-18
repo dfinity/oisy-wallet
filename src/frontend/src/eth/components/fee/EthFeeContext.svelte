@@ -109,7 +109,8 @@
 						? {
 								amount: amount.toString(),
 								amountBigint: BigInt(amount.toString()),
-								parseAMount: parseToken({ value: amount.toString(), unitName: sendToken.decimals })
+								parseAMount: parseToken({ value: amount.toString(), unitName: undefined }),
+								parsedUnits: parseUnits(amount.toString())
 							}
 						: 'nullish'
 				);
@@ -118,9 +119,7 @@
 					? undefined
 					: await safeEstimateGas({
 							...params,
-							...(nonNullish(amount)
-								? { value: parseUnits(amount.toString()) }
-								: {}),
+							...(nonNullish(amount) ? { value: parseUnits(amount.toString()) } : {}),
 							data
 						});
 
