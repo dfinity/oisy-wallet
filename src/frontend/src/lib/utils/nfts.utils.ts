@@ -19,7 +19,7 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network === tokenNetwork && id === tokenId
+			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
 	);
 
 export const findNftsByToken = ({
