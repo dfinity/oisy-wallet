@@ -112,7 +112,7 @@ A list of useful faucets:
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 - TESTICP: [TESTICP Faucet](https://nqoci-rqaaa-aaaap-qp53q-cai.icp0.io/)
-- TESTICRC1: [TESTICRC1 Faucet](https://pwwqf-yaaaa-aaaap-qp5wq-cai.icp0.io/)
+- TICRC1: [TICRC1 Faucet](https://pwwqf-yaaaa-aaaap-qp5wq-cai.icp0.io/)
 
 ## Testing
 
