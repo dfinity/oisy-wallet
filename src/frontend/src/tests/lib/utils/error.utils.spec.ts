@@ -397,7 +397,7 @@ Call context:
     at async Promise.allSettled (index 1)
     at async xs (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:54:7953)`;
 			const expected = {
-				"Request status": "processing"
+				'Request status': 'processing'
 			};
 			const error = new Error(JSON.stringify(errorMsg));
 
@@ -415,12 +415,11 @@ Call context:
     at async ma.executeJob (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:122663)
     at async a (https://beta.oisy.com/_app/immutable/workers/workers-D2ASsSmu.js:99:122301)`;
 
-
 			const error = new Error(JSON.stringify(errorMsg));
 
 			const result = parseIcErrorMessage(error);
 
-			expect(result).toBeUndefined()
+			expect(result).toBeUndefined();
 		});
 	});
 
