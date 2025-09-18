@@ -255,7 +255,7 @@ describe('alchemy.providers', () => {
 				expect(provider).toBeInstanceOf(AlchemyProvider);
 
 				expect(provider).toHaveProperty('deprecatedProvider');
-				expect(provider).not.toHaveProperty('provider');
+				expect(provider).toHaveProperty('provider');
 			});
 		});
 
