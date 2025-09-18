@@ -4,6 +4,8 @@ import bscMainnetIconDark from '$lib/assets/networks/dark/bsc-mainnet.svg';
 import bscTestnetIconDark from '$lib/assets/networks/dark/bsc-testnet.svg';
 import bscMainnetIconLight from '$lib/assets/networks/light/bsc-mainnet.svg';
 import bscTestnetIconLight from '$lib/assets/networks/light/bsc-testnet.svg';
+import bscMainnetIconTransparent from '$lib/assets/networks/transparent/bsc-mainnet.svg';
+import bscTestnetIconTransparent from '$lib/assets/networks/transparent/bsc-testnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -25,6 +27,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 56n,
 	iconLight: bscMainnetIconLight,
 	iconDark: bscMainnetIconDark,
+	iconTransparent: bscMainnetIconTransparent,
 	explorerUrl: BSC_EXPLORER_URL,
 	providers: {
 		infura: 'bnb',
@@ -47,6 +50,7 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	chainId: 97n,
 	iconLight: bscTestnetIconLight,
 	iconDark: bscTestnetIconDark,
+	iconTransparent: bscTestnetIconTransparent,
 	explorerUrl: BSC_TESTNET_EXPLORER_URL,
 	providers: {
 		infura: 'bnbt',

@@ -8,6 +8,8 @@ import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
 import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
 import solDevnetIconLight from '$lib/assets/networks/light/solana-devnet.svg';
 import solMainnetIconLight from '$lib/assets/networks/light/solana-mainnet.svg';
+import solDevnetIconTransparent from '$lib/assets/networks/transparent/solana-devnet.svg';
+import solMainnetIconTransparent from '$lib/assets/networks/transparent/solana-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -47,6 +49,7 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
 	iconLight: solMainnetIconLight,
 	iconDark: solMainnetIconDark,
+	iconTransparent: solMainnetIconTransparent,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'solana' }
 };
@@ -62,6 +65,7 @@ export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	chainId: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
 	iconLight: solDevnetIconLight,
 	iconDark: solDevnetIconDark,
+	iconTransparent: solDevnetIconTransparent,
 	explorerUrl: SOL_DEVNET_EXPLORER_URL
 };
 
@@ -74,7 +78,8 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	env: 'testnet',
 	name: 'Solana Local',
 	iconLight: solDevnetIconLight,
-	iconDark: solDevnetIconDark
+	iconDark: solDevnetIconDark,
+	iconTransparent: solDevnetIconTransparent
 };
 
 export const SUPPORTED_SOLANA_NETWORKS: Network[] = defineSupportedNetworks({
