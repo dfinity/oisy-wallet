@@ -87,6 +87,9 @@ describe('EthConvertTokenWizard', () => {
 		maxFeePerGas: 100n,
 		maxPriorityFeePerGas: 100n
 	};
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -94,7 +97,10 @@ describe('EthConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext
 	};
 
 	let sendSpy: MockInstance;
