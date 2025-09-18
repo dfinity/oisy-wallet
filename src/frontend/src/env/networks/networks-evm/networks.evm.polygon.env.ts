@@ -31,7 +31,8 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	explorerUrl: POLYGON_EXPLORER_URL,
 	providers: {
 		infura: 'matic',
-		alchemy: Network.MATIC_MAINNET,
+		alchemy: 'matic',
+		alchemyDeprecated: Network.MATIC_MAINNET,
 		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
@@ -53,7 +54,8 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
 	providers: {
 		infura: 'matic-amoy',
-		alchemy: Network.MATIC_AMOY,
+		alchemy: 'matic-amoy',
+		alchemyDeprecated: Network.MATIC_AMOY,
 		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2'
 	}
 };

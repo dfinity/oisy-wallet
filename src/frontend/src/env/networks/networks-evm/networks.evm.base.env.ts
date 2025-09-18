@@ -31,7 +31,8 @@ export const BASE_NETWORK: EthereumNetwork = {
 	explorerUrl: BASE_EXPLORER_URL,
 	providers: {
 		infura: 'base',
-		alchemy: Network.BASE_MAINNET,
+		alchemy: 'base',
+		alchemyDeprecated: Network.BASE_MAINNET,
 		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'base' },
@@ -53,7 +54,8 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	explorerUrl: BASE_SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'base-sepolia',
-		alchemy: Network.BASE_SEPOLIA,
+		alchemy: 'base-sepolia',
+		alchemyDeprecated: Network.BASE_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2'
 	}
 };

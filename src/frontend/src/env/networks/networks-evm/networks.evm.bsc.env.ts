@@ -31,7 +31,8 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	explorerUrl: BSC_EXPLORER_URL,
 	providers: {
 		infura: 'bnb',
-		alchemy: Network.BNB_MAINNET,
+		alchemy: 'bnb',
+		alchemyDeprecated: Network.BNB_MAINNET,
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },
@@ -53,7 +54,8 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	explorerUrl: BSC_TESTNET_EXPLORER_URL,
 	providers: {
 		infura: 'bnbt',
-		alchemy: Network.BNB_TESTNET,
+		alchemy: 'bnbt',
+		alchemyDeprecated: Network.BNB_TESTNET,
 		alchemyJsonRpcUrl: 'https://bnb-testnet.g.alchemy.com/v2'
 	}
 };
