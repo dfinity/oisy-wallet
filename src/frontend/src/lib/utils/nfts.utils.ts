@@ -16,11 +16,20 @@ export const findNft = ({
 	nfts: Nft[];
 	token: NonFungibleToken;
 	tokenId: NftId;
-}): Nft | undefined =>
-	nfts.find(
+}): Nft | undefined => {
+	if (tokenAddress === '0xf60a44920d51f4264ba0a8eb164a4bc15dc34e92') {
+		console.log('FIND NFT', {
+			nfts,
+			tokenAddress,
+			tokenNetwork,
+			tokenId
+		});
+	}
+	return nfts.find(
 		({ id, collection: { address, network } }) =>
 			address === tokenAddress && network === tokenNetwork && id === tokenId
 	);
+};
 
 export const findNftsByToken = ({
 	nfts,
