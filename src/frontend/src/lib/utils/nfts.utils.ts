@@ -33,7 +33,7 @@ export const findNft = ({
 				ids: id === tokenId
 			});
 		}
-		return address === tokenAddress && network === tokenNetwork && id === tokenId;
+		return address === tokenAddress && network.id === tokenNetwork.id && id === tokenId;
 	});
 };
 
