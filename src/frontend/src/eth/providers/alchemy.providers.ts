@@ -23,6 +23,7 @@ import {
 	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
+import type { Networkish } from 'ethers/lib.esm/providers';
 import { AlchemyProvider as AlchemyProviderLib } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
@@ -124,7 +125,7 @@ export class AlchemyProvider {
 	private readonly provider: AlchemyProviderLib;
 
 	constructor(
-		private readonly network: Network,
+		private readonly network: Networkish,
 		// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 		private readonly networkDeprecated: Network
 	) {
