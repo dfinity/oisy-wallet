@@ -8,7 +8,7 @@ import { get } from 'svelte/store';
 
 describe('RewardRequirement', () => {
 	describe('Requirements', () => {
-		it('should not render min logins requirement', () => {
+		it('should render min logins requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -30,7 +30,7 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min transactions requirement', () => {
+		it('should render min transactions requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -52,7 +52,29 @@ describe('RewardRequirement', () => {
 			).toBeInTheDocument();
 		});
 
-		it('should not render min total assets usd requirement', () => {
+		it('should not render min transactions in network requirement', () => {
+			const { queryByText } = render(RewardRequirement, {
+				props: {
+					criterion: {
+						satisfied: false,
+						type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+						days: 6n,
+						count: 3
+					}
+				}
+			});
+
+			expect(
+				queryByText(
+					replacePlaceholders(get(i18n).rewards.requirements.min_transactions, {
+						$transactions: '3',
+						$days: '6'
+					})
+				)
+			).not.toBeInTheDocument();
+		});
+
+		it('should render min total assets usd requirement', () => {
 			const { getByText } = render(RewardRequirement, {
 				props: {
 					criterion: {
@@ -70,6 +92,26 @@ describe('RewardRequirement', () => {
 					})
 				)
 			).toBeInTheDocument();
+		});
+
+		it('should render min total assets usd in network requirement', () => {
+			const { queryByText } = render(RewardRequirement, {
+				props: {
+					criterion: {
+						satisfied: false,
+						type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+						usd: 21
+					}
+				}
+			});
+
+			expect(
+				queryByText(
+					replacePlaceholders(get(i18n).rewards.requirements.min_total_assets_usd, {
+						$usd: '21'
+					})
+				)
+			).not.toBeInTheDocument();
 		});
 	});
 

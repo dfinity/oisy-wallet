@@ -20,9 +20,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { mapNetworkIdToAddressType } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -81,9 +79,6 @@
 
 	const network: Network | undefined = $derived(token.network);
 
-	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
-		mapNetworkIdToAddressType(network?.id)
-	);
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
@@ -92,8 +87,8 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
-	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
-		<Card noMargin>
+	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
+		<Card noMargin withGap>
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
@@ -104,7 +99,7 @@
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
-						<NetworkLogo addressType={networkAddressType} {network} testId="transaction-network" />
+						<NetworkLogo {network} testId="transaction-network" transparent />
 					</div>
 				{/if}
 			</span>
@@ -113,12 +108,20 @@
 				<div>
 					{#if iconType === 'token'}
 						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} {nft} />
+							<NftLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								logoSize="md"
+								{nft}
+							/>
 						{:else}
-							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
+							<TokenLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								data={token}
+								logoSize="md"
+							/>
 						{/if}
 					{:else}
-						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} size="16" />
 					{/if}
 				</div>
 			{/snippet}
@@ -139,7 +142,7 @@
 			{/snippet}
 			{#snippet amountDescription()}
 				{#if nonNullish(timestamp)}
-					<span data-tid="receive-tokens-modal-transaction-timestamp">
+					<span class="text-xs sm:text-sm" data-tid="receive-tokens-modal-transaction-timestamp">
 						{formatSecondsToDate({
 							seconds: Number(timestamp),
 							language: $currentLanguage,
@@ -154,35 +157,43 @@
 			{/snippet}
 
 			{#snippet description()}
-				<span class="inline-flex min-w-0 items-center gap-2 text-primary">
-					{#if type === 'send'}
-						<span class="shrink-0">{$i18n.transaction.text.to}</span>
-					{:else if type === 'receive'}
-						<span class="shrink-0">{$i18n.transaction.text.from}</span>
-					{/if}
-
-					{#if nonNullish(contact)}
-						<span class="shrink-0">
-							<Avatar name={contact.name} image={contact.image} variant="xxs" />
-						</span>
-					{/if}
-
+				<span
+					class="flex min-w-0 flex-col items-start items-center text-xs text-primary sm:flex-row sm:text-sm"
+				>
 					<span class="inline-flex min-w-0 items-center gap-1">
-						<span>
-							{#if nonNullish(contact)}
-								{contact.name}
-							{:else if nonNullish(contactAddress)}
-								{shortenWithMiddleEllipsis({ text: contactAddress })}
-							{/if}
-						</span>
-						{#if notEmptyString(addressAlias)}
-							<span class="inline-flex items-center gap-1 text-tertiary">
-								<Divider />{addressAlias}
+						{#if type === 'send'}
+							<span class="shrink-0">{$i18n.transaction.text.to}</span>
+						{:else if type === 'receive'}
+							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{/if}
+
+						{#if nonNullish(contact)}
+							<span class="shrink-0">
+								<Avatar name={contact.name} image={contact.image} variant="xxs" />
 							</span>
 						{/if}
-					</span>
 
-					<TransactionStatusComponent {status} />
+						<span class="flex min-w-0 flex-wrap items-center">
+							<span class="max-w-38 inline-block truncate">
+								{#if nonNullish(contact)}
+									{contact.name}
+								{:else if nonNullish(contactAddress)}
+									{shortenWithMiddleEllipsis({ text: contactAddress })}
+								{/if}
+							</span>
+							{#if notEmptyString(addressAlias)}
+								<span class="inline-flex items-center text-tertiary">
+									<Divider />
+									<span class="sm:max-w-29 lg:max-w-34 inline-block max-w-20 truncate">
+										{addressAlias}
+									</span>
+								</span>
+							{/if}
+						</span>
+					</span>
+					<span class="truncate text-tertiary">
+						<TransactionStatusComponent {status} />
+					</span>
 				</span>
 			{/snippet}
 		</Card>

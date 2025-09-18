@@ -7,6 +7,7 @@
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
 		SESSION_REQUEST_ETH_SIGN_V4,
 		SESSION_REQUEST_PERSONAL_SIGN
 	} from '$eth/constants/wallet-connect.constants';
@@ -85,7 +86,13 @@
 
 	const disconnectListener = async () => {
 		try {
-			await listener?.disconnect();
+			if (isNullish(listener)) {
+				return;
+			}
+
+			detachHandlers(listener);
+
+			await listener.disconnect();
 		} catch (err: unknown) {
 			toastsError({
 				msg: {
@@ -246,6 +253,7 @@
 		} = sessionRequest;
 
 		switch (method) {
+			case SESSION_REQUEST_ETH_SIGN_LEGACY:
 			case SESSION_REQUEST_ETH_SIGN_V4:
 			case SESSION_REQUEST_ETH_SIGN:
 			case SESSION_REQUEST_PERSONAL_SIGN:
@@ -280,6 +288,14 @@
 		listener.sessionDelete(onSessionDelete);
 
 		listener.sessionRequest(onSessionRequest);
+	};
+
+	const detachHandlers = (listener: WalletConnectListener) => {
+		listener.offSessionProposal(onSessionProposal);
+
+		listener.offSessionDelete(onSessionDelete);
+
+		listener.offSessionRequest(onSessionRequest);
 	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {

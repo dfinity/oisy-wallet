@@ -3,9 +3,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
+	import EligibilityBadge from '$lib/components/rewards/EligibilityBadge.svelte';
+	import NetworkBonusImage from '$lib/components/rewards/NetworkBonusImage.svelte';
 	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
-	import Badge from '$lib/components/ui/Badge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 	import { REWARDS_BANNER, REWARDS_STATUS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -13,7 +15,7 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import { isEndedCampaign } from '$lib/utils/rewards.utils';
+	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -27,14 +29,20 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
-	const campaignEligibility = getCampaignEligibility(reward.id);
+	const campaignEligibility = $derived(getCampaignEligibility(reward.id));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
+	const networkBonusMultiplier = $derived(
+		normalizeNetworkMultiplier(
+			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
+		)
+	);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 </script>
 
 <button class="flex flex-col" data-tid={testId} {onclick}>
 	<div class="-mb-7">
-		<div class="max-h-66 overflow-hidden rounded-2xl">
+		<div class="max-h-66 relative overflow-hidden rounded-2xl">
 			<Img
 				alt={replacePlaceholders($i18n.rewards.alt.reward_banner, {
 					$campaignName: resolveText({ i18n: $i18n, path: reward.cardTitle })
@@ -43,6 +51,13 @@
 				src={reward.cardBanner}
 				testId={REWARDS_BANNER}
 			/>
+
+			<span class="absolute right-4 top-4">
+				<RewardDateBadge
+					date={reward.endDate}
+					testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
+				/>
+			</span>
 		</div>
 	</div>
 
@@ -50,30 +65,20 @@
 		<article class="h-full">
 			<section>
 				<div
-					class="flex flex-col-reverse items-center text-start text-lg font-semibold md:flex-row"
+					class="flex gap-3 text-start text-lg font-semibold"
+					class:flex-col-reverse={hasNetworkBonus}
 				>
-					<div class="mr-auto flex flex-col items-center md:flex-row">
-						<div>
-							{resolveText({ i18n: $i18n, path: reward.cardTitle })}
-						</div>
-						{#if isEligible && !hasEnded}
-							<span class="mr-auto inline-flex md:mx-1">
-								<Badge
-									testId={nonNullish(testId) ? `${testId}-badge` : undefined}
-									variant="success"
-								>
-									{$i18n.rewards.text.youre_eligible}
-								</Badge>
-							</span>
+					{resolveText({ i18n: $i18n, path: reward.cardTitle })}
+
+					<div class="flex flex-wrap items-center gap-3">
+						{#if !hasEnded}
+							<EligibilityBadge {isEligible} {testId} />
+						{/if}
+
+						{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+							<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
 						{/if}
 					</div>
-
-					<span class="mr-auto inline-flex md:ml-auto md:mr-0">
-						<RewardDateBadge
-							date={reward.endDate}
-							testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
-						/>
-					</span>
 				</div>
 
 				<p class="m-0 mt-2 text-start text-xs text-tertiary">

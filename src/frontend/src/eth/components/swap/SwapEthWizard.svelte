@@ -6,7 +6,7 @@
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { nativeEthereumToken as nativeEthereumTokenStore } from '$eth/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -17,6 +17,7 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
 	import {
@@ -84,7 +85,11 @@
 	 */
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived($nativeEthereumTokenStore);
+	let nativeEthereumToken = $derived(
+		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
+			({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
+		)
+	);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
@@ -92,13 +97,17 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
-		feeSymbolStore.set(nativeEthereumToken.symbol);
-		feeTokenIdStore.set(nativeEthereumToken.id);
-		feeDecimalsStore.set(nativeEthereumToken.decimals);
+		if (nonNullish(nativeEthereumToken)) {
+			feeSymbolStore.set(nativeEthereumToken.symbol);
+			feeTokenIdStore.set(nativeEthereumToken.id);
+			feeDecimalsStore.set(nativeEthereumToken.decimals);
+		}
 	});
 
 	$effect(() => {
-		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		if (nonNullish(nativeEthereumToken)) {
+			feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		}
 	});
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
@@ -214,7 +223,9 @@
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
 					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? ''
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
@@ -227,7 +238,9 @@
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
 					swapType: $swapAmountsStore.swaps[0].type ?? '',
-					error: errorDetailToString(err) ?? ''
+					error: errorDetailToString(err) ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
@@ -244,7 +257,7 @@
 	};
 </script>
 
-{#if nonNullish($sourceToken)}
+{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
