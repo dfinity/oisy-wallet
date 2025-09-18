@@ -19,7 +19,8 @@ describe('NftCard', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
 				nft: mockValidErc1155Nft,
-				testId
+				testId,
+				type: 'card-link'
 			}
 		});
 
@@ -45,7 +46,8 @@ describe('NftCard', () => {
 		const { container, getByText } = render(NftCard, {
 			props: {
 				nft: { ...mockValidErc721Nft, imageUrl: undefined },
-				testId
+				testId,
+				type: 'card-link'
 			}
 		});
 
@@ -61,5 +63,43 @@ describe('NftCard', () => {
 
 		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+	});
+
+	it('should render the correct styles for each type', async () => {
+		const { container, rerender } = render(NftCard, {
+			props: {
+				nft: { ...mockValidErc721Nft, imageUrl: undefined },
+				testId,
+				type: 'default'
+			}
+		});
+
+		const cardElement = container.querySelector('button');
+
+		assertNonNullish(cardElement);
+
+		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeTruthy();
+		expect(cardElement.getAttribute('class')?.includes(' group')).toBeFalsy();
+		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeFalsy();
+
+		await rerender({
+			nft: { ...mockValidErc721Nft, imageUrl: undefined },
+			testId,
+			type: 'card-link'
+		});
+
+		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
+		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
+		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
+
+		await rerender({
+			nft: { ...mockValidErc721Nft, imageUrl: undefined },
+			testId,
+			type: 'card-selectable'
+		});
+
+		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
+		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
+		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
 	});
 });
