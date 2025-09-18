@@ -45,6 +45,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -86,14 +87,11 @@
 	 */
 	const feeStore = initEthFeeStore();
 
-	let fallbackEvmToken = $derived(
-		$evmNativeToken ??
-			$enabledEvmTokens.find(
-				({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
-			)
+	let nativeEthereumToken = $derived(
+		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
+			({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
+		)
 	);
-
-	let nativeEthereumToken = $derived(fallbackEvmToken ?? $nativeEthereumTokenStore);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
@@ -101,13 +99,17 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
-		feeSymbolStore.set(nativeEthereumToken.symbol);
-		feeTokenIdStore.set(nativeEthereumToken.id);
-		feeDecimalsStore.set(nativeEthereumToken.decimals);
+		if (nonNullish(nativeEthereumToken)) {
+			feeSymbolStore.set(nativeEthereumToken.symbol);
+			feeTokenIdStore.set(nativeEthereumToken.id);
+			feeDecimalsStore.set(nativeEthereumToken.decimals);
+		}
 	});
 
 	$effect(() => {
-		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		if (nonNullish(nativeEthereumToken)) {
+			feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		}
 	});
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)

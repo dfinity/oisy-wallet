@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, onMount, setContext } from 'svelte';
 	import NewSwapWizard from './NewSwapWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
@@ -202,12 +202,6 @@
 			stepName
 		});
 	};
-
-	$effect(() => {
-		if ($selectedNetwork) {
-			setFilterNetwork($selectedNetwork);
-		}
-	});
 </script>
 
 <WizardModal
@@ -225,7 +219,6 @@
 			on:icSelectToken={selectToken}
 			on:icCloseTokensList={closeTokenList}
 			on:icSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
-			{selectTokenType}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
 		<ModalNetworksFilter

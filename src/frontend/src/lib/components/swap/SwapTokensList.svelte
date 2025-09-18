@@ -19,14 +19,6 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { Token, TokenUi } from '$lib/types/token';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-	import { nonNullish } from '@dfinity/utils';
-	import { selectedNetwork } from '$lib/derived/network.derived';
-
-	interface Props {
-		selectTokenType?: string;
-	}
-
-	let { selectTokenType }: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -62,7 +54,7 @@
 
 <ModalTokensList
 	loading={false}
-	networkSelectorViewOnly={!VELORA_SWAP_ENABLED || nonNullish($selectedNetwork)}
+	networkSelectorViewOnly={!VELORA_SWAP_ENABLED}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}
 >
