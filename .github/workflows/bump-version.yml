@@ -13,9 +13,6 @@ on:
           - minor
           - patch
           - prerelease
-      release_description:
-        description: 'Short description of the release (motivation, changes, tests)'
-        required: true
 
 permissions: {}
 
