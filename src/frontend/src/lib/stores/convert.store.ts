@@ -1,4 +1,4 @@
-import { nativeEthereumToken } from '$eth/derived/token.derived';
+import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 import { ckEthMinterInfoStore, type CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
@@ -46,7 +46,7 @@ export const initConvertContext = (convertData: ConvertData): ConvertContext => 
 	);
 
 	const balanceForFee = derived(
-		[sourceToken, balancesStore, nativeEthereumToken, ethereumFeeTokenCkEth, ckEthereumNativeToken],
+		[sourceToken, balancesStore, nativeEthereumTokenWithFallback, ethereumFeeTokenCkEth, ckEthereumNativeToken],
 		([
 			$sourceToken,
 			$balancesStore,

@@ -134,7 +134,7 @@ describe('EthConvertTokenWizard', () => {
 			.mockImplementation(() => readable(address));
 
 	const mockEthereumToken = (token = ETHEREUM_TOKEN) =>
-		vi.spyOn(tokensDerived, 'nativeEthereumToken', 'get').mockImplementation(() => readable(token));
+		vi.spyOn(tokensDerived, 'nativeEthereumTokenWithFallback', 'get').mockImplementation(() => readable(token));
 
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';
