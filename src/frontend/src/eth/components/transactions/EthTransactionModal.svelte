@@ -13,6 +13,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
@@ -36,7 +37,6 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	interface Props {
 		transaction: EthTransactionUi;
