@@ -23,7 +23,7 @@ import {
 	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
-import type { Networkish } from 'ethers/lib.esm/providers';
+import type { Networkish } from 'ethers/providers';
 import { AlchemyProvider as AlchemyProviderLib } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
