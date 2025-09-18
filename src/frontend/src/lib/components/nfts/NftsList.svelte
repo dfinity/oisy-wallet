@@ -148,7 +148,7 @@
 	{:else}
 		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} testId="card-link" />
+				<NftCard {nft} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -158,7 +158,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} testId="card-link" />
+					<NftCard isHidden {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -169,7 +169,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} testId="card-link" />
+					<NftCard isSpam {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
