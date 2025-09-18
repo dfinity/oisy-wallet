@@ -301,7 +301,7 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name ===  WizardStepsManageTokens.SAVING}
+	disablePointerEvents={currentStep?.name === WizardStepsManageTokens.SAVING}
 	onClose={close}
 	{steps}
 	testId={MANAGE_TOKENS_MODAL}
@@ -309,7 +309,7 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name ===WizardStepsManageTokens.REVIEW}
+	{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenReview
 				{indexCanisterId}

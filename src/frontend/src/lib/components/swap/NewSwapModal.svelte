@@ -231,7 +231,7 @@
 			on:icSelectProvider={selectProvider}
 			on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
 		/>
-	{:else if currentStep?.name === WizardStepsSwap.SWAP ||  currentStep?.name === WizardStepsSwap.REVIEW ||  currentStep?.name === WizardStepsSwap.SWAPPING}
+	{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 		<NewSwapWizard
 			{currentStep}
 			onBack={modal.back}
