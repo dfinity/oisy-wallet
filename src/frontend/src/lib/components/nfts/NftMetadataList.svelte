@@ -38,7 +38,7 @@
 	);
 </script>
 
-<List condensed styleClass="text-sm text-primary">
+<List condensed styleClass="text-sm text-primary" itemStyleClass="flex-col sm:flex-row">
 	<ListItem>
 		<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
