@@ -102,6 +102,17 @@
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
 				// Otherwise, we would need to emulate the data that are provided to the minter contract address.
+
+				console.log(
+					nonNullish(amount)
+						? {
+								amount: amount.toString(),
+								amountBigint: BigInt(amount.toString()),
+								parseAMount: amount.toString()
+							}
+						: 'nullish'
+				);
+
 				const estimatedGas = isNetworkICP(targetNetwork)
 					? undefined
 					: await safeEstimateGas({
