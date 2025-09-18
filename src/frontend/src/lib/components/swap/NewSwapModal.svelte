@@ -202,6 +202,12 @@
 			stepName
 		});
 	};
+
+	$effect(() => {
+		if ($selectedNetwork) {
+			setFilterNetwork($selectedNetwork);
+		}
+	});
 </script>
 
 <WizardModal
@@ -219,6 +225,7 @@
 			on:icSelectToken={selectToken}
 			on:icCloseTokensList={closeTokenList}
 			on:icSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+			{selectTokenType}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
 		<ModalNetworksFilter
