@@ -57,6 +57,3 @@ jobs:
           title: 'chore(release): v${{ steps.bump_version.outputs.new_version }}'
           body: |
             This PR prepares the release of version v${{ steps.bump_version.outputs.new_version }}.
-
-            ### Release Description:
-            ${{ github.event.inputs.release_description }}
