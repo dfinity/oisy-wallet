@@ -5,7 +5,7 @@
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
-	import IconOisy from '$lib/components/icons/IconOisy.svelte';
+	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
 	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import IconSend from '$lib/components/icons/IconSend.svelte';
 	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
@@ -152,7 +152,7 @@
 	transition:fade
 >
 	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
-		<IconOisy size="36" />
+		<IconAiAssistant />
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
