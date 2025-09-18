@@ -17,18 +17,24 @@ export const findNft = ({
 	token: NonFungibleToken;
 	tokenId: NftId;
 }): Nft | undefined => {
-	if (tokenAddress === '0xf60a44920d51f4264ba0a8eb164a4bc15dc34e92') {
-		console.log('FIND NFT', {
-			nfts,
-			tokenAddress,
-			tokenNetwork,
-			tokenId
-		});
-	}
-	return nfts.find(
-		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network === tokenNetwork && id === tokenId
-	);
+	return nfts.find(({ id, collection: { address, network } }) => {
+		if (address === '0xf60a44920d51f4264ba0a8eb164a4bc15dc34e92') {
+			console.log('FIND NFT', {
+				nfts,
+				address,
+				network,
+				tokenAddress,
+				tokenNetwork,
+				tokenId
+			});
+			console.log('EQUALS?', {
+				addresses: address === tokenAddress,
+				networks: network === tokenNetwork,
+				ids: id === tokenId
+			});
+		}
+		return address === tokenAddress && network === tokenNetwork && id === tokenId;
+	});
 };
 
 export const findNftsByToken = ({
