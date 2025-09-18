@@ -41,6 +41,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -175,7 +176,7 @@
 	{/snippet}
 
 	<EthFeeContext
-		amount={amount.toString()}
+		amount={formatToken({ value: amount, unitName: $sendToken.decimals })}
 		{data}
 		{destination}
 		nativeEthereumToken={$nativeEthereumTokenWithFallback}
