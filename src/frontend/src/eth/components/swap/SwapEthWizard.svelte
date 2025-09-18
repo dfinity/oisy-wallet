@@ -6,7 +6,7 @@
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { nativeEthereumToken as nativeEthereumTokenStore } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -86,6 +86,7 @@
 	 * Fee context store
 	 */
 	const feeStore = initEthFeeStore();
+
 
 	let nativeEthereumToken = $derived(
 		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
