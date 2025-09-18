@@ -54,7 +54,7 @@ jobs:
             "oisy-wallet-signer") PKG_NAME="signer" ;;
             "eslint-config-oisy-wallet") PKG_NAME="oisy-eslint" ;;
             "agent") PKG_NAME="agent" ;;
-            "agent & ic-js") PKG_NAME="agent:ic-js" ;;
+            "agent&ic-js") PKG_NAME="agent:ic-js" ;;
             *) echo "Invalid package selection: $PACKAGE" && exit 1 ;;
           esac
           echo "PKG_NAME=$PKG_NAME" >> "$GITHUB_ENV"
