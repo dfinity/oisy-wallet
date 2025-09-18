@@ -52,32 +52,33 @@ testWithII('should display receive-tokens modal', async () => {
 	});
 });
 
-testWithII('should display correct QR codes for receiving ICP tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICP_SECTION
-	});
-});
+const sections = [
+	{
+		name: 'ICP',
+		selector: RECEIVE_TOKENS_MODAL_ICP_SECTION
+	},
+	{
+		name: 'ICRC',
+		selector: RECEIVE_TOKENS_MODAL_ICRC_SECTION
+	},
+	{
+		name: 'ETH',
+		selector: RECEIVE_TOKENS_MODAL_ETH_SECTION
+	},
+	{
+		name: 'SOL mainnet',
+		selector: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
+	},
+	{
+		name: 'SOL devnet',
+		selector: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
+	}
+];
 
-testWithII('should display correct QR codes for receiving ICRC tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ICRC_SECTION
+for (const { name, selector } of sections) {
+	testWithII(`should display correct QR codes for receiving ${name} tokens`, async () => {
+		await homepageLoggedIn.testReceiveModalQrCode({
+			receiveModalSectionSelector: selector
+		});
 	});
-});
-
-testWithII('should display correct QR codes for receiving ETH tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_ETH_SECTION
-	});
-});
-
-testWithII('should display correct QR codes for receiving SOL mainnet tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_MAINNET_SECTION
-	});
-});
-
-testWithII('should display correct QR codes for receiving SOL devnet tokens', async () => {
-	await homepageLoggedIn.testReceiveModalQrCode({
-		receiveModalSectionSelector: RECEIVE_TOKENS_MODAL_SOL_DEVNET_SECTION
-	});
-});
+}
