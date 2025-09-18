@@ -44,6 +44,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { evmNativeToken } from '$evm/derived/token.derived';
+	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -85,7 +86,14 @@
 	 */
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived($evmNativeToken ?? $nativeEthereumTokenStore);
+	let fallbackEvmToken = $derived(
+		$evmNativeToken ??
+			$enabledEvmTokens.find(
+				({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
+			)
+	);
+
+	let nativeEthereumToken = $derived(fallbackEvmToken ?? $nativeEthereumTokenStore);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
