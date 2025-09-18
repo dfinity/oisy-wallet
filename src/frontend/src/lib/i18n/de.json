@@ -9,6 +9,7 @@
 			"close": "Schließen",
 			"change": "Ändern",
 			"apply": "Anwenden",
+			"retry": "",
 			"refresh": "Aktualisieren",
 			"name": "Name",
 			"symbol": "Symbol",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Wo Governance auf Zusammenarbeit trifft und Inovation entfacht.",
 				"description": "Toolkit ist eine vielseitige Suite zur Verwaltung von Service Nervous Systems (SNS) und Projekten im Internet-Computer. Von Governance-Vorschlägen bis zur Kanisterbereitstellung ermöglicht es Nutzern nahtlose Innovation, Zusammenarbeit und Dezentralisierung."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
+			"not_eligible": "",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
 			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
+			"network_bonus_info": "",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
@@ -422,6 +435,36 @@
 						"title": "Mehr verdienen durch Einladen",
 						"description": "Du hast gerade Sprinkles verdient – und die Person, die Dich eingeladen hat, auch.<br>Lade 4 Freunde ein und erhalte $1.<br>Die Top 4 Werber gewinnen jeweils $200.",
 						"share_href": "https://x.com/intent/post?text=Ich%20habe%20mich%20bei%20%40OISY%20angemeldet%20und%20Sprinkles%20erhalten.%20%20%0AMein%20Freund%2C%20der%20mich%20eingeladen%20hat%2C%20auch.%20Win-win.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "Fehler beim Abrufen der BTC-Auszahlungsstatus.",
 			"transaction_price": "Fehler beim Laden der Schätzung des Transaktionspreises.",
 			"icrc_canisters": "Fehler beim Laden der ICRC-Canisters.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Fehler beim Laden der ERC20-Benutzertoken.",
 			"erc721_custom_tokens": "Fehler beim Laden der ERC721-Benutzertoken.",
 			"erc1155_custom_tokens": "Fehler beim Laden der ERC1155-Benutzertoken.",
@@ -551,7 +595,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "Zu Entwicklungszwecken zeigen wir den Branch und den Commit nur in Test-Canisters.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Umschalten, um Testnetzwerke anzuzeigen oder zu verbergen",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP-Konto-ID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Für alle Token verwenden, wenn du von Wallets, Nutzern oder anderen Apps empfängst, die dieses Adressformat unterstützen.",
 				"use_for_icrc_deposit": "Für den Empfang von ICRC-1-Token im ICP-Netzwerk verwenden, z. B. SNS, ck-Token usw.",
 				"use_for_icp_deposit": "Für ICP-Einzahlungen von Börsen oder anderen Wallets verwenden, die nur Konto-IDs unterstützen.",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "Sende jetzt die erste Transaktion!",
 			"contacts_empty_state_title": "Deine Kontakte werden hier angezeigt",
 			"contacts_empty_state_description": "Es sieht so aus, als hättest du noch keine Kontakte hinzugefügt",
-			"send_review_subtitle": "Du sendest"
+			"send_review_subtitle": "Du sendest",
+			"no_nfts_found": "Keine NFTs gefunden",
+			"no_nfts_found_desc": "Passe die Suche oder das Netzwerk an um deine NFTs zu finden",
+			"select_nft": "NFT auswählen"
 		},
 		"placeholder": {
 			"enter_eth_address": "Gib öffentliche Adresse (0x), Name oder Alias ein",
 			"enter_recipient_address": "Gib Empfängeradresse, Name oder Alias ein",
 			"enter_wallet_address": "Gib Wallet-Adresse, Name oder Alias ein",
-			"select_network": "Netzwerk auswählen"
+			"select_network": "Netzwerk auswählen",
+			"search_nfts": "NFTs suchen"
 		},
 		"info": {
 			"ckbtc_certified": "Bitte warte, bis die ckBTC-Parameter zertifiziert sind.",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "Ungültige Bitcoin-Transaktionsdaten",
 			"btc_utxo_locked": "Bitcoin-Guthaben durch ausstehende Transaktionen gesperrt",
 			"btc_invalid_fee_calculation": "Bitcoin-Transaktionsgebühren-Validierung fehlgeschlagen",
-			"pending_transactions_not_available": "Der Service für ausstehende Transaktionen ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut."
+			"pending_transactions_not_available": "Der Service für ausstehende Transaktionen ist derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Beim Senden der Transaktion ist etwas schiefgelaufen.",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "Beim Berechnen der Transaktionsgebühr ist etwas schiefgelaufen.",
 			"unable_to_retrieve_amount": "k. A. (konnte nicht abgerufen werden)",
 			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut.",
-			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde."
+			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1061,14 +1116,16 @@
 			"open_in_new_tab": "In neuem Tab öffnen",
 			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
 			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
-			"learn_more": "Erfahre mehr"
+			"learn_more": "Erfahre mehr",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
 			"card": {
 				"image": "NFT Bild mit token ID: $tokenId"
 			},
-			"copy_address": "Diese Adresse in die Zwischenablage kopieren"
+			"copy_address": "Diese Adresse in die Zwischenablage kopieren",
+			"review_preference": "Anzeigeeinstellung anpassen"
 		}
 	},
 	"fee": {
@@ -1507,12 +1564,12 @@
 			"review_description": "Um OISY Wallet zu benutzen, musst du unseren Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"review_updated_description": "Um OISY Wallet weiterhin zu benutzen, musst du unseren angepassten Geschäftsbedingungen zustimmen. Diese Dokumente erläutern die Regeln für unsere Dienstleistung, und wie deine Daten geschützt werden.",
 			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
-			"i_have_accepted": "Ich habe die Dokumente gelesen und stimme ihnen zu.",
-			"i_have_accepted_updated": "Ich habe die angepassten Dokumente gelesen und stimme ihnen zu.",
+			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
+			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
 			"accept_and_continue": "Zustimmen und weiterfahren"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
 		}
 	},
 	"license_agreement": {
@@ -1546,7 +1603,7 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
-			"title": "Nutzungsbedingungen",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1556,7 +1613,7 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Datenschutzrichtlinie",
-			"title": "Datenschutzrichtlinie",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1591,7 +1648,7 @@
 	"welcome": {
 		"title": "Wilkommen bei $oisy_short!",
 		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
+		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1626,7 +1683,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "",
 			"loading": "",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "",

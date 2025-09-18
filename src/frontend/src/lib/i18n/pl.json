@@ -9,6 +9,7 @@
 			"close": "Zamknij",
 			"change": "Zmień",
 			"apply": "Zastosuj",
+			"retry": "",
 			"refresh": "Odśwież",
 			"name": "Nazwa",
 			"symbol": "Symbol",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Gdzie zarządzanie spotyka się ze współpracą, aby rozpalić innowacje.",
 				"description": "Toolkit to wszechstronny pakiet do zarządzania systemami nerwowymi usług (SNS) i projektami na Internet Computer. Od propozycji zarządzania po wdrażanie kanistrów, umożliwia użytkownikom płynne wprowadzanie innowacji, współpracę i decentralizację."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "Dowiedz się więcej",
 			"sprinkles_earned": "Zdobyłeś $noOfSprinkles sprinkles o łącznej wartości $amount! 🎊",
 			"youre_eligible": "Jesteś uprawniony!",
+			"not_eligible": "",
 			"ongoing": "Trwa",
 			"ended": "Zakończono ($amount)",
 			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
+			"network_bonus_info": "",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
 			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
 			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
@@ -422,6 +435,36 @@
 						"title": "Zdobądź więcej za polecanie",
 						"description": "Właśnie zdobyłeś Sprinkles - tak jak osoba, która Cię poleciła.<br>Wyślij 4 znajomym i zarób 1 USD.<br>4 najlepszych polecających wygrywa po 200 USD.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "Błąd podczas pobierania statusów wypłat BTC.",
 			"transaction_price": "Błąd podczas ładowania oszacowania ceny transakcji.",
 			"icrc_canisters": "Błąd podczas ładowania kanistrów ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC20.",
 			"erc721_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC721.",
 			"erc1155_custom_tokens": "Błąd podczas ładowania niestandardowych tokenów ERC1155.",
@@ -551,7 +595,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "Do celów deweloperskich pokazujemy gałąź i commit tylko w kanistrach testowych.",
 			"git_branch_name": "Gałąź:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Przełącz, aby pokazać lub ukryć sieci testowe",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Identyfikator konta ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Użyj dla wszystkich tokenów podczas odbierania z portfeli, od użytkowników lub z innych aplikacji obsługujących ten format adresu.",
 				"use_for_icrc_deposit": "Użyj do odbierania tokenów ICRC-1 w sieci ICP, takich jak SNS, tokeny ck itp.",
 				"use_for_icp_deposit": "Użyj do wpłat ICP z giełd lub innych portfeli obsługujących tylko identyfikatory kont.",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "Wyślij teraz swoją pierwszą przesyłkę!",
 			"contacts_empty_state_title": "Twoje kontakty pojawią się tutaj",
 			"contacts_empty_state_description": "Wygląda na to, że nie dodałeś jeszcze żadnych kontaktów",
-			"send_review_subtitle": "Wysyłasz"
+			"send_review_subtitle": "Wysyłasz",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Wprowadź adres publiczny (0x), nazwę lub alias",
 			"enter_recipient_address": "Wprowadź adres odbiorcy, nazwę lub alias",
 			"enter_wallet_address": "Wprowadź adres portfela, nazwę lub alias",
-			"select_network": "Wybierz sieć"
+			"select_network": "Wybierz sieć",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Poczekaj, aż parametry ckBTC zostaną certyfikowane.",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "Nieprawidłowe dane transakcji Bitcoin",
 			"btc_utxo_locked": "Środki Bitcoin są zablokowane przez oczekujące transakcje",
 			"btc_invalid_fee_calculation": "Weryfikacja opłaty transakcyjnej Bitcoin nie powiodła się",
-			"pending_transactions_not_available": ""
+			"pending_transactions_not_available": "",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Coś poszło nie tak podczas wysyłania transakcji.",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "Coś poszło nie tak podczas obliczania opłaty transakcyjnej.",
 			"unable_to_retrieve_amount": "niedostępne (nie można pobrać)",
 			"solana_transaction_expired": "Twoja transakcja wysłania nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa nie była wystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj wysłać ją ponownie.",
-			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo."
+			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1061,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Jeszcze brak NFT",
 			"card": {
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
-			"copy_address": "Skopiuj ten adres do schowka"
+			"copy_address": "Skopiuj ten adres do schowka",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1502,22 +1559,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Przejrzyj warunki korzystania z usługi",
+			"review_updated_title": "Przejrzyj zaktualizowane warunki korzystania z usługi",
+			"review_description": "Zanim zaczniesz korzystać z Portfela OISY, musisz zapoznać się z naszymi Warunkami korzystania z usługi i Polityką prywatności oraz je zaakceptować. Dokumenty te wyjaśniają zasady korzystania z naszej usługi i sposób, w jaki chronimy Twoje dane.",
+			"review_updated_description": "Aby nadal korzystać z Portfela OISY, zapoznaj się z naszymi zaktualizowanymi Warunkami korzystania z usługi i Polityką prywatności oraz zaakceptuj je. Zmiany te są ważne dla zapewnienia bezpieczeństwa i zgodności naszych usług z przepisami.",
+			"reject_warning": "Aby kontynuować, musisz zaakceptować Regulamin. Możesz spróbować ponownie w dowolnym momencie.",
+			"i_have_accepted": "Przeczytałem i akceptuję",
+			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
+			"accept_and_continue": "Zaakceptuj i kontynuuj"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Wystąpił błąd podczas aktualizacji umów."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Umowa licencyjna",
 			"accept_terms": "Klikając ten przycisk, zgadzasz się na",
 			"accept_terms_link": "Umowę licencyjną",
 			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
@@ -1545,22 +1602,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Warunki użytkowania",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link do warunków korzystania"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Polityka prywatności",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link do Polityka prywatności"
 		}
 	},
 	"activity": {
@@ -1591,7 +1648,7 @@
 	"welcome": {
 		"title": "Witamy w $oisy_short!",
 		"subtitle": "Gotowy do zarabiania?",
-		"description": "Jesteś 2 kroki od swojej pierwszej nagrody: zaloguj się, trzymaj ponad 20 USD w tokenach i wykonaj 2 akcje. To wszystko, czego potrzeba, aby zacząć zarabiać Sprinkles.<br><br>Chcesz więcej? Poleć 4 znajomych i zdobądź gwarantowany bonus."
+		"description": "Jesteś 2 kroki od swojej pierwszej nagrody: zaloguj się, trzymaj ponad 20 USD w tokenach i wykonaj 2 akcje. To wszystko, czego potrzeba, aby zacząć zarabiać Sprinkles.<br><br>Chcesz więcej? Polecaj nas znajomym i zgarniaj bonus za każdym razem, gdy któryś z nich zdobędzie posypki."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1612,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Asystent AI $oisy_short",
-			"welcome_message": "Cześć! 👋 Jestem OISY, Twój osobisty upgrade'owany magister AI. Oto jak mogę Ci pomóc:",
+			"welcome_message": "Cześć! 👋 Jestem estem Twoim osobistym konsjerżem AI. W czym mogę Ci pomóc?",
 			"action_button_contacts_title": "Pokaż kontakty",
 			"action_button_contacts_subtitle": "Wyświetl zapisane kontakty",
 			"action_button_contacts_prompt": "Pokaż mi moje kontakty.",
@@ -1626,7 +1683,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
 			"loading": "Myślenie...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Przepraszamy, coś poszło nie tak z uzyskaniem odpowiedzi od LLM.",

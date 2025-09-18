@@ -11,6 +11,7 @@ import type {
 	SolSignedTransaction,
 	SolTransactionUi
 } from '$sol/types/sol-transaction';
+import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import {
 	address,
@@ -21,7 +22,7 @@ import {
 	stringifiedNumber,
 	type Base58EncodedBytes,
 	type Blockhash,
-	type CompilableTransactionMessage,
+	type SignaturesMap,
 	type TransactionMessageBytes,
 	type UnixTimestamp
 } from '@solana/kit';
@@ -1252,7 +1253,14 @@ export const mockSolTransactionMessage: SolTransactionMessage = {
 
 export const mockSolSignedTransaction: SolSignedTransaction = {
 	messageBytes: Uint8Array.from([1, 2, 3, 4, 5, 6]) as unknown as TransactionMessageBytes,
-	signatures: Uint8Array.from([9, 8, 7, 6, 5, 4, 3, 2, 1])
+	signatures: {
+		[mockSolAddress]: Uint8Array.from([
+			173, 246, 119, 142, 238, 105, 46, 1, 187, 26, 128, 178, 141, 79, 197, 130, 141, 96, 178, 129
+		]),
+		[mockSolAddress2]: Uint8Array.from([
+			173, 246, 119, 142, 238, 105, 46, 1, 187, 26, 128, 178, 141, 79, 197, 130, 141, 96, 178, 129
+		])
+	} as SignaturesMap
 } as unknown as SolSignedTransaction;
 
 export const mockSolParsedTransactionMessage: CompilableTransactionMessage = {

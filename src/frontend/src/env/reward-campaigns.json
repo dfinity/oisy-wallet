@@ -45,7 +45,7 @@
 		"campaignHref": "rewards.campaigns.sprinkles_s1e4.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-06-26T12:00:00.000Z",
-		"endDate": "2025-09-17T12:00:00.000Z",
+		"endDate": "2025-09-24T12:00:00.000Z",
 		"win": {
 			"default": {
 				"title": "rewards.campaigns.sprinkles_s1e4.win.default.title",
@@ -76,6 +76,46 @@
 				"banner": "/images/rewards/airdrop-icp.svg",
 				"description": "rewards.campaigns.sprinkles_s1e4.win.referee.description",
 				"shareHref": "rewards.campaigns.sprinkles_s1e4.win.referee.share_href"
+			}
+		}
+	},
+	{
+		"id": "sprinkles_s1e5",
+		"title": "rewards.campaigns.sprinkles_s1e5.title",
+		"cardTitle": "rewards.campaigns.sprinkles_s1e5.card_title",
+		"oneLiner": "rewards.campaigns.sprinkles_s1e5.one_liner",
+		"participateTitle": "rewards.campaigns.sprinkles_s1e5.participate_title",
+		"description": "rewards.campaigns.sprinkles_s1e5.description",
+		"logo": "/images/rewards/oisy-reward-logo.svg",
+		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
+		"campaignHref": "rewards.campaigns.sprinkles_s1e5.campaign_href",
+		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
+		"startDate": "2025-09-24T12:00:00.000Z",
+		"endDate": "2025-11-12T12:00:00.000Z",
+		"win": {
+			"default": {
+				"title": "rewards.campaigns.sprinkles_s1e5.win.default.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e5.win.default.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.default.share_href"
+			},
+			"jackpot": {
+				"title": "rewards.campaigns.sprinkles_s1e5.win.jackpot.title",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e5.win.jackpot.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.jackpot.share_href"
+			},
+			"leaderboard": {
+				"title": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.title",
+				"banner": "/images/rewards/reward-jackpot-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.leaderboard.share_href"
+			},
+			"referral": {
+				"title": "rewards.campaigns.sprinkles_s1e5.win.referral.title",
+				"banner": "/images/rewards/reward-received.svg",
+				"description": "rewards.campaigns.sprinkles_s1e5.win.referral.description",
+				"shareHref": "rewards.campaigns.sprinkles_s1e5.win.referral.share_href"
 			}
 		}
 	}

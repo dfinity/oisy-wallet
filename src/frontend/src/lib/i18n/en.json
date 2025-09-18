@@ -9,6 +9,7 @@
 			"close": "Close",
 			"change": "Change",
 			"apply": "Apply",
+			"retry": "Retry",
 			"refresh": "Refresh",
 			"name": "Name",
 			"symbol": "Symbol",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Where governance meets collaboration to ignite innovation.",
 				"description": "Toolkit is a versatile suite for managing Service Nervous Systems (SNS) and projects on the Internet Computer. From governance proposals to canister deployment, it empowers users to innovate, collaborate, and decentralize seamlessly."
+			},
+			"altitudefi": {
+				"name": "Altitude",
+				"one_liner": "Altitude actively manages users’ debt and collateral in real-time, optimizing capital efficiency.",
+				"description": "DeFi loans are typically over-collateralized and capital-inefficient, Altitude is a non-custodial protocol that optimizes DeFi loans. Altitude actively manages users’ debt and collateral in real-time, optimizing capital efficiency."
+			},
+			"usdai": {
+				"name": "USD.AI",
+				"one_liner": "A synthetic‑dollar protocol backing USDai with income‑generating AI compute infrastructure and offering yield via sUSDai.",
+				"description": "USD.AI is a synthetic dollar protocol backed by income-generating AI compute infrastructure, creating a decentralized stablecoin called USDai. Users can hold or stake USDai to earn sUSDai, a yield-bearing version that reflects protocol earnings. The system is designed to create a composable, productive, and decentralized alternative to fiat-backed stablecoins."
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
+			"not_eligible": "Not eligible",
 			"ongoing": "Ongoing",
 			"ended": "Ended ($amount)",
 			"banner_text": "Earn daily rewards with OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",
+			"network_bonus_info": "Each network on which you hold assets gives you a reward multiplier. The more networks you use, the more rewards you get!",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
 			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
@@ -422,6 +435,36 @@
 						"title": "Get more for Referring",
 						"description": "You just earned Sprinkles - so did the person who referred you.<br>Send 4 friends and earn $1.<br>Top 4 referrers win $200 each.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 5 is coming soon....",
+				"one_liner": "Earn BTC for staying active.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer your friends and get a bonus every time they win. Top referrers win even more.",
+				"participate_title": "Earn BTC by staying active - and get a Bonus every time a friend wins.",
+				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Land in the top 3 referrers and win a jackpot.",
+				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"win": {
+					"default": {
+						"title": "You got rewarded",
+						"description": "Your rewards just landed in your wallet<br>Don't forget to refer and stay active to win more",
+						"share_href": "https://x.com/intent/post?text=Another%20%40OISY%20Sprinkle%20hit%20my%20wallet.%0AOne%20of%20the%20easiest%20airdrops%20in%20DeFi.%0ACheck%20OISY.com"
+					},
+					"jackpot": {
+						"title": "You've won the weekly bonus drop",
+						"description": "You just earned one of our weekly bonus drops.<br>Stay active, and keep referring to win more",
+						"share_href": "https://x.com/intent/post?text=Won%20the%20%2450%20Sprinkle%20Jackpot%20from%20%40OISY.%0AThey%E2%80%99re%20giving%20serious%20rewards%20to%20activity%20and%20referrals%20this%20season.%0AOISY.com"
+					},
+					"leaderboard": {
+						"title": "You topped the Leaderboard",
+						"description": "You ranked among the top 3 referrers this season<br>$200 has been added to your wallet",
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
+					},
+					"referral": {
+						"title": "Here a small thank you",
+						"description": "One of your referred users just got some sprinkles.",
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "Error while fetching the BTC withdrawal statuses.",
 			"transaction_price": "Error while loading the estimation of the price of a transaction.",
 			"icrc_canisters": "Error while loading the ICRC canisters.",
+			"icrc_canister_loading": "The token with Ledger canister $ledgerCanisterId could not be loaded because it’s currently not responding.",
 			"erc20_custom_tokens": "Error while loading the ERC20 custom tokens.",
 			"erc721_custom_tokens": "Error while loading the ERC721 custom tokens.",
 			"erc1155_custom_tokens": "Error while loading the ERC1155 custom tokens.",
@@ -551,7 +595,11 @@
 			"appearance_system": "System",
 			"git_disclaimer": "For development purpose, we show the branch and the commit only in test canisters.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "Beta features",
+			"enable_beta_feature": "Enable beta feature",
+			"disable_beta_feature": "Disable beta feature",
+			"save_beta_feature_success": "Your beta feature settings have been updated."
 		},
 		"alt": {
 			"testnets_toggle": "Toggle to show or hide testnets",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP Account ID",
+				"checking_index_canister_status": "Checking transactions status...",
 				"use_for_all_tokens": "Use for all tokens when receiving from wallets, users, or other apps that support this address format.",
 				"use_for_icrc_deposit": "Use for receiving ICRC-1 tokens in the ICP network, such as SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use for ICP deposits from exchanges or other wallets that only support Account IDs.",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "Make your first send now!",
 			"contacts_empty_state_title": "Your contacts will appear here",
 			"contacts_empty_state_description": "It looks like you haven’t added contacts yet",
-			"send_review_subtitle": "You send"
+			"send_review_subtitle": "You send",
+			"no_nfts_found": "No NFTs found",
+			"no_nfts_found_desc": "Adjust your search or network to find your NFTs",
+			"select_nft": "Select NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Enter public address (0x), name or alias",
 			"enter_recipient_address": "Enter recipient address, name or alias",
 			"enter_wallet_address": "Enter wallet address, name or alias",
-			"select_network": "Select network"
+			"select_network": "Select network",
+			"search_nfts": "Search NFTs"
 		},
 		"info": {
 			"ckbtc_certified": "Please wait until the ckBTC parameters have been certified.",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "Invalid Bitcoin transaction data",
 			"btc_utxo_locked": "Bitcoin funds are locked by pending transactions",
 			"btc_invalid_fee_calculation": "Bitcoin transaction fee validation failed",
-			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later."
+			"pending_transactions_not_available": "The pending transaction service is currently not available. Please try again later.",
+			"no_nft_selected": "No NFT has been selected for sending."
 		},
 		"error": {
 			"unexpected": "Something went wrong while sending the transaction.",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "Something went wrong while calculating transaction fee.",
 			"unable_to_retrieve_amount": "n/a (unable to retrieve)",
 			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
-			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly."
+			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
+			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
 	"convert": {
@@ -1061,14 +1116,16 @@
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"token_id": "Token ID"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
 			"card": {
 				"image": "Image of NFT with token ID: $tokenId"
 			},
-			"copy_address": "Copy this address to clipboard"
+			"copy_address": "Copy this address to clipboard",
+			"review_preference": "Change display preference"
 		}
 	},
 	"fee": {
@@ -1592,7 +1649,7 @@
 	"welcome": {
 		"title": "Welcome to $oisy_short!",
 		"subtitle": "Ready to Earn?",
-		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1613,7 +1670,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Assistant",
-			"welcome_message": "Hello there! \uD83D\uDC4B I'm OISY, your personal AI concierge. Here's how I can help you:",
+			"welcome_message": "Hello there! \uD83D\uDC4B I'm your personal AI concierge. How I can help you?",
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",
@@ -1627,7 +1684,8 @@
 			"send_token_succeeded": "Transaction completed!",
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
 			"loading": "Thinking...",
-			"reset_chat_history": "Reset chat history"
+			"reset_chat_history": "Reset chat history",
+			"feature_description": "The AI Assistant allows you to ask about generic crypto topics, get help about specific OISY features, and to send tokens. Note that no sensitive data like your or your contacts addresses are sent to the assistant, and that all transactions must be confirmed by the user. The feature is still in beta status, and we are rolling out new features on a regular basis."
 		},
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",

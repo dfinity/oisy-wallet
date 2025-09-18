@@ -9,6 +9,7 @@
 			"close": "Đóng",
 			"change": "Thay đổi",
 			"apply": "Áp dụng",
+			"retry": "",
 			"refresh": "Làm mới",
 			"name": "Tên",
 			"symbol": "Ký hiệu",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Một sự đổi mới trong quản trị DAO",
 				"description": "Toolkit là bộ công cụ đa năng để quản lý các Service Nervous Systems (SNS) và dự án trên Internet Computer. Từ các đề xuất quản trị đến việc triển khai canister, nó trao quyền cho người dùng để đổi mới, hợp tác và phân quyền một cách liền mạch"
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
+			"not_eligible": "",
 			"ongoing": "Đang diễn ra",
 			"ended": "Đã kết thúc ($amount)",
 			"banner_text": "Kiếm phần thưởng hàng ngày với OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
+			"network_bonus_info": "",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
@@ -422,6 +435,36 @@
 						"title": "Nhận thêm cho việc giới thiệu",
 						"description": "Bạn vừa kiếm được Sprinkles - người giới thiệu bạn cũng vậy.<br>Gửi 4 người bạn và kiếm được 1$.<br>Top 4 người giới thiệu hàng đầu mỗi người giành được 200$.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
 			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
 			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
@@ -551,7 +595,11 @@
 			"appearance_system": "Hệ thống",
 			"git_disclaimer": "Vì mục đích phát triển, chúng tôi chỉ hiển thị branch và commit trong các canister thử nghiệm.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "Hãy gửi lần đầu tiên ngay bây giờ!",
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
-			"send_review_subtitle": "Bạn gửi"
+			"send_review_subtitle": "Bạn gửi",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
-			"select_network": "Chọn mạng"
+			"select_network": "Chọn mạng",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
 			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
 			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
-			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau."
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa."
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1061,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Không có ảnh NFT",
 			"card": {
 				"image": "Ảnh của NFT với token ID: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1517,7 +1574,7 @@
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Thỏa thuận cấp phép",
 			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
 			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
@@ -1545,22 +1602,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Điều khoản sử dụng",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Liên kết đến Điều khoản sử dụng"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Chính sách bảo mật",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Liên kết đến Chính sách bảo mật"
 		}
 	},
 	"activity": {
@@ -1591,7 +1648,7 @@
 	"welcome": {
 		"title": "Chào mừng đến với $oisy_short!",
 		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1612,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Trợ lý AI $oisy_short",
-			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"welcome_message": "Xin chào! 👋 Tôi là chuyên gia AI cá nhân của bạn. Tôi có thể giúp gì cho bạn?",
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
@@ -1626,7 +1683,8 @@
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Xin lỗi, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong danh bạ của bạn.",
 			"loading": "Đang suy nghĩ...",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",

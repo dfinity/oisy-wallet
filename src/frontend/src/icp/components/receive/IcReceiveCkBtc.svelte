@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import IcReceiveInfoCkBTC from '$icp/components/receive/IcReceiveInfoCkBTC.svelte';
+	import IcReceiveInfoCkBtc from '$icp/components/receive/IcReceiveInfoCkBtc.svelte';
 	import { loadAllCkBtcInfo } from '$icp/services/ckbtc.services';
 	import { initCkBTCMinterInfoWorker } from '$icp/services/worker.ck-minter-info.services';
 	import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
@@ -43,11 +43,11 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<svelte:window on:oisyReceiveCkBTC={async () => await openModal(modalId)} />
+<svelte:window onoisyReceiveCkBTC={async () => await openModal(modalId)} />
 
 <ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBTC} on:nnsClose={close} />
+		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBtc} on:nnsClose={close} />
 	{/snippet}
 </ReceiveButtonWithModal>
 

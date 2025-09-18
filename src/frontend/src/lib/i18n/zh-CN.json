@@ -9,6 +9,7 @@
 			"close": "关闭",
 			"change": "更改",
 			"apply": "应用",
+			"retry": "",
 			"refresh": "刷新",
 			"name": "名称",
 			"symbol": "符号",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "治理与协作相遇，激发创新。",
 				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
+			"not_eligible": "",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
 			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
 		},
 		"requirements": {
 			"requirements_title": "资格标准",
+			"network_bonus_info": "",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
 			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
 			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
@@ -422,6 +435,36 @@
 						"title": "推荐可获得更多",
 						"description": "您刚刚赢得了 Sprinkles——推荐您的人也是如此。<br>发送 4 位朋友并赚取 1 美元。<br>前 4 名推荐人每人可赢得 200 美元。",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
@@ -551,7 +595,11 @@
 			"appearance_system": "系统",
 			"git_disclaimer": "仅在测试环境中显示分支和提交信息，仅用于开发目的。",
 			"git_branch_name": "分支：",
-			"git_commit_hash": "提交："
+			"git_commit_hash": "提交：",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP 账户 ID",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
 				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
 				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "现在就开始你的第一次发送吧！",
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
-			"send_review_subtitle": "你将发送"
+			"send_review_subtitle": "你将发送",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
-			"select_network": "选择网络"
+			"select_network": "选择网络",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "无效的比特币交易数据",
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
 			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
-			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。"
+			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "计算交易手续费时发生错误。",
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
-			"solana_confirmation_failed": "Solana确认失败"
+			"solana_confirmation_failed": "Solana确认失败",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1061,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "图片占位",
 			"card": {
 				"image": "图片"
 			},
-			"copy_address": "把该地址复制到粘贴版"
+			"copy_address": "把该地址复制到粘贴版",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1546,8 +1603,8 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "使用条款",
-			"title": "使用条款",
-			"body": "生效日期：$date。通过使用 OISY 钱包、访问 oisy.com 网站或使用我们链接到本使用条款的其他服务（统称为“服务”），您即表示您与 DFINITY 基金会（包括我们的附属公司和子公司，统称为“DFINITY”）同意遵守本使用条款以及我们的许可协议（统称为“协议”）。若本使用条款与许可协议存在冲突或不一致之处，以本使用条款为准。若您不同意，请勿使用我们的服务。通过使用服务，您确认您已年满 18 岁。OISY 钱包是一个基于浏览器的、自托管的、支持多链的钱包去中心化应用，托管于 Internet Computer 公共区块链网络，允许您访问 OISY 钱包支持的特定代币及其他第三方服务。我们不拥有、控制或运营此类第三方服务，您自行承担使用第三方服务的风险。部分 OISY 钱包功能为实验性或测试版本。您有责任：（1）自行安排访问本网站所需的一切条件；（2）妥善保管您的访问凭证，包括您的 Internet Identity。如果您丢失 Internet Identity 或其遭到泄露，我们无法为您恢复账户访问权限。若您要访问网站或其部分资源，可能需提供某些注册信息或其他资料。您提供的信息必须准确、最新且完整。您同意您提供的所有注册信息，包括通过网站交互功能所提交的资料，将受我们的《隐私政策》约束，并同意我们依据该政策处理您的信息。您同意在每次会话结束时退出账户，特别是在公共或共享电脑上使用账户时需格外小心，防止他人查看或记录您的密码或个人信息。您也承认我们不托管、访问或控制您 OISY 钱包中的资金，OISY 钱包完全由用户自行控制。在适用法律允许的最大范围内，我们的服务按“原样”提供，不附带任何形式的担保，包括但不限于对资金损失或技术故障的担保或保证。您需自行承担使用去中心化基础设施的风险，并承认我们对任何资金损失不承担责任，无论损失原因为何。DFINITY 在法律允许的最大范围内，否认所有明示、默示、法定或其他形式的担保，包括但不限于适用于特定目的的适用性、适销性、所有权、质量、结果和不侵权性。DFINITY 不保证服务始终可用、安全或可靠（无论现在还是将来），也不对服务的准确性、功能性、信息的真实性或完整性，以及服务的一致性或使用结果承担任何担保。DFINITY 不保证服务能转移任何代币或数字资产的所有权或权利，也不对所有权作出任何担保。在适用法律允许的最大范围内，DFINITY 不对因使用或无法使用服务、DFINITY 材料或文中定义的任何第三方项目所引起的任何间接、特殊、附带、惩罚性或后果性损害承担责任，即使已被告知该类损害可能发生，且即使任何有限救济未能实现其基本目的。在任何情况下，DFINITY 所承担的赔偿责任总额不超过 100 瑞士法郎（CHF）。您同意为因您使用或滥用服务、违反本协议或适用法律法规所导致的任何责任和费用（包括合理律师费）为 DFINITY 及其附属公司、高管、董事、供应商、许可方及其他用户进行赔偿、抗辩并使其免责。通过参与我们的奖励计划，您同意 OISY REWARDS INITIATIVE - TERMS AND CONDITIONS，该协议作为本协议的一部分，且可随时变更。您同意遵守所有适用法律和法规（包括但不限于出口管制、反洗钱和经济制裁相关法律法规），并不得将服务用于任何非法目的，或以侵犯 DFINITY 实体、其他用户或任何其他人的权利的方式使用服务。您需遵守所有适用的联邦、州和地方法律法规，负责相关税费的申报与支付。与服务有关的任何索赔应适用瑞士法律，不适用法律冲突规则。与本协议相关的任何争议（包括非合同争议及其解释）应由瑞士苏黎世法院专属管辖，且可上诉至瑞士联邦法院。我们不拥有、控制、认可或采纳您在使用服务时可能看到或连接的任何第三方内容、应用、服务、网站或其他项目（统称为“第三方项目”），并对其不承担任何责任。您与第三方及第三方项目的任何使用、交易或通信仅在您与该第三方之间进行，风险自负。本协议不旨在向任何第三方，包括其他服务用户，授予任何权利、利益或救济。若本使用条款的任何条款被判定为非法、无效或不可执行，该条款仍应在适用法律允许的最大范围内执行，不可执行的部分视为从本条款中分离，且不影响其他条款的有效性与可执行性。本协议在被终止前持续有效，如您违反本协议，您的权利和许可将立即终止。DFINITY 可基于任何理由随时终止本协议，包括但不限于您对服务的实际或涉嫌滥用或违反协议的行为。如我们未行使或执行本使用条款中的任何权利或规定，不构成对该权利或规定的放弃。本使用条款及我们在本网站发布的任何政策或运营规则构成您与我们之间关于服务使用的完整协议，取代之前任何口头或书面形式的协议、沟通或提议（包括旧版本使用条款）。若条款存在解释上的歧义，不应对起草方不利解释。请参阅我们的隐私政策 [链接另附]。如您使用 OISY 钱包或其他第三方服务与区块链技术，您将与一个独立于我们、且不受我们控制的全球社区共享信息。由于区块链是去中心化的，且第三方服务不由我们或我们的附属公司控制或运营，我们无法控制、删除、修改或更改在使用这些区块链技术时所处理的个人数据。我们可自行决定更新本协议。继续使用即视为接受更新。如有疑问，请联系 support@oisy.com"
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"terms_of_use": "使用条款链接"
@@ -1556,8 +1613,8 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "隐私政策",
-			"title": "隐私政策",
-			"body": "生效日期：$date。我们，DFINITY Stiftung，地址为瑞士苏黎世 Genferstrasse 11，邮编8002（以下简称“DFINITY”或“我们”），在本《OISY 隐私政策》（“隐私政策”）中披露您在使用 OISY 钱包、访问 oisy.com 网站或任何链接至本隐私政策的网站（统称为“网站”）时所提交的个人数据的处理方式。本隐私政策不适用于任何其他数据处理活动，包括但不限于：我们在线下收集的个人数据，或通过未链接本隐私政策的网站收集的个人数据；您在使用网站或其他基于区块链的技术时与其他用户共享的个人数据；或您与我们不拥有或控制的第三方服务共享的个人数据。如果您使用 OISY 钱包或其他第三方服务与区块链技术，您将信息共享给一个独立于我们且不受我们控制的全球社区。由于区块链是去中心化的，且第三方服务不由我们或我们的附属机构控制或运营，我们无法控制、删除、修改或更改在使用此类区块链技术过程中处理的个人数据。### 1. 处理的数据类别及使用目的：当您访问我们的网站时，您的 IP 地址会被自动提交。此处理行为是出于我们优化网站性能的合法利益，且不会被您或其他用户的隐私及其他权利所取代。[插入 DFINITY 收集的其他数据，例如设备信息、登录信息、交易信息。DFINITY 如何履行 KYC（了解您的客户）义务？DFINITY 可能需要出于法律合规目的收集某些数据，例如姓名、地址、电话号码、银行账户信息。] ### 2. 数据共享：我们可能会将您的数据共享给其他 DFINITY 实体、服务提供商和第三方，以便为您提供服务，并用于我们打击和调查欺诈行为的努力中。### 3. 数据保留：我们将在瑞士及我们的员工和承包商所在的地区（包括美国）保留您的个人数据，最长保留时间为自收集之日起 24 个月。### 4. 用户权利与合规性：您可以通过联系我们（privacy@dfinity.com）请求访问、更正、删除或限制我们对您个人数据的处理，或对处理行为提出异议。您还可能有权向主管机构提出投诉。但如果数据是在区块链或与第三方服务相关的环境中处理的，由于这些数据不受我们或我们的附属机构控制，您将无法就此类数据行使上述权利。### 5. 本政策的变更：我们可能会不时自行决定更新本隐私政策，并可能在我们的网站上发布新版本。### 6. 联系方式：如有问题或希望行使您的权利，请访问 support@oisy.com"
+			"title": "",
+			"body": ""
 		},
 		"alt": {
 			"privacy_policy": "隐私政策链接"
@@ -1591,7 +1648,7 @@
 	"welcome": {
 		"title": "欢迎来到 $oisy_short！",
 		"subtitle": "准备好赚取收益了吗？",
-		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐 4 位朋友即可获得保证奖金。"
+		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1611,22 +1668,23 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "标题",
-			"welcome_message": "欢迎信息",
-			"action_button_contacts_title": "联系人标题按钮",
-			"action_button_contacts_subtitle": "联系人副标题按钮",
-			"action_button_contacts_prompt": "联系人提示按钮",
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
 			"action_button_send_tokens_title": "发送资产",
 			"action_button_send_tokens_subtitle": "设置发送于几秒钟后",
 			"action_button_send_tokens_prompt": "我想发送代币",
 			"select_contact_message": "选择一个联系人来开启发送过程",
 			"send_to_message": "发给 $contact_name（$address_info）",
 			"send_message": "发送消息",
-			"send_message_input_placeholder": "发送消息输入占位符",
+			"send_message_input_placeholder": "",
 			"send_token_succeeded": "交易完成",
 			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
 			"loading": "思考中",
-			"reset_chat_history": ""
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		batchLoadTransactions,
@@ -16,10 +17,23 @@
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 	import type { TokenId } from '$lib/types/token';
 
-	// TODO: make it more functional
-	let tokensAlreadyLoaded: TokenId[] = [];
+	interface Props {
+		children: Snippet;
+	}
 
-	let loading = false;
+	let { children }: Props = $props();
+
+	// TODO: make it more functional
+	let tokensAlreadyLoaded = $state<TokenId[]>([]);
+
+	let loading = $state(false);
+
+	let tokens = $derived([
+		...$enabledEthereumTokens,
+		...$enabledErc20Tokens,
+		...$enabledEvmTokens,
+		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
+	]);
 
 	const onLoad = async () => {
 		if (loading) {
@@ -28,24 +42,7 @@
 
 		loading = true;
 
-		if (
-			isNullish($enabledEthereumTokens) ||
-			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledEvmTokens) ||
-			isNullish($enabledNonFungibleTokens)
-		) {
-			return;
-		}
-
-		const loader = batchLoadTransactions({
-			tokens: [
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			],
-			tokensAlreadyLoaded
-		});
+		const loader = batchLoadTransactions({ tokens, tokensAlreadyLoaded });
 
 		for await (const results of loader) {
 			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
@@ -56,11 +53,11 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens,
-		$enabledErc20Tokens,
-		$enabledEvmTokens,
-		$enabledNonFungibleTokens,
-		debounceLoad());
+	$effect(() => {
+		[tokens];
+
+		debounceLoad();
+	});
 
 	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
@@ -70,12 +67,7 @@
 		}
 
 		await Promise.allSettled(
-			[
-				...$enabledEthereumTokens,
-				...$enabledErc20Tokens,
-				...$enabledEvmTokens,
-				...$enabledNonFungibleTokens
-			].map(async ({ id: tokenId, network: { id: networkId } }) => {
+			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
 					return;
 				}
@@ -93,5 +85,5 @@
 </script>
 
 <IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	<slot />
+	{@render children()}
 </IntervalLoader>

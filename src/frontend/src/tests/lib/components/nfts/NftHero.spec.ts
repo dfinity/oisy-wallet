@@ -1,18 +1,24 @@
 import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import type { OptionString } from '$lib/types/string';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('NftHero', () => {
 	const openFullscreenSpy = vi
 		.spyOn(modalStore, 'openNftFullscreenDisplay')
 		.mockImplementation(() => {});
+
+	const openSendSpy = vi.spyOn(modalStore, 'openSend');
 
 	beforeAll(() => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
@@ -107,5 +113,35 @@ describe('NftHero', () => {
 				id: expect.any(Symbol)
 			})
 		);
+	});
+
+	it('should open the send modal in Nft send flow when send button is clicked', () => {
+		mockPage.mock({
+			network: mockValidErc1155Nft.collection.network as unknown as OptionString
+		});
+		mockPage.mockDynamicRoutes({
+			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+		});
+
+		const { getByTestId, getByText } = render(NftHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const nftSendButton = getByText(get(i18n).send.text.send);
+
+		assertNonNullish(nftSendButton);
+
+		fireEvent.click(nftSendButton);
+
+		waitFor(() => {
+			const modalTitle = getByTestId('modal-title');
+
+			expect(modalTitle).toHaveTextContent(get(i18n).send.text.select_nft);
+		});
+
+		expect(openSendSpy).toHaveBeenCalledOnce();
 	});
 });

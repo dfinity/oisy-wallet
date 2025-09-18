@@ -43,6 +43,7 @@ export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
 export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_ACTION_SEND = 'nft-action-send';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -169,6 +170,7 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
+export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';

@@ -3,6 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
+	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -62,7 +64,7 @@
 	const save = async () => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
-			if (token.standard === 'erc721') {
+			if (isTokenErc721(token)) {
 				await saveErc721CustomTokens({
 					tokens: [
 						{
@@ -73,7 +75,7 @@
 					],
 					identity: $authIdentity
 				});
-			} else if (token.standard === 'erc1155') {
+			} else if (isTokenErc1155(token)) {
 				await saveErc1155CustomTokens({
 					tokens: [
 						{
@@ -96,9 +98,15 @@
 				coll.collection.id === collection.id && coll.collection.address === collection.address
 		)?.nfts ?? []
 	);
+
+	const onClose = () => {
+		if (!saveLoading) {
+			modalStore.close();
+		}
+	};
 </script>
 
-<Modal {testId} on:nnsClose={() => (!saveLoading ? modalStore.close() : undefined)}>
+<Modal {onClose} {testId}>
 	<ContentWithToolbar>
 		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
 			<span class="flex text-warning-primary">
@@ -125,19 +133,19 @@
 		</p>
 
 		<div class="flex flex-col gap-2 text-sm">
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span><span
 					>{shortCollectionName}</span
 				>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.networks.network}</span><span
 					><NetworkWithLogo network={collection.network} /></span
 				>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-				<span>
+				<span class="inline-flex">
 					<output data-tid={`${testId}-collectionAddress`}
 						>{shortenWithMiddleEllipsis({ text: collection.address })}</output
 					>
@@ -154,19 +162,37 @@
 					/>
 				</span>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary" data-tid={`${testId}-displayPreferences`}
 					>{$i18n.nfts.text.display_preference}</span
 				><span>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span>
 			</div>
-			<div class="flex w-full justify-between">
+			<div class="flex w-full flex-col justify-between md:flex-row">
 				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
-				<span class="flex-col justify-items-end" data-tid={`${testId}-nfts-media`}>
+				<span class="justify-items-between flex-col" data-tid={`${testId}-nfts-media`}>
+					{#if nonNullish(collection.bannerImageUrl)}
+						<span class="flex w-full items-start justify-start md:items-center md:justify-end">
+							<output class="text-tertiary"
+								>{shortenWithMiddleEllipsis({
+									text: collection.bannerImageUrl,
+									splitLength: 20
+								})}</output
+							>
+							<AddressActions
+								copyAddress={collection.bannerImageUrl}
+								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+									$address: collection.bannerImageUrl
+								})}
+								externalLink={collection.bannerImageUrl}
+								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+							/>
+						</span>
+					{/if}
 					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 						{#if nonNullish(nft?.imageUrl)}
-							<span class="flex">
+							<span class="flex w-full items-start justify-end md:items-center">
 								#{nft.id} &nbsp;
-								<output class="text-tertiary"
+								<output class="truncate text-tertiary"
 									>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
 								>
 								<AddressActions

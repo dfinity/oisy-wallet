@@ -7,7 +7,7 @@
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import type { EthTransactionUi } from '$eth/types/eth-transaction';
 	import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -24,29 +24,32 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { EthAddress } from '$lib/types/address';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckMinterInfoAddresses: EthAddress[] = [];
-	$: ckMinterInfoAddresses = toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$ethereumTokenId]);
-
-	let sortedTransactionsUi: EthTransactionUi[];
-	$: sortedTransactionsUi = $sortedEthTransactions.map(({ data: transaction }) =>
-		mapEthTransactionUi({
-			transaction,
-			ckMinterInfoAddresses,
-			ethAddress: $ethAddress
-		})
+	let ckMinterInfoAddresses = $derived(
+		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$nativeEthereumTokenId])
 	);
 
-	let selectedTransaction: EthTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<EthTransactionUi>({
-			$modalOpen: $modalEthTransaction,
-			$modalStore
-		}));
+	let sortedTransactionsUi = $derived(
+		$sortedEthTransactions.map(({ data: transaction }) =>
+			mapEthTransactionUi({
+				transaction,
+				ckMinterInfoAddresses,
+				ethAddress: $ethAddress
+			})
+		)
+	);
+
+	let selectedTransaction = $state<EthTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<EthTransactionUi>({
+				$modalOpen: $modalEthTransaction,
+				$modalStore
+			}));
+	});
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
