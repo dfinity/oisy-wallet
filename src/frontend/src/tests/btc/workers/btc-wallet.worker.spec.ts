@@ -18,7 +18,7 @@ import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
 describe('btc-wallet.worker', () => {
-	let spyGetCertifiedBalance: MockInstance;
+	// let spyGetCertifiedBalance: MockInstance;
 	let spyGetUncertifiedBalance: MockInstance;
 
 	const signerCanisterMock = mock<SignerCanister>();
@@ -108,10 +108,10 @@ describe('btc-wallet.worker', () => {
 		vi.spyOn(BitcoinCanister, 'create').mockReturnValue(bitcoinCanisterMock);
 
 		spyGetUncertifiedBalance = bitcoinCanisterMock.getBalanceQuery.mockResolvedValue(mockBalance);
-		spyGetCertifiedBalance = signerCanisterMock.getBtcBalance.mockImplementation(async () => {
-			await waitFor(() => Promise.resolve(), { timeout: 1000 });
-			return mockBalance;
-		});
+		// spyGetCertifiedBalance = signerCanisterMock.getBtcBalance.mockImplementation(async () => {
+		// 	await waitFor(() => Promise.resolve(), { timeout: 1000 });
+		// 	return mockBalance;
+		// });
 	});
 
 	afterEach(() => {
@@ -134,16 +134,17 @@ describe('btc-wallet.worker', () => {
 			certified: false,
 			withTransactions: true
 		});
-		const mockPostMessageCertified = mockPostMessage({
-			certified: true,
-			withTransactions: false
-		});
+		// TODO(SDK-2328): use the certified parameter again when we fix the issue with propagating timeout
+		// const mockPostMessageCertified = mockPostMessage({
+		// 	certified: true,
+		// 	withTransactions: false
+		// });
 
 		return {
 			setup: () => {},
 
 			teardown: () => {
-				// reset internal store with transactions
+				// reset the internal store with transactions
 				scheduler['store'] = {
 					transactions: {},
 					balance: undefined,
@@ -159,23 +160,23 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenCalledTimes(4-1);
 					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
-					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
+					// expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4-1, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(6);
-					expect(postMessageMock).toHaveBeenNthCalledWith(5, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(6, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(6-1);
+					expect(postMessageMock).toHaveBeenNthCalledWith(5-1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(6-1, mockPostMessageStatusIdle);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
-					expect(postMessageMock).toHaveBeenCalledTimes(8);
-					expect(postMessageMock).toHaveBeenNthCalledWith(7, mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenNthCalledWith(8, mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(8-1);
+					expect(postMessageMock).toHaveBeenNthCalledWith(7-1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(8-1, mockPostMessageStatusIdle);
 				});
 
 				it('should start the scheduler with an interval', async () => {
@@ -188,7 +189,7 @@ describe('btc-wallet.worker', () => {
 					await scheduler.trigger(startData);
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
-					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
+					// expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 				});
 
 				it('should stop the scheduler', () => {
@@ -204,17 +205,17 @@ describe('btc-wallet.worker', () => {
 					await awaitJobExecution();
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
-					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
+					// expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(2);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
+					// expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(2);
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
 					expect(spyGetUncertifiedBalance).toHaveBeenCalledTimes(3);
-					expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
+					// expect(spyGetCertifiedBalance).toHaveBeenCalledTimes(3);
 				});
 
 				it('should postMessage with status of the worker', async () => {
@@ -226,7 +227,8 @@ describe('btc-wallet.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
 				});
 
-				it('should trigger postMessage with error on third try', async () => {
+				// TODO(SDK-2328): use the certified parameter again when we fix the issue with propagating timeout
+				it.skip('should trigger postMessage with error on third try', async () => {
 					const err = new Error('test');
 					signerCanisterMock.getBtcBalance.mockRejectedValue(err);
 

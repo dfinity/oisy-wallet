@@ -248,10 +248,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		const balance = await this.loadBtcBalance({
 			identity,
 			bitcoinNetwork,
-			// When a call takes more than 5 minutes, agent-js raises an error. However, it seems that all the subsequent calls to the same canister fail even without expiring the timeout.
-			// We would temporarily need to avoid this propagation. Since this call is one that takes most time and often times out, we temporarily use only query calls.
-			// TODO(SDK-2328): use the certified parameter again when we fix the issue with propagating timeout
-			certified: false,
+			certified,
 			btcAddress,
 			minterCanisterId,
 			pendingTransactions: pendingTransactionData.transactions,
@@ -294,7 +291,11 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 					this.postMessageWalletError({ error });
 				}
 			},
-			resolution: 'all_settled'
+			resolution: 'all_settled',
+			// When a call takes more than 5 minutes, agent-js raises an error. However, it seems that all the subsequent calls to the same canister fail even without expiring the timeout.
+			// We would temporarily need to avoid this propagation. Since this call is one that takes most time and often times out, we temporarily use only query calls.
+			// TODO(SDK-2328): use the certified parameter again when we fix the issue with propagating timeout
+			strategy: 'query'
 		});
 	};
 
