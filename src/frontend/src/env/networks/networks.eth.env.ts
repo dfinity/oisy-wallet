@@ -31,7 +31,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	providers: {
 		infura: 'homestead',
-		alchemy: Network.ETH_MAINNET,
+		alchemy: 'homestead',
+		alchemyDeprecated: Network.ETH_MAINNET,
 		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'ethereum' },
@@ -52,7 +53,8 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	explorerUrl: SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'sepolia',
-		alchemy: Network.ETH_SEPOLIA,
+		alchemy: 'sepolia',
+		alchemyDeprecated: Network.ETH_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://eth-sepolia.g.alchemy.com/v2'
 	}
 };

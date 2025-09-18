@@ -11,11 +11,12 @@
 
 	const { children, styleClass }: Props = $props();
 
-	const { variant, condensed, noPadding, noBorder } = getContext<ListContext>('list-context');
+	const { variant, condensed, noPadding, noBorder, itemStyleClass } =
+		getContext<ListContext>('list-context');
 
 	const classes: { [key in ListVariant]: string } = {
 		none: `ml-3 ${condensed || noPadding ? 'py-0' : 'py-1'} ${styleClass ?? ''}`,
-		styled: `flex flex-col sm:flex-row justify-between ${!noPadding ? (condensed ? 'py-1.5 px-1' : 'py-2.5 px-1') : ''} ${!noBorder ? 'border-b-1 last-of-type:border-b-0 border-brand-subtle-10' : ''} ${styleClass ?? ''}`
+		styled: `flex justify-between ${!noPadding ? (condensed ? 'py-1.5 px-1' : 'py-2.5 px-1') : ''} ${!noBorder ? 'border-b-1 last-of-type:border-b-0 border-brand-subtle-10' : ''} ${styleClass ?? ''} ${itemStyleClass}`
 	};
 </script>
 
