@@ -35,12 +35,12 @@
 
 <button
 	class="block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
-	class:cursor-not-allowed={disabled}
+	class:bg-primary={type === 'default'}
 	class:cursor-default={type === 'default'}
+	class:cursor-not-allowed={disabled}
+	class:group={type !== 'default'}
 	class:hover:-translate-y-1={!disabled && type !== 'default'}
 	class:hover:bg-primary={!disabled && type !== 'default'}
-	class:bg-primary={type === 'default'}
-	class:group={type !== 'default'}
 	data-tid={testId}
 	onclick={onClick}
 >
