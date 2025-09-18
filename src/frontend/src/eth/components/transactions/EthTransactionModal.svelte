@@ -36,6 +36,7 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -111,7 +112,7 @@
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					{#if isTokenNonFungible(token) && nonNullish(nft)}
-						<NftLogo badge={{ type: 'network' }} {nft} />
+						<NftCard {nft} disabled />
 					{:else}
 						<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 					{/if}
