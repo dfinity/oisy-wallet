@@ -173,8 +173,8 @@
 							</span>
 						{/if}
 
-						<span class="flex flex-wrap min-w-0 items-center">
-							<span class="inline-block max-w-38 truncate">
+						<span class="flex min-w-0 flex-wrap items-center">
+							<span class="max-w-38 inline-block truncate">
 								{#if nonNullish(contact)}
 									{contact.name}
 								{:else if nonNullish(contactAddress)}
@@ -182,11 +182,11 @@
 								{/if}
 							</span>
 							{#if notEmptyString(addressAlias)}
-							<span class="inline-flex items-center text-tertiary">
-							<Divider />
-								<span class="inline-block max-w-20 sm:max-w-29 lg:max-w-34 truncate">
-									{addressAlias}
-								</span>
+								<span class="inline-flex items-center text-tertiary">
+									<Divider />
+									<span class="sm:max-w-29 lg:max-w-34 inline-block max-w-20 truncate">
+										{addressAlias}
+									</span>
 								</span>
 							{/if}
 						</span>
