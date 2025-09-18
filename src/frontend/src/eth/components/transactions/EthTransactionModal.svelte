@@ -112,7 +112,7 @@
 			{#snippet logo()}
 				{#if nonNullish(token)}
 					{#if isTokenNonFungible(token) && nonNullish(nft)}
-						<NftCard {nft} disabled />
+						<NftCard {nft} />
 					{:else}
 						<TokenLogo badge={{ type: 'network' }} data={token} logoSize="lg" />
 					{/if}
