@@ -510,7 +510,7 @@ describe('rewards.utils', () => {
 									}
 								],
 								probability_multiplier_enabled: [false],
-								probability_multiplier: [1]
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -559,7 +559,7 @@ describe('rewards.utils', () => {
 									}
 								],
 								probability_multiplier_enabled: [false],
-								probability_multiplier: [1]
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -608,7 +608,7 @@ describe('rewards.utils', () => {
 									}
 								],
 								probability_multiplier_enabled: [false],
-								probability_multiplier: [1]
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -656,7 +656,7 @@ describe('rewards.utils', () => {
 									}
 								],
 								probability_multiplier_enabled: [false],
-								probability_multiplier: [1]
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -703,7 +703,7 @@ describe('rewards.utils', () => {
 									}
 								],
 								probability_multiplier_enabled: [false],
-								probability_multiplier: [1]
+								probability_multiplier: toNullable(1)
 							}
 						]
 					]
@@ -747,7 +747,7 @@ describe('rewards.utils', () => {
 								}
 							],
 							probability_multiplier_enabled: [false],
-							probability_multiplier: [1]
+							probability_multiplier: toNullable(1)
 						}
 					]
 				]
