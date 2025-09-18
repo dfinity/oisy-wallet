@@ -46,7 +46,7 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = $derived((!isTransactionsPage || (isTransactionsPage && $networkICP)));
+	let swapAction = $derived(!isTransactionsPage || (isTransactionsPage && $networkICP));
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
