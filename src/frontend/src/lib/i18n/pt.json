@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
+			"network_bonus_info": "",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
@@ -1115,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1666,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short Assistente AI",
-			"welcome_message": "Olá! 👋 Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
+			"welcome_message": "Olá! 👋 Sou seu concierge pessoal de IA. Como posso ajudar você?",
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",

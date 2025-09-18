@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
+			"network_bonus_info": "",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
 			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
 			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
@@ -1115,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
 			"card": {
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
-			"copy_address": "Zkopírovat tuto adresu do schránky"
+			"copy_address": "Zkopírovat tuto adresu do schránky",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1666,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Asistent",
-			"welcome_message": "Dobrý den! 👋 Jsem OISY, váš osobní AI asistent. Zde je návod, jak vám mohu pomoci:",
+			"welcome_message": "Dobrý den! 👋 Jsem váš osobní asistent s umělou inteligencí. Jak vám mohu pomoci?",
 			"action_button_contacts_title": "Zobrazit kontakty",
 			"action_button_contacts_subtitle": "Zobrazte své uložené kontakty",
 			"action_button_contacts_prompt": "Ukaž mi moje kontakty.",
@@ -1680,7 +1683,7 @@
 			"send_token_succeeded": "Transakce dokončena!",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
 			"loading": "Přemýšlím...",
-			"reset_chat_history": "",
+			"reset_chat_history": "Obnovit historii chatu",
 			"feature_description": ""
 		},
 		"errors": {
