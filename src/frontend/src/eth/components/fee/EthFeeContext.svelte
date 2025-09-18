@@ -108,7 +108,7 @@
 						? {
 								amount: amount.toString(),
 								amountBigint: BigInt(amount.toString()),
-								parseAMount: amount.toString()
+								parseAMount: parseToken({ value: amount.toString(), unitName: sendToken.decimals })
 							}
 						: 'nullish'
 				);
