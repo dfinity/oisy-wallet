@@ -101,12 +101,12 @@
 					styleClass="md:text-[19.2px]"
 					variant="xs"
 				/>
-					<span
-						class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
-						data-tid={`${AVATAR_BADGE}-${contact.name}`}
-					>
-						<EditAvatar {imageUrl} onRemoveImage={removeImage} onReplaceImage={replaceImage} />
-					</span>
+				<span
+					class="absolute -right-1 bottom-0 flex h-6 w-6 items-center justify-center rounded-full border-[0.5px] border-tertiary bg-primary text-sm font-semibold text-primary"
+					data-tid={`${AVATAR_BADGE}-${contact.name}`}
+				>
+					<EditAvatar {imageUrl} onRemoveImage={removeImage} onReplaceImage={replaceImage} />
+				</span>
 			</div>
 		{/snippet}
 
@@ -184,4 +184,4 @@
 	{/snippet}
 </ContentWithToolbar>
 
-	<HiddenFileInput bind:this={fileInput} onChange={handleFileChange} testId={AVATAR_UPLOAD_IMAGE} />
+<HiddenFileInput bind:this={fileInput} onChange={handleFileChange} testId={AVATAR_UPLOAD_IMAGE} />
