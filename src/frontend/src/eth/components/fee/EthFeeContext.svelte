@@ -40,7 +40,6 @@
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import { parseUnits } from 'ethers/utils';
 
 	export let observe: boolean;
 	export let destination = '';
@@ -103,18 +102,6 @@
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
 				// Otherwise, we would need to emulate the data that are provided to the minter contract address.
-
-				console.log(
-					nonNullish(amount)
-						? {
-								amount1: amount,
-								amount: amount.toString(),
-								// amountBigint: BigInt(amount.toString()),
-								parseAMount: parseToken({ value: amount.toString(), unitName: sendToken.decimals }),
-								// parsedUnits: parseUnits(amount.toString())
-							}
-						: 'nullish'
-				);
 
 				const estimatedGas = isNetworkICP(targetNetwork)
 					? undefined
