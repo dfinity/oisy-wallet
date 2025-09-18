@@ -123,12 +123,16 @@ export class AlchemyProvider {
 	private readonly deprecatedProvider: Alchemy;
 	private readonly provider: AlchemyProviderLib;
 
-	constructor(private readonly network: Network) {
+	constructor(
+		private readonly network: Network,
+		// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+		private readonly networkDeprecated: Network
+	) {
+		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
-			network: this.network
+			network: this.networkDeprecated
 		});
-		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 	}
 
 	getTransaction = async (hash: string): Promise<TransactionResponse | null> => {
@@ -247,9 +251,9 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+	(acc, { id, providers: { alchemy, alchemyDeprecated } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(alchemyDeprecated)
+		[id]: new AlchemyProvider(alchemy, alchemyDeprecated)
 	}),
 	{}
 );
