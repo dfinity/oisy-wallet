@@ -7,6 +7,7 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -45,7 +46,6 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -86,7 +86,6 @@
 	 * Fee context store
 	 */
 	const feeStore = initEthFeeStore();
-
 
 	let nativeEthereumToken = $derived(
 		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
