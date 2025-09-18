@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Eligibility criteria",
+			"network_bonus_info": "Each network on which you hold assets gives you a reward multiplier. The more networks you use, the more rewards you get!",
 			"min_logins": "Login $loginsx in last $days days",
 			"min_transactions": "Complete $transactions transactions in last $days days",
 			"min_total_assets_usd": "Hold $$usd worth of tokens at the time of issuance",
@@ -439,7 +440,7 @@
 			},
 			"sprinkles_s1e5": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 5 is Live \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episode 5 is coming soon....",
 				"one_liner": "Earn BTC for staying active.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer your friends and get a bonus every time they win. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and get a Bonus every time a friend wins.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Land in the top 3 referrers and win a jackpot.",
@@ -1115,14 +1116,16 @@
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
-			"learn_more": "Learn more"
+			"learn_more": "Learn more",
+			"token_id": "Token ID"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
 			"card": {
 				"image": "Image of NFT with token ID: $tokenId"
 			},
-			"copy_address": "Copy this address to clipboard"
+			"copy_address": "Copy this address to clipboard",
+			"review_preference": "Change display preference"
 		}
 	},
 	"fee": {
@@ -1667,7 +1670,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI Assistant",
-			"welcome_message": "Hello there! \uD83D\uDC4B I'm OISY, your personal AI concierge. Here's how I can help you:",
+			"welcome_message": "Hello there! \uD83D\uDC4B I'm your personal AI concierge. How I can help you?",
 			"action_button_contacts_title": "Show contacts",
 			"action_button_contacts_subtitle": "Display your saved contacts",
 			"action_button_contacts_prompt": "Show me my contacts.",
@@ -1682,7 +1685,7 @@
 			"no_contacts_found_message": "Sorry, I couldn't find any suitable contacts in your address book.",
 			"loading": "Thinking...",
 			"reset_chat_history": "Reset chat history",
-			"feature_description": "The experimental AI Assistant allows you to manage your  assets, contacts, and setup transactions."
+			"feature_description": "The AI Assistant allows you to ask about generic crypto topics, get help about specific OISY features, and to send tokens. Note that no sensitive data like your or your contacts addresses are sent to the assistant, and that all transactions must be confirmed by the user. The feature is still in beta status, and we are rolling out new features on a regular basis."
 		},
 		"errors": {
 			"unknown": "Sorry, something went wrong with getting a response from the LLM.",
