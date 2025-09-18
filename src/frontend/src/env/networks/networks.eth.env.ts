@@ -4,6 +4,8 @@ import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
 import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
 import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
 import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
+import ethereumIconTransparent from '$lib/assets/networks/transparent/ethereum-mainnet.svg';
+import sepoliaIconTransparent from '$lib/assets/networks/transparent/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -28,6 +30,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	chainId: 1n,
 	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
+	iconTransparent: ethereumIconTransparent,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	providers: {
 		infura: 'homestead',
@@ -49,6 +52,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
+	iconTransparent: sepoliaIconTransparent,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'sepolia',
