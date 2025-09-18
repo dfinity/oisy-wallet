@@ -14,7 +14,7 @@ on:
           - oisy-wallet-signer
           - eslint-config-oisy-wallet
           - agent
-          - agent+ic-js
+          - agent&ic-js
       next:
         required: false
         type: boolean
