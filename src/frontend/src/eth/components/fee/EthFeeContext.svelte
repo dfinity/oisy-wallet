@@ -109,7 +109,7 @@
 						? {
 								amount: amount.toString(),
 								amountBigint: BigInt(amount.toString()),
-								parseAMount: parseToken({ value: amount.toString(), unitName: undefined }),
+								parseAMount: parseToken({ value: amount.toString(), unitName: 'wei'}),
 								parsedUnits: parseUnits(amount.toString())
 							}
 						: 'nullish'
