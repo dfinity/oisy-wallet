@@ -11,7 +11,7 @@ testWithII('should display privacy mode on homepage', async ({ page, iiPage, isM
 
 	await homepageLoggedIn.clickTokenGroupCard('ETH');
 
-	await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+	await homepageLoggedIn.takeScreenshot();
 });
 
 testWithII(
@@ -25,7 +25,7 @@ testWithII(
 
 		await homepageLoggedIn.openNetworkSelector();
 
-		await homepageLoggedIn.takeScreenshot({ freezeCarousel: true });
+		await homepageLoggedIn.takeScreenshot();
 	}
 );
 
