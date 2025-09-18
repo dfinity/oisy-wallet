@@ -163,7 +163,11 @@ export const parseSolTokenInstruction = (
 				...parseUiAmountToAmountInstruction(instruction),
 				instructionType: TokenInstruction.UiAmountToAmount
 			};
-		default:
+		default: {
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = decodedInstruction;
+
 			return instruction;
+		}
 	}
 };

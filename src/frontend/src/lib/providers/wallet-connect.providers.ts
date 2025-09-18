@@ -1,5 +1,6 @@
 import {
-	CAIP10_CHAINS_KEYS,
+	CAIP10_DEVNET_CHAINS_KEYS,
+	CAIP10_MAINNET_CHAINS_KEYS,
 	LEGACY_SOLANA_DEVNET_NAMESPACE,
 	LEGACY_SOLANA_MAINNET_NAMESPACE
 } from '$env/caip10-chains.env';
@@ -8,6 +9,7 @@ import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/net
 import {
 	SESSION_REQUEST_ETH_SEND_TRANSACTION,
 	SESSION_REQUEST_ETH_SIGN,
+	SESSION_REQUEST_ETH_SIGN_LEGACY,
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
@@ -140,7 +142,8 @@ export const initWalletConnect = async ({
 									SESSION_REQUEST_ETH_SEND_TRANSACTION,
 									SESSION_REQUEST_ETH_SIGN,
 									SESSION_REQUEST_PERSONAL_SIGN,
-									SESSION_REQUEST_ETH_SIGN_V4
+									SESSION_REQUEST_ETH_SIGN_V4,
+									SESSION_REQUEST_ETH_SIGN_LEGACY
 								],
 								events: ['accountsChanged', 'chainChanged'],
 								accounts: EIP155_CHAINS_KEYS.map((chain) => `${chain}:${ethAddress}`)
@@ -150,7 +153,10 @@ export const initWalletConnect = async ({
 				...(nonNullish(solAddressMainnet) || nonNullish(solAddressDevnet)
 					? {
 							solana: {
-								chains: CAIP10_CHAINS_KEYS,
+								chains: [
+									...(nonNullish(solAddressMainnet) ? CAIP10_MAINNET_CHAINS_KEYS : []),
+									...(nonNullish(solAddressDevnet) ? CAIP10_DEVNET_CHAINS_KEYS : [])
+								],
 								methods: [
 									SESSION_REQUEST_SOL_SIGN_TRANSACTION,
 									SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION,
