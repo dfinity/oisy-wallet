@@ -17,28 +17,30 @@
 		disabled?: boolean;
 		isHidden?: boolean;
 		isSpam?: boolean;
-		selectable?: boolean;
+		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 	}
 
-	let { nft, testId, disabled, isHidden, isSpam, selectable, onSelect }: Props = $props();
+	let { nft, testId, disabled, isHidden, isSpam, type = 'default', onSelect }: Props = $props();
 
 	const onClick = () => {
-		if (selectable && nonNullish(onSelect) && !disabled) {
+		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
-			return;
 		}
-		if (!selectable && !disabled) {
+		if (type === 'card-link' && !disabled) {
 			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};
 </script>
 
 <button
-	class="group block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class="block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:cursor-not-allowed={disabled}
-	class:hover:-translate-y-1={!disabled}
-	class:hover:bg-primary={!disabled}
+	class:cursor-default={type === 'default'}
+	class:hover:-translate-y-1={!disabled && type !== 'default'}
+	class:hover:bg-primary={!disabled && type !== 'default'}
+	class:bg-primary={type === 'default'}
+	class:group={type !== 'default'}
 	data-tid={testId}
 	onclick={onClick}
 >
@@ -46,7 +48,7 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type={selectable ? 'card-selectable' : 'card'}>
+		<NftImageConsent {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -71,7 +73,7 @@
 		{/if}
 
 		<span class="absolute bottom-2 right-2 block flex items-center gap-1">
-			{#if isCollectionErc1155(nft.collection)}
+			{#if isCollectionErc1155(nft.collection) && type !== 'default'}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
 

@@ -21,6 +21,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nftStore } from '$lib/stores/nft.store';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -148,7 +149,7 @@
 	{:else}
 		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} />
+				<NftCard {nft} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -158,7 +159,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} />
+					<NftCard isHidden {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -169,9 +170,11 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} />
+					<NftCard isSpam {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
 	{/if}
+
+	<NftCard nft={$nftStore?.[0]} />
 </NftsDisplayHandler>
