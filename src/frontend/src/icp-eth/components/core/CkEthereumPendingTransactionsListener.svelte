@@ -86,6 +86,8 @@
 		});
 	};
 
+	let isDestroyed = false;
+
 	const init = async ({
 		toAddress,
 		twinToken
@@ -94,6 +96,12 @@
 		twinToken: OptionToken;
 	}) => {
 		await listener?.disconnect();
+
+		// There could a race condition where the component is destroyed before the listener is connected.
+		// However, the flow still connects the listener and updates the UI.
+		if (isDestroyed) {
+			return;
+		}
 
 		if (isNullish(toAddress) || isEmptyString(toAddress)) {
 			return;
@@ -137,6 +145,7 @@
 	$: ($balance, toContractAddress, debounceLoadPendingTransactions());
 
 	onDestroy(async () => {
+		isDestroyed = true;
 		await listener?.disconnect();
 		listener = undefined;
 	});
