@@ -84,15 +84,6 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
 			: undefined
 	);
-
-	$effect(() => {
-		if (tokenId === 47744) {
-			console.log('nft', nft);
-			console.log('token', token);
-			console.log('iconType', iconType);
-			console.log('nonFungibleToken', isTokenNonFungible(token));
-		}
-	});
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
