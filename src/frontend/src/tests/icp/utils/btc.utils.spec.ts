@@ -1,4 +1,6 @@
 // Hoisted holder for values used/assigned inside the vi.mock factory
+import { toNullable } from '@dfinity/utils';
+
 interface TxEntry {
 	txid: unknown;
 	utxos?: Array<{
@@ -101,7 +103,7 @@ describe('btc.utils', () => {
 
 		it('returns empty array when address not in populated store', () => {
 			const storeValue: StoreValue = {
-				'other-addr': { certified: true as const, data: [{ txid: [1] }] }
+				'other-addr': { certified: true as const, data: [{ txid: toNullable(1) }] }
 			};
 			mockStoreApi.setStoreValue(storeValue);
 
