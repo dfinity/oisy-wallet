@@ -213,7 +213,7 @@
 
 		await listener?.disconnect();
 
-		// There could a race condition where the component is destroyed before the listener is connected.
+		// There could be a race condition where the component is destroyed before the listener is connected.
 		// However, the flow still connects the listener and updates the UI.
 		if (isDestroyed) {
 			return;
