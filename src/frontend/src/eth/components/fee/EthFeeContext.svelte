@@ -107,9 +107,10 @@
 				console.log(
 					nonNullish(amount)
 						? {
+								amount1: amount,
 								amount: amount.toString(),
 								amountBigint: BigInt(amount.toString()),
-								parseAMount: parseToken({ value: amount.toString(), unitName: 'wei'}),
+								parseAMount: parseToken({ value: amount.toString(), unitName: 'ether' }),
 								parsedUnits: parseUnits(amount.toString())
 							}
 						: 'nullish'
