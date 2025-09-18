@@ -59,10 +59,10 @@
 		<ImgBanner alt={$i18n.about.why_oisy.text.title} src={CoverWhyOisy} styleClass="max-h-56" />
 
 		<div class="mt-5 flex flex-col gap-6">
-			{#each features as { title, description, icon: iconComponent } (title)}
+			{#each features as { title, description, icon: IconCmp } (title)}
 				<AboutFeatureItem {description} {title}>
 					{#snippet icon()}
-						<svelte:component this={iconComponent} />
+						<IconCmp />
 					{/snippet}
 				</AboutFeatureItem>
 			{/each}

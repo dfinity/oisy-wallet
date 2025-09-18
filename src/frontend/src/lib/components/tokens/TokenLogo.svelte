@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
@@ -9,23 +10,37 @@
 	import type { CardData } from '$lib/types/token-card';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let data: CardData;
-	export let color: 'off-white' | 'white' = 'off-white';
-	export let badge:
-		| { type: 'network' }
-		| { type: 'tokenCount'; count: number }
-		| { type: 'icon'; icon: Component; ariaLabel: string }
-		| undefined = undefined;
-	export let logoSize: LogoSize = 'lg';
-	export let ring = false;
-	export let testId: string | undefined = undefined;
-	export let badgeTestId: string | undefined = undefined;
+	interface Props {
+		data: CardData;
+		color?: 'off-white' | 'white';
+		badge?:
+			| { type: 'network' }
+			| { type: 'tokenCount'; count: number }
+			| { type: 'icon'; icon: Component; ariaLabel: string }
+			| undefined;
+		logoSize?: LogoSize;
+		ring?: boolean;
+		testId?: string;
+		badgeTestId?: string;
+	}
 
-	let icon: CardData['icon'];
-	let name: CardData['name'];
-	let network: CardData['network'];
+	let {
+		data,
+		color = 'off-white',
+		badge = undefined,
+		logoSize = 'lg',
+		ring = false,
+		testId = undefined,
+		badgeTestId = undefined
+	}: Props = $props();
 
-	$: ({ icon, name, network } = data);
+	let icon: CardData['icon'] = $state();
+	let name: CardData['name'] = $state();
+	let network: CardData['network'] = $state();
+
+	run(() => {
+		({ icon, name, network } = data);
+	});
 </script>
 
 <div class="relative">

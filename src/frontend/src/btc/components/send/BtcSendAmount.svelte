@@ -16,14 +16,17 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	interface Props {
+		amount?: OptionAmount;
+		amountError: BtcAmountAssertionError | undefined;
+	}
+
+	let { amount = $bindable(), amountError = $bindable() }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit: DisplayUnit = $state('usd');
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -63,8 +66,13 @@
 			dispatch('icTokensList');
 		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}
+			<span>{$i18n.core.text.amount}</span>
+		{/snippet}
 
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 		<svelte:fragment slot="amount-info">
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
@@ -78,7 +86,7 @@
 			{/if}
 		</svelte:fragment>
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -87,6 +95,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

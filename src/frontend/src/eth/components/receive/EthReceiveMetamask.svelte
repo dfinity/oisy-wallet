@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { assertNonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
@@ -30,8 +31,10 @@
 
 	// TODO: The Metamask button currently does not support sending ERC20 tokens - it always populates an ETH transaction.
 	// We aim to fix this, but for now, the functionality is commented out.
-	let tokenStandardEth = true;
-	$: tokenStandardEth = $pageTokenStandard === 'ethereum';
+	let tokenStandardEth = $state(true);
+	run(() => {
+		tokenStandardEth = $pageTokenStandard === 'ethereum';
+	});
 </script>
 
 {#if $metamaskAvailable && $networkEthereum && tokenStandardEth}

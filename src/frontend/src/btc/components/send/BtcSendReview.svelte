@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import type { Readable } from 'svelte/store';
 	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
@@ -18,43 +19,60 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let source: string;
-	export let utxosFee: UtxosFee | undefined = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		source: string;
+		utxosFee?: UtxosFee | undefined;
+		selectedContact?: ContactUi;
+	}
+
+	let {
+		destination = '',
+		amount = undefined,
+		source,
+		utxosFee = $bindable(),
+		selectedContact = undefined
+	}: Props = $props();
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
-	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus> = $derived(
+		initPendingSentTransactionsStatus(source)
+	);
 
-	// When BTC extension is enabled, we allow parallel transactions, so return NONE status
-	$: pendingTransactionsStatus = BTC_EXTENSION_FEATURE_FLAG_ENABLED
-		? BtcPendingSentTransactionsStatus.NONE
-		: $hasPendingTransactionsStore;
+	let disableSend: boolean = $derived(
+		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
+			isNullish(utxosFee) ||
+			(nonNullish(utxosFee) && (utxosFee.utxos.length === 0 || nonNullish(utxosFee.error))) ||
+			invalid
+	);
 
-	let disableSend: boolean;
-	// We want to disable send if pending transactions or UTxOs fee isn't available yet, there was an error or there are pending transactions.
-	$: disableSend =
-		pendingTransactionsStatus !== BtcPendingSentTransactionsStatus.NONE ||
-		isNullish(utxosFee) ||
-		nonNullish(utxosFee?.error) ||
-		isInvalidDestinationBtc({
-			destination,
-			networkId: $sendTokenNetworkId
-		}) ||
-		invalidAmount(amount) ||
-		utxosFee.utxos.length === 0;
+	// Should never happen given that the same checks are performed on previous wizard step
+	let invalid = $state(true);
+
+	run(() => {
+		invalid =
+			isInvalidDestinationBtc({
+				destination,
+				networkId: $sendTokenNetworkId
+			}) || invalidAmount(amount);
+	});
+	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
 </script>
 
 <SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
-	<BtcReviewNetwork slot="network" networkId={$sendTokenNetworkId} />
+	{#snippet network()}
+		<BtcReviewNetwork networkId={$sendTokenNetworkId} />
+	{/snippet}
 
-	<BtcUtxosFee slot="fee" {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+	{#snippet fee()}
+		<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+	{/snippet}
 
-	<div slot="info" class="mt-8">
-		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
-		<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
-	</div>
+	{#snippet info()}
+		<div class="mt-8">
+			<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
+		</div>
+	{/snippet}
 </SendReview>

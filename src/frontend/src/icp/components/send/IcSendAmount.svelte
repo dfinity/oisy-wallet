@@ -12,20 +12,22 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: IcAmountAssertionError | undefined;
+	interface Props {
+		amount?: OptionAmount;
+		amountError: IcAmountAssertionError | undefined;
+	}
+
+	let { amount = $bindable(), amountError = $bindable() }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
 	const { sendToken, sendTokenExchangeRate, sendBalance } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fee: bigint | undefined;
-	$: fee = ($sendToken as OptionIcToken)?.fee;
+	let fee: bigint | undefined = $derived(($sendToken as OptionIcToken)?.fee);
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit: DisplayUnit = $state('usd');
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (isNullish(fee) || isNullish($sendToken)) {
@@ -59,8 +61,13 @@
 			dispatch('icTokensList');
 		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}
+			<span>{$i18n.core.text.amount}</span>
+		{/snippet}
 
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 		<svelte:fragment slot="amount-info">
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
@@ -74,7 +81,7 @@
 			{/if}
 		</svelte:fragment>
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -84,6 +91,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

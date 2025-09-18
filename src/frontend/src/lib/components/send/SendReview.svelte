@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
@@ -15,11 +16,25 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
-	export let nft: Nft | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		disabled?: boolean | undefined;
+		selectedContact?: ContactUi;
+		network?: Snippet;
+		fee?: Snippet;
+		info?: Snippet;
+	}
+
+	let {
+		destination = '',
+		amount = undefined,
+		disabled = false,
+		selectedContact = undefined,
+		network,
+		fee,
+		info
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -37,11 +52,11 @@
 		<SendReviewDestination {destination} {selectedContact} />
 	</div>
 
-	<slot name="network" />
+	{@render network?.()}
 
-	<slot name="fee" />
+	{@render fee?.()}
 
-	<slot name="info" />
+	{@render info?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">

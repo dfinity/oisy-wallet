@@ -2,7 +2,8 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { type Snippet, createEventDispatcher, getContext, setContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { writable } from 'svelte/store';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -53,27 +54,45 @@
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		currentStep: WizardStep | undefined;
+		destination?: string;
+		amount?: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		children?: Snippet;
+	}
+
+	let {
+		currentStep,
+		destination = $bindable(''),
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact = undefined,
+		children
+	}: Props = $props();
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let network: Network | undefined = undefined;
-	$: ({ network } = $sendToken);
+	let network: Network | undefined = $state(undefined);
+	run(() => {
+		({ network } = $sendToken);
+	});
 
-	let networkId: NetworkId | undefined = undefined;
-	$: ({ id: networkId } = network);
+	let networkId: NetworkId | undefined = $state(undefined);
+	run(() => {
+		({ id: networkId } = network);
+	});
 
-	let source: OptionSolAddress;
-	let solanaNativeToken: Token;
-	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
-		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-		: isNetworkIdSOLLocal(networkId)
-			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-			: [$solAddressMainnet, SOLANA_TOKEN];
+	let source: OptionSolAddress = $state();
+	let solanaNativeToken: Token = $state();
+	run(() => {
+		[source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+			: isNetworkIdSOLLocal(networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN];
+	});
 
 	/**
 	 * Fee context store
@@ -84,13 +103,19 @@
 	const ataFeeStore = initFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(solanaNativeToken.symbol);
+	run(() => {
+		feeSymbolStore.set(solanaNativeToken.symbol);
+	});
 
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(solanaNativeToken.id);
+	run(() => {
+		feeTokenIdStore.set(solanaNativeToken.id);
+	});
 
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(solanaNativeToken.decimals);
+	run(() => {
+		feeDecimalsStore.set(solanaNativeToken.decimals);
+	});
 
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
@@ -222,9 +247,11 @@
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</SolSendForm>
 	{:else}
-		<slot />
+		{@render children?.()}
 	{/if}
 </SolFeeContext>

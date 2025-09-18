@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { BTC_DECIMALS } from '$env/tokens/tokens.btc.env';
 	import IcReceiveWalletAddress from '$icp/components/receive/IcReceiveWalletAddress.svelte';
@@ -32,14 +33,17 @@
 			copyAriaLabel: $i18n.receive.bitcoin.text.bitcoin_address_copied
 		});
 
-	let btcAddress: string | undefined = undefined;
-	$: btcAddress = $btcAddressStore?.[$tokenId]?.data;
+	let btcAddress: string | undefined = $state(undefined);
+	run(() => {
+		btcAddress = $btcAddressStore?.[$tokenId]?.data;
+	});
 
-	let kytFee: bigint | undefined = undefined;
-	$: kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
+	let kytFee: bigint | undefined = $state(undefined);
+	run(() => {
+		kytFee = $ckBtcMinterInfoStore?.[$tokenId]?.data.kyt_fee;
+	});
 
-	let twinToken: Token | undefined;
-	$: twinToken = ($token as IcCkToken | undefined)?.twinToken;
+	let twinToken: Token | undefined = $derived(($token as IcCkToken | undefined)?.twinToken);
 </script>
 
 <ContentWithToolbar>

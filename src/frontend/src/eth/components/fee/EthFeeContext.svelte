@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { debounce, isNullish } from '@dfinity/utils';
+	import { type Snippet, getContext, onDestroy, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, onMount } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
@@ -41,16 +44,31 @@
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let observe: boolean;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let data: string | undefined = undefined;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let nativeEthereumToken: Token;
-	export let sendToken: Token;
-	export let sendTokenId: TokenId;
-	export let sendNft: Nft | undefined = undefined;
+	interface Props {
+		observe: boolean;
+		destination?: string;
+		amount?: OptionAmount;
+		data?: string;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network | undefined;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		children?: Snippet;
+	}
+
+	let {
+		observe,
+		destination = '',
+		amount = undefined,
+		data = undefined,
+		sourceNetwork,
+		targetNetwork = undefined,
+		nativeEthereumToken,
+		sendToken,
+		sendTokenId,
+		children
+	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -233,12 +251,16 @@
 	 * Observe input properties for erc20
 	 */
 
-	$: obverseFeeData(observe);
+	run(() => {
+		obverseFeeData(observe);
+	});
 
-	$: ($ckEthMinterInfoStore,
-		(() => {
-			observe && debounceUpdateFeeData();
-		})());
+	run(() => {
+		($ckEthMinterInfoStore,
+			(() => {
+				observe && debounceUpdateFeeData();
+			})());
+	});
 
 	/**
 	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.
@@ -246,4 +268,4 @@
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
-<slot />
+{@render children?.()}

@@ -62,28 +62,26 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let isTransactionsPage: boolean;
-	export let isNftsPage: boolean;
+	interface Props {
+		isTransactionsPage: boolean;
+	}
 
-	let destination = '';
-	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
-	let selectedContact: ContactUi | undefined = undefined;
-	let amount: number | undefined = undefined;
-	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	let { isTransactionsPage }: Props = $props();
 
-	let steps: WizardSteps<WizardStepsSend>;
-	$: steps = isTransactionsPage
-		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
-		: isNftsPage
-			? nonNullish($pageNft)
-				? sendNftsWizardSteps({ i18n: $i18n })
-				: allSendNftsWizardSteps({ i18n: $i18n })
-			: allSendWizardSteps({ i18n: $i18n });
+	let destination = $state('');
+	let activeSendDestinationTab: SendDestinationTab = $state('recentlyUsed');
+	let selectedContact: ContactUi | undefined = $state(undefined);
+	let amount: number | undefined = $state(undefined);
+	let sendProgressStep: string = $state(ProgressStepsSend.INITIALIZATION);
 
-	let currentStep: WizardStep<WizardStepsSend> | undefined;
-	let modal: WizardModal<WizardStepsSend>;
-	let selectedNft: Nft | undefined;
-	$: selectedNft = $pageNft;
+	let steps: WizardSteps<WizardStepsSend> = $derived(
+		isTransactionsPage
+			? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
+			: allSendWizardSteps({ i18n: $i18n })
+	);
+
+	let currentStep: WizardStep<WizardStepsSend> | undefined = $state();
+	let modal: WizardModal<WizardStepsSend> = $state();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,

@@ -21,26 +21,30 @@
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: SolAmountAssertionError | undefined;
+	interface Props {
+		amount?: OptionAmount;
+		amountError: SolAmountAssertionError | undefined;
+	}
+
+	let { amount = $bindable(), amountError = $bindable() }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit: DisplayUnit = $state('usd');
+	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let solanaNativeToken: Token;
-	$: solanaNativeToken = isNetworkIdSOLDevnet($sendTokenNetworkId)
-		? SOLANA_DEVNET_TOKEN
-		: isNetworkIdSOLLocal($sendTokenNetworkId)
-			? SOLANA_LOCAL_TOKEN
-			: SOLANA_TOKEN;
+	let solanaNativeToken: Token = $derived(
+		isNetworkIdSOLDevnet($sendTokenNetworkId)
+			? SOLANA_DEVNET_TOKEN
+			: isNetworkIdSOLLocal($sendTokenNetworkId)
+				? SOLANA_LOCAL_TOKEN
+				: SOLANA_TOKEN
+	);
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
 		if (invalidAmount(Number(userAmount)) || userAmount === ZERO) {
@@ -83,8 +87,13 @@
 			dispatch('icTokensList');
 		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}
+			<span>{$i18n.core.text.amount}</span>
+		{/snippet}
 
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 		<svelte:fragment slot="amount-info">
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
@@ -98,7 +107,7 @@
 			{/if}
 		</svelte:fragment>
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -108,6 +117,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

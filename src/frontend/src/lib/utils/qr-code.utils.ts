@@ -92,7 +92,7 @@ export const decodeQrCode = ({
 	expectedToken
 }: {
 	status: QrStatus;
-	code?: string | undefined;
+	code?: string;
 	expectedToken?: OptionToken;
 }): QrResponse => {
 	if (status !== 'success') {

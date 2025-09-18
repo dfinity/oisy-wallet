@@ -1,17 +1,22 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import type { TokenToListener } from '$lib/types/listener';
 	import type { OptionToken } from '$lib/types/token';
 	import { mapListeners } from '$lib/utils/listener.utils';
 
-	export let tokens: OptionToken[];
+	interface Props {
+		tokens: OptionToken[];
+		children: Snippet;
+	}
 
-	let listeners: TokenToListener[];
-	$: listeners = $authSignedIn ? mapListeners(tokens) : [];
+	let { tokens, children }: Props = $props();
+
+	let listeners: TokenToListener[] = $derived($authSignedIn ? mapListeners(tokens) : []);
 </script>
 
-{#each listeners as { token, listener } (token.id)}
-	<svelte:component this={listener} {token} />
+{#each listeners as { token, listener: ListenerCmp } (token.id)}
+	<ListenerCmp {token} />
 {/each}
 
-<slot />
+{@render children()}

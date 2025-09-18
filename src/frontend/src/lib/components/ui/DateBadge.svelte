@@ -7,9 +7,9 @@
 
 	interface Props {
 		date: Date;
-		prefix?: string | undefined;
-		suffix?: string | undefined;
-		testId?: string | undefined;
+		prefix?: string;
+		suffix?: string;
+		testId?: string;
 		variant?: BadgeVariant;
 		showIcon?: boolean;
 	}

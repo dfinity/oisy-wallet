@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Backdrop } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { type Snippet, onMount, type Snippet } from 'svelte';
 	import { fade, slide } from 'svelte/transition';
 	import { afterNavigate } from '$app/navigation';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';

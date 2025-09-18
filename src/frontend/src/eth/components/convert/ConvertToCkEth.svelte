@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
 	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
@@ -13,22 +14,26 @@
 	import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let ckEthToken: IcCkToken | undefined;
-	$: (() => {
-		if (nonNullish(ckEthToken) || isNullish($pageToken)) {
-			return;
-		}
+	let ckEthToken: IcCkToken | undefined = $state();
+	run(() => {
+		(() => {
+			if (nonNullish(ckEthToken) || isNullish($pageToken)) {
+				return;
+			}
 
-		ckEthToken = findTwinToken({
-			tokenToPair: $pageToken,
-			tokens: $tokens
-		});
-	})();
+			ckEthToken = findTwinToken({
+				tokenToPair: $pageToken,
+				tokens: $tokens
+			});
+		})();
+	});
 </script>
 
-<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$nativeEthereumTokenId}>
-	<IconCkConvert slot="icon" size="24" />
-	<span>{($nativeEthereumToken as RequiredTokenWithLinkedData).twinTokenSymbol ?? ''}</span>
+<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
+	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
