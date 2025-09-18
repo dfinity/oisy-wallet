@@ -8,7 +8,7 @@
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { nativeEthereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -89,7 +89,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumToken.id],
+			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id],
 			network: ICP_NETWORK
 		});
 
@@ -135,7 +135,7 @@
 				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
-				minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumToken.id]
+				minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id]
 			});
 
 			trackEvent({
@@ -164,7 +164,7 @@
 <EthFeeContext
 	amount={sendAmount}
 	{destination}
-	nativeEthereumToken={$nativeEthereumToken}
+	nativeEthereumToken={$nativeEthereumTokenWithFallback}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
 		currentStep?.name !== WizardStepsConvert.REVIEW}
 	sendToken={$sourceToken}
@@ -189,7 +189,7 @@
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<EthConvertProgress
 			{destination}
-			nativeEthereumToken={$nativeEthereumToken}
+			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			sourceTokenId={$sourceToken.id}
 			bind:convertProgressStep
 		/>
