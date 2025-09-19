@@ -39,6 +39,8 @@ export interface ShowContactsToolResult {
 export interface ReviewSendTokensToolResult {
 	amount: number;
 	token: Token;
+	sendCompleted: boolean;
+	id: string;
 	contact?: ExtendedAddressContactUi;
 	contactAddress?: ContactAddressUiWithId;
 	address?: Address;
