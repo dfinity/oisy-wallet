@@ -23,7 +23,7 @@
 </script>
 
 <footer
-	class="pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pt-5 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 md:pb-5 md:pt-12 lg:fixed lg:inset-x-0 lg:bottom-0"
+	class="pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pt-5 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 md:pb-5 md:pt-12 lg:inset-x-0 lg:bottom-0"
 	class:md:bottom-0={$authSignedIn}
 	class:md:fixed={$authSignedIn}
 	class:md:h-md:grid={$authNotSignedIn}
@@ -31,7 +31,7 @@
 	class:md:h-md:pr-0={$authNotSignedIn}
 	class:md:inset-x-0={$authSignedIn}
 	class:pb-24={$authSignedIn}
-	class:sm:sticky={$authNotSignedIn}
+	class:sticky={$authNotSignedIn}
 	class:z-1={!$aiAssistantConsoleOpen}
 	class:z-3={$aiAssistantConsoleOpen}
 >
