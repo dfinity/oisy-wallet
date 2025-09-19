@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.6.8",
+	"version": "1.7.0",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -128,7 +128,7 @@
 		"prettier-plugin-organize-imports": "^4.2.0",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.6.14",
-		"sass": "^1.89.2",
+		"sass": "^1.92.1",
 		"svelte": "^5.33.18",
 		"svelte-check": "^4.2.2",
 		"tailwindcss": "4.1.11",
