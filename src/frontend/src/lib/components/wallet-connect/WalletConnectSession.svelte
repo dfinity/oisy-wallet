@@ -493,7 +493,7 @@
 
 		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
 			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
-		{:else}
+		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}
 	</WizardModal>
