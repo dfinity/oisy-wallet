@@ -4,6 +4,8 @@ import polygonAmoyIconDark from '$lib/assets/networks/dark/polygon-amoy.svg';
 import polygonMainnetIconDark from '$lib/assets/networks/dark/polygon-mainnet.svg';
 import polygonAmoyIconLight from '$lib/assets/networks/light/polygon-amoy.svg';
 import polygonMainnetIconLight from '$lib/assets/networks/light/polygon-mainnet.svg';
+import polygonAmoyIconTransparent from '$lib/assets/networks/transparent/polygon-amoy.svg';
+import polygonMainnetIconTransparent from '$lib/assets/networks/transparent/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -25,10 +27,12 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 137n,
 	iconLight: polygonMainnetIconLight,
 	iconDark: polygonMainnetIconDark,
+	iconTransparent: polygonMainnetIconTransparent,
 	explorerUrl: POLYGON_EXPLORER_URL,
 	providers: {
 		infura: 'matic',
-		alchemy: Network.MATIC_MAINNET,
+		alchemy: 'matic',
+		alchemyDeprecated: Network.MATIC_MAINNET,
 		alchemyJsonRpcUrl: 'https://polygon-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'polygon-pos' },
@@ -46,10 +50,12 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	chainId: 80002n,
 	iconLight: polygonAmoyIconLight,
 	iconDark: polygonAmoyIconDark,
+	iconTransparent: polygonAmoyIconTransparent,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
 	providers: {
 		infura: 'matic-amoy',
-		alchemy: Network.MATIC_AMOY,
+		alchemy: 'matic-amoy',
+		alchemyDeprecated: Network.MATIC_AMOY,
 		alchemyJsonRpcUrl: 'https://polygon-amoy.g.alchemy.com/v2'
 	}
 };
