@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -8,13 +8,12 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { findNonFungibleToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -26,19 +25,9 @@
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
-
-	const tokenByNft = $derived(
-		nonNullish(collection)
-			? findNonFungibleToken({
-					tokens: $nonFungibleTokens,
-					address: collection.address,
-					networkId: collection.network.id
-				})
-			: token
-	);
 </script>
 
-<List condensed styleClass="text-sm text-primary">
+<List condensed itemStyleClass="flex-col sm:flex-row" styleClass="text-sm text-primary">
 	<ListItem>
 		<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
@@ -110,7 +99,7 @@
 			</span>
 		{/if}
 	</ListItem>
-	{#if nonNullish(tokenByNft) && isTokenErc1155(tokenByNft) && nonNullish(nft?.balance)}
+	{#if nonNullish(collection) && isCollectionErc1155(collection) && nonNullish(nft?.balance)}
 		<ListItem
 			><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"
 				>{nft.balance}</span
