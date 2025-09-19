@@ -355,7 +355,7 @@
 			"activity_button_text": "查看近期活动",
 			"activity_button_text_short": "查看活动",
 			"open_wallet": "前往钱包",
-			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线！",
+			"carousel_slide_title": "$oisy_short Sprinkles 第五集现已上线！",
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
@@ -374,7 +374,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "请密切关注即将到来的空投活动！<a href=\"https://x.com/oisy\" target=\"_blank\">在 X 上关注我们</a>、加入 <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>，或加入 <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> 社区保持更新。",
-			"coming_soon": "$oisy_short 第四集即将上线",
+			"coming_soon": "$oisy_short 第六集即将上线",
 			"reward_banner": "活动 $campaignName 的横幅"
 		},
 		"campaigns": {

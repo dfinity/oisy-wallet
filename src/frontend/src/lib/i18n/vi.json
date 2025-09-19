@@ -344,7 +344,7 @@
 	"rewards": {
 		"text": {
 			"title": "Phần thưởng",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Phần 4 sắp ra mắt!<br>Hãy theo dõi để cập nhật",
+			"upcoming_campaigns": "Chiến dịch sắp tới",
 			"active_date": "Kết thúc vào",
 			"ended_date": "Kết thúc vào",
 			"share": "Chia sẻ trên X",
@@ -355,7 +355,7 @@
 			"activity_button_text": "Kiểm tra hoạt động gần đây",
 			"activity_button_text_short": "Kiểm tra hoạt động",
 			"open_wallet": "Đưa tôi đến ví",
-			"carousel_slide_title": "$oisy_short Sprinkles Tập 4 hiện đã có!",
+			"carousel_slide_title": "$oisy_short Sprinkles Tập 5 hiện đã có!",
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
@@ -374,7 +374,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 4 của $oisy_short sắp ra mắt",
+			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {

@@ -355,7 +355,7 @@
 			"activity_button_text": "Sprawdź ostatnią aktywność",
 			"activity_button_text_short": "Sprawdź aktywność",
 			"open_wallet": "Zabierz mnie do portfela",
-			"carousel_slide_title": "Kampania 4 $oisy_short Sprinkles jest już dostępna!",
+			"carousel_slide_title": "Kampania 5 $oisy_short Sprinkles jest już dostępna!",
 			"carousel_slide_cta": "Dowiedz się więcej",
 			"sprinkles_earned": "Zdobyłeś $noOfSprinkles sprinkles o łącznej wartości $amount! 🎊",
 			"youre_eligible": "Jesteś uprawniony!",
@@ -374,7 +374,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Bądź na bieżąco z nadchodzącymi airdropami tokenów! <a href=\"https://x.com/oisy\" target=\"_blank\">Śledź nas na X</a>, dołącz do naszego <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddita</a> lub dołącz do naszego <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discorda</a>, aby być na bieżąco.",
-			"coming_soon": "Kampania 4 $oisy_short już wkrótce",
+			"coming_soon": "Kampania 6 $oisy_short już wkrótce",
 			"reward_banner": "Baner kampanii $campaignName"
 		},
 		"campaigns": {

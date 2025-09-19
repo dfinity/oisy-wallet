@@ -355,7 +355,7 @@
 			"activity_button_text": "Zkontrolovat nedávnou aktivitu",
 			"activity_button_text_short": "Zkontrolovat aktivitu",
 			"open_wallet": "Přejít do peněženky",
-			"carousel_slide_title": "Epizoda 4 OISY Sprinkles nyní probíhá!",
+			"carousel_slide_title": "Epizoda 5 OISY Sprinkles nyní probíhá!",
 			"carousel_slide_cta": "Zjistit více",
 			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
 			"youre_eligible": "Jste způsobilí!",
@@ -374,7 +374,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Sledujte nadcházející airdropy tokenů! <a href=\"https://x.com/oisy\" target=\"_blank\">Sledujte nás na X</a>, připojte se k našemu <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Redditu</a> nebo se přidejte do <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discordu</a>, abyste zůstali v obraze.",
-			"coming_soon": "Epizoda 4 $oisy_short se blíží",
+			"coming_soon": "Epizoda 6 $oisy_short se blíží",
 			"reward_banner": "Banner kampaně $campaignName"
 		},
 		"campaigns": {
