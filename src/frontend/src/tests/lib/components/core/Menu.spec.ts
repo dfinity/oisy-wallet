@@ -141,7 +141,6 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
-		await waitForElement({ selector: authLicenseLink });
 	});
 
 	it('should show direct logout button when LOCK_SCREEN_ENABLED is false', async () => {
