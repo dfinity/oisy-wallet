@@ -112,7 +112,7 @@
 					<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 					<span
 						class="text-center md:text-left"
-						class:1.5md:h-md:block={$authNotSignedIn}
+						class:lg:h-md:block={$authNotSignedIn}
 						class:md:h-md:hidden={$authNotSignedIn}
 						class:md:hidden={$authSignedIn}
 						class:xl:block={$authSignedIn}
