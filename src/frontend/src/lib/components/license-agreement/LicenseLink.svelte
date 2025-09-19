@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.contants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -29,14 +28,10 @@
 	aria-label={replaceOisyPlaceholders($i18n.license_agreement.alt.license_agreement)}
 	data-tid={testId}
 	href="/license-agreement"
-	onclick={NEW_AGREEMENTS_ENABLED ? handleClick : undefined}
-	target={NEW_AGREEMENTS_ENABLED ? '_blank' : undefined}
+	onclick={handleClick}
+	target="_blank"
 >
-	{#if NEW_AGREEMENTS_ENABLED}
-		{$i18n.license_agreement.text.license_agreement}
-	{:else}
-		{$i18n.license_agreement.text.accept_terms_link}
-	{/if}
+	{$i18n.license_agreement.text.license_agreement}
 
 	{@render icon?.()}
 </a>
