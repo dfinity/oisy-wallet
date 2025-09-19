@@ -3,10 +3,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
@@ -110,11 +108,7 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				{#if NEW_AGREEMENTS_ENABLED}
-					<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
-				{:else}
-					<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" needHelpLink={false} />
-				{/if}
+				<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
 			</span>
 			<Hr />
 

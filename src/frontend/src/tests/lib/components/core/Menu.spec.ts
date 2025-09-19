@@ -2,7 +2,6 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
-	AUTH_LICENSE_LINK,
 	LOGIN_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
@@ -31,7 +30,6 @@ describe('Menu', () => {
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
 	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
 	const loginOrCreateButton = `button[data-tid="${LOGIN_BUTTON}"]`;
-	const authLicenseLink = `a[data-tid="${AUTH_LICENSE_LINK}"]`;
 
 	let container: HTMLElement;
 
@@ -135,6 +133,5 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
-		await waitForElement({ selector: authLicenseLink });
 	});
 });
