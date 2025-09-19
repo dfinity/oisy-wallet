@@ -90,7 +90,6 @@ on:
         required: true
       VITE_AI_ASSISTANT_CONSOLE_ENABLED_STAGING:
         required: true
-        required: true
       VITE_ONRAMPER_API_KEY_DEV_STAGING:
         required: true
       VITE_ONRAMPER_API_KEY_PROD_STAGING:
@@ -134,7 +133,6 @@ on:
       VITE_FRONTEND_NEW_AGREEMENTS_ENABLED_BETA:
         required: true
       VITE_AI_ASSISTANT_CONSOLE_ENABLED_BETA:
-        required: true
         required: true
       VITE_ONRAMPER_API_KEY_PROD_BETA:
         required: true
