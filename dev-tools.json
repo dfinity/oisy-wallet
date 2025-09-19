@@ -38,7 +38,7 @@
 	},
 	"ic-wasm": {
 		"method": "cargo-binstall",
-		"version": "0.8.5"
+		"version": "0.9.3"
 	},
 	"cargo-audit": {
 		"method": "cargo-binstall",
@@ -54,7 +54,7 @@
 	},
 	"candid-extractor": {
 		"method": "cargo-binstall",
-		"version": "0.1.4"
+		"version": "0.1.6"
 	},
 	"zizmor": {
 		"method": "cargo-binstall",
