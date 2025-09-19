@@ -34,7 +34,7 @@ import type { InternetIdentityPage } from '@dfinity/internet-identity-playwright
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { expect, type Locator, type Page, type ViewportSize } from '@playwright/test';
 import { PromotionCarousel } from '../components/promotion-carousel.component';
-import { HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
+import { E2E_ENV_URL, HOMEPAGE_URL, LOCAL_REPLICA_URL } from '../constants/e2e.constants';
 import { getQRCodeValueFromDataURL } from '../qr-code.utils';
 import {
 	getReceiveTokensModalAddressLabelSelector,
@@ -600,13 +600,12 @@ export class HomepageLoggedIn extends Homepage {
 
 	async waitForAuthentication(): Promise<void> {
 		await this.#iiPage.waitReady({
-			url: LOCAL_REPLICA_URL,
-			canisterId: process.env.E2E_LOCAL_INTERNET_IDENTITY_CANISTER_ID
+			url: E2E_ENV_URL
 		});
 
 		await this.waitForHomepageReady();
 
-		await this.#iiPage.signInWithNewIdentity();
+		await this.#iiPage.signInWithIdentity({ identity: 2745932 });
 	}
 
 	async checkIfStillLoggedIn(timeout = 10000): Promise<void> {
