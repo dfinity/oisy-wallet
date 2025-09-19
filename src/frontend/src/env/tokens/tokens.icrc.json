@@ -162,11 +162,21 @@
 	},
 	"SGLDT": {
 		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
-		"fee": {
-			"__bigint__": "1000"
-		},
+		"decimals": 8,
 		"name": "sGLDT - GLDT Wrapper",
 		"symbol": "sGLDT",
-		"decimals": 8
+		"fee": {
+			"__bigint__": "1000"
+		}
+	},
+	"TICRC1": {
+		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
+		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
+		"decimals": 8,
+		"name": "TEST ICRC1",
+		"symbol": "TICRC1",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	}
 }

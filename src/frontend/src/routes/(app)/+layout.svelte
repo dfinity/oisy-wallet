@@ -20,7 +20,8 @@
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
-	import { pageToken } from '$lib/derived/page-token.derived';
+	import { routeCollection } from '$lib/derived/nav.derived';
+	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
 
@@ -33,14 +34,14 @@
 	let tokensRoute = $derived(isRouteTokens(page));
 
 	let nftsRoute = $derived(isRouteNfts(page));
-	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish(page.params.collectionId));
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 
 	let transactionsRoute = $derived(isRouteTransactions(page));
 
 	let showHero = $derived((tokensRoute || nftsRoute || transactionsRoute) && !nftsCollectionRoute);
 
 	$effect(() => {
-		token.set($pageToken);
+		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
 	});
 
 	// Source: https://svelte.dev/blog/view-transitions

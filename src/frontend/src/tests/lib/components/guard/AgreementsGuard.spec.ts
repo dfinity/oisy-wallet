@@ -1,9 +1,8 @@
-import * as agreementsEnv from '$env/agreements.env';
 import { agreementsData } from '$env/agreements.env';
 import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockUserAgreements, mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -11,16 +10,12 @@ import { render } from '@testing-library/svelte';
 describe('AgreementsGuard', () => {
 	const certified = false;
 
-	const mockSnippet = createMockSnippet('mock-snippet');
-
 	const mockParams = { children: mockSnippet };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		userProfileStore.reset();
-
-		vi.spyOn(agreementsEnv, 'NEW_AGREEMENTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	it('should render the modal when user profile is not set', () => {

@@ -9,6 +9,7 @@
 			"close": "Fechar",
 			"change": "Alterar",
 			"apply": "Aplicar",
+			"retry": "",
 			"refresh": "Atualizar",
 			"name": "Nome",
 			"symbol": "Símbolo",
@@ -327,6 +328,16 @@
 				"name": "Toolkit",
 				"one_liner": "Onde a governança encontra a colaboração para impulsionar a inovação.",
 				"description": "O Toolkit é um conjunto versátil para gerenciar Service Nervous Systems (SNS) e projetos no Internet Computer. De propostas de governança à implantação de contêineres, ele capacita os usuários a inovar, colaborar e descentralizar perfeitamente."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,12 +359,14 @@
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
+			"not_eligible": "",
 			"ongoing": "Em andamento",
 			"ended": "Finalizado ($amount)",
 			"banner_text": "Ganhe recompensas diárias com OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
+			"network_bonus_info": "",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
@@ -422,6 +435,36 @@
 						"title": "Ganhe mais por referenciar",
 						"description": "Acabou de ganhar Sprinkles - tal como a pessoa que o indicou. <br>Envie para 4 amigos e ganhe $1. <br>Os 4 primeiros referenciadores ganham $200 cada.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "",
+				"card_title": "",
+				"one_liner": "",
+				"participate_title": "",
+				"description": "",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "",
+						"description": "",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "",
+						"description": "",
+						"share_href": ""
 					}
 				}
 			}
@@ -499,6 +542,7 @@
 			"btc_withdrawal_statuses": "Erro ao buscar os status de retirada de BTC.",
 			"transaction_price": "Erro ao carregar a estimativa do preço de uma transação.",
 			"icrc_canisters": "Erro ao carregar os canisters ICRC.",
+			"icrc_canister_loading": "",
 			"erc20_custom_tokens": "Erro ao carregar o token personalizado ERC20.",
 			"erc721_custom_tokens": "Erro ao carregar o token personalizado ERC721.",
 			"erc1155_custom_tokens": "Erro ao carregar o token personalizado ERC1155.",
@@ -551,7 +595,11 @@
 			"appearance_system": "Sistema",
 			"git_disclaimer": "Para fins de desenvolvimento, mostramos o branch e o commit apenas em canisters de teste.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "",
+			"enable_beta_feature": "",
+			"disable_beta_feature": "",
+			"save_beta_feature_success": ""
 		},
 		"alt": {
 			"testnets_toggle": "Alternar para mostrar ou ocultar testnets",
@@ -586,6 +634,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID da Conta ICP",
+				"checking_index_canister_status": "",
 				"use_for_all_tokens": "Use para todos os tokens ao receber de carteiras, usuários ou outros aplicativos que suportam este formato de endereço.",
 				"use_for_icrc_deposit": "Use para receber tokens ICRC-1 na rede ICP, como SNS, ck tokens, etc.",
 				"use_for_icp_deposit": "Use para depósitos ICP de exchanges ou outras carteiras que suportam apenas IDs de Conta.",
@@ -685,13 +734,17 @@
 			"recently_used_empty_state_description": "Faça seu primeiro envio agora!",
 			"contacts_empty_state_title": "Seus contatos aparecerão aqui",
 			"contacts_empty_state_description": "Parece que você ainda não adicionou contatos",
-			"send_review_subtitle": "Você envia"
+			"send_review_subtitle": "Você envia",
+			"no_nfts_found": "",
+			"no_nfts_found_desc": "",
+			"select_nft": ""
 		},
 		"placeholder": {
 			"enter_eth_address": "Insira endereço público (0x), nome ou alias",
 			"enter_recipient_address": "Insira o endereço do destinatário, nome ou alias",
 			"enter_wallet_address": "Insira o endereço da carteira, nome ou alias",
-			"select_network": "Selecionar rede"
+			"select_network": "Selecionar rede",
+			"search_nfts": ""
 		},
 		"info": {
 			"ckbtc_certified": "Por favor, aguarde até que os parâmetros ckBTC tenham sido certificados.",
@@ -732,7 +785,8 @@
 			"btc_invalid_utxo_data": "Dados de transação Bitcoin inválidos",
 			"btc_utxo_locked": "Fundos Bitcoin estão bloqueados por transações pendentes",
 			"btc_invalid_fee_calculation": "Validação de taxa de transação Bitcoin falhou",
-			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde."
+			"pending_transactions_not_available": "O serviço de transações pendentes não está disponível no momento. Tente novamente mais tarde.",
+			"no_nft_selected": ""
 		},
 		"error": {
 			"unexpected": "Algo deu errado ao enviar a transação.",
@@ -751,7 +805,8 @@
 			"unexpected_utxos_fee": "Algo deu errado ao calcular a taxa de transação.",
 			"unable_to_retrieve_amount": "n/d (não foi possível recuperar)",
 			"solana_transaction_expired": "Sua transação de envio não foi processada pela rede Solana e expirou, provavelmente porque a taxa de prioridade fornecida não foi suficiente. Nós a atualizamos para o valor recomendado mais recente, então tente enviá-la novamente.",
-			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente."
+			"solana_confirmation_failed": "Não recebemos uma confirmação da transação que você acabou de criar. Aguarde alguns segundos e verifique a lista de transações do seu token para confirmar se a transação foi criada corretamente.",
+			"fee_calc_unsupported_standard": ""
 		}
 	},
 	"convert": {
@@ -1047,9 +1102,13 @@
 			"unhide": "",
 			"hidden": "",
 			"open_explorer": "",
+			"img_consent_disabled": "",
+			"img_consent_none": "",
+			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
 			"display_preference": "",
+			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
@@ -1057,14 +1116,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1498,22 +1559,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Revise os Termos e Condições",
+			"review_updated_title": "Revise os Termos e Condições atualizados",
+			"review_description": "Antes de usar a Carteira OISY, você deve revisar e concordar com nossos Termos de Serviço e Política de Privacidade. Esses documentos explicam as regras do nosso serviço e como protegemos seus dados.",
+			"review_updated_description": "Para continuar usando a Carteira OISY, revise e concorde com nossos Termos de Serviço e Política de Privacidade atualizados. Essas alterações são importantes para manter nosso serviço seguro e em conformidade.",
+			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
+			"i_have_accepted": "Li e concordo com os",
+			"i_have_accepted_updated": "Li e concordo com os atualizados",
+			"accept_and_continue": "Aceite e continue"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
+			"license_agreement": "Contrato de Licença",
 			"accept_terms": "Ao clicar neste botão, você concorda com o",
 			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
@@ -1541,22 +1602,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Termos de Uso",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link para os Termos de Uso"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Política de Privacidade",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link para a Política de Privacidade"
 		}
 	},
 	"activity": {
@@ -1587,7 +1648,7 @@
 	"welcome": {
 		"title": "Bem vindo ao $oisy_curtas!",
 		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1608,7 +1669,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short Assistente AI",
-			"welcome_message": "Olá! 👋 Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
+			"welcome_message": "Olá! 👋 Sou seu concierge pessoal de IA. Como posso ajudar você?",
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",
@@ -1621,7 +1682,9 @@
 			"send_message_input_placeholder": "O que você quer fazer?",
 			"send_token_succeeded": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
-			"loading": "A pensar..."
+			"loading": "A pensar...",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
 			"unknown": "Desculpe, ocorreu um erro ao obter uma resposta do LLM.",

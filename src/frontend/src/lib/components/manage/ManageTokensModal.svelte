@@ -301,7 +301,7 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === 'Saving'}
+	disablePointerEvents={currentStep?.name === WizardStepsManageTokens.SAVING}
 	onClose={close}
 	{steps}
 	testId={MANAGE_TOKENS_MODAL}
@@ -309,7 +309,7 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === 'Review'}
+	{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenReview
 				{indexCanisterId}
@@ -329,19 +329,19 @@
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview
 				{network}
+				onBack={modal.back}
+				onSave={saveSplToken}
 				tokenAddress={splTokenAddress}
-				on:icBack={modal.back}
-				on:icSave={saveSplToken}
 				bind:metadata={splMetadata}
 			/>
 		{/if}
-	{:else if currentStep?.name === 'Saving'}
+	{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
 		<InProgressWizard
 			progressStep={saveProgressStep}
 			steps={addTokenSteps($i18n)}
 			warningType="manage"
 		/>
-	{:else if currentStep?.name === 'Import'}
+	{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
 	{:else}
 		<ManageTokens

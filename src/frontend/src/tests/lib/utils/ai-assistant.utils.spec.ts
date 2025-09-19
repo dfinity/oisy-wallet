@@ -4,8 +4,9 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
-	parseFromAiAssistantContacts,
+	generateAiAssistantResponseEventMetadata,
 	parseReviewSendTokensToolArguments,
+	parseShowFilteredContactsToolArguments,
 	parseToAiAssistantContacts
 } from '$lib/utils/ai-assistant.utils';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
@@ -28,7 +29,6 @@ describe('ai-assistant.utils', () => {
 	const storeData = get(extendedAddressContacts);
 	const extendedAddressContactUi = storeData[`${contactsData[0].id}`];
 	const aiAssistantContact = {
-		id: extendedAddressContactUi.id,
 		name: extendedAddressContactUi.name,
 		addresses: [
 			{
@@ -42,32 +42,28 @@ describe('ai-assistant.utils', () => {
 	describe('parseToAiAssistantContacts', () => {
 		it('returns correct result', () => {
 			expect(parseToAiAssistantContacts(storeData)).toEqual({
-				[`${aiAssistantContact.id}`]: aiAssistantContact
+				[`${extendedAddressContactUi.id}`]: aiAssistantContact
 			});
-		});
-	});
-
-	describe('parseFromAiAssistantContacts', () => {
-		it('returns correct result', () => {
-			expect(
-				parseFromAiAssistantContacts({
-					aiAssistantContacts: [aiAssistantContact],
-					extendedAddressContacts: storeData
-				})
-			).toEqual(Object.values(storeData));
 		});
 	});
 
 	describe('parseReviewSendTokenToolArguments', () => {
 		const sendValue = 0.00001;
+		const mockRandomUUID = 'd7775002-80bf-4208-a2f0-84225281677a';
 
-		it('returns correct result when addressId is provided', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => mockRandomUUID);
+		});
+
+		it('returns correct result when selectedContactAddressId is provided', () => {
 			expect(
 				parseReviewSendTokensToolArguments({
 					filterParams: [
 						{
 							value: extendedAddressContactUi.addresses[0].id,
-							name: 'addressId'
+							name: 'selectedContactAddressId'
 						},
 						{
 							value: `${sendValue}`,
@@ -86,7 +82,9 @@ describe('ai-assistant.utils', () => {
 				contactAddress: extendedAddressContactUi.addresses[0],
 				contact: extendedAddressContactUi,
 				amount: sendValue,
-				address: undefined
+				address: undefined,
+				id: mockRandomUUID,
+				sendCompleted: false
 			});
 		});
 
@@ -119,7 +117,79 @@ describe('ai-assistant.utils', () => {
 				contactAddress: undefined,
 				contact: undefined,
 				amount: sendValue,
-				address: mockEthAddress
+				address: mockEthAddress,
+				id: mockRandomUUID,
+				sendCompleted: false
+			});
+		});
+	});
+
+	describe('parseShowFilteredContactsToolArguments', () => {
+		it('returns correct result when addressIds is provided', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: `["${extendedAddressContactUi.addresses[0].id}"]`,
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: [extendedAddressContactUi]
+			});
+		});
+
+		it('returns empty result when addressIds cannot be matched with existing contacts', () => {
+			expect(
+				parseShowFilteredContactsToolArguments({
+					filterParams: [
+						{
+							value: '["random-id"]',
+							name: 'addressIds'
+						}
+					],
+					extendedAddressContacts: storeData
+				})
+			).toEqual({
+				contacts: []
+			});
+		});
+	});
+
+	describe('generateAiAssistantResponseEventMetadata', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('returns correct result with a tool name', () => {
+			const requestStartTimestamp = 1000000;
+			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 4000000);
+
+			expect(
+				generateAiAssistantResponseEventMetadata({
+					toolName: 'test',
+					requestStartTimestamp
+				})
+			).toEqual({
+				toolName: 'test',
+				responseTime: '4000s',
+				responseTimeCategory: '100000+'
+			});
+		});
+
+		it('returns correct result without a tool name', () => {
+			const requestStartTimestamp = 9000000;
+			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 65579);
+
+			expect(
+				generateAiAssistantResponseEventMetadata({
+					requestStartTimestamp
+				})
+			).toEqual({
+				responseTime: '65.579s',
+				responseTimeCategory: '20001-100000'
 			});
 		});
 	});

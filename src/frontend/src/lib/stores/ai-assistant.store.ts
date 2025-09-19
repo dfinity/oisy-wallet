@@ -10,7 +10,9 @@ export interface AiAssistantStore extends Readable<AiAssistant | undefined> {
 	open: () => void;
 	close: () => void;
 	reset: () => void;
+	resetChatHistory: () => void;
 	appendMessage: (message: ChatMessage) => void;
+	removeLastMessage: () => void;
 }
 
 const initialState = {
@@ -36,8 +38,16 @@ const initAiAssistantStore = (): AiAssistantStore => {
 			set(initialState);
 		},
 
+		resetChatHistory: () => {
+			update((state) => ({ ...state, chatHistory: initialState.chatHistory }));
+		},
+
 		appendMessage: (message: ChatMessage) => {
 			update((state) => ({ ...state, chatHistory: [...state.chatHistory, message] }));
+		},
+
+		removeLastMessage: () => {
+			update((state) => ({ ...state, chatHistory: [...state.chatHistory.slice(0, -1)] }));
 		}
 	};
 };

@@ -1,17 +1,16 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthConvertForm from '$eth/components/convert/EthConvertForm.svelte';
 	import EthConvertProgress from '$eth/components/convert/EthConvertProgress.svelte';
 	import EthConvertReview from '$eth/components/convert/EthConvertReview.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
 	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
-	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -41,25 +40,41 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let currentStep: WizardStep | undefined;
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let convertProgressStep: string;
-	export let formCancelAction: 'back' | 'close' = 'close';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		convertProgressStep: string;
+		currentStep?: WizardStep;
+		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		children?: Snippet;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		convertProgressStep = $bindable(),
+		currentStep,
+		formCancelAction = 'close',
+		onBack,
+		onClose,
+		onNext,
+		children
+	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const { feeStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
-	let destination = '';
-	$: destination = isTokenErc20($sourceToken)
-		? ($ckErc20HelperContractAddress ?? '')
-		: ($ckEthHelperContractAddress ?? '');
+	let destination = $derived(
+		isTokenErc20($sourceToken)
+			? ($ckErc20HelperContractAddress ?? '')
+			: ($ckEthHelperContractAddress ?? '')
+	);
 
-	let sourceNetwork: EthereumNetwork;
-	$: sourceNetwork = $selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK;
-
-	const dispatch = createEventDispatcher();
+	let sourceNetwork = $derived($selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK);
 
 	const convert = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -89,7 +104,7 @@
 		}
 
 		const { valid } = assertCkEthMinterInfoLoaded({
-			minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id],
+			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id],
 			network: ICP_NETWORK
 		});
 
@@ -117,7 +132,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await executeSend({
@@ -135,7 +150,7 @@
 				sourceNetwork,
 				targetNetwork: ICP_NETWORK,
 				identity: $authIdentity,
-				minterInfo: $ckEthMinterInfoStore?.[$ethereumToken.id]
+				minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenWithFallback.id]
 			});
 
 			trackEvent({
@@ -153,18 +168,18 @@
 				err
 			});
 
-			dispatch('icBack');
+			back();
 		}
 	};
 
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icBack');
+	const close = () => onClose();
+	const back = () => onBack();
 </script>
 
 <EthFeeContext
 	amount={sendAmount}
 	{destination}
-	nativeEthereumToken={$ethereumToken}
+	nativeEthereumToken={$nativeEthereumTokenWithFallback}
 	observe={currentStep?.name !== WizardStepsConvert.CONVERTING &&
 		currentStep?.name !== WizardStepsConvert.REVIEW}
 	sendToken={$sourceToken}
@@ -173,7 +188,13 @@
 	targetNetwork={ICP_NETWORK}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm {destination} on:icNext on:icClose bind:sendAmount bind:receiveAmount>
+		<EthConvertForm
+			{destination}
+			on:icNext={onNext}
+			on:icClose={onClose}
+			bind:sendAmount
+			bind:receiveAmount
+		>
 			<svelte:fragment slot="cancel">
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
@@ -183,17 +204,17 @@
 			</svelte:fragment>
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack>
+		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
 			<ButtonBack slot="cancel" onclick={back} />
 		</EthConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<EthConvertProgress
 			{destination}
-			nativeEthereumToken={$ethereumToken}
+			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			sourceTokenId={$sourceToken.id}
 			bind:convertProgressStep
 		/>
 	{:else}
-		<slot />
+		{@render children?.()}
 	{/if}
 </EthFeeContext>
