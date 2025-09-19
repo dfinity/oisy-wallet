@@ -134,7 +134,7 @@
 			steps={HIDE_TOKEN_STEPS}
 			warningType="manage"
 		/>
-	{:else}
+	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
 		<HideTokenReview on:icCancel={close} on:icHide={hide} />
 	{/if}
 </WizardModal>
