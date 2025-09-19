@@ -11,6 +11,7 @@ import {
 	type IcrcAllowance,
 	type IcrcBlockIndex,
 	type IcrcGetBlocksResult,
+	type IcrcStandardRecord,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
@@ -226,6 +227,30 @@ export const getBlocks = async ({
 	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return getBlocks({ certified, ...rest });
+};
+
+/**
+ * Retrieves the ledger ICRC1 supported standards.
+ *
+ * @param {Object} params - The parameters for fetching supported standards.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
+ */
+export const icrc1SupportedStandards = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcStandardRecord[]> => {
+	assertNonNullish(identity);
+
+	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return icrc1SupportedStandards({ certified });
 };
 
 const ledgerCanister = async ({
