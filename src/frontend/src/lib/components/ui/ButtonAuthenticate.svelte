@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
+	import { LOGIN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import {LOGIN_BUTTON} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		onclick: () => void;
