@@ -484,14 +484,14 @@
 		{#snippet title()}
 			<WalletConnectModalTitle>
 				{`${
-					currentStep?.name === 'Review' && nonNullish(proposal)
+					currentStep?.name === WizardStepsWalletConnect.REVIEW && nonNullish(proposal)
 						? $i18n.wallet_connect.text.session_proposal
 						: $i18n.wallet_connect.text.name
 				}`}
 			</WalletConnectModalTitle>
 		{/snippet}
 
-		{#if currentStep?.name === 'Review'}
+		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
 			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else}
 			<WalletConnectForm on:icConnect={userConnect} />
