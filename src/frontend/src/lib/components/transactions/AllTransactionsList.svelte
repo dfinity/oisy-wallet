@@ -15,6 +15,7 @@
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
+	import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -102,13 +103,15 @@
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
 		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
-			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-				<TransactionsDateGroup
-					{formattedDate}
-					testId={`all-transactions-date-group-${index}`}
-					{transactions}
-				/>
-			{/each}
+			<AllTransactionsScroll>
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`all-transactions-date-group-${index}`}
+						{transactions}
+					/>
+				{/each}
+			</AllTransactionsScroll>
 		{/if}
 
 		{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
