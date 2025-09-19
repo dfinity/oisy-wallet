@@ -301,7 +301,7 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name ===  WizardStepsManageTokens.SAVING}
+	disablePointerEvents={currentStep?.name === WizardStepsManageTokens.SAVING}
 	onClose={close}
 	{steps}
 	testId={MANAGE_TOKENS_MODAL}
