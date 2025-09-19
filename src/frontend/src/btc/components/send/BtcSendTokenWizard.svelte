@@ -204,6 +204,4 @@
 	>
 		<ButtonBack slot="cancel" onclick={back} />
 	</BtcSendForm>
-{:else}
-	<slot />
 {/if}
