@@ -1,4 +1,4 @@
-use candid::{CandidType, Deserialize, Principal};
+use candid::{CandidType, Deserialize};
 use shared::types::{token::ChainId, Version};
 
 #[derive(CandidType, Deserialize, Clone)]
