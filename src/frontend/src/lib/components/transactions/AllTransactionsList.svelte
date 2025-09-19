@@ -54,7 +54,7 @@
 		$ckBtcPendingUtxosStore
 	});
 
-	console.log('transactions', JSON.stringify(transactions));
+	$: console.log('transactions', JSON.stringify(transactions));
 
 	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
 	$: sortedTransactions = nonNullish(transactions)
