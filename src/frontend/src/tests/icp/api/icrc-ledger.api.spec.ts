@@ -4,6 +4,7 @@ import {
 	approve,
 	balance,
 	getBlocks,
+	icrc1SupportedStandards,
 	metadata,
 	transactionFee,
 	transfer
@@ -517,6 +518,47 @@ describe('icrc-ledger.api', () => {
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(getBlocks({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('icrc1SupportedStandards', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const supportedStandards = [
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		];
+
+		beforeEach(() => {
+			ledgerCanisterMock.icrc1SupportedStandards.mockResolvedValue(supportedStandards);
+		});
+
+		it('successfully calls icrc1SupportedStandards endpoint', async () => {
+			const result = await icrc1SupportedStandards(params);
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls icrc1SupportedStandards endpoint as query', async () => {
+			const result = await icrc1SupportedStandards({ ...params, certified: false });
+
+			expect(result).toEqual(supportedStandards);
+
+			expect(ledgerCanisterMock.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });
