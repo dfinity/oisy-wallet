@@ -56,7 +56,7 @@
 		formCancelAction = 'close',
 		onBack,
 		onClose,
-		onNext,
+		onNext
 	}: Props = $props();
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
