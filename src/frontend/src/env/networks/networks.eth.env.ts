@@ -33,8 +33,8 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	iconTransparent: ethereumIconTransparent,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	providers: {
-		infura: 'homestead',
-		alchemy: 'homestead',
+		infura: 'mainnet',
+		alchemy: 'mainnet',
 		alchemyDeprecated: Network.ETH_MAINNET,
 		alchemyJsonRpcUrl: 'https://eth-mainnet.g.alchemy.com/v2'
 	},
