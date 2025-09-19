@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Popover } from '@dfinity/gix-components';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
@@ -86,13 +85,11 @@
 		<ChangelogLink asMenuItem asMenuItemCondensed trackEventSource={USER_MENU_ROUTE} />
 	</div>
 
-	{#if NEW_AGREEMENTS_ENABLED}
-		<Hr />
+	<Hr />
 
-		<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
-			<TermsOfUseLink />
-			<PrivacyPolicyLink />
-			<LicenseLink />
-		</div>
-	{/if}
+	<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
+		<TermsOfUseLink />
+		<PrivacyPolicyLink />
+		<LicenseLink />
+	</div>
 </Popover>
