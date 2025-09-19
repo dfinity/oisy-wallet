@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onMount, type Snippet } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import BtcConvertForm from '$btc/components/convert/BtcConvertForm.svelte';
 	import BtcConvertProgress from '$btc/components/convert/BtcConvertProgress.svelte';
 	import BtcConvertReview from '$btc/components/convert/BtcConvertReview.svelte';
@@ -46,7 +46,6 @@
 		onBack: () => void;
 		onClose: () => void;
 		onNext: () => void;
-		children?: Snippet;
 	}
 
 	let {
@@ -57,8 +56,7 @@
 		formCancelAction = 'close',
 		onBack,
 		onClose,
-		onNext,
-		children
+		onNext
 	}: Props = $props();
 
 	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
@@ -181,7 +179,5 @@
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />
-	{:else}
-		{@render children?.()}
 	{/if}
 </UtxosFeeContext>
