@@ -1,6 +1,7 @@
 <script lang="ts">
 	import IconAstronautArrow from '$lib/components/icons/IconAstronautArrow.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import {LOGIN_BUTTON} from "$lib/constants/test-ids.constants";
 
 	interface Props {
 		onclick: () => void;
@@ -13,7 +14,7 @@
 <button
 	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg font-bold leading-6 text-primary-inverted sm:px-12"
 	class:sm:w-80={!fullWidth}
-	data-tid="login-button"
+	data-tid={LOGIN_BUTTON}
 	{onclick}
 >
 	{$i18n.auth.text.authenticate}
