@@ -54,18 +54,21 @@ testWithII.skip(
 );
 
 // TODO: E2E tests are failing and/or take too much time, we need to fix them slowly, so we skip them for now
-testWithII.skip('should display privacy mode on activity page', async ({ page, iiPage, isMobile }) => {
-	const flowPage = new FlowPage({ page, iiPage, isMobile });
+testWithII.skip(
+	'should display privacy mode on activity page',
+	async ({ page, iiPage, isMobile }) => {
+		const flowPage = new FlowPage({ page, iiPage, isMobile });
 
-	await flowPage.waitForReady();
+		await flowPage.waitForReady();
 
-	await flowPage.receiveTokens();
+		await flowPage.receiveTokens();
 
-	await flowPage.sendTokens();
+		await flowPage.sendTokens();
 
-	await flowPage.navigateToActivity();
+		await flowPage.navigateToActivity();
 
-	await flowPage.activatePrivacyMode();
+		await flowPage.activatePrivacyMode();
 
-	await flowPage.takeScreenshot();
-});
+		await flowPage.takeScreenshot();
+	}
+);
