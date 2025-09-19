@@ -136,7 +136,9 @@ export const parseReviewSendTokensToolArguments = ({
 		contactAddress,
 		address: addressFilter,
 		amount: parsedAmount,
-		token: tokenWithFallback
+		token: tokenWithFallback,
+		sendCompleted: false,
+		id: crypto.randomUUID().toString()
 	};
 };
 
