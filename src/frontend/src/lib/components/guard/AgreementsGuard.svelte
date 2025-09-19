@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 	import {
 		hasAcceptedAllLatestAgreements,
@@ -16,7 +15,7 @@
 	let { children }: Props = $props();
 </script>
 
-{#if $hasAcceptedAllLatestAgreements || !NEW_AGREEMENTS_ENABLED}
+{#if $hasAcceptedAllLatestAgreements}
 	<div in:fade>
 		{@render children()}
 	</div>
