@@ -20,7 +20,7 @@
 	</div>
 
 	<!-- TODO: determine if this value is specific/permanent or can be changed -->
-	<div class="mb-5 max-h-full overflow-hidden pt-[10dvh]">
+	<div class="mb-5 mt-[10dvh] max-h-full overflow-hidden">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
 			<BgImg
 				{ariaLabel}
