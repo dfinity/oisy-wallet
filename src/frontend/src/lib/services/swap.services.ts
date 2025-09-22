@@ -187,8 +187,6 @@ export const loadKongSwapTokens = async ({
 		return acc;
 	}, {});
 
-	console.log(supportedTokens);
-
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
@@ -248,13 +246,6 @@ const fetchSwapAmountsICP = async ({
 			})
 		)
 	);
-
-
-	console.log({isSourceTokenIcrc2});
-	
-
-	console.log({settledResults});
-	
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
