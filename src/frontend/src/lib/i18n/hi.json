@@ -366,6 +366,7 @@
 		},
 		"requirements": {
 			"requirements_title": "योग्यता शर्तें",
+			"network_bonus_info": "",
 			"min_logins": "पिछले $days दिनों में $loginsx बार लॉगिन करें",
 			"min_transactions": "पिछले $days दिनों में $transactions लेनदेन पूरे करें",
 			"min_total_assets_usd": "जारी होने के समय $$usd मूल्य के टोकन रखें",

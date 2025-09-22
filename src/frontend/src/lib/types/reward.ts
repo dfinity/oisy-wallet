@@ -56,8 +56,8 @@ export interface CampaignEligibility {
 	available: boolean;
 	eligible: boolean;
 	criteria: CampaignCriterion[];
-	probabilityMultiplierEnabled: boolean;
-	probabilityMultiplier: number;
+	probabilityMultiplierEnabled?: boolean;
+	probabilityMultiplier?: number;
 }
 
 export interface CampaignCriterion {
@@ -75,7 +75,16 @@ export interface MinTransactionsCriterion extends CampaignCriterion {
 	count: number;
 }
 
+export interface MinTransactionsInNetworkCriterion extends CampaignCriterion {
+	days: bigint;
+	count: number;
+}
+
 export interface MinTotalAssetsUsdCriterion extends CampaignCriterion {
+	usd: number;
+}
+
+export interface MinTotalAssetsUsdInNetworkCriterion extends CampaignCriterion {
 	usd: number;
 }
 

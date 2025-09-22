@@ -434,60 +434,26 @@ const CKXAUT_IC_DATA: IcCkInterface | undefined = nonNullish(CKERC20_PRODUCTION_
 
 const ADDITIONAL_ICRC_PRODUCTION_DATA = mapIcrcData(additionalIcrcTokens);
 
-export const GLDT_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.GLDT
-)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT,
-			position: 16
-		}
-	: undefined;
+export const GLDT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.GLDT?.ledgerCanisterId ?? '6c7su-kiaaa-aaaar-qaira-cai';
 
-const GHOSTNODE_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.GHOSTNODE
-)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE,
-			position: 23
-		}
-	: undefined;
+export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.GHOSTNODE?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
 
-const ICONFUCIUS_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.ICONFUCIUS
-)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.ICONFUCIUS,
-			position: 27
-		}
-	: undefined;
+export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.ICONFUCIUS?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
 
-const BITCAT_IC_DATA: IcInterface | undefined = nonNullish(ADDITIONAL_ICRC_PRODUCTION_DATA?.BITCAT)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT,
-			position: 30
-		}
-	: undefined;
+export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA.BITCAT?.ledgerCanisterId ?? 'xlwi6-kyaaa-aaaar-qarya-cai';
 
-const FORSETISCN_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN
-)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.FORSETISCN,
-			position: 31
-		}
-	: undefined;
+export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.FORSETISCN?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
 
-const ODINDOG_IC_DATA: IcInterface | undefined = nonNullish(
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG
-)
-	? {
-			...ADDITIONAL_ICRC_PRODUCTION_DATA.ODINDOG,
-			position: 34
-		}
-	: undefined;
+export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
 
-const TESTICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.TESTICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
+const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.TICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
 
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
@@ -579,7 +545,7 @@ export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS,
 	...CKERC20_LEDGER_CANISTER_TESTNET_IDS,
-	TESTICRC1_LEDGER_CANISTER_ID
+	TICRC1_LEDGER_CANISTER_ID
 ];
 
 // On Chain Fusion view, we want to display ICP, Ethereum and selected CK tokens.
@@ -606,18 +572,3 @@ export const BITCOIN_CANISTER_IDS: Record<MinterCanisterIdText, CanisterIdText> 
 		[IC_CKBTC_MINTER_CANISTER_ID]: 'ghsi2-tqaaa-aaaan-aaaca-cai'
 	})
 };
-
-export const GHOSTNODE_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	GHOSTNODE_IC_DATA?.ledgerCanisterId ?? 'sx3gz-hqaaa-aaaar-qaoca-cai';
-
-export const ICONFUCIUS_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ICONFUCIUS_IC_DATA?.ledgerCanisterId ?? '5kijx-siaaa-aaaar-qaqda-cai';
-
-export const BITCAT_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	BITCAT_IC_DATA?.ledgerCanisterId ?? 'xlwi6-kyaaa-aaaar-qarya-cai';
-
-export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	FORSETISCN_IC_DATA?.ledgerCanisterId ?? 'tta5j-yqaaa-aaaar-qarbq-cai';
-
-export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ODINDOG_IC_DATA?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
