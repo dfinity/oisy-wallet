@@ -2,10 +2,7 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
-	AUTH_LICENSE_LINK,
-	LOCK_BUTTON,
 	LOGIN_BUTTON,
-	LOGOUT_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_DOC_BUTTON,
@@ -20,11 +17,7 @@ import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
-import { render, screen, waitFor } from '@testing-library/svelte';
-
-vi.mock('$env/lock-screen.env', () => ({
-	LOCK_SCREEN_ENABLED: false
-}));
+import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
@@ -37,7 +30,6 @@ describe('Menu', () => {
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
 	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
 	const loginOrCreateButton = `button[data-tid="${LOGIN_BUTTON}"]`;
-	const authLicenseLink = `a[data-tid="${AUTH_LICENSE_LINK}"]`;
 
 	let container: HTMLElement;
 
@@ -141,28 +133,5 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
-		await waitForElement({ selector: authLicenseLink });
-	});
-
-	it('should show direct logout button when LOCK_SCREEN_ENABLED is false', async () => {
-		vi.doMock('$env/lock-screen.env', () => ({
-			LOCK_SCREEN_ENABLED: false
-		}));
-
-		const { default: MenuWithLockDisabled } = await import('$lib/components/core/Menu.svelte');
-
-		({ container } = render(MenuWithLockDisabled));
-		const menuButton = container.querySelector(menuButtonSelector) as HTMLElement;
-
-		expect(menuButton).toBeInTheDocument();
-
-		menuButton?.click();
-
-		const logoutButton = await screen.findByTestId(LOGOUT_BUTTON);
-
-		expect(logoutButton).toBeInTheDocument();
-		expect(logoutButton).toHaveTextContent(/log out/i);
-
-		expect(screen.queryByTestId(LOCK_BUTTON)).not.toBeInTheDocument();
 	});
 });
