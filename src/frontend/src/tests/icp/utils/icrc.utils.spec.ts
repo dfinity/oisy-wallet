@@ -1,3 +1,5 @@
+import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
@@ -5,6 +7,7 @@ import {
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
+	isIcrcTokenSupportIcrc2,
 	mapIcrcToken,
 	sortIcTokens,
 	type IcrcLoadData
@@ -12,7 +15,16 @@ import {
 import type { TokenStandard } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
-import { IcrcMetadataResponseEntries, type IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc';
+import { mockIdentity } from '$tests/mocks/identity.mock';
+import {
+	IcrcMetadataResponseEntries,
+	type IcrcStandardRecord,
+	type IcrcTokenMetadataResponse
+} from '@dfinity/ledger-icrc';
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
 
 describe('icrc.utils', () => {
 	describe('mapIcrcToken', () => {
@@ -383,6 +395,80 @@ describe('icrc.utils', () => {
 			const { enabled: _, ...mockIcrcCustomTokenWithoutEnabled } = mockIcrcCustomToken;
 
 			expect(icTokenIcrcCustomToken(mockIcrcCustomTokenWithoutEnabled)).toBeFalsy();
+		});
+	});
+
+	describe('isTokenSupportIcrc2', () => {
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('returns true when ICRC-2 standard is supported', async () => {
+			const supportedStandards: IcrcStandardRecord[] = [
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' },
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			];
+
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeTruthy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			});
+		});
+
+		it('returns false when ICRC-2 standard is not supported', async () => {
+			const supportedStandards = [
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' },
+				{ name: 'ICRC-3', url: 'https://github.com/dfinity/ICRC-3' }
+			];
+
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeFalsy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			});
+		});
+
+		it('returns false when no standards are supported', async () => {
+			const supportedStandards: [] = [];
+
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeFalsy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			});
+		});
+
+		it('returns true when only ICRC-2 is supported', async () => {
+			const supportedStandards = [{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }];
+
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue(supportedStandards);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeTruthy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
+			});
 		});
 	});
 });
