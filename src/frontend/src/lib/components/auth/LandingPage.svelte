@@ -3,7 +3,6 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -19,15 +18,14 @@
 		<HeroSignIn />
 	</div>
 
-	<!-- TODO: determine if this value is specific/permanent or can be changed -->
-	<div class="mb-0 mt-5 md:-mb-28">
+	<div class="min-h-[85dvh] md:mt-10 md:min-h-[75dvh]">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
 			<BgImg
 				{ariaLabel}
 				imageUrl={src}
 				size="contain"
 				shadow="none"
-				styleClass="h-[90dvh] w-[2000px] bg-left relative"
+				styleClass="min-h-[85dvh] min-w-[1200px] bg-left absolute"
 			/>
 		{/await}
 	</div>

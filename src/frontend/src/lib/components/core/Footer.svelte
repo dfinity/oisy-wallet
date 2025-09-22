@@ -27,10 +27,7 @@
 	class:md:fixed={$authSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 	class:md:inset-x-0={$authSignedIn}
-	class:mt-0={$authNotSignedIn}
 	class:pb-18={$authSignedIn}
-	class:sticky={$authNotSignedIn}
-	class:md:relative={$authNotSignedIn}
 	class:z-1={!$aiAssistantConsoleOpen}
 	class:z-3={$aiAssistantConsoleOpen}
 >
