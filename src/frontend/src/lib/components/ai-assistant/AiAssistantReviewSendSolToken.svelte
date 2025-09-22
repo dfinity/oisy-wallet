@@ -60,9 +60,10 @@
 		destination: Address;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const {
 		sendToken,
@@ -217,10 +218,9 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			sendCompleted = true;
+			onSendCompleted();
 			loading = false;
 		} catch (err: unknown) {
-			sendCompleted = false;
 			loading = false;
 
 			trackEvent({
