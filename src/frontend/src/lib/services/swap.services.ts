@@ -165,6 +165,8 @@ export const loadKongSwapTokens = async ({
 	identity: Identity;
 	allIcrcTokens: IcToken[];
 }): Promise<void> => {
+	console.log('allIcrcTokens', allIcrcTokens);
+
 	const kongSwapTokens = await Promise.allSettled(
 		allIcrcTokens.map((token: IcToken) =>
 			kongTokens({
@@ -173,6 +175,8 @@ export const loadKongSwapTokens = async ({
 			})
 		)
 	);
+
+	console.log('kongSwapTokens', kongSwapTokens);
 
 	const processedTokens = kongSwapTokens.reduce<KongSwapTokensStoreData>((acc, result) => {
 		if (result.status === 'fulfilled') {
@@ -186,6 +190,8 @@ export const loadKongSwapTokens = async ({
 		}
 		return acc;
 	}, {});
+
+	console.log({ processedTokens });
 
 	kongSwapTokensStore.setKongSwapTokens(processedTokens);
 };
