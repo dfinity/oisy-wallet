@@ -187,6 +187,8 @@ export const loadKongSwapTokens = async ({
 		return acc;
 	}, {});
 
+	console.log(supportedTokens);
+
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
