@@ -1,3 +1,5 @@
+import { randomWait } from '$lib/utils/time.utils';
+
 export const batch = async function* <T>({
 	promises,
 	batchSize
@@ -9,7 +11,7 @@ export const batch = async function* <T>({
 		const batch = promises.slice(i, i + batchSize);
 		const results = await Promise.allSettled(batch.map((fn) => fn()));
 		yield results;
-		await new Promise((resolve) => setTimeout(resolve, 1000));
+		await randomWait({});
 	}
 };
 
