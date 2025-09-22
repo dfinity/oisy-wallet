@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import NewSwapModal from './NewSwapModal.svelte';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -33,7 +34,6 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
-	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
