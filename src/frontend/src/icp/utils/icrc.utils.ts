@@ -189,7 +189,7 @@ export const isIcrcTokenSupportIcrc2 = async ({
 		ledgerCanisterId
 	});
 
-	return supportedStandards.some((standard) => standard.name === IcTokenStandards.icrc2);
+	return supportedStandards.some(({name}) => name === IcTokenStandards.icrc2);
 };
 
 // TODO: create tests
