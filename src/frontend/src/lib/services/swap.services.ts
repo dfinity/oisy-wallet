@@ -158,20 +158,36 @@ export const fetchKongSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): Promise<void> => {
-	const kongSwapTokens = await kongTokens({
-		identity
-	});
-
-	kongSwapTokensStore.setKongSwapTokens(
-		kongSwapTokens.reduce<KongSwapTokensStoreData>(
-			(acc, kongToken) =>
-				'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
-					? { ...acc, [kongToken.IC.symbol]: kongToken.IC }
-					: acc,
-			{}
+export const loadKongSwapTokens = async ({
+	identity,
+	allIcrcTokens
+}: {
+	identity: Identity;
+	allIcrcTokens: IcToken[];
+}): Promise<void> => {
+	const kongSwapTokens = await Promise.allSettled(
+		allIcrcTokens.map((token: IcToken) =>
+			kongTokens({
+				identity,
+				tokenLedgerCanisterId: token.ledgerCanisterId
+			})
 		)
 	);
+
+	const processedTokens = kongSwapTokens.reduce<KongSwapTokensStoreData>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			return result.value.reduce<KongSwapTokensStoreData>(
+				(acc, kongToken) =>
+					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+						? { ...acc, [kongToken.IC.symbol]: kongToken.IC }
+						: acc,
+				{}
+			);
+		}
+		return acc;
+	}, {});
+
+	kongSwapTokensStore.setKongSwapTokens(processedTokens);
 };
 
 export const fetchSwapAmounts = async ({
