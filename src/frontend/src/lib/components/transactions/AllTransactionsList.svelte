@@ -39,16 +39,6 @@
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	declare global {
-		interface BigInt {
-			toJSON(): Number;
-		}
-	}
-
-	BigInt.prototype.toJSON = function () {
-		return Number(this);
-	};
-
 	let transactions: AllTransactionUiWithCmp[];
 	$: transactions = mapAllTransactionsUi({
 		tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
@@ -63,8 +53,6 @@
 		$icPendingTransactionsStore,
 		$ckBtcPendingUtxosStore
 	});
-
-	$: console.log('transactions', JSON.stringify(transactions));
 
 	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
 	$: sortedTransactions = nonNullish(transactions)
