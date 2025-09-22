@@ -25,7 +25,7 @@
 				imageUrl={src}
 				size="contain"
 				shadow="none"
-				styleClass="min-h-[85dvh] min-w-[100dvw] bg-left absolute"
+				styleClass="min-h-[85dvh] min-w-[1400px] bg-left absolute"
 			/>
 		{/await}
 	</div>
