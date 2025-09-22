@@ -11,7 +11,6 @@
 	},
 	"CLOUD": {
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
-		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
 		"decimals": 8,
 		"name": "Crypto Cloud",
 		"symbol": "CLOUD",
