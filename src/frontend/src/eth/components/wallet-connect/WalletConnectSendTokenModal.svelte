@@ -191,7 +191,7 @@
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 				/>
-			{:else}
+			{:else if currentStep?.name === WizardStepsSend.REVIEW}
 				<WalletConnectSendReview
 					{amount}
 					{data}
