@@ -28,7 +28,7 @@
 
 <span class="flex flex-col gap-1">
 	<output
-		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
+		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold md:text-5xl"
 		data-tid={AMOUNT_DATA}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}
