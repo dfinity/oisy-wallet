@@ -52,7 +52,6 @@
 		networkSolanaMainnetEnabled
 	} from '$lib/derived/networks.derived';
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { ProgressStepsLoader } from '$lib/enums/progress-steps';
 	import { initLoader } from '$lib/services/loader.services';
 	import { loadNfts } from '$lib/services/nft.services';
@@ -69,6 +68,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
 		children: Snippet;
@@ -223,7 +223,7 @@
 
 	const debounceLoadNfts = debounce(async () => {
 		await loadNfts({
-			tokens: $nonFungibleTokens ?? [],
+			tokens: $enabledNonFungibleNetworkTokens ?? [],
 			loadedNfts: $nftStore ?? [],
 			walletAddress: $ethAddress
 		});
@@ -234,7 +234,7 @@
 			NFTS_ENABLED &&
 			($erc721CustomTokensInitialized || $erc1155CustomTokensInitialized) &&
 			nonNullish($ethAddress) &&
-			$nonFungibleTokens.length > 0
+			$enabledNonFungibleNetworkTokens.length > 0
 		) {
 			debounceLoadNfts();
 		}
