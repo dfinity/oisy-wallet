@@ -3,10 +3,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import AuthHelpModal from '$lib/components/auth/AuthHelpModal.svelte';
 	import HeroSignIn from '$lib/components/hero/HeroSignIn.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { modalAuthHelp, modalAuthHelpData } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
@@ -23,8 +23,8 @@
 			<BgImg
 				{ariaLabel}
 				imageUrl={src}
-				size="contain"
 				shadow="none"
+				size="contain"
 				styleClass="min-h-[85dvh] min-w-[1400px] bg-left absolute"
 			/>
 		{/await}
