@@ -17,7 +17,11 @@
 
 <DateBadge
 	date={isUpcoming ? startDate : endDate}
-	prefix={isUpcoming ? $i18n.rewards.text.upcoming_date : hasEnded ? $i18n.rewards.text.ended_date : $i18n.rewards.text.active_date}
+	prefix={isUpcoming
+		? $i18n.rewards.text.upcoming_date
+		: hasEnded
+			? $i18n.rewards.text.ended_date
+			: $i18n.rewards.text.active_date}
 	showIcon
 	{testId}
 ></DateBadge>
