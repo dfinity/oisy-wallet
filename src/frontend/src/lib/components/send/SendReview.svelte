@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext, type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -15,13 +15,34 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
-	export let nft: Nft | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		disabled?: boolean;
+		selectedContact?: ContactUi;
+		nft?: Nft;
+		network?: Snippet;
+		fee?: Snippet;
+		info?: Snippet;
+		toolbar?: Snippet;
+		onBack: () => void;
+		onSend: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		destination = '',
+		amount,
+		disabled = false,
+		selectedContact,
+		nft,
+		network,
+		fee,
+		info,
+		toolbar: toolbarProp,
+		onBack,
+		onSend,
+	}: Props = $props();
+
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -37,18 +58,22 @@
 		<SendReviewDestination {destination} {selectedContact} />
 	</div>
 
-	<slot name="network" />
+	{@render network?.()}
 
-	<slot name="fee" />
+	{@render fee?.()}
 
-	<slot name="info" />
+	{@render info?.()}
 
 	{#snippet toolbar()}
-		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
-				{$i18n.send.text.send}
-			</Button>
-		</ButtonGroup>
+		{#if nonNullish(toolbarProp)}
+			{@render toolbarProp()}
+		{:else}
+			<ButtonGroup testId="toolbar">
+				<ButtonBack onclick={onBack} />
+				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+					{$i18n.send.text.send}
+				</Button>
+			</ButtonGroup>
+		{/if}
 	{/snippet}
 </ContentWithToolbar>
