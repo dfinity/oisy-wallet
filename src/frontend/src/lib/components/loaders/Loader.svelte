@@ -39,6 +39,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import {
 		networkBitcoinMainnetEnabled,
 		networkBitcoinRegtestEnabled,
@@ -68,7 +69,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
 		children: Snippet;
