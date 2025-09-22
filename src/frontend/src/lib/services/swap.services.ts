@@ -249,6 +249,10 @@ const fetchSwapAmountsICP = async ({
 		)
 	);
 
+
+	console.log({isSourceTokenIcrc2});
+	
+
 	console.log({settledResults});
 	
 
