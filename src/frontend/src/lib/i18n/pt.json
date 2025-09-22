@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Contrato de Licença",
-			"accept_terms": "Ao clicar neste botão, você concorda com o",
-			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
 			"paragraph_1": "Obrigado pelo seu interesse em $oisy_name, um aplicativo descentralizado de carteira multi-cadeia e auto-custódia baseado em navegador, hospedado na rede pública de blockchain Internet Computer (“$oisy_short”). Para obter mais informações sobre $oisy_short, seu código-fonte aberto e licenças relacionadas, consulte o repositório GitHub de $oisy_short aqui: $oisy_repo_url.",
 			"paragraph_2": "Este Contrato de Licença rege o uso de $oisy_short por você (“Você”). AO USAR $oisy_short, VOCÊ CONCORDA QUE LEU, COMPREENDEU E CONCORDA EM ESTAR VINCULADO POR ESTE CONTRATO DE LICENÇA. SE VOCÊ NÃO CONCORDA, VOCÊ NÃO PODE USAR $oisy_short.",

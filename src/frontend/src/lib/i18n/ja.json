@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",
-			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
-			"accept_terms_link": "ライセンス契約",
 			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
 			"paragraph_1": "ブラウザベースの自己管理型マルチチェーンウォレット分散型アプリケーションである$oisy_name（以下「$oisy_short」）は、Internet Computerの公開ブロックチェーンネットワーク上でホストされています。$oisy_short、そのオープンソースコード、および関連するライセンスの詳細については、$oisy_shortのGitHubリポジトリ($oisy_repo_url)を参照してください。",
 			"paragraph_2": "本ライセンス契約は、お客様（以下「お客様」）の$oisy_shortの使用を規定します。$oisy_shortを使用することにより、お客様は本ライセンス契約を読み、理解し、これに拘束されることに同意するものとします。同意しない場合、$oisy_shortを使用することはできません。",
