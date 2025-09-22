@@ -33,6 +33,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
@@ -57,7 +58,7 @@
 		try {
 			await loadKongSwapTokensService({
 				identity: $authIdentity,
-				allIcrcTokens: $allIcrcTokens
+				allIcrcTokens: [{ ...ICP_TOKEN }, ...$allIcrcTokens]
 			});
 
 			return 'ready';
