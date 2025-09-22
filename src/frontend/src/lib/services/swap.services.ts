@@ -166,7 +166,7 @@ export const loadKongSwapTokens = async ({
 	allIcrcTokens: IcToken[];
 }): Promise<void> => {
 	const kongSwapTokens = await Promise.allSettled(
-		allIcrcTokens.map(({ledgerCanisterId: tokenLedgerCanisterId}: IcToken) =>
+		allIcrcTokens.map(({ ledgerCanisterId: tokenLedgerCanisterId }: IcToken) =>
 			kongTokens({
 				identity,
 				tokenLedgerCanisterId
