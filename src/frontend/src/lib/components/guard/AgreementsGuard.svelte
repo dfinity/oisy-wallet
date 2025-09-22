@@ -16,7 +16,7 @@
 </script>
 
 {#if $hasAcceptedAllLatestAgreements}
-	<div in:fade>
+	<div class="flex flex-1 flex-col" in:fade>
 		{@render children()}
 	</div>
 {:else if $noAgreementVisionedYet || $hasOutdatedAgreements}
