@@ -121,20 +121,20 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
+	disablePointerEvents={currentStep?.name === WizardStepsHideToken.HIDING}
 	onClose={close}
 	{steps}
 	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === 'Hiding'}
+	{#if currentStep?.name === WizardStepsHideToken.HIDING}
 		<InProgressWizard
 			progressStep={hideProgressStep}
 			steps={HIDE_TOKEN_STEPS}
 			warningType="manage"
 		/>
-	{:else}
+	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
 		<HideTokenReview on:icCancel={close} on:icHide={hide} />
 	{/if}
 </WizardModal>
