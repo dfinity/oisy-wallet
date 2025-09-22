@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 
 	interface Props {
 		data: string | undefined;
