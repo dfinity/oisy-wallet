@@ -4,8 +4,6 @@
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
-	import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-	import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
@@ -22,6 +20,8 @@
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 
 	interface Props {
 		children?: Snippet;
@@ -157,7 +157,7 @@
 		const customErc721Tokens = tokens.filter(({ token }) => 'Erc721' in token);
 		const customErc1155Tokens = tokens.filter(({ token }) => 'Erc1155' in token);
 
-		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
 		for (const network of networks) {
 			const contracts: OwnedContract[] = await loadContracts(network);
 
