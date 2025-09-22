@@ -11,9 +11,25 @@
 
 	let { onLoad, interval, skipInitialLoad = false, children }: Props = $props();
 
-	let timer: NodeJS.Timeout | undefined = undefined;
+	let timer = $state<NodeJS.Timeout | undefined>();
+
+	let isDestroyed = $state(false);
+
+	const run = async () => {
+		if (isDestroyed) {
+			stopTimer();
+
+			return;
+		}
+
+		await onLoad();
+	};
 
 	const startTimer = async () => {
+		if (isDestroyed) {
+			return;
+		}
+
 		if (nonNullish(timer)) {
 			return;
 		}
@@ -22,7 +38,7 @@
 			await onLoad();
 		}
 
-		timer = setInterval(onLoad, interval);
+		timer = setInterval(run, interval);
 	};
 
 	const stopTimer = () => {
@@ -36,7 +52,11 @@
 
 	onMount(startTimer);
 
-	onDestroy(stopTimer);
+	onDestroy(() => {
+		isDestroyed = true;
+
+		stopTimer();
+	});
 </script>
 
 {@render children?.()}
