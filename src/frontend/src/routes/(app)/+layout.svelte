@@ -63,7 +63,11 @@
 	<LockPage />
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
-		<div class="relative flex h-full min-h-[100dvh] flex-col overflow-x-hidden pb-5 md:pb-0">
+		<div
+			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
+			class:h-full={$authSignedIn}
+			class:min-h-[100dvh]={$authNotSignedIn}
+		>
 			<Header />
 
 			<AuthGuard>

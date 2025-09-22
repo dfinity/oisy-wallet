@@ -11,9 +11,7 @@
 	const ariaLabel = $derived(replaceOisyPlaceholders($i18n.auth.alt.preview));
 </script>
 
-<div
-	class="container flex grid max-w-screen-2.5xl flex-1 grid-cols-1 gap-5 md:grid-cols-2 xl:m-auto"
->
+<div class="flex grid w-full max-w-screen-2.5xl flex-1 grid-cols-1 gap-5 md:grid-cols-2 xl:m-auto">
 	<div class="flex h-full flex-col justify-center px-5 md:px-8">
 		<HeroSignIn />
 	</div>
