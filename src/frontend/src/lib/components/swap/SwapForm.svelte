@@ -32,6 +32,9 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { isIcrcTokenSupportIcrc2, isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
