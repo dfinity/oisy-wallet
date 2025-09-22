@@ -30,9 +30,14 @@
 		modalNftImageConsent,
 		modalNftImageConsentData,
 		modalNftFullscreenDisplayData,
-		modalNftFullscreenDisplayOpen
+		modalNftFullscreenDisplayOpen,
+		modalReceive,
+		modalReceiveId
 	} from '$lib/derived/modal.derived';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
+	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
+	import { getSymbol } from '$lib/utils/modal.utils';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.
@@ -64,5 +69,7 @@
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
 		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
+	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
+		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{/if}
 {/if}

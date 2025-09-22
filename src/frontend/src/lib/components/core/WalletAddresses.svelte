@@ -1,7 +1,8 @@
 <script lang="ts">
 	import IconOisyMenu from '$lib/components/icons/IconOisyMenu.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { emit } from '$lib/utils/events.utils';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { getSymbol } from '$lib/utils/modal.utils';
 
 	interface Props {
 		onClick?: () => void;
@@ -11,7 +12,7 @@
 
 	const openReceive = () => {
 		onClick?.();
-		emit({ message: 'oisyReceive' });
+		modalStore.openReceive(getSymbol('menu-addresses'));
 	};
 </script>
 
