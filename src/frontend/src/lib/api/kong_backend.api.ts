@@ -39,13 +39,18 @@ export const kongTokens = async ({
 	canisterId,
 	nullishIdentityErrorMessage
 }: CanisterApiFunctionParams): Promise<TokenReply[]> => {
-	const { tokens } = await kongBackendCanister({
+
+	console.log('here');
+	
+	const service = await kongBackendCanister({
 		identity,
 		canisterId,
 		nullishIdentityErrorMessage
 	});
 
-	return tokens();
+	console.log('Service', service);
+	
+	return service.tokens();
 };
 
 const kongBackendCanister = async ({
