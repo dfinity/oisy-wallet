@@ -92,6 +92,8 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 
 		const response = await tokens(toNullable());
 
+		console.log('Response from tokens', response);
+
 		if ('Ok' in response) {
 			return response.Ok;
 		}
