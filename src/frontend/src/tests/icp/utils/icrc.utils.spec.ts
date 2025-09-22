@@ -3,11 +3,11 @@ import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	icTokenIcrcCustomToken,
+	isIcrcTokenSupportIcrc2,
 	isTokenDip20,
 	isTokenIc,
 	isTokenIcp,
 	isTokenIcrc,
-	isIcrcTokenSupportIcrc2,
 	mapIcrcToken,
 	sortIcTokens,
 	type IcrcLoadData
