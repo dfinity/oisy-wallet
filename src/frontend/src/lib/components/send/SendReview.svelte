@@ -40,9 +40,8 @@
 		info,
 		toolbar: toolbarProp,
 		onBack,
-		onSend,
+		onSend
 	}: Props = $props();
-
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
