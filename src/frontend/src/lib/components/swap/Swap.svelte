@@ -43,7 +43,7 @@
 		store: icTokenFeeStore
 	});
 
-	const isDisabled = (): boolean => isNullish($kongSwapTokensStore) || isNullish($allIcrcTokens);
+	const isDisabled = (): boolean => isNullish($kongSwapTokensStore);
 
 	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
 		if (isNullish($authIdentity)) {
