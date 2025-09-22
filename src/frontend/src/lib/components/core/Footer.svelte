@@ -25,8 +25,6 @@
 	class="pointer-events-none mx-auto mt-5 flex w-full max-w-screen-2.5xl flex-col items-center justify-end px-4 sm:flex-row sm:items-end sm:justify-between sm:px-8 md:pb-5"
 	class:md:bottom-0={$authSignedIn}
 	class:md:fixed={$authSignedIn}
-	class:md:h-md:grid={$authNotSignedIn}
-	class:md:h-md:grid-cols-2={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 	class:md:inset-x-0={$authSignedIn}
 	class:mt-0={$authNotSignedIn}
