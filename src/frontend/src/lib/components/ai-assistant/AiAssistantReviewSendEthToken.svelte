@@ -57,6 +57,7 @@
 		sourceNetwork: EthereumNetwork;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
 	let {
@@ -64,8 +65,9 @@
 		destination,
 		nativeEthereumToken,
 		sourceNetwork,
-		sendCompleted = $bindable(),
-		sendEnabled
+		sendCompleted,
+		sendEnabled,
+		onSendCompleted
 	}: Props = $props();
 
 	const {
@@ -245,10 +247,9 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			sendCompleted = true;
+			onSendCompleted();
 			loading = false;
 		} catch (err: unknown) {
-			sendCompleted = false;
 			loading = false;
 
 			trackEvent({
