@@ -70,17 +70,17 @@
 		<ConvertWizard
 			{currentStep}
 			formCancelAction="close"
+			onBack={modal.back}
+			onClose={close}
+			onDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
 			onIcQrCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onIcQrCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
+			onNext={modal.next}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:convertProgressStep
 			bind:customDestination
-			on:icBack={modal.back}
-			on:icNext={modal.next}
-			on:icDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
-			on:icDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
-			on:icQRCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
-			on:icClose={close}
 		/>
 	</WizardModal>
 </ConvertContexts>

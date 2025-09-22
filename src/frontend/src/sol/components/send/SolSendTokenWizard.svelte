@@ -251,7 +251,5 @@
 				<ButtonBack onclick={back} />
 			{/snippet}
 		</SolSendForm>
-	{:else}
-		{@render children?.()}
 	{/if}
 </SolFeeContext>

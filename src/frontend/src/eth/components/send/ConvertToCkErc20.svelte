@@ -2,7 +2,10 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { run } from 'svelte/legacy';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import type { OptionErc20Token } from '$eth/types/erc20';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
@@ -45,7 +48,7 @@
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckToken) && nonNullish($pageToken)}
-	<EthFeeStoreContext token={$nativeEthereumToken}>
+	<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
 		<ConvertModal destinationToken={ckToken} sourceToken={$pageToken} />
 	</EthFeeStoreContext>
 {/if}

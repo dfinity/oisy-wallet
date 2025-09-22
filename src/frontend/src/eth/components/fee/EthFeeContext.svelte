@@ -124,7 +124,9 @@
 					? undefined
 					: await safeEstimateGas({
 							...params,
-							...(nonNullish(amount) ? { value: BigInt(amount.toString()) } : {}),
+							...(nonNullish(amount)
+								? { value: parseToken({ value: amount.toString(), unitName: sendToken.decimals }) }
+								: {}),
 							data
 						});
 
@@ -212,9 +214,12 @@
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
 	let listenerCallbackTimer: NodeJS.Timeout | undefined;
+
+	let isDestroyed = false;
+
 	const obverseFeeData = async (watch: boolean) => {
 		const throttledCallback = () => {
-			// to make sure we don't update UI too often, we listen to the WS updates max. once per 10 secs
+			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
 				listenerCallbackTimer = setTimeout(() => {
 					debounceUpdateFeeData();
@@ -226,11 +231,18 @@
 
 		await listener?.disconnect();
 
+		// There could be a race condition where the component is destroyed before the listener is connected.
+		// However, the flow still connects the listener and updates the UI.
+		if (isDestroyed) {
+			return;
+		}
+
 		if (!watch) {
 			return;
 		}
 
 		debounceUpdateFeeData();
+
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
 			callback: async () => throttledCallback(),
@@ -241,8 +253,9 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
-	onDestroy(() => {
-		listener?.disconnect();
+	onDestroy(async () => {
+		isDestroyed = true;
+		await listener?.disconnect();
 		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
 	});
@@ -263,7 +276,7 @@
 	});
 
 	/**
-	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.
+	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
 	 */
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>

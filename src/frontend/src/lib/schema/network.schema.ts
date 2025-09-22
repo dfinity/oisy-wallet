@@ -46,6 +46,7 @@ export const NetworkSchema = z.object({
 	name: z.string(),
 	iconLight: IconSchema.optional(),
 	iconDark: IconSchema.optional(),
+	iconTransparent: IconSchema.optional(),
 	exchange: NetworkExchangeSchema.optional(),
 	buy: z.custom<AtLeastOne<NetworkBuy>>().optional()
 });

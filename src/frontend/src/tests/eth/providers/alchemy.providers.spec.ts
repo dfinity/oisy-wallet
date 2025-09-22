@@ -34,10 +34,10 @@ describe('alchemy.providers', () => {
 	it('should create the correct map of providers', () => {
 		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
 
-		networks.forEach(({ providers: { alchemy } }, index) => {
+		networks.forEach(({ providers: { alchemy: _, alchemyDeprecated } }, index) => {
 			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
 				apiKey: ALCHEMY_API_KEY,
-				network: alchemy
+				network: alchemyDeprecated
 			});
 		});
 	});
@@ -254,7 +254,8 @@ describe('alchemy.providers', () => {
 
 				expect(provider).toBeInstanceOf(AlchemyProvider);
 
-				expect(provider).toHaveProperty('provider');
+				expect(provider).toHaveProperty('deprecatedProvider');
+				expect(provider).not.toHaveProperty('provider');
 			});
 		});
 

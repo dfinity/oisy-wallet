@@ -32,11 +32,11 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemy } }) => ({
+	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
 		...acc,
 		[id]: {
 			apiKey: ALCHEMY_API_KEY,
-			network: alchemy
+			network: alchemyDeprecated
 		}
 	}),
 	{}
@@ -118,17 +118,18 @@ export const initPendingTransactionsListener = ({
 };
 
 export class AlchemyProvider {
-	private readonly provider: Alchemy;
+	// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	private readonly deprecatedProvider: Alchemy;
 
 	constructor(private readonly network: Network) {
-		this.provider = new Alchemy({
+		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
 	}
 
 	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.provider.core.getTransaction(hash);
+		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
 
 		if (isNullish(transaction)) {
 			return transaction;
@@ -153,11 +154,14 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: tokens.map((token) => token.address),
-			omitMetadata: false,
-			orderBy: NftOrdering.TRANSFERTIME
-		});
+		const result: AlchemyProviderOwnedNfts = await this.deprecatedProvider.nft.getNftsForOwner(
+			address,
+			{
+				contractAddresses: tokens.map((token) => token.address),
+				omitMetadata: false,
+				orderBy: NftOrdering.TRANSFERTIME
+			}
+		);
 
 		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
 			const {
@@ -211,7 +215,8 @@ export class AlchemyProvider {
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
-		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+		const result: AlchemyProviderContracts =
+			await this.deprecatedProvider.nft.getContractsForOwner(address);
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
@@ -240,7 +245,10 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy } }) => ({ ...acc, [id]: new AlchemyProvider(alchemy) }),
+	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+		...acc,
+		[id]: new AlchemyProvider(alchemyDeprecated)
+	}),
 	{}
 );
 

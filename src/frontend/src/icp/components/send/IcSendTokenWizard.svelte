@@ -143,6 +143,4 @@
 			<ButtonBack onclick={back} />
 		{/snippet}
 	</IcSendForm>
-{:else}
-	{@render children?.()}
 {/if}

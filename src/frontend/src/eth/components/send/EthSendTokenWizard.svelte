@@ -369,7 +369,5 @@
 				<ButtonBack onclick={back} />
 			{/snippet}
 		</EthSendForm>
-	{:else}
-		{@render children?.()}
 	{/if}
 </EthFeeContext>

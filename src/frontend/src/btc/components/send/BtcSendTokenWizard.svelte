@@ -221,6 +221,4 @@
 			<ButtonBack onclick={back} />
 		{/snippet}
 	</BtcSendForm>
-{:else}
-	{@render children?.()}
 {/if}
