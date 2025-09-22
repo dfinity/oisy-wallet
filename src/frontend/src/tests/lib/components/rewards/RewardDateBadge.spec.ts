@@ -1,10 +1,10 @@
-import { render } from '@testing-library/svelte';
 import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 import { i18n } from '$lib/stores/i18n.store';
+import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('RewardDateBadge', () => {
-	const testId = 'testBadge'
+	const testId = 'testBadge';
 
 	const dateBadgeSelector = `span[data-tid="${testId}"]`;
 
@@ -15,13 +15,13 @@ describe('RewardDateBadge', () => {
 		const endDate = new Date();
 		endDate.setDate(endDate.getDate() + 2);
 
-		const {container} = render(RewardDateBadge, {
+		const { container } = render(RewardDateBadge, {
 			props: {
 				startDate,
 				endDate,
 				testId
 			}
-		})
+		});
 
 		const dateBadge: HTMLSpanElement | null = container.querySelector(dateBadgeSelector);
 
@@ -37,13 +37,13 @@ describe('RewardDateBadge', () => {
 		const endDate = new Date();
 		endDate.setDate(endDate.getDate() + 1);
 
-		const {container} = render(RewardDateBadge, {
+		const { container } = render(RewardDateBadge, {
 			props: {
 				startDate,
 				endDate,
 				testId
 			}
-		})
+		});
 
 		const dateBadge: HTMLSpanElement | null = container.querySelector(dateBadgeSelector);
 
@@ -59,13 +59,13 @@ describe('RewardDateBadge', () => {
 		const endDate = new Date();
 		endDate.setDate(endDate.getDate() - 1);
 
-		const {container} = render(RewardDateBadge, {
+		const { container } = render(RewardDateBadge, {
 			props: {
 				startDate,
 				endDate,
 				testId
 			}
-		})
+		});
 
 		const dateBadge: HTMLSpanElement | null = container.querySelector(dateBadgeSelector);
 
