@@ -28,6 +28,8 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 			certifiedIdlFactory: idlCertifiedFactoryKongBackend
 		});
 
+		console.log('KongBackendCanister created with canisterId:', canisterId.toText(), service);
+
 		return new KongBackendCanister(canisterId, service, certifiedService);
 	}
 
@@ -89,6 +91,8 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 		const { tokens } = this.caller({
 			certified: false
 		});
+
+		console.log('loadTokens called');
 
 		const response = await tokens(toNullable());
 

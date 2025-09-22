@@ -65,12 +65,18 @@ const kongBackendCanister = async ({
 }: CanisterApiFunctionParams): Promise<KongBackendCanister> => {
 	assertNonNullish(identity, nullishIdentityErrorMessage);
 
+	console.log('Creating kong backend canister with identity');
+	
+
 	if (isNullish(canister)) {
 		canister = await KongBackendCanister.create({
 			identity,
 			canisterId: Principal.fromText(canisterId)
 		});
 	}
+
+	console.log('Kong backend canister', canister);
+	
 
 	return canister;
 };
