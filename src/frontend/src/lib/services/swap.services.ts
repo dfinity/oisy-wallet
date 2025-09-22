@@ -249,6 +249,9 @@ const fetchSwapAmountsICP = async ({
 		)
 	);
 
+	console.log({settledResults});
+	
+
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
 			const result = settledResults[index];
