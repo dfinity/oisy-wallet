@@ -5,12 +5,14 @@
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -20,8 +22,6 @@
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 
 	interface Props {
 		children?: Snippet;
