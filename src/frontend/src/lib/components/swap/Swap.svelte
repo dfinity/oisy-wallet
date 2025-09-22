@@ -14,7 +14,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
 	import SwapModal from '$lib/components/swap/SwapModal.svelte';
-	import { allDisabledKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import { allDisabledKongSwapCompatibleIcrcTokens, allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -39,7 +39,7 @@
 		store: icTokenFeeStore
 	});
 
-	const isDisabled = (): boolean => isNullish($kongSwapTokensStore);
+	const isDisabled = (): boolean => isNullish($allIcrcTokens);
 
 	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
 		if (isNullish($authIdentity)) {
@@ -82,15 +82,15 @@
 
 		busy.stop();
 
-		if (kongSwapTokensStatus !== 'ready') {
-			toastsShow({
-				text: $i18n.swap.error.kong_not_available,
-				level: 'info',
-				duration: 3000
-			});
+		// if (kongSwapTokensStatus !== 'ready') {
+		// 	toastsShow({
+		// 		text: $i18n.swap.error.kong_not_available,
+		// 		level: 'info',
+		// 		duration: 3000
+		// 	});
 
-			return;
-		}
+		// 	return;
+		// }
 
 		modalStore.openSwap(tokenId);
 
