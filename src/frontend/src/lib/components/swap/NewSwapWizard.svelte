@@ -10,6 +10,9 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -36,11 +39,18 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2 } =
+	const { sourceToken, destinationToken } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let isSwapAmountsLoading = $state(false);
 	let manualPause = $state(false);
+
+	let isSourceTokenIcrc2 = $derived(
+		await isIcrcTokenSupportIcrc2({
+			identity: $authIdentity,
+			ledgerCanisterId: ($sourceToken as IcToken).ledgerCanisterId
+		})
+	);
 
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
 
@@ -59,7 +69,7 @@
 	amount={swapAmount}
 	destinationToken={$destinationToken}
 	{enableAmountUpdates}
-	isSourceTokenIcrc2={$isSourceTokenIcrc2}
+	{isSourceTokenIcrc2}
 	pauseAmountUpdates={shouldPause}
 	{slippageValue}
 	sourceToken={$sourceToken}

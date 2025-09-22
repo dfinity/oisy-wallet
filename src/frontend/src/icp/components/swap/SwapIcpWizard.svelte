@@ -35,6 +35,7 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -63,17 +64,19 @@
 		onBack
 	}: Props = $props();
 
-	const {
-		sourceToken,
-		destinationToken,
-		isSourceTokenIcrc2,
-		failedSwapError,
-		sourceTokenExchangeRate
-	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContextType>(IC_TOKEN_FEE_CONTEXT_KEY);
+
+	let isSourceTokenIcrc2 = $derived(
+		await isIcrcTokenSupportIcrc2({
+			identity: $authIdentity,
+			ledgerCanisterId: ($sourceToken as IcToken).ledgerCanisterId
+		})
+	);
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 
@@ -134,7 +137,7 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2,
+				isSourceTokenIcrc2: isSourceTokenIcrc2,
 				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&

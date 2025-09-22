@@ -54,7 +54,6 @@
 		sourceTokenExchangeRate,
 		sourceTokenBalance,
 		destinationTokenExchangeRate,
-		isSourceTokenIcrc2,
 		switchTokens
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -68,6 +67,13 @@
 
 	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
+	let isSourceTokenIcrc2 = $derived(
+		await isIcrcTokenSupportIcrc2({
+			identity: $authIdentity,
+			ledgerCanisterId: ($sourceToken as IcToken).ledgerCanisterId
+		})
+	);
+
 	let sourceTokenFee: bigint | undefined = $derived(
 		nonNullish($sourceToken) && nonNullish($icTokenFeeStore)
 			? $icTokenFeeStore[$sourceToken.symbol]
@@ -75,7 +81,7 @@
 	);
 
 	let totalFee: bigint | undefined = $derived(
-		(sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
+		(sourceTokenFee ?? ZERO) * (isSourceTokenIcrc2 ? 2n : 1n)
 	);
 
 	let swapAmountsLoading = $derived(
