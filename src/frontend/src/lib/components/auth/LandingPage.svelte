@@ -20,14 +20,14 @@
 	</div>
 
 	<!-- TODO: determine if this value is specific/permanent or can be changed -->
-	<div class="mb-5 max-h-full overflow-hidden">
+	<div class="mb-5 max-h-full overflow-hidden pt-[10dvh]">
 		{#await import(`$lib/assets/main-image-${$themeStore ?? 'light'}.webp`) then { default: src }}
 			<BgImg
 				{ariaLabel}
 				imageUrl={src}
 				size="contain"
 				shadow="none"
-				styleClass="min-h-[640px] min-w-[2000px] md:min-h-full bg-left relative md:absolute"
+				styleClass="min-h-[640px] min-w-[2000px] md:min-h-[800px] max-h-[1688px] bg-left relative md:absolute"
 			/>
 		{/await}
 	</div>
