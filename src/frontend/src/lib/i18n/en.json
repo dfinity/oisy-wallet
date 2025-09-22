@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "License Agreement",
-			"accept_terms": "By clicking this button, you agree to the",
-			"accept_terms_link": "License Agreement",
 			"title": "$oisy_name License Agreement (“License Agreement”)",
 			"paragraph_1": "Thank you for your interest in $oisy_name, a browser-based, self-custodial and multi-chain wallet decentralized application hosted on the Internet Computer public blockchain network (“$oisy_short”). For more information about $oisy_short, its open-source code and related licenses, please refer to the $oisy_short github repository found here: $oisy_repo_url.",
 			"paragraph_2": "This License Agreement governs your use of $oisy_short (\"You\"). BY USING $oisy_short, YOU AGREE THAT YOU HAVE READ, UNDERSTOOD, AND AGREE TO BE BOUND BY THIS LICENSE AGREEMENT. IF YOU DO NOT AGREE, YOU MAY NOT USE $oisy_short.",
