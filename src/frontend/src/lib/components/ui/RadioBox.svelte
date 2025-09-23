@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Radio from '$lib/components/ui/Radio.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import Radio from '$lib/components/ui/Radio.svelte';
 
 	interface Props {
 		checked: boolean;
@@ -17,7 +17,7 @@
 <label
 	class="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-3 transition hover:bg-brand-subtle-20"
 >
-	<Radio {checked} {disabled} {onChange} inputId={id} />
+	<Radio {checked} {disabled} inputId={id} {onChange} />
 	<span class="flex flex-col items-start text-left">
 		<span class="font-bold">{label}</span>
 		{#if nonNullish(description)}
