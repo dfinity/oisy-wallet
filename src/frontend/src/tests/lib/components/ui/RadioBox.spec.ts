@@ -1,4 +1,5 @@
 import RadioBox from '$lib/components/ui/RadioBox.svelte';
+import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 
 describe('RadioBox', () => {
@@ -40,6 +41,8 @@ describe('RadioBox', () => {
 		});
 
 		const boxElm: HTMLLabelElement | null = container.querySelector('label');
+
+		assertNonNullish(boxElm);
 
 		await fireEvent.click(boxElm);
 
