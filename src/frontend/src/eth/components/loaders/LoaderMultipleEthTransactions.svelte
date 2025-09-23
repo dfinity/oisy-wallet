@@ -66,7 +66,7 @@
 			return;
 		}
 
-        loading = true;
+		loading = true;
 
 		await Promise.allSettled(
 			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
@@ -84,9 +84,9 @@
 			})
 		);
 
-        loading = false;
+		loading = false;
 
-        await onLoad()
+		await onLoad();
 	});
 </script>
 

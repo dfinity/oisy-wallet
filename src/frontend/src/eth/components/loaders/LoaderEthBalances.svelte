@@ -57,7 +57,7 @@
 			return;
 		}
 
-        loading = true;
+		loading = true;
 
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
@@ -71,9 +71,9 @@
 			)
 		);
 
-        loading = false;
+		loading = false;
 
-        await onLoad()
+		await onLoad();
 	});
 </script>
 

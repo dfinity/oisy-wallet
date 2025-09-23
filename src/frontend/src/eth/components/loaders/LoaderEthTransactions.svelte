@@ -108,7 +108,7 @@
 			return;
 		}
 
-        loading = true;
+		loading = true;
 
 		const {
 			network: { id: networkId },
@@ -123,9 +123,9 @@
 			transactionsStore: ethTransactionsStore
 		});
 
-        loading = false;
+		loading = false;
 
-        await load()
+		await load();
 	});
 </script>
 
