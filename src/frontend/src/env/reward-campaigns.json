@@ -45,7 +45,7 @@
 		"campaignHref": "rewards.campaigns.sprinkles_s1e4.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
 		"startDate": "2025-06-26T12:00:00.000Z",
-		"endDate": "2025-09-23T12:00:00.000Z",
+		"endDate": "2025-09-24T12:00:00.000Z",
 		"win": {
 			"default": {
 				"title": "rewards.campaigns.sprinkles_s1e4.win.default.title",
@@ -90,7 +90,7 @@
 		"cardBanner": "/images/rewards/oisy-episode-three-campaign.svg",
 		"campaignHref": "rewards.campaigns.sprinkles_s1e5.campaign_href",
 		"learnMoreHref": "https://docs.oisy.com/rewards/oisy-sprinkles",
-		"startDate": "2025-09-23T12:00:00.000Z",
+		"startDate": "2025-09-24T12:00:00.000Z",
 		"endDate": "2025-11-12T12:00:00.000Z",
 		"win": {
 			"default": {
