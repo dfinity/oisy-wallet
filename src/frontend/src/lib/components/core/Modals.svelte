@@ -5,6 +5,8 @@
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
+	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
@@ -34,10 +36,8 @@
 		modalReceive,
 		modalReceiveId
 	} from '$lib/derived/modal.derived';
-	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
-	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
-	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import { getSymbol } from '$lib/utils/modal.utils';
+	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
 	/**
 	 * Modals that must be declared at the root of the layout if they are used across routes - available on navigation.

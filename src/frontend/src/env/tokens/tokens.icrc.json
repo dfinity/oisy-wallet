@@ -1,7 +1,6 @@
 {
 	"BURN": {
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
-		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
 		"decimals": 8,
 		"name": "MSQ Cycle Burn",
 		"symbol": "BURN",
@@ -11,7 +10,6 @@
 	},
 	"CLOUD": {
 		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
-		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
 		"decimals": 8,
 		"name": "Crypto Cloud",
 		"symbol": "CLOUD",
@@ -21,7 +19,6 @@
 	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
-		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
 		"decimals": 8,
 		"name": "aaaaa-aa ∞",
 		"symbol": "AAA",
