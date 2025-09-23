@@ -7,7 +7,10 @@ import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { enabledTokens } from '$lib/derived/tokens.derived';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
-import { parseToAiAssistantContacts } from '$lib/utils/ai-assistant.utils';
+import {
+	parseToAiAssistantContacts,
+	parseToAiAssistantTokens
+} from '$lib/utils/ai-assistant.utils';
 import { jsonReplacer, notEmptyString, toNullable } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
@@ -25,11 +28,7 @@ export const aiAssistantSystemMessage: Readable<chat_message_v1> = derived(
 	[extendedAddressContacts, enabledTokens],
 	([$extendedAddressContacts, $enabledTokens]) => {
 		const aiAssistantContacts = Object.values(parseToAiAssistantContacts($extendedAddressContacts));
-		const aiEnabledTokens = $enabledTokens.map(({ name, symbol, network: { id: networkId } }) => ({
-			name,
-			symbol,
-			networkId: networkId.description
-		}));
+		const aiEnabledTokens = parseToAiAssistantTokens($enabledTokens);
 
 		return {
 			system: {
