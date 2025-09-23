@@ -175,5 +175,9 @@
 		"fee": {
 			"__bigint__": "10000"
 		}
+	},
+	"DYA": {
+		"ledgerCanisterId": "vrsv6-3qaaa-aaaau-abytq-cai",
+		"indexCanisterId": "u44rq-uyaaa-aaaau-abyua-cai"
 	}
 }
