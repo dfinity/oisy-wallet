@@ -39,9 +39,9 @@ describe('RadioBox', () => {
 			props
 		});
 
-		const box: HTMLLabelElement | null = container.querySelector('label');
+		const boxElm: HTMLLabelElement | null = container.querySelector('label');
 
-		await fireEvent.click(box);
+		await fireEvent.click(boxElm);
 
 		expect(props.onChange).toHaveBeenCalledOnce();
 	});
