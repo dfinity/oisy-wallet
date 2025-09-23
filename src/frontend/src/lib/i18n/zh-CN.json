@@ -205,7 +205,8 @@
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
-			"tools": "工具包"
+			"tools": "工具包",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -337,6 +338,12 @@
 			"usdai": {
 				"name": "",
 				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
