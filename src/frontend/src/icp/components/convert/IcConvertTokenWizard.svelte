@@ -81,7 +81,7 @@
 		onDestination,
 		onDestinationBack,
 		onIcQrCodeBack,
-		onIcQrCodeScan,
+		onIcQrCodeScan
 	}: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
