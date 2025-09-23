@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
-			"tools": "Khí cụ"
+			"tools": "Khí cụ",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -337,6 +338,12 @@
 			"usdai": {
 				"name": "",
 				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
