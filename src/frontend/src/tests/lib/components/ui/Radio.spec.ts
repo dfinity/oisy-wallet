@@ -1,5 +1,6 @@
 import Radio from '$lib/components/ui/Radio.svelte';
-import { render } from '@testing-library/svelte';
+import { assertNonNullish } from '@dfinity/utils';
+import { fireEvent, render } from '@testing-library/svelte';
 
 describe('Radio', () => {
 	const props: { inputId: string; checked: boolean } = {
@@ -51,5 +52,20 @@ describe('Radio', () => {
 		input = container.querySelector('input');
 
 		expect(input?.checked).toBeFalsy();
+	});
+
+	it('should call onChange when input is clicked', async () => {
+		const onChange = vi.fn();
+		const { container } = render(Radio, {
+			props: { ...props, onChange }
+		});
+
+		const input: HTMLInputElement | null = container.querySelector('input');
+
+		assertNonNullish(input);
+
+		await fireEvent.change(input);
+
+		expect(onChange).toHaveBeenCalledOnce();
 	});
 });
