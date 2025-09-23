@@ -25,7 +25,7 @@ describe('RadioBox', () => {
 			props
 		});
 
-		const input = container.querySelector('input');
+		const input: HTMLInputElement | null = container.querySelector('input');
 
 		expect(input?.checked).toBeFalsy();
 
@@ -39,7 +39,7 @@ describe('RadioBox', () => {
 			props
 		});
 
-		const box = container.querySelector('label');
+		const box: HTMLLabelElement | null = container.querySelector('label');
 
 		await fireEvent.click(box);
 
@@ -51,8 +51,8 @@ describe('RadioBox', () => {
 			props
 		});
 
-		let label = queryByText(props.label);
-		let description = queryByText(props.description);
+		let label: HTMLElement | null = queryByText(props.label);
+		let description: HTMLElement | null = queryByText(props.description);
 
 		expect(label).toBeInTheDocument();
 		expect(description).toBeInTheDocument();
