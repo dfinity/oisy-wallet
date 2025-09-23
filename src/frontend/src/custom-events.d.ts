@@ -5,8 +5,6 @@ declare module 'svelte/elements' {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyTriggerWallet?: (event: CustomEvent<any>) => void;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyReceive?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyReceiveCkBTC?: (event: CustomEvent<any>) => void;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyCkBtcUpdateBalance?: (event: CustomEvent<any>) => void;
