@@ -1,12 +1,15 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type {
 	AiAssistantContactUiMap,
+	AiAssistantToken,
 	ReviewSendTokensToolResult,
 	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Token } from '$lib/types/token';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
@@ -19,10 +22,51 @@ export const parseToAiAssistantContacts = (
 			...acc,
 			[contactId]: {
 				name,
-				addresses: addresses.map(({ address: _, ...restAddress }) => restAddress)
+				addresses: addresses.map(({ address, addressType, ...restAddress }) => ({
+					acceptedTokenStandards:
+						addressType === 'Btc'
+							? ['bitcoin']
+							: addressType === 'Icrcv2'
+								? !isIcrcAddress(address)
+									? ['icp']
+									: ['icp', 'icrc']
+								: addressType === 'Sol'
+									? ['solana', 'spl']
+									: addressType === 'Eth'
+										? // We do not include NFT standards here until the console can handle sending them
+											['ethereum', 'erc20', 'dip20']
+										: [],
+					addressType,
+					...restAddress
+				}))
 			}
 		};
 	}, {});
+
+export const parseToAiAssistantTokens = (tokens: Token[]): AiAssistantToken[] =>
+	tokens.reduce<AiAssistantToken[]>((acc, token) => {
+		// We do not yet support sending NFTs via the AI console
+		if (isTokenNonFungible(token)) {
+			return acc;
+		}
+
+		const {
+			name,
+			standard,
+			symbol,
+			network: { id: networkId }
+		} = token;
+
+		return [
+			...acc,
+			{
+				name,
+				symbol,
+				standard,
+				networkId: networkId.description ?? ''
+			}
+		];
+	}, []);
 
 export const parseShowFilteredContactsToolArguments = ({
 	filterParams,

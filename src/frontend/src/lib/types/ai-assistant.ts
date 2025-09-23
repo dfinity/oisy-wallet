@@ -1,6 +1,6 @@
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
 
 export interface ChatMessageContent {
 	text?: string;
@@ -59,7 +59,13 @@ export interface ToolResult {
 
 export interface AiAssistantContactUi
 	extends Omit<ExtendedAddressContactUi, 'addresses' | 'image' | 'updateTimestampNs' | 'id'> {
-	addresses: Omit<ContactAddressUiWithId, 'address'>[];
+	addresses: (Omit<ContactAddressUiWithId, 'address'> & {
+		acceptedTokenStandards: TokenStandard[];
+	})[];
 }
 
 export type AiAssistantContactUiMap = Record<string, AiAssistantContactUi>;
+
+export type AiAssistantToken = Pick<Token, 'name' | 'symbol' | 'standard'> & {
+	networkId: string;
+};

@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Thỏa thuận cấp phép",
-			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
-			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
 			"paragraph_1": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung ví đa chuỗi, tự quản lý dựa trên trình duyệt được lưu trữ trên mạng blockchain công khai Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ GitHub của $oisy_short tại đây: $oisy_repo_url.",
 			"paragraph_2": "Thỏa thuận cấp phép này điều chỉnh việc bạn (“Bạn”) sử dụng $oisy_short. BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.",
