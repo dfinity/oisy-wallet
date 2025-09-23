@@ -47,9 +47,10 @@
 		destination: Address;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -207,11 +208,10 @@
 				metadata: sendTrackingEventMetadata
 			});
 
+			onSendCompleted();
 			loading = false;
-			sendCompleted = true;
 		} catch (err: unknown) {
 			loading = false;
-			sendCompleted = false;
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
