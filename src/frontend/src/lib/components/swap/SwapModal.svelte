@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import NewSwapWizard from './NewSwapWizard.svelte';
+	import SwapWizard from './SwapWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
@@ -232,7 +232,7 @@
 			on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-		<NewSwapWizard
+		<SwapWizard
 			{currentStep}
 			onBack={modal.back}
 			onClose={close}
