@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { getContext, setContext, type Snippet } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import IcConvertForm from '$icp/components/convert/IcConvertForm.svelte';
 	import IcConvertProgress from '$icp/components/convert/IcConvertProgress.svelte';
 	import IcConvertReview from '$icp/components/convert/IcConvertReview.svelte';
@@ -66,7 +66,6 @@
 		onDestinationBack: () => void;
 		onIcQrCodeBack: () => void;
 		onIcQrCodeScan: () => void;
-		children?: Snippet;
 	}
 
 	let {
@@ -83,7 +82,6 @@
 		onDestinationBack,
 		onIcQrCodeBack,
 		onIcQrCodeScan,
-		children
 	}: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -256,8 +254,6 @@
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
 			/>
-		{:else}
-			{@render children?.()}
 		{/if}
 	</BitcoinFeeContext>
 </EthereumFeeContext>
