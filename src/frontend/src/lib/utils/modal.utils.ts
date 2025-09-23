@@ -1,5 +1,4 @@
 import { modalStore } from '$lib/stores/modal.store';
-import { nonNullish } from '@dfinity/utils';
 
 export const closeModal = (reset: () => void) => {
 	modalStore.close();
