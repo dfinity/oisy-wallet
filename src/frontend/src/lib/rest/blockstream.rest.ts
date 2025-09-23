@@ -1,4 +1,14 @@
-import { BLOCKSTREAM_API_URL } from '$env/rest/blockstream.env';
+import { isBitcoinNetworkRegtest, isBitcoinNetworkTestnet } from '$btc/utils/network.utils';
+import {
+	BLOCKSTREAM_API_URL,
+	BLOCKSTREAM_REGTEST_API_URL,
+	BLOCKSTREAM_TESTNET_API_URL
+} from '$env/rest/blockstream.env';
+import type {
+	BlockstreamBtcAddressTxsParams,
+	BlockstreamTransaction
+} from '$lib/types/blockstream';
+import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
 /**
  * Get latest mined BTC block height. Used for calculating the number of confirmations for a BTC transaction.
@@ -7,13 +17,46 @@ import { BLOCKSTREAM_API_URL } from '$env/rest/blockstream.env';
  * - https://github.com/Blockstream/esplora/blob/master/API.md#get-blockstipheight
  *
  */
-export const btcLatestBlockHeight = (): Promise<number> =>
+export const btcLatestBlockHeight = ({
+	bitcoinNetwork
+}: {
+	bitcoinNetwork: BitcoinNetwork;
+}): Promise<number> =>
 	fetchBlockstreamApi<number>({
-		endpointPath: `blocks/tip/height`
+		endpointPath: `blocks/tip/height`,
+		bitcoinNetwork
 	});
 
-const fetchBlockstreamApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
-	const response = await fetch(`${BLOCKSTREAM_API_URL}/${endpointPath}`);
+/**
+ * Get BTC address transactions.
+ *
+ * Documentation:
+ * - https://github.com/Blockstream/esplora/blob/master/API.md#get-addressaddresstxs
+ *
+ */
+export const btcAddressTransactions = ({
+	btcAddress,
+	bitcoinNetwork
+}: BlockstreamBtcAddressTxsParams): Promise<BlockstreamTransaction[]> =>
+	fetchBlockstreamApi<BlockstreamTransaction[]>({
+		endpointPath: `address/${btcAddress}/txs`,
+		bitcoinNetwork
+	});
+
+const fetchBlockstreamApi = async <T>({
+	endpointPath,
+	bitcoinNetwork
+}: {
+	endpointPath: string;
+	bitcoinNetwork: BitcoinNetwork;
+}): Promise<T> => {
+	const baseUrl = isBitcoinNetworkTestnet(bitcoinNetwork)
+		? BLOCKSTREAM_TESTNET_API_URL
+		: isBitcoinNetworkRegtest(bitcoinNetwork)
+			? BLOCKSTREAM_REGTEST_API_URL
+			: BLOCKSTREAM_API_URL;
+
+	const response = await fetch(`${baseUrl}/${endpointPath}`);
 
 	if (!response.ok) {
 		throw new Error('Blockstream API response not ok.');

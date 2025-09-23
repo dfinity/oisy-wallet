@@ -127,7 +127,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 		try {
 			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
 
-			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
+			const latestBitcoinBlockHeight = await btcLatestBlockHeight({ bitcoinNetwork: 'mainnet' });
 
 			// Check if the block height has changed since last sync
 			const blockHeightChanged = this.store.latestBitcoinBlockHeight !== latestBitcoinBlockHeight;
