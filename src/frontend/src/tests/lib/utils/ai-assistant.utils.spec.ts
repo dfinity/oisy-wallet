@@ -38,7 +38,8 @@ describe('ai-assistant.utils', () => {
 			{
 				addressType: extendedAddressContactUi.addresses[0].addressType,
 				id: extendedAddressContactUi.addresses[0].id,
-				label: extendedAddressContactUi.addresses[0].label
+				label: extendedAddressContactUi.addresses[0].label,
+				acceptedTokenStandards: ['ethereum', 'erc20', 'dip20']
 			}
 		]
 	};
