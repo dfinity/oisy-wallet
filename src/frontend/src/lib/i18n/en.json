@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Game",
-			"tools": "Tools"
+			"tools": "Tools",
+			"ai": "AI"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -338,6 +339,12 @@
 				"name": "USD.AI",
 				"one_liner": "A synthetic‑dollar protocol backing USDai with income‑generating AI compute infrastructure and offering yield via sUSDai.",
 				"description": "USD.AI is a synthetic dollar protocol backed by income-generating AI compute infrastructure, creating a decentralized stablecoin called USDai. Users can hold or stake USDai to earn sUSDai, a yield-bearing version that reflects protocol earnings. The system is designed to create a composable, productive, and decentralized alternative to fiat-backed stablecoins."
+			},
+			"caffeine": {
+				"name": "Caffeine",
+				"one_liner": "The first platform for building self-writing apps.",
+				"call_to_action": "Try Caffeine",
+				"description": "Caffeine is the first platform for building self-writing apps. Just talk to AI on desktop or mobile, and it creates apps and services for you – including ones that connect to OISY Wallet. Experience the future of app development with AI-powered creation."
 			}
 		}
 	},
