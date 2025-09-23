@@ -11,6 +11,4 @@ export const closeModal = (reset: () => void) => {
 const symbols: Record<string, symbol> = {};
 
 export const getSymbol = (identifier: string) =>
-	nonNullish(symbols[identifier])
-		? symbols[identifier]
-		: (symbols[identifier] = Symbol(identifier));
+	symbols[identifier] ?? (symbols[identifier] = Symbol(identifier));
