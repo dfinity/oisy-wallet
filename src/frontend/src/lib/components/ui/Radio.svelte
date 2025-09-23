@@ -16,9 +16,9 @@
 		{checked}
 		data-tid="radio"
 		{disabled}
+		onchange={onChange}
 		tabindex="-1"
 		type="radio"
-		onchange={onChange}
 	/>
 </div>
 
