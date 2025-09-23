@@ -38,7 +38,8 @@ describe('ai-assistant.utils', () => {
 			{
 				addressType: extendedAddressContactUi.addresses[0].addressType,
 				id: extendedAddressContactUi.addresses[0].id,
-				label: extendedAddressContactUi.addresses[0].label
+				label: extendedAddressContactUi.addresses[0].label,
+				acceptedTokenStandards: ['ethereum', 'erc20', 'dip20']
 			}
 		]
 	};
@@ -192,6 +193,39 @@ describe('ai-assistant.utils', () => {
 			).toEqual({
 				contacts: []
 			});
+		});
+	});
+
+	describe('parseToAiAssistantTokens', () => {
+		it('parses array of tokens correctly', () => {
+			expect(
+				parseToAiAssistantTokens([
+					ICP_TOKEN,
+					ETHEREUM_TOKEN,
+					SOLANA_TOKEN,
+					mockValidErc721Token,
+					mockValidErc1155Token
+				])
+			).toEqual([
+				{
+					name: ICP_TOKEN.name,
+					symbol: ICP_TOKEN.symbol,
+					standard: ICP_TOKEN.standard,
+					networkId: ICP_TOKEN.network.id.description ?? ''
+				},
+				{
+					name: ETHEREUM_TOKEN.name,
+					symbol: ETHEREUM_TOKEN.symbol,
+					standard: ETHEREUM_TOKEN.standard,
+					networkId: ETHEREUM_TOKEN.network.id.description ?? ''
+				},
+				{
+					name: SOLANA_TOKEN.name,
+					symbol: SOLANA_TOKEN.symbol,
+					standard: SOLANA_TOKEN.standard,
+					networkId: SOLANA_TOKEN.network.id.description ?? ''
+				}
+			]);
 		});
 	});
 

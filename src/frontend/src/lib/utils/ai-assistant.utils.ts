@@ -1,4 +1,5 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { isIcrcAddress } from '$icp/utils/icrc-account.utils';
 import type {
 	AiAssistantContactUiMap,
 	AiAssistantToken,
@@ -21,7 +22,21 @@ export const parseToAiAssistantContacts = (
 			...acc,
 			[contactId]: {
 				name,
-				addresses: addresses.map(({ address: _, ...restAddress }) => restAddress)
+				addresses: addresses.map(({ address, addressType, ...restAddress }) => ({
+					acceptedTokenStandards:
+						addressType === 'Btc'
+							? ['bitcoin']
+							: addressType === 'Icrcv2'
+								? !isIcrcAddress(address)
+									? ['icp']
+									: ['icp', 'icrc']
+								: addressType === 'Sol'
+									? ['solana', 'spl']
+									: // We do not include NFT standards here until the console can handle sending them
+										['ethereum', 'erc20', 'dip20'],
+					addressType,
+					...restAddress
+				}))
 			}
 		};
 	}, {});
