@@ -349,7 +349,7 @@ div.step {
 	}
 }
 
-div.checkbox {
+div.checkbox, div.radio {
 	&:hover input {
 		--secondary: var(--color-background-brand-secondary) !important;
 		--input-custom-border-color: var(--color-background-brand-secondary);
@@ -357,7 +357,7 @@ div.checkbox {
 		--input-background: var(--color-background-brand-secondary);
 	}
 
-	input[type='checkbox'] {
+	input[type='checkbox'], input[type='radio'] {
 		--secondary: var(--color-primary);
 		--focus-background: var(--color-background-primary);
 
