@@ -1,5 +1,5 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
-import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
+import SwapForm from '$lib/components/swap/SwapForm.svelte';
 import {
 	SWAP_SWITCH_TOKENS_BUTTON,
 	TOKEN_INPUT_AMOUNT_EXCHANGE_BUTTON,
@@ -90,7 +90,7 @@ describe('SwapForm', () => {
 			setupSwapAmountsStore(swapAmounts as SwapAmountsStoreData);
 			setupIcTokenFeeStore();
 
-			const { getByTestId } = render(NewSwapForm, {
+			const { getByTestId } = render(SwapForm, {
 				props: { ...props, slippageValue: undefined, isSwapAmountsLoading: false },
 				context: mockContext
 			});
@@ -111,7 +111,7 @@ describe('SwapForm', () => {
 		});
 
 		const renderSwapForm = () =>
-			render(NewSwapForm, {
+			render(SwapForm, {
 				props: {
 					swapAmount: '1',
 					receiveAmount: 2,
