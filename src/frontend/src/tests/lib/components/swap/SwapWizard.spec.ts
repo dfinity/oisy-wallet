@@ -1,7 +1,7 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
-import NewSwapWizard from '$lib/components/swap/NewSwapWizard.svelte';
+import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
@@ -81,7 +81,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render component', () => {
-		const { container } = render(NewSwapWizard, {
+		const { container } = render(SwapWizard, {
 			props: defaultProps,
 			context: mockContext
 		});
@@ -90,7 +90,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ICP wizard when sourceToken is null', () => {
-		const { container } = render(NewSwapWizard, {
+		const { container } = render(SwapWizard, {
 			props: defaultProps,
 			context: mockContext
 		});
@@ -99,7 +99,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ETH wizard when sourceToken is not ICP network', () => {
-		const { container } = render(NewSwapWizard, {
+		const { container } = render(SwapWizard, {
 			props: defaultProps,
 			context: mockContext
 		});

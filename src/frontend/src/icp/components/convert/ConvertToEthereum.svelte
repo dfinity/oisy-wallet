@@ -14,7 +14,7 @@
 	$: icCkToken = $pageToken as OptionIcCkToken;
 </script>
 
-<ConvertEth
+<!-- <ConvertEth
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
@@ -22,7 +22,7 @@
 >
 	<IconCkConvert slot="icon" size="24" />
 	<span>{$ckEthereumTwinToken.symbol}</span>
-</ConvertEth>
+</ConvertEth> -->
 
 {#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}
 	<ConvertModal destinationToken={icCkToken.twinToken} sourceToken={icCkToken} />
