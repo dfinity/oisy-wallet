@@ -14,10 +14,7 @@ describe('blockchain.rest', () => {
 		});
 
 		it('fetches BTC address data with cors=true', async () => {
-			const result = await btcAddressData({
-				btcAddress: mockBtcAddress,
-				bitcoinNetwork: 'mainnet'
-			});
+			const result = await btcAddressData({ btcAddress: mockBtcAddress });
 
 			expect(result).toEqual(mockBlockchainResponse);
 
@@ -34,12 +31,9 @@ describe('blockchain.rest', () => {
 				})
 			) as unknown as typeof fetch;
 
-			await expect(
-				btcAddressData({
-					btcAddress: mockBtcAddress,
-					bitcoinNetwork: 'mainnet'
-				})
-			).rejects.toThrow('Blockchain API response not ok.');
+			await expect(btcAddressData({ btcAddress: mockBtcAddress })).rejects.toThrow(
+				'Blockchain API response not ok.'
+			);
 
 			expect(global.fetch).toHaveBeenCalledWith(
 				expect.stringContaining(`rawaddr/${mockBtcAddress}?cors=true`)

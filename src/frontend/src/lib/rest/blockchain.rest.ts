@@ -1,7 +1,5 @@
-import { isBitcoinNetworkTestnet } from '$btc/utils/network.utils';
-import { BLOCKCHAIN_API_URL, BLOCKCHAIN_TESTNET_API_URL } from '$env/rest/blockchain.env';
+import { BLOCKCHAIN_API_URL } from '$env/rest/blockchain.env';
 import type { BitcoinAddressData, BlockchainBtcAddressDataParams } from '$lib/types/blockchain';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
 
 /**
  * Get BTC address data (including transactions).
@@ -11,27 +9,14 @@ import type { BitcoinNetwork } from '@dfinity/ckbtc';
  *
  */
 export const btcAddressData = ({
-	btcAddress,
-	bitcoinNetwork
+	btcAddress
 }: BlockchainBtcAddressDataParams): Promise<BitcoinAddressData> =>
 	fetchBlockchainApi<BitcoinAddressData>({
-		endpointPath: `rawaddr/${btcAddress}`,
-		bitcoinNetwork
+		endpointPath: `rawaddr/${btcAddress}`
 	});
 
-const fetchBlockchainApi = async <T>({
-	endpointPath,
-	bitcoinNetwork
-}: {
-	endpointPath: string;
-	bitcoinNetwork: BitcoinNetwork;
-}): Promise<T> => {
-	// TODO add baseUrl for regtest for locally emulated endpoint
-	const baseUrl = isBitcoinNetworkTestnet(bitcoinNetwork)
-		? BLOCKCHAIN_TESTNET_API_URL
-		: BLOCKCHAIN_API_URL;
-
-	const url = new URL(`${baseUrl}/${endpointPath}`);
+const fetchBlockchainApi = async <T>({ endpointPath }: { endpointPath: string }): Promise<T> => {
+	const url = new URL(`${BLOCKCHAIN_API_URL}/${endpointPath}`);
 
 	// Some API calls are available with CORS headers if you add a &cors=true parameter to the GET request
 	// https://www.blockchain.com/explorer/api/q
