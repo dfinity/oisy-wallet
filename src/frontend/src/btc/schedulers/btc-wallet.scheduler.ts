@@ -1,7 +1,11 @@
 import { BTC_BALANCE_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
-import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
+import {
+	btcWalletBalanceEquals,
+	type BtcTransactionUi,
+	type BtcWalletBalance
+} from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { mapBtcTransaction } from '$btc/utils/btc-blockstream.utils';
+import { mapBtcTransaction } from '$btc/utils/blockstream-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
@@ -115,7 +119,13 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 	}
-	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
+	private async loadBtcTransactionsData({
+		btcAddress,
+		bitcoinNetwork
+	}: {
+		btcAddress: BtcAddress;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
 	}> {
@@ -225,7 +235,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}: LoadBtcWalletParams) => {
 		const transactionData =
 			shouldFetchTransactions && !certified
-				? await this.loadBtcTransactionsData({ btcAddress })
+				? await this.loadBtcTransactionsData({ btcAddress, bitcoinNetwork })
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
 
 		const pendingTransactionData =
@@ -249,12 +259,6 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			pendingTransactions: pendingTransactionData.transactions,
 			uncertifiedTransactions: transactionData.transactions
 		});
-
-		// TODO: investigate and implement "update" call for BTC transactions
-		const transactionData =
-			shouldFetchTransactions && !certified
-				? await this.loadBtcTransactionsData({ btcAddress })
-				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
 
 		return {
 			balance,

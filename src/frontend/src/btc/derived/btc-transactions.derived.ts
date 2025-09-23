@@ -1,5 +1,5 @@
 import { btcTransactionsStore, type BtcTransactionsData } from '$btc/stores/btc-transactions.store';
-import { sortBtcTransactions } from '$btc/utils/btc-transactions.utils';
+import { sortBtcTransactions } from '$btc/utils/blockchain-transactions.utils';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';

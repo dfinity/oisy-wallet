@@ -104,9 +104,7 @@ export const mapBtcTransaction = ({
 	// Step 7: Compose the final structured BTC transaction object for the UI
 	return {
 		id: txid,
-		timestamp: nonNullish(status.block_time)
-			? BigInt(status.block_time)
-			: BigInt(Date.now() / 1000),
+		timestamp: nonNullish(status.block_time) ? BigInt(Math.floor(status.block_time)) : undefined,
 		value,
 		status: transactionStatus,
 		blockNumber: status.block_height ?? undefined,

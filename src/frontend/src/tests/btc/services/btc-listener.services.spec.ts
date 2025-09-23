@@ -5,7 +5,7 @@ import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-messa
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcTransactionUi } from '$tests/mocks/blockstream-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

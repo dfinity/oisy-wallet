@@ -1,13 +1,12 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
-import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import { mapBtcTransaction } from '$btc/utils/blockstream-transactions.utils';
 import * as authClientApi from '$lib/api/auth-client.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
-import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
-import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcTransaction } from '$tests/mocks/blockstream-transactions.mock';
+import { mockBlockstreamTransactions } from '$tests/mocks/blockstream.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
@@ -56,12 +55,19 @@ describe('btc-wallet.worker', () => {
 			wallet: {
 				balance: {
 					certified,
-					data: {
-						confirmed: mockBalance,
-						unconfirmed: 0n,
-						locked: 0n,
-						total: mockBalance
-					}
+					data: certified
+						? {
+								confirmed: mockBalance,
+								unconfirmed: 0n,
+								locked: 0n,
+								total: mockBalance
+							}
+						: {
+								confirmed: mockBalance,
+								unconfirmed: 126527n,
+								locked: 0n,
+								total: 126627n
+							}
 				},
 				newTransactions: JSON.stringify(
 					withTransactions
@@ -99,10 +105,11 @@ describe('btc-wallet.worker', () => {
 
 		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 
-		let mockBlockHeight = 1000;
-		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);
+		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(latestBitcoinBlockHeight);
 
-		vi.spyOn(blockchainRest, 'btcAddressData').mockResolvedValue(mockBlockchainResponse);
+		vi.spyOn(blockstreamRest, 'btcAddressTransactions').mockResolvedValue(
+			mockBlockstreamTransactions
+		);
 
 		vi.spyOn(SignerCanister, 'create').mockResolvedValue(signerCanisterMock);
 		vi.spyOn(BitcoinCanister, 'create').mockReturnValue(bitcoinCanisterMock);
