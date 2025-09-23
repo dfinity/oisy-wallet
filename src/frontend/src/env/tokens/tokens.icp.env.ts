@@ -52,7 +52,7 @@ export const TESTICP_TOKEN: RequiredToken<Omit<IcToken, 'deprecated' | 'explorer
 	network: ICP_PSEUDO_TESTNET_NETWORK,
 	standard: 'icp',
 	category: 'default',
-	exchangeCoinId: 'test-internet-computer',
+	exchangeCoinId: 'internet-computer',
 	position: 0,
 	name: 'Test ICP',
 	symbol: TESTICP_SYMBOL,
