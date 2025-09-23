@@ -362,7 +362,7 @@
 			"activity_button_text": "Check on Recent Activity",
 			"activity_button_text_short": "Check activity",
 			"open_wallet": "Take me to the wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 is now Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 is now Live!",
 			"carousel_slide_cta": "Learn more",
 			"sprinkles_earned": "You've earned $noOfSprinkles sprinkles, totaling $amount! \uD83C\uDF89",
 			"youre_eligible": "You're eligible!",
@@ -381,7 +381,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Keep an eye out for upcoming token drops! <a href=\"https://x.com/oisy\" target=\"_blank\">Follow us on X</a>, join our <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, or hop into <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> to stay in the loop.",
-			"coming_soon": "$oisy_short episode 4 is coming soon",
+			"coming_soon": "$oisy_short episode 6 is coming soon",
 			"reward_banner": "Banner of the campaign $campaignName"
 		},
 		"campaigns": {
@@ -447,7 +447,7 @@
 			},
 			"sprinkles_s1e5": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episode 5 is coming soon....",
+				"card_title": "OISY Sprinkles: Episode 5 is Live \uD83C\uDF89",
 				"one_liner": "Earn BTC for staying active.<br/>Log in, make transactions, and hold tokens to qualify for daily drops. Refer your friends and get a bonus every time they win. Top referrers win even more.",
 				"participate_title": "Earn BTC by staying active - and get a Bonus every time a friend wins.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Land in the top 3 referrers and win a jackpot.",
