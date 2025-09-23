@@ -3,7 +3,6 @@
 	import { setContext } from 'svelte';
 	import NewSwapModal from './NewSwapModal.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import {
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
