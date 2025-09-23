@@ -3,6 +3,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { getSymbol } from '$lib/utils/modal.utils';
+	import { NAVIGATION_MENU_RECEIVE_BUTTON } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		onClick?: () => void;
@@ -11,12 +12,16 @@
 	let { onClick }: Props = $props();
 
 	const openReceive = () => {
-		onClick?.();
 		modalStore.openReceive(getSymbol('menu-addresses'));
+		onClick?.();
 	};
 </script>
 
-<button class="nav-item nav-item-condensed" onclick={openReceive}>
+<button
+	class="nav-item nav-item-condensed"
+	onclick={openReceive}
+	data-tid={NAVIGATION_MENU_RECEIVE_BUTTON}
+>
 	<IconOisyMenu size="20" />
 	{$i18n.wallet.text.your_addresses}
 </button>
