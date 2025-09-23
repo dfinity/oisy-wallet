@@ -66,6 +66,8 @@
 			return;
 		}
 
+        loading = true;
+
 		await Promise.allSettled(
 			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
 				if (nonNullish($ethTransactionsStore?.[tokenId])) {
@@ -81,6 +83,8 @@
 				});
 			})
 		);
+
+        loading = false;
 	});
 </script>
 

@@ -23,6 +23,7 @@
 		if (loading) {
 			return;
 		}
+
 		loading = true;
 
 		if (isNullish($ethAddress)) {
@@ -56,6 +57,8 @@
 			return;
 		}
 
+        loading = true;
+
 		await Promise.allSettled(
 			[...$enabledEthereumTokens, ...$enabledEvmTokens, ...$enabledErc20Tokens].map(
 				async ({ id: tokenId, network: { id: networkId } }) => {
@@ -67,6 +70,8 @@
 				}
 			)
 		);
+
+        loading = false;
 	});
 </script>
 
