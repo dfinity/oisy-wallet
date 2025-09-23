@@ -64,14 +64,9 @@
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
-			class="relative min-h-[640px] pb-5 md:pb-0 lg:flex lg:h-full lg:flex-col"
-			class:flex={$authSignedIn}
-			class:flex-col={$authSignedIn}
+			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
-			class:md:flex={$authNotSignedIn}
-			class:md:flex-col={$authNotSignedIn}
-			class:md:h-full={$authNotSignedIn}
-			class:overflow-hidden={$authNotSignedIn}
+			class:min-h-[100dvh]={$authNotSignedIn}
 		>
 			<Header />
 
