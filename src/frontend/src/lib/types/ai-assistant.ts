@@ -63,3 +63,7 @@ export interface AiAssistantContactUi
 }
 
 export type AiAssistantContactUiMap = Record<string, AiAssistantContactUi>;
+
+export type AiAssistantToken = Pick<Token, 'name' | 'symbol' | 'standard'> & {
+	networkId: string;
+};
