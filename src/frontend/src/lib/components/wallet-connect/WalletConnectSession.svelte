@@ -467,6 +467,8 @@
 	};
 </script>
 
+<svelte:window oisyDisconnectWalletConnect={disconnect} />
+
 {#if nonNullish(listener)}
 	<WalletConnectButton onclick={disconnect}>
 		{$i18n.wallet_connect.text.disconnect}
