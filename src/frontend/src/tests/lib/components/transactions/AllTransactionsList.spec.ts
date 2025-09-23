@@ -15,6 +15,10 @@ import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transaction
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
+import {
+	IntersectionObserverActive,
+	IntersectionObserverPassive
+} from '$tests/mocks/infinite-scroll.mock';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/auth.services', () => ({
@@ -32,7 +36,15 @@ describe('AllTransactionsList', () => {
 			ETHEREUM_NETWORK_ID,
 			SEPOLIA_NETWORK_ID
 		]);
+
+		Object.defineProperty(window, 'IntersectionObserver', {
+			writable: true,
+			configurable: true,
+			value: IntersectionObserverActive
+		});
 	});
+
+	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('should call the function to map the transactions list', () => {
 		const spyMapAllTransactionsUi = vi.spyOn(transactionsUtils, 'mapAllTransactionsUi');
@@ -151,7 +163,7 @@ describe('AllTransactionsList', () => {
 			const { container } = render(AllTransactionsList);
 
 			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement?.parentElement?.parentElement === container
+				(el) => el.parentElement?.parentElement?.parentElement?.parentElement === container
 			);
 
 			expect(transactionComponents).toHaveLength(
