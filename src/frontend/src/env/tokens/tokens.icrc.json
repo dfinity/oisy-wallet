@@ -179,6 +179,9 @@
 	"DYA": {
 		"ledgerCanisterId": "vrsv6-3qaaa-aaaau-abytq-cai",
 		"indexCanisterId": "u44rq-uyaaa-aaaau-abyua-cai",
+		"decimals": 8,
+		"name": "Dyah AI",
+		"symbol": "DYA",
 		"fee": {
 			"__bigint__": "10000"
 		}
