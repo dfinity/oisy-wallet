@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import NewSwapModal from './NewSwapModal.svelte';
+	import SwapModal from './SwapModal.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -108,5 +108,5 @@
 </script>
 
 <SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
-	<NewSwapModal on:nnsClose />
+	<SwapModal on:nnsClose />
 </SwapButtonWithModal>
