@@ -8,19 +8,24 @@ import {
 	NAVIGATION_MENU_DOC_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+	NAVIGATION_MENU_RECEIVE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { getSymbol } from '$lib/utils/modal.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
+	const menuItemReceiveButtonSelector = `button[data-tid="${NAVIGATION_MENU_RECEIVE_BUTTON}"]`;
 	const menuItemPrivacyModeButtonSelector = `button[data-tid="${NAVIGATION_MENU_PRIVACY_MODE_BUTTON}"]`;
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
@@ -133,5 +138,20 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
+	});
+
+	it('should open the receive modal', async () => {
+		const openReceiveSpy = vi.spyOn(modalStore, 'openReceive');
+
+		await openMenu();
+		await waitForElement({ selector: menuItemReceiveButtonSelector });
+
+		const button: HTMLButtonElement | null = container.querySelector(menuItemReceiveButtonSelector);
+
+		assertNonNullish(button);
+
+		button.click();
+
+		expect(openReceiveSpy).toHaveBeenCalledWith(getSymbol('menu-addresses'));
 	});
 });

@@ -5,7 +5,7 @@ import type {
 	AllTransactionUiWithCmp,
 	AllTransactionUiWithCmpNonEmptyList
 } from '$lib/types/transaction';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { render } from '@testing-library/svelte';
 
