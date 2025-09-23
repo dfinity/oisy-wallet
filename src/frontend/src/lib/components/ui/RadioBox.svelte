@@ -17,13 +17,13 @@
 	class="flex cursor-pointer items-center gap-3 rounded-lg border border-brand-subtle-20 bg-brand-subtle-10 p-3"
 >
 	<input
-		type="radio"
-		{name}
 		{id}
-		onchange={onChange}
+		{name}
+		class:selected
 		checked={selected}
 		{disabled}
-		class:selected
+		onchange={onChange}
+		type="radio"
 	/>
 	{@render label()}
 </label>
