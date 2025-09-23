@@ -3,7 +3,6 @@
 	import { setContext } from 'svelte';
 	import NewSwapModal from './NewSwapModal.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import {
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
@@ -14,7 +13,6 @@
 		icTokenFeeStore
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
-	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 	import {
 		allDisabledKongSwapCompatibleIcrcTokens,
 		allIcrcTokens
@@ -110,9 +108,5 @@
 </script>
 
 <SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
-	{#if VELORA_SWAP_ENABLED}
-		<NewSwapModal on:nnsClose />
-	{:else}
-		<SwapModal on:nnsClose />
-	{/if}
+	<NewSwapModal on:nnsClose />
 </SwapButtonWithModal>
