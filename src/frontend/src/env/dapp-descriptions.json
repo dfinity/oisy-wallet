@@ -15,6 +15,7 @@
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
 		"screenshots": ["/images/dapps/kong-swap.webp"],
+		"featured": true,
 		"carousel": {
 			"text": "dapps.descriptions.kongswap.carousel.text",
 			"callToAction": "dapps.descriptions.kongswap.carousel.call_to_action"
@@ -317,7 +318,6 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/caffeine-logo.webp",
-		"screenshots": ["/images/dapps/caffeine-screenshot.webp"],
-		"featured": true
+		"screenshots": ["/images/dapps/caffeine-screenshot.webp"]
 	}
 ]

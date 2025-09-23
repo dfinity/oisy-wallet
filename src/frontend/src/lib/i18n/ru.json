@@ -205,7 +205,8 @@
 			"staking": "Стейкинг",
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
-			"tools": "Инструменты"
+			"tools": "Инструменты",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -337,6 +338,12 @@
 			"usdai": {
 				"name": "",
 				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
