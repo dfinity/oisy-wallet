@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Licenční smlouva",
-			"accept_terms": "Kliknutím na toto tlačítko souhlasíte s",
-			"accept_terms_link": "Licenční smlouvou",
 			"title": "Licenční smlouva $oisy_name („Licenční smlouva“)",
 			"paragraph_1": "Děkujeme za váš zájem o $oisy_name, decentralizovanou aplikaci peněženky s více sítěmi a vlastní úschovou založenou na prohlížeči, hostovanou na veřejné blockchainové síti Internet Computer („$oisy_short“). Další informace o $oisy_short, jeho open-source kódu a souvisejících licencích naleznete v repozitáři GitHub $oisy_short zde: $oisy_repo_url.",
 			"paragraph_2": "Tato licenční smlouva upravuje vaše používání $oisy_short („vy“). POUŽÍVÁNÍM $oisy_short SOUHLASÍTE S TÍM, ŽE JSTE SI PŘEČETLI, POROZUMĚLI A SOUHLASÍTE S TÍM, ŽE BUDETE VÁZÁNI TOUTO LICENČNÍ SMLOUVOU. POKUD NESOUHLASÍTE, NESMÍTE $oisy_short POUŽÍVAT.",
