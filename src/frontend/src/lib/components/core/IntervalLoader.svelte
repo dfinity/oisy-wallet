@@ -26,7 +26,6 @@
 		}
 
 		clearInterval(timer);
-		timer = undefined;
 	};
 
 	// Lifecycle: on component mount
