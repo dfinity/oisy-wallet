@@ -17,7 +17,7 @@
 
 <article class="relative flex items-end overflow-hidden rounded-2xl">
 	{#if dAppDescription.screenshots.length > 0}
-		<div class="max-h-64 bg-brand-subtle-30 flex items-center justify-center">
+		<div class="flex max-h-64 items-center justify-center bg-brand-subtle-30">
 			<ImgBanner
 				alt={replacePlaceholders($i18n.dapps.alt.website, {
 					$dAppName: resolveText({ i18n: $i18n, path: dAppDescription.name })
@@ -28,13 +28,13 @@
 	{/if}
 	<div class="backdrop-blur-xs absolute start-0 w-full flex-1 bg-black/30 px-4 py-4">
 		<div class="flex items-center gap-x-2">
-			<div class="h-12 w-12 rounded-full overflow-hidden">
+			<div class="h-12 w-12 overflow-hidden rounded-full">
 				<Img
 					alt={replacePlaceholders($i18n.dapps.alt.logo, {
 						$dAppName: resolveText({ i18n: $i18n, path: dAppDescription.name })
 					})}
-					src={dAppDescription.logo}
 					rounded={true}
+					src={dAppDescription.logo}
 				/>
 			</div>
 			<div class="flex-1">
