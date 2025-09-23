@@ -124,6 +124,8 @@
 		});
 
         loading = false;
+
+        await load()
 	});
 </script>
 

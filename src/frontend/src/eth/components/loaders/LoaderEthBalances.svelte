@@ -72,6 +72,8 @@
 		);
 
         loading = false;
+
+        await onLoad()
 	});
 </script>
 
