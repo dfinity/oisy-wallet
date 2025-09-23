@@ -23,6 +23,7 @@
 </div>
 
 <style lang="scss">
+	// same as checkbox styles from gix
 	.radio {
 		display: flex;
 		justify-content: space-between;
