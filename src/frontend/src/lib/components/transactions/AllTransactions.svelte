@@ -14,35 +14,38 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	$: enabledTokensWithoutTransaction = $enabledFungibleNetworkTokens
-		.filter((token) => $icTransactionsStore?.[token.id] === null)
-		.map((token: TokenUi) => token as IcToken);
+	let enabledTokensWithoutTransaction = $derived(
+		$enabledFungibleNetworkTokens
+			.filter((token) => $icTransactionsStore?.[token.id] === null)
+			.map((token: TokenUi) => token as IcToken)
+	);
 
-	let tokenListWithoutCanister: string;
-	let tokenListWithUnavailableCanister: string;
-	$: {
-		const result = enabledTokensWithoutTransaction.reduce(
-			(
-				acc: {
-					enabledTokensWithoutCanister: string[];
-					enabledTokensWithUnavailableCanister: string[];
+	let { tokenListWithoutCanister, tokenListWithUnavailableCanister } = $derived.by(() => {
+		const { enabledTokensWithoutCanister, enabledTokensWithUnavailableCanister } =
+			enabledTokensWithoutTransaction.reduce(
+				(
+					acc: {
+						enabledTokensWithoutCanister: string[];
+						enabledTokensWithUnavailableCanister: string[];
+					},
+					curr
+				) => {
+					hasNoIndexCanister(curr)
+						? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
+						: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
+					return acc;
 				},
-				curr
-			) => {
-				hasNoIndexCanister(curr)
-					? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
-					: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
-				return acc;
-			},
-			{
-				enabledTokensWithoutCanister: [],
-				enabledTokensWithUnavailableCanister: []
-			}
-		);
+				{
+					enabledTokensWithoutCanister: [],
+					enabledTokensWithUnavailableCanister: []
+				}
+			);
 
-		tokenListWithoutCanister = result.enabledTokensWithoutCanister.join(', ');
-		tokenListWithUnavailableCanister = result.enabledTokensWithUnavailableCanister.join(', ');
-	}
+		return {
+			tokenListWithoutCanister: enabledTokensWithoutCanister.join(', '),
+			tokenListWithUnavailableCanister: enabledTokensWithUnavailableCanister.join(', ')
+		};
+	});
 </script>
 
 <div class="flex flex-col gap-5">

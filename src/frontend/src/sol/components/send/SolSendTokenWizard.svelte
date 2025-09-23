@@ -224,7 +224,5 @@
 		>
 			<ButtonBack slot="cancel" onclick={back} />
 		</SolSendForm>
-	{:else}
-		<slot />
 	{/if}
 </SolFeeContext>

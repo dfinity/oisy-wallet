@@ -35,3 +35,8 @@ export type IcCkInterface = z.infer<typeof IcCkInterfaceSchema>;
 
 export type OptionIcToken = Option<IcToken>;
 export type OptionIcCkToken = Option<IcCkToken>;
+
+export enum IcTokenStandards {
+	icrc1 = 'ICRC-1',
+	icrc2 = 'ICRC-2'
+}

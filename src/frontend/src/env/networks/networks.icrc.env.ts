@@ -452,8 +452,8 @@ export const FORSETISCN_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 export const ODINDOG_LEDGER_CANISTER_ID: LedgerCanisterIdText =
 	ADDITIONAL_ICRC_PRODUCTION_DATA?.ODINDOG?.ledgerCanisterId ?? 'eazb6-tqaaa-aaaar-qan2a-cai';
 
-const TESTICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
-	ADDITIONAL_ICRC_PRODUCTION_DATA?.TESTICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
+const TICRC1_LEDGER_CANISTER_ID: LedgerCanisterIdText =
+	ADDITIONAL_ICRC_PRODUCTION_DATA?.TICRC1?.ledgerCanisterId ?? '3jkp5-oyaaa-aaaaj-azwqa-cai';
 
 export const CKERC20_LEDGER_CANISTER_TESTNET_IDS: CanisterIdText[] = [
 	...(nonNullish(LOCAL_CKUSDC_LEDGER_CANISTER_ID) ? [LOCAL_CKUSDC_LEDGER_CANISTER_ID] : []),
@@ -545,7 +545,7 @@ export const ICRC_LEDGER_CANISTER_TESTNET_IDS = [
 	...CKBTC_LEDGER_CANISTER_TESTNET_IDS,
 	...CKETH_LEDGER_CANISTER_TESTNET_IDS,
 	...CKERC20_LEDGER_CANISTER_TESTNET_IDS,
-	TESTICRC1_LEDGER_CANISTER_ID
+	TICRC1_LEDGER_CANISTER_ID
 ];
 
 // On Chain Fusion view, we want to display ICP, Ethereum and selected CK tokens.

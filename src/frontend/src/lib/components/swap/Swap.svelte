@@ -2,6 +2,7 @@
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import NewSwapModal from './NewSwapModal.svelte';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -14,7 +15,10 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
 	import SwapModal from '$lib/components/swap/SwapModal.svelte';
-	import { allDisabledKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import {
+		allDisabledKongSwapCompatibleIcrcTokens,
+		allIcrcTokens
+	} from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -53,7 +57,8 @@
 
 		try {
 			await loadKongSwapTokensService({
-				identity: $authIdentity
+				identity: $authIdentity,
+				allIcrcTokens: [ICP_TOKEN, ...$allIcrcTokens]
 			});
 
 			return 'ready';

@@ -343,7 +343,5 @@
 		>
 			<ButtonBack slot="cancel" onclick={back} />
 		</EthSendForm>
-	{:else}
-		<slot />
 	{/if}
 </EthFeeContext>
