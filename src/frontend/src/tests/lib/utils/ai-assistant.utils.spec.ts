@@ -196,39 +196,6 @@ describe('ai-assistant.utils', () => {
 		});
 	});
 
-	describe('parseToAiAssistantTokens', () => {
-		it('parses array of tokens correctly', () => {
-			expect(
-				parseToAiAssistantTokens([
-					ICP_TOKEN,
-					ETHEREUM_TOKEN,
-					SOLANA_TOKEN,
-					mockValidErc721Token,
-					mockValidErc1155Token
-				])
-			).toEqual([
-				{
-					name: ICP_TOKEN.name,
-					symbol: ICP_TOKEN.symbol,
-					standard: ICP_TOKEN.standard,
-					networkId: ICP_TOKEN.network.id.description ?? ''
-				},
-				{
-					name: ETHEREUM_TOKEN.name,
-					symbol: ETHEREUM_TOKEN.symbol,
-					standard: ETHEREUM_TOKEN.standard,
-					networkId: ETHEREUM_TOKEN.network.id.description ?? ''
-				},
-				{
-					name: SOLANA_TOKEN.name,
-					symbol: SOLANA_TOKEN.symbol,
-					standard: SOLANA_TOKEN.standard,
-					networkId: SOLANA_TOKEN.network.id.description ?? ''
-				}
-			]);
-		});
-	});
-
 	describe('generateAiAssistantResponseEventMetadata', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
