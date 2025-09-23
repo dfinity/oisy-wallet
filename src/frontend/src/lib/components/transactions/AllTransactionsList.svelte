@@ -31,72 +31,67 @@
 		enabledNonFungibleNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
-	import type { AllTransactionUiWithCmp, TransactionsUiDateGroup } from '$lib/types/transaction';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let transactions: AllTransactionUiWithCmp[];
-	$: transactions = mapAllTransactionsUi({
-		tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
-		$btcTransactions: $btcTransactionsStore,
-		$ethTransactions: $ethTransactionsStore,
-		$ckEthMinterInfo: $ckEthMinterInfoStore,
-		$ethAddress,
-		$btcStatuses: $btcStatusesStore,
-		$solTransactions: $solTransactionsStore,
-		$icTransactionsStore,
-		$ckBtcMinterInfoStore,
-		$icPendingTransactionsStore,
-		$ckBtcPendingUtxosStore
-	});
+	let transactions = $derived(
+		mapAllTransactionsUi({
+			tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
+			$btcTransactions: $btcTransactionsStore,
+			$ethTransactions: $ethTransactionsStore,
+			$ckEthMinterInfo: $ckEthMinterInfoStore,
+			$ethAddress,
+			$btcStatuses: $btcStatusesStore,
+			$solTransactions: $solTransactionsStore,
+			$icTransactionsStore,
+			$ckBtcMinterInfoStore,
+			$icPendingTransactionsStore,
+			$ckBtcPendingUtxosStore
+		})
+	);
 
-	let sortedTransactions: AllTransactionUiWithCmp[] | undefined;
-	$: sortedTransactions = nonNullish(transactions)
-		? transactions.sort(({ transaction: a }, { transaction: b }) =>
-				sortTransactions({ transactionA: a, transactionB: b })
-			)
-		: undefined;
+	let sortedTransactions = $derived(
+		nonNullish(transactions)
+			? transactions.sort(({ transaction: a }, { transaction: b }) =>
+					sortTransactions({ transactionA: a, transactionB: b })
+				)
+			: undefined
+	);
 
-	let groupedTransactions: TransactionsUiDateGroup<AllTransactionUiWithCmp> | undefined;
-	$: groupedTransactions = nonNullish(sortedTransactions)
-		? groupTransactionsByDate(sortedTransactions)
-		: undefined;
+	let groupedTransactions = $derived(
+		nonNullish(sortedTransactions) ? groupTransactionsByDate(sortedTransactions) : undefined
+	);
 
-	let selectedBtcTransaction: BtcTransactionUi | undefined;
-	let selectedBtcToken: OptionToken;
-	$: ({ transaction: selectedBtcTransaction, token: selectedBtcToken } =
+	let { transaction: selectedBtcTransaction, token: selectedBtcToken } = $derived(
 		mapTransactionModalData<BtcTransactionUi>({
 			$modalOpen: $modalBtcTransaction,
 			$modalStore
-		}));
+		})
+	);
 
-	let selectedEthTransaction: EthTransactionUi | undefined;
-	let selectedEthToken: OptionToken;
-	$: ({ transaction: selectedEthTransaction, token: selectedEthToken } =
+	let { transaction: selectedEthTransaction, token: selectedEthToken } = $derived(
 		mapTransactionModalData<EthTransactionUi>({
 			$modalOpen: $modalEthTransaction,
 			$modalStore
-		}));
+		})
+	);
 
-	let selectedIcTransaction: IcTransactionUi | undefined;
-	let selectedIcToken: OptionToken;
-	$: ({ transaction: selectedIcTransaction, token: selectedIcToken } =
+	let { transaction: selectedIcTransaction, token: selectedIcToken } = $derived(
 		mapTransactionModalData<IcTransactionUi>({
 			$modalOpen: $modalIcTransaction,
 			$modalStore
-		}));
+		})
+	);
 
-	let selectedSolTransaction: SolTransactionUi | undefined;
-	let selectedSolToken: OptionToken;
-	$: ({ transaction: selectedSolTransaction, token: selectedSolToken } =
+	let { transaction: selectedSolTransaction, token: selectedSolToken } = $derived(
 		mapTransactionModalData<SolTransactionUi>({
 			$modalOpen: $modalSolTransaction,
 			$modalStore
-		}));
+		})
+	);
 </script>
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
