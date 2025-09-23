@@ -38,6 +38,8 @@ const initAuthStore = (): AuthStore => {
 		identity: undefined
 	});
 
+	// With different tabs opened of OISy in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
+	// To avoid issues, we use this method to pick the most up-to-date authClient object, since the data are cached in IndexedDB.
 	const pickAuthClient = async (): Promise<AuthClient> => {
 		if (nonNullish(authClient) && (await authClient.isAuthenticated())) {
 			return authClient;
