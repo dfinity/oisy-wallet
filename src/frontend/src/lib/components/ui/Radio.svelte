@@ -63,22 +63,6 @@
 		}
 	}
 
-	label {
-		user-select: none;
-		cursor: pointer;
-
-		flex: 1;
-		order: var(--checkbox-label-order);
-
-		color: var(--value-color);
-
-		&.inline {
-			white-space: var(--text-white-space, nowrap);
-			overflow: hidden;
-			text-overflow: ellipsis;
-		}
-	}
-
 	/** https://moderncss.dev/pure-css-custom-styled-radio-buttons/ **/
 	/** accent-color not supported yet on Safari 😩 **/
 
