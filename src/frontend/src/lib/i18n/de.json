@@ -205,7 +205,8 @@
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
-			"tools": "Tools"
+			"tools": "Tools",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -337,6 +338,12 @@
 			"usdai": {
 				"name": "",
 				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
 				"description": ""
 			}
 		}
