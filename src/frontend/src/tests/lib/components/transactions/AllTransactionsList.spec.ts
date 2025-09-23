@@ -32,6 +32,11 @@ describe('AllTransactionsList', () => {
 			ETHEREUM_NETWORK_ID,
 			SEPOLIA_NETWORK_ID
 		]);
+
+		btcTransactionsStore.reset(BTC_MAINNET_TOKEN_ID);
+		ethTransactionsStore.nullify(ETHEREUM_TOKEN_ID);
+		icTransactionsStore.reset(ICP_TOKEN_ID);
+		solTransactionsStore.reset(SOLANA_TOKEN_ID);
 	});
 
 	it('should call the function to map the transactions list', () => {
