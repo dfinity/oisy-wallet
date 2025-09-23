@@ -36,6 +36,7 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
@@ -750,7 +751,7 @@ describe('loadKongSwapTokens', () => {
 	it('properly updates kongSwapToken store with the fetched tokens', async () => {
 		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue(mockKongBackendTokens);
 
-		await loadKongSwapTokens({ identity: mockIdentity });
+		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({
 			[kongIcToken.symbol]: kongIcToken
@@ -760,7 +761,7 @@ describe('loadKongSwapTokens', () => {
 	it('properly does not update store if no IC kongTokens available', async () => {
 		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue([{ ...mockKongBackendTokens[1] }]);
 
-		await loadKongSwapTokens({ identity: mockIdentity });
+		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({});
 	});

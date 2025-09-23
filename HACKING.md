@@ -112,7 +112,7 @@ A list of useful faucets:
 - Bitcoin: [Coinfaucet](https://coinfaucet.eu/en/btc-testnet/)
 - SOL: [Solana Foundation Faucet](https://faucet.solana.com/) or [Sol Faucet](https://solfaucet.com/)
 - TESTICP: [TESTICP Faucet](https://nqoci-rqaaa-aaaap-qp53q-cai.icp0.io/)
-- TESTICRC1: [TESTICRC1 Faucet](https://pwwqf-yaaaa-aaaap-qp5wq-cai.icp0.io/)
+- TICRC1: [TICRC1 Faucet](https://pwwqf-yaaaa-aaaap-qp5wq-cai.icp0.io/)
 
 ## Testing
 
@@ -350,7 +350,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	explorerUrl: BSC_EXPLORER_URL,
 	providers: {
 		infura: 'bnb',
-		alchemy: Network.BNB_MAINNET,
+		alchemy: 'bnb',
 		alchemyJsonRpcUrl: 'https://bnb-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'binance-smart-chain' },

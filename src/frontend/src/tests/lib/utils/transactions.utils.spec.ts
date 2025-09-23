@@ -53,7 +53,7 @@ import {
 } from '$lib/utils/transactions.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthCertifiedTransactions } from '$tests/mocks/eth-transactions.mock';
 import { getMockExchanges, mockExchanges } from '$tests/mocks/exchanges.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';

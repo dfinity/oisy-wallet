@@ -16,6 +16,7 @@
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
+	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ReviewSendTokensToolResult } from '$lib/types/ai-assistant';
 	import {
@@ -30,7 +31,8 @@
 		sendEnabled: boolean;
 	}
 
-	let { amount, contact, address, contactAddress, sendEnabled }: Props = $props();
+	let { amount, contact, address, contactAddress, sendEnabled, sendCompleted, id }: Props =
+		$props();
 
 	const { sendToken, sendTokenExchangeRate, sendTokenNetworkId } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -43,7 +45,9 @@
 
 	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 
-	let sendCompleted = $state(false);
+	const onSendCompleted = () => {
+		aiAssistantStore.setSendToolActionAsCompleted(id);
+	};
 </script>
 
 <SendTokenReview
@@ -66,25 +70,45 @@
 				{amount}
 				{destination}
 				nativeEthereumToken={$nativeEthereumTokenWithFallback}
+				{onSendCompleted}
+				{sendCompleted}
 				{sendEnabled}
 				sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
-				bind:sendCompleted
 			/>
 		{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 			<AiAssistantReviewSendEthToken
 				{amount}
 				{destination}
 				nativeEthereumToken={evmNativeEthereumToken}
+				{onSendCompleted}
+				{sendCompleted}
 				{sendEnabled}
 				sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
-				bind:sendCompleted
 			/>
 		{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
-			<AiAssistantReviewSendBtcToken {amount} {destination} {sendEnabled} bind:sendCompleted />
+			<AiAssistantReviewSendBtcToken
+				{amount}
+				{destination}
+				{onSendCompleted}
+				{sendCompleted}
+				{sendEnabled}
+			/>
 		{:else if isNetworkIdSolana($sendToken.network.id)}
-			<AiAssistantReviewSendSolToken {amount} {destination} {sendEnabled} bind:sendCompleted />
+			<AiAssistantReviewSendSolToken
+				{amount}
+				{destination}
+				{onSendCompleted}
+				{sendCompleted}
+				{sendEnabled}
+			/>
 		{:else if isNetworkIdICP($sendTokenNetworkId)}
-			<AiAssistantReviewSendIcToken {amount} {destination} {sendEnabled} bind:sendCompleted />
+			<AiAssistantReviewSendIcToken
+				{amount}
+				{destination}
+				{onSendCompleted}
+				{sendCompleted}
+				{sendEnabled}
+			/>
 		{/if}
 	{/snippet}
 </SendTokenReview>

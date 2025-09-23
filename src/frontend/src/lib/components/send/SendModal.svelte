@@ -239,7 +239,7 @@
 				bind:destination
 				bind:amount
 			/>
-		{:else}
+		{:else if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
 			<SendWizard
 				{currentStep}
 				{destination}

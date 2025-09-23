@@ -130,6 +130,4 @@
 	<IcSendForm {selectedContact} on:icNext on:icBack on:icTokensList bind:destination bind:amount>
 		<ButtonBack slot="cancel" onclick={back} />
 	</IcSendForm>
-{:else}
-	<slot />
 {/if}

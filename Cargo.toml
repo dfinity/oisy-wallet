@@ -19,7 +19,7 @@ ic-cycles-ledger-types = { path = "src/cycles_ledger/types" }
 ic-ledger-types = "0.13.0"
 ic-stable-structures = "0.6.9"
 ic-metrics-encoder = "1.1.1"
-ic-canister-sig-creation = "1.1.0"
+ic-canister-sig-creation = "1.2.0"
 ic-verifiable-credentials = "1.0.1"
 candid = "0.10.18"
 candid_parser = "0.1"

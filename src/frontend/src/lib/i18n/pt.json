@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Jogo",
-			"tools": "Ferramentas"
+			"tools": "Ferramentas",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -338,6 +339,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -355,7 +362,7 @@
 			"activity_button_text": "Verificar Atividade Recente",
 			"activity_button_text_short": "Verificar atividade",
 			"open_wallet": "Leve-me para a carteira",
-			"carousel_slide_title": "$oisy_short Sprinkles estão agora ativas!",
+			"carousel_slide_title": "$oisy_short Sprinkles episódio 5 agora ativas!",
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
@@ -374,7 +381,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Fique de olho nos próximos lançamentos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Siga-nos no X</a>, junte-se ao nosso <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou entre no nosso <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para ficar por dentro das últimas novidades.",
-			"coming_soon": "O episódio 4 de $oisy_short está chegando",
+			"coming_soon": "O episódio 6 de $oisy_short está chegando",
 			"reward_banner": "Banner da campanha $campaignName"
 		},
 		"campaigns": {
@@ -1575,8 +1582,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Contrato de Licença",
-			"accept_terms": "Ao clicar neste botão, você concorda com o",
-			"accept_terms_link": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
 			"paragraph_1": "Obrigado pelo seu interesse em $oisy_name, um aplicativo descentralizado de carteira multi-cadeia e auto-custódia baseado em navegador, hospedado na rede pública de blockchain Internet Computer (“$oisy_short”). Para obter mais informações sobre $oisy_short, seu código-fonte aberto e licenças relacionadas, consulte o repositório GitHub de $oisy_short aqui: $oisy_repo_url.",
 			"paragraph_2": "Este Contrato de Licença rege o uso de $oisy_short por você (“Você”). AO USAR $oisy_short, VOCÊ CONCORDA QUE LEU, COMPREENDEU E CONCORDA EM ESTAR VINCULADO POR ESTE CONTRATO DE LICENÇA. SE VOCÊ NÃO CONCORDA, VOCÊ NÃO PODE USAR $oisy_short.",

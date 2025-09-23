@@ -39,6 +39,7 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
+import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
@@ -245,6 +246,8 @@ const logout = async ({
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
+
+	emit({ message: 'oisyDisconnectWalletConnect' });
 
 	if (clearCurrentPrincipalStorages) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));

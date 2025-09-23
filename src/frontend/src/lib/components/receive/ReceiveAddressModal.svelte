@@ -13,6 +13,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { closeModal } from '$lib/utils/modal.utils';
 
 	export let infoCmp:
 		| typeof ReceiveAddresses
@@ -57,7 +58,7 @@
 
 <WizardModal
 	bind:this={modal}
-	onClose={() => dispatch('nnsClose')}
+	onClose={() => closeModal(() => dispatch('nnsClose'))}
 	{steps}
 	testId={RECEIVE_TOKENS_MODAL}
 	bind:currentStep

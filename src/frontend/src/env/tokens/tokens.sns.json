@@ -408,13 +408,13 @@
 		"indexCanisterId": "n535v-yiaaa-aaaaq-aadsq-cai",
 		"metadata": {
 			"decimals": 8,
-			"name": "Poked",
-			"symbol": "POKED",
+			"name": "PHASMA",
+			"symbol": "PHASMA",
 			"fee": {
 				"__bigint__": "100000000"
 			},
-			"alternativeName": "PokedBots",
-			"url": "https://www.pokedbots.com"
+			"alternativeName": "PHASMA",
+			"url": "https://phasma-lm0.caffeine.xyz"
 		}
 	},
 	{
