@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Conditions de licence",
-			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
-			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",
 			"paragraph_1": "Nous vous remercions de votre intérêt pour $oisy_name, une application décentralisée de portefeuille multi-chaînes auto-dépositaire basée sur navigateur, hébergée sur le réseau public de blockchain Internet Computer (« $oisy_short »). Pour plus d'informations sur $oisy_short, son code source ouvert et les licences associées, veuillez consulter le dépôt GitHub de $oisy_short ici : $oisy_repo_url.",
 			"paragraph_2": "Le présent Accord de Licence régit votre utilisation de $oisy_short (ci-après « Vous »). EN UTILISANT $oisy_short, VOUS DÉCLAREZ AVOIR LU, COMPRIS ET ACCEPTER D'ÊTRE LIÉ PAR LE PRÉSENT ACCORD DE LICENCE. SI VOUS N'ACCEPTEZ PAS, VOUS NE POUVEZ PAS UTILISER $oisy_short.",

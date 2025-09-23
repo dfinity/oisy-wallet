@@ -2,8 +2,8 @@ import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
-describe('AutoLoader', () => {
-	const interval = 1000;
+describe('IntervalLoader', () => {
+	const interval = 30_000;
 
 	beforeAll(() => {
 		vi.useFakeTimers();
@@ -30,7 +30,6 @@ describe('AutoLoader', () => {
 
 	it('should call load function repeatedly on interval', async () => {
 		const onLoad = vi.fn();
-		const interval = 1000;
 
 		render(IntervalLoader, {
 			props: {

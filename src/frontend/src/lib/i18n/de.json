@@ -1575,8 +1575,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Lizenzvereinbarung",
-			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
-			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
 			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
 			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",
