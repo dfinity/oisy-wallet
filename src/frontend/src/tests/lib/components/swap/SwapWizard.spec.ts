@@ -1,7 +1,7 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
-import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
+import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
@@ -30,7 +30,7 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	}))
 }));
 
-describe('SwapWizard', () => {
+describe('SwapTokenWizard', () => {
 	const mockContext = new Map();
 
 	const defaultProps = {
@@ -81,7 +81,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render component', () => {
-		const { container } = render(SwapWizard, {
+		const { container } = render(SwapTokenWizard, {
 			props: defaultProps,
 			context: mockContext
 		});
@@ -90,7 +90,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ICP wizard when sourceToken is null', () => {
-		const { container } = render(SwapWizard, {
+		const { container } = render(SwapTokenWizard, {
 			props: defaultProps,
 			context: mockContext
 		});
@@ -99,7 +99,7 @@ describe('SwapWizard', () => {
 	});
 
 	it('should render ETH wizard when sourceToken is not ICP network', () => {
-		const { container } = render(SwapWizard, {
+		const { container } = render(SwapTokenWizard, {
 			props: defaultProps,
 			context: mockContext
 		});
