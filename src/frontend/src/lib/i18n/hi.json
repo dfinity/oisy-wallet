@@ -580,6 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "सेटिंग्स",
+			"general": "",
 			"principal": "आपका प्रिंसिपल",
 			"principal_copied": "प्रिंसिपल क्लिपबोर्ड पर कॉपी किया गया",
 			"principal_description": "$oisy_name के लिए आपकी आईडी। आपकी इंटरनेट आइडेंटिटी द्वारा बनाया गया।",

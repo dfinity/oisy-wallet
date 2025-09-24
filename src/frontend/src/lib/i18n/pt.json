@@ -580,6 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "Configurações",
+			"general": "",
 			"principal": "Seu Principal",
 			"principal_copied": "Principal copiado para a área de transferência",
 			"principal_description": "Seu ID para $oisy_name. Criado pela sua Internet Identity.",

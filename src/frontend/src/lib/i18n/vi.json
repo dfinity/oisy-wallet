@@ -580,6 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "Cài đặt",
+			"general": "",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",

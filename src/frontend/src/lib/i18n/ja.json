@@ -580,6 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "設定",
+			"general": "",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました",
 			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます",

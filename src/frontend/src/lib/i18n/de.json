@@ -580,7 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "Einrichten",
-            "general": "Allgemein",
+			"general": "Allgemein",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",
 			"principal_description": "Deine ID für $oisy_name. Erstellt durch deine Internet Identity.",

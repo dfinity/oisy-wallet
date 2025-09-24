@@ -580,6 +580,7 @@
 	"settings": {
 		"text": {
 			"title": "Настройки",
+			"general": "",
 			"principal": "Ваш Принципал",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",
