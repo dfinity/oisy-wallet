@@ -1,7 +1,7 @@
 import { BSC_EXPLORER_URL, BSC_TESTNET_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import bscMainnetIconTransparent from '$lib/assets/networks/transparent/bsc-mainnet.svg';
-import bscTestnetIconTransparent from '$lib/assets/networks/transparent/bsc-testnet.svg';
+import bscMainnetIconTransparent from '$lib/assets/networks/bsc-mainnet.svg';
+import bscTestnetIconTransparent from '$lib/assets/networks/bsc-testnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -21,7 +21,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'BNB Smart Chain',
 	chainId: 56n,
-	iconTransparent: bscMainnetIconTransparent,
+	icon: bscMainnetIconTransparent,
 	explorerUrl: BSC_EXPLORER_URL,
 	providers: {
 		infura: 'bnb',
@@ -42,7 +42,7 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'BNB Smart Chain (Testnet)',
 	chainId: 97n,
-	iconTransparent: bscTestnetIconTransparent,
+	icon: bscTestnetIconTransparent,
 	explorerUrl: BSC_TESTNET_EXPLORER_URL,
 	providers: {
 		infura: 'bnbt',
