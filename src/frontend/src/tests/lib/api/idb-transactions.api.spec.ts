@@ -19,7 +19,7 @@ import {
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';

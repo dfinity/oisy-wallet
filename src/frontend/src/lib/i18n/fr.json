@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Jeu",
-			"tools": "Outils"
+			"tools": "Outils",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -338,6 +339,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -355,7 +362,7 @@
 			"activity_button_text": "Vérifier l'activité récente",
 			"activity_button_text_short": "Vérifier l'activité",
 			"open_wallet": "Aller au portefeuille",
-			"carousel_slide_title": "L'épisode 4 de OISY Sprinkles est maintenant en ligne !",
+			"carousel_slide_title": "L'épisode 5 de OISY Sprinkles est maintenant en ligne !",
 			"carousel_slide_cta": "En savoir plus",
 			"sprinkles_earned": "Vous avez gagné $noOfSprinkles sprinkles, pour un total de $amount ! 🎉",
 			"youre_eligible": "Vous êtes éligible !",
@@ -374,7 +381,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Gardez un œil sur les prochains airdrops de tokens ! <a href=\"https://x.com/oisy\" target=\"_blank\">Suivez-nous sur X</a>, rejoignez notre <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou rejoignez notre <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> pour rester informé.",
-			"coming_soon": "L'épisode 4 de $oisy_short arrive bientôt",
+			"coming_soon": "L'épisode 6 de $oisy_short arrive bientôt",
 			"reward_banner": "Bannière de la campagne $campaignName"
 		},
 		"campaigns": {
@@ -1575,8 +1582,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Conditions de licence",
-			"accept_terms": "En cliquant sur ce bouton, vous acceptez les",
-			"accept_terms_link": "Conditions de licence",
 			"title": "Accord de licence $oisy_name (« Accord de licence »)",
 			"paragraph_1": "Nous vous remercions de votre intérêt pour $oisy_name, une application décentralisée de portefeuille multi-chaînes auto-dépositaire basée sur navigateur, hébergée sur le réseau public de blockchain Internet Computer (« $oisy_short »). Pour plus d'informations sur $oisy_short, son code source ouvert et les licences associées, veuillez consulter le dépôt GitHub de $oisy_short ici : $oisy_repo_url.",
 			"paragraph_2": "Le présent Accord de Licence régit votre utilisation de $oisy_short (ci-après « Vous »). EN UTILISANT $oisy_short, VOUS DÉCLAREZ AVOIR LU, COMPRIS ET ACCEPTER D'ÊTRE LIÉ PAR LE PRÉSENT ACCORD DE LICENCE. SI VOUS N'ACCEPTEZ PAS, VOUS NE POUVEZ PAS UTILISER $oisy_short.",

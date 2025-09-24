@@ -15,7 +15,6 @@
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
 		"screenshots": ["/images/dapps/kong-swap.webp"],
-		"featured": true,
 		"carousel": {
 			"text": "dapps.descriptions.kongswap.carousel.text",
 			"callToAction": "dapps.descriptions.kongswap.carousel.call_to_action"
@@ -304,5 +303,21 @@
 		"stats": "",
 		"logo": "/images/dapps/usdai-logo.svg",
 		"screenshots": ["/images/dapps/usdai-screenshot.webp"]
+	},
+	{
+		"id": "caffeine",
+		"name": "dapps.descriptions.caffeine.name",
+		"oneLiner": "dapps.descriptions.caffeine.one_liner",
+		"callToAction": "dapps.descriptions.caffeine.call_to_action",
+		"website": "https://caffeine.ai/",
+		"twitter": "https://x.com/caffeineai",
+		"tags": ["dapps.categories.ai"],
+		"description": "dapps.descriptions.caffeine.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/caffeine-logo.webp",
+		"screenshots": ["/images/dapps/caffeine-screenshot.webp"],
+		"featured": true
 	}
 ]

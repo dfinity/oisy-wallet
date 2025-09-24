@@ -37,7 +37,7 @@
 </script>
 
 <span class="flex flex-col items-center gap-1">
-	<output class="mt-7 inline-block break-all text-5xl font-bold">
+	<output class="mt-7 inline-block break-all text-4xl font-bold md:text-5xl">
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots styleClass="my-4.25" times={6} variant="lg" />

@@ -21,30 +21,31 @@
 			.map((token: TokenUi) => token as IcToken)
 	);
 
-	let tokenListWithoutCanister: string = $state();
-	let tokenListWithUnavailableCanister: string = $state();
-	run(() => {
-		const result = enabledTokensWithoutTransaction.reduce(
-			(
-				acc: {
-					enabledTokensWithoutCanister: string[];
-					enabledTokensWithUnavailableCanister: string[];
+	let { tokenListWithoutCanister, tokenListWithUnavailableCanister } = $derived.by(() => {
+		const { enabledTokensWithoutCanister, enabledTokensWithUnavailableCanister } =
+			enabledTokensWithoutTransaction.reduce(
+				(
+					acc: {
+						enabledTokensWithoutCanister: string[];
+						enabledTokensWithUnavailableCanister: string[];
+					},
+					curr
+				) => {
+					hasNoIndexCanister(curr)
+						? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
+						: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
+					return acc;
 				},
-				curr
-			) => {
-				hasNoIndexCanister(curr)
-					? acc.enabledTokensWithoutCanister.push(`$${getTokenDisplaySymbol(curr)}`)
-					: acc.enabledTokensWithUnavailableCanister.push(`$${getTokenDisplaySymbol(curr)}`);
-				return acc;
-			},
-			{
-				enabledTokensWithoutCanister: [],
-				enabledTokensWithUnavailableCanister: []
-			}
-		);
+				{
+					enabledTokensWithoutCanister: [],
+					enabledTokensWithUnavailableCanister: []
+				}
+			);
 
-		tokenListWithoutCanister = result.enabledTokensWithoutCanister.join(', ');
-		tokenListWithUnavailableCanister = result.enabledTokensWithUnavailableCanister.join(', ');
+		return {
+			tokenListWithoutCanister: enabledTokensWithoutCanister.join(', '),
+			tokenListWithUnavailableCanister: enabledTokensWithUnavailableCanister.join(', ')
+		};
 	});
 </script>
 
