@@ -26,7 +26,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import SolTransactions from '$sol/components/transactions/SolTransactions.svelte';
 
-
 	let token = $derived(
 		$allTokens.find(
 			(token) =>
@@ -35,7 +34,6 @@
 				token.network.id.description === $routeNetwork
 		)
 	);
-
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 

@@ -42,7 +42,6 @@
 
 	let minterInfoLoaded = $state(false);
 
-
 	const openConvert = async () => {
 		// ckBtcToken is already available at this point, so the check is needed for TS-purposes only
 		if (isNullish(ckBtcToken)) {
