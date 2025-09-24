@@ -200,6 +200,7 @@ interface I18nDapps {
 		walletconnect: string;
 		game: string;
 		tools: string;
+		ai: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -257,6 +258,7 @@ interface I18nDapps {
 		toolkit: { name: string; one_liner: string; description: string };
 		altitudefi: { name: string; one_liner: string; description: string };
 		usdai: { name: string; one_liner: string; description: string };
+		caffeine: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -1288,8 +1290,6 @@ interface I18nAgreements {
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
-		accept_terms: string;
-		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;

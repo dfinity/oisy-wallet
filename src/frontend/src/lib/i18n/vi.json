@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
-			"tools": "Khí cụ"
+			"tools": "Khí cụ",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -338,13 +339,19 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Phần thưởng",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Phần 4 sắp ra mắt!<br>Hãy theo dõi để cập nhật",
+			"upcoming_campaigns": "Chiến dịch sắp tới",
 			"active_date": "Kết thúc vào",
 			"ended_date": "Kết thúc vào",
 			"upcoming_date": "",
@@ -356,7 +363,7 @@
 			"activity_button_text": "Kiểm tra hoạt động gần đây",
 			"activity_button_text_short": "Kiểm tra hoạt động",
 			"open_wallet": "Đưa tôi đến ví",
-			"carousel_slide_title": "$oisy_short Sprinkles Tập 4 hiện đã có!",
+			"carousel_slide_title": "$oisy_short Sprinkles Tập 5 hiện đã có!",
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
@@ -375,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 4 của $oisy_short sắp ra mắt",
+			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {
@@ -1576,8 +1583,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Thỏa thuận cấp phép",
-			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
-			"accept_terms_link": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
 			"paragraph_1": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung ví đa chuỗi, tự quản lý dựa trên trình duyệt được lưu trữ trên mạng blockchain công khai Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ GitHub của $oisy_short tại đây: $oisy_repo_url.",
 			"paragraph_2": "Thỏa thuận cấp phép này điều chỉnh việc bạn (“Bạn”) sử dụng $oisy_short. BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.",

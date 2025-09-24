@@ -1,5 +1,6 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
+export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
@@ -202,7 +203,6 @@ export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
 export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 
-export const AUTH_LICENSE_LINK = 'auth-license-link';
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
 export const TOKEN_LIST_FILTER = 'token-list-filter';
@@ -294,3 +294,6 @@ export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkb
 export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
 	'agreements-modal-checkbox-license-agreement';
 export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
+
+// UI components
+export const DATE_BADGE_ICON = 'date-badge-icon';

@@ -10,10 +10,10 @@ type PromiseResult = Promise<ResultByToken>;
 
 export const batchLoadTransactions = ({
 	tokens,
-	tokensAlreadyLoaded
+	tokensAlreadyLoaded = []
 }: {
 	tokens: Token[];
-	tokensAlreadyLoaded: TokenId[];
+	tokensAlreadyLoaded?: TokenId[];
 }): AsyncGenerator<PromiseSettledResult<ResultByToken>[]> => {
 	const promises = tokens.reduce<(() => Promise<ResultByToken>)[]>(
 		(acc, { network: { id: networkId }, id: tokenId, standard }) => {
