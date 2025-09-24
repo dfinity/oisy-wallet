@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
@@ -11,45 +11,55 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		amount: OptionAmount;
+		destination?: string;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onNext: () => void;
+		onTokensList: () => void;
+		cancel: Snippet;
+	}
+
+	let {
+		amount = $bindable(),
+		destination = $bindable(''),
+		selectedContact,
+		onBack,
+		onNext,
+		onTokensList,
+		cancel
+	}: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let amountError: IcAmountAssertionError | undefined;
+	let amountError = $state<IcAmountAssertionError | undefined>();
 
-	let invalidDestination = false;
-	$: invalidDestination =
+	let invalidDestination = $derived(
 		isNullishOrEmpty(destination) ||
-		isInvalidDestinationIc({
-			destination,
-			tokenStandard: $sendTokenStandard
-		});
+			isInvalidDestinationIc({
+				destination,
+				tokenStandard: $sendTokenStandard
+			})
+	);
 
-	let invalid = true;
-	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
 </script>
 
 <SendForm
+	{cancel}
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
-	onBack={() => dispatch('icBack')}
-	onNext={() => dispatch('icNext')}
+	{onBack}
+	{onNext}
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<IcSendAmount onTokensList={() => dispatch('icTokensList')} bind:amount bind:amountError />
+		<IcSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
 		<IcTokenFee />
-	{/snippet}
-
-	{#snippet cancel()}
-		<slot name="cancel" />
 	{/snippet}
 </SendForm>
