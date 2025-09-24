@@ -85,15 +85,8 @@ export const mapIcpTransaction = ({
 		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
-	const mapAmount = ({
-		amount,
-		fee,
-		incoming
-	}: {
-		incoming: boolean | undefined;
-		fee: Tokens;
-		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO);
+	const mapFee = ({ fee, incoming }: { incoming: boolean | undefined; fee: Tokens }): bigint =>
+		incoming === false ? fee.e8s : ZERO;
 
 	if ('Approve' in operation) {
 		return {
@@ -130,8 +123,8 @@ export const mapIcpTransaction = ({
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),
-			value: mapAmount({
-				amount: operation.Transfer.amount,
+			value: operation.Transfer.amount.e8s,
+			fee: mapFee({
 				fee: operation.Transfer.fee,
 				incoming: source.incoming
 			})
