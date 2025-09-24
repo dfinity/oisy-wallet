@@ -13,14 +13,14 @@
 		destination: string;
 		invalidDestination?: boolean;
 		selectedContact?: ContactUi;
-		onIcSendDestinationStep: () => void;
+		onSendDestinationStep: () => void;
 	}
 
 	let {
 		destination,
 		invalidDestination = false,
 		selectedContact,
-		onIcSendDestinationStep
+		onSendDestinationStep
 	}: Props = $props();
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
@@ -54,7 +54,7 @@
 			<button
 				class="text-brand-primary"
 				aria-label={$i18n.core.text.back}
-				onclick={onIcSendDestinationStep}
+				onclick={onSendDestinationStep}
 			>
 				<IconPenLine />
 			</button>
