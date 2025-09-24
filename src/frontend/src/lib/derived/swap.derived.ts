@@ -42,8 +42,8 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 
 export const swappableTokens: Readable<SwappableTokens> = derived(
 	[balancesStore, selectedSwappableToken],
-	([$balancesStore, $selectedSwappableToken]) => {		
-		const selectedToken = $selectedSwappableToken;		
+	([$balancesStore, $selectedSwappableToken]) => {
+		const selectedToken = $selectedSwappableToken;
 		if (isNullish(selectedToken)) {
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
