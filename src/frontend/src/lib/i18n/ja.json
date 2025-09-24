@@ -367,14 +367,14 @@
 			"carousel_slide_cta": "詳細を見る",
 			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
 			"youre_eligible": "参加資格があります！",
-			"not_eligible": "",
+			"not_eligible": "対象外",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
 			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
 		},
 		"requirements": {
 			"requirements_title": "参加基準",
-			"network_bonus_info": "",
+			"network_bonus_info": "資産を保有するネットワークごとに報酬倍率が付与されます。利用するネットワークが多ければ多いほど、より多くの報酬を獲得できます！",
 			"min_logins": "過去$days日間に$loginsx回以上ログイン",
 			"min_transactions": "過去$days日間に$transactions件以上のトランザクションを完了",
 			"min_total_assets_usd": "発行時点で$$usd相当のトークンを保有",
