@@ -42,7 +42,7 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+		<IcSendAmount  bind:amount bind:amountError on:icTokensList />
 	{/snippet}
 
 	{#snippet fee()}
