@@ -22,6 +22,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkSolana } from '$lib/utils/network.utils';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	interface Props {
 		transaction: SolTransactionUi;
@@ -132,6 +133,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if type === 'receive' && nonNullish(from) && nonNullish(fromAddress) && from !== fromAddress}
 				<ListItem>
 					<span>{$i18n.transaction.text.from_ata}</span>

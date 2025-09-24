@@ -23,6 +23,7 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	interface Props {
 		transaction: BtcTransactionUi;
@@ -102,6 +103,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(id)}
 				<ListItem>
 					<span>

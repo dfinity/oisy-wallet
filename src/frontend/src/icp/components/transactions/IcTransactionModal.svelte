@@ -78,6 +78,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
