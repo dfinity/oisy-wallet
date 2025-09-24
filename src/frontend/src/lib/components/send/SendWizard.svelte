@@ -32,11 +32,11 @@
 		currentStep?: WizardStep;
 		selectedContact?: ContactUi;
 		nft?: Nft;
-        onBack: () => void;
-        onClose: () => void;
-        onNext: () => void;
-        onSendBack: () => void
-        onTokensList: () => void;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
 	}
 
 	let {
@@ -46,11 +46,11 @@
 		currentStep,
 		selectedContact,
 		nft,
-        onBack,
-        onClose,
-        onNext,
-        onSendBack,
-        onTokensList,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
 	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
