@@ -446,31 +446,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episodio 5 è Live 🎊",
+				"one_liner": "Guadagna Sprinkles per essere attivo, segnalare altri e utilizzare OISY su più reti. Le tue azioni aumentano le tue ricompense e i referral attivi le incrementano ulteriormente.<br/>Inoltre, ora più reti significano maggiori possibilità di vincere.",
+				"participate_title": "Guadagna token per attività e referral. Più reti significano più possibilità.",
+				"description": "Rimani attivo per oltre 10 giorni per qualificarti: accedi spesso, completa le azioni del portafoglio e detieni almeno $ 20.<br/>Ogni rete attiva aumenta le tue probabilità con un moltiplicatore multireti.<br/>Guadagna il 10% dagli amici che si qualificano e classificati tra i primi 3 per vincere un Super Sprinkle da $ 200.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Sei stato ricompensato",
+						"description": "Le tue ricompense sono appena arrivate nel tuo portafoglio.<br>Non dimenticare di invitare e rimanere attivo per vincere di più.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Hai vinto il bonus settimanale",
+						"description": "Hai appena guadagnato uno dei nostri bonus settimanali.<br>Rimani attivo e continua a fare riferimento per vincere di più.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Hai raggiunto la vetta della classifica",
+						"description": "Ti sei classificato tra i primi 4 referrer di questa stagione<br>200$ sono stati aggiunti al tuo portafoglio.",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Ecco un piccolo ringraziamento",
+						"description": "Uno dei tuoi utenti referenziati ha appena ricevuto degli sprinkles.",
 						"share_href": ""
 					}
 				}
