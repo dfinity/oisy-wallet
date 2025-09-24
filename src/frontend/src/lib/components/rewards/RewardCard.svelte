@@ -54,7 +54,8 @@
 
 			<span class="absolute right-4 top-4">
 				<RewardDateBadge
-					date={reward.endDate}
+					endDate={reward.endDate}
+					startDate={reward.startDate}
 					testId={nonNullish(testId) ? `${testId}-date-badge` : undefined}
 				/>
 			</span>

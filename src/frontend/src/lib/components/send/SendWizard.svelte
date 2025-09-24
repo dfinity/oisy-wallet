@@ -116,7 +116,5 @@
 			on:icSendBack
 			on:icTokensList
 		/>
-	{:else}
-		<slot />
 	{/if}
 </SendTokenContext>
