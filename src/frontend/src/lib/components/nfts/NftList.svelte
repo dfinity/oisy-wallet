@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import type { Nft } from '$lib/types/nft';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
+	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
 		nftListItem: Snippet<[{ nft: Nft }]>;
