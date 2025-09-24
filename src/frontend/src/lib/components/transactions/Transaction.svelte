@@ -42,6 +42,7 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
+		fee?: bigint;
 	}
 
 	const {
@@ -56,8 +57,13 @@
 		from,
 		tokenId,
 		children,
-		onClick
+		onClick,
+		fee
 	}: Props = $props();
+
+	const amountWithFee = $derived(
+		nonNullish(cardAmount) && nonNullish(fee) ? cardAmount + fee : cardAmount
+	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
@@ -127,12 +133,12 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount) && !isTokenErc721(token)}
+				{#if nonNullish(amountWithFee) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={cardAmount}
+							amount={amountWithFee}
 							decimals={token.decimals}
 							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}

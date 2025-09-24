@@ -23,7 +23,8 @@
 		timestamp: timestampNanoseconds,
 		incoming,
 		to,
-		from
+		from,
+		fee
 	} = $derived(transaction);
 
 	let pending = $derived(transaction?.status === 'pending');
@@ -52,6 +53,7 @@
 	{to}
 	{token}
 	{type}
+	{fee}
 >
 	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
 </Transaction>
