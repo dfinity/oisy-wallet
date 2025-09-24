@@ -321,9 +321,9 @@
 			{amount}
 			{destination}
 			{nft}
+			onBack={() => dispatch('icBack')}
+			onSend={nonNullish(nft) ? nftSend : send}
 			{selectedContact}
-			on:icBack
-			on:icSend={nonNullish(nft) ? nftSend : send}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard

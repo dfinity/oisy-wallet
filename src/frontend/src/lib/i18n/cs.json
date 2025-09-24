@@ -447,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 5 nyní běží 🎊",
+				"one_liner": "Získejte Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč řetězci. Vaše akce zvyšují vaše odměny a aktivní doporučení je ještě více posilují.<br/>Navíc nyní více řetězců znamená větší šance na výhru.",
+				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
+				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Byli jste odměněni",
+						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Vyhráli jste týdenní bonusový drop",
+						"description": "Právě jste získali jeden z našich týdenních bonusů.<br>Zůstaňte aktivní a doporučujte nás, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Dostali jste se na vrchol žebříčku",
+						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Zde je malé poděkování",
+						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -581,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Nastavení",
+			"general": "",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",

@@ -447,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Odcinek 5 już dostępny 🎊",
+				"one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY w sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia dodatkowo je wzmacniają.<br/>Dodatkowo, teraz więcej sieci oznacza większe szanse na wygraną.",
+				"participate_title": "Zdobywaj żetony za aktywność i polecenia. Więcej łańcuchów oznacza więcej szans.",
+				"description": "Pozostań aktywny przez ponad 10 dni, aby się zakwalifikować: loguj się często, wykonuj działania w portfelu i utrzymuj na koncie co najmniej 20 USD.<br/>Każdy aktywny łańcuch zwiększa Twoje szanse dzięki mnożnikowi Multichain.<br/>Zarób 10% od znajomych, którzy się zakwalifikują, i znajdź się w pierwszej trójce, aby wygrać Super Sprinkle o wartości 200 USD.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Zostałeś nagrodzony",
+						"description": "Twoje nagrody właśnie wylądowały w Twoim portfelu.<br>Nie zapomnij polecać i pozostać aktywnym, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Wygrałeś cotygodniowy bonus",
+						"description": "Właśnie zdobyłeś jeden z naszych cotygodniowych bonusów.<br>Bądź aktywny i polecaj nas regularnie, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Znalazłeś się na szczycie tabeli liderów",
+						"description": "Znalazłeś się w pierwszej czwórce polecających w tym sezonie.<br>200 USD zostało dodane do Twojego portfela.",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Oto małe podziękowanie",
+						"description": "Jeden z Twoich poleconych użytkowników właśnie dostał trochę sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -581,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Ustawienia",
+			"general": "",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
