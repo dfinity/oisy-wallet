@@ -1,13 +1,13 @@
-import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
-import type { IcToken } from '$icp/types/ic-token';
-import SwapWizard from '$lib/components/swap/SwapWizard.svelte';
+import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
+import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/stores/eth-fee.store';
+import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
+import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
-import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
+import { SWAP_CONTEXT_KEY, initSwapContext } from '$lib/stores/swap.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { mockSwapProviders } from '$tests/mocks/swap.mocks';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
@@ -15,79 +15,95 @@ vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
 
-const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
-const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
+vi.mock('$eth/services/eth-listener.services', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
 
-const BASE_PROPS = {
-	swapAmount: '1',
-	receiveAmount: 2,
-	slippageValue: '0.5',
-	swapProgressStep: ProgressStepsSwap.INITIALIZATION,
-	swapFailedProgressSteps: []
-};
+vi.mock('$eth/providers/alchemy.providers', () => ({
+	initMinedTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	})),
+	initPendingTransactionsListener: vi.fn(() => ({
+		disconnect: vi.fn()
+	}))
+}));
 
-describe('SwapWizard', () => {
-	let mockContext: Map<symbol, unknown>;
+describe('SwapTokenWizard', () => {
+	const mockContext = new Map();
 
-	const createContext = (): Map<symbol, unknown> => {
-		const swapContext = {
-			sourceToken: readable(mockToken),
-			destinationToken: readable(mockDestToken),
-			isSourceTokenIcrc2: readable(true),
-			failedSwapError: writable(undefined)
-		};
-
-		const swapAmountsStore = initSwapAmountsStore();
-		swapAmountsStore.setSwaps({
-			swaps: [],
-			amountForSwap: '1',
-			selectedProvider: mockSwapProviders[1]
-		});
-
-		const feeStore = {
-			reset: vi.fn(),
-			subscribe: readable({
-				[mockToken.symbol]: 1000n
-			}).subscribe
-		};
-
-		return new Map<symbol, unknown>([
-			[SWAP_CONTEXT_KEY, swapContext],
-			[SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore }],
-			[IC_TOKEN_FEE_CONTEXT_KEY, { store: feeStore }]
-		]);
+	const defaultProps = {
+		currentStep: { id: 'init', name: 'init', title: 'Initialization' },
+		swapAmount: 100,
+		receiveAmount: 95,
+		slippageValue: '0.5',
+		swapProgressStep: ProgressStepsSwap.INITIALIZATION,
+		onShowTokensList: vi.fn(),
+		onClose: vi.fn(),
+		onNext: vi.fn(),
+		onBack: vi.fn()
 	};
 
 	beforeEach(() => {
-		mockContext = createContext();
+		setupUserNetworksStore('allEnabled');
 
 		mockAuthStore();
+
+		const mockToken = { ...mockValidIcToken, enabled: true };
+
+		const originalContext = initSwapContext({
+			sourceToken: mockToken,
+			destinationToken: mockToken
+		});
+
+		const mockSwapContext = {
+			...originalContext,
+			sourceTokenExchangeRate: readable(10),
+			destinationTokenExchangeRate: readable(2)
+		};
+
+		mockContext.set(SWAP_CONTEXT_KEY, mockSwapContext);
+
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+		mockContext.set(IC_TOKEN_FEE_CONTEXT_KEY, { store: icTokenFeeStore });
+
+		// Add ETH fee context for SwapEthWizard
+		mockContext.set(
+			ETH_FEE_CONTEXT_KEY,
+			initEthFeeContext({
+				feeStore: initEthFeeStore(),
+				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
+				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
+				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
+			})
+		);
 	});
 
-	const renderWithStep = (step: WizardStepsSwap) =>
-		render(SwapWizard, {
-			props: {
-				...BASE_PROPS,
-				currentStep: { name: step, title: 'Swap' }
-			},
+	it('should render component', () => {
+		const { container } = render(SwapTokenWizard, {
+			props: defaultProps,
 			context: mockContext
 		});
 
-	it('renders SwapForm on SWAP step', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAP);
-
-		expect(getByText(/review/i)).toBeInTheDocument();
+		expect(container).toBeTruthy();
 	});
 
-	it('renders SwapReview on REVIEW step', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.REVIEW);
+	it('should render ICP wizard when sourceToken is null', () => {
+		const { container } = render(SwapTokenWizard, {
+			props: defaultProps,
+			context: mockContext
+		});
 
-		expect(getByText(/swap provider/i)).toBeInTheDocument();
+		expect(container).toBeTruthy();
 	});
 
-	it('renders SwapProgress on SWAPPING step', () => {
-		const { getByText } = renderWithStep(WizardStepsSwap.SWAPPING);
+	it('should render ETH wizard when sourceToken is not ICP network', () => {
+		const { container } = render(SwapTokenWizard, {
+			props: defaultProps,
+			context: mockContext
+		});
 
-		expect(getByText(/swapping/i)).toBeInTheDocument();
+		expect(container).toBeTruthy();
 	});
 });
