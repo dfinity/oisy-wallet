@@ -51,7 +51,8 @@
 			"switch_currency": "Cambia valuta"
 		},
 		"warning": {
-			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata"
+			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

@@ -51,7 +51,8 @@
 			"switch_currency": "通貨を切り替え"
 		},
 		"warning": {
-			"do_not_close": "取引完了までタブを閉じないでください"
+			"do_not_close": "取引完了までタブを閉じないでください",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

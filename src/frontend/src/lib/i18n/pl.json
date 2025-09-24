@@ -51,7 +51,8 @@
 			"switch_currency": "Zmień walutę"
 		},
 		"warning": {
-			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona"
+			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
