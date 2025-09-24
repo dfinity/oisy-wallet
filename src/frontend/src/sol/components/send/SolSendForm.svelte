@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -26,26 +26,35 @@
 
 	let invalid = true;
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <SendForm
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	onBack={() => dispatch('icBack')}
+	onNext={() => dispatch('icNext')}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	<SolSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet sendAmount()}
+		<SolSendAmount bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
-	<SolFeeDisplay slot="fee" />
+	{#snippet fee()}
+		<SolFeeDisplay />
+	{/snippet}
 
-	<SendFeeInfo
-		slot="info"
-		decimals={$feeDecimalsStore}
-		feeSymbol={$feeSymbolStore}
-		feeTokenId={$feeTokenIdStore}
-	/>
+	{#snippet info()}
+		<SendFeeInfo
+			decimals={$feeDecimalsStore}
+			feeSymbol={$feeSymbolStore}
+			feeTokenId={$feeTokenIdStore}
+		/>
+	{/snippet}
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		<slot name="cancel" />
+	{/snippet}
 </SendForm>

@@ -42,6 +42,7 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
+		approveSpender?: string;
 	}
 
 	const {
@@ -56,7 +57,8 @@
 		from,
 		tokenId,
 		children,
-		onClick
+		onClick,
+		approveSpender
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -64,7 +66,13 @@
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
 	const contactAddress: string | undefined = $derived(
-		type === 'send' ? to : type === 'receive' ? from : undefined
+		type === 'send'
+			? to
+			: type === 'receive'
+				? from
+				: type === 'approve'
+					? approveSpender
+					: undefined
 	);
 
 	const contact: ContactUi | undefined = $derived(
