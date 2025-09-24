@@ -184,10 +184,10 @@
 	<BtcSendReview
 		{amount}
 		{destination}
+		onBack={() => dispatch('icBack')}
+		onSend={send}
 		{selectedContact}
 		{source}
-		on:icBack
-		on:icSend={send}
 		bind:utxosFee
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
