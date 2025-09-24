@@ -16,6 +16,7 @@ export type CanisterApiFunctionParams<T = unknown> = T & {
 	nullishIdentityErrorMessage?: string;
 	identity: OptionIdentity;
 	canisterId?: CanisterIdText;
+	tokenLedgerCanisterId?: string;
 };
 
 export interface CreateCanisterOptions<T> extends Omit<CanisterOptions<T>, 'canisterId' | 'agent'> {

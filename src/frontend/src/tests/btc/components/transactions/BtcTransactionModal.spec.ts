@@ -1,7 +1,7 @@
 import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcTransactionUi } from '$tests/mocks/blockchain-transactions.mock';
 import { capitalizeFirstLetter } from '$tests/utils/string-utils';
 import { render } from '@testing-library/svelte';
 

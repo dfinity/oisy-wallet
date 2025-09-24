@@ -205,7 +205,8 @@
 			"staking": "质押",
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
-			"tools": "工具包"
+			"tools": "工具包",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -338,6 +339,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -347,6 +354,7 @@
 			"upcoming_campaigns": "即将举行的宣发活动",
 			"active_date": "结束时间",
 			"ended_date": "已结束",
+			"upcoming_date": "",
 			"share": "分享到 X",
 			"learn_more": "了解更多",
 			"check_status": "检查状态与资格",
@@ -355,7 +363,7 @@
 			"activity_button_text": "查看近期活动",
 			"activity_button_text_short": "查看活动",
 			"open_wallet": "前往钱包",
-			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线！",
+			"carousel_slide_title": "$oisy_short Sprinkles 第五集现已上线！",
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
@@ -374,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "请密切关注即将到来的空投活动！<a href=\"https://x.com/oisy\" target=\"_blank\">在 X 上关注我们</a>、加入 <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>，或加入 <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> 社区保持更新。",
-			"coming_soon": "$oisy_short 第四集即将上线",
+			"coming_soon": "$oisy_short 第六集即将上线",
 			"reward_banner": "活动 $campaignName 的横幅"
 		},
 		"campaigns": {
@@ -1575,8 +1583,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "许可协议",
-			"accept_terms": "点击此按钮即表示你同意",
-			"accept_terms_link": "许可协议",
 			"title": "$oisy_name 许可协议（“许可协议”）",
 			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
 			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",

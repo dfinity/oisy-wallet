@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
+	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -52,7 +52,7 @@
 			: undefined;
 </script>
 
-<NewSwapForm
+<SwapForm
 	{errorType}
 	fee={totalFee}
 	{isSwapAmountsLoading}
@@ -74,4 +74,4 @@
 			</div>
 		{/if}
 	{/snippet}
-</NewSwapForm>
+</SwapForm>
