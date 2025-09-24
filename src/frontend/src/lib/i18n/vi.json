@@ -366,14 +366,14 @@
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
-			"not_eligible": "",
+			"not_eligible": "Không đủ điều kiện",
 			"ongoing": "Đang diễn ra",
 			"ended": "Đã kết thúc ($amount)",
 			"banner_text": "Kiếm phần thưởng hàng ngày với OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
-			"network_bonus_info": "",
+			"network_bonus_info": "Mỗi mạng lưới mà bạn nắm giữ tài sản sẽ mang lại cho bạn một hệ số thưởng. Bạn càng sử dụng nhiều mạng lưới, bạn càng nhận được nhiều phần thưởng!",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
