@@ -39,7 +39,7 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<SolSendAmount bind:amount bind:amountError on:icTokensList />
+		<SolSendAmount onTokensList={() => dispatch('icTokensList')} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
