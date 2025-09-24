@@ -14,6 +14,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 	import { isEndedCampaign, isOngoingCampaign, isUpcomingCampaign } from '$lib/utils/rewards.utils';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { modalRewardDetails, modalRewardDetailsData } from '$lib/derived/modal.derived';
 
 	let selectedRewardState = $state(RewardStates.ONGOING);
 
@@ -52,5 +55,9 @@
 		/>
 	{:else if selectedRewardState === RewardStates.ENDED}
 		<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
+	{/if}
+
+	{#if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+		<RewardModal reward={$modalRewardDetailsData} />
 	{/if}
 </RewardsEligibilityContext>
