@@ -123,7 +123,13 @@
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview {amount} {destination} {selectedContact} on:icBack on:icSend={send} />
+	<IcSendReview
+		{amount}
+		{destination}
+		onBack={() => dispatch('icBack')}
+		onSend={send}
+		{selectedContact}
+	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<IcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
