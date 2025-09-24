@@ -77,6 +77,6 @@ describe('BtcTransactionModal', () => {
 		});
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
-		expect(getByText(BTC_MAINNET_TOKEN.name)).toBeInTheDocument();
+		expect(getByText(BTC_MAINNET_TOKEN.network.name)).toBeInTheDocument();
 	});
 });

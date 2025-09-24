@@ -101,6 +101,6 @@ describe('EthTransactionModal', () => {
 		});
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
-		expect(getByText(ETHEREUM_TOKEN.name)).toBeInTheDocument();
+		expect(getByText(ETHEREUM_TOKEN.network.name)).toBeInTheDocument();
 	});
 });

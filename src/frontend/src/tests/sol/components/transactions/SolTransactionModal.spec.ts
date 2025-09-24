@@ -125,6 +125,6 @@ describe('SolTransactionModal', () => {
 		});
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
-		expect(getByText(BONK_TOKEN.name)).toBeInTheDocument();
+		expect(getByText(BONK_TOKEN.network.name)).toBeInTheDocument();
 	});
 });

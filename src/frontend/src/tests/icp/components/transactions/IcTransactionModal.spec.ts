@@ -60,6 +60,6 @@ describe('IcTransactionModal', () => {
 		});
 
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
-		expect(getByText(ICP_TOKEN.name)).toBeInTheDocument();
+		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
 	});
 });
