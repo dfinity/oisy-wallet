@@ -46,8 +46,6 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	// Temporary: swaps aren’t supported on Solana or Bitcoin yet.
-	// TODO: Remove once Swap is enabled on those networks.
 	let swapAction = $derived(
 		!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)
 	);
@@ -55,10 +53,6 @@
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
 	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
-
-	/// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
-	// TODO: Remove once Swap/Convert are refactored and merged.
-	let buyActionDisabled = $derived(convertErc20 && convertEth);
 </script>
 
 <div class="flex w-full justify-center pt-8" role="toolbar">
@@ -109,7 +103,7 @@
 			{/if}
 		{/if}
 
-		{#if buyAction && !buyActionDisabled}
+		{#if buyAction}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>
