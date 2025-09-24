@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
@@ -25,10 +25,23 @@
 			tokenStandard: $sendTokenStandard
 		}) ||
 		invalidAmount(amount);
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
-	<IcTokenFee slot="fee" />
+<SendReview
+	{amount}
+	{destination}
+	disabled={invalid}
+	onBack={() => dispatch('icBack')}
+	onSend={() => dispatch('icSend')}
+	{selectedContact}
+>
+	{#snippet fee()}
+		<IcTokenFee />
+	{/snippet}
 
-	<IcReviewNetwork slot="network" />
+	{#snippet network()}
+		<IcReviewNetwork />
+	{/snippet}
 </SendReview>

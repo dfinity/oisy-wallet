@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import type { Readable } from 'svelte/store';
 	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
@@ -46,15 +46,30 @@
 		}) ||
 		invalidAmount(amount) ||
 		utxosFee.utxos.length === 0;
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<SendReview {amount} {destination} disabled={disableSend} {selectedContact} on:icBack on:icSend>
-	<BtcReviewNetwork slot="network" networkId={$sendTokenNetworkId} />
+<SendReview
+	{amount}
+	{destination}
+	disabled={disableSend}
+	onBack={() => dispatch('icBack')}
+	onSend={() => dispatch('icSend')}
+	{selectedContact}
+>
+	{#snippet network()}
+		<BtcReviewNetwork networkId={$sendTokenNetworkId} />
+	{/snippet}
 
-	<BtcUtxosFee slot="fee" {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+	{#snippet fee()}
+		<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+	{/snippet}
 
-	<div slot="info" class="mt-8">
-		<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
-		<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
-	</div>
+	{#snippet info()}
+		<div class="mt-8">
+			<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
+			<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
+		</div>
+	{/snippet}
 </SendReview>
