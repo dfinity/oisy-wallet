@@ -117,14 +117,24 @@ export const mapIcrcTransaction = ({
 					? 'send'
 					: 'receive';
 
+	const approveFee = fromNullishNullable(fromNullable(approve)?.fee) ?? ZERO;
+	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO;
+
 	const value = isApprove
-		? (fromNullishNullable(fromNullable(approve)?.fee) ?? ZERO)
+		? approveFee
 		: nonNullish(data?.amount)
-			? data.amount +
-				(isTransfer && source.incoming === false
-					? (fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO)
-					: ZERO)
+			? data.amount + (isTransfer && source.incoming === false ? transferFee : ZERO)
 			: undefined;
+
+	const approveData = fromNullable(approve);
+	const approveSpender = approveData
+		? encodeIcrcAccount({
+				owner: approveData.spender.owner,
+				subaccount: fromNullable(approveData.spender.subaccount)
+			})
+		: undefined;
+
+	const approveExpiresAt = approveData ? fromNullable(approveData.expires_at) : undefined;
 
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
@@ -139,6 +149,8 @@ export const mapIcrcTransaction = ({
 				: undefined,
 		...(nonNullish(value) && { value }),
 		timestamp,
-		status: 'executed'
+		status: 'executed',
+		approveSpender,
+		approveExpiresAt
 	};
 };
