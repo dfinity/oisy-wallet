@@ -48,13 +48,13 @@
 		});
 	};
 
-	const labelsByFeatureId: Record<ExperimentalFeatureId, Record<string, string>> = {
+	const labelsByFeatureId: Record<ExperimentalFeatureId, Record<string, string>> = $derived({
 		AiAssistantBeta: {
 			title: replaceOisyPlaceholders($i18n.ai_assistant.text.title),
 			description: $i18n.ai_assistant.text.feature_description,
 			learnMore: OISY_AI_ASSISTANT_DOCS_URL
 		}
-	};
+	});
 </script>
 
 <SettingsCard>
