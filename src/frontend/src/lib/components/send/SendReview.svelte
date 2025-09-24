@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -19,24 +19,28 @@
 	interface Props {
 		destination?: string;
 		amount?: OptionAmount;
-		disabled?: boolean | undefined;
+		disabled?: boolean;
 		selectedContact?: ContactUi;
+		nft?: Nft;
 		network?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
+		onBack: () => void;
+		onSend: () => void;
 	}
 
 	let {
 		destination = '',
-		amount = undefined,
+		amount,
 		disabled = false,
-		selectedContact = undefined,
+		selectedContact,
+		nft,
 		network,
 		fee,
-		info
+		info,
+		onBack,
+		onSend
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -60,8 +64,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
+			<ButtonBack onclick={onBack} />
+			<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
 				{$i18n.send.text.send}
 			</Button>
 		</ButtonGroup>

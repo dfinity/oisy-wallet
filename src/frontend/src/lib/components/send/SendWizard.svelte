@@ -125,7 +125,5 @@
 			on:icSendBack
 			on:icTokensList
 		/>
-	{:else}
-		{@render children?.()}
 	{/if}
 </SendTokenContext>
