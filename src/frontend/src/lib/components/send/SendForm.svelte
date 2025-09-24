@@ -25,7 +25,7 @@
 			{destination}
 			{invalidDestination}
 			{selectedContact}
-			on:icSendDestinationStep={back}
+			onSendDestinationStep={back}
 		/>
 
 		<slot name="fee" />

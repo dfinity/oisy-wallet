@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
@@ -14,12 +13,15 @@
 		destination: string;
 		invalidDestination?: boolean;
 		selectedContact?: ContactUi;
+		onIcSendDestinationStep: () => void;
 	}
-	let { destination, invalidDestination = false, selectedContact }: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
-	const onIcSendDestinationStep = () => dispatch('icSendDestinationStep');
+	let {
+		destination,
+		invalidDestination = false,
+		selectedContact,
+		onIcSendDestinationStep
+	}: Props = $props();
 
 	let addressToDisplay = $derived(shortenWithMiddleEllipsis({ text: destination }));
 </script>
