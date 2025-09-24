@@ -456,7 +456,7 @@
 					"default": {
 						"title": "Du wurdest belohnt",
 						"description": "Deine Belohnungen sind gerade in Deiner Wallet eingetroffen.<br>Nicht vergessen: Weiter einladen und aktiv bleiben, um mehr zu gewinnen.",
-						"share_href": ""
+						"share_href": "https://x.com/intent/post?text=Wieder%20ein%20%40OISY%20Sprinkle%20in%20meiner%20Wallet%20gelandet.%20%20%0AEiner%20der%20einfachsten%20Airdrops%20in%20DeFi.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
 					},
 					"jackpot": {
 						"title": "Du hast den Bonus gewonnen",
