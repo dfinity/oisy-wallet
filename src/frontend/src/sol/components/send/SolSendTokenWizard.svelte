@@ -221,15 +221,16 @@
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SolSendForm
+			onBack={() => dispatch('icBack')}
+			onNext={() => dispatch('icNext')}
 			{selectedContact}
-			on:icNext
-			on:icClose
-			on:icTokensList
-			on:icBack
+			onTokensList={() => dispatch('icTokensList')}
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</SolSendForm>
 	{/if}
 </SolFeeContext>
