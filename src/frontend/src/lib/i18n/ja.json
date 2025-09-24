@@ -446,31 +446,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: エピソード5公開中 🎉",
+				"one_liner": "アクティブな活動、他のユーザーへの紹介、そしてチェーン全体でのOISY利用でSprinklesを獲得できます。あなたの行動によって報酬が増え、アクティブな紹介によってさらに報酬がアップします。<br/>さらに、チェーンが増えるほど、賞品獲得のチャンスも高まります。",
+				"participate_title": "アクティビティや紹介に応じてトークンを獲得できます。チェーン数が増えるほど、チャンスも増えます。",
+				"description": "資格を得るには、10 日間アクティブに活動してください。頻繁にログインし、ウォレット アクションを完了し、少なくとも 20 ドルを保有してください。<br/>アクティブなチェーンごとに、マルチチェーン マルチプライヤーによって当選確率が上がります。<br/>資格を得た友人から 10% を獲得し、上位 3 位に入ると 200 ドルのスーパー スプリンクルを獲得できます。",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "報酬を獲得しました",
+						"description": "報酬がウォレットに届きました<br>もっと勝つために紹介とアクティブな活動を忘れずに",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "ウィークリーボーナスドロップを獲得しました。",
+						"description": "ウィークリーボーナスドロップの 1 つを獲得しました。<br>アクティブに活動し、紹介を続けてさらに獲得しましょう。",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "リーダーボードのトップに立ちました",
+						"description": "今シーズンのトップ4リファラーにランクインしました<br>ウォレットに200ドルが追加されました",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "ささやかな感謝の気持ちです",
+						"description": "紹介したユーザーの一人がSprinklesを獲得しました。",
 						"share_href": ""
 					}
 				}
