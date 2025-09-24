@@ -118,7 +118,7 @@ export const mapIcrcTransaction = ({
 					: 'receive';
 
 	const value = isApprove
-		? ZERO
+		? (fromNullishNullable(fromNullable(approve)?.fee) ?? ZERO)
 		: nonNullish(data?.amount)
 			? data.amount +
 				(isTransfer && source.incoming === false
