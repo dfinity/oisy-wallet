@@ -210,8 +210,8 @@
 		"descriptions": {
 			"kongswap": {
 				"name": "KongSwap",
-				"one_liner": "Der Token Shop für alles - Handle Token aller Blochchains mühelos mit KongSwap.",
-				"description": "KongSwap ist eine vollständig dezentrale Börse (DEX), die brückenlose, kettenübergreifende Transaktionen zwischen ICP, Bitcoin, Ethereum und Solana anbietet. Durch die Nutzung der Chain Fusion Technologie und des Internet Computer Protokolls reduziert sie Gebühren, vereinfacht die Benutzererfahrung und vermeidet Liquiditätsfragmentierung. Sowohl das Frontend als auch das Backend operieren on-chain über Smart Contracts, was ein nahtloses DeFi-Erlebnis ermöglicht.",
+				"one_liner": "Der Token Shop für alles - Handle Token aller Blockchains mühelos mit KongSwap.",
+				"description": "KongSwap ist eine vollständig dezentrale Börse (DEX), die brückenlose, blockchainübergreifende Transaktionen zwischen ICP, Bitcoin, Ethereum und Solana anbietet. Durch die Nutzung der Chain Fusion Technologie und des Internet Computer Protokolls reduziert sie Gebühren, vereinfacht die Benutzererfahrung und vermeidet Liquiditätsfragmentierung. Sowohl das Frontend als auch das Backend operieren on-chain über Smart Contracts, was ein nahtloses DeFi-Erlebnis ermöglicht.",
 				"carousel": {
 					"text": "Tausche deine Token via DEX",
 					"call_to_action": "Probiere KongSwap"
@@ -283,7 +283,7 @@
 			},
 			"curve_finance": {
 				"name": "Curve Finance",
-				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Ketten.",
+				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Chains.",
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
