@@ -100,13 +100,6 @@
 				</ListItem>
 			{/if}
 
-			{#if nonNullish(token)}
-				<ListItem>
-					<span>{$i18n.networks.network}</span>
-					<span><NetworkWithLogo logo="start" network={token.network} /></span>
-				</ListItem>
-			{/if}
-
 			<ListItem>
 				<span>{$i18n.transaction.text.id}</span>
 				<span>
