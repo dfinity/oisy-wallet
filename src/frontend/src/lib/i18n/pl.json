@@ -581,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Ustawienia",
+			"general": "",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
