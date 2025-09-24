@@ -36,6 +36,7 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -147,6 +148,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(hash)}
 				<ListItem>
 					<span>{$i18n.transaction.text.hash}</span>
