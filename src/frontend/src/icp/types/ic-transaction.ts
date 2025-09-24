@@ -55,4 +55,5 @@ export interface IcTransactionUi {
 	txExplorerUrl?: string;
 	approveSpender?: string;
 	approveExpiresAt?: bigint;
+	fee?: bigint;
 }

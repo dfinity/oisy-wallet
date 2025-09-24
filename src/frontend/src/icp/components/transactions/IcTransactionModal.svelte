@@ -25,7 +25,7 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
+	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl, fee } =
 		$derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -113,6 +113,22 @@
 					/>
 				</span>
 			</ListItem>
+
+			{#if nonNullish(fee) && nonNullish(token)}
+				<ListItem>
+					<span>Fee</span>
+
+					<output class:text-success-primary={type === 'receive'}>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals,
+							showPlusSign: type === 'receive'
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
 		</List>
 
 		{#snippet toolbar()}
