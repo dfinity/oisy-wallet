@@ -13,6 +13,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 
 describe('SolSendForm', () => {
 	const mockContext = new Map([]);
@@ -24,7 +25,11 @@ describe('SolSendForm', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		source: mockSolAddress
+		source: mockSolAddress,
+		onBack: vi.fn,
+		onNext: vi.fn,
+		onTokensList: vi.fn,
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
