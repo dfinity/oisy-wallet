@@ -7,7 +7,7 @@
 		hideDescription?: boolean;
 	}
 
-	let {hideDescription = false}: Props = $props();
+	let { hideDescription = false }: Props = $props();
 </script>
 
 <div class="flex flex-col items-center gap-5 px-6 py-10">

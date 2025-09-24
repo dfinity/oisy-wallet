@@ -114,10 +114,10 @@
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList
+				isMain
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
-				isMain
 			/>
 
 			{#if $showHidden}
