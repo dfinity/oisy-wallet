@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { logoSizes } from '$lib/constants/components.constants';
-	import { ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 
 	interface Props {
 		network: Network;
@@ -34,16 +34,16 @@
 	</div>
 {:else}
 	<div
-		class="rounded-full"
-		class:bg-primary={!isTestnet}
-		class:bg-disabled={isTestnet}
-		data-tid={`${testId}-light-container`}
 		style={`max-height: ${logoSizes[size]}`}
+		class="rounded-full"
+		class:bg-disabled={isTestnet}
+		class:bg-primary={!isTestnet}
+		data-tid={`${testId}-light-container`}
 	>
 		<span
 			class="inline-flex"
-			class:invert-on-dark-theme={!isTestnet}
 			class:brightness-90={isTestnet}
+			class:invert-on-dark-theme={!isTestnet}
 		>
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, {
