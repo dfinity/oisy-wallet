@@ -46,7 +46,9 @@
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 	let isNftsPage = $derived(isRouteNfts(page));
 
-	let swapAction = $derived(!isTransactionsPage || (isTransactionsPage && $networkICP));
+	let swapAction = $derived(
+		!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)
+	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
@@ -101,7 +103,7 @@
 			{/if}
 		{/if}
 
-		{#if buyAction}
+		{#if buyAction && !convertErc20 && !convertEth}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>
