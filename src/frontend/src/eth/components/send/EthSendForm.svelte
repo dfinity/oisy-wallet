@@ -42,7 +42,12 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds on:icTokensList />
+		<EthSendAmount
+			{nativeEthereumToken}
+			onTokensList={() => dispatch('icTokensList')}
+			bind:amount
+			bind:insufficientFunds
+		/>
 	{/snippet}
 
 	{#snippet fee()}
