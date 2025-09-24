@@ -6,8 +6,8 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { render } from '@testing-library/svelte';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { render } from '@testing-library/svelte';
 
 describe('IcSendForm', () => {
 	const mockContext = new Map([]);
