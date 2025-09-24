@@ -96,13 +96,13 @@
 	);
 
 	const isEmptyList = $derived.by(() => {
-		const hasNoCollections = nftCollections.length === 0;
+		const hasOnlyEmptyCollections = nftCollections.filter((c) => c.nfts.length > 0).length === 0;
 		const hasCommonCollections = commonCollections.length > 0;
 		const hasVisibleSpamCollections = $showSpam && spamCollections.length > 0;
 		const hasVisibleHiddenCollections = $showHidden && hiddenCollections.length > 0;
 
 		return (
-			hasNoCollections ||
+			hasOnlyEmptyCollections ||
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});

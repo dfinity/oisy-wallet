@@ -16,7 +16,7 @@ describe('SendDestination', () => {
 
 	it('renders provided destination', () => {
 		const { getByText } = render(SendDestination, {
-			props: { destination: mockEthAddress },
+			props: { destination: mockEthAddress, onSendDestinationStep: vi.fn() },
 			context: mockContext
 		});
 

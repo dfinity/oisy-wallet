@@ -10,6 +10,7 @@ import SolSendForm from '$sol/components/send/SolSendForm.svelte';
 import { SOL_FEE_CONTEXT_KEY, initFeeContext, initFeeStore } from '$sol/stores/sol-fee.store';
 import * as solAddressUtils from '$sol/utils/sol-address.utils';
 import en from '$tests/mocks/i18n.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
@@ -24,7 +25,11 @@ describe('SolSendForm', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		source: mockSolAddress
+		source: mockSolAddress,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
