@@ -1,7 +1,7 @@
 import { POLYGON_AMOY_EXPLORER_URL, POLYGON_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import polygonAmoyIconTransparent from '$lib/assets/networks/transparent/polygon-amoy.svg';
-import polygonMainnetIconTransparent from '$lib/assets/networks/transparent/polygon-mainnet.svg';
+import polygonAmoyIconTransparent from '$lib/assets/networks/polygon-amoy.svg';
+import polygonMainnetIconTransparent from '$lib/assets/networks/polygon-mainnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -21,7 +21,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Polygon',
 	chainId: 137n,
-	iconTransparent: polygonMainnetIconTransparent,
+	icon: polygonMainnetIconTransparent,
 	explorerUrl: POLYGON_EXPLORER_URL,
 	providers: {
 		infura: 'matic',
@@ -42,7 +42,7 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Polygon (Amoy Testnet)',
 	chainId: 80002n,
-	iconTransparent: polygonAmoyIconTransparent,
+	icon: polygonAmoyIconTransparent,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
 	providers: {
 		infura: 'matic-amoy',
