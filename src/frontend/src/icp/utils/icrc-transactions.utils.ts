@@ -117,13 +117,11 @@ export const mapIcrcTransaction = ({
 					? 'send'
 					: 'receive';
 
-	const value = isApprove
-		? ZERO
-		: nonNullish(data?.amount)
-			? data.amount +
-				(isTransfer && source.incoming === false
-					? (fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO)
-					: ZERO)
+	const value = isApprove ? ZERO : nonNullish(data?.amount) ? data.amount : undefined;
+
+	const fee =
+		isTransfer && source.incoming === false
+			? (fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO)
 			: undefined;
 
 	return {
@@ -138,6 +136,7 @@ export const mapIcrcTransaction = ({
 					})
 				: undefined,
 		...(nonNullish(value) && { value }),
+		...(nonNullish(fee) && { fee }),
 		timestamp,
 		status: 'executed'
 	};

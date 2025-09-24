@@ -53,4 +53,5 @@ export interface IcTransactionUi {
 	timestamp?: bigint;
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
+	fee?: bigint;
 }
