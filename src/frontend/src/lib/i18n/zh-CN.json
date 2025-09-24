@@ -367,14 +367,14 @@
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
-			"not_eligible": "",
+			"not_eligible": "不符合资格",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
 			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
 		},
 		"requirements": {
 			"requirements_title": "资格标准",
-			"network_bonus_info": "",
+			"network_bonus_info": "您持有资产的每个网络都会为您提供奖励乘数。您使用的网络越多，获得的奖励就越多！",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
 			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
 			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
