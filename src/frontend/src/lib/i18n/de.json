@@ -367,14 +367,14 @@
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
-			"not_eligible": "",
+			"not_eligible": "Nicht berechtigt",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
 			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
-			"network_bonus_info": "",
+			"network_bonus_info": "Jedes Netwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
