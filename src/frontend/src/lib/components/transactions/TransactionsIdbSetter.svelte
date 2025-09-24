@@ -35,7 +35,7 @@
 	$effect(() => {
 		[$btcTransactionsStore];
 
-		debounceSetIdbBtcTransactions;
+		debounceSetIdbBtcTransactions();
 	});
 
 	const debounceSetIdbEthTransactions = debounce(() => {
