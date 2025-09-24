@@ -134,7 +134,7 @@ export const mapIcrcTransaction = ({
 			})
 		: undefined;
 
-	const approveExpiresAt = approveData ? fromNullable(approveData.expires_at) : undefined;
+	const approveExpiresAt =fromNullishNullable(approveData?.expires_at)
 
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
