@@ -22,4 +22,4 @@ export const isPWAStandalone = () => {
 	}
 
 	return window.matchMedia('(display-mode: standalone)').matches;
-}
+};
