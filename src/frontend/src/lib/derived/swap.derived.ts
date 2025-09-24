@@ -1,5 +1,4 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	allCrossChainSwapTokens,
@@ -21,7 +20,7 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 	[pageToken, allKongSwapCompatibleIcrcTokens, allCrossChainSwapTokens],
 	([$pageToken, $allKongSwapCompatibleIcrcTokens, $allCrossChainSwapTokens]) => {
 		if (nonNullish($pageToken)) {
-			const selectedToken = $pageToken;			
+			const selectedToken = $pageToken;
 
 			const swappableToken: Token | undefined = [
 				{ ...ICP_TOKEN, enabled: true },
@@ -43,8 +42,8 @@ const selectedSwappableToken: Readable<Token | undefined> = derived(
 
 export const swappableTokens: Readable<SwappableTokens> = derived(
 	[balancesStore, selectedSwappableToken],
-	([$balancesStore, $selectedSwappableToken]) => {
-		const selectedToken = $selectedSwappableToken;
+	([$balancesStore, $selectedSwappableToken]) => {		
+		const selectedToken = $selectedSwappableToken;		
 		if (isNullish(selectedToken)) {
 			return { sourceToken: undefined, destinationToken: undefined };
 		}
