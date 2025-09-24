@@ -61,7 +61,7 @@ export const signIn = async (
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
 
-		// We clean previous messages in case user was signed out automatically before sign-in again.
+		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
 
 		return { success: 'ok' };
@@ -312,7 +312,7 @@ const appendMsgToUrl = (msg: ToastMsg) => {
 };
 
 /**
- * If the url contains a msg that has been provided on logout, display it as a toast message. Cleanup url afterwards - we don't want the user to see the message again if reloads the browser
+ * If the url contains a msg that has been provided on logout, display it as a toast message. Clean up the url afterwards - we don't want the user to see the message again if reloads the browser
  */
 export const displayAndCleanLogoutMsg = () => {
 	const urlParams: URLSearchParams = new URLSearchParams(window.location.search);
