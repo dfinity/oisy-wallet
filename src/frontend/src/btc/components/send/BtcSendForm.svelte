@@ -41,7 +41,7 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<BtcSendAmount  bind:amount bind:amountError on:icTokensList />
+		<BtcSendAmount bind:amount bind:amountError on:icTokensList />
 	{/snippet}
 
 	<!--	TODO: calculate and display transaction fee	-->
