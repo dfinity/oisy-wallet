@@ -13,7 +13,7 @@
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		destination?: string;
 		selectedContact?: ContactUi;
 		onBack: () => void;
