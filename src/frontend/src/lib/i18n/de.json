@@ -206,7 +206,8 @@
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
-			"tools": "Tools"
+			"tools": "Tools",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -339,15 +340,22 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Prämien",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
+			"upcoming_campaigns": "Zukünftige Episoden",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
+			"upcoming_date": "Startet am",
 			"share": "Teilen auf X",
 			"learn_more": "Mehr erfahren",
 			"check_status": "Status & Berechtigung prüfen",
@@ -356,7 +364,7 @@
 			"activity_button_text": "Letzte Aktivität prüfen",
 			"activity_button_text_short": "Aktivität prüfen",
 			"open_wallet": "Zur Wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 ist jetzt aktiv!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 ist jetzt aktiv!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
@@ -375,7 +383,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
-			"coming_soon": "$oisy_short Folge 4 erscheint bald",
+			"coming_soon": "$oisy_short Folge 6 erscheint bald",
 			"reward_banner": "Banner der Kampagne $campaignName"
 		},
 		"campaigns": {
@@ -1576,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Lizenzvereinbarung",
-			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
-			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
 			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
 			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",

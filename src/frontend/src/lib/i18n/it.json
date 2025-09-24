@@ -206,7 +206,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Gioco",
-			"tools": "Strumenti"
+			"tools": "Strumenti",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -339,6 +340,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,6 +355,7 @@
 			"upcoming_campaigns": "Campagne in Arrivo",
 			"active_date": "Termina il",
 			"ended_date": "Terminato il",
+			"upcoming_date": "",
 			"share": "Condividi su X",
 			"learn_more": "Scopri di più",
 			"check_status": "Verifica stato ed eleggibilità",
@@ -356,7 +364,7 @@
 			"activity_button_text": "Verifica attività recenti",
 			"activity_button_text_short": "Verifica attività",
 			"open_wallet": "Portami al wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles: Episodio 4 è ora Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles: Episodio 5 è ora Live!",
 			"carousel_slide_cta": "Scopri di più",
 			"sprinkles_earned": "Hai guadagnato $noOfSprinkles sprinkles, per un totale di $amount! 🎉",
 			"youre_eligible": "Sei idoneo!",
@@ -375,7 +383,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Tieni d'occhio i prossimi airdrop di token! <a href=\"https://x.com/oisy\" target=\"_blank\">Seguici su X</a>, unisciti al nostro <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, o entra nel nostro <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> per rimanere aggiornato.",
-			"coming_soon": "L'episodio 4 di $oisy_short arriverà presto",
+			"coming_soon": "L'episodio 6 di $oisy_short arriverà presto",
 			"reward_banner": "Banner della campagna $campaignName"
 		},
 		"campaigns": {
@@ -1576,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Accordo di Licenza",
-			"accept_terms": "Cliccando su questo pulsante, accetti l'",
-			"accept_terms_link": "Accordo di Licenza",
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
 			"paragraph_1": "Grazie per il tuo interesse in $oisy_name, un'applicazione decentralizzata di wallet multi-chain, self-custody basata su browser, hostata sulla rete blockchain pubblica Internet Computer (\"$oisy_short\"). Per maggiori informazioni su $oisy_short, il suo codice open-source e le licenze correlate, fai riferimento al repository GitHub di $oisy_short qui: $oisy_repo_url.",
 			"paragraph_2": "Il presente Accordo di Licenza regola l'utilizzo di $oisy_short da parte dell'Utente (di seguito, \"Utente\"). UTILIZZANDO $oisy_short, L'UTENTE DICHIARA DI AVER LETTO, COMPRESO E ACCETTATO DI ESSERE VINCOLATO DAL PRESENTE ACCORDO DI LICENZA. SE L'UTENTE NON ACCETTA, NON PUÒ UTILIZZARE $oisy_short.",

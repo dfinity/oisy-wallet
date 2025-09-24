@@ -20,7 +20,7 @@
 	};
 </script>
 
-<div class="border-t border-secondary px-4 py-3 pb-4 text-xs">
+<div class="border-t border-secondary px-4 py-3 pb-4 text-base sm:text-xs">
 	<form method="POST" onsubmit={onSubmit}>
 		<InputText
 			name="message"

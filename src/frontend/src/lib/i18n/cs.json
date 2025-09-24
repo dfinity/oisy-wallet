@@ -206,7 +206,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
-			"tools": "Nářadí"
+			"tools": "Nářadí",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -339,6 +340,12 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
@@ -348,6 +355,7 @@
 			"upcoming_campaigns": "Nadcházející kampaně",
 			"active_date": "Končí",
 			"ended_date": "Skončilo",
+			"upcoming_date": "",
 			"share": "Sdílet na X",
 			"learn_more": "Zjistit více",
 			"check_status": "Zkontrolovat stav a způsobilost",
@@ -356,7 +364,7 @@
 			"activity_button_text": "Zkontrolovat nedávnou aktivitu",
 			"activity_button_text_short": "Zkontrolovat aktivitu",
 			"open_wallet": "Přejít do peněženky",
-			"carousel_slide_title": "Epizoda 4 OISY Sprinkles nyní probíhá!",
+			"carousel_slide_title": "Epizoda 5 OISY Sprinkles nyní probíhá!",
 			"carousel_slide_cta": "Zjistit více",
 			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
 			"youre_eligible": "Jste způsobilí!",
@@ -375,7 +383,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Sledujte nadcházející airdropy tokenů! <a href=\"https://x.com/oisy\" target=\"_blank\">Sledujte nás na X</a>, připojte se k našemu <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Redditu</a> nebo se přidejte do <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discordu</a>, abyste zůstali v obraze.",
-			"coming_soon": "Epizoda 4 $oisy_short se blíží",
+			"coming_soon": "Epizoda 6 $oisy_short se blíží",
 			"reward_banner": "Banner kampaně $campaignName"
 		},
 		"campaigns": {
@@ -1576,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Licenční smlouva",
-			"accept_terms": "Kliknutím na toto tlačítko souhlasíte s",
-			"accept_terms_link": "Licenční smlouvou",
 			"title": "Licenční smlouva $oisy_name („Licenční smlouva“)",
 			"paragraph_1": "Děkujeme za váš zájem o $oisy_name, decentralizovanou aplikaci peněženky s více sítěmi a vlastní úschovou založenou na prohlížeči, hostovanou na veřejné blockchainové síti Internet Computer („$oisy_short“). Další informace o $oisy_short, jeho open-source kódu a souvisejících licencích naleznete v repozitáři GitHub $oisy_short zde: $oisy_repo_url.",
 			"paragraph_2": "Tato licenční smlouva upravuje vaše používání $oisy_short („vy“). POUŽÍVÁNÍM $oisy_short SOUHLASÍTE S TÍM, ŽE JSTE SI PŘEČETLI, POROZUMĚLI A SOUHLASÍTE S TÍM, ŽE BUDETE VÁZÁNI TOUTO LICENČNÍ SMLOUVOU. POKUD NESOUHLASÍTE, NESMÍTE $oisy_short POUŽÍVAT.",

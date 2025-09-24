@@ -5,6 +5,7 @@ export enum Languages {
 	FRENCH = 'fr',
 	HINDI = 'hi',
 	ITALIAN = 'it',
+	JAPANESE = 'ja',
 	POLISH = 'pl',
 	PORTUGUESE = 'pt',
 	VIETNAMESE = 'vi',
