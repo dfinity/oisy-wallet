@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
@@ -24,7 +24,6 @@
 		network?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
-		toolbar?: Snippet;
 		onBack: () => void;
 		onSend: () => void;
 	}
@@ -38,7 +37,6 @@
 		network,
 		fee,
 		info,
-		toolbar: toolbarProp,
 		onBack,
 		onSend
 	}: Props = $props();
@@ -64,15 +62,11 @@
 	{@render info?.()}
 
 	{#snippet toolbar()}
-		{#if nonNullish(toolbarProp)}
-			{@render toolbarProp()}
-		{:else}
-			<ButtonGroup testId="toolbar">
-				<ButtonBack onclick={onBack} />
-				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
-					{$i18n.send.text.send}
-				</Button>
-			</ButtonGroup>
-		{/if}
+		<ButtonGroup testId="toolbar">
+			<ButtonBack onclick={onBack} />
+			<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+				{$i18n.send.text.send}
+			</Button>
+		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

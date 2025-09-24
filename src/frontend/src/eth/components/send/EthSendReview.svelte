@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
@@ -29,14 +29,30 @@
 		!isEthAddress(destination) ||
 		(isNullish(nft) && invalidAmount(amount)) ||
 		isNullish($storeFeeData);
+
+	const dispatch = createEventDispatcher();
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {nft} {selectedContact} on:icBack on:icSend>
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.max_fee_eth} />
-		{/snippet}
-	</EthFeeDisplay>
+<SendReview
+	{amount}
+	{destination}
+	disabled={invalid}
+	{nft}
+	onBack={() => dispatch('icBack')}
+	onSend={() => dispatch('icSend')}
+	{selectedContact}
+>
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
 	<ReviewNetwork slot="network" sourceNetwork={$sendToken.network} />
+
+	{#snippet network()}
+		<ReviewNetwork sourceNetwork={$sendToken.network} />
+	{/snippet}
 </SendReview>
