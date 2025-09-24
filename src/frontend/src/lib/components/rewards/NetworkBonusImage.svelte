@@ -7,6 +7,12 @@
 	}
 
 	let { multiplier, disabled = false }: Props = $props();
+
+	$effect(() => {
+		console.log("------------------------------")
+		console.log(multiplier)
+		console.log("------------------------------")
+	})
 </script>
 
 <div data-tid={REWARDS_NETWORK_MULTIPLIER_IMAGE}>

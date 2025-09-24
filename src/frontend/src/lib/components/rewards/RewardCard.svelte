@@ -38,6 +38,11 @@
 		)
 	);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
+
+	$effect(() => {
+		console.log(networkBonusMultiplier)
+	})
+
 </script>
 
 <button class="flex flex-col" data-tid={testId} {onclick}>

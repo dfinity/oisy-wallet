@@ -51,6 +51,10 @@
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
 	let amountOfRewards = $state(0);
+
+	$effect(() => {
+		console.log(networkBonusMultiplier)
+	})
 </script>
 
 <Modal onClose={modalStore.close} testId={REWARDS_MODAL}>

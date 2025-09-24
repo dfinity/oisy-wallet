@@ -38,6 +38,7 @@
 			<EligibilityBadge {isEligible} />
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
+
 				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
 
 				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
