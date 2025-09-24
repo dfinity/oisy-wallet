@@ -57,6 +57,16 @@
 			"__bigint__": "10000"
 		}
 	},
+	"VEUR": {
+		"ledgerCanisterId": "wu6g4-6qaaa-aaaan-qmrza-cai",
+		"indexCanisterId": "wi24n-jqaaa-aaaan-qmr3a-cai",
+		"decimals": 8,
+		"name": "VNX Euro",
+		"symbol": "VEUR",
+		"fee": {
+			"__bigint__": "10000"
+		}
+	},
 	"GHOSTNODE": {
 		"ledgerCanisterId": "sx3gz-hqaaa-aaaar-qaoca-cai",
 		"decimals": 8,
