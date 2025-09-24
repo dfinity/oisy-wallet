@@ -446,31 +446,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 5 đã có mặt 🎊",
+				"one_liner": "Nhận Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn sẽ giúp tăng phần thưởng, và lượt giới thiệu tích cực sẽ giúp tăng thêm phần thưởng.<br/>Thêm vào đó, giờ đây, càng nhiều chuỗi thì cơ hội chiến thắng càng cao.",
+				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
+				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được gửi vào ví của bạn.<br>Đừng quên giới thiệu và duy trì hoạt động để giành được nhiều hơn.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã giành được phần thưởng hàng tuần",
+						"description": "Bạn vừa nhận được một trong những phần thưởng hàng tuần của chúng tôi.<br>Hãy tích cực và tiếp tục giới thiệu để giành được nhiều phần thưởng hơn.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã đứng đầu Bảng xếp hạng",
+						"description": "Bạn đã được xếp hạng trong top 4 người giới thiệu hàng đầu mùa này<br>200$ đã được thêm vào ví của bạn",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Đây là một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng được bạn giới thiệu vừa nhận được một số sprinkles.",
 						"share_href": ""
 					}
 				}
