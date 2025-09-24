@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "Nadcházející kampaně",
 			"active_date": "Končí",
 			"ended_date": "Skončilo",
+			"upcoming_date": "",
 			"share": "Sdílet na X",
 			"learn_more": "Zjistit více",
 			"check_status": "Zkontrolovat stav a způsobilost",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Nastavení",
+			"general": "",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",

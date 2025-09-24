@@ -10,25 +10,35 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onSend: () => void;
+	}
+
+	let { destination = '', amount, selectedContact, onBack, onSend }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
-	let invalid = true;
-	$: invalid =
+	let invalid = $derived(
 		isNullish($sendTokenStandard) ||
-		isInvalidDestinationIc({
-			destination,
-			tokenStandard: $sendTokenStandard
-		}) ||
-		invalidAmount(amount);
+			isInvalidDestinationIc({
+				destination,
+				tokenStandard: $sendTokenStandard
+			}) ||
+			invalidAmount(amount)
+	);
 </script>
 
-<SendReview {amount} {destination} disabled={invalid} {selectedContact} on:icBack on:icSend>
-	<IcTokenFee slot="fee" />
+<SendReview {amount} {destination} disabled={invalid} {onBack} {onSend} {selectedContact}>
+	{#snippet fee()}
+		<IcTokenFee />
+	{/snippet}
 
-	<IcReviewNetwork slot="network" />
+	{#snippet network()}
+		<IcReviewNetwork />
+	{/snippet}
 </SendReview>

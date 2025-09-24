@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "Предстоящие кампании",
 			"active_date": "Заканчивается",
 			"ended_date": "Закончилось",
+			"upcoming_date": "",
 			"share": "Поделиться в X",
 			"learn_more": "Узнать больше",
 			"check_status": "Проверить статус и право на участие",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Настройки",
+			"general": "",
 			"principal": "Ваш Принципал",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",

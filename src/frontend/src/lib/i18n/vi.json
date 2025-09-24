@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "Chiến dịch sắp tới",
 			"active_date": "Kết thúc vào",
 			"ended_date": "Kết thúc vào",
+			"upcoming_date": "",
 			"share": "Chia sẻ trên X",
 			"learn_more": "Tìm hiểu thêm",
 			"check_status": "Kiểm tra trạng thái & tư cách đủ điều kiện",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Cài đặt",
+			"general": "",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",

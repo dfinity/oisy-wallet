@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "Campagne in Arrivo",
 			"active_date": "Termina il",
 			"ended_date": "Terminato il",
+			"upcoming_date": "",
 			"share": "Condividi su X",
 			"learn_more": "Scopri di più",
 			"check_status": "Verifica stato ed eleggibilità",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Impostazioni",
+			"general": "",
 			"principal": "Il tuo Principal",
 			"principal_copied": "Principal copiato negli appunti",
 			"principal_description": "Il tuo ID per $oisy_name. Creato dalla tua Internet Identity.",

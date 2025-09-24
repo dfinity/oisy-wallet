@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "Próximas campanhas",
 			"active_date": "Termina em",
 			"ended_date": "Terminou em",
+			"upcoming_date": "",
 			"share": "Partilhar no X",
 			"learn_more": "Saiba mais",
 			"check_status": "Verificar Status e Elegibilidade",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Configurações",
+			"general": "",
 			"principal": "Seu Principal",
 			"principal_copied": "Principal copiado para a área de transferência",
 			"principal_description": "Seu ID para $oisy_name. Criado pela sua Internet Identity.",
