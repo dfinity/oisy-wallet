@@ -22,13 +22,13 @@
 	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
 </script>
 
-{#if transparent && nonNullish(network.iconTransparent)}
+{#if transparent && nonNullish(network.icon)}
 	<div class="block" data-tid={`${testId}-transparent-container`}>
 		<Logo
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 			{color}
 			{size}
-			src={network.iconTransparent}
+			src={network.icon}
 			testId={`${testId}-transparent`}
 		/>
 	</div>
@@ -51,7 +51,7 @@
 				})}
 				{color}
 				{size}
-				src={network.iconTransparent}
+				src={network.icon}
 				testId={`${testId}-default`}
 			/>
 		</span>
