@@ -6,6 +6,7 @@
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ModalHero from '$lib/components/common/ModalHero.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionContactCard from '$lib/components/transactions/TransactionContactCard.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
@@ -23,7 +24,6 @@
 	} from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdBTCTestnet, isNetworkIdBTCRegtest } from '$lib/utils/network.utils';
-	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
 
 	interface Props {
 		transaction: BtcTransactionUi;
