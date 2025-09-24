@@ -206,7 +206,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "Jeu",
 			"tools": "Outils",
-			"ai": ""
+			"ai": "IA"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -366,14 +366,14 @@
 			"carousel_slide_cta": "En savoir plus",
 			"sprinkles_earned": "Vous avez gagné $noOfSprinkles sprinkles, pour un total de $amount ! 🎉",
 			"youre_eligible": "Vous êtes éligible !",
-			"not_eligible": "",
+			"not_eligible": "Non éligible",
 			"ongoing": "En cours",
 			"ended": "Terminé ($amount)",
 			"banner_text": "Gagnez des récompenses quotidiennes avec OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Critères d'éligibilité",
-			"network_bonus_info": "",
+			"network_bonus_info": "Chaque réseau sur lequel vous détenez des actifs vous confère un multiplicateur de récompenses. Plus vous utilisez de réseaux, plus vous obtenez de récompenses !",
 			"min_logins": "Connectez-vous $loginsx fois au cours des $days derniers jours",
 			"min_transactions": "Effectuez $transactions transactions au cours des $days derniers jours",
 			"min_total_assets_usd": "Détenez $$usd de tokens au moment de l'émission",
