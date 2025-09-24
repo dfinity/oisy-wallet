@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -29,36 +29,39 @@
 
 	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: EthFeeContext =
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <SendForm
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	onBack={() => dispatch('icBack')}
+	onNext={() => dispatch('icNext')}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	<EthSendAmount
-		slot="amount"
-		{nativeEthereumToken}
-		bind:amount
-		bind:insufficientFunds
-		on:icTokensList
-	/>
+	{#snippet sendAmount()}
+		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds on:icTokensList />
+	{/snippet}
 
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.max_fee_eth} />
-		{/snippet}
-	</EthFeeDisplay>
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
-	<SendFeeInfo
-		slot="info"
-		decimals={$feeDecimalsStore}
-		feeSymbol={$feeSymbolStore}
-		feeTokenId={$feeTokenIdStore}
-	/>
+	{#snippet info()}
+		<SendFeeInfo
+			decimals={$feeDecimalsStore}
+			feeSymbol={$feeSymbolStore}
+			feeTokenId={$feeTokenIdStore}
+		/>
+	{/snippet}
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		<slot name="cancel" />
+	{/snippet}
 </SendForm>

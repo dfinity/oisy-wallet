@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import IcTokenFee from '$icp/components/fee/IcTokenFee.svelte';
 	import IcSendAmount from '$icp/components/send/IcSendAmount.svelte';
 	import type { IcAmountAssertionError } from '$icp/types/ic-send';
@@ -29,19 +29,27 @@
 
 	let invalid = true;
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <SendForm
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	onBack={() => dispatch('icBack')}
+	onNext={() => dispatch('icNext')}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet sendAmount()}
+		<IcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
-	<IcTokenFee slot="fee" />
+	{#snippet fee()}
+		<IcTokenFee />
+	{/snippet}
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		<slot name="cancel" />
+	{/snippet}
 </SendForm>

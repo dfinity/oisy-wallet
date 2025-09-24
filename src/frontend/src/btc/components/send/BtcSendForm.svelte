@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import BtcSendAmount from '$btc/components/send/BtcSendAmount.svelte';
 	import type { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import SendForm from '$lib/components/send/SendForm.svelte';
@@ -28,19 +28,25 @@
 	// TODO: check if we can align this validation flag with other SendForm components (e.g IcSendForm)
 	let invalid = true;
 	$: invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <SendForm
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	onBack={() => dispatch('icBack')}
+	onNext={() => dispatch('icNext')}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{#snippet sendAmount()}
+		<BtcSendAmount slot="amount" bind:amount bind:amountError on:icTokensList />
+	{/snippet}
 
 	<!--	TODO: calculate and display transaction fee	-->
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		<slot name="cancel" />
+	{/snippet}
 </SendForm>
