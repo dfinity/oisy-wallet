@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { debounce, isNullish , nonNullish } from '@dfinity/utils';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { type Snippet, getContext, onDestroy, onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
-			import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
+	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
 	import { initMinedTransactionsListener } from '$eth/services/eth-listener.services';

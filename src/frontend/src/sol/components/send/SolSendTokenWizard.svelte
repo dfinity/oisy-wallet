@@ -2,7 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
-	import { type Snippet, createEventDispatcher, getContext, setContext } from 'svelte';
+	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import { writable } from 'svelte/store';
 	import {
@@ -60,7 +60,6 @@
 		amount?: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
-		children?: Snippet;
 	}
 
 	let {
@@ -68,8 +67,7 @@
 		destination = $bindable(''),
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
-		selectedContact = undefined,
-		children
+		selectedContact = undefined
 	}: Props = $props();
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);

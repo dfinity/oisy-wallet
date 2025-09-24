@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';

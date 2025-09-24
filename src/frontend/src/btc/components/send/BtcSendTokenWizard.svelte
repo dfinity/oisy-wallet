@@ -44,7 +44,6 @@
 		amount?: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
-		children?: Snippet;
 	}
 
 	let {
@@ -53,7 +52,6 @@
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
 		selectedContact = undefined,
-		children
 	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);

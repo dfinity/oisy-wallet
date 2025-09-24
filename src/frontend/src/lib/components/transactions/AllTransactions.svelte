@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { notEmptyString } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { hasNoIndexCanister } from '$icp/validation/ic-token.validation';

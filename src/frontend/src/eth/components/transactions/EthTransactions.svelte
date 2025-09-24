@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import { slide } from 'svelte/transition';
 	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';

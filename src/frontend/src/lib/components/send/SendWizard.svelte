@@ -32,7 +32,6 @@
 		sendProgressStep: string;
 		currentStep: WizardStep | undefined;
 		selectedContact?: ContactUi;
-		children?: Snippet;
 	}
 
 	let {
@@ -41,7 +40,6 @@
 		sendProgressStep = $bindable(),
 		currentStep,
 		selectedContact = undefined,
-		children
 	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);

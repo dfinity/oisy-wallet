@@ -34,7 +34,6 @@
 		amount?: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
-		children?: Snippet;
 	}
 
 	let {
@@ -43,7 +42,6 @@
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
 		selectedContact = undefined,
-		children
 	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
