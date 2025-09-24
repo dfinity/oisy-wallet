@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
@@ -19,9 +19,18 @@
 		amount: OptionAmount;
 		network?: Network;
 		selectedContact?: ContactUi;
+		onBack: () => void;
+		onSend: () => void;
 	}
 
-	const { destination = '', amount, network: sourceNetwork, selectedContact }: Props = $props();
+	const {
+		destination = '',
+		amount,
+		network: sourceNetwork,
+		selectedContact,
+		onBack,
+		onSend
+	}: Props = $props();
 
 	const {
 		feeStore: fee,
@@ -42,18 +51,9 @@
 	let invalid = $derived(invalidSolAddress(destination) || invalidAmount(amount));
 
 	let disableSend = $derived(insufficientFundsForFee || invalid);
-
-	const dispatch = createEventDispatcher();
 </script>
 
-<SendReview
-	{amount}
-	{destination}
-	disabled={disableSend}
-	onBack={() => dispatch('icBack')}
-	onSend={() => dispatch('icSend')}
-	{selectedContact}
->
+<SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
 	{#snippet network()}
 		<ReviewNetwork {sourceNetwork} />
 	{/snippet}
