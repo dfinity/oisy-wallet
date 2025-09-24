@@ -4,15 +4,15 @@
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/backend.did';
-	import { SUPPORTED_EVM_MAINNET_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
-	import { SUPPORTED_ETHEREUM_MAINNET_NETWORKS } from '$env/networks/networks.eth.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
+	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { saveCustomTokens as saveErc1155CustomTokens } from '$eth/services/erc1155-custom-tokens.services';
 	import { saveCustomTokens as saveErc721CustomTokens } from '$eth/services/erc721-custom-tokens.services';
 	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
@@ -157,7 +157,7 @@
 		const customErc721Tokens = tokens.filter(({ token }) => 'Erc721' in token);
 		const customErc1155Tokens = tokens.filter(({ token }) => 'Erc1155' in token);
 
-		const networks = [...SUPPORTED_EVM_MAINNET_NETWORKS, ...SUPPORTED_ETHEREUM_MAINNET_NETWORKS];
+		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
 		for (const network of networks) {
 			const contracts: OwnedContract[] = await loadContracts(network);
 

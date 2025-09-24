@@ -35,9 +35,10 @@
 		destination: Address;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenSymbol, sendTokenDecimals } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -126,10 +127,9 @@
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
 
-			sendCompleted = true;
+			onSendCompleted();
 			loading = false;
 		} catch (err: unknown) {
-			sendCompleted = false;
 			loading = false;
 
 			trackEvent({

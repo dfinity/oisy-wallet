@@ -23,7 +23,7 @@
 	]);
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
+<div class="flex flex-col items-center text-center md:items-start md:text-left">
 	<!-- Invite Rewards Banner -->
 	<div class="flex justify-center md:justify-start">
 		<InviteRewardsBanner />

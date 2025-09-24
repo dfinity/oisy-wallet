@@ -16,9 +16,7 @@
 </script>
 
 {#if $hasAcceptedAllLatestAgreements}
-	<div in:fade>
-		{@render children()}
-	</div>
+	{@render children()}
 {:else if $noAgreementVisionedYet || $hasOutdatedAgreements}
 	<div in:fade={{ delay: 0, duration: 250 }}>
 		<AcceptAgreementsModal />
