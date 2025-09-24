@@ -211,7 +211,7 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col gap-3 pt-3">
+		<div class="flex max-w-80 flex-col pt-3">
 			<LockOrSignOut onHidePopover={hidePopover} />
 		</div>
 	{/if}
