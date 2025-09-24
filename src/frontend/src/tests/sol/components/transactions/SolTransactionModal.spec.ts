@@ -117,4 +117,14 @@ describe('SolTransactionModal', () => {
 			).toBeInTheDocument();
 		});
 	});
+
+	it('should display the network', () => {
+		const { getByText } = render(SolTransactionModal, {
+			transaction: mockSolTransactionUi,
+			token: BONK_TOKEN
+		});
+
+		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
+		expect(getByText(BONK_TOKEN.name)).toBeInTheDocument();
+	});
 });

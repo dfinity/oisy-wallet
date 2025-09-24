@@ -1,5 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import {
@@ -8,6 +9,7 @@ import {
 } from '$tests/mocks/eth-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 const [mockEthTransactionUi] = createMockEthTransactionsUi(1);
 const [mockErc721TransactionUi] = createMockNftTransactionsUi(1);
@@ -90,5 +92,15 @@ describe('EthTransactionModal', () => {
 		assertNonNullish(mockErc721TransactionUi.tokenId);
 
 		expect(getByText(mockErc721TransactionUi.tokenId.toString())).toBeInTheDocument();
+	});
+
+	it('should display the network', () => {
+		const { getByText } = render(EthTransactionModal, {
+			transaction: mockEthTransactionUi,
+			token: ETHEREUM_TOKEN
+		});
+
+		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
+		expect(getByText(ETHEREUM_TOKEN.name)).toBeInTheDocument();
 	});
 });

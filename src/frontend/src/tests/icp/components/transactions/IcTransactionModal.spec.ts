@@ -1,8 +1,10 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 const [mockIcTransactionUi] = createMockIcTransactionsUi(1);
 
@@ -49,5 +51,15 @@ describe('IcTransactionModal', () => {
 		expect(
 			getByText(shortenWithMiddleEllipsis({ text: mockIcTransactionUi.id }))
 		).toBeInTheDocument();
+	});
+
+	it('should display the network', () => {
+		const { getByText } = render(IcTransactionModal, {
+			transaction: mockIcTransactionUi,
+			token: ICP_TOKEN
+		});
+
+		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
+		expect(getByText(ICP_TOKEN.name)).toBeInTheDocument();
 	});
 });
