@@ -373,7 +373,6 @@
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
-			"network_bonus_info": "Each network on which you hold assets gives you a reward multiplier. The more networks you use, the more rewards you get!",
 			"network_bonus_info": "Jedes Netwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
