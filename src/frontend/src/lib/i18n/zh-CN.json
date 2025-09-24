@@ -354,6 +354,7 @@
 			"upcoming_campaigns": "即将举行的宣发活动",
 			"active_date": "结束时间",
 			"ended_date": "已结束",
+			"upcoming_date": "",
 			"share": "分享到 X",
 			"learn_more": "了解更多",
 			"check_status": "检查状态与资格",
@@ -580,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "设置",
+			"general": "",
 			"principal": "你的 Principal",
 			"principal_copied": "Principal 已复制到剪贴板",
 			"principal_description": "你在 $oisy_name 中的身份标识，由 Internet Identity 创建。",
@@ -1674,7 +1676,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short AI 助手",
-			"welcome_message": "你好！ \uD83D\uDC4B 我是你的个人 AI 礼宾。有啥我能帮你？",
+			"welcome_message": "你好！ 👋 我是你的个人 AI 礼宾。有啥我能帮你？",
 			"action_button_contacts_title": "显示联系人",
 			"action_button_contacts_subtitle": "展示你保存的联系人",
 			"action_button_contacts_prompt": "给我看看我的联系人。",
