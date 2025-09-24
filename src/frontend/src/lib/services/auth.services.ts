@@ -1,3 +1,4 @@
+import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
 	clearIdbEthAddress,
@@ -42,6 +43,7 @@ import type { ToastMsg } from '$lib/types/toast';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
@@ -233,6 +235,17 @@ const clearSessionStorage = async () => {
 	sessionStorage.clear();
 };
 
+const disconnectWalletConnect = async () => {
+	emit({ message: 'oisyDisconnectWalletConnect' });
+
+	// Wait until WalletConnect is not connected or until a certain max number of attempts is made.
+	let count = 0;
+	while (get(walletConnectPaired) && count < 10) {
+		await randomWait({ min: 1000, max: 1000 });
+		count++;
+	}
+};
+
 const logout = async ({
 	msg = undefined,
 	clearCurrentPrincipalStorages = true,
@@ -247,7 +260,7 @@ const logout = async ({
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
 
-	emit({ message: 'oisyDisconnectWalletConnect' });
+	await disconnectWalletConnect();
 
 	if (clearCurrentPrincipalStorages) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
