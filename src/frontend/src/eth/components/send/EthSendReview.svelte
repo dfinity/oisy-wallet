@@ -50,8 +50,6 @@
 		</EthFeeDisplay>
 	{/snippet}
 
-	<ReviewNetwork slot="network" sourceNetwork={$sendToken.network} />
-
 	{#snippet network()}
 		<ReviewNetwork sourceNetwork={$sendToken.network} />
 	{/snippet}
