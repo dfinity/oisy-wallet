@@ -24,8 +24,8 @@
 		<SendDestination
 			{destination}
 			{invalidDestination}
-			{selectedContact}
 			onSendDestinationStep={back}
+			{selectedContact}
 		/>
 
 		<slot name="fee" />
