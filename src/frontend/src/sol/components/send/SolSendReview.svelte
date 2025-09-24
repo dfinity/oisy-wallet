@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { createEventDispatcher, getContext } from 'svelte';
 	import InsufficientFundsForFee from '$lib/components/fee/InsufficientFundsForFee.svelte';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
@@ -51,6 +51,8 @@
 	let invalid = $derived(invalidSolAddress(destination) || invalidAmount(amount));
 
 	let disableSend = $derived(insufficientFundsForFee || invalid);
+
+	const dispatch = createEventDispatcher();
 </script>
 
 <SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
