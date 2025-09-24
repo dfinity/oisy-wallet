@@ -5,6 +5,7 @@
 	import type { LogoSize } from '$lib/types/components';
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { logoSizes } from '$lib/constants/components.constants';
 
 	interface Props {
 		network: Network;
@@ -28,27 +29,23 @@
 		/>
 	</div>
 {:else}
-	<div class="dark-hidden block" data-tid={`${testId}-light-container`}>
-		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: network.name
-			})}
-			{color}
-			{size}
-			src={network.iconLight}
-			testId={`${testId}-light`}
-		/>
-	</div>
-
-	<div class="dark-block hidden" data-tid={`${testId}-dark-container`}>
-		<Logo
-			alt={replacePlaceholders($i18n.core.alt.logo, {
-				$name: network.name
-			})}
-			{color}
-			{size}
-			src={network.iconDark}
-			testId={`${testId}-dark`}
-		/>
+	<div
+		class="rounded-full"
+		class:bg-primary={network.env === 'mainnet'}
+		class:bg-disabled-alt={network.env === 'testnet'}
+		data-tid={`${testId}-light-container`}
+		style={`max-height: ${logoSizes[size]}`}
+	>
+		<span class="inline-flex" class:invert-on-dark-theme={network.env === 'mainnet'}>
+			<Logo
+				alt={replacePlaceholders($i18n.core.alt.logo, {
+					$name: network.name
+				})}
+				{color}
+				{size}
+				src={network.iconTransparent}
+				testId={`${testId}-light`}
+			/>
+		</span>
 	</div>
 {/if}
