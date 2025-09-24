@@ -213,11 +213,6 @@
 
 		<div class="flex max-w-80 flex-col gap-3 pt-3">
 			<LockOrSignOut onHidePopover={hidePopover} />
-			<Hr />
-
-			<span class="text-center text-sm text-tertiary">
-				<LicenseLink noUnderline />
-			</span>
 		</div>
 	{/if}
 </Popover>
