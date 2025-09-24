@@ -1,36 +1,37 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import type { NftCollectionUi } from '$lib/types/nft';
+	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 
 	interface Props {
 		title: string;
+		isMain?: boolean;
 		icon?: Snippet;
 		nftCollections: NftCollectionUi[];
 		testId?: string;
 	}
 
-	let { title, icon, nftCollections, testId }: Props = $props();
+	let { title, isMain = false, icon, nftCollections, testId }: Props = $props();
+
+	const notEmptyCollections = $derived(nftCollections.filter((c) => c.nfts.length > 0));
 </script>
 
-{#if nftCollections.length > 0}
 	<div data-tid={testId}>
-		<div class="mt-2 flex items-center gap-2">
-			{@render icon?.()}
-			<h5>{title}</h5>
-		</div>
+		{#if notEmptyCollections.length > 0 || isMain}
+			<div class="mt-2 flex items-center gap-2">
+				{@render icon?.()}
+				<h5>{title}</h5>
+			</div>
+		{/if}
 
-		<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
-			{#if nftCollections.filter((c) => c.nfts.length > 0).length > 0}
-				{#each nftCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-					{#if collection.nfts.length > 0}
-						<NftCollectionCard {collection} />
-					{/if}
+		{#if notEmptyCollections.length > 0}
+			<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
+				{#each notEmptyCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
+					<NftCollectionCard {collection} />
 				{/each}
-			{:else}
-				<NftCardSkeleton times={3} />
-			{/if}
-		</div>
+			</div>
+		{:else if isMain}
+			<EmptyNftsList hideDescription />
+		{/if}
 	</div>
-{/if}
