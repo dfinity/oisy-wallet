@@ -24,6 +24,7 @@
 		incoming,
 		to,
 		from,
+		fee,
 		approveSpender
 	} = $derived(transaction);
 
@@ -54,6 +55,7 @@
 	{to}
 	{token}
 	{type}
+	{fee}
 >
 	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
 </Transaction>
