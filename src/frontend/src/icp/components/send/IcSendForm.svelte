@@ -42,7 +42,7 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<IcSendAmount bind:amount bind:amountError on:icTokensList />
+		<IcSendAmount onTokensList={() => dispatch('icTokensList')} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
