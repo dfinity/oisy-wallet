@@ -53,6 +53,7 @@
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
 	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
+	let tooManyButtons = $derived(convertErc20 || convertEth);
 </script>
 
 <div class="flex w-full justify-center pt-8" role="toolbar">
@@ -103,7 +104,7 @@
 			{/if}
 		{/if}
 
-		{#if buyAction}
+		{#if buyAction && !tooManyButtons}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>
