@@ -367,14 +367,14 @@
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
-			"not_eligible": "",
+			"not_eligible": "Nicht berechtigt",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
 			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
-			"network_bonus_info": "",
+			"network_bonus_info": "Jedes Netwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
@@ -447,32 +447,32 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 5 ist aktiv 🎉",
+				"one_liner": "Verdiene Sprinkles, indem du aktiv bist, andere empfiehlst und OISY netzwerkübergreifend verwendest. Deine Aktionen erhöhen deine Belohnungen, und aktive Empfehlungen steigern sie noch weiter.<br/>Und je mehr Netzwerke, desto bessere Gewinnchancen.",
+				"participate_title": "Verdiene Tokens für Aktivitäten und Empfehlungen. Mehr Netzwerke bedeuten mehr Chancen.",
+				"description": "Bleibe 10 Tage lang aktiv, um dich zu qualifizieren: Melden dich häufig an, führe Wallet-Aktionen durch und halte mindestens $20.<br/>Jedes aktive Netzwerk erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10% von Freunden, die sich qualifizieren, und lande unter den ersten drei, um einen Super Sprinkle im Wert von $200 zu gewinnen.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du wurdest belohnt",
+						"description": "Deine Belohnungen sind gerade in Deiner Wallet eingetroffen.<br>Nicht vergessen: Weiter einladen und aktiv bleiben, um mehr zu gewinnen.",
+						"share_href": "https://x.com/intent/post?text=Wieder%20ein%20%40OISY%20Sprinkle%20in%20meiner%20Wallet%20gelandet.%20%20%0AEiner%20der%20einfachsten%20Airdrops%20in%20DeFi.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du hast den Bonus gewonnen",
+						"description": "Du hast einen unserer wöchentlichen Bonus Sprinkles gewonnen.<br>Bleibe aktiv, empfehle uns weiter und gewinne mehr.",
+						"share_href": "https://x.com/intent/post?text=Habe%20den%20%2450%20Bonus%20Sprinkle%20von%20%40OISY%20gewonnen.%20%20%0ADiese%20Saison%20gibt%E2%80%99s%20richtig%20starke%20Belohnungen%20f%C3%BCr%20Aktivit%C3%A4t%20und%20Einladungen.%20%20%0AOISY.com"
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du bist in der Bestenliste",
+						"description": "Du bist in dieser Saison unter den Top 3 der Empfehler.<br>$200 wurden deinem Guthaben gutgeschrieben.",
+						"share_href": "https://x.com/intent/post?text=Gerade%20unter%20die%20Top%204%20bei%20den%20%40OISY%20Einladungen%20gekommen%20und%20%24200%20gewonnen.%20%20%0AEines%20der%20besten%20Belohnungssysteme%20im%20Space.%20%20%0ASchau%20noch%20heute%20auf%20OISY.com%20vorbei"
 					},
 					"referral": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Hier ein kleines Dankeschön",
+						"description": "Ein Benutzer, der durch dich eigeladen wurde, hat soeben OISY Sprinkles gewonnen.",
+						"share_href": "https://x.com/intent/post?text=Habe%20einem%20Freund%20die%20%40OISY%20Wallet%20empfohlen%20-%20and%20gratis%20%24BTC%20gewonnen%20%F0%9F%AA%82%0AWenn%20deine%20Freunde%20gewinnen%2C%20gewinnst%20du%20auch.%20Einfach%21%0AVersuche%20es%20auch%2C%20bei%20OISY.com"
 					}
 				}
 			}
