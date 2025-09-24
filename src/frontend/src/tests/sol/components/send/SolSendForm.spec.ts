@@ -26,9 +26,9 @@ describe('SolSendForm', () => {
 		destination: mockAtaAddress,
 		amount: 22_000,
 		source: mockSolAddress,
-		onBack: vi.fn,
-		onNext: vi.fn,
-		onTokensList: vi.fn,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
 		cancel: mockSnippet
 	};
 
