@@ -206,7 +206,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": ""
+			"ai": "AI"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -366,14 +366,14 @@
 			"carousel_slide_cta": "Zjistit více",
 			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
 			"youre_eligible": "Jste způsobilí!",
-			"not_eligible": "",
+			"not_eligible": "Není způsobilé",
 			"ongoing": "Probíhá",
 			"ended": "Skončeno ($amount)",
 			"banner_text": "Získejte denní odměny s OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
-			"network_bonus_info": "",
+			"network_bonus_info": "Každá síť, ve které držíte aktiva, vám dává multiplikátor odměn. Čím více sítí používáte, tím více odměn získáte!",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
 			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
 			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
