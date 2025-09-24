@@ -127,14 +127,14 @@ export const mapIcrcTransaction = ({
 			: undefined;
 
 	const approveData = fromNullable(approve);
-	const approveSpender =nonNullish( approveData)
+	const approveSpender = nonNullish(approveData)
 		? encodeIcrcAccount({
 				owner: approveData.spender.owner,
 				subaccount: fromNullable(approveData.spender.subaccount)
 			})
 		: undefined;
 
-	const approveExpiresAt =fromNullishNullable(approveData?.expires_at)
+	const approveExpiresAt = fromNullishNullable(approveData?.expires_at);
 
 	return {
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
