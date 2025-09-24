@@ -223,8 +223,8 @@
 		<SolSendForm
 			onBack={() => dispatch('icBack')}
 			onNext={() => dispatch('icNext')}
-			{selectedContact}
 			onTokensList={() => dispatch('icTokensList')}
+			{selectedContact}
 			bind:destination
 			bind:amount
 		>

@@ -54,7 +54,7 @@
 	{selectedContact}
 >
 	{#snippet sendAmount()}
-		<SolSendAmount bind:amount bind:amountError {onTokensList} />
+		<SolSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
