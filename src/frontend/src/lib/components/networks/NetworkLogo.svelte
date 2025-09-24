@@ -6,6 +6,7 @@
 	import type { Network } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { logoSizes } from '$lib/constants/components.constants';
+	import { ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 
 	interface Props {
 		network: Network;
@@ -16,6 +17,9 @@
 	}
 
 	let { network, size = 'xxs', color = 'off-white', testId, transparent = false }: Props = $props();
+
+	const isPseudoNetwork = $derived(network.id === ICP_PSEUDO_TESTNET_NETWORK_ID);
+	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
 </script>
 
 {#if transparent && nonNullish(network.iconTransparent)}
@@ -31,12 +35,16 @@
 {:else}
 	<div
 		class="rounded-full"
-		class:bg-primary={network.env === 'mainnet'}
-		class:bg-disabled-alt={network.env === 'testnet'}
+		class:bg-primary={!isTestnet}
+		class:bg-disabled={isTestnet}
 		data-tid={`${testId}-light-container`}
 		style={`max-height: ${logoSizes[size]}`}
 	>
-		<span class="inline-flex" class:invert-on-dark-theme={network.env === 'mainnet'}>
+		<span
+			class="inline-flex"
+			class:invert-on-dark-theme={!isTestnet}
+			class:brightness-90={isTestnet}
+		>
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, {
 					$name: network.name
@@ -44,7 +52,7 @@
 				{color}
 				{size}
 				src={network.iconTransparent}
-				testId={`${testId}-light`}
+				testId={`${testId}-default`}
 			/>
 		</span>
 	</div>
