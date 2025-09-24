@@ -127,7 +127,7 @@ export const mapIcrcTransaction = ({
 			: undefined;
 
 	const approveData = fromNullable(approve);
-	const approveSpender = approveData
+	const approveSpender =nonNullish( approveData)
 		? encodeIcrcAccount({
 				owner: approveData.spender.owner,
 				subaccount: fromNullable(approveData.spender.subaccount)
