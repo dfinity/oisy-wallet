@@ -21,6 +21,10 @@
 	// 		: $maxGasFee
 	// );
 
+	$effect(() => {
+		console.log({ maxGasFee: $maxGasFee });
+	});
+
 	const feeAmount = $derived(
 		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
 	);
