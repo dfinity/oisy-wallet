@@ -73,11 +73,11 @@
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icSendBack={onSendBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
+			onBack={onBack}
+			onSendBack={onSendBack}
+			onNext={onNext}
+			onClose={onClose}
+			onTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
@@ -89,11 +89,11 @@
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icSendBack={onSendBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
+			onBack={onBack}
+			onSendBack={onSendBack}
+			onNext={onNext}
+			onClose={onClose}
+			onTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdICP($sendToken.network.id)}
 		<IcSendTokenWizard
