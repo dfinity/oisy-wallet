@@ -225,7 +225,7 @@
 				"description": "OpenChat je plnohodnotná chatovací aplikace běžící end-to-end na blockchainu Internet Computer.<br/><br/>OpenChat je řízen svou komunitou jako DAO a má svůj vlastní token CHAT. Tokeny CHAT jsou rozdávány jako odměny uživatelům za účelem urychlení růstu a vytvoření týmu milionů příznivců, což OpenChatu umožňuje stát se životaschopným vyzyvatelem centralizovaných velkých technologických konkurentů!",
 				"stats": "80 000+ uživatelů",
 				"carousel": {
-					"text2": "",
+					"text": "",
 					"call_to_action": "Zobrazit více"
 				}
 			},
