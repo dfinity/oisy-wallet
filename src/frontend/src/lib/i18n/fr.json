@@ -1610,7 +1610,7 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Conditions d'utilisation",
-			"title": "Conditions d'utilisation",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1620,7 +1620,7 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Politique de confidentialité",
-			"title": "Politique de confidentialité",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
