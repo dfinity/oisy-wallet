@@ -32,10 +32,11 @@
 
 	const dispatch = createEventDispatcher();
 
-	const { filteredTokens, filterNetwork, filterQuery, setFilterQuery } =
-		getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+	const { filteredTokens, filterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
+		MODAL_TOKENS_LIST_CONTEXT_KEY
+	);
 
-	let filter = $state($filterQuery ?? '');
+	let filter = $state('');
 
 	$effect(() => {
 		setFilterQuery(filter);

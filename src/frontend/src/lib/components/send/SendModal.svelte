@@ -244,14 +244,14 @@
 				{currentStep}
 				{destination}
 				nft={selectedNft}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				{selectedContact}
 				bind:amount
 				bind:sendProgressStep
-				on:icBack={modal.back}
-				on:icSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
-				on:icTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icNext={modal.next}
-				on:icClose={close}
 			/>
 		{/if}
 	</WizardModal>

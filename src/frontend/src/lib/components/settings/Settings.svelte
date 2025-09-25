@@ -59,7 +59,7 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">General</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.settings.text.general}</svelte:fragment>
 
 	<SettingsCardItem>
 		<svelte:fragment slot="key">
