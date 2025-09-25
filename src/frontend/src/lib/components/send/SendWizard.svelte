@@ -102,11 +102,11 @@
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icSendBack={onSendBack}
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
+			onSendBack={onSendBack}
+			onBack={onBack}
+			onNext={onNext}
+			onClose={onClose}
+			onTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdBitcoin($sendToken.network.id)}
 		<BtcSendTokenWizard
