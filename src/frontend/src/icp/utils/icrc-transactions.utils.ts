@@ -121,11 +121,7 @@ export const mapIcrcTransaction = ({
 	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO;
 
 	// for approve we shows the fee value
-	const value = isApprove
-		? approveFee
-		: nonNullish(data?.amount)
-			? data.amount + (isTransfer && source.incoming === false ? transferFee : ZERO)
-			: undefined;
+	const value = isApprove ? approveFee : nonNullish(data?.amount) ? data.amount : undefined;
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
