@@ -340,7 +340,11 @@
 				"name": "Caffeine",
 				"one_liner": "首个用于构建自我编写应用的平台。",
 				"call_to_action": "试用 Caffeine",
-				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。"
+				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
