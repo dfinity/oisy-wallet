@@ -7,7 +7,7 @@ import type {
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (
@@ -85,9 +85,6 @@ export const mapIcpTransaction = ({
 		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
-	const mapFee = ({ fee, incoming }: { incoming: boolean | undefined; fee: Tokens }): bigint =>
-		incoming === false ? fee.e8s : ZERO;
-
 	if ('Approve' in operation) {
 		return {
 			...tx,
@@ -124,10 +121,7 @@ export const mapIcpTransaction = ({
 			...source,
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
-			fee: mapFee({
-				fee: operation.Transfer.fee,
-				incoming: source.incoming
-			})
+			fee: source.incoming === false ? operation.Transfer.fee.e8s : ZERO
 		};
 	}
 
