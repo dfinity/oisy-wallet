@@ -31,7 +31,7 @@
 
 	interface Props {
 		currentStep?: WizardStep;
-		destination: string;
+		destination?: string;
 		amount: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
