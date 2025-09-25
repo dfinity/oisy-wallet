@@ -53,5 +53,6 @@ export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
 	env: 'testnet',
 	name: 'IC (testnet tokens)',
 	iconLight: icpIconLight,
-	iconDark: icpIconDark
+	iconDark: icpIconDark,
+	iconTransparent: icpIconTransparent
 };
