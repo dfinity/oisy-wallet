@@ -4,6 +4,7 @@
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { checkAuthentication } from '$lib/workers/auth.worker';
 
 	interface Props {
 		fullWidth?: boolean;
@@ -16,6 +17,12 @@
 	const modalId = Symbol();
 
 	const onclick = async () => {
+		if (await checkAuthentication()) {
+			window.location.reload();
+
+			return;
+		}
+
 		const { success } = await signIn({});
 
 		if (success === 'cancelled' || success === 'error') {

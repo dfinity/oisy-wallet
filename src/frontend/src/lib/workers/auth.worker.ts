@@ -23,7 +23,7 @@ export const onAuthMessage = async ({
 let timer: NodeJS.Timeout | undefined = undefined;
 
 /**
- * The timer is executed only if user has signed in
+ * The timer is executed only if the user has signed in
  */
 const startIdleTimer = () =>
 	(timer = setInterval(async () => await onIdleSignOut(), AUTH_TIMER_INTERVAL));
@@ -54,13 +54,13 @@ const onIdleSignOut = async () => {
  *
  * @returns true if authenticated
  */
-const checkAuthentication = async (): Promise<boolean> => {
+export const checkAuthentication = async (): Promise<boolean> => {
 	const authClient: AuthClient = await createAuthClient();
 	return authClient.isAuthenticated();
 };
 
 /**
- * If there is no delegation or if not valid, then delegation is not valid
+ * If there is no delegation or if not valid, then the delegation is not valid
  *
  * @returns true if delegation is valid
  */
@@ -80,7 +80,7 @@ const checkDelegationChain = async (): Promise<{
 
 // We do the logout on the client side because we reload the window to reload stores afterwards
 const logout = () => {
-	// Clear timer to not emit sign-out multiple times
+	// Clear timer to doesn't emit sign-out multiple times
 	stopIdleTimer();
 
 	postMessage({ msg: 'signOutIdleTimer' });
