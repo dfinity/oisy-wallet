@@ -69,15 +69,15 @@
 			{destination}
 			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
 			bind:sendProgressStep
-			onBack={onBack}
-			onSendBack={onSendBack}
-			onNext={onNext}
-			onClose={onClose}
-			onTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
@@ -85,15 +85,15 @@
 			{destination}
 			nativeEthereumToken={evmNativeEthereumToken}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount
 			bind:sendProgressStep
-			onBack={onBack}
-			onSendBack={onSendBack}
-			onNext={onNext}
-			onClose={onClose}
-			onTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdICP($sendToken.network.id)}
 		<IcSendTokenWizard
