@@ -1,4 +1,8 @@
-import { createAuthClient, safeCreateAuthClient } from '$lib/api/auth-client.api';
+import {
+	authClientStorage,
+	createAuthClient,
+	safeCreateAuthClient
+} from '$lib/api/auth-client.api';
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -12,7 +16,8 @@ import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
-import type { AuthClient } from '@dfinity/auth-client';
+import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
+import { ECDSAKeyIdentity } from '@dfinity/identity';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -99,7 +104,26 @@ const initAuthStore = (): AuthStore => {
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-					onSuccess: () => {
+					onSuccess: async () => {
+						// When multiple OISY tabs are open in the same browser, each creates a new `authClient` object
+						// with its own key pair. Since keys are stored in IndexedDB (IDB) as a security measure to avoid
+						// key injection, the last loaded tab overwrites the cached keys.
+						//
+						// This causes a problem: if a user logs in on a tab that is not the "latest" one (without refreshing first),
+						// the existing `authClient` in that tab uses a key pair different from the one currently cached in IDB.
+						// It will then request a delegation for those non-cached keys, and store that delegation in IDB too.
+						// As a result, the cache ends up with a delegation that does not match the cached key.
+						//
+						// Later, if we recreate the `authClient` (e.g. inside a worker) or refresh another tab, the mismatch
+						// between keys and delegation leads to invalid signatures and errors.
+						//
+						// To prevent this, we must ensure that after login, the correct key is always cached in IDB,
+						// overwriting any previously stored key. This guarantees that delegation and keys remain in sync.
+						//
+						// TODO: Remove this when authClient will do it by itself during login
+						const key = authClient?.['_key'];
+						await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
+
 						update((state: AuthStoreData) => ({
 							...state,
 							identity: authClient?.getIdentity()
