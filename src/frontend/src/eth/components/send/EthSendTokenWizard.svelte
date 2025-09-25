@@ -365,7 +365,9 @@
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</EthSendForm>
 	{/if}
 </EthFeeContext>
