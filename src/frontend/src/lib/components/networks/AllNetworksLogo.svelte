@@ -16,7 +16,11 @@
 	let { size = 'xxs', color = 'off-white', testId, transparent = false }: Props = $props();
 </script>
 
-<div style={`max-height: ${logoSizes[size]}`} class="rounded-full" class:bg-primary={!transparent}>
+<div
+	style={`max-height: ${logoSizes[size]}`}
+	class="rounded-full ring ring-disabled"
+	class:bg-primary={!transparent}
+>
 	<span class="invert-on-dark-theme inline-flex">
 		<Logo
 			alt={replacePlaceholders($i18n.core.alt.logo, {

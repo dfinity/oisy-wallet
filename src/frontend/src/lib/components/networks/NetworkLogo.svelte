@@ -35,16 +35,10 @@
 {:else}
 	<div
 		style={`max-height: ${logoSizes[size]}`}
-		class="rounded-full"
-		class:bg-disabled={isTestnet}
-		class:bg-primary={!isTestnet}
+		class="rounded-full bg-primary ring ring-disabled"
 		data-tid={`${testId}-light-container`}
 	>
-		<span
-			class="inline-flex"
-			class:brightness-90={isTestnet}
-			class:invert-on-dark-theme={!isTestnet}
-		>
+		<span class="inline-flex" class:invert-on-dark-theme={!isTestnet}>
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, {
 					$name: network.name
