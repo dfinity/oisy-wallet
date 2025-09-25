@@ -97,7 +97,7 @@ describe('network.schema', () => {
 
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
-			iconTransparent: 'https://example.com/icon.svg',
+			icon: 'https://example.com/icon.svg',
 			buy: { onramperId: 'icp' }
 		};
 
@@ -132,7 +132,7 @@ describe('network.schema', () => {
 		it('should fail validation when icon is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				iconTransparent: 'https://example.com/invalid-icon.png'
+				icon: 'https://example.com/invalid-icon.png'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
@@ -141,7 +141,7 @@ describe('network.schema', () => {
 		it('should fail validation when iconBW is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				iconTransparent: 'https://example.com/invalid-icon-bw.png'
+				icon: 'https://example.com/invalid-icon-bw.png'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
