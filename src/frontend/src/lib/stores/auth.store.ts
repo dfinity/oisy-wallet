@@ -17,7 +17,7 @@ import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
-import { ECDSAKeyIdentity } from '@dfinity/identity';
+import type { ECDSAKeyIdentity } from '@dfinity/identity';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
