@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
