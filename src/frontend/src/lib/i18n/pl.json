@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
 				"call_to_action": "Przejdź do Taggr",
-				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników.",
-				"carousel": {
-					"text": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
-					"call_to_action": "Dowiedz się więcej"
-				}
+				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników."
 			},
 			"toolkit": {
 				"name": "Toolkit",
