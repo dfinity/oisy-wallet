@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Réseau social décentralisé - postez, gagnez, possédez.",
 				"call_to_action": "Aller sur Taggr",
-				"description": "Taggr est une plateforme de médias sociaux entièrement décentralisée qui vit sur un réseau de calcul distribué public alimenté par l'Internet Computer. Contrairement aux plateformes de médias sociaux traditionnelles contrôlées par des entreprises, Taggr est entièrement détenu et gouverné par ses utilisateurs.",
-				"carousel": {
-					"text": "Réseau social décentralisé - postez, gagnez, possédez.",
-					"call_to_action": "En savoir plus"
-				}
+				"description": "Taggr est une plateforme de médias sociaux entièrement décentralisée qui vit sur un réseau de calcul distribué public alimenté par l'Internet Computer. Contrairement aux plateformes de médias sociaux traditionnelles contrôlées par des entreprises, Taggr est entièrement détenu et gouverné par ses utilisateurs."
 			},
 			"toolkit": {
 				"name": "Toolkit",

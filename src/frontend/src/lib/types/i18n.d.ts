@@ -248,13 +248,7 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
-		taggr: {
-			name: string;
-			one_liner: string;
-			call_to_action: string;
-			description: string;
-			carousel: { text: string; call_to_action: string };
-		};
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
 		toolkit: { name: string; one_liner: string; description: string };
 		altitudefi: { name: string; one_liner: string; description: string };
 		usdai: { name: string; one_liner: string; description: string };
