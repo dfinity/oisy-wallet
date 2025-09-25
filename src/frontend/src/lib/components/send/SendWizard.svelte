@@ -125,14 +125,14 @@
 		<SolSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			onBack={onBack}
-			onNext={onNext}
-			onClose={onClose}
-			onSendBack={onSendBack}
-			onTokensList={onTokensList}
 		/>
 	{/if}
 </SendTokenContext>
