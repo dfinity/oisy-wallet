@@ -89,7 +89,7 @@
 		"@solana/kit": "^3.0.3",
 		"@velora-dex/sdk": "^9.0.0",
 		"@walletconnect/auth-client": "^2.1.2",
-		"alchemy-sdk": "3.6.3",
+		"alchemy-sdk": "^3.6.4",
 		"bitcoinjs-lib": "^6.1.7",
 		"browser-image-compression": "^2.0.2",
 		"buffer": "^6.0.3",
@@ -144,9 +144,7 @@
 		"@ethersproject/providers": {
 			"ws": "^7.5.10"
 		},
-		"elliptic": "^6.6.1",
-		"cookie": "^0.7.0",
-		"axios": "^1.12.0"
+		"cookie": "^0.7.0"
 	},
 	"engines": {
 		"npm": ">=10.9.0 <11.0.0",
