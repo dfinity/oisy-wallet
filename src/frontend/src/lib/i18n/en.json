@@ -225,7 +225,7 @@
 				"description": "OpenChat is a fully featured chat application running end-to-end on the Internet Computer blockchain.<br/><br/>OpenChat is governed by its community as a DAO and has its own CHAT token. CHAT tokens are given as rewards to users to turbo-charge growth and to create a team of millions of advocates allowing OpenChat to become a viable challenger to centralized big tech competitors!",
 				"stats": "80,000+ users",
 				"carousel": {
-					"text2": "OpenChat - privacy messenger",
+					"text": "OpenChat - privacy messenger",
 					"call_to_action": "Show more"
 				}
 			},
