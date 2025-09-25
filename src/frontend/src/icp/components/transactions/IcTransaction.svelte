@@ -57,7 +57,6 @@
 	{to}
 	{token}
 	{type}
-	{fee}
 >
 	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
 </Transaction>
