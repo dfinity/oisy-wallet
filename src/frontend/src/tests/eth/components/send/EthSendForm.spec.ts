@@ -7,6 +7,7 @@ import {
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -32,7 +33,11 @@ describe('EthSendForm', () => {
 		destination: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9',
 		amount: '22000000',
 		network: ETHEREUM_NETWORK,
-		nativeEthereumToken: ETHEREUM_TOKEN
+		nativeEthereumToken: ETHEREUM_TOKEN,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onTokensList: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const amountSelector = `input[data-tid="${TOKEN_INPUT_CURRENCY_TOKEN}"]`;
