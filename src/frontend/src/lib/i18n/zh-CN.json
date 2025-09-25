@@ -225,7 +225,7 @@
 				"description": "OpenChat 是一个功能齐全的聊天应用程序，完全在ICP区块链上端到端运行。<br/><br/>OpenChat 由其社区作为 DAO 进行管理，并拥有自己的 CHAT 代币。CHAT 代币作为奖励发放给用户，以加速增长并创建一个由数百万支持者组成的团队，使 OpenChat 能够成为中心化大型科技竞争对手的可行挑战者！",
 				"stats": "80,000+ 用户",
 				"carousel": {
-					"text": "OpenChat - web3 的沟通之地",
+					"text2": "",
 					"call_to_action": "显示更多"
 				}
 			},

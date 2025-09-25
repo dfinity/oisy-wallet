@@ -215,7 +215,7 @@ interface I18nDapps {
 			call_to_action: string;
 			description: string;
 			stats: string;
-			carousel: { text: string; call_to_action: string };
+			carousel: { text2: string; call_to_action: string };
 		};
 		decideid: {
 			name: string;
