@@ -60,6 +60,10 @@ export const getErc20FeeData = async ({
 		// TODO: discuss the fee estimation issue with the cross-chain team and decide how can we properly calculate the max gas
 		const feeBuffer = isResearchCoin ? (fee * 15n) / 10n : fee / 2n;
 
+
+		console.log({finalFee: fee + feeBuffer}, 'Final Fee Calculation');
+		
+
 		return fee + feeBuffer;
 	} catch (err: unknown) {
 		// We silence the error on purpose.
