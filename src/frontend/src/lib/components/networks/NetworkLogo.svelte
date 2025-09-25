@@ -23,7 +23,11 @@
 </script>
 
 {#if transparent && nonNullish(network.icon)}
-	<div class="block" data-tid={`${testId}-transparent-container`}>
+	<div
+		class="block"
+		class:invert-on-dark-theme={!isTestnet}
+		data-tid={`${testId}-transparent-container`}
+	>
 		<Logo
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 			{color}
