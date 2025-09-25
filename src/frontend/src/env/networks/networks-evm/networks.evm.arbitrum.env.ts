@@ -65,5 +65,3 @@ export const SUPPORTED_ARBITRUM_NETWORKS: EthereumNetwork[] = defineSupportedNet
 export const SUPPORTED_ARBITRUM_NETWORK_IDS: NetworkId[] = SUPPORTED_ARBITRUM_NETWORKS.map(
 	({ id }) => id
 );
-
-const test = null;
