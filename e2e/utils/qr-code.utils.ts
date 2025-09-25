@@ -1,10 +1,6 @@
-import { nonNullish } from '@dfinity/utils';
-import { Jimp } from 'jimp';
-import jsQR from 'jsqr';
-
 // TODO: uncomment and replace Jimp with native functions
 export const getQRCodeValueFromDataURL = async ({
-	dataUrl:_
+	dataUrl: _
 }: {
 	dataUrl: string;
 	// eslint-disable-next-line arrow-body-style,require-await
@@ -26,4 +22,3 @@ export const getQRCodeValueFromDataURL = async ({
 	// 	return decodedQR.data;
 	// }
 };
-
