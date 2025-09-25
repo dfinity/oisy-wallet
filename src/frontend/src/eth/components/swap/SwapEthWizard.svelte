@@ -144,6 +144,14 @@
 			isNotDefaultEthereumToken($sourceToken)
 	);
 
+	$effect(() => {
+		console.log({ isApproveNeeded });
+		console.log({ isMarket: $swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET });
+		console.log({ isNotDefaultToken: isNotDefaultEthereumToken($sourceToken) });
+		console.log({ sourceToken: $sourceToken });
+		console.log({ swapAmount: $swapAmountsStore?.swaps[0]?.type });
+	});
+
 	let sourceTokenUsdValue = $derived(
 		nonNullish($sourceTokenExchangeRate) && nonNullish($sourceToken) && nonNullish(swapAmount)
 			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
