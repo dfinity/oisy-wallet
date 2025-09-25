@@ -1,7 +1,7 @@
 import { ARBITRUM_EXPLORER_URL, ARBITRUM_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import arbitrumMainnetIconTransparent from '$lib/assets/networks/transparent/arbitrum-mainnet.svg';
-import arbitrumSepoliaIconTransparent from '$lib/assets/networks/transparent/arbitrum-sepolia.svg';
+import arbitrumMainnetIcon from '$lib/assets/networks/arbitrum-mainnet.svg';
+import arbitrumSepoliaIcon from '$lib/assets/networks/arbitrum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -23,7 +23,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Arbitrum',
 	chainId: 42161n,
-	iconTransparent: arbitrumMainnetIconTransparent,
+	icon: arbitrumMainnetIcon,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum',
@@ -46,7 +46,7 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Arbitrum Sepolia',
 	chainId: 421614n,
-	iconTransparent: arbitrumSepoliaIconTransparent,
+	icon: arbitrumSepoliaIcon,
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum-sepolia',
