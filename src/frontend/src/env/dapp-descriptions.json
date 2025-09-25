@@ -318,6 +318,10 @@
 		"stats": "",
 		"logo": "/images/dapps/caffeine-logo.webp",
 		"screenshots": ["/images/dapps/caffeine-screenshot.webp"],
-		"featured": true
+		"featured": true,
+		"carousel": {
+			"text": "dapps.descriptions.caffeine.carousel.text",
+			"callToAction": "dapps.descriptions.caffeine.carousel.call_to_action"
+		}
 	}
 ]
