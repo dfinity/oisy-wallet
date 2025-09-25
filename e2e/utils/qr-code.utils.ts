@@ -1,4 +1,4 @@
-// TODO: uncomment and replace Jimp with native functions
+// TODO: uncomment and replace Jimp with native functions, unless the library bumps its dependency to zod
 export const getQRCodeValueFromDataURL = async ({
 	dataUrl: _
 }: {
