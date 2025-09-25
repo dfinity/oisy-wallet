@@ -50,8 +50,7 @@ describe('NftLogo', () => {
 				}
 			});
 
-			expect(getByTestId('network-badge-light')).toBeInTheDocument();
-			expect(getByTestId('network-badge-dark')).toBeInTheDocument();
+			expect(getByTestId('network-badge-default')).toBeInTheDocument();
 		});
 	});
 
