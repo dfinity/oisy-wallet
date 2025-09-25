@@ -72,16 +72,16 @@
 		"@dfinity/gix-components": "^8.0.0-next-2025-09-24",
 		"@dfinity/ledger-icp": "^6.0.0",
 		"@dfinity/ledger-icrc": "^4.0.1",
-		"@dfinity/oisy-wallet-signer": "^1.0.0-next-2025-09-08",
+		"@dfinity/oisy-wallet-signer": "^1.0.0-next-2025-09-25",
 		"@dfinity/principal": "^3.2.6",
 		"@dfinity/utils": "^3.1.0",
 		"@dfinity/verifiable-credentials": "^1.1.0",
-		"@dfinity/zod-schemas": "^1.1.0",
+		"@dfinity/zod-schemas": "^2.1.0",
 		"@metamask/detect-provider": "^2.0.0",
 		"@noble/ed25519": "^2.3.0",
 		"@noble/hashes": "^1.8.0",
 		"@noble/secp256k1": "^2.3.0",
-		"@reown/walletkit": "^1.2.9",
+		"@reown/walletkit": "^1.2.11",
 		"@solana-program/compute-budget": "^0.9.0",
 		"@solana-program/system": "^0.8.0",
 		"@solana-program/token": "^0.6.0",
@@ -98,7 +98,7 @@
 		"idb-keyval": "^6.2.2",
 		"plausible-tracker": "^0.3.9",
 		"svelte-confetti": "^2.3.2",
-		"zod": "^3.25.75"
+		"zod": "^4.1.11"
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.2.2",
