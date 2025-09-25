@@ -112,14 +112,14 @@
 		<BtcSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icSendBack={onSendBack}
-			on:icTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdSolana($sendToken.network.id)}
 		<SolSendTokenWizard
