@@ -66,7 +66,8 @@ export class InfuraErc20Provider implements Erc20Provider {
 			erc20Contract.transfer.estimateGas(to, amount, { from })
 		]);
 
-
+		console.log({approveFee: await erc20Contract.approve.estimateGas(to, amount, { from })}, 'approveFee');
+		console.log({transferFee: await erc20Contract.transfer.estimateGas(to, amount, { from })}, 'transferFee');
 		console.log({results}, 'results Fee Calculation');
 		
 
