@@ -9,7 +9,7 @@ export const getQRCodeValueFromDataURL = async ({
 	dataUrl: string;
 	// eslint-disable-next-line arrow-body-style,require-await
 }): Promise<string | undefined> => {
-	return Promise.reject(new Error('Not implemented'));
+	return Promise.reject(new Error('Function `getQRCodeValueFromDataURL` not implemented'));
 
 	// const qrBuffer = Buffer.from(dataUrl.replace(/^data:image\/[a-z]+;base64,/, ''), 'base64');
 	// const image = await Jimp.read(qrBuffer);
