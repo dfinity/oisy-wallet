@@ -79,7 +79,7 @@
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let { network } = $derived($sendToken);
+	let network = $derived($sendToken?.network);
 
 	let networkId = $derived(network?.id);
 
