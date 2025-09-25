@@ -65,6 +65,12 @@
 		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
 	);
 
+	$effect(() => {
+		console.log({ isApproveNeeded });
+		console.log({maxGas: $maxGasFee});
+		
+	});
+
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
 		if (isNullish($storeFeeData) || isNullish($sourceToken?.id)) {
 			return;
