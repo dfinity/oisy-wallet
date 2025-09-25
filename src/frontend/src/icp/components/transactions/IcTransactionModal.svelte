@@ -111,16 +111,15 @@
 				</span>
 			</ListItem>
 
-			{#if nonNullish(fee) && nonNullish(token)}
+			{#if nonNullish(fee) && nonNullish(token) && (type === 'send' || type === 'approve')}
 				<ListItem>
 					<span>Fee</span>
 
-					<output class:text-success-primary={type === 'receive'}>
+					<output>
 						{formatToken({
 							value: fee,
 							unitName: token.decimals,
-							displayDecimals: token.decimals,
-							showPlusSign: type === 'receive'
+							displayDecimals: token.decimals
 						})}
 						{token.symbol}
 					</output>
