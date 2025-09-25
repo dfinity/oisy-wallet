@@ -1,5 +1,5 @@
 <script lang="ts">
-	import allNetworksIcon from '$lib/assets/networks/all-networks.svg';
+	import allNetworksIcon from '$lib/assets/networks/transparent/all-networks.svg';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import { i18n } from '$lib/stores/i18n.store';

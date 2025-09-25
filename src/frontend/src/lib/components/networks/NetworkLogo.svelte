@@ -22,7 +22,7 @@
 	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
 </script>
 
-{#if transparent && nonNullish(network.icon)}
+{#if transparent && nonNullish(network.iconTransparent)}
 	<div
 		class="block"
 		class:invert-on-dark-theme={!isTestnet}
@@ -32,27 +32,11 @@
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 			{color}
 			{size}
-			src={network.icon}
+			src={network.iconTransparent}
 			testId={`${testId}-transparent`}
 		/>
 	</div>
 {:else}
-	<div
-		style={`max-height: ${logoSizes[size]}`}
-		class="rounded-full bg-primary ring ring-disabled"
-		data-tid={`${testId}-light-container`}
-	>
-		<span class="inline-flex" class:invert-on-dark-theme={!isTestnet}>
-			<Logo
-				alt={replacePlaceholders($i18n.core.alt.logo, {
-					$name: network.name
-				})}
-				{color}
-				{size}
-				src={network.icon}
-				testId={`${testId}-default`}
-			/>
-		</span>
 	<div
 		style={`max-height: ${logoSizes[size]}`}
 		class="rounded-full bg-primary ring ring-disabled"

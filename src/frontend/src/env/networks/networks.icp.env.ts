@@ -1,4 +1,4 @@
-import icpIcon from '$lib/assets/networks/icp.svg';
+import icpIconTransparent from '$lib/assets/networks/transparent/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -27,7 +27,7 @@ export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Internet Computer',
-	icon: icpIcon,
+	iconTransparent: icpIconTransparent,
 	buy: { onramperId: 'icp' }
 };
 
@@ -48,5 +48,5 @@ export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
 	id: ICP_PSEUDO_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'IC (testnet tokens)',
-	icon: icpIcon
+	iconTransparent: icpIconTransparent
 };
