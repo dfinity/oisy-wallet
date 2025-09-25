@@ -15,19 +15,19 @@
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
-	// const feeAmount = $derived(
-	// 	nonNullish(isApproveNeeded) && nonNullish($maxGasFee) && isApproveNeeded
-	// 		? $maxGasFee * 2n
-	// 		: $maxGasFee
-	// );
+	const feeAmount = $derived(
+		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) && isApproveNeeded
+			? $maxGasFee * 2n
+			: $maxGasFee
+	);
 
 	$effect(() => {
 		console.log({ maxGasFee: $maxGasFee });
 	});
 
-	const feeAmount = $derived(
-		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
-	);
+	// const feeAmount = $derived(
+	// 	nonNullish(isApproveNeeded) && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+	// );
 </script>
 
 {#if nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}
