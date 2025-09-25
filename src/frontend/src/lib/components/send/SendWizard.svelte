@@ -128,11 +128,11 @@
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icSendBack={onSendBack}
-			on:icTokensList={onTokensList}
+			onBack={onBack}
+			onNext={onNext}
+			onClose={onClose}
+			onSendBack={onSendBack}
+			onTokensList={onTokensList}
 		/>
 	{/if}
 </SendTokenContext>
