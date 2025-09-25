@@ -9,12 +9,14 @@ import type {
 	HangoverCriterion,
 	MinLoginsCriterion,
 	MinTotalAssetsUsdCriterion,
+	MinTotalAssetsUsdInNetworkCriterion,
 	MinTransactionsCriterion,
+	MinTransactionsInNetworkCriterion,
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
 import type { Identity } from '@dfinity/agent';
-import { isNullish } from '@dfinity/utils';
+import { fromNullable, isNullish } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 
@@ -109,7 +111,9 @@ export const mapEligibilityReport = (eligibilityReport: EligibilityReport): Camp
 			campaignId,
 			available: eligibility.available,
 			eligible: eligibility.eligible,
-			criteria
+			criteria,
+			probabilityMultiplierEnabled: fromNullable(eligibility.probability_multiplier_enabled),
+			probabilityMultiplier: fromNullable(eligibility.probability_multiplier)
 		};
 	});
 
@@ -140,6 +144,19 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 		}
 		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
 	}
+	if ('MinTransactionsInNetwork' in criterion.criterion) {
+		const { duration, count } = criterion.criterion.MinTransactionsInNetwork;
+		if ('Days' in duration) {
+			const days = duration.Days;
+			return {
+				satisfied: criterion.satisfied,
+				type: RewardCriterionType.MIN_TRANSACTIONS_IN_NETWORK,
+				days,
+				count
+			} as MinTransactionsInNetworkCriterion;
+		}
+		return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+	}
 	if ('MinTotalAssetsUsd' in criterion.criterion) {
 		const { usd } = criterion.criterion.MinTotalAssetsUsd;
 
@@ -148,6 +165,15 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD,
 			usd
 		} as MinTotalAssetsUsdCriterion;
+	}
+	if ('MinTotalAssetsUsdInNetwork' in criterion.criterion) {
+		const { usd } = criterion.criterion.MinTotalAssetsUsdInNetwork;
+
+		return {
+			satisfied: criterion.satisfied,
+			type: RewardCriterionType.MIN_TOTAL_ASSETS_USD_IN_NETWORK,
+			usd
+		} as MinTotalAssetsUsdInNetworkCriterion;
 	}
 	if ('Hangover' in criterion.criterion) {
 		const { duration } = criterion.criterion.Hangover;
@@ -163,4 +189,12 @@ const mapCriterion = (criterion: CriterionEligibility): CampaignCriterion => {
 	}
 
 	return { satisfied: criterion.satisfied, type: RewardCriterionType.UNKNOWN };
+};
+
+export const normalizeNetworkMultiplier = (value: number): 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 => {
+	if (![1, 2, 3, 4, 5, 6, 7, 8].includes(value)) {
+		return 1;
+	}
+
+	return value as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 };

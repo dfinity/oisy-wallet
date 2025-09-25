@@ -184,26 +184,25 @@
 	<BtcSendReview
 		{amount}
 		{destination}
+		onBack={() => dispatch('icBack')}
+		onSend={send}
 		{selectedContact}
 		{source}
-		on:icBack
-		on:icSend={send}
 		bind:utxosFee
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm
+		onBack={() => dispatch('icBack')}
+		onNext={() => dispatch('icNext')}
+		onTokensList={() => dispatch('icTokensList')}
 		{selectedContact}
-		on:icNext
-		on:icClose
-		on:icBack
-		on:icTokensList
 		bind:destination
 		bind:amount
 	>
-		<ButtonBack slot="cancel" onclick={back} />
+		{#snippet cancel()}
+			<ButtonBack onclick={back} />
+		{/snippet}
 	</BtcSendForm>
-{:else}
-	<slot />
 {/if}

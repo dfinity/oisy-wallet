@@ -71,15 +71,15 @@
 		<EthConvertTokenWizard
 			{currentStep}
 			formCancelAction="back"
-			bind:sendAmount
-			bind:receiveAmount
-			bind:convertProgressStep
-			on:icBack={() =>
+			onBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
 					: modal?.back()}
-			on:icNext={modal?.next}
-			on:icClose={close}
+			onClose={close}
+			onNext={modal?.next}
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
 		>
 			<HowToConvertEthereumWizardSteps
 				{currentStep}

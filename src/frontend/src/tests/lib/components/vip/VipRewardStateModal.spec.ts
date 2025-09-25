@@ -1,5 +1,4 @@
-import * as icrcNetworks from '$env/networks/networks.icrc.env';
-import { additionalIcrcTokens } from '$env/tokens/tokens.icrc.env';
+import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { setCustomToken } from '$icp-eth/services/custom-token.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
@@ -20,8 +19,6 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mapLocalIcrcData } from '$tests/utils/map-icrc-data.test-utils';
-import { nonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -106,22 +103,14 @@ describe('VipRewardStateModal', () => {
 	});
 
 	describe('Handle token state', () => {
-		const additionalIcrcData = mapLocalIcrcData(additionalIcrcTokens);
-		const goldToken = nonNullish(additionalIcrcData?.GLDT)
-			? {
-					...additionalIcrcData.GLDT,
-					position: 16
-				}
-			: undefined;
-
 		const mockIcrcDefaultToken: IcToken = {
 			...mockValidIcToken,
-			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai'
+			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 		};
 
 		const mockIcrcCustomToken: IcrcCustomToken = {
 			...mockValidIcToken,
-			ledgerCanisterId: goldToken?.ledgerCanisterId ?? 'mxzaz-hqaaa-aaaar-qaada-cai',
+			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
 			enabled: false
 		};
 
@@ -134,8 +123,6 @@ describe('VipRewardStateModal', () => {
 			icrcDefaultTokensStore.set({ data: mockIcrcDefaultToken, certified: false });
 
 			icrcCustomTokensStore.resetAll();
-
-			vi.spyOn(icrcNetworks, 'GLDT_IC_DATA', 'get').mockImplementation(() => goldToken);
 		});
 
 		it('should auto-enable GLDT token for Gold campaign and undefined token', () => {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { GLDT_IC_DATA } from '$env/networks/networks.icrc.env';
+	import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
@@ -31,7 +31,7 @@
 	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
 
 	const goldToken = $derived(
-		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId)
+		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_LEDGER_CANISTER_ID)
 	);
 
 	const enableGldtToken = async () => {
@@ -41,7 +41,7 @@
 		}
 
 		const token = $icrcTokens.find(
-			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
+			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_LEDGER_CANISTER_ID
 		);
 
 		await autoLoadSingleToken({

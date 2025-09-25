@@ -20,6 +20,9 @@ describe('wallet-connect.services', () => {
 		rejectRequest: vi.fn(),
 		sessionDelete: vi.fn(),
 		sessionRequest: vi.fn(),
+		offSessionProposal: vi.fn(),
+		offSessionDelete: vi.fn(),
+		offSessionRequest: vi.fn(),
 		getActiveSessions: vi.fn(),
 		approveRequest: vi.fn(),
 		disconnect: vi.fn()

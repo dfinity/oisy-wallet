@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import type { IcCkToken } from '$icp/types/ic-token';
 	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
@@ -10,6 +13,7 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
 	let ckEthToken: IcCkToken | undefined;
@@ -27,11 +31,13 @@
 
 <ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$nativeEthereumTokenId}>
 	<IconCkConvert slot="icon" size="24" />
-	<span>{$nativeEthereumToken.twinTokenSymbol ?? ''}</span>
+	<span
+		>{($nativeEthereumTokenWithFallback as RequiredTokenWithLinkedData).twinTokenSymbol ?? ''}</span
+	>
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}
-	<EthFeeStoreContext token={$nativeEthereumToken}>
-		<ConvertModal destinationToken={ckEthToken} sourceToken={$nativeEthereumToken} />
+	<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
+		<ConvertModal destinationToken={ckEthToken} sourceToken={$nativeEthereumTokenWithFallback} />
 	</EthFeeStoreContext>
 {/if}

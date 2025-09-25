@@ -10,6 +10,9 @@ import bitcoinTestnetIconDark from '$lib/assets/networks/dark/bitcoin-testnet.sv
 import bitcoinMainnetIconLight from '$lib/assets/networks/light/bitcoin-mainnet.svg';
 import bitcoinRegtestIconLight from '$lib/assets/networks/light/bitcoin-regtest.svg';
 import bitcoinTestnetIconLight from '$lib/assets/networks/light/bitcoin-testnet.svg';
+import bitcoinMainnetIconTransparent from '$lib/assets/networks/transparent/bitcoin-mainnet.svg';
+import bitcoinRegtestIconTransparent from '$lib/assets/networks/transparent/bitcoin-regtest.svg';
+import bitcoinTestnetIconTransparent from '$lib/assets/networks/transparent/bitcoin-testnet.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -31,6 +34,7 @@ export const BTC_MAINNET_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin',
 	iconLight: bitcoinMainnetIconLight,
 	iconDark: bitcoinMainnetIconDark,
+	iconTransparent: bitcoinMainnetIconTransparent,
 	explorerUrl: BTC_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'bitcoin' }
 };
@@ -45,7 +49,8 @@ export const BTC_TESTNET_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin',
 	explorerUrl: BTC_TESTNET_EXPLORER_URL,
 	iconLight: bitcoinTestnetIconLight,
-	iconDark: bitcoinTestnetIconDark
+	iconDark: bitcoinTestnetIconDark,
+	iconTransparent: bitcoinTestnetIconTransparent
 };
 
 export const BTC_REGTEST_NETWORK_SYMBOL = 'BTC (Regtest)';
@@ -58,7 +63,8 @@ export const BTC_REGTEST_NETWORK: BitcoinNetwork = {
 	name: 'Bitcoin (Regtest)',
 	explorerUrl: BTC_REGTEST_EXPLORER_URL,
 	iconLight: bitcoinRegtestIconLight,
-	iconDark: bitcoinRegtestIconDark
+	iconDark: bitcoinRegtestIconDark,
+	iconTransparent: bitcoinRegtestIconTransparent
 };
 
 export const SUPPORTED_BITCOIN_NETWORKS: BitcoinNetwork[] = defineSupportedNetworks({

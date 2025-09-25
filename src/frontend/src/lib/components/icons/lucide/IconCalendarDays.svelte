@@ -2,12 +2,20 @@
 <script lang="ts">
 	interface Props {
 		size?: string;
+		testId?: string;
 	}
 
-	let { size }: Props = $props();
+	let { size, testId }: Props = $props();
 </script>
 
-<svg fill="none" height={size} viewBox="0 0 14 14" width={size} xmlns="http://www.w3.org/2000/svg">
+<svg
+	data-tid={testId}
+	fill="none"
+	height={size}
+	viewBox="0 0 14 14"
+	width={size}
+	xmlns="http://www.w3.org/2000/svg"
+>
 	<path
 		clip-rule="evenodd"
 		d="M2.91663 2.91667C2.59446 2.91667 2.33329 3.17783 2.33329 3.5V11.6667C2.33329 11.9888 2.59446 12.25 2.91663 12.25H11.0833C11.4055 12.25 11.6666 11.9888 11.6666 11.6667V3.5C11.6666 3.17783 11.4055 2.91667 11.0833 2.91667H2.91663ZM1.16663 3.5C1.16663 2.5335 1.95013 1.75 2.91663 1.75H11.0833C12.0498 1.75 12.8333 2.5335 12.8333 3.5V11.6667C12.8333 12.6332 12.0498 13.4167 11.0833 13.4167H2.91663C1.95013 13.4167 1.16663 12.6332 1.16663 11.6667V3.5Z"

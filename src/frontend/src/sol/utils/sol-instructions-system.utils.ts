@@ -91,7 +91,11 @@ export const parseSolSystemInstruction = (
 				...parseUpgradeNonceAccountInstruction(instruction),
 				instructionType: SystemInstruction.UpgradeNonceAccount
 			};
-		default:
+		default: {
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = decodedInstruction;
+
 			return instruction;
+		}
 	}
 };

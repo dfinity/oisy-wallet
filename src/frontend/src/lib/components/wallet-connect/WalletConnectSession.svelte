@@ -7,6 +7,7 @@
 	import {
 		SESSION_REQUEST_ETH_SEND_TRANSACTION,
 		SESSION_REQUEST_ETH_SIGN,
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
 		SESSION_REQUEST_ETH_SIGN_V4,
 		SESSION_REQUEST_PERSONAL_SIGN
 	} from '$eth/constants/wallet-connect.constants';
@@ -85,7 +86,13 @@
 
 	const disconnectListener = async () => {
 		try {
-			await listener?.disconnect();
+			if (isNullish(listener)) {
+				return;
+			}
+
+			detachHandlers(listener);
+
+			await listener.disconnect();
 		} catch (err: unknown) {
 			toastsError({
 				msg: {
@@ -246,6 +253,7 @@
 		} = sessionRequest;
 
 		switch (method) {
+			case SESSION_REQUEST_ETH_SIGN_LEGACY:
 			case SESSION_REQUEST_ETH_SIGN_V4:
 			case SESSION_REQUEST_ETH_SIGN:
 			case SESSION_REQUEST_PERSONAL_SIGN:
@@ -280,6 +288,14 @@
 		listener.sessionDelete(onSessionDelete);
 
 		listener.sessionRequest(onSessionRequest);
+	};
+
+	const detachHandlers = (listener: WalletConnectListener) => {
+		listener.offSessionProposal(onSessionProposal);
+
+		listener.offSessionDelete(onSessionDelete);
+
+		listener.offSessionRequest(onSessionRequest);
 	};
 
 	const connect = async (uri: string): Promise<{ result: 'success' | 'error' | 'critical' }> => {
@@ -451,6 +467,8 @@
 	};
 </script>
 
+<svelte:window onoisyDisconnectWalletConnect={disconnect} />
+
 {#if nonNullish(listener)}
 	<WalletConnectButton onclick={disconnect}>
 		{$i18n.wallet_connect.text.disconnect}
@@ -468,16 +486,16 @@
 		{#snippet title()}
 			<WalletConnectModalTitle>
 				{`${
-					currentStep?.name === 'Review' && nonNullish(proposal)
+					currentStep?.name === WizardStepsWalletConnect.REVIEW && nonNullish(proposal)
 						? $i18n.wallet_connect.text.session_proposal
 						: $i18n.wallet_connect.text.name
 				}`}
 			</WalletConnectModalTitle>
 		{/snippet}
 
-		{#if currentStep?.name === 'Review'}
+		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
 			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
-		{:else}
+		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
 			<WalletConnectForm on:icConnect={userConnect} />
 		{/if}
 	</WizardModal>

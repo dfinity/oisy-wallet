@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Jogo",
-			"tools": "Ferramentas"
+			"tools": "Ferramentas",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "O OpenChat é uma aplicação de chat completa, que funciona de ponta a ponta na blockchain Internet Computer. <br/><br/>O OpenChat é governado pela sua comunidade através de um DAO e tem o seu próprio token CHAT. Os tokens CHAT são dados como recompensa aos utilizadores para impulsionar crescimento e criar uma equipa de milhões de defensores da descentralização, permitindo que o OpenChat se torne um concorrente viável para os grandes concorrentes de tecnologias centralizadas!",
 				"stats": "80,000+ utilizadores",
 				"carousel": {
-					"text": "OpenChat – Onde a web3 comunica",
+					"text": "",
 					"call_to_action": "Mostrar mais"
 				}
 			},
@@ -318,16 +319,32 @@
 				"name": "Taggr",
 				"one_liner": "Redes sociais descentralizadas: publique, ganhe, possua.",
 				"call_to_action": "Viajar até ao Taggr",
-				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores.",
-				"carousel": {
-					"text": "Mídias social descentralizada - publique, ganhe, possua.",
-					"call_to_action": "Aprender mais"
-				}
+				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores."
 			},
 			"toolkit": {
 				"name": "Toolkit",
 				"one_liner": "Onde a governança encontra a colaboração para impulsionar a inovação.",
 				"description": "O Toolkit é um conjunto versátil para gerenciar Service Nervous Systems (SNS) e projetos no Internet Computer. De propostas de governança à implantação de contêineres, ele capacita os usuários a inovar, colaborar e descentralizar perfeitamente."
+			},
+			"altitudefi": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"usdai": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -337,6 +354,7 @@
 			"upcoming_campaigns": "Próximas campanhas",
 			"active_date": "Termina em",
 			"ended_date": "Terminou em",
+			"upcoming_date": "",
 			"share": "Partilhar no X",
 			"learn_more": "Saiba mais",
 			"check_status": "Verificar Status e Elegibilidade",
@@ -345,16 +363,18 @@
 			"activity_button_text": "Verificar Atividade Recente",
 			"activity_button_text_short": "Verificar atividade",
 			"open_wallet": "Leve-me para a carteira",
-			"carousel_slide_title": "$oisy_short Sprinkles estão agora ativas!",
+			"carousel_slide_title": "$oisy_short Sprinkles episódio 5 agora ativas!",
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
+			"not_eligible": "Não elegível",
 			"ongoing": "Em andamento",
 			"ended": "Finalizado ($amount)",
 			"banner_text": "Ganhe recompensas diárias com OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
+			"network_bonus_info": "Cada rede na qual você mantém ativos lhe dá um multiplicador de recompensas. Quanto mais redes você usar, mais recompensas você receberá!",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
@@ -362,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Fique de olho nos próximos lançamentos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Siga-nos no X</a>, junte-se ao nosso <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou entre no nosso <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para ficar por dentro das últimas novidades.",
-			"coming_soon": "O episódio 4 de $oisy_short está chegando",
+			"coming_soon": "O episódio 6 de $oisy_short está chegando",
 			"reward_banner": "Banner da campanha $campaignName"
 		},
 		"campaigns": {
@@ -423,6 +443,36 @@
 						"title": "Ganhe mais por referenciar",
 						"description": "Acabou de ganhar Sprinkles - tal como a pessoa que o indicou. <br>Envie para 4 amigos e ganhe $1. <br>Os 4 primeiros referenciadores ganham $200 cada.",
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
+					}
+				}
+			},
+			"sprinkles_s1e5": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episódio 5 está no ar 🎉",
+				"one_liner": "Ganhe Sprinkles por ser ativo, indicar outras pessoas e usar o OISY em diferentes redes. Suas ações aumentam suas recompensas, e indicações ativas as impulsionam ainda mais.<br/>Além disso, agora mais redes significam mais chances de ganhar.",
+				"participate_title": "Ganhe tokens por atividades e indicações. Mais cadeias significam mais chances.",
+				"description": "Permaneça ativo por mais de 10 dias para se qualificar: faça login com frequência, conclua ações da carteira e mantenha pelo menos US$ 20.<br/>Cada cadeia ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% de amigos que se qualificarem e fique entre os 3 primeiros para ganhar um Super Sprinkle de US$ 200.",
+				"campaign_href": "",
+				"win": {
+					"default": {
+						"title": "Você foi recompensado",
+						"description": "As suas recompensas acabaram de chegar à sua carteira<br>Não se esqueça de indicar amigos e manter-se ativo para ganhar ainda mais",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Você ganhou o bônus semanal",
+						"description": "Você acabou de ganhar um de nossos bônus semanais.<br>Mantenha-se ativo e continue indicando para ganhar mais.",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "Você chegou ao topo da tabela de classificação",
+						"description": "Você ficou entre os 4 melhores indicadores desta temporada<br>$200 foram adicionados à sua carteira",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Aqui está um pequeno agradecimento",
+						"description": "Um dos seus utilizadores indicados acabou de ganhar alguns sprinkles.",
+						"share_href": ""
 					}
 				}
 			}
@@ -531,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Configurações",
+			"general": "",
 			"principal": "Seu Principal",
 			"principal_copied": "Principal copiado para a área de transferência",
 			"principal_description": "Seu ID para $oisy_name. Criado pela sua Internet Identity.",
@@ -1074,14 +1125,16 @@
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
-			"learn_more": ""
+			"learn_more": "",
+			"token_id": ""
 		},
 		"alt": {
 			"placeholder_image": "Nenhum NFT por enquanto",
 			"card": {
 				"image": "Imagem do NFT com token ID: $tokenId"
 			},
-			"copy_address": ""
+			"copy_address": "",
+			"review_preference": ""
 		}
 	},
 	"fee": {
@@ -1515,24 +1568,22 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "Revise os Termos e Condições",
+			"review_updated_title": "Revise os Termos e Condições atualizados",
+			"review_description": "Antes de usar a Carteira OISY, você deve revisar e concordar com nossos Termos de Serviço e Política de Privacidade. Esses documentos explicam as regras do nosso serviço e como protegemos seus dados.",
+			"review_updated_description": "Para continuar usando a Carteira OISY, revise e concorde com nossos Termos de Serviço e Política de Privacidade atualizados. Essas alterações são importantes para manter nosso serviço seguro e em conformidade.",
+			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
+			"i_have_accepted": "Li e concordo com os",
+			"i_have_accepted_updated": "Li e concordo com os atualizados",
+			"accept_and_continue": "Aceite e continue"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
 		}
 	},
 	"license_agreement": {
 		"text": {
-			"license_agreement": "",
-			"accept_terms": "Ao clicar neste botão, você concorda com o",
-			"accept_terms_link": "Contrato de Licença",
+			"license_agreement": "Contrato de Licença",
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
 			"paragraph_1": "Obrigado pelo seu interesse em $oisy_name, um aplicativo descentralizado de carteira multi-cadeia e auto-custódia baseado em navegador, hospedado na rede pública de blockchain Internet Computer (“$oisy_short”). Para obter mais informações sobre $oisy_short, seu código-fonte aberto e licenças relacionadas, consulte o repositório GitHub de $oisy_short aqui: $oisy_repo_url.",
 			"paragraph_2": "Este Contrato de Licença rege o uso de $oisy_short por você (“Você”). AO USAR $oisy_short, VOCÊ CONCORDA QUE LEU, COMPREENDEU E CONCORDA EM ESTAR VINCULADO POR ESTE CONTRATO DE LICENÇA. SE VOCÊ NÃO CONCORDA, VOCÊ NÃO PODE USAR $oisy_short.",
@@ -1558,22 +1609,22 @@
 	},
 	"terms_of_use": {
 		"text": {
-			"terms_of_use": "",
+			"terms_of_use": "Termos de Uso",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"terms_of_use": ""
+			"terms_of_use": "Link para os Termos de Uso"
 		}
 	},
 	"privacy_policy": {
 		"text": {
-			"privacy_policy": "",
+			"privacy_policy": "Política de Privacidade",
 			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"privacy_policy": ""
+			"privacy_policy": "Link para a Política de Privacidade"
 		}
 	},
 	"activity": {
@@ -1604,7 +1655,7 @@
 	"welcome": {
 		"title": "Bem vindo ao $oisy_curtas!",
 		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1625,7 +1676,7 @@
 	"ai_assistant": {
 		"text": {
 			"title": "$oisy_short Assistente AI",
-			"welcome_message": "Olá! 👋 Só o OISY, o seu assistente pessoal de AI. Veja como posso ajudar:",
+			"welcome_message": "Olá! 👋 Sou seu concierge pessoal de IA. Como posso ajudar você?",
 			"action_button_contacts_title": "Mostrar contatos",
 			"action_button_contacts_subtitle": "Mostrar os seus contatos salvos",
 			"action_button_contacts_prompt": "Mostrar meus contatos.",

@@ -19,7 +19,6 @@ export const parseSolComputeBudgetInstruction = (
 	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
-
 	switch (decodedInstruction) {
 		case ComputeBudgetInstruction.RequestUnits:
 			return {
@@ -46,7 +45,11 @@ export const parseSolComputeBudgetInstruction = (
 				...parseSetLoadedAccountsDataSizeLimitInstruction(instruction),
 				instructionType: ComputeBudgetInstruction.SetLoadedAccountsDataSizeLimit
 			};
-		default:
+		default: {
+			// Force compiler error on unhandled cases based on leftover types
+			const _: never = decodedInstruction;
+
 			return instruction;
+		}
 	}
 };

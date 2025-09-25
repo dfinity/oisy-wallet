@@ -54,14 +54,6 @@ export const sendNftsWizardSteps = (
 	params: SendWizardStepsParams
 ): WizardSteps<WizardStepsSend> => [
 	{
-		name: WizardStepsSend.NFTS_LIST,
-		title: params.i18n.send.text.select_nft
-	},
-	{
-		name: WizardStepsSend.FILTER_NETWORKS,
-		title: params.i18n.send.text.select_network_filter
-	},
-	{
 		name: WizardStepsSend.DESTINATION,
 		title: params.i18n.send.text.send
 	},
@@ -73,4 +65,18 @@ export const sendNftsWizardSteps = (
 		name: WizardStepsSend.SENDING,
 		title: params.i18n.send.text.sending
 	}
+];
+
+export const allSendNftsWizardSteps = (
+	params: SendWizardStepsParams
+): WizardSteps<WizardStepsSend> => [
+	{
+		name: WizardStepsSend.NFTS_LIST,
+		title: params.i18n.send.text.select_nft
+	},
+	{
+		name: WizardStepsSend.FILTER_NETWORKS,
+		title: params.i18n.send.text.select_network_filter
+	},
+	...sendNftsWizardSteps(params)
 ];

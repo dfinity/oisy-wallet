@@ -3,7 +3,6 @@
 	import { page } from '$app/state';
 	import ConvertToCkBtc from '$btc/components/convert/ConvertToCkBtc.svelte';
 	import BtcReceive from '$btc/components/receive/BtcReceive.svelte';
-	import { SWAP_ACTION_ENABLED } from '$env/actions.env';
 	import ConvertToCkEth from '$eth/components/convert/ConvertToCkEth.svelte';
 	import EthReceive from '$eth/components/receive/EthReceive.svelte';
 	import ConvertToCkErc20 from '$eth/components/send/ConvertToCkErc20.svelte';
@@ -48,12 +47,18 @@
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-		SWAP_ACTION_ENABLED && (!isTransactionsPage || (isTransactionsPage && $networkICP))
+		!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)
 	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
 	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
+
+	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
+	// TODO: Remove once Swap/Convert are refactored and merged.
+	let tooManyButtons = $derived(
+		sendAction && swapAction && (convertErc20 || convertEth || convertCkBtc || convertBtc)
+	);
 </script>
 
 <div class="flex w-full justify-center pt-8" role="toolbar">
@@ -104,7 +109,7 @@
 			{/if}
 		{/if}
 
-		{#if buyAction}
+		{#if buyAction && !tooManyButtons}
 			<Buy />
 		{/if}
 	</HeroButtonGroup>

@@ -200,6 +200,7 @@ interface I18nDapps {
 		walletconnect: string;
 		game: string;
 		tools: string;
+		ai: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -247,14 +248,17 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
-		taggr: {
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
+		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
+		usdai: { name: string; one_liner: string; description: string };
+		caffeine: {
 			name: string;
 			one_liner: string;
 			call_to_action: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		toolkit: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -264,6 +268,7 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
+		upcoming_date: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -276,12 +281,14 @@ interface I18nRewards {
 		carousel_slide_cta: string;
 		sprinkles_earned: string;
 		youre_eligible: string;
+		not_eligible: string;
 		ongoing: string;
 		ended: string;
 		banner_text: string;
 	};
 	requirements: {
 		requirements_title: string;
+		network_bonus_info: string;
 		min_logins: string;
 		min_transactions: string;
 		min_total_assets_usd: string;
@@ -315,6 +322,20 @@ interface I18nRewards {
 				leaderboard: { title: string; description: string; share_href: string };
 				referrer: { title: string; description: string; share_href: string };
 				referee: { title: string; description: string; share_href: string };
+			};
+		};
+		sprinkles_s1e5: {
+			title: string;
+			card_title: string;
+			one_liner: string;
+			participate_title: string;
+			description: string;
+			campaign_href: string;
+			win: {
+				default: { title: string; description: string; share_href: string };
+				jackpot: { title: string; description: string; share_href: string };
+				leaderboard: { title: string; description: string; share_href: string };
+				referral: { title: string; description: string; share_href: string };
 			};
 		};
 	};
@@ -414,6 +435,7 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -922,8 +944,14 @@ interface I18nNfts {
 		review_title: string;
 		review_description: string;
 		learn_more: string;
+		token_id: string;
 	};
-	alt: { placeholder_image: string; card: { image: string }; copy_address: string };
+	alt: {
+		placeholder_image: string;
+		card: { image: string };
+		copy_address: string;
+		review_preference: string;
+	};
 }
 
 interface I18nFee {
@@ -1263,8 +1291,6 @@ interface I18nAgreements {
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
-		accept_terms: string;
-		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;

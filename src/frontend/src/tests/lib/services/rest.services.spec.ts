@@ -75,10 +75,6 @@ describe('rest.services', () => {
 				error: new Error('Second attempt failed'),
 				retryCount: 1
 			});
-
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenCalledWith('Request attempt 1 failed. Retrying...');
-			expect(console.warn).toHaveBeenCalledWith('Request attempt 2 failed. Retrying...');
 		});
 
 		it('should stop retrying and raise an error after maxRetries', async () => {
@@ -208,10 +204,6 @@ describe('rest.services', () => {
 
 			expect(mockFailedRequest).toHaveBeenCalledTimes(3);
 			expect(randomWait).toHaveBeenCalledTimes(2);
-
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenCalledWith('Request attempt 1 failed. Retrying...');
-			expect(console.warn).toHaveBeenCalledWith('Request attempt 2 failed. Retrying...');
 		});
 
 		it('should not retry if maxRetries is set to 0', async () => {

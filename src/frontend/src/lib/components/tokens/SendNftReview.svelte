@@ -12,8 +12,8 @@
 
 <div class="border-1 mb-5 flex rounded-lg border-brand-subtle-20 bg-brand-subtle-10 p-3">
 	<div class="flex items-center">
-		<span class="flex bg-primary">
-			<NftLogo badge={{ type: 'network' }} {nft} ring />
+		<span class="flex">
+			<NftLogo badge={{ type: 'network' }} {nft} />
 		</span>
 		<div class="ml-4 flex flex-col">
 			<span class="flex font-bold">{$i18n.send.text.send}: {nft?.name} #{nft?.id}</span>

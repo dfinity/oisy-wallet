@@ -1,34 +1,31 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconPenLine from '$lib/components/icons/IconPenLine.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { Nft } from '$lib/types/nft';
+	import type { NftCollection } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
-		nft: Nft;
+		collection: NftCollection;
 	}
 
-	const { nft }: Props = $props();
+	const { collection }: Props = $props();
 
 	const hasConsent = $derived(
-		nonNullish(nft)
+		nonNullish(collection)
 			? getAllowMediaForNft({
 					tokens: $nonFungibleTokens,
-					networkId: nft.collection.network.id,
-					address: nft.collection.address
+					networkId: collection.network.id,
+					address: collection.address
 				})
 			: false
 	);
 
 	const openConsentModal = () => {
-		if (nonNullish(nft)) {
-			modalStore.openNftImageConsent({ id: Symbol(), data: nft.collection });
+		if (nonNullish(collection)) {
+			modalStore.openNftImageConsent({ id: Symbol(), data: collection });
 		}
 	};
 </script>
@@ -39,25 +36,13 @@
 	{:else}
 		{$i18n.nfts.text.media_disabled}
 	{/if}
-	<Responsive up="md">
-		<Button
-			colorStyle="secondary-light"
-			onclick={openConsentModal}
-			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
-			transparent>{$i18n.nfts.text.review_preference}</Button
-		>
-	</Responsive>
-	<Responsive down="sm">
-		<ButtonIcon
-			ariaLabel={$i18n.nfts.text.review_preference}
-			colorStyle="secondary-light"
-			onclick={openConsentModal}
-			styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2 h-auto"
-			transparent
-		>
-			{#snippet icon()}
-				<IconPenLine />
-			{/snippet}
-		</ButtonIcon>
-	</Responsive>
+	<Button
+		ariaLabel={$i18n.nfts.alt.review_preference}
+		colorStyle="secondary-light"
+		onclick={openConsentModal}
+		styleClass="w-auto p-0 grow-0 text-nowrap hover:bg-inherit ml-2"
+		transparent
+	>
+		{$i18n.nfts.text.review_preference}
+	</Button>
 </span>
