@@ -50,10 +50,14 @@ export const setIdbTransactionsStore = async <T extends IdbTransactionsStoreData
 		return;
 	}
 
+	if (isNullish(transactionsStoreData)) {
+		return;
+	}
+
 	// We don't necessarily need this function to work, it is just a cache-saving service. Useful but not critical. We can ignore errors.
 	await Promise.allSettled(
 		tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
-			const transactions = transactionsStoreData?.[tokenId];
+			const transactions = transactionsStoreData[tokenId];
 
 			if (isNullish(transactions)) {
 				return;

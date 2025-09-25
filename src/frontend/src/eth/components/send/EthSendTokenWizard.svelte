@@ -321,9 +321,9 @@
 			{amount}
 			{destination}
 			{nft}
+			onBack={() => dispatch('icBack')}
+			onSend={nonNullish(nft) ? nftSend : send}
 			{selectedContact}
-			on:icBack
-			on:icSend={nonNullish(nft) ? nftSend : send}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -333,15 +333,16 @@
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<EthSendForm
 			{nativeEthereumToken}
+			onBack={() => dispatch('icBack')}
+			onNext={() => dispatch('icNext')}
+			onTokensList={() => dispatch('icTokensList')}
 			{selectedContact}
-			on:icNext
-			on:icClose={close}
-			on:icBack
-			on:icTokensList
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</EthSendForm>
 	{/if}
 </EthFeeContext>

@@ -91,7 +91,7 @@ describe('SwapForm', () => {
 			setupIcTokenFeeStore();
 
 			const { getByTestId } = render(SwapForm, {
-				props: { ...props, slippageValue: undefined },
+				props: { ...props, slippageValue: undefined, isSwapAmountsLoading: false },
 				context: mockContext
 			});
 
@@ -115,7 +115,8 @@ describe('SwapForm', () => {
 				props: {
 					swapAmount: '1',
 					receiveAmount: 2,
-					slippageValue: undefined
+					slippageValue: undefined,
+					isSwapAmountsLoading: false
 				},
 				context: mockContext
 			});

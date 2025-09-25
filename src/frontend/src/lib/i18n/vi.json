@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
-			"tools": "Khí cụ"
+			"tools": "Khí cụ",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "OpenChat là một ứng dụng trò chuyện đầy đủ tính năng từ đầu tới cuối trên blockchain Internet Computer.<br/><br/>OpenChat được quản lý bởi cộng đồng của nó như một DAO và có token CHAT riêng. Token CHAT được trao làm phần thưởng cho người dùng để thúc đẩy tăng trưởng và tạo ra một đội ngũ hàng triệu người ủng hộ cho phép OpenChat trở thành một đối thủ cạnh tranh khả thi với các đối thủ công nghệ lớn tập trung!",
 				"stats": "Hơn 80.000 người dùng",
 				"carousel": {
-					"text": "OpenChat - nơi web3 giao tiếp",
+					"text": "",
 					"call_to_action": "Hiển thị thêm"
 				}
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
 				"call_to_action": "Đến Taggr",
-				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý.",
-				"carousel": {
-					"text": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
-					"call_to_action": "Tìm hiểu thêm"
-				}
+				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,15 +335,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Phần thưởng",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Phần 4 sắp ra mắt!<br>Hãy theo dõi để cập nhật",
+			"upcoming_campaigns": "Chiến dịch sắp tới",
 			"active_date": "Kết thúc vào",
 			"ended_date": "Kết thúc vào",
+			"upcoming_date": "",
 			"share": "Chia sẻ trên X",
 			"learn_more": "Tìm hiểu thêm",
 			"check_status": "Kiểm tra trạng thái & tư cách đủ điều kiện",
@@ -355,18 +363,18 @@
 			"activity_button_text": "Kiểm tra hoạt động gần đây",
 			"activity_button_text_short": "Kiểm tra hoạt động",
 			"open_wallet": "Đưa tôi đến ví",
-			"carousel_slide_title": "$oisy_short Sprinkles Tập 4 hiện đã có!",
+			"carousel_slide_title": "$oisy_short Sprinkles Tập 5 hiện đã có!",
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
-			"not_eligible": "",
+			"not_eligible": "Không đủ điều kiện",
 			"ongoing": "Đang diễn ra",
 			"ended": "Đã kết thúc ($amount)",
 			"banner_text": "Kiếm phần thưởng hàng ngày với OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
-			"network_bonus_info": "",
+			"network_bonus_info": "Mỗi mạng lưới mà bạn nắm giữ tài sản sẽ mang lại cho bạn một hệ số thưởng. Bạn càng sử dụng nhiều mạng lưới, bạn càng nhận được nhiều phần thưởng!",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
@@ -374,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 4 của $oisy_short sắp ra mắt",
+			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {
@@ -439,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 5 đã có mặt 🎊",
+				"one_liner": "Nhận Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn sẽ giúp tăng phần thưởng, và lượt giới thiệu tích cực sẽ giúp tăng thêm phần thưởng.<br/>Thêm vào đó, giờ đây, càng nhiều chuỗi thì cơ hội chiến thắng càng cao.",
+				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
+				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được gửi vào ví của bạn.<br>Đừng quên giới thiệu và duy trì hoạt động để giành được nhiều hơn.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã giành được phần thưởng hàng tuần",
+						"description": "Bạn vừa nhận được một trong những phần thưởng hàng tuần của chúng tôi.<br>Hãy tích cực và tiếp tục giới thiệu để giành được nhiều phần thưởng hơn.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Bạn đã đứng đầu Bảng xếp hạng",
+						"description": "Bạn đã được xếp hạng trong top 4 người giới thiệu hàng đầu mùa này<br>200$ đã được thêm vào ví của bạn",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Đây là một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng được bạn giới thiệu vừa nhận được một số sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Cài đặt",
+			"general": "",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",

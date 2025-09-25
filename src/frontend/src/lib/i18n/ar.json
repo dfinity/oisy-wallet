@@ -205,7 +205,8 @@
 			"staking": "التخزين",
 			"walletconnect": "WalletConnect",
 			"game": "لعبة",
-			"tools": "أدوات"
+			"tools": "أدوات",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "OpenChat هو تطبيق دردشة كامل الميزات يعمل بالكامل من طرف إلى طرف على بلوكتشين Internet Computer.<br/><br/>يتم إدارة OpenChat من قبل مجتمعه كمنظمة مستقلة لامركزية (DAO) وله توكن خاص به يسمى CHAT. تُمنح توكنات CHAT كمكافآت للمستخدمين لتسريع النمو وإنشاء فريق من ملايين المؤيدين مما يسمح لـ OpenChat بأن يصبح منافسًا قويًا للمنافسين الكبار في مجال التكنولوجيا المركزية!",
 				"stats": "أكثر من 80,000 مستخدم",
 				"carousel": {
-					"text": "OpenChat - حيث يتواصل web3",
+					"text": "",
 					"call_to_action": "عرض المزيد"
 				}
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "وسائل تواصل اجتماعي لامركزية - انشر، اكسب، امتلك.",
 				"call_to_action": "اذهب إلى Taggr",
-				"description": "Taggr هي منصة وسائط اجتماعية لامركزية بالكامل تعيش على شبكة حوسبة موزعة عامة مدعومة من Internet Computer. على عكس منصات الوسائط الاجتماعية التقليدية التي تسيطر عليها الشركات، فإن Taggr مملوكة ومحكومة بالكامل من قبل مستخدميها.",
-				"carousel": {
-					"text": "وسائل تواصل اجتماعي لامركزية - انشر، اكسب، امتلك.",
-					"call_to_action": "تعلم المزيد"
-				}
+				"description": "Taggr هي منصة وسائط اجتماعية لامركزية بالكامل تعيش على شبكة حوسبة موزعة عامة مدعومة من Internet Computer. على عكس منصات الوسائط الاجتماعية التقليدية التي تسيطر عليها الشركات، فإن Taggr مملوكة ومحكومة بالكامل من قبل مستخدميها."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,6 +335,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -347,6 +354,7 @@
 			"upcoming_campaigns": "الحملات القادمة",
 			"active_date": "ينتهي في",
 			"ended_date": "انتهى في",
+			"upcoming_date": "",
 			"share": "شارك على X",
 			"learn_more": "تعلم المزيد",
 			"check_status": "تحقق من الحالة والأهلية",
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "الإعدادات",
+			"general": "",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",

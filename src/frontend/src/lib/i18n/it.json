@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Gioco",
-			"tools": "Strumenti"
+			"tools": "Strumenti",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "OpenChat è un'applicazione di chat completa che funziona end-to-end sulla blockchain di Internet Computer.<br/><br/>OpenChat è governata dalla sua comunità come una DAO e ha il suo token CHAT. I token CHAT vengono dati come ricompensa agli utenti per accelerare la crescita e creare un team di milioni di sostenitori che permettano a OpenChat di diventare un valido concorrente per i grandi concorrenti tecnologici centralizzati!",
 				"stats": "80.000+ utenti",
 				"carousel": {
-					"text": "OpenChat - dove il web3 comunica",
+					"text": "",
 					"call_to_action": "Mostra di più"
 				}
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Social media decentralizzato - pubblica, guadagna, possiedi.",
 				"call_to_action": "Vai su Taggr",
-				"description": "Taggr è una piattaforma di social media completamente decentralizzata che vive su una rete di calcolo pubblica e distribuita alimentata da Internet Computer. A differenza delle piattaforme di social media tradizionali controllate dalle aziende, Taggr è interamente posseduta e governata dai suoi utenti.",
-				"carousel": {
-					"text": "Social media decentralizzato - pubblica, guadagna, possiedi.",
-					"call_to_action": "Scopri di più"
-				}
+				"description": "Taggr è una piattaforma di social media completamente decentralizzata che vive su una rete di calcolo pubblica e distribuita alimentata da Internet Computer. A differenza delle piattaforme di social media tradizionali controllate dalle aziende, Taggr è interamente posseduta e governata dai suoi utenti."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,6 +335,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -347,6 +354,7 @@
 			"upcoming_campaigns": "Campagne in Arrivo",
 			"active_date": "Termina il",
 			"ended_date": "Terminato il",
+			"upcoming_date": "",
 			"share": "Condividi su X",
 			"learn_more": "Scopri di più",
 			"check_status": "Verifica stato ed eleggibilità",
@@ -355,18 +363,18 @@
 			"activity_button_text": "Verifica attività recenti",
 			"activity_button_text_short": "Verifica attività",
 			"open_wallet": "Portami al wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles: Episodio 4 è ora Live!",
+			"carousel_slide_title": "$oisy_short Sprinkles: Episodio 5 è ora Live!",
 			"carousel_slide_cta": "Scopri di più",
 			"sprinkles_earned": "Hai guadagnato $noOfSprinkles sprinkles, per un totale di $amount! 🎉",
 			"youre_eligible": "Sei idoneo!",
-			"not_eligible": "",
+			"not_eligible": "Non idoneo",
 			"ongoing": "In corso",
 			"ended": "Terminato ($amount)",
 			"banner_text": "Guadagna ricompense giornaliere con OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Criteri di eleggibilità",
-			"network_bonus_info": "",
+			"network_bonus_info": "Ogni rete su cui possiedi risorse ti dà un moltiplicatore di ricompense. Più reti utilizzi, più ricompense ricevi!",
 			"min_logins": "Accedi $loginsx volte negli ultimi $days giorni",
 			"min_transactions": "Completa $transactions transazioni negli ultimi $days giorni",
 			"min_total_assets_usd": "Detieni $$usd di token al momento dell'emissione",
@@ -374,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Tieni d'occhio i prossimi airdrop di token! <a href=\"https://x.com/oisy\" target=\"_blank\">Seguici su X</a>, unisciti al nostro <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, o entra nel nostro <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> per rimanere aggiornato.",
-			"coming_soon": "L'episodio 4 di $oisy_short arriverà presto",
+			"coming_soon": "L'episodio 6 di $oisy_short arriverà presto",
 			"reward_banner": "Banner della campagna $campaignName"
 		},
 		"campaigns": {
@@ -439,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episodio 5 è Live 🎊",
+				"one_liner": "Guadagna Sprinkles per essere attivo, segnalare altri e utilizzare OISY su più reti. Le tue azioni aumentano le tue ricompense e i referral attivi le incrementano ulteriormente.<br/>Inoltre, ora più reti significano maggiori possibilità di vincere.",
+				"participate_title": "Guadagna token per attività e referral. Più reti significano più possibilità.",
+				"description": "Rimani attivo per oltre 10 giorni per qualificarti: accedi spesso, completa le azioni del portafoglio e detieni almeno $ 20.<br/>Ogni rete attiva aumenta le tue probabilità con un moltiplicatore multireti.<br/>Guadagna il 10% dagli amici che si qualificano e classificati tra i primi 3 per vincere un Super Sprinkle da $ 200.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Sei stato ricompensato",
+						"description": "Le tue ricompense sono appena arrivate nel tuo portafoglio.<br>Non dimenticare di invitare e rimanere attivo per vincere di più.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Hai vinto il bonus settimanale",
+						"description": "Hai appena guadagnato uno dei nostri bonus settimanali.<br>Rimani attivo e continua a fare riferimento per vincere di più.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Hai raggiunto la vetta della classifica",
+						"description": "Ti sei classificato tra i primi 4 referrer di questa stagione<br>200$ sono stati aggiunti al tuo portafoglio.",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Ecco un piccolo ringraziamento",
+						"description": "Uno dei tuoi utenti referenziati ha appena ricevuto degli sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Impostazioni",
+			"general": "",
 			"principal": "Il tuo Principal",
 			"principal_copied": "Principal copiato negli appunti",
 			"principal_description": "Il tuo ID per $oisy_name. Creato dalla tua Internet Identity.",
