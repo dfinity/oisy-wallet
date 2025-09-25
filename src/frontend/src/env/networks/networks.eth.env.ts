@@ -1,7 +1,7 @@
 import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
-import ethereumIconTransparent from '$lib/assets/networks/transparent/ethereum-mainnet.svg';
-import sepoliaIconTransparent from '$lib/assets/networks/transparent/ethereum-sepolia.svg';
+import ethereumIcon from '$lib/assets/networks/ethereum-mainnet.svg';
+import sepoliaIcon from '$lib/assets/networks/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -24,7 +24,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
-	iconTransparent: ethereumIconTransparent,
+	icon: ethereumIcon,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
 	providers: {
 		infura: 'mainnet',
@@ -45,7 +45,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	iconTransparent: sepoliaIconTransparent,
+	icon: sepoliaIcon,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'sepolia',
