@@ -4,8 +4,6 @@ import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';
 import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 
-import solDevnetIconDark from '$lib/assets/networks/dark/solana-devnet.svg';
-import solMainnetIconDark from '$lib/assets/networks/dark/solana-mainnet.svg';
 import solDevnetIconTransparent from '$lib/assets/networks/transparent/solana-devnet.svg';
 import solMainnetIconTransparent from '$lib/assets/networks/transparent/solana-mainnet.svg';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -45,7 +43,6 @@ export const SOLANA_MAINNET_NETWORK: SolanaNetwork = {
 	env: 'mainnet',
 	name: 'Solana',
 	chainId: '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
-	iconDark: solMainnetIconDark,
 	iconTransparent: solMainnetIconTransparent,
 	explorerUrl: SOL_MAINNET_EXPLORER_URL,
 	buy: { onramperId: 'solana' }
@@ -60,7 +57,6 @@ export const SOLANA_DEVNET_NETWORK: SolanaNetwork = {
 	env: 'testnet',
 	name: 'Solana Devnet',
 	chainId: 'EtWTRABZaYq6iMfeYKouRu166VU2xqa1',
-	iconDark: solDevnetIconDark,
 	iconTransparent: solDevnetIconTransparent,
 	explorerUrl: SOL_DEVNET_EXPLORER_URL
 };
@@ -73,7 +69,6 @@ export const SOLANA_LOCAL_NETWORK: SolanaNetwork = {
 	id: SOLANA_LOCAL_NETWORK_ID,
 	env: 'testnet',
 	name: 'Solana Local',
-	iconDark: solDevnetIconDark,
 	iconTransparent: solDevnetIconTransparent
 };
 
