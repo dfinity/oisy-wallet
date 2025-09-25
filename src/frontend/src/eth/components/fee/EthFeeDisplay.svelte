@@ -20,12 +20,6 @@
 			? $maxGasFee * 2n
 			: $maxGasFee
 	);
-
-	$effect(() => {
-		console.log({ isApproveNeeded });
-		console.log({ maxGas: $maxGasFee });
-		console.log({ feeAmount });
-	});
 </script>
 
 {#if nonNullish($feeSymbolStore) && nonNullish($feeDecimalsStore)}

@@ -99,8 +99,6 @@
 				)
 			});
 
-			console.log({ feeData }, 'in store');
-
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
 				// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
 				// Otherwise, we would need to emulate the data that are provided to the minter contract address.
@@ -113,8 +111,6 @@
 								: {}),
 							data
 						});
-
-				console.log('first statemnet', { estimatedGas, feeDataGas, feeData });
 
 				feeStore.setFee({
 					...feeData,
@@ -132,8 +128,6 @@
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
-				console.log('isTwinToken', { erc20GasFeeParams, feeData });
-
 				feeStore.setFee({
 					...feeData,
 					gas: await getCkErc20FeeData({
@@ -175,18 +169,6 @@
 				});
 				return;
 			}
-
-			console.log('Calculating ERC20 fee', {
-				feeData,
-				gas: await getErc20FeeData({
-					...erc20GasFeeParams,
-					targetNetwork,
-					to:
-						// When converting "ICP Erc20" to native ICP, the destination address is an "old" ICP hex account identifier.
-						// Therefore, it should not be prefixed with 0x.
-						isNetworkICP(targetNetwork) ? destination : erc20GasFeeParams.to
-				})
-			});
 
 			feeStore.setFee({
 				...feeData,
