@@ -81,7 +81,7 @@
 
 	let { network } = $derived($sendToken);
 
-	let { id: networkId } = $derived(network);
+	let networkId = $derived(network?.id);
 
 	let [source, solanaNativeToken] = $derived(
 		isNetworkIdSOLDevnet(networkId)
