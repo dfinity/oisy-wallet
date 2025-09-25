@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "去中心化社交媒体 - 发布、赚取、拥有。",
 				"call_to_action": "前往 Taggr",
-				"description": "Taggr 是一个完全去中心化的社交媒体平台，它运行在由互联网计算机驱动的公共分布式计算网络上。与由公司控制的传统社交媒体平台不同，Taggr 完全由其用户拥有和管理。",
-				"carousel": {
-					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
-					"call_to_action": "了解更多"
-				}
+				"description": "Taggr 是一个完全去中心化的社交媒体平台，它运行在由互联网计算机驱动的公共分布式计算网络上。与由公司控制的传统社交媒体平台不同，Taggr 完全由其用户拥有和管理。"
 			},
 			"toolkit": {
 				"name": "Toolkit",
