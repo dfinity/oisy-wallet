@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
 				"call_to_action": "Đến Taggr",
-				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý.",
-				"carousel": {
-					"text": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
-					"call_to_action": "Tìm hiểu thêm"
-				}
+				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý."
 			},
 			"toolkit": {
 				"name": "Toolkit",
