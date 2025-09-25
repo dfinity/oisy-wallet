@@ -853,37 +853,37 @@ export const fetchVeloraMarketSwap = async ({
 
 	const TokenTransferProxy = await sdk.swap.getSpender();
 
-	// if (!isDefaultEthereumToken(sourceToken)) {
-	// 	await approveToken({
-	// 		token: sourceToken,
-	// 		from: userAddress,
-	// 		to: TokenTransferProxy,
-	// 		amount: parsedSwapAmount,
-	// 		sourceNetwork,
-	// 		identity,
-	// 		gas,
-	// 		maxFeePerGas,
-	// 		maxPriorityFeePerGas,
-	// 		shouldSwapWithApproval: true,
-	// 		progress,
-	// 		progressSteps: ProgressStepsSwap
-	// 	});
+	if (!isDefaultEthereumToken(sourceToken)) {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: TokenTransferProxy,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			maxPriorityFeePerGas,
+			shouldSwapWithApproval: true,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
 
-	// 	await retryWithDelay({
-	// 		maxRetries: 10,
-	// 		request: async () => {
-	// 			const currentAllowance = await erc20ContractAllowance({
-	// 				token: sourceToken,
-	// 				owner: userAddress,
-	// 				spender: TokenTransferProxy,
-	// 				networkId: sourceNetwork.id
-	// 			});
-	// 			if (currentAllowance < parsedSwapAmount) {
-	// 				throw new Error(get(i18n).swap.error.unexpected);
-	// 			}
-	// 		}
-	// 	});
-	// }
+		await retryWithDelay({
+			maxRetries: 10,
+			request: async () => {
+				const currentAllowance = await erc20ContractAllowance({
+					token: sourceToken,
+					owner: userAddress,
+					spender: TokenTransferProxy,
+					networkId: sourceNetwork.id
+				});
+				if (currentAllowance < parsedSwapAmount) {
+					throw new Error(get(i18n).swap.error.unexpected);
+				}
+			}
+		});
+	}
 
 	progress(ProgressStepsSwap.SWAP);
 
