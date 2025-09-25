@@ -9,7 +9,7 @@
 			"close": "关闭",
 			"change": "更改",
 			"apply": "应用",
-			"retry": "",
+			"retry": "重试",
 			"refresh": "刷新",
 			"name": "名称",
 			"symbol": "符号",
@@ -39,7 +39,7 @@
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",
-			"test_banner_beta": ""
+			"test_banner_beta": "这是测试版本。您可能会遇到错误。实际资产正在使用中 - 请谨慎使用。"
 		},
 		"alt": {
 			"logo": "$name 标志",
@@ -117,7 +117,7 @@
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
 			"session_expired": "由于会话已过期，您已被登出。",
-			"reload_and_retry": ""
+			"reload_and_retry": "登录时出现错误。请重新加载页面并重试。如果此错误仍然存​​在，请联系客服。"
 		},
 		"error": {
 			"no_internet_identity": "没有 Internet Identity。",
@@ -206,7 +206,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
 			"tools": "工具包",
-			"ai": ""
+			"ai": "人工智能"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -225,7 +225,7 @@
 				"description": "OpenChat 是一个功能齐全的聊天应用程序，完全在ICP区块链上端到端运行。<br/><br/>OpenChat 由其社区作为 DAO 进行管理，并拥有自己的 CHAT 代币。CHAT 代币作为奖励发放给用户，以加速增长并创建一个由数百万支持者组成的团队，使 OpenChat 能够成为中心化大型科技竞争对手的可行挑战者！",
 				"stats": "80,000+ 用户",
 				"carousel": {
-					"text": "OpenChat - web3 的沟通之地",
+					"text": "",
 					"call_to_action": "显示更多"
 				}
 			},
@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "去中心化社交媒体 - 发布、赚取、拥有。",
 				"call_to_action": "前往 Taggr",
-				"description": "Taggr 是一个完全去中心化的社交媒体平台，它运行在由互联网计算机驱动的公共分布式计算网络上。与由公司控制的传统社交媒体平台不同，Taggr 完全由其用户拥有和管理。",
-				"carousel": {
-					"text": "去中心化社交媒体 - 发布、赚取、拥有。",
-					"call_to_action": "了解更多"
-				}
+				"description": "Taggr 是一个完全去中心化的社交媒体平台，它运行在由互联网计算机驱动的公共分布式计算网络上。与由公司控制的传统社交媒体平台不同，Taggr 完全由其用户拥有和管理。"
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -331,20 +327,24 @@
 				"description": "Toolkit 是一款多功能套件，用于管理 Service Nervous System (SNS) 和互联网计算机上的项目。从治理提案到容器部署，它使用户能够无缝地进行创新、协作和去中心化。"
 			},
 			"altitudefi": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Altitude",
+				"one_liner": "Altitude 实时主动管理用户的债务和抵押品，优化资本效率。",
+				"description": "DeFi 借贷通常是超额抵押且资本效率低下，Altitude 是一个优化 DeFi 借贷的非托管协议。Altitude 实时主动管理用户的债务和抵押品，优化资本效率。"
 			},
 			"usdai": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "USD.AI",
+				"one_liner": "一个合成美元协议，通过能产生收益的 AI 计算基础设施支持 USDai，并通过 sUSDai 提供收益。",
+				"description": "USD.AI 是一个由能产生收益的 AI 计算基础设施支持的合成美元协议，创造了一种名为 USDai 的去中心化稳定币。用户可以持有或质押 USDai 来获得 sUSDai，这是一种能反映协议收益的生息版本。该系统旨在创造一个可组合、高效和去中心化的法币稳定币替代方案。"
 			},
 			"caffeine": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Caffeine",
+				"one_liner": "首个用于构建自我编写应用的平台。",
+				"call_to_action": "试用 Caffeine",
+				"description": "Caffeine 是首个用于构建自我编写应用的平台。只需在桌面或移动端与 AI 对话，它就会为你创建应用和服务——包括那些能连接到 OISY 钱包的。体验由 AI 驱动的应用开发未来。",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -363,18 +363,18 @@
 			"activity_button_text": "查看近期活动",
 			"activity_button_text_short": "查看活动",
 			"open_wallet": "前往钱包",
-			"carousel_slide_title": "$oisy_short Sprinkles 第五集现已上线！",
+			"carousel_slide_title": "$oisy_short Sprinkles 第四集现已上线！",
 			"carousel_slide_cta": "了解更多",
 			"sprinkles_earned": "你已获得 $noOfSprinkles 个 Sprinkles，总计 $amount！🎉",
 			"youre_eligible": "你符合资格！",
-			"not_eligible": "",
+			"not_eligible": "不符合资格",
 			"ongoing": "进行中",
 			"ended": "已结束（$amount）",
 			"banner_text": "通过 OISY Sprinkles 赚取每日奖励"
 		},
 		"requirements": {
 			"requirements_title": "资格标准",
-			"network_bonus_info": "",
+			"network_bonus_info": "您持有资产的每个网络都会为您提供奖励乘数。您使用的网络越多，获得的奖励就越多！",
 			"min_logins": "最近 $days 天内登录 $loginsx 次",
 			"min_transactions": "最近 $days 天内完成 $transactions 笔交易",
 			"min_total_assets_usd": "在发放时持有价值 $$usd 的代币",
@@ -382,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "请密切关注即将到来的空投活动！<a href=\"https://x.com/oisy\" target=\"_blank\">在 X 上关注我们</a>、加入 <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>，或加入 <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> 社区保持更新。",
-			"coming_soon": "$oisy_short 第六集即将上线",
+			"coming_soon": "$oisy_short 第四集即将上线",
 			"reward_banner": "活动 $campaignName 的横幅"
 		},
 		"campaigns": {
@@ -447,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles：第 5 期已上线 🎊",
+				"one_liner": "通过活跃、推荐他人以及跨链使用 OISY 赚取 Sprinkles。您的行为会增加您的奖励，而积极的推荐则会进一步提升奖励。<br/>此外，现在更多链意味着更高的获胜机会。",
+				"participate_title": "通过活跃度和推荐赚取代币。更多连锁意味着更多机会。",
+				"description": "保持活跃超过 10 天即可获得资格：经常登录、完成钱包操作并持有至少 20 美元。<br/>每个活跃链都会通过多链乘数提高您的几率。<br/>从符合资格的朋友那里赚取 10%，并排名前 3 位即可赢得 200 美元的超级洒水。",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "您已获得奖励",
+						"description": "您的奖励刚刚存入您的钱包<br>别忘了推荐并保持活跃以赢得更多",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "您赢得了每周奖励",
+						"description": "您刚刚赢得了我们的每周奖金之一。<br>保持活跃，并继续推荐以赢得更多。",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "您已登上排行榜榜首",
+						"description": "您本赛季排名前 4 名推荐人<br>200 美元已添加到您的钱包",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "这是一点小小的感谢",
+						"description": "您推荐的一位用户刚刚获得了一些 Sprinkles。",
 						"share_href": ""
 					}
 				}
@@ -550,7 +550,7 @@
 			"btc_withdrawal_statuses": "获取 BTC 提现状态时出错。",
 			"transaction_price": "加载交易价格预估时出错。",
 			"icrc_canisters": "加载 ICRC 容器时出错。",
-			"icrc_canister_loading": "",
+			"icrc_canister_loading": "无法加载带有 Ledger 容器 $ledgerCanisterId 的令牌，因为它目前没有响应。",
 			"erc20_custom_tokens": "加载 ERC20 用户代币时出错。",
 			"erc721_custom_tokens": "加载 ERC721 用户代币时出错。",
 			"erc1155_custom_tokens": "加载 ERC1155 用户代币时出错。",
@@ -560,7 +560,7 @@
 			"icrc_custom_token": "加载 ICRC 自定义代币时出错。",
 			"loading_wallet_timeout": "你的钱包需要一些尚未加载的初始数据，请重试。",
 			"allow_signing": "设置签名钱包时发生错误，你已被登出。如问题持续，请联系支持。",
-			"waiting_for_allowed_cycles_aborted": "",
+			"waiting_for_allowed_cycles_aborted": "已中止周期账本准备。请稍后尝试登录。",
 			"btc_wallet_error": "加载 BTC 钱包信息时出错。",
 			"sol_wallet_error": "加载 SOL 钱包信息时出错。"
 		}
@@ -581,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "设置",
+			"general": "",
 			"principal": "你的 Principal",
 			"principal_copied": "Principal 已复制到剪贴板",
 			"principal_description": "你在 $oisy_name 中的身份标识，由 Internet Identity 创建。",
@@ -604,10 +605,10 @@
 			"git_disclaimer": "仅在测试环境中显示分支和提交信息，仅用于开发目的。",
 			"git_branch_name": "分支：",
 			"git_commit_hash": "提交：",
-			"beta_features": "",
-			"enable_beta_feature": "",
-			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"beta_features": "测试功能",
+			"enable_beta_feature": "启用测试功能",
+			"disable_beta_feature": "禁用测试功能",
+			"save_beta_feature_success": "你的测试功能设置已更新。"
 		},
 		"alt": {
 			"testnets_toggle": "切换是否显示测试网络",
@@ -642,7 +643,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ICP 账户 ID",
-				"checking_index_canister_status": "",
+				"checking_index_canister_status": "检查交易状态...",
 				"use_for_all_tokens": "从钱包、用户或其他支持此地址格式的应用接收时使用此地址接收所有代币。",
 				"use_for_icrc_deposit": "在 ICP 网络中接收 ICRC-1 代币，例如 SNS、ck 代币等。",
 				"use_for_icp_deposit": "从仅支持账户 ID 的交易所或其他钱包接收 ICP 时使用此地址。",
@@ -743,16 +744,16 @@
 			"contacts_empty_state_title": "你的联系人将显示在此处",
 			"contacts_empty_state_description": "你似乎还没有添加联系人",
 			"send_review_subtitle": "你将发送",
-			"no_nfts_found": "",
-			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"no_nfts_found": "未找到 NFT",
+			"no_nfts_found_desc": "请调整搜索条件或网络以查找你的 NFT",
+			"select_nft": "选择 NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "输入公共地址（0x）、名称或别名",
 			"enter_recipient_address": "输入收款人地址、名称或别名",
 			"enter_wallet_address": "输入钱包地址、名称或别名",
 			"select_network": "选择网络",
-			"search_nfts": ""
+			"search_nfts": "搜索 NFT"
 		},
 		"info": {
 			"ckbtc_certified": "请等待 ckBTC 参数被认证。",
@@ -794,7 +795,7 @@
 			"btc_utxo_locked": "比特币资金被待处理交易锁定",
 			"btc_invalid_fee_calculation": "比特币交易费用验证失败",
 			"pending_transactions_not_available": "待处理交易服务当前不可用。请稍后重试。",
-			"no_nft_selected": ""
+			"no_nft_selected": "尚未选择要发送的 NFT。"
 		},
 		"error": {
 			"unexpected": "发送交易时发生错误。",
@@ -814,7 +815,7 @@
 			"unable_to_retrieve_amount": "无法获取金额（n/a）",
 			"solana_transaction_expired": "你的交易未被 Solana 网络处理并已过期，可能是因为提供的优先费用不足。我们已更新为最新建议金额，请重新发送。",
 			"solana_confirmation_failed": "Solana确认失败",
-			"fee_calc_unsupported_standard": ""
+			"fee_calc_unsupported_standard": "由于不支持所提供的令牌标准，因此无法计算费用。"
 		}
 	},
 	"convert": {
@@ -1104,36 +1105,36 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
-			"spam": "",
-			"not_spam": "",
-			"hide": "",
-			"unhide": "",
-			"hidden": "",
+			"spam": "垃圾信息",
+			"not_spam": "非垃圾信息",
+			"hide": "隐藏",
+			"unhide": "取消隐藏",
+			"hidden": "已隐藏",
 			"open_explorer": "在区块链浏览器中打开此合约",
-			"img_consent_disabled": "",
-			"img_consent_none": "",
-			"review_button": "",
-			"collection_name": "",
-			"media_urls": "",
-			"display_preference": "",
-			"review_preference": "",
-			"media_enabled": "",
-			"media_disabled": "",
-			"enable_media": "",
-			"disable_media": "",
-			"open_in_new_tab": "",
-			"review_title": "",
-			"review_description": "",
-			"learn_more": "",
-			"token_id": ""
+			"img_consent_disabled": "你已禁用该合集的图片",
+			"img_consent_none": "出于安全原因图片已禁用",
+			"review_button": "审核",
+			"collection_name": "合集名称",
+			"media_urls": "媒体链接",
+			"display_preference": "显示偏好",
+			"review_preference": "审核偏好",
+			"media_enabled": "媒体已启用",
+			"media_disabled": "媒体已禁用",
+			"enable_media": "启用媒体",
+			"disable_media": "禁用媒体",
+			"open_in_new_tab": "在新标签页中打开",
+			"review_title": "为 \"$collectionName\" 审核媒体来源",
+			"review_description": "注意！这些图片来自未验证的来源。启用它们可能会将你的 IP 地址共享给第三方，并带来潜在的安全风险。",
+			"learn_more": "了解更多",
+			"token_id": "代币 ID"
 		},
 		"alt": {
-			"placeholder_image": "图片占位",
+			"placeholder_image": "还没有 NFT",
 			"card": {
-				"image": "图片"
+				"image": "代币 ID 为 $tokenId 的 NFT 图片"
 			},
-			"copy_address": "把该地址复制到粘贴版",
-			"review_preference": ""
+			"copy_address": "复制此地址到剪贴板",
+			"review_preference": "更改显示偏好"
 		}
 	},
 	"fee": {
@@ -1567,17 +1568,17 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"review_title": "查看条款与条件",
+			"review_updated_title": "查看更新后的条款与条件",
+			"review_description": "在使用 OISY 钱包之前，你必须查看并同意我们的服务条款和隐私政策。这些文件解释了我们的服务规则以及我们如何保护你的数据。",
+			"review_updated_description": "要继续使用 OISY 钱包，请查看并同意我们更新后的服务条款和隐私政策。这些更改对于保持我们的服务安全和合规非常重要。",
+			"reject_warning": "你必须接受条款与条件才能继续。你可以随时再次尝试。",
+			"i_have_accepted": "我已阅读并同意",
+			"i_have_accepted_updated": "我已阅读并同意更新后的",
+			"accept_and_continue": "接受并继续"
 		},
 		"error": {
-			"cannot_update_user_agreements": ""
+			"cannot_update_user_agreements": "更新你的协议时发生错误。"
 		}
 	},
 	"license_agreement": {
@@ -1674,23 +1675,23 @@
 	},
 	"ai_assistant": {
 		"text": {
-			"title": "",
-			"welcome_message": "",
-			"action_button_contacts_title": "",
-			"action_button_contacts_subtitle": "",
-			"action_button_contacts_prompt": "",
+			"title": "$oisy_short AI 助手",
+			"welcome_message": "你好！ 👋 我是你的个人 AI 礼宾。有啥我能帮你？",
+			"action_button_contacts_title": "显示联系人",
+			"action_button_contacts_subtitle": "展示你保存的联系人",
+			"action_button_contacts_prompt": "给我看看我的联系人。",
 			"action_button_send_tokens_title": "发送资产",
-			"action_button_send_tokens_subtitle": "设置发送于几秒钟后",
-			"action_button_send_tokens_prompt": "我想发送代币",
-			"select_contact_message": "选择一个联系人来开启发送过程",
-			"send_to_message": "发给 $contact_name（$address_info）",
+			"action_button_send_tokens_subtitle": "几秒内完成发送设置",
+			"action_button_send_tokens_prompt": "我想发送代币。",
+			"select_contact_message": "选择一个联系人以开始发送流程：",
+			"send_to_message": "发送给 $contact_name ($address_info)。",
 			"send_message": "发送消息",
-			"send_message_input_placeholder": "",
-			"send_token_succeeded": "交易完成",
-			"no_contacts_found_message": "抱歉，我无法在你的地址簿中找到相应的联系人",
-			"loading": "思考中",
-			"reset_chat_history": "",
-			"feature_description": ""
+			"send_message_input_placeholder": "你想做什么？",
+			"send_token_succeeded": "交易已完成！",
+			"no_contacts_found_message": "抱歉，我在你的地址簿中找不到合适的联系人。",
+			"loading": "思考中...",
+			"reset_chat_history": "重置聊天记录",
+			"feature_description": "AI 助手可让你咨询通用加密主题、获取特定 OISY 功能的帮助，并发送代币。请注意，不会将你的或你联系人的地址等敏感数据发送给助手，且所有交易都必须由用户确认。该功能仍处于测试阶段，我们会定期推出新功能。"
 		},
 		"errors": {
 			"unknown": "抱歉，从大语言模型中获取反馈出错",

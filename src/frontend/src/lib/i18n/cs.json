@@ -225,7 +225,7 @@
 				"description": "OpenChat je plnohodnotná chatovací aplikace běžící end-to-end na blockchainu Internet Computer.<br/><br/>OpenChat je řízen svou komunitou jako DAO a má svůj vlastní token CHAT. Tokeny CHAT jsou rozdávány jako odměny uživatelům za účelem urychlení růstu a vytvoření týmu milionů příznivců, což OpenChatu umožňuje stát se životaschopným vyzyvatelem centralizovaných velkých technologických konkurentů!",
 				"stats": "80 000+ uživatelů",
 				"carousel": {
-					"text": "OpenChat - kde web3 komunikuje",
+					"text": "",
 					"call_to_action": "Zobrazit více"
 				}
 			},
@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
 				"call_to_action": "Přejít na Taggr",
-				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli.",
-				"carousel": {
-					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
-					"call_to_action": "Zjistit více"
-				}
+				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +340,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -367,14 +367,14 @@
 			"carousel_slide_cta": "Zjistit více",
 			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
 			"youre_eligible": "Jste způsobilí!",
-			"not_eligible": "",
+			"not_eligible": "Není způsobilé",
 			"ongoing": "Probíhá",
 			"ended": "Skončeno ($amount)",
 			"banner_text": "Získejte denní odměny s OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
-			"network_bonus_info": "",
+			"network_bonus_info": "Každá síť, ve které držíte aktiva, vám dává multiplikátor odměn. Čím více sítí používáte, tím více odměn získáte!",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
 			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
 			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
@@ -447,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 5 nyní běží 🎊",
+				"one_liner": "Získejte Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč řetězci. Vaše akce zvyšují vaše odměny a aktivní doporučení je ještě více posilují.<br/>Navíc nyní více řetězců znamená větší šance na výhru.",
+				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
+				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Byli jste odměněni",
+						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Vyhráli jste týdenní bonusový drop",
+						"description": "Právě jste získali jeden z našich týdenních bonusů.<br>Zůstaňte aktivní a doporučujte nás, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Dostali jste se na vrchol žebříčku",
+						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Zde je malé poděkování",
+						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -581,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Nastavení",
+			"general": "",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
