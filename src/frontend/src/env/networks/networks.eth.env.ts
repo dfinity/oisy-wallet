@@ -2,8 +2,6 @@ import { ETHEREUM_EXPLORER_URL, SEPOLIA_EXPLORER_URL } from '$env/explorers.env'
 import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import ethereumIconDark from '$lib/assets/networks/dark/ethereum-mainnet.svg';
 import sepoliaIconDark from '$lib/assets/networks/dark/ethereum-sepolia.svg';
-import ethereumIconLight from '$lib/assets/networks/light/ethereum-mainnet.svg';
-import sepoliaIconLight from '$lib/assets/networks/light/ethereum-sepolia.svg';
 import ethereumIconTransparent from '$lib/assets/networks/transparent/ethereum-mainnet.svg';
 import sepoliaIconTransparent from '$lib/assets/networks/transparent/ethereum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
@@ -28,7 +26,6 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Ethereum',
 	chainId: 1n,
-	iconLight: ethereumIconLight,
 	iconDark: ethereumIconDark,
 	iconTransparent: ethereumIconTransparent,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
@@ -51,7 +48,6 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Sepolia',
 	chainId: 11155111n,
-	iconLight: sepoliaIconLight,
 	iconDark: sepoliaIconDark,
 	iconTransparent: sepoliaIconTransparent,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
