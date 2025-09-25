@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { ICP_PSEUDO_TESTNET_NETWORK_ID } from '$env/networks/networks.icp.env';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
@@ -22,7 +21,7 @@
 	const isTestnet = $derived(network.env === 'testnet' && !isPseudoNetwork);
 </script>
 
-{#if transparent && nonNullish(network.iconTransparent)}
+{#if transparent}
 	<div
 		class="block"
 		class:invert-on-dark-theme={!isTestnet}
@@ -32,7 +31,7 @@
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: network.name })}
 			{color}
 			{size}
-			src={network.iconTransparent}
+			src={network.icon}
 			testId={`${testId}-transparent`}
 		/>
 	</div>
@@ -49,7 +48,7 @@
 				})}
 				{color}
 				{size}
-				src={network.iconTransparent}
+				src={network.icon}
 				testId={`${testId}-default`}
 			/>
 		</span>
