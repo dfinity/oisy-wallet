@@ -69,15 +69,15 @@
 			{destination}
 			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icSendBack={onSendBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
@@ -85,54 +85,54 @@
 			{destination}
 			nativeEthereumToken={evmNativeEthereumToken}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icSendBack={onSendBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdICP($sendToken.network.id)}
 		<IcSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icSendBack={onSendBack}
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdBitcoin($sendToken.network.id)}
 		<BtcSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icSendBack={onSendBack}
-			on:icTokensList={onTokensList}
 		/>
 	{:else if isNetworkIdSolana($sendToken.network.id)}
 		<SolSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack={onBack}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			on:icSendBack={onSendBack}
-			on:icTokensList={onTokensList}
 		/>
 	{/if}
 </SendTokenContext>

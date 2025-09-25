@@ -125,7 +125,12 @@ describe('EthSendTokenWizard.spec', () => {
 				destination,
 				sourceNetwork,
 				amount: amount ?? 1,
-				nativeEthereumToken
+				nativeEthereumToken,
+				onBack: vi.fn(),
+				onClose: vi.fn(),
+				onNext: vi.fn(),
+				onSendBack: vi.fn(),
+				onTokensList: vi.fn()
 			},
 			context: mockContext({ sendToken, sendTokenId, sendTokenDecimals })
 		});
