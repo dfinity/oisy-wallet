@@ -1,7 +1,5 @@
 import { ARBITRUM_EXPLORER_URL, ARBITRUM_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import arbitrumMainnetIconDark from '$lib/assets/networks/dark/arbitrum-mainnet.svg';
-import arbitrumSepoliaIconDark from '$lib/assets/networks/dark/arbitrum-sepolia.svg';
 import arbitrumMainnetIconTransparent from '$lib/assets/networks/transparent/arbitrum-mainnet.svg';
 import arbitrumSepoliaIconTransparent from '$lib/assets/networks/transparent/arbitrum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
@@ -25,7 +23,6 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Arbitrum',
 	chainId: 42161n,
-	iconDark: arbitrumMainnetIconDark,
 	iconTransparent: arbitrumMainnetIconTransparent,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
 	providers: {
@@ -49,7 +46,6 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Arbitrum Sepolia',
 	chainId: 421614n,
-	iconDark: arbitrumSepoliaIconDark,
 	iconTransparent: arbitrumSepoliaIconTransparent,
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
 	providers: {
