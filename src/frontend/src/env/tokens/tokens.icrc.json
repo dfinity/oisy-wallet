@@ -8,6 +8,15 @@
 			"__bigint__": "10000"
 		}
 	},
+	"CLOUD": {
+		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
+		"decimals": 8,
+		"name": "Crypto Cloud",
+		"symbol": "CLOUD",
+		"fee": {
+			"__bigint__": "100000000"
+		}
+	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
 		"decimals": 8,
@@ -146,6 +155,15 @@
 		"symbol": "ODINDOG•ID•YTTL•ODIN",
 		"fee": {
 			"__bigint__": "10"
+		}
+	},
+	"SGLDT": {
+		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
+		"decimals": 8,
+		"name": "sGLDT - GLDT Wrapper",
+		"symbol": "sGLDT",
+		"fee": {
+			"__bigint__": "1000"
 		}
 	},
 	"TICRC1": {
