@@ -91,7 +91,6 @@ export const mapIcrcTransaction = ({
 	});
 
 	const isApprove = nonNullish(fromNullable(approve));
-	const isTransfer = nonNullish(fromNullable(transfer));
 	const isMint = nonNullish(fromNullable(mint));
 
 	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
