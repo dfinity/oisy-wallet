@@ -5,6 +5,8 @@
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
+	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
@@ -30,8 +32,11 @@
 		modalNftImageConsent,
 		modalNftImageConsentData,
 		modalNftFullscreenDisplayData,
-		modalNftFullscreenDisplayOpen
+		modalNftFullscreenDisplayOpen,
+		modalReceive,
+		modalReceiveId
 	} from '$lib/derived/modal.derived';
+	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
 	/**
@@ -64,5 +69,7 @@
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
 	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
 		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
+	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
+		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{/if}
 {/if}

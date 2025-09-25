@@ -1,13 +1,18 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { transactionFee } from '$icp/api/icrc-ledger.api';
 	import { IC_TOKEN_FEE_CONTEXT_KEY, type IcTokenFeeContext } from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 
-	export let token: IcToken | undefined;
+	interface Props {
+		token?: IcToken;
+		children: Snippet;
+	}
+
+	let { token, children }: Props = $props();
 
 	const { store } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
 
@@ -38,9 +43,14 @@
 			});
 		}
 	};
+
 	const debounceLoadIcTokenFee = debounce(loadIcTokenFee);
 
-	$: (token, debounceLoadIcTokenFee());
+	$effect(() => {
+		[token];
+
+		debounceLoadIcTokenFee();
+	});
 </script>
 
-<slot />
+{@render children()}

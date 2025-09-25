@@ -192,3 +192,6 @@ export const CONTACT_MAX_LABEL_LENGTH = 50;
 
 // Contact validation
 export const CONTACT_MAX_NAME_LENGTH = 100;
+
+// Network bonus multiplier
+export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;

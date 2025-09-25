@@ -7,7 +7,10 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import { nativeEthereumToken, nativeEthereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -38,6 +41,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -172,10 +176,10 @@
 	{/snippet}
 
 	<EthFeeContext
-		amount={amount.toString()}
+		amount={formatToken({ value: amount, unitName: $sendToken.decimals })}
 		{data}
 		{destination}
-		nativeEthereumToken={$nativeEthereumToken}
+		nativeEthereumToken={$nativeEthereumTokenWithFallback}
 		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
@@ -187,7 +191,7 @@
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 				/>
-			{:else}
+			{:else if currentStep?.name === WizardStepsSend.REVIEW}
 				<WalletConnectSendReview
 					{amount}
 					{data}

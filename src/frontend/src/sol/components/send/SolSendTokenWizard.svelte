@@ -209,22 +209,28 @@
 
 <SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview {amount} {destination} {network} {selectedContact} on:icBack on:icSend={send} />
+		<SolSendReview
+			{amount}
+			{destination}
+			{network}
+			onBack={() => dispatch('icBack')}
+			onSend={send}
+			{selectedContact}
+		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<SolSendForm
+			onBack={() => dispatch('icBack')}
+			onNext={() => dispatch('icNext')}
+			onTokensList={() => dispatch('icTokensList')}
 			{selectedContact}
-			on:icNext
-			on:icClose
-			on:icTokensList
-			on:icBack
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</SolSendForm>
-	{:else}
-		<slot />
 	{/if}
 </SolFeeContext>

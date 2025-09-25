@@ -1,4 +1,3 @@
-import * as agreementsEnv from '$env/agreements.env';
 import { agreementsData } from '$env/agreements.env';
 import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
 import { AGREEMENTS_MODAL } from '$lib/constants/test-ids.constants';
@@ -17,8 +16,6 @@ describe('AgreementsGuard', () => {
 		vi.clearAllMocks();
 
 		userProfileStore.reset();
-
-		vi.spyOn(agreementsEnv, 'NEW_AGREEMENTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	it('should render the modal when user profile is not set', () => {

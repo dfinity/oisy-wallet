@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
-	import { nativeEthereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import HowToConvertEthereumModal from '$icp/components/convert/HowToConvertEthereumModal.svelte';
 	import type { IcCkToken, IcToken } from '$icp/types/ic-token';
 	import eth from '$icp-eth/assets/eth.svg';
@@ -62,7 +62,7 @@
 </div>
 
 {#if $modalHowToConvertToTwinTokenEth && nonNullish(sourceToken) && nonNullish(destinationToken)}
-	<EthFeeStoreContext token={$nativeEthereumToken}>
+	<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
 		<HowToConvertEthereumModal {destinationToken} {sourceToken} />
 	</EthFeeStoreContext>
 {/if}

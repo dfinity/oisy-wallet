@@ -29,7 +29,7 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should render the collection data', async () => {
-		const { container, getByText } = render(NftCollectionHero, {
+		const { container, getByText, getAllByText } = render(NftCollectionHero, {
 			props: {
 				nfts: mockNftollectionUi.nfts,
 				token: mockToken
@@ -38,9 +38,11 @@ describe('NftCollectionHero', () => {
 
 		assertNonNullish(mockNftollectionUi.collection.name);
 
-		const name: HTMLElement | null = getByText(mockToken.name);
+		const names: HTMLElement[] | null = getAllByText(mockToken.name);
 
-		expect(name).toBeInTheDocument();
+		names.forEach((n) => {
+			expect(n).toBeInTheDocument();
+		});
 
 		const standard: HTMLElement | null = getByText(mockToken.standard);
 

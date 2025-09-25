@@ -20,7 +20,7 @@
 	};
 </script>
 
-<div class="border-t border-secondary px-4 py-3 pb-4 text-xs">
+<div class="border-t border-secondary px-4 py-3 pb-4 text-base sm:text-xs">
 	<form method="POST" onsubmit={onSubmit}>
 		<InputText
 			name="message"
@@ -30,9 +30,12 @@
 		>
 			{#snippet innerEnd()}
 				<button
-					class="rounded-md bg-secondary p-1 text-disabled transition"
-					class:hover:bg-brand-primary={!disabled}
-					class:hover:text-primary-inverted={!disabled}
+					class="rounded-md p-1 transition"
+					class:bg-brand-primary={!disabled}
+					class:bg-secondary={disabled}
+					class:hover:bg-brand-subtle-30={!disabled}
+					class:text-disabled={disabled}
+					class:text-primary-inverted={!disabled}
 					aria-label={$i18n.ai_assistant.text.send_message}
 					data-tid={AI_ASSISTANT_SEND_MESSAGE_BUTTON}
 					{disabled}

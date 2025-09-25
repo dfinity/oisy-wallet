@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { setContext, type Snippet } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
@@ -12,7 +13,7 @@
 	import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 
 	interface Props {
-		token: Token;
+		token?: Token;
 		children: Snippet;
 	}
 
@@ -28,7 +29,7 @@
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
-	let networkId = $derived(token.network.id);
+	let networkId = $derived(token?.network.id);
 
 	let isEthNetwork = $derived(isNetworkIdEthereum(networkId) || isNetworkIdEvm(networkId));
 
@@ -40,7 +41,7 @@
 	};
 
 	$effect(() => {
-		if (!isEthNetwork) {
+		if (!isEthNetwork || isNullish(token)) {
 			return;
 		}
 
@@ -50,7 +51,7 @@
 	});
 
 	$effect(() => {
-		if (!isEthNetwork) {
+		if (!isEthNetwork || isNullish(token)) {
 			return;
 		}
 
