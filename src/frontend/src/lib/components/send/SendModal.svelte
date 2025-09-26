@@ -226,10 +226,10 @@
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icNext={modal.next}
-				on:icClose={close}
-				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+				onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				onNext={modal.next}
+				onClose={close}
+				onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
