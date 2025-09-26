@@ -117,14 +117,14 @@ export const mapIcrcTransaction = ({
 					? 'send'
 					: 'receive';
 
-	const approveFee = fromNullishNullable(fromNullable(approve)?.fee) ?? ZERO;
-	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO;
+	const approveFee = fromNullishNullable(fromNullable(approve)?.fee);
+	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
 
 	// for approve we shows the fee value
 	const value = isApprove
 		? approveFee
 		: nonNullish(data?.amount)
-			? data.amount + (isTransfer && source.incoming === false ? transferFee : ZERO)
+			? data.amount + (isTransfer && source.incoming === false ? (transferFee ?? ZERO) : ZERO)
 			: undefined;
 
 	const approveData = fromNullable(approve);
@@ -152,6 +152,6 @@ export const mapIcrcTransaction = ({
 		timestamp,
 		status: 'executed',
 		approveSpender,
-		approveExpiresAt
+		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
 	};
 };
