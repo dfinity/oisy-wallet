@@ -6,7 +6,7 @@
 
 <script generics="T extends Token = Token" lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { type Snippet, onDestroy, type Snippet } from 'svelte';
+	import {  onDestroy, type Snippet } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { InitWalletWorkerFn, WalletWorker } from '$lib/types/listener';
 	import type { TokenId } from '$lib/types/token';
