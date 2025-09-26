@@ -165,12 +165,17 @@ const initAuthStore = (): AuthStore => {
 							identity: authClient?.getIdentity()
 						}));
 
-						// If the user has more than one tab open in the same browser,
-						// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
-						// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
-						// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-						const bc = new AuthBroadcastChannel();
-						bc.postLoginSuccess();
+						try {
+							// If the user has more than one tab open in the same browser,
+							// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
+							// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
+							// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
+							const bc = new AuthBroadcastChannel();
+							bc.postLoginSuccess();
+						} catch (_: unknown) {
+							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
+							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+						}
 
 						resolve();
 					},

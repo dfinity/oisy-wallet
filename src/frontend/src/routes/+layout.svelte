@@ -111,13 +111,18 @@
 	});
 
 	const openBc = () => {
-		const bc = new AuthBroadcastChannel();
+		try {
+			const bc = new AuthBroadcastChannel();
 
-		bc.onLoginSuccess(authStore.forceSync);
+			bc.onLoginSuccess(authStore.forceSync);
 
-		return () => {
-			bc?.close();
-		};
+			return () => {
+				bc?.close();
+			};
+		} catch (_: unknown) {
+			// We don't really care if the broadcast channel fails to open or if it fails to handle messages.
+			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+		}
 	};
 
 	onMount(openBc);
