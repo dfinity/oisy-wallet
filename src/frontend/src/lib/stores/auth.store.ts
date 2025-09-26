@@ -99,8 +99,7 @@ const initAuthStore = (): AuthStore => {
 
 			await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
 		} catch (_: unknown) {
-			// In case of error in this flow, we prefer to log out the user to avoid possible further conflicts.
-			// The logout will in any case refresh the page.
+			// In case of error in this flow, we prefer to log out the user and refresh the page to avoid possible further conflicts.
 
 			busy.start();
 
