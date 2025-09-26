@@ -21,7 +21,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import {
-		AuthBroadcastChannel,
 		type AuthBroadcastChannelInterface,
 		initAuthBroadcastChannel
 	} from '$lib/services/auth-broadcast.services';
