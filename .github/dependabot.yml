@@ -26,3 +26,4 @@ updates:
       - dependency-name: 'eslint'
       - dependency-name: 'eslint-*'
       - dependency-name: 'typescript'
+    open-pull-requests-limit: 10
