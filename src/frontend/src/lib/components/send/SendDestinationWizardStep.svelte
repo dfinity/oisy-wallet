@@ -64,8 +64,8 @@
 	const back = () => dispatch('icBack');
 	const next = () => {
 		if (isNullish(selectedContact)) {
-			// if next button is clicked and there is no contact selected,
-			// we manually lookup the contact and select it if one exists
+			// If the next button is clicked and there is no contact selected,
+			// we manually look up the contact and select it if one exists
 			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
 			if (nonNullish(contact)) {
 				selectedContact = contact;
@@ -99,10 +99,10 @@
 				<SendDestinationTabs
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					onNext={next}
 					bind:destination
 					bind:activeSendDestinationTab
 					bind:selectedContact
-					on:icNext={next}
 				/>
 			</CkEthLoader>
 		</div>
@@ -119,10 +119,10 @@
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
@@ -138,10 +138,10 @@
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdSolana($sendTokenNetworkId)}
@@ -156,10 +156,10 @@
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{/if}
