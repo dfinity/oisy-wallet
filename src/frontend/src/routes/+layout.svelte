@@ -14,16 +14,16 @@
 	} from '$lib/constants/analytics.contants';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import {
+		type AuthBroadcastChannelInterface,
+		initAuthBroadcastChannel
+	} from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import {
-		type AuthBroadcastChannelInterface,
-		initAuthBroadcastChannel
-	} from '$lib/services/auth-broadcast.services';
 
 	interface Props {
 		children: Snippet;
