@@ -1,10 +1,7 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
 import * as analytics from '$lib/services/analytics.services';
 import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
-import {
-	AUTH_BROADCAST_CHANNEL,
-	AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS
-} from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import App from '$routes/+layout.svelte';
@@ -105,40 +102,36 @@ describe('App Layout', () => {
 		expect(spy).toHaveBeenCalledOnce();
 	});
 
-	it('should initialize a BroadcastChannel for auth synchronization', () => {
-		const spy = vi.spyOn(authBroadcastServices, 'initAuthBroadcastChannel');
-
-		expect(spy).not.toHaveBeenCalled();
-
-		render(App, { children: mockSnippet });
-
-		expect(spy).toHaveBeenCalledExactlyOnceWith();
-	});
-
 	it('should listen to BroadcastChannel events for auth synchronization', () => {
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+
 		const spy = vi.spyOn(authStore, 'forceSync');
 
 		render(App, { children: mockSnippet });
 
 		spy.mockClear();
 
-		const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+		const newBc = new BroadcastChannel(channelName);
 
-		newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
+		newBc.postMessage(loginSuccessMessage);
 
 		expect(spy).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should destroy the BroadcastChannel on unmount', () => {
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+
 		const spy = vi.spyOn(authStore, 'forceSync');
 
 		const { unmount } = render(App, { children: mockSnippet });
 
 		spy.mockClear();
 
-		const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+		const newBc = new BroadcastChannel(channelName);
 
-		newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
+		newBc.postMessage(loginSuccessMessage);
 
 		expect(spy).toHaveBeenCalledExactlyOnceWith();
 
@@ -150,8 +143,23 @@ describe('App Layout', () => {
 
 		expect(broadcastChannelCloseSpy).toHaveBeenCalledExactlyOnceWith();
 
-		newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
+		newBc.postMessage(loginSuccessMessage);
 
 		expect(spy).toHaveBeenCalledExactlyOnceWith();
+	});
+
+	it('should initialize a BroadcastChannel for auth synchronization', () => {
+		const spy = vi.fn();
+
+		vi.spyOn(authBroadcastServices, 'AuthBroadcastChannel').mockReturnValueOnce({
+			onLoginSuccess: spy,
+			close: vi.fn()
+		} as unknown as AuthBroadcastChannel);
+
+		expect(spy).not.toHaveBeenCalled();
+
+		render(App, { children: mockSnippet });
+
+		expect(spy).toHaveBeenCalledExactlyOnceWith(authStore.forceSync);
 	});
 });
