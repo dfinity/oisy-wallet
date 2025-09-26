@@ -89,7 +89,7 @@ export const mapIcpTransaction = ({
 		const approve = operation.Approve;
 		const approveValue = approve.allowance.e8s;
 		const approveFee = approve?.fee?.e8s;
-		const approveExpiresAt = fromNullable(approve?.expires_at)?.timestamp_nanos;
+		const approveExpiresAt = fromNullable(approve.expires_at)?.timestamp_nanos;
 
 		return {
 			...tx,
