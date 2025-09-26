@@ -14,7 +14,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { RequiredTokenWithLinkedData } from '$lib/types/token';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
 	let ckEthToken: IcCkToken | undefined = $state();
@@ -32,11 +31,11 @@
 	});
 </script>
 
-<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$ethereumTokenId}>
+<ConvertEth ariaLabel={$i18n.convert.text.convert_to_cketh} nativeTokenId={$nativeEthereumTokenId}>
 	{#snippet icon()}
 		<IconCkConvert size="24" />
 	{/snippet}
-	<span>{$ethereumToken.twinTokenSymbol ?? ''}</span>
+	<span>{$nativeEthereumTokenWithFallback.twinTokenSymbol ?? ''}</span>
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenCkEth && nonNullish(ckEthToken)}

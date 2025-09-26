@@ -18,8 +18,8 @@
 	interface Props {
 		infoCmp:
 			| typeof ReceiveAddresses
-			| typeof IcReceiveInfoCkBTC
-			| typeof IcReceiveInfoICP
+			| typeof IcReceiveInfoCkBtc
+			| typeof IcReceiveInfoIcp
 			| typeof IcReceiveInfoIcrc;
 	}
 

@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
-	import type { BtcTransactionStatus, BtcTransactionUi } from '$btc/types/btc';
-	import type { BtcTransactionType } from '$btc/types/btc-transaction';
+	import type { BtcTransactionUi } from '$btc/types/btc';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
