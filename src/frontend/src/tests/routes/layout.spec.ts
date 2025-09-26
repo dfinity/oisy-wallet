@@ -4,7 +4,6 @@ import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
 import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import * as toastsStore from '$lib/stores/toasts.store';
 import App from '$routes/+layout.svelte';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
@@ -150,12 +149,6 @@ describe('App Layout', () => {
 		});
 
 		describe('on login success message', () => {
-			beforeEach(() => {
-				vi.clearAllMocks();
-
-				vi.spyOn(toastsStore, 'toastsShow');
-			});
-
 			it('should trigger the forced re-synchronization', () => {
 				const spy = vi.spyOn(authStore, 'forceSync');
 
