@@ -62,4 +62,14 @@ describe('IcTransactionModal', () => {
 		expect(getByText(get(i18n).networks.network)).toBeInTheDocument();
 		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
 	});
+
+	it('should display the fee', () => {
+		const { getByText } = render(IcTransactionModal, {
+			transaction: mockIcTransactionUi,
+			token: ICP_TOKEN
+		});
+
+		expect(getByText(get(i18n).fee.text.fee)).toBeInTheDocument();
+		expect(getByText(`${mockIcTransactionUi.fee} ${ICP_TOKEN.symbol}`)).toBeInTheDocument();
+	});
 });
