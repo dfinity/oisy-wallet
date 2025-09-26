@@ -7,8 +7,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
-import type { Identity } from '@dfinity/agent';
 import { isNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 const assertErc20SendTokenData = (sendToken: Erc20Token): AutoLoadTokenResult | undefined => {

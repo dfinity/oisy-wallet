@@ -1,5 +1,5 @@
-import { Cbor } from '@dfinity/agent';
 import { arrayOfNumberToUint8Array } from '@dfinity/utils';
+import { Cbor } from '@icp-sdk/core/agent';
 import * as z from 'zod';
 
 // Mint

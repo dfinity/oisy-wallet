@@ -6,8 +6,8 @@ import {
 } from '$icp/utils/icp-account.utils';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('icp-account.utils', () => {
 	describe('parseIcrcv2AccountId', () => {

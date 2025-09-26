@@ -38,8 +38,8 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockUserExperimentalFeatures } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { mockUserTokens } from '$tests/mocks/user-tokens.mock';
-import { Principal } from '@dfinity/principal';
 import type { QueryParams } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 describe('backend.api', () => {

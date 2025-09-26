@@ -13,8 +13,8 @@ import {
 	type RetrieveErc20Request,
 	type RetrieveEthRequest
 } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({

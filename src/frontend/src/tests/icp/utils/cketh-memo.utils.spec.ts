@@ -8,12 +8,12 @@ import {
 	MINT_MEMO_REIMBURSE_TRANSACTION,
 	MINT_MEMO_REIMBURSE_WITHDRAWAL
 } from '$icp/utils/cketh-memo.utils';
-import { Cbor } from '@dfinity/agent';
 import {
 	arrayBufferToUint8Array,
 	hexStringToUint8Array,
 	uint8ArrayToHexString
 } from '@dfinity/utils';
+import { Cbor } from '@icp-sdk/core/agent';
 
 describe('cketh-memo.utils', () => {
 	describe('decode mint memo', () => {
