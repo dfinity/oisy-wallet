@@ -85,11 +85,11 @@ const initAuthStore = (): AuthStore => {
 	 * TODO: Remove this when `authClient` will handle it by itself during login.
 	 */
 	const overwriteStoredIdentityKey = async () => {
-		// In the unlikely event of an error while setting a value in IndexedDB,
-		// we log out the user and refresh the page to prevent potential conflicts.
-		assertNonNullish(authClient);
-
 		try {
+			// In the unlikely event of an error while setting a value in IndexedDB,
+			// we log out the user and refresh the page to prevent potential conflicts.
+			assertNonNullish(authClient);
+
 			const key = authClient['_key'];
 
 			await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
