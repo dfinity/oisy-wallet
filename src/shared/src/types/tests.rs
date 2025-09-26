@@ -3,7 +3,7 @@
 mod bitcoin {
     //! Tests for the bitcoin types.
     use candid::{Decode, Encode};
-    use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, Outpoint, Utxo};
+    use ic_cdk::bitcoin_canister::{Network, Outpoint, Utxo};
 
     use crate::{
         types::bitcoin::{
@@ -22,7 +22,7 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES],
                     utxos: vec![],
                     address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: true,
             },
@@ -32,7 +32,7 @@ mod bitcoin {
                     txid: vec![0; MAX_TXID_BYTES + 1],
                     utxos: vec![],
                     address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: false,
             },
@@ -49,7 +49,7 @@ mod bitcoin {
                         height: 0,
                     }],
                     address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: true,
             },
@@ -66,7 +66,7 @@ mod bitcoin {
                         height: 0,
                     }],
                     address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: false,
             },
@@ -86,7 +86,7 @@ mod bitcoin {
                         MAX_UTXOS_LEN + 1
                     ],
                     address: "".to_string(),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: false,
             },
@@ -100,7 +100,7 @@ mod bitcoin {
                 description: "BtcGetPendingTransactionsRequest with max length address",
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: true,
             },
@@ -108,7 +108,7 @@ mod bitcoin {
                 description: "BtcGetPendingTransactionsRequest with address too long",
                 input: BtcGetPendingTransactionsRequest {
                     address: "1".repeat(MAX_ADDRESS_LEN + 1),
-                    network: BitcoinNetwork::Mainnet,
+                    network: Network::Mainnet,
                 },
                 valid: false,
             },
