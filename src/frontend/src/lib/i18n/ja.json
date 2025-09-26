@@ -205,7 +205,8 @@
 			"staking": "ステーキング",
 			"walletconnect": "WalletConnect",
 			"game": "ゲーム",
-			"tools": "ツール"
+			"tools": "ツール",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "OpenChatは、Internet Computerブロックチェーン上でエンドツーエンドで動作するフル機能のチャットアプリケーションです。<br/><br/>OpenChatはDAOとしてコミュニティによって統治され、独自のCHATトークンを持っています。CHATトークンはユーザーへの報酬として与えられ、成長を加速させ、OpenChatが中央集権的な大手ハイテク競合他社に対する有力な挑戦者となるための数百万人の支持者チームを作り出します！",
 				"stats": "80,000人以上のユーザー",
 				"carousel": {
-					"text": "OpenChat - web3がコミュニケーションする場所",
+					"text": "",
 					"call_to_action": "もっと見る"
 				}
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "分散型ソーシャルメディア - 投稿、獲得、所有。",
 				"call_to_action": "Taggrへ",
-				"description": "Taggrは、Internet Computerによって動力を与えられた公共の分散コンピューティングネットワーク上に存在する、完全に分散化されたソーシャルメディアプラットフォームです。企業によって管理される従来のソーシャルメディアプラットフォームとは異なり、Taggrは完全にそのユーザーによって所有および統治されています。",
-				"carousel": {
-					"text": "分散型ソーシャルメディア - 投稿、獲得、所有。",
-					"call_to_action": "もっと詳しく"
-				}
+				"description": "Taggrは、Internet Computerによって動力を与えられた公共の分散コンピューティングネットワーク上に存在する、完全に分散化されたソーシャルメディアプラットフォームです。企業によって管理される従来のソーシャルメディアプラットフォームとは異なり、Taggrは完全にそのユーザーによって所有および統治されています。"
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,6 +335,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -347,6 +354,7 @@
 			"upcoming_campaigns": "今後のキャンペーン",
 			"active_date": "終了日",
 			"ended_date": "終了済み",
+			"upcoming_date": "",
 			"share": "Xでシェア",
 			"learn_more": "詳細を見る",
 			"check_status": "ステータスと参加資格を確認",
@@ -359,14 +367,14 @@
 			"carousel_slide_cta": "詳細を見る",
 			"sprinkles_earned": "$noOfSprinkles Sprinkles、合計 $amount を獲得しました！ 🎉",
 			"youre_eligible": "参加資格があります！",
-			"not_eligible": "",
+			"not_eligible": "対象外",
 			"ongoing": "進行中",
 			"ended": "終了済み ($amount)",
 			"banner_text": "OISY Sprinklesで毎日の報酬を獲得しよう"
 		},
 		"requirements": {
 			"requirements_title": "参加基準",
-			"network_bonus_info": "",
+			"network_bonus_info": "資産を保有するネットワークごとに報酬倍率が付与されます。利用するネットワークが多ければ多いほど、より多くの報酬を獲得できます！",
 			"min_logins": "過去$days日間に$loginsx回以上ログイン",
 			"min_transactions": "過去$days日間に$transactions件以上のトランザクションを完了",
 			"min_total_assets_usd": "発行時点で$$usd相当のトークンを保有",
@@ -439,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: エピソード5公開中 🎉",
+				"one_liner": "アクティブな活動、他のユーザーへの紹介、そしてチェーン全体でのOISY利用でSprinklesを獲得できます。あなたの行動によって報酬が増え、アクティブな紹介によってさらに報酬がアップします。<br/>さらに、チェーンが増えるほど、賞品獲得のチャンスも高まります。",
+				"participate_title": "アクティビティや紹介に応じてトークンを獲得できます。チェーン数が増えるほど、チャンスも増えます。",
+				"description": "資格を得るには、10 日間アクティブに活動してください。頻繁にログインし、ウォレット アクションを完了し、少なくとも 20 ドルを保有してください。<br/>アクティブなチェーンごとに、マルチチェーン マルチプライヤーによって当選確率が上がります。<br/>資格を得た友人から 10% を獲得し、上位 3 位に入ると 200 ドルのスーパー スプリンクルを獲得できます。",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "報酬を獲得しました",
+						"description": "報酬がウォレットに届きました<br>もっと勝つために紹介とアクティブな活動を忘れずに",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "ウィークリーボーナスドロップを獲得しました。",
+						"description": "ウィークリーボーナスドロップの 1 つを獲得しました。<br>アクティブに活動し、紹介を続けてさらに獲得しましょう。",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "リーダーボードのトップに立ちました",
+						"description": "今シーズンのトップ4リファラーにランクインしました<br>ウォレットに200ドルが追加されました",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "ささやかな感謝の気持ちです",
+						"description": "紹介したユーザーの一人がSprinklesを獲得しました。",
 						"share_href": ""
 					}
 				}
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "設定",
+			"general": "",
 			"principal": "あなたのPrincipal",
 			"principal_copied": "Principalがコピーされました",
 			"principal_description": "$oisy_nameのあなたのIDです。Internet Identityによって作成されます",
@@ -1575,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",
-			"accept_terms": "このボタンをクリックすると、以下に同意したことになります。",
-			"accept_terms_link": "ライセンス契約",
 			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
 			"paragraph_1": "ブラウザベースの自己管理型マルチチェーンウォレット分散型アプリケーションである$oisy_name（以下「$oisy_short」）は、Internet Computerの公開ブロックチェーンネットワーク上でホストされています。$oisy_short、そのオープンソースコード、および関連するライセンスの詳細については、$oisy_shortのGitHubリポジトリ($oisy_repo_url)を参照してください。",
 			"paragraph_2": "本ライセンス契約は、お客様（以下「お客様」）の$oisy_shortの使用を規定します。$oisy_shortを使用することにより、お客様は本ライセンス契約を読み、理解し、これに拘束されることに同意するものとします。同意しない場合、$oisy_shortを使用することはできません。",

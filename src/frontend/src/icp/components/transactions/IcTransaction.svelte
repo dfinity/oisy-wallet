@@ -23,7 +23,8 @@
 		timestamp: timestampNanoseconds,
 		incoming,
 		to,
-		from
+		from,
+		approveSpender
 	} = $derived(transaction);
 
 	let pending = $derived(transaction?.status === 'pending');
@@ -43,6 +44,7 @@
 
 <Transaction
 	{amount}
+	{approveSpender}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}

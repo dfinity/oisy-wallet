@@ -205,7 +205,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Gra",
-			"tools": "Narzędzia"
+			"tools": "Narzędzia",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -224,7 +225,7 @@
 				"description": "OpenChat to w pełni funkcjonalna aplikacja do czatu działająca w całości na blockchainie Internet Computer.<br/><br/>OpenChat jest zarządzany przez swoją społeczność jako DAO i ma własny token CHAT. Tokeny CHAT są przyznawane jako nagrody dla użytkowników w celu przyspieszenia rozwoju i stworzenia zespołu milionów zwolenników, co pozwoli OpenChat stać się realnym konkurentem dla scentralizowanych gigantów technologicznych!",
 				"stats": "Ponad 80 000 użytkowników",
 				"carousel": {
-					"text": "OpenChat - gdzie komunikuje się web3",
+					"text": "",
 					"call_to_action": "Pokaż więcej"
 				}
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
 				"call_to_action": "Przejdź do Taggr",
-				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników.",
-				"carousel": {
-					"text": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
-					"call_to_action": "Dowiedz się więcej"
-				}
+				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,6 +335,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -347,6 +354,7 @@
 			"upcoming_campaigns": "Nadchodzące kampanie",
 			"active_date": "Kończy się",
 			"ended_date": "Zakończono",
+			"upcoming_date": "",
 			"share": "Udostępnij na X",
 			"learn_more": "Dowiedz się więcej",
 			"check_status": "Sprawdź status i uprawnienia",
@@ -355,18 +363,18 @@
 			"activity_button_text": "Sprawdź ostatnią aktywność",
 			"activity_button_text_short": "Sprawdź aktywność",
 			"open_wallet": "Zabierz mnie do portfela",
-			"carousel_slide_title": "Kampania 4 $oisy_short Sprinkles jest już dostępna!",
+			"carousel_slide_title": "Kampania 5 $oisy_short Sprinkles jest już dostępna!",
 			"carousel_slide_cta": "Dowiedz się więcej",
 			"sprinkles_earned": "Zdobyłeś $noOfSprinkles sprinkles o łącznej wartości $amount! 🎊",
 			"youre_eligible": "Jesteś uprawniony!",
-			"not_eligible": "",
+			"not_eligible": "Nie uprawniony",
 			"ongoing": "Trwa",
 			"ended": "Zakończono ($amount)",
 			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
-			"network_bonus_info": "",
+			"network_bonus_info": "Każda sieć, w której przechowujesz aktywa, daje Ci mnożnik nagród. Im więcej sieci używasz, tym więcej nagród otrzymujesz!",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
 			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
 			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
@@ -374,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Bądź na bieżąco z nadchodzącymi airdropami tokenów! <a href=\"https://x.com/oisy\" target=\"_blank\">Śledź nas na X</a>, dołącz do naszego <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddita</a> lub dołącz do naszego <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discorda</a>, aby być na bieżąco.",
-			"coming_soon": "Kampania 4 $oisy_short już wkrótce",
+			"coming_soon": "Kampania 6 $oisy_short już wkrótce",
 			"reward_banner": "Baner kampanii $campaignName"
 		},
 		"campaigns": {
@@ -439,31 +447,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Odcinek 5 już dostępny 🎊",
+				"one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY w sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia dodatkowo je wzmacniają.<br/>Dodatkowo, teraz więcej sieci oznacza większe szanse na wygraną.",
+				"participate_title": "Zdobywaj żetony za aktywność i polecenia. Więcej łańcuchów oznacza więcej szans.",
+				"description": "Pozostań aktywny przez ponad 10 dni, aby się zakwalifikować: loguj się często, wykonuj działania w portfelu i utrzymuj na koncie co najmniej 20 USD.<br/>Każdy aktywny łańcuch zwiększa Twoje szanse dzięki mnożnikowi Multichain.<br/>Zarób 10% od znajomych, którzy się zakwalifikują, i znajdź się w pierwszej trójce, aby wygrać Super Sprinkle o wartości 200 USD.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Zostałeś nagrodzony",
+						"description": "Twoje nagrody właśnie wylądowały w Twoim portfelu.<br>Nie zapomnij polecać i pozostać aktywnym, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Wygrałeś cotygodniowy bonus",
+						"description": "Właśnie zdobyłeś jeden z naszych cotygodniowych bonusów.<br>Bądź aktywny i polecaj nas regularnie, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Znalazłeś się na szczycie tabeli liderów",
+						"description": "Znalazłeś się w pierwszej czwórce polecających w tym sezonie.<br>200 USD zostało dodane do Twojego portfela.",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Oto małe podziękowanie",
+						"description": "Jeden z Twoich poleconych użytkowników właśnie dostał trochę sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Ustawienia",
+			"general": "",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
@@ -1575,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Umowa licencyjna",
-			"accept_terms": "Klikając ten przycisk, zgadzasz się na",
-			"accept_terms_link": "Umowę licencyjną",
 			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
 			"paragraph_1": "Dziękujemy za zainteresowanie $oisy_name, przeglądarkową, samodzielną i wielołańcuchową zdecentralizowaną aplikacją portfela hostowaną w publicznej sieci blockchain Internet Computer („$oisy_short”). Więcej informacji na temat $oisy_short, jego otwartego kodu źródłowego i powiązanych licencji można znaleźć w repozytorium GitHub $oisy_short pod adresem: $oisy_repo_url.",
 			"paragraph_2": "Niniejsza Umowa Licencyjna reguluje korzystanie z $oisy_short przez Ciebie („Ty”). KORZYSTAJĄC Z $oisy_short, ZGADZASZ SIĘ, ŻE PRZECZYTAŁEŚ, ZROZUMIAŁEŚ I ZGADZASZ SIĘ NA ZWIĄZANIE NINIEJSZĄ UMOWĄ LICENCYJNĄ. JEŚLI SIĘ NIE ZGADZASZ, NIE MOŻESZ KORZYSTAĆ Z $oisy_short.",

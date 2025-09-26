@@ -1,5 +1,5 @@
 import type { BitcoinAddressData } from '$lib/types/blockchain';
-import { mockBtcTransaction } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcTransaction } from '$tests/mocks/blockchain-transactions.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 
 export const mockBlockchainResponse: BitcoinAddressData = {

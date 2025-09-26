@@ -200,6 +200,7 @@ interface I18nDapps {
 		walletconnect: string;
 		game: string;
 		tools: string;
+		ai: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -247,16 +248,17 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
-		taggr: {
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
+		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
+		usdai: { name: string; one_liner: string; description: string };
+		caffeine: {
 			name: string;
 			one_liner: string;
 			call_to_action: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		toolkit: { name: string; one_liner: string; description: string };
-		altitudefi: { name: string; one_liner: string; description: string };
-		usdai: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -266,6 +268,7 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
+		upcoming_date: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -432,6 +435,7 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -1287,8 +1291,6 @@ interface I18nAgreements {
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
-		accept_terms: string;
-		accept_terms_link: string;
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;

@@ -1,8 +1,10 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import LoaderEthBalances from '$eth/components/loaders/LoaderEthBalances.svelte';
+	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import CkBtcUpdateBalanceListener from '$icp/components/core/CkBtcUpdateBalanceListener.svelte';
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
+	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
 	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
 	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
@@ -16,6 +18,7 @@
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
 	import TransactionsIdbSetter from '$lib/components/transactions/TransactionsIdbSetter.svelte';
+	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	interface Props {
 		children: Snippet;
@@ -32,21 +35,25 @@
 					<ShortcutGuard>
 						<RewardGuard>
 							<LoaderEthBalances>
-								<LoaderWallets>
-									<ExchangeWorker>
-										<LoaderMetamask>
-											<UserSnapshotWorker>
-												<LoaderContacts>
-													<TransactionsIdbSetter>
-														<BalancesIdbSetter>
-															{@render children()}
-														</BalancesIdbSetter>
-													</TransactionsIdbSetter>
-												</LoaderContacts>
-											</UserSnapshotWorker>
-										</LoaderMetamask>
-									</ExchangeWorker>
-								</LoaderWallets>
+								<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
+									<LoaderMultipleEthTransactions>
+										<LoaderWallets>
+											<ExchangeWorker>
+												<LoaderMetamask>
+													<UserSnapshotWorker>
+														<LoaderContacts>
+															<TransactionsIdbSetter>
+																<BalancesIdbSetter>
+																	{@render children()}
+																</BalancesIdbSetter>
+															</TransactionsIdbSetter>
+														</LoaderContacts>
+													</UserSnapshotWorker>
+												</LoaderMetamask>
+											</ExchangeWorker>
+										</LoaderWallets>
+									</LoaderMultipleEthTransactions>
+								</MultipleListeners>
 							</LoaderEthBalances>
 						</RewardGuard>
 					</ShortcutGuard>

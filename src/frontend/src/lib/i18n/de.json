@@ -205,13 +205,14 @@
 			"staking": "Beteiligungen",
 			"walletconnect": "Wallet Connect",
 			"game": "Spiele",
-			"tools": "Tools"
+			"tools": "Tools",
+			"ai": ""
 		},
 		"descriptions": {
 			"kongswap": {
 				"name": "KongSwap",
-				"one_liner": "Der Token Shop für alles - Handle Token aller Blochchains mühelos mit KongSwap.",
-				"description": "KongSwap ist eine vollständig dezentrale Börse (DEX), die brückenlose, kettenübergreifende Transaktionen zwischen ICP, Bitcoin, Ethereum und Solana anbietet. Durch die Nutzung der Chain Fusion Technologie und des Internet Computer Protokolls reduziert sie Gebühren, vereinfacht die Benutzererfahrung und vermeidet Liquiditätsfragmentierung. Sowohl das Frontend als auch das Backend operieren on-chain über Smart Contracts, was ein nahtloses DeFi-Erlebnis ermöglicht.",
+				"one_liner": "Der Token Shop für alles - Handle Token aller Blockchains mühelos mit KongSwap.",
+				"description": "KongSwap ist eine vollständig dezentrale Börse (DEX), die brückenlose, blockchainübergreifende Transaktionen zwischen ICP, Bitcoin, Ethereum und Solana anbietet. Durch die Nutzung der Chain Fusion Technologie und des Internet Computer Protokolls reduziert sie Gebühren, vereinfacht die Benutzererfahrung und vermeidet Liquiditätsfragmentierung. Sowohl das Frontend als auch das Backend operieren on-chain über Smart Contracts, was ein nahtloses DeFi-Erlebnis ermöglicht.",
 				"carousel": {
 					"text": "Tausche deine Token via DEX",
 					"call_to_action": "Probiere KongSwap"
@@ -224,8 +225,8 @@
 				"description": "OpenChat ist eine voll funktionsfähige Chat-Anwendung, die vollständig auf der Internet Computer Blockchain läuft. Es wird von seiner Community als DAO (Decentralized Autonomous Organization) verwaltet und verfügt über einen eigenen CHAT-Token. CHAT-Token werden an Benutzer als Belohnung vergeben, um das Wachstum anzukurbeln und ein Team von Millionen von Unterstützern aufzubauen, was es OpenChat ermöglicht, ein konkurrenzfähiger Herausforderer zu zentralisierten großen Technologiekonkurrenten zu werden.",
 				"stats": "80,000+ Benutzer",
 				"carousel": {
-					"text": "OpenChat - Wo web3 kommuniziert",
-					"call_to_action": "Zeige mit mehr"
+					"text": "",
+					"call_to_action": "Mehr erfahren"
 				}
 			},
 			"decideid": {
@@ -283,7 +284,7 @@
 			},
 			"curve_finance": {
 				"name": "Curve Finance",
-				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Ketten.",
+				"one_liner": "Führender DEX-, Stablecoin-Anbieter und Kreditplattform auf Ethereum- und EVM-kompatiblen Chains.",
 				"call_to_action": "Gehe zu Curve",
 				"description": "Curve Finance ist eine führende dezentrale Börse, ein Stablecoin-Anbieter und eine Kreditplattform auf Ethereum- und EVM-kompatiblen Blockchains. Das Unternehmen ist bekannt für seine fortschrittlichen automatisierten Market Maker für Stablecoins und volatile Vermögenswerte sowie sein einzigartiges Soft-Liquidation-System für Kredite."
 			},
@@ -318,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Dezentrale soziale Medien – posten, verdienen, besitzen.",
 				"call_to_action": "Gehe zu Taggr",
-				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet.",
-				"carousel": {
-					"text": "Dezentrale soziale Medien",
-					"call_to_action": "Mehr erfahren"
-				}
+				"description": "Taggr ist eine vollständig dezentralisierte Social-Media-Plattform, die auf einem öffentlichen, verteilten Computernetzwerk basiert, das vom Internetcomputer betrieben wird. Im Gegensatz zu herkömmlichen, von Unternehmen kontrollierten Social-Media-Plattformen gehört Taggr vollständig seinen Nutzern und wird von ihnen verwaltet."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -338,15 +335,26 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"caffeine": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Prämien",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Episode 4 startet bald!<br>Bleib dran für Updates",
+			"upcoming_campaigns": "Zukünftige Episoden",
 			"active_date": "Endet am",
 			"ended_date": "Endete am",
+			"upcoming_date": "Startet am",
 			"share": "Teilen auf X",
 			"learn_more": "Mehr erfahren",
 			"check_status": "Status & Berechtigung prüfen",
@@ -355,18 +363,18 @@
 			"activity_button_text": "Letzte Aktivität prüfen",
 			"activity_button_text_short": "Aktivität prüfen",
 			"open_wallet": "Zur Wallet",
-			"carousel_slide_title": "$oisy_short Sprinkles Episode 4 ist jetzt aktiv!",
+			"carousel_slide_title": "$oisy_short Sprinkles Episode 5 ist jetzt aktiv!",
 			"carousel_slide_cta": "Mehr erfahren",
 			"sprinkles_earned": "Du hast $noOfSprinkles Sprinkles verdient, insgesamt $amount! 🎉",
 			"youre_eligible": "Du bist berechtigt!",
-			"not_eligible": "",
+			"not_eligible": "Nicht berechtigt",
 			"ongoing": "Aktiv",
 			"ended": "Beendet ($amount)",
 			"banner_text": "Erhalte täglich Prämien mit Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Berechtigungskriterien",
-			"network_bonus_info": "",
+			"network_bonus_info": "Jedes Netwerk das du aktiv benutzt gibt dir einen Multiplikator. Je mehr Netzwerke, desto mehr Belohnungen kannst du bekommen!",
 			"min_logins": "Melde Dich $loginsx Mal in den letzten $days Tagen an",
 			"min_transactions": "Führe $transactions Transaktionen in den letzten $days Tagen durch",
 			"min_total_assets_usd": "Halte Token im Wert von $usd USD zum Ausgabezeitpunkt",
@@ -374,7 +382,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Behalte anstehende Token-Drops im Auge! <a href=\"https://x.com/oisy\" target=\"_blank\">Folge uns auf X</a>, tritt unserem <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> bei oder komm in unseren <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a>, um auf dem Laufenden zu bleiben.",
-			"coming_soon": "$oisy_short Folge 4 erscheint bald",
+			"coming_soon": "$oisy_short Folge 6 erscheint bald",
 			"reward_banner": "Banner der Kampagne $campaignName"
 		},
 		"campaigns": {
@@ -439,32 +447,32 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episode 5 ist aktiv 🎉",
+				"one_liner": "Verdiene Sprinkles, indem du aktiv bist, andere empfiehlst und OISY netzwerkübergreifend verwendest. Deine Aktionen erhöhen deine Belohnungen, und aktive Empfehlungen steigern sie noch weiter.<br/>Und je mehr Netzwerke, desto bessere Gewinnchancen.",
+				"participate_title": "Verdiene Tokens für Aktivitäten und Empfehlungen. Mehr Netzwerke bedeuten mehr Chancen.",
+				"description": "Bleibe 10 Tage lang aktiv, um dich zu qualifizieren: Melden dich häufig an, führe Wallet-Aktionen durch und halte mindestens $20.<br/>Jedes aktive Netzwerk erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10% von Freunden, die sich qualifizieren, und lande unter den ersten drei, um einen Super Sprinkle im Wert von $200 zu gewinnen.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du wurdest belohnt",
+						"description": "Deine Belohnungen sind gerade in Deiner Wallet eingetroffen.<br>Nicht vergessen: Weiter einladen und aktiv bleiben, um mehr zu gewinnen.",
+						"share_href": "https://x.com/intent/post?text=Wieder%20ein%20%40OISY%20Sprinkle%20in%20meiner%20Wallet%20gelandet.%20%20%0AEiner%20der%20einfachsten%20Airdrops%20in%20DeFi.%20%20%0ASchau%20vorbei%20auf%20OISY.com"
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du hast den Bonus gewonnen",
+						"description": "Du hast einen unserer wöchentlichen Bonus Sprinkles gewonnen.<br>Bleibe aktiv, empfehle uns weiter und gewinne mehr.",
+						"share_href": "https://x.com/intent/post?text=Habe%20den%20%2450%20Bonus%20Sprinkle%20von%20%40OISY%20gewonnen.%20%20%0ADiese%20Saison%20gibt%E2%80%99s%20richtig%20starke%20Belohnungen%20f%C3%BCr%20Aktivit%C3%A4t%20und%20Einladungen.%20%20%0AOISY.com"
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Du bist in der Bestenliste",
+						"description": "Du bist in dieser Saison unter den Top 3 der Empfehler.<br>$200 wurden deinem Guthaben gutgeschrieben.",
+						"share_href": "https://x.com/intent/post?text=Gerade%20unter%20die%20Top%204%20bei%20den%20%40OISY%20Einladungen%20gekommen%20und%20%24200%20gewonnen.%20%20%0AEines%20der%20besten%20Belohnungssysteme%20im%20Space.%20%20%0ASchau%20noch%20heute%20auf%20OISY.com%20vorbei"
 					},
 					"referral": {
-						"title": "",
-						"description": "",
-						"share_href": ""
+						"title": "Hier ein kleines Dankeschön",
+						"description": "Ein Benutzer, der durch dich eigeladen wurde, hat soeben OISY Sprinkles gewonnen.",
+						"share_href": "https://x.com/intent/post?text=Habe%20einem%20Freund%20die%20%40OISY%20Wallet%20empfohlen%20-%20and%20gratis%20%24BTC%20gewonnen%20%F0%9F%AA%82%0AWenn%20deine%20Freunde%20gewinnen%2C%20gewinnst%20du%20auch.%20Einfach%21%0AVersuche%20es%20auch%2C%20bei%20OISY.com"
 					}
 				}
 			}
@@ -573,6 +581,7 @@
 	"settings": {
 		"text": {
 			"title": "Einrichten",
+			"general": "Allgemein",
 			"principal": "Dein Principal",
 			"principal_copied": "Principal in Zwischenablage kopiert",
 			"principal_description": "Deine ID für $oisy_name. Erstellt durch deine Internet Identity.",
@@ -1575,8 +1584,6 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Lizenzvereinbarung",
-			"accept_terms": "Durch Klicken auf diese Schaltfläche stimmst du der",
-			"accept_terms_link": "Lizenzvereinbarung zu",
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
 			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
 			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",

@@ -20,9 +20,7 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
-	import { mapNetworkIdToAddressType } from '$lib/utils/address.utils';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
@@ -44,6 +42,7 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
+		approveSpender?: string;
 	}
 
 	const {
@@ -58,7 +57,8 @@
 		from,
 		tokenId,
 		children,
-		onClick
+		onClick,
+		approveSpender
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -66,7 +66,13 @@
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
 	const contactAddress: string | undefined = $derived(
-		type === 'send' ? to : type === 'receive' ? from : undefined
+		type === 'send'
+			? to
+			: type === 'receive'
+				? from
+				: type === 'approve'
+					? approveSpender
+					: undefined
 	);
 
 	const contact: ContactUi | undefined = $derived(
@@ -81,9 +87,6 @@
 
 	const network: Network | undefined = $derived(token.network);
 
-	const networkAddressType: TokenAccountIdTypes | undefined = $derived(
-		mapNetworkIdToAddressType(network?.id)
-	);
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
@@ -104,7 +107,7 @@
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
-						<NetworkLogo addressType={networkAddressType} {network} testId="transaction-network" />
+						<NetworkLogo {network} testId="transaction-network" transparent />
 					</div>
 				{/if}
 			</span>
@@ -178,8 +181,8 @@
 							</span>
 						{/if}
 
-						<span class="inline-flex min-w-0 items-center truncate">
-							<span class="inline-block max-w-32 truncate">
+						<span class="flex min-w-0 flex-wrap items-center">
+							<span class="max-w-38 inline-block truncate">
 								{#if nonNullish(contact)}
 									{contact.name}
 								{:else if nonNullish(contactAddress)}
@@ -187,8 +190,11 @@
 								{/if}
 							</span>
 							{#if notEmptyString(addressAlias)}
-								<span class="inline-flex items-center truncate text-tertiary">
-									<Divider />{addressAlias}
+								<span class="inline-flex items-center text-tertiary">
+									<Divider />
+									<span class="sm:max-w-29 lg:max-w-34 inline-block max-w-20 truncate">
+										{addressAlias}
+									</span>
 								</span>
 							{/if}
 						</span>

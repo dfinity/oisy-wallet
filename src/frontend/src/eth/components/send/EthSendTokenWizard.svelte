@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -46,8 +46,6 @@
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let currentStep: WizardStep | undefined;
-
 	/**
 	 * Send context store
 	 */
@@ -58,24 +56,49 @@
 	 * Props
 	 */
 
-	export let nft: Nft | undefined = undefined;
-	export let destination = '';
-	export let sourceNetwork: EthereumNetwork;
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
-	// Required for the fee and also to retrieve ck minter information.
-	// i.e. Ethereum or Sepolia "main" token.
-	export let nativeEthereumToken: Token;
+	interface Props {
+		currentStep?: WizardStep;
+		destination?: string;
+		amount: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		sourceNetwork: EthereumNetwork;
+		// Required for the fee and also to retrieve ck minter information.
+		// i.e. Ethereum or Sepolia "main" token.
+		nativeEthereumToken: Token;
+		nft?: Nft;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
+	}
 
-	let sendWithApproval: boolean;
-	$: sendWithApproval = shouldSendWithApproval({
-		to: destination,
-		tokenId: $sendTokenId,
-		erc20HelperContractAddress: toCkErc20HelperContractAddress(
-			$ckEthMinterInfoStore?.[nativeEthereumToken.id]
-		)
-	});
+	let {
+		currentStep,
+		destination = '',
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact,
+		sourceNetwork,
+		nativeEthereumToken,
+		nft,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
+	}: Props = $props();
+
+	let sendWithApproval = $derived(
+		shouldSendWithApproval({
+			to: destination,
+			tokenId: $sendTokenId,
+			erc20HelperContractAddress: toCkErc20HelperContractAddress(
+				$ckEthMinterInfoStore?.[nativeEthereumToken.id]
+			)
+		})
+	);
 
 	/**
 	 * Fee context store
@@ -84,18 +107,22 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(nativeEthereumToken.symbol);
-
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(nativeEthereumToken.id);
-
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(nativeEthereumToken.decimals);
+
+	$effect(() => {
+		feeSymbolStore.set(nativeEthereumToken.symbol);
+		feeTokenIdStore.set(nativeEthereumToken.id);
+		feeDecimalsStore.set(nativeEthereumToken.decimals);
+	});
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	$: feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 
-	let feeContext: EthFeeContext | undefined;
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+	});
+
+	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -113,8 +140,6 @@
 	/**
 	 * Send
 	 */
-
-	const dispatch = createEventDispatcher();
 
 	const nftSend = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -158,7 +183,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await sendNft({
@@ -200,7 +225,7 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 
@@ -254,7 +279,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await executeSend({
@@ -297,12 +322,12 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icSendBack');
+	const close = () => onClose();
+	const back = () => onSendBack();
 </script>
 
 <EthFeeContext
@@ -321,9 +346,9 @@
 			{amount}
 			{destination}
 			{nft}
+			{onBack}
+			onSend={nonNullish(nft) ? nftSend : send}
 			{selectedContact}
-			on:icBack
-			on:icSend={nonNullish(nft) ? nftSend : send}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -333,17 +358,16 @@
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<EthSendForm
 			{nativeEthereumToken}
+			{onBack}
+			{onNext}
+			{onTokensList}
 			{selectedContact}
-			on:icNext
-			on:icClose={close}
-			on:icBack
-			on:icTokensList
 			bind:destination
 			bind:amount
 		>
-			<ButtonBack slot="cancel" onclick={back} />
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</EthSendForm>
-	{:else}
-		<slot />
 	{/if}
 </EthFeeContext>

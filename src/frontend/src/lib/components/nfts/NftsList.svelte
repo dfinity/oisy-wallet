@@ -96,13 +96,13 @@
 	);
 
 	const isEmptyList = $derived.by(() => {
-		const hasNoCollections = nftCollections.length === 0;
+		const hasOnlyEmptyCollections = nftCollections.filter((c) => c.nfts.length > 0).length === 0;
 		const hasCommonCollections = commonCollections.length > 0;
 		const hasVisibleSpamCollections = $showSpam && spamCollections.length > 0;
 		const hasVisibleHiddenCollections = $showHidden && hiddenCollections.length > 0;
 
 		return (
-			hasNoCollections ||
+			hasOnlyEmptyCollections ||
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});
@@ -148,7 +148,7 @@
 	{:else}
 		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} />
+				<NftCard {nft} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -158,7 +158,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} />
+					<NftCard isHidden {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -169,7 +169,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} />
+					<NftCard isSpam {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}

@@ -11,7 +11,7 @@ import type { NonEmptyArray } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as EthersTransactionResponse, FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 

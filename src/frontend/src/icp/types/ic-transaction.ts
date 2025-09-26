@@ -40,6 +40,7 @@ export interface IcTransactionUi {
 	type: IcTransactionType;
 	// e.g. BTC Received
 	typeLabel?: string;
+	fee?: bigint;
 	from?: string;
 	// e.g. From: BTC Network
 	fromLabel?: string;
@@ -53,4 +54,6 @@ export interface IcTransactionUi {
 	timestamp?: bigint;
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
+	approveSpender?: string;
+	approveExpiresAt?: bigint;
 }

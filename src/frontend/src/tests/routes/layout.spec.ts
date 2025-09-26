@@ -1,4 +1,7 @@
+import { OISY_URL } from '$lib/constants/oisy.constants';
 import * as analytics from '$lib/services/analytics.services';
+import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import App from '$routes/+layout.svelte';
@@ -16,6 +19,10 @@ vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => 
 });
 
 describe('App Layout', () => {
+	const mockChannels = new Map<string, BroadcastChannel>();
+
+	const broadcastChannelCloseSpy = vi.fn();
+
 	beforeAll(() => {
 		Object.defineProperty(window, 'matchMedia', {
 			writable: true,
@@ -28,6 +35,43 @@ describe('App Layout', () => {
 				dispatchEvent: vi.fn()
 			}))
 		});
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
+
+		vi.stubGlobal(
+			'BroadcastChannel',
+			vi.fn((name: string) => {
+				const postMessage = vi.fn();
+
+				const channel =
+					mockChannels.get(name) ??
+					({
+						name,
+						onmessage: null,
+						postMessage,
+						close: broadcastChannelCloseSpy
+					} as unknown as BroadcastChannel);
+
+				postMessage.mockImplementation((message: unknown) => {
+					const event = new MessageEvent('message', {
+						data: message,
+						origin: OISY_URL
+					});
+
+					channel.onmessage?.(event);
+				});
+
+				mockChannels.set(name, channel);
+
+				return channel;
+			})
+		);
+	});
+
+	afterEach(() => {
+		vi.unstubAllGlobals();
 	});
 
 	it('should render the app layout', () => {
@@ -56,5 +100,66 @@ describe('App Layout', () => {
 		render(App, { children: mockSnippet });
 
 		expect(spy).toHaveBeenCalledOnce();
+	});
+
+	it('should listen to BroadcastChannel events for auth synchronization', () => {
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+
+		const spy = vi.spyOn(authStore, 'forceSync');
+
+		render(App, { children: mockSnippet });
+
+		spy.mockClear();
+
+		const newBc = new BroadcastChannel(channelName);
+
+		newBc.postMessage(loginSuccessMessage);
+
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+	});
+
+	it('should destroy the BroadcastChannel on unmount', () => {
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+
+		const spy = vi.spyOn(authStore, 'forceSync');
+
+		const { unmount } = render(App, { children: mockSnippet });
+
+		spy.mockClear();
+
+		const newBc = new BroadcastChannel(channelName);
+
+		newBc.postMessage(loginSuccessMessage);
+
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+
+		expect(broadcastChannelCloseSpy).not.toHaveBeenCalled();
+
+		spy.mockClear();
+
+		unmount();
+
+		expect(broadcastChannelCloseSpy).toHaveBeenCalledExactlyOnceWith();
+
+		newBc.postMessage(loginSuccessMessage);
+
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+	});
+
+	it('should initialize a BroadcastChannel for auth synchronization', () => {
+		const spy = vi.fn();
+
+		vi.spyOn(authBroadcastServices, 'AuthBroadcastChannel').mockReturnValueOnce({
+			onLoginSuccess: spy,
+			close: vi.fn()
+		} as unknown as AuthBroadcastChannel);
+
+		expect(spy).not.toHaveBeenCalled();
+
+		render(App, { children: mockSnippet });
+
+		expect(spy).toHaveBeenCalledExactlyOnceWith(authStore.forceSync);
 	});
 });

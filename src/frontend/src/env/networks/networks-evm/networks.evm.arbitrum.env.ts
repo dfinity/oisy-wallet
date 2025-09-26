@@ -1,9 +1,7 @@
 import { ARBITRUM_EXPLORER_URL, ARBITRUM_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import arbitrumMainnetIconDark from '$lib/assets/networks/dark/arbitrum-mainnet.svg';
-import arbitrumSepoliaIconDark from '$lib/assets/networks/dark/arbitrum-sepolia.svg';
-import arbitrumMainnetIconLight from '$lib/assets/networks/light/arbitrum-mainnet.svg';
-import arbitrumSepoliaIconLight from '$lib/assets/networks/light/arbitrum-sepolia.svg';
+import arbitrumMainnetIcon from '$lib/assets/networks/arbitrum-mainnet.svg';
+import arbitrumSepoliaIcon from '$lib/assets/networks/arbitrum-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -25,8 +23,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Arbitrum',
 	chainId: 42161n,
-	iconLight: arbitrumMainnetIconLight,
-	iconDark: arbitrumMainnetIconDark,
+	icon: arbitrumMainnetIcon,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum',
@@ -49,8 +46,7 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Arbitrum Sepolia',
 	chainId: 421614n,
-	iconLight: arbitrumSepoliaIconLight,
-	iconDark: arbitrumSepoliaIconDark,
+	icon: arbitrumSepoliaIcon,
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'arbitrum-sepolia',

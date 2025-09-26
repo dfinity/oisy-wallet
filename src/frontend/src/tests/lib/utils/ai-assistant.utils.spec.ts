@@ -1,16 +1,20 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { contactsStore } from '$lib/stores/contacts.store';
 import {
 	generateAiAssistantResponseEventMetadata,
 	parseReviewSendTokensToolArguments,
 	parseShowFilteredContactsToolArguments,
-	parseToAiAssistantContacts
+	parseToAiAssistantContacts,
+	parseToAiAssistantTokens
 } from '$lib/utils/ai-assistant.utils';
 import { mapToFrontendContact } from '$lib/utils/contact.utils';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import { get } from 'svelte/store';
 
@@ -34,7 +38,8 @@ describe('ai-assistant.utils', () => {
 			{
 				addressType: extendedAddressContactUi.addresses[0].addressType,
 				id: extendedAddressContactUi.addresses[0].id,
-				label: extendedAddressContactUi.addresses[0].label
+				label: extendedAddressContactUi.addresses[0].label,
+				acceptedTokenStandards: ['ethereum', 'erc20', 'dip20']
 			}
 		]
 	};
@@ -49,6 +54,13 @@ describe('ai-assistant.utils', () => {
 
 	describe('parseReviewSendTokenToolArguments', () => {
 		const sendValue = 0.00001;
+		const mockRandomUUID = 'd7775002-80bf-4208-a2f0-84225281677a';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => mockRandomUUID);
+		});
 
 		it('returns correct result when selectedContactAddressId is provided', () => {
 			expect(
@@ -75,7 +87,9 @@ describe('ai-assistant.utils', () => {
 				contactAddress: extendedAddressContactUi.addresses[0],
 				contact: extendedAddressContactUi,
 				amount: sendValue,
-				address: undefined
+				address: undefined,
+				id: mockRandomUUID,
+				sendCompleted: false
 			});
 		});
 
@@ -108,8 +122,43 @@ describe('ai-assistant.utils', () => {
 				contactAddress: undefined,
 				contact: undefined,
 				amount: sendValue,
-				address: mockEthAddress
+				address: mockEthAddress,
+				id: mockRandomUUID,
+				sendCompleted: false
 			});
+		});
+	});
+
+	describe('parseToAiAssistantTokens', () => {
+		it('parses array of tokens correctly', () => {
+			expect(
+				parseToAiAssistantTokens([
+					ICP_TOKEN,
+					ETHEREUM_TOKEN,
+					SOLANA_TOKEN,
+					mockValidErc721Token,
+					mockValidErc1155Token
+				])
+			).toEqual([
+				{
+					name: ICP_TOKEN.name,
+					symbol: ICP_TOKEN.symbol,
+					standard: ICP_TOKEN.standard,
+					networkId: ICP_TOKEN.network.id.description ?? ''
+				},
+				{
+					name: ETHEREUM_TOKEN.name,
+					symbol: ETHEREUM_TOKEN.symbol,
+					standard: ETHEREUM_TOKEN.standard,
+					networkId: ETHEREUM_TOKEN.network.id.description ?? ''
+				},
+				{
+					name: SOLANA_TOKEN.name,
+					symbol: SOLANA_TOKEN.symbol,
+					standard: SOLANA_TOKEN.standard,
+					networkId: SOLANA_TOKEN.network.id.description ?? ''
+				}
+			]);
 		});
 	});
 
