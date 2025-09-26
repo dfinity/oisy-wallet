@@ -69,7 +69,13 @@ describe('IcTransactionModal', () => {
 			token: ICP_TOKEN
 		});
 
+		const formattedAmount = `${formatToken({
+			value: mockIcTransactionUi.fee ?? 0n,
+			unitName: ICP_TOKEN.decimals,
+			displayDecimals: ICP_TOKEN.decimals
+		})} ${ICP_TOKEN.symbol}`;
+
 		expect(getByText(get(i18n).fee.text.fee)).toBeInTheDocument();
-		expect(getByText(`${mockIcTransactionUi.fee} ${ICP_TOKEN.symbol}`)).toBeInTheDocument();
+		expect(getByText(formattedAmount)).toBeInTheDocument();
 	});
 });
