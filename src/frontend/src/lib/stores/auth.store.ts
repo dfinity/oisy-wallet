@@ -6,7 +6,7 @@ import {
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
-import { isNullish } from '@dfinity/utils';
+import { isNullish , nonNullish } from '@dfinity/utils';
 
 import {
 	AUTH_MAX_TIME_TO_LIVE,
@@ -22,7 +22,6 @@ import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
 import type { ECDSAKeyIdentity } from '@dfinity/identity';
-import { nonNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
