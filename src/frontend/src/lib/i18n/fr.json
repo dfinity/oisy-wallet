@@ -206,7 +206,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "Jeu",
 			"tools": "Outils",
-			"ai": ""
+			"ai": "IA"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -374,7 +374,7 @@
 		},
 		"requirements": {
 			"requirements_title": "Critères d'éligibilité",
-			"network_bonus_info": "Chaque réseau sur lequel vous détenez des actifs vous confère un multiplicateur de récompenses. Plus vous utilisez de réseaux, plus vous obtenez de récompenses !",
+			"network_bonus_info": "Chaque réseau sur lequel vous détenez des actifs vous confère un multiplicateur de récompenses. Plus vous utilisez de réseaux, plus vous obtenez de récompenses !",
 			"min_logins": "Connectez-vous $loginsx fois au cours des $days derniers jours",
 			"min_transactions": "Effectuez $transactions transactions au cours des $days derniers jours",
 			"min_total_assets_usd": "Détenez $$usd de tokens au moment de l'émission",
