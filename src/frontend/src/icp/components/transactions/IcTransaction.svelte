@@ -33,7 +33,13 @@
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
 	let amount = $derived(
-		nonNullish(value) ? (incoming ? value : (value + (fee ?? ZERO)) * -1n) : value
+		nonNullish(value)
+			? type === 'approve'
+				? fee
+				: incoming
+					? value
+					: (value + (fee ?? ZERO)) * -1n
+			: value
 	);
 
 	let timestamp = $derived(
