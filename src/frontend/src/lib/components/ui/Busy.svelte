@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Spinner, stopPropagation } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { stopPropagation } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { busy } from '$lib/stores/busy.store';
 
