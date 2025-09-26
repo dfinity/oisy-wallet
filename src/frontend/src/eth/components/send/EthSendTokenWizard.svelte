@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, createEventDispatcher, getContext, setContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthSendForm from '$eth/components/send/EthSendForm.svelte';
@@ -53,35 +52,45 @@
 
 	const { sendTokenDecimals, sendTokenId, sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	// Required for the fee and also to retrieve ck minter information.
+	/**
+	 * Props
+	 */
 
 	interface Props {
-		currentStep: WizardStep | undefined;
-		/**
-		 * Props
-		 */
+		currentStep?: WizardStep;
 		destination?: string;
-		sourceNetwork: EthereumNetwork;
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
+		sourceNetwork: EthereumNetwork;
+		// Required for the fee and also to retrieve ck minter information.
 		// i.e. Ethereum or Sepolia "main" token.
 		nativeEthereumToken: Token;
-		children?: Snippet;
+		nft?: Nft;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
 	}
 
 	let {
 		currentStep,
-		destination = $bindable(''),
-		sourceNetwork,
+		destination = '',
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
-		selectedContact = undefined,
+		selectedContact,
+		sourceNetwork,
 		nativeEthereumToken,
-		children
+		nft,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
 	}: Props = $props();
 
-	let sendWithApproval: boolean = $derived(
+	let sendWithApproval = $derived(
 		shouldSendWithApproval({
 			to: destination,
 			tokenId: $sendTokenId,
@@ -98,26 +107,22 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	run(() => {
-		feeSymbolStore.set(nativeEthereumToken.symbol);
-	});
-
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	run(() => {
-		feeTokenIdStore.set(nativeEthereumToken.id);
-	});
-
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	run(() => {
+
+	$effect(() => {
+		feeSymbolStore.set(nativeEthereumToken.symbol);
+		feeTokenIdStore.set(nativeEthereumToken.id);
 		feeDecimalsStore.set(nativeEthereumToken.decimals);
 	});
 
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
-	run(() => {
+
+	$effect(() => {
 		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 	});
 
-	let feeContext: EthFeeContext | undefined = $state();
+	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
 
 	setContext<FeeContextType>(
@@ -135,8 +140,6 @@
 	/**
 	 * Send
 	 */
-
-	const dispatch = createEventDispatcher();
 
 	const nftSend = async () => {
 		if (isNullishOrEmpty(destination)) {
@@ -180,7 +183,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await sendNft({
@@ -222,7 +225,7 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 
@@ -276,7 +279,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await executeSend({
@@ -319,12 +322,12 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icSendBack');
+	const close = () => onClose();
+	const back = () => onSendBack();
 </script>
 
 <EthFeeContext
@@ -343,9 +346,9 @@
 			{amount}
 			{destination}
 			{nft}
+			{onBack}
+			onSend={nonNullish(nft) ? nftSend : send}
 			{selectedContact}
-			on:icBack
-			on:icSend={nonNullish(nft) ? nftSend : send}
 		/>
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard
@@ -355,11 +358,10 @@
 	{:else if currentStep?.name === WizardStepsSend.SEND}
 		<EthSendForm
 			{nativeEthereumToken}
+			{onBack}
+			{onNext}
+			{onTokensList}
 			{selectedContact}
-			on:icNext
-			on:icClose={close}
-			on:icBack
-			on:icTokensList
 			bind:destination
 			bind:amount
 		>

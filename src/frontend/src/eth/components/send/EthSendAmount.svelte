@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext } from 'svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -19,25 +18,26 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		insufficientFunds: boolean;
 		nativeEthereumToken: Token;
+		onTokensList: () => void;
 	}
 
 	let {
 		amount = $bindable(),
 		insufficientFunds = $bindable(),
-		nativeEthereumToken
+		nativeEthereumToken,
+		onTokensList
 	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
-	let exchangeValueUnit: DisplayUnit = $state('usd');
-	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
-	let insufficientFundsError: InsufficientFundsError | undefined = $state(undefined);
+	let insufficientFundsError = $state<InsufficientFundsError | undefined>();
 
-	run(() => {
+	$effect(() => {
 		insufficientFunds = nonNullish(insufficientFundsError);
 	});
 
@@ -66,7 +66,7 @@
 				})
 			: ZERO;
 
-		// If ETH, the balance should cover the user entered amount plus the min gas fee
+		// If ETH, the balance should cover the user-entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sendTokenId) || isSupportedEvmNativeTokenId($sendTokenId)) {
 			const total = userAmount + ($minGasFee ?? ZERO);
 
@@ -92,7 +92,7 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and the fees are changing.
+	 * Reevaluate max amount if the user has used the "Max" button and the fees are changing.
 	 */
 	let amountSetToMax = $state(false);
 </script>
@@ -107,9 +107,7 @@
 		bind:amount
 		bind:amountSetToMax
 		bind:error={insufficientFundsError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
+		on:click={onTokensList}
 	>
 		{#snippet title()}
 			<span>{$i18n.core.text.amount}</span>

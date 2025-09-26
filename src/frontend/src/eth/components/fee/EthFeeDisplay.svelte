@@ -16,7 +16,9 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const feeAmount = $derived(
-		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		nonNullish(isApproveNeeded) && nonNullish($maxGasFee) && isApproveNeeded
+			? $maxGasFee * 2n
+			: $maxGasFee
 	);
 </script>
 

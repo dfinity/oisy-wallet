@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, type Snippet } from 'svelte';
 	import SendFeeInfo from '$lib/components/send/SendFeeInfo.svelte';
 	import SendForm from '$lib/components/send/SendForm.svelte';
 	import type { ContactUi } from '$lib/types/contact';
@@ -14,47 +13,48 @@
 	import { invalidSolAddress } from '$sol/utils/sol-address.utils';
 
 	interface Props {
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		destination?: string;
 		selectedContact?: ContactUi;
-		cancel?: Snippet;
+		onBack: () => void;
+		onNext: () => void;
+		onTokensList: () => void;
+		cancel: Snippet;
 	}
 
 	let {
 		amount = $bindable(),
-		destination = '',
-		selectedContact = undefined,
+		destination = $bindable(''),
+		selectedContact,
+		onBack,
+		onNext,
+		onTokensList,
 		cancel
 	}: Props = $props();
 
 	const { feeDecimalsStore, feeSymbolStore, feeTokenIdStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let amountError: SolAmountAssertionError | undefined = $state();
+	let amountError = $state<SolAmountAssertionError | undefined>();
 
-	let invalidDestination = $state(false);
-	run(() => {
-		invalidDestination = isNullishOrEmpty(destination) || invalidSolAddress(destination);
-	});
+	let invalidDestination = $derived(
+		isNullishOrEmpty(destination) || invalidSolAddress(destination)
+	);
 
-	let invalid = $state(true);
-	run(() => {
-		invalid = invalidDestination || nonNullish(amountError) || isNullish(amount);
-	});
-
-	const cancel_render = $derived(cancel);
+	let invalid = $derived(invalidDestination || nonNullish(amountError) || isNullish(amount));
 </script>
 
 <SendForm
+	{cancel}
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	{onBack}
+	{onNext}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	{#snippet amount()}
-		<SolSendAmount bind:amount bind:amountError on:icTokensList />
+	{#snippet sendAmount()}
+		<SolSendAmount {onTokensList} bind:amount bind:amountError />
 	{/snippet}
 
 	{#snippet fee()}
@@ -67,9 +67,5 @@
 			feeSymbol={$feeSymbolStore}
 			feeTokenId={$feeTokenIdStore}
 		/>
-	{/snippet}
-
-	{#snippet cancel()}
-		{@render cancel_render?.()}
 	{/snippet}
 </SendForm>

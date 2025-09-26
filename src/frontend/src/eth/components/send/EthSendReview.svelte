@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
@@ -18,33 +18,26 @@
 		destination?: string;
 		amount?: OptionAmount;
 		selectedContact?: ContactUi;
+		nft?: Nft;
+		onBack: () => void;
+		onSend: () => void;
 	}
 
-	let { destination = '', amount = undefined, selectedContact = undefined }: Props = $props();
+	let { destination = '', amount, selectedContact, nft, onBack, onSend }: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: storeFeeData }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
-	let invalid = true;
-	$: invalid =
+	let invalid = $derived(
 		isNullishOrEmpty(destination) ||
-		!isEthAddress(destination) ||
-		(isNullish(nft) && invalidAmount(amount)) ||
-		isNullish($storeFeeData);
-
-	const dispatch = createEventDispatcher();
+			!isEthAddress(destination) ||
+			(isNullish(nft) && invalidAmount(amount)) ||
+			isNullish($storeFeeData)
+	);
 </script>
 
-<SendReview
-	{amount}
-	{destination}
-	disabled={invalid}
-	{nft}
-	onBack={() => dispatch('icBack')}
-	onSend={() => dispatch('icSend')}
-	{selectedContact}
->
+<SendReview {amount} {destination} disabled={invalid} {nft} {onBack} {onSend} {selectedContact}>
 	{#snippet fee()}
 		<EthFeeDisplay>
 			{#snippet label()}

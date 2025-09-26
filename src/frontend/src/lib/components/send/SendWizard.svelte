@@ -16,7 +16,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
 	import type { Nft } from '$lib/types/nft';
-	import type { Token } from '$lib/types/token';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdICP,
@@ -28,10 +27,16 @@
 
 	interface Props {
 		destination: string;
-		amount: number | undefined;
+		amount?: number;
 		sendProgressStep: string;
-		currentStep: WizardStep | undefined;
+		currentStep?: WizardStep;
 		selectedContact?: ContactUi;
+		nft?: Nft;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
 	}
 
 	let {
@@ -39,16 +44,22 @@
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
 		currentStep,
-		selectedContact = undefined,
+		selectedContact,
+		nft,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
 	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let fallbackEvmToken: Token | undefined = $derived(
+	let fallbackEvmToken = $derived(
 		$enabledEvmTokens.find(({ network: { id: networkId } }) => $sendToken.network.id === networkId)
 	);
 
-	let evmNativeEthereumToken: Token | undefined = $derived($evmNativeToken ?? fallbackEvmToken);
+	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 </script>
 
 <SendTokenContext token={$sendToken}>
@@ -58,15 +69,15 @@
 			{destination}
 			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEthereumNetwork ?? DEFAULT_ETHEREUM_NETWORK}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack
-			on:icSendBack
-			on:icNext
-			on:icClose
-			on:icTokensList
 		/>
 	{:else if isNetworkIdEvm($sendToken.network.id) && nonNullish(evmNativeEthereumToken)}
 		<EthSendTokenWizard
@@ -74,54 +85,54 @@
 			{destination}
 			nativeEthereumToken={evmNativeEthereumToken}
 			{nft}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			sourceNetwork={$selectedEvmNetwork ?? ($sendToken.network as EthereumNetwork)}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack
-			on:icSendBack
-			on:icNext
-			on:icClose
-			on:icTokensList
 		/>
 	{:else if isNetworkIdICP($sendToken.network.id)}
 		<IcSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icSendBack
-			on:icBack
-			on:icNext
-			on:icClose
-			on:icTokensList
 		/>
 	{:else if isNetworkIdBitcoin($sendToken.network.id)}
 		<BtcSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack
-			on:icNext
-			on:icClose
-			on:icSendBack
-			on:icTokensList
 		/>
 	{:else if isNetworkIdSolana($sendToken.network.id)}
 		<SolSendTokenWizard
 			{currentStep}
 			{destination}
+			{onBack}
+			{onClose}
+			{onNext}
+			{onSendBack}
+			{onTokensList}
 			{selectedContact}
 			bind:amount
 			bind:sendProgressStep
-			on:icBack
-			on:icNext
-			on:icClose
-			on:icSendBack
-			on:icTokensList
 		/>
 	{/if}
 </SendTokenContext>

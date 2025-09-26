@@ -1,8 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
@@ -29,7 +28,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -39,33 +37,40 @@
 	} from '$lib/utils/network.utils';
 
 	interface Props {
-		currentStep: WizardStep | undefined;
+		currentStep?: WizardStep;
 		destination?: string;
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		sendProgressStep: string;
 		selectedContact?: ContactUi;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
 	}
 
 	let {
 		currentStep,
-		destination = $bindable(''),
+		destination = '',
 		amount = $bindable(),
 		sendProgressStep = $bindable(),
-		selectedContact = undefined,
+		selectedContact,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
 	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined = $state(undefined);
+	let utxosFee = $state<UtxosFee | undefined>();
 
-	let networkId: NetworkId | undefined = $state(undefined);
-	run(() => {
-		networkId = $sendToken.network.id;
-	});
+	let networkId = $derived($sendToken.network.id);
 
-	let source: string = $derived(
+	let source = $derived(
 		(isNetworkIdBTCTestnet(networkId)
 			? $btcAddressTestnet
 			: isNetworkIdBTCRegtest(networkId)
@@ -73,10 +78,9 @@
 				: $btcAddressMainnet) ?? ''
 	);
 
-	const dispatch = createEventDispatcher();
+	const close = () => onClose();
+	const back = () => onSendBack();
 
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icSendBack');
 	const send = async () => {
 		progress(ProgressStepsSendBtc.INITIALIZATION);
 
@@ -121,7 +125,8 @@
 			await nullishSignOut();
 			return;
 		}
-		dispatch('icNext');
+
+		onNext();
 
 		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
 			// Validate UTXOs before proceeding
@@ -148,7 +153,8 @@
 				});
 
 				// go back to the previous step so the user can correct/ try again
-				dispatch('icBack');
+				onBack();
+
 				return;
 			}
 		}
@@ -188,7 +194,7 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 </script>
@@ -197,7 +203,7 @@
 	<BtcSendReview
 		{amount}
 		{destination}
-		onBack={() => dispatch('icBack')}
+		{onBack}
 		onSend={send}
 		{selectedContact}
 		{source}
@@ -206,15 +212,7 @@
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm
-		{selectedContact}
-		on:icNext
-		on:icClose
-		on:icBack
-		on:icTokensList
-		bind:destination
-		bind:amount
-	>
+	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
 		{#snippet cancel()}
 			<ButtonBack onclick={back} />
 		{/snippet}

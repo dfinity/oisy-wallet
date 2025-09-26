@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
@@ -17,16 +17,16 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	interface Props {
-		amount?: OptionAmount;
-		amountError: BtcAmountAssertionError | undefined;
+		amount: OptionAmount;
+		amountError?: BtcAmountAssertionError;
+		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable() }: Props = $props();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	const dispatch = createEventDispatcher();
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
-	let exchangeValueUnit: DisplayUnit = $state('usd');
-	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -62,9 +62,7 @@
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
+		on:click={onTokensList}
 	>
 		{#snippet title()}
 			<span>{$i18n.core.text.amount}</span>

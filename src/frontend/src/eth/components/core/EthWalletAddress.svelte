@@ -9,7 +9,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	let explorerUrl: string | undefined = $derived(
+	let explorerUrl = $derived(
 		notEmptyString($ethAddress)
 			? `${getExplorerUrl({
 					network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork

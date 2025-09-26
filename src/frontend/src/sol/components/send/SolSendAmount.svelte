@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -15,30 +15,29 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { InsufficientFundsError, type OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
-	import type { Token } from '$lib/types/token';
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import { type FeeContext, SOL_FEE_CONTEXT_KEY } from '$sol/stores/sol-fee.store';
 	import { SolAmountAssertionError } from '$sol/types/sol-send';
 
 	interface Props {
-		amount?: OptionAmount;
-		amountError: SolAmountAssertionError | undefined;
+		amount: OptionAmount;
+		amountError?: SolAmountAssertionError;
+		onTokensList: () => void;
 	}
 
-	let { amount = $bindable(), amountError = $bindable() }: Props = $props();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	const dispatch = createEventDispatcher();
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 
-	let exchangeValueUnit: DisplayUnit = $state('usd');
-	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenNetworkId, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { feeStore: fee }: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	let solanaNativeToken: Token = $derived(
+	let solanaNativeToken = $derived(
 		isNetworkIdSOLDevnet($sendTokenNetworkId)
 			? SOLANA_DEVNET_TOKEN
 			: isNetworkIdSOLLocal($sendTokenNetworkId)
@@ -83,9 +82,7 @@
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
+		on:click={onTokensList}
 	>
 		{#snippet title()}
 			<span>{$i18n.core.text.amount}</span>

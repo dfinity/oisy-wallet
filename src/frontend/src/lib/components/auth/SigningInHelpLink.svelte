@@ -10,7 +10,7 @@
 		testId?: string;
 	}
 
-	let { styleClass = '', testId = undefined }: Props = $props();
+	let { styleClass = '', testId }: Props = $props();
 
 	const modalId = Symbol();
 

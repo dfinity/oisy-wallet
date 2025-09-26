@@ -15,28 +15,21 @@
 	} from '$lib/derived/address.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionSolAddress } from '$lib/types/address';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
-	import type { SolanaNetwork } from '$sol/types/network';
 
-	let address: OptionSolAddress = $state();
-	let network: SolanaNetwork = $state();
-	run(() => {
-		[address, network] = isNetworkIdSOLDevnet($networkId)
+	let [address, network] = $derived(
+		isNetworkIdSOLDevnet($networkId)
 			? [$solAddressDevnet, SOLANA_DEVNET_NETWORK]
 			: isNetworkIdSOLLocal($networkId)
 				? [$solAddressLocal, SOLANA_LOCAL_NETWORK]
-				: [$solAddressMainnet, SOLANA_MAINNET_NETWORK];
-	});
+				: [$solAddressMainnet, SOLANA_MAINNET_NETWORK]
+	);
 
-	let explorerUrl: string | undefined = $state();
-	run(() => {
-		({ explorerUrl } = network);
-	});
+	let { explorerUrl } = $derived(network);
 
-	let explorerAddressUrl: string | undefined = $derived(
+	let explorerAddressUrl = $derived(
 		nonNullish(explorerUrl)
 			? replacePlaceholders(explorerUrl, { $args: `account/${address}/` })
 			: undefined

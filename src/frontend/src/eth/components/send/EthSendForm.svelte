@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, type Snippet } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import EthSendAmount from '$eth/components/send/EthSendAmount.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -16,32 +15,32 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
+		amount: OptionAmount;
 		destination?: string;
-		amount?: OptionAmount;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
-		cancel?: Snippet;
+		onBack: () => void;
+		onNext: () => void;
+		onTokensList: () => void;
+		cancel: Snippet;
 	}
 
 	let {
-		destination = '',
 		amount = $bindable(),
+		destination = $bindable(''),
 		nativeEthereumToken,
-		selectedContact = undefined,
+		selectedContact,
+		onBack,
+		onNext,
+		onTokensList,
 		cancel
 	}: Props = $props();
 
-	let insufficientFunds: boolean = $state();
+	let insufficientFunds = $state(false);
 
-	let invalidDestination = $state(false);
-	run(() => {
-		invalidDestination = isNullishOrEmpty(destination) || !isEthAddress(destination);
-	});
+	let invalidDestination = $derived(isNullishOrEmpty(destination) || !isEthAddress(destination));
 
-	let invalid = $state(true);
-	run(() => {
-		invalid = invalidDestination || insufficientFunds || isNullish(amount);
-	});
+	let invalid = $derived(invalidDestination || insufficientFunds || isNullish(amount));
 
 	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: EthFeeContext =
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -50,22 +49,25 @@
 </script>
 
 <SendForm
+	{cancel}
 	{destination}
 	disabled={invalid}
 	{invalidDestination}
+	{onBack}
+	{onNext}
 	{selectedContact}
-	on:icNext
-	on:icBack
 >
-	{#snippet amount()}
-		<EthSendAmount {nativeEthereumToken} bind:amount bind:insufficientFunds on:icTokensList />
+	{#snippet sendAmount()}
+		<EthSendAmount {nativeEthereumToken} {onTokensList} bind:amount bind:insufficientFunds />
 	{/snippet}
 
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.max_fee_eth} />
-		{/snippet}
-	</EthFeeDisplay>
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
 	{#snippet info()}
 		<SendFeeInfo
@@ -73,9 +75,5 @@
 			feeSymbol={$feeSymbolStore}
 			feeTokenId={$feeTokenIdStore}
 		/>
-	{/snippet}
-
-	{#snippet cancel()}
-		{@render cancel_render?.()}
 	{/snippet}
 </SendForm>
