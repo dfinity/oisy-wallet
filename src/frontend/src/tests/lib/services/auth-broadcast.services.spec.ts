@@ -57,7 +57,7 @@ describe('auth-broadcast.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
+			vi.spyOn(authStore, 'forceSync').mockImplementation(vi.fn());
 
 			bc = initAuthBroadcastChannel();
 		});
@@ -75,7 +75,7 @@ describe('auth-broadcast.services', () => {
 
 			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
 
-			expect(authStore.sync).toHaveBeenCalledExactlyOnceWith();
+			expect(authStore.forceSync).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should not call handler for different messages', () => {
@@ -83,7 +83,7 @@ describe('auth-broadcast.services', () => {
 
 			newBc.postMessage('someOtherMessage');
 
-			expect(authStore.sync).not.toHaveBeenCalled();
+			expect(authStore.forceSync).not.toHaveBeenCalled();
 		});
 
 		it('should not call handler for messages from different origins', () => {
@@ -93,7 +93,7 @@ describe('auth-broadcast.services', () => {
 
 			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
 
-			expect(authStore.sync).not.toHaveBeenCalled();
+			expect(authStore.forceSync).not.toHaveBeenCalled();
 		});
 	});
 
@@ -121,7 +121,7 @@ describe('auth-broadcast.services', () => {
 		});
 
 		it('should not close all the BroadcastChannel after posting the message', () => {
-			vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
+			vi.spyOn(authStore, 'forceSync').mockImplementation(vi.fn());
 
 			initAuthBroadcastChannel();
 
@@ -129,13 +129,13 @@ describe('auth-broadcast.services', () => {
 
 			expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 
-			expect(authStore.sync).toHaveBeenCalledExactlyOnceWith();
+			expect(authStore.forceSync).toHaveBeenCalledExactlyOnceWith();
 
 			const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
 
 			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
 
-			expect(authStore.sync).toHaveBeenCalledTimes(2);
+			expect(authStore.forceSync).toHaveBeenCalledTimes(2);
 		});
 	});
 });

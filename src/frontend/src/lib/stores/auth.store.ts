@@ -35,6 +35,7 @@ export interface AuthSignInParams {
 
 export interface AuthStore extends Readable<AuthStoreData> {
 	sync: () => Promise<void>;
+	forceSync: () => Promise<void>;
 	signIn: (params: AuthSignInParams) => Promise<void>;
 	signOut: () => Promise<void>;
 	setForTesting: (identity: Identity) => void;
@@ -103,30 +104,38 @@ const initAuthStore = (): AuthStore => {
 		}
 	};
 
+	const sync = async ({ forceSync }: { forceSync: boolean }) => {
+		authClient = forceSync ? await createAuthClient() : await pickAuthClient();
+
+		const isAuthenticated: boolean = await authClient.isAuthenticated();
+
+		if (!isAuthenticated) {
+			// When the user signs out, we trigger a call to `sync()`.
+			// The `sync()` method creates a new `AuthClient` (since the previous one was nullified on sign-out), causing the creation of new identity keys in IndexedDB.
+			// To avoid using such keys (or tampered ones) for the next login, we use the method `safeCreateAuthClient()` which clears any stored keys before creating a new `AuthClient`.
+			// We do it only if the user is not authenticated, because if it is, then it is theoretically already safe (or at least, it is out of our control to make it safer).
+			authClient = await safeCreateAuthClient();
+
+			set({ identity: null });
+
+			return;
+		}
+
+		// If it is already authenticated, it is theoretically already safe (or at least, it is out of our control to make it safer)
+		set({
+			identity: authClient.getIdentity()
+		});
+	};
+
 	return {
 		subscribe,
 
 		sync: async () => {
-			authClient = await pickAuthClient();
+			await sync({ forceSync: false });
+		},
 
-			const isAuthenticated: boolean = await authClient.isAuthenticated();
-
-			if (!isAuthenticated) {
-				// When the user signs out, we trigger a call to `sync()`.
-				// The `sync()` method creates a new `AuthClient` (since the previous one was nullified on sign-out), causing the creation of new identity keys in IndexedDB.
-				// To avoid using such keys (or tampered ones) for the next login, we use the method `safeCreateAuthClient()` which clears any stored keys before creating a new `AuthClient`.
-				// We do it only if the user is not authenticated, because if it is, then it is theoretically already safe (or at least, it is out of our control to make it safer).
-				authClient = await safeCreateAuthClient();
-
-				set({ identity: null });
-
-				return;
-			}
-
-			// If it is already authenticated, it is theoretically already safe (or at least, it is out of our control to make it safer)
-			set({
-				identity: authClient.getIdentity()
-			});
+		forceSync: async () => {
+			await sync({ forceSync: true });
 		},
 
 		signIn: ({ domain }: AuthSignInParams) =>

@@ -116,7 +116,7 @@ describe('App Layout', () => {
 	});
 
 	it('should listen to BroadcastChannel events for auth synchronization', () => {
-		const spy = vi.spyOn(authStore, 'sync');
+		const spy = vi.spyOn(authStore, 'forceSync');
 
 		render(App, { children: mockSnippet });
 
@@ -130,7 +130,7 @@ describe('App Layout', () => {
 	});
 
 	it('should destroy the BroadcastChannel on unmount', () => {
-		const spy = vi.spyOn(authStore, 'sync');
+		const spy = vi.spyOn(authStore, 'forceSync');
 
 		const { unmount } = render(App, { children: mockSnippet });
 

@@ -31,7 +31,7 @@ class AuthBroadcastChannel implements AuthBroadcastChannelInterface {
 	};
 
 	init = () => {
-		this.onLoginSuccess(authStore.sync);
+		this.onLoginSuccess(authStore.forceSync);
 	};
 
 	close = () => {
