@@ -25,8 +25,19 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl, fee } =
-		$derived(transaction);
+	let {
+		id,
+		from,
+		to,
+		value,
+		timestamp,
+		type,
+		txExplorerUrl,
+		fromExplorerUrl,
+		toExplorerUrl,
+		fee,
+		incoming
+	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -114,7 +125,7 @@
 				</span>
 			</ListItem>
 
-			{#if nonNullish(fee) && nonNullish(token) && (type === 'send' || type === 'approve')}
+			{#if nonNullish(fee) && nonNullish(token) && !incoming}
 				<ListItem>
 					<span>{$i18n.fee.text.fee}</span>
 
