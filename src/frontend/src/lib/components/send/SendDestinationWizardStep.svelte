@@ -131,9 +131,9 @@
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
