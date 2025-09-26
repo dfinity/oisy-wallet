@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
 			"session_expired": "Deine Sitzung ist abgelaufen, du wurdest abgemeldet.",

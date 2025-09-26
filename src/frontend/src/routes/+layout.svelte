@@ -12,6 +12,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.contants';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
@@ -20,7 +21,7 @@
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 
 	interface Props {
 		children: Snippet;
@@ -110,11 +111,30 @@
 		spinner?.remove();
 	});
 
+	const handleBroadcastLoginSuccess = async () => {
+		const wasPreviouslyAuthenticated = $authSignedIn;
+
+		await authStore.forceSync();
+
+		if ($authNotSignedIn) {
+			return;
+		}
+
+		if (!wasPreviouslyAuthenticated) {
+			toastsShow({
+				text: $i18n.auth.message.refreshed_authentication,
+				level: 'success'
+			});
+		}
+
+		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
+	};
+
 	const openBc = () => {
 		try {
 			const bc = new AuthBroadcastChannel();
 
-			bc.onLoginSuccess(authStore.forceSync);
+			bc.onLoginSuccess(handleBroadcastLoginSuccess);
 
 			return () => {
 				bc?.close();
