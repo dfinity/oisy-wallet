@@ -4,7 +4,6 @@ import type {
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import {
@@ -116,8 +115,8 @@ export const mapIcrcTransaction = ({
 					? 'send'
 					: 'receive';
 
-	const approveFee = fromNullishNullable(fromNullable(approve)?.fee) ?? ZERO;
-	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee) ?? ZERO;
+	const approveFee = fromNullishNullable(fromNullable(approve)?.fee);
+	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
 
 	// for approve we shows the fee value
 	const value = isApprove ? approveFee : nonNullish(data?.amount) ? data.amount : undefined;
