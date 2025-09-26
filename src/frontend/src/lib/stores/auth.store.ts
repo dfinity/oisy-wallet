@@ -172,9 +172,11 @@ const initAuthStore = (): AuthStore => {
 							// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
 							const bc = new AuthBroadcastChannel();
 							bc.postLoginSuccess();
-						} catch (_: unknown) {
+						} catch (err: unknown) {
 							// We don't really care if the broadcast channel fails to open or if it fails to post messages.
 							// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+							// We just print a warning in the console for debugging purposes.
+							console.warn('Auth BroadcastChannel posting failed', err);
 						}
 
 						resolve();
