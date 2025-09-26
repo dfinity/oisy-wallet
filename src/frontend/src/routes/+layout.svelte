@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
+	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -14,6 +14,7 @@
 	} from '$lib/constants/analytics.contants';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -108,6 +109,25 @@
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
 	});
+
+	const openBc = () => {
+		try {
+			const bc = new AuthBroadcastChannel();
+
+			bc.onLoginSuccess(authStore.forceSync);
+
+			return () => {
+				bc?.close();
+			};
+		} catch (err: unknown) {
+			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
+			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+			// We just print a warning in the console for debugging purposes.
+			console.warn('Auth BroadcastChannel initialization failed', err);
+		}
+	};
+
+	onMount(openBc);
 </script>
 
 <svelte:window onstorage={syncAuthStore} />
