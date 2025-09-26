@@ -451,7 +451,7 @@ describe('nfts.utils', () => {
 			const url = 'ipfs:// ';
 			const result = parseMetadataResourceUrl({ url, error: mockError });
 
-			expect(result?.href).toBe('ipfs:/');
+			expect(result?.href).toBe('https://ipfs.io/ipfs/');
 		});
 
 		it('should not allow URL with localhost', () => {
