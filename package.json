@@ -73,7 +73,7 @@
 		"@dfinity/utils": "^3.1.0-next-2025-09-24",
 		"@dfinity/verifiable-credentials": "^1.1.0-next-2025-09-26",
 		"@dfinity/zod-schemas": "^2.1.0-next-2025-09-24",
-		"@icp-sdk/auth": "^4.0.0-beta.1",
+		"@icp-sdk/auth": "file:icp-sdk-auth-4.0.1-beta.0.tar",
 		"@icp-sdk/core": "^4.0.4",
 		"@metamask/detect-provider": "^2.0.0",
 		"@noble/ed25519": "^2.3.0",
