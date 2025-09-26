@@ -179,7 +179,7 @@ describe('ic-transactions.services', () => {
 			fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${transaction.from}`,
 			toExplorerUrl: `${ICP_EXPLORER_URL}/account/${mockIdentity.getPrincipal().toString()}`,
 			txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${transaction.id}`,
-			fee: 0n
+			fee: ZERO
 		}));
 
 		const mockCertifiedTransactions = mockTransactions.map((transaction) => ({
