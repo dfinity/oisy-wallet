@@ -12,7 +12,7 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type { Token, TokenId } from '$lib/types/token';
-import { bn1Bi } from '$tests/mocks/balances.mock';
+import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
 import type { PendingUtxo } from '@dfinity/ckbtc';
@@ -22,7 +22,7 @@ export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 		id: Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(),
 		type: 'send',
 		status: 'executed',
-		value: bn1Bi,
+		value: bn3Bi,
 		fee: bn1Bi,
 		from: 'dndtm-gk4kn-ssvos-asuit-2q33x-lgtpj-5bnoi-v5ync-m4iza-xclem-mae',
 		to: 'cmpd6-ywgum-ofyfa-masyv-v3gba-il2hu-upwxw-xhdq3-mzkhx-zfhpb-7ae',
