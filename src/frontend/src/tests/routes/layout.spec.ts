@@ -57,4 +57,14 @@ describe('App Layout', () => {
 
 		expect(spy).toHaveBeenCalledOnce();
 	});
+
+	it('should initialize a BroadcastChannel for auth synchronization', () => {
+		const spy = vi.spyOn(authStore, 'sync').mockImplementation(vi.fn());
+
+		expect(spy).not.toHaveBeenCalled();
+
+		render(App, { children: mockSnippet });
+
+		expect(spy).toHaveBeenCalledOnce();
+	});
 });

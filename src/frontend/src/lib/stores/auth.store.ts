@@ -6,6 +6,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
+import { broadcastAuthClientLoginSuccess } from '$lib/services/auth-broadcast.services';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
@@ -104,6 +105,12 @@ const initAuthStore = (): AuthStore => {
 							...state,
 							identity: authClient?.getIdentity()
 						}));
+
+						// If the user has more than one tab open in the same browser,
+						// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
+						// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
+						// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
+						broadcastAuthClientLoginSuccess();
 
 						resolve();
 					},
