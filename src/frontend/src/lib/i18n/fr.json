@@ -461,7 +461,7 @@
 					},
 					"jackpot": {
 						"title": "Vous avez gagné le bonus drop hebdomadaire",
-						"description": "Vous venez de gagner l'un de nos bonus drops hebdomadaires.<br>Restez actif et continuez à parrainer pour gagner plus",
+						"description": "Vous venez de gagner l'un de nos bonus drops hebdomadaires<br>Restez actif et continuez à parrainer pour gagner plus",
 						"share_href": ""
 					},
 					"leaderboard": {
@@ -471,7 +471,7 @@
 					},
 					"referral": {
 						"title": "Voici un petit merci",
-						"description": "L'un de vos utilisateurs parrainés vient de recevoir des sprinkles.",
+						"description": "L'un de vos utilisateurs parrainés vient de recevoir des sprinkles",
 						"share_href": ""
 					}
 				}
