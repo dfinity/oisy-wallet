@@ -6,8 +6,8 @@ import {
 	Icrcv2AccountIdObjectSchema,
 	SolAddressSchema
 } from '$lib/schema/address.schema';
-import { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('address.schema', () => {
 	describe('SolAddressSchema', () => {

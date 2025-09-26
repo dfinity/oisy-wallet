@@ -15,8 +15,8 @@ import type {
 	RewardResponseInfo,
 	RewardResult
 } from '$lib/types/reward';
-import type { Identity } from '@dfinity/agent';
 import { fromNullable, isNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
 

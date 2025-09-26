@@ -13,8 +13,8 @@ import {
 	type ManagedCanisters,
 	type OrchestratorInfo
 } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, jsonReplacer, nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { agent, loadMetadata, saveLogo } from './build.tokens.utils';

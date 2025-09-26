@@ -3,8 +3,8 @@ import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import { nullishSignOut } from '$lib/services/auth.services';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
-import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { clear, createStore, del, get, set as idbSet, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.

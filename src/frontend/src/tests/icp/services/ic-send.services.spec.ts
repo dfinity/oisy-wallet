@@ -31,7 +31,7 @@ import {
 } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipalText2 } from '$tests/mocks/identity.mock';
 import { decodeIcrcAccount } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/utils/wallet.utils', () => ({
 	waitAndTriggerWallet: vi.fn()

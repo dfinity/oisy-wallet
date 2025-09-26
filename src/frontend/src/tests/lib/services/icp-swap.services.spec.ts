@@ -26,7 +26,7 @@ import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 const mockPool = {
 	canisterId: Principal.fromText('aaaaa-aa'),

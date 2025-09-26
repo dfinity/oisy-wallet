@@ -4,10 +4,10 @@ import type { IcCkToken } from '$icp/types/ic-token';
 import { isTokenCkErc20Ledger } from '$icp/utils/ic-send.utils';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import { AnonymousIdentity } from '@dfinity/agent';
 import type { Eip1559TransactionPrice } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, queryAndUpdate } from '@dfinity/utils';
+import { AnonymousIdentity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const loadEip1559TransactionPrice = async (token: IcCkToken) => {
