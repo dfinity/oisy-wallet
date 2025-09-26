@@ -5,18 +5,21 @@
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let progressStep: string;
-	export let steps: NonEmptyArray<ProgressStep | StaticStep>;
-	export let type: 'progress' | 'static' = 'progress';
-	export let failedSteps: string[] = [];
+	interface Props {
+		progressStep: string;
+		steps: NonEmptyArray<ProgressStep | StaticStep>;
+		type?: 'progress' | 'static';
+		failedSteps?: string[];
+	}
 
-	let cmp: typeof StaticSteps | typeof ProgressStepsCmp;
-	$: cmp = type === 'static' ? StaticSteps : ProgressStepsCmp;
+	let { progressStep, steps, type = 'progress', failedSteps = [] }: Props = $props();
 
-	let dynamicSteps: ProgressSteps = [
+	let Cmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
+
+	let dynamicSteps = $state<ProgressSteps>([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
-	];
+	]);
 
 	const updateSteps = () => {
 		const progressIndex = dynamicSteps.findIndex(({ step }) => step === progressStep);
@@ -36,9 +39,13 @@
 		}) as ProgressSteps;
 	};
 
-	$: (progressStep, updateSteps());
+	$effect(() => {
+		[progressStep];
+
+		updateSteps();
+	});
 </script>
 
 <div class="px-2 pb-3">
-	<svelte:component this={cmp} steps={dynamicSteps} />
+	<Cmp steps={dynamicSteps} />
 </div>
