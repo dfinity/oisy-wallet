@@ -14,16 +14,15 @@
 		destination: string;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
-        onNext: () => void;
+		onNext: () => void;
 	}
 
 	let {
 		networkContacts,
 		selectedContact = $bindable(),
 		destination = $bindable(),
-        onNext
+		onNext
 	}: Props = $props();
-
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -60,7 +59,7 @@
 						onClick={() => {
 							selectedContact = contact;
 							destination = address;
-							onNext()
+							onNext();
 						}}
 					/>
 				{/each}
