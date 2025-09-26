@@ -1,141 +1,119 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
-import {
-	AUTH_BROADCAST_CHANNEL,
-	AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS,
-	broadcastAuthClientLoginSuccess,
-	initAuthBroadcastChannel,
-	type AuthBroadcastChannelInterface
-} from '$lib/services/auth-broadcast.services';
-import { authStore } from '$lib/stores/auth.store';
+import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 
 describe('auth-broadcast.services', () => {
-	const postMessageSpy = vi.fn();
-	const closeSpy = vi.fn();
+	describe('AuthBroadcastChannel', () => {
+		let bc: AuthBroadcastChannel;
 
-	const mockOrigin = vi.fn().mockReturnValue(OISY_URL);
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
 
-	const mockChannels = new Map<string, BroadcastChannel>();
+		const postMessageSpy = vi.fn();
+		const closeSpy = vi.fn();
 
-	beforeEach(() => {
-		vi.clearAllMocks();
+		const mockOrigin = vi.fn().mockReturnValue(OISY_URL);
 
-		vi.stubGlobal(
-			'BroadcastChannel',
-			vi.fn((name: string) => {
-				const channel =
-					mockChannels.get(name) ??
-					({
-						name,
-						onmessage: null,
-						postMessage: postMessageSpy,
-						close: closeSpy
-					} as unknown as BroadcastChannel);
+		const mockChannels = new Map<string, BroadcastChannel>();
 
-				postMessageSpy.mockImplementation((message: unknown) => {
-					const event = new MessageEvent('message', {
-						data: message,
-						origin: mockOrigin()
-					});
-
-					channel.onmessage?.(event);
-				});
-
-				mockChannels.set(name, channel);
-
-				return channel;
-			})
-		);
-	});
-
-	afterEach(() => {
-		vi.unstubAllGlobals();
-	});
-
-	describe('initAuthBroadcastChannel', () => {
-		let bc: AuthBroadcastChannelInterface;
+		const mockHandler = vi.fn();
 
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(authStore, 'forceSync').mockImplementation(vi.fn());
+			vi.stubGlobal(
+				'BroadcastChannel',
+				vi.fn((name: string) => {
+					const channel =
+						mockChannels.get(name) ??
+						({
+							name,
+							onmessage: null,
+							postMessage: postMessageSpy,
+							close: closeSpy
+						} as unknown as BroadcastChannel);
 
-			bc = initAuthBroadcastChannel();
+					postMessageSpy.mockImplementation((message: unknown) => {
+						const event = new MessageEvent('message', {
+							data: message,
+							origin: mockOrigin()
+						});
+
+						channel.onmessage?.(event);
+					});
+
+					mockChannels.set(name, channel);
+
+					return channel;
+				})
+			);
+
+			bc = new AuthBroadcastChannel();
+
+			bc.onLoginSuccess(mockHandler);
 		});
 
 		afterEach(() => {
 			bc.close();
+
+			vi.unstubAllGlobals();
 		});
 
 		it('should create a BroadcastChannel with the correct name', () => {
-			expect(BroadcastChannel).toHaveBeenCalledExactlyOnceWith(AUTH_BROADCAST_CHANNEL);
+			expect(BroadcastChannel).toHaveBeenCalledExactlyOnceWith(channelName);
 		});
 
-		it('should set up onmessage handler', () => {
-			const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+		describe('onLoginSuccess', () => {
+			const newBc = new BroadcastChannel(channelName);
 
-			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
+			it('should set up onmessage handler', () => {
+				newBc.postMessage(loginSuccessMessage);
 
-			expect(authStore.forceSync).toHaveBeenCalledExactlyOnceWith();
+				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
+			});
+
+			it('should not call handler for different messages', () => {
+				newBc.postMessage('someOtherMessage');
+
+				expect(mockHandler).not.toHaveBeenCalled();
+			});
+
+			it('should not call handler for messages from different origins', () => {
+				mockOrigin.mockReturnValueOnce('https://malicious.com');
+
+				newBc.postMessage(loginSuccessMessage);
+
+				expect(mockHandler).not.toHaveBeenCalled();
+			});
 		});
 
-		it('should not call handler for different messages', () => {
-			const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+		describe('close', () => {
+			it('should close the BroadcastChannel', () => {
+				bc.close();
 
-			newBc.postMessage('someOtherMessage');
+				expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
+			});
 
-			expect(authStore.forceSync).not.toHaveBeenCalled();
+			it('should not close all the BroadcastChannel', () => {
+				bc.close();
+
+				expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
+
+				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				expect(mockHandler).toHaveBeenCalledTimes(2);
+			});
 		});
 
-		it('should not call handler for messages from different origins', () => {
-			mockOrigin.mockReturnValueOnce('https://malicious.com');
+		describe('postLoginSuccess', () => {
+			it('should post a login success message', () => {
+				bc.postLoginSuccess();
 
-			const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
-
-			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
-
-			expect(authStore.forceSync).not.toHaveBeenCalled();
-		});
-	});
-
-	describe('broadcastAuthClientLoginSuccess', () => {
-		beforeEach(() => {
-			vi.clearAllMocks();
-		});
-
-		it('should create a BroadcastChannel with the correct name', () => {
-			broadcastAuthClientLoginSuccess();
-
-			expect(BroadcastChannel).toHaveBeenCalledExactlyOnceWith(AUTH_BROADCAST_CHANNEL);
-		});
-
-		it('should post a login success message', () => {
-			broadcastAuthClientLoginSuccess();
-
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
-		});
-
-		it('should close the BroadcastChannel after posting the message', () => {
-			broadcastAuthClientLoginSuccess();
-
-			expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
-		});
-
-		it('should not close all the BroadcastChannel after posting the message', () => {
-			vi.spyOn(authStore, 'forceSync').mockImplementation(vi.fn());
-
-			initAuthBroadcastChannel();
-
-			broadcastAuthClientLoginSuccess();
-
-			expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
-
-			expect(authStore.forceSync).toHaveBeenCalledExactlyOnceWith();
-
-			const newBc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
-
-			newBc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
-
-			expect(authStore.forceSync).toHaveBeenCalledTimes(2);
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith(loginSuccessMessage);
+			});
 		});
 	});
 });

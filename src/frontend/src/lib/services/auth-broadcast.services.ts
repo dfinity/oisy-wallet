@@ -1,31 +1,28 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
-import { authStore } from '$lib/stores/auth.store';
-
-export const AUTH_BROADCAST_CHANNEL = 'oisy_auth_channel';
-
-export const AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS = 'authClientLoginSuccess';
 
 // If the user has more than one tab open in the same browser,
 // there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
 // This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
 // To mitigate this, we use a `BroadcastChannel` to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-class AuthBroadcastChannel {
+export class AuthBroadcastChannel {
 	readonly #bc: BroadcastChannel;
 
+	static readonly CHANNEL_NAME: BroadcastChannel['name'] = 'oisy_auth_channel';
+	static readonly MESSAGE_LOGIN_SUCCESS = 'authClientLoginSuccess';
+
 	constructor() {
-		this.#bc = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+		this.#bc = new BroadcastChannel(AuthBroadcastChannel.CHANNEL_NAME);
 	}
 
-	private onLoginSuccess = (handler: () => Promise<void>) => {
+	onLoginSuccess = (handler: () => Promise<void>) => {
 		this.#bc.onmessage = async ($event) => {
-			if ($event.origin === OISY_URL && $event.data === AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS) {
+			if (
+				$event.origin === OISY_URL &&
+				$event.data === AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS
+			) {
 				await handler();
 			}
 		};
-	};
-
-	init = () => {
-		this.onLoginSuccess(authStore.forceSync);
 	};
 
 	close = () => {
@@ -33,22 +30,6 @@ class AuthBroadcastChannel {
 	};
 
 	postLoginSuccess = () => {
-		this.#bc.postMessage(AUTH_BROADCAST_MESSAGE_LOGIN_SUCCESS);
+		this.#bc.postMessage(AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS);
 	};
 }
-
-export const initAuthBroadcastChannel = (): AuthBroadcastChannel => {
-	const bc = new AuthBroadcastChannel();
-
-	bc.init();
-
-	return bc;
-};
-
-export const broadcastAuthClientLoginSuccess = () => {
-	const bc = new AuthBroadcastChannel();
-
-	bc.postLoginSuccess();
-
-	bc.close();
-};

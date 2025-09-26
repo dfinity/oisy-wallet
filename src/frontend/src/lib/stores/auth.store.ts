@@ -13,7 +13,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { broadcastAuthClientLoginSuccess } from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
@@ -169,7 +169,8 @@ const initAuthStore = (): AuthStore => {
 						// there could be a mismatch of the cached delegation chain vs the identity key of the `authClient` object.
 						// This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
 						// To mitigate this, we use a BroadcastChannel to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
-						broadcastAuthClientLoginSuccess();
+						const bc = new AuthBroadcastChannel();
+						bc.postLoginSuccess();
 
 						resolve();
 					},
