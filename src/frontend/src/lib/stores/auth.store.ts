@@ -3,8 +3,6 @@ import {
 	createAuthClient,
 	safeCreateAuthClient
 } from '$lib/api/auth-client.api';
-import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
-import { busy } from '$lib/stores/busy.store';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -99,8 +97,6 @@ const initAuthStore = (): AuthStore => {
 			await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
 		} catch (_: unknown) {
 			// In case of error in this flow, we prefer to log out the user and refresh the page to avoid possible further conflicts.
-
-			busy.start();
 
 			await authStore.signOut();
 
