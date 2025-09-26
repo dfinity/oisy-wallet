@@ -97,14 +97,14 @@ export const mapIcpTransaction = ({
 
 	if ('Approve' in operation) {
 		const approve = operation.Approve;
-		const approveValue: bigint | undefined = approve?.fee?.e8s;
-		const approveExpiresAt: bigint | undefined = fromNullable(approve?.expires_at)?.timestamp_nanos;
+		const approveValue = approve.fee.e8s;
+		const approveExpiresAt = fromNullable(approve.expires_at)?.timestamp_nanos;
 
 		return {
 			...tx,
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
-			...(nonNullish(approveValue) && { value: approveValue }),
+			value: approveValue,
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender
 		};
