@@ -9,10 +9,7 @@
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsCkBtcListeners from '$icp/components/transactions/IcTransactionsCkBtcListeners.svelte';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
-	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
@@ -25,7 +22,6 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
-	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
@@ -36,14 +32,6 @@
 	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
-
-	let AdditionalListener = $derived(
-		$tokenCkBtcLedger
-			? IcTransactionsCkBtcListeners
-			: ckEthereum
-				? IcTransactionsCkEthereumListeners
-				: IcTransactionsNoListener
-	);
 
 	let selectedTransaction = $state<IcTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
@@ -79,25 +67,23 @@
 </Header>
 
 <IcTransactionsSkeletons>
-	<AdditionalListener ckEthereumNativeToken={$ckEthereumNativeToken} {token}>
-		{#if $icTransactions.length > 0}
-			<IcTransactionsScroll {token}>
-				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
-					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction {token} transaction={transaction.data} />
-					</li>
-				{/each}
-			</IcTransactionsScroll>
-		{/if}
+	{#if $icTransactions.length > 0}
+		<IcTransactionsScroll {token}>
+			{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
+				<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
+					<IcTransaction {token} transaction={transaction.data} />
+				</li>
+			{/each}
+		</IcTransactionsScroll>
+	{/if}
 
-		{#if noTransactions}
-			<IcNoIndexPlaceholder
-				placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
-			/>
-		{:else if $icTransactions.length === 0}
-			<TransactionsPlaceholder />
-		{/if}
-	</AdditionalListener>
+	{#if noTransactions}
+		<IcNoIndexPlaceholder
+			placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
+		/>
+	{:else if $icTransactions.length === 0}
+		<TransactionsPlaceholder />
+	{/if}
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}
