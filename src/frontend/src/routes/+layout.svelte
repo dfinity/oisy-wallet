@@ -14,7 +14,10 @@
 	} from '$lib/constants/analytics.contants';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
-	import { initAuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+	import {
+		AuthBroadcastChannel,
+		initAuthBroadcastChannel
+	} from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { initAuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
@@ -111,7 +114,9 @@
 	});
 
 	const openBc = () => {
-		const bc = initAuthBroadcastChannel();
+		const bc = new AuthBroadcastChannel();
+
+		bc.onLoginSuccess(authStore.forceSync);
 
 		return () => {
 			bc?.close();
