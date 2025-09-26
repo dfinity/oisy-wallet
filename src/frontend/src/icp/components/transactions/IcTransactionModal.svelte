@@ -116,7 +116,7 @@
 
 			{#if nonNullish(fee) && nonNullish(token) && (type === 'send' || type === 'approve')}
 				<ListItem>
-					<span>Fee</span>
+					<span>{$i18n.fee.text.fee}</span>
 
 					<output>
 						{formatToken({
