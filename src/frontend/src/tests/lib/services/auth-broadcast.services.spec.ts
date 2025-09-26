@@ -21,17 +21,15 @@ describe('auth-broadcast.services', () => {
 
 		vi.stubGlobal(
 			'BroadcastChannel',
-			vi.fn((key: string) => {
-				const channel: BroadcastChannel = mockChannels.get(key) ?? {
-					name: key,
-					dispatchEvent: vi.fn(),
-					onmessage: null,
-					onmessageerror: vi.fn(),
-					postMessage: postMessageSpy,
-					close: closeSpy,
-					addEventListener: vi.fn(),
-					removeEventListener: vi.fn()
-				};
+			vi.fn((name: string) => {
+				const channel =
+					mockChannels.get(name) ??
+					({
+						name,
+						onmessage: null,
+						postMessage: postMessageSpy,
+						close: closeSpy
+					} as unknown as BroadcastChannel);
 
 				postMessageSpy.mockImplementation((message: unknown) => {
 					const event = new MessageEvent('message', {
@@ -42,7 +40,7 @@ describe('auth-broadcast.services', () => {
 					channel.onmessage?.(event);
 				});
 
-				mockChannels.set(key, channel);
+				mockChannels.set(name, channel);
 
 				return channel;
 			})
