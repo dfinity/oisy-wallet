@@ -91,10 +91,10 @@
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					onQRCodeScan={() => dispatch('icQRCodeScan')}
 					token={$sendToken}
 					bind:destination
 					bind:invalidDestination
-					on:icQRCodeScan
 				/>
 				<SendDestinationTabs
 					knownDestinations={$ethKnownDestinations}
