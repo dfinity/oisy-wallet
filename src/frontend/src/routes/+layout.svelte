@@ -20,7 +20,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+	import {AuthBroadcastChannel, initAuthBroadcastChannel} from '$lib/services/auth-broadcast.services';
 
 	interface Props {
 		children: Snippet;
@@ -114,10 +114,8 @@
 
 	const openBc = () => {
 		if (isNullish(bc)) {
-			bc = new AuthBroadcastChannel();
+			bc = initAuthBroadcastChannel();
 		}
-
-		bc?.init()
 
 		return () => {
 			bc?.close();
