@@ -4,7 +4,7 @@ import {
 	safeCreateAuthClient
 } from '$lib/api/auth-client.api';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 import {
 	AUTH_MAX_TIME_TO_LIVE,
@@ -85,11 +85,9 @@ const initAuthStore = (): AuthStore => {
 	 * TODO: Remove this when `authClient` will handle it by itself during login.
 	 */
 	const overwriteStoredIdentityKey = async () => {
-		// This does not happen at this point, since the method is called after the login is successful.
-		// But we add this check to make is type-safe.
-		if (isNullish(authClient)) {
-			return;
-		}
+		// In the unlikely event of an error while setting a value in IndexedDB,
+		// we log out the user and refresh the page to prevent potential conflicts.
+		assertNonNullish(authClient);
 
 		try {
 			const key = authClient['_key'];
