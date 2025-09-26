@@ -5,7 +5,7 @@ import type {
 	SolAddressSchema
 } from '$lib/schema/address.schema';
 import type { Option } from '$lib/types/utils';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type Address = z.infer<typeof AddressSchema>;
 
