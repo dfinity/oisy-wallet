@@ -10,11 +10,13 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 
-	const address = isNetworkIdBTCTestnet($networkId)
-		? $btcAddressTestnet
-		: isNetworkIdBTCRegtest($networkId)
-			? $btcAddressRegtest
-			: $btcAddressMainnet;
+	let address = $derived(
+		isNetworkIdBTCTestnet($networkId)
+			? $btcAddressTestnet
+			: isNetworkIdBTCRegtest($networkId)
+				? $btcAddressRegtest
+				: $btcAddressMainnet
+	);
 </script>
 
 <div class="p-3">
