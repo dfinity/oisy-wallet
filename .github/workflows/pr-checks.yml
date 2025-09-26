@@ -8,7 +8,6 @@ on:
       - reopened
       - synchronize
       - labeled
-  merge_group:
 
 permissions: {}
 
