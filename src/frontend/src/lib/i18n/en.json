@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "A Smarter Wallet",
-			"title_part_2": "100% Decentralized",
+			"title_part_1": "Your Digital Assets",
+			"title_part_2": "Private and Secure",
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
 			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
-			"instant_and_private": "Built in AI with privacy as standard",
-			"advanced_cryptography": "Secured by advanced cryptography - fully onchain"
+			"instant_and_private": "Built-in AI Assistant with privacy as standard",
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
