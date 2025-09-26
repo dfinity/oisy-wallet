@@ -113,16 +113,11 @@
 		spinner?.remove();
 	});
 
-	let bc = $state<AuthBroadcastChannelInterface | undefined>();
-
 	const openBc = () => {
-		if (isNullish(bc)) {
-			bc = initAuthBroadcastChannel();
-		}
+		const bc = initAuthBroadcastChannel();
 
 		return () => {
 			bc?.close();
-			bc = undefined;
 		};
 	};
 
