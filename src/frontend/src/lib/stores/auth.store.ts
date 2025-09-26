@@ -14,7 +14,6 @@ import {
 	TEST
 } from '$lib/constants/app.constants';
 import { broadcastAuthClientLoginSuccess } from '$lib/services/auth-broadcast.services';
-import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
