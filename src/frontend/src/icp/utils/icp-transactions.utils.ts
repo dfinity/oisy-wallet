@@ -95,10 +95,10 @@ export const mapIcpTransaction = ({
 			...tx,
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
-			value: approveValue,
+			...(nonNullish(approveValue) && { value: approveValue }),
 			...(nonNullish(approveFee) && { fee: approveFee }),
-			...(nonNullish(approve.spender) && { approveSpender: approve.spender }),
-			...(nonNullish(approveExpiresAt) && { approveExpiresAt })
+			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
+			approveSpender: approve.spender
 		};
 	}
 
