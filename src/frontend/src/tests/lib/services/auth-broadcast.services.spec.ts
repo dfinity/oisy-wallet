@@ -63,15 +63,17 @@ describe('auth-broadcast.services', () => {
 		});
 
 		describe('onLoginSuccess', () => {
-			const newBc = new BroadcastChannel(channelName);
-
 			it('should set up onmessage handler', () => {
+				const newBc = new BroadcastChannel(channelName);
+
 				newBc.postMessage(loginSuccessMessage);
 
 				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should not call handler for different messages', () => {
+				const newBc = new BroadcastChannel(channelName);
+
 				newBc.postMessage('someOtherMessage');
 
 				expect(mockHandler).not.toHaveBeenCalled();
@@ -79,6 +81,8 @@ describe('auth-broadcast.services', () => {
 
 			it('should not call handler for messages from different origins', () => {
 				mockOrigin.mockReturnValueOnce('https://malicious.com');
+
+				const newBc = new BroadcastChannel(channelName);
 
 				newBc.postMessage(loginSuccessMessage);
 
@@ -98,13 +102,13 @@ describe('auth-broadcast.services', () => {
 
 				expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 
-				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
+				expect(mockHandler).not.toHaveBeenCalled();
 
 				const newBc = new BroadcastChannel(channelName);
 
 				newBc.postMessage(loginSuccessMessage);
 
-				expect(mockHandler).toHaveBeenCalledTimes(2);
+				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 
