@@ -111,10 +111,10 @@
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}

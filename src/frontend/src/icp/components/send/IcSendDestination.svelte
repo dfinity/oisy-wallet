@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,16 +9,27 @@
 	import type { KnownDestinations } from '$lib/types/transactions';
 	import { isNetworkIdBitcoin, isNetworkIdEthereum } from '$lib/utils/network.utils';
 
-	export let destination = '';
-	export let networkId: NetworkId | undefined = undefined;
-	export let tokenStandard: TokenStandard;
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		destination: string;
+		networkId?: NetworkId;
+		tokenStandard: TokenStandard;
+		invalidDestination: boolean;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+		onQRCodeScan?: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		destination = $bindable(''),
+		networkId,
+		tokenStandard,
+		invalidDestination = $bindable(false),
+		knownDestinations,
+		networkContacts,
+		onQRCodeScan
+	}: Props = $props();
 
-	let isInvalidDestination: () => boolean;
+	let isInvalidDestination = $state<(() => boolean) | undefined>();
 
 	const init = () =>
 		(isInvalidDestination = (): boolean =>
@@ -32,14 +42,19 @@
 
 	const debounceValidateInit = debounce(init);
 
-	$: (destination, tokenStandard, networkId, debounceValidateInit());
+	$effect(() => {
+		[destination, tokenStandard, networkId];
 
-	let inputPlaceholder: string;
-	$: inputPlaceholder = isNetworkIdEthereum(networkId)
-		? $i18n.send.placeholder.enter_eth_address
-		: isNetworkIdBitcoin(networkId)
-			? $i18n.send.placeholder.enter_recipient_address
-			: $i18n.send.placeholder.enter_wallet_address;
+		debounceValidateInit();
+	});
+
+	let inputPlaceholder = $derived(
+		isNetworkIdEthereum(networkId)
+			? $i18n.send.placeholder.enter_eth_address
+			: isNetworkIdBitcoin(networkId)
+				? $i18n.send.placeholder.enter_recipient_address
+				: $i18n.send.placeholder.enter_wallet_address
+	);
 </script>
 
 <SendInputDestination
@@ -47,8 +62,7 @@
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	onQRButtonClick={onQRCodeScan}
 	bind:destination
 	bind:invalidDestination
-	on:icQRCodeScan
 />
