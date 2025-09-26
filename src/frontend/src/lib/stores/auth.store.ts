@@ -3,6 +3,11 @@ import {
 	createAuthClient,
 	safeCreateAuthClient
 } from '$lib/api/auth-client.api';
+import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
+import { busy } from '$lib/stores/busy.store';
+import { AuthClientNotInitializedError } from '$lib/types/errors';
+import { isNullish } from '@dfinity/utils';
+
 import {
 	AUTH_MAX_TIME_TO_LIVE,
 	AUTH_POPUP_HEIGHT,
@@ -10,9 +15,6 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { warnSignOut } from '$lib/services/auth.services';
-import { i18n } from '$lib/stores/i18n.store';
-import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
@@ -20,8 +22,8 @@ import { popupCenter } from '$lib/utils/window.utils';
 import type { Identity } from '@dfinity/agent';
 import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
 import type { ECDSAKeyIdentity } from '@dfinity/identity';
-import { isNullish, nonNullish } from '@dfinity/utils';
-import { get, writable, type Readable } from 'svelte/store';
+import { nonNullish } from '@dfinity/utils';
+import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
 	identity: OptionIdentity;
@@ -99,7 +101,12 @@ const initAuthStore = (): AuthStore => {
 		} catch (_: unknown) {
 			// In case of error in this flow, we prefer to log out the user to avoid possible further conflicts.
 			// The logout will in any case refresh the page.
-			await warnSignOut(get(i18n).auth.warning.reload_and_retry);
+
+			busy.start();
+
+			await authStore.signOut();
+
+			window.location.reload();
 		}
 	};
 
