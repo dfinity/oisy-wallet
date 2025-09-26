@@ -149,9 +149,9 @@
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
