@@ -139,7 +139,7 @@
 						/>
 					{/if}
 					{#if nonNullish(onQRButtonClick)}
-						<QrButton on:click={onQRButtonClick} />
+						<QrButton onclick={onQRButtonClick} />
 					{/if}
 				</span>
 			{/snippet}
