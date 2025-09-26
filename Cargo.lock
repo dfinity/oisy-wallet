@@ -145,7 +145,7 @@ dependencies = [
  "futures",
  "getrandom",
  "hex",
- "ic-cdk 0.16.1",
+ "ic-cdk 0.17.2",
  "ic-cdk-macros 0.16.0",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
@@ -1664,7 +1664,7 @@ name = "ic-cycles-ledger-client"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.1",
+ "ic-cdk 0.17.2",
  "ic-cycles-ledger-types",
  "serde",
  "serde_bytes",
@@ -1675,7 +1675,7 @@ name = "ic-cycles-ledger-pic"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.1",
+ "ic-cdk 0.17.2",
  "ic-cycles-ledger-types",
  "pocket-ic",
  "serde",
@@ -1687,7 +1687,7 @@ name = "ic-cycles-ledger-types"
 version = "0.1.0"
 dependencies = [
  "candid",
- "ic-cdk 0.16.1",
+ "ic-cdk 0.17.2",
  "serde",
  "serde_bytes",
 ]
@@ -3635,7 +3635,7 @@ dependencies = [
  "getrandom",
  "hex",
  "ic-canister-sig-creation",
- "ic-cdk 0.16.1",
+ "ic-cdk 0.17.2",
  "ic-cdk-macros 0.16.0",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
