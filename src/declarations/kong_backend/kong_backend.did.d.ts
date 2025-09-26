@@ -1,5 +1,5 @@
-import type { ActorMethod } from '@icp-sdk/core/agent';
-import type { IDL } from '@icp-sdk/core/candid';
+import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
 
 export type AddLiquiditAmountsResult = { Ok: AddLiquidityAmountsReply } | { Err: string };
 export interface AddLiquidityAmountsReply {

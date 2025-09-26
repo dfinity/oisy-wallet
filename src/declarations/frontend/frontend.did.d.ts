@@ -1,6 +1,6 @@
-import type { ActorMethod } from '@icp-sdk/core/agent';
-import type { IDL } from '@icp-sdk/core/candid';
-import type { Principal } from '@icp-sdk/core/principal';
+import type { ActorMethod } from '@dfinity/agent';
+import type { IDL } from '@dfinity/candid';
+import type { Principal } from '@dfinity/principal';
 
 export type AssetCanisterArgs = { Upgrade: UpgradeArgs } | { Init: InitArgs };
 export type BatchId = bigint;
