@@ -149,6 +149,10 @@ describe('App Layout', () => {
 		});
 
 		describe('on login success message', () => {
+			beforeEach(() => {
+				vi.clearAllMocks();
+			});
+
 			it('should trigger the forced re-synchronization', () => {
 				const spy = vi.spyOn(authStore, 'forceSync');
 
