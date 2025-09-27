@@ -7,7 +7,7 @@ import type {
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Tokens, Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (
@@ -85,19 +85,10 @@ export const mapIcpTransaction = ({
 		toExplorerUrl: `${ICP_EXPLORER_URL}/account/${to}`
 	});
 
-	const mapAmount = ({
-		amount,
-		fee,
-		incoming
-	}: {
-		incoming: boolean | undefined;
-		fee: Tokens;
-		amount: Tokens;
-	}): bigint => amount.e8s + (incoming === false ? fee.e8s : ZERO);
-
 	if ('Approve' in operation) {
 		const approve = operation.Approve;
-		const approveValue = approve.fee.e8s;
+		const approveValue = approve.allowance.e8s;
+		const approveFee = approve.fee?.e8s;
 		const approveExpiresAt = fromNullable(approve.expires_at)?.timestamp_nanos;
 
 		return {
@@ -105,6 +96,7 @@ export const mapIcpTransaction = ({
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
 			value: approveValue,
+			...(nonNullish(approveFee) && { fee: approveFee }),
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender
 		};
@@ -137,11 +129,8 @@ export const mapIcpTransaction = ({
 			type: source.incoming === false ? 'send' : 'receive',
 			...source,
 			...mapTo(operation.Transfer.to),
-			value: mapAmount({
-				amount: operation.Transfer.amount,
-				fee: operation.Transfer.fee,
-				incoming: source.incoming
-			})
+			value: operation.Transfer.amount.e8s,
+			fee: source.incoming === false ? operation.Transfer.fee.e8s : ZERO
 		};
 	}
 
