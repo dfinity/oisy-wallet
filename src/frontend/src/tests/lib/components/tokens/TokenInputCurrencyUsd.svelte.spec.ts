@@ -14,7 +14,8 @@ describe('TokenInputCurrencyFiat', () => {
 		disabled: false,
 		placeholder: '0',
 		error: false,
-		loading: false
+		loading: false,
+		onInput: vi.fn()
 	};
 
 	it('renders in USD mode with $ sign', () => {

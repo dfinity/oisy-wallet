@@ -114,12 +114,12 @@
 						error={nonNullish(errorType)}
 						{exchangeRate}
 						{loading}
+						{onInput}
 						{placeholder}
 						tokenDecimals={token.decimals}
 						bind:tokenAmount={amount}
 						on:focus={onFocus}
 						on:blur={onBlur}
-						on:nnsInput={onInput}
 					/>
 				{/if}
 			{:else}

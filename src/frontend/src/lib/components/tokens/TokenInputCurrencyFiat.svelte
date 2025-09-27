@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import TokenInputCurrency from '$lib/components/tokens/TokenInputCurrency.svelte';
 	import {
 		TOKEN_INPUT_CURRENCY_FIAT,
@@ -17,19 +16,33 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let tokenAmount: OptionAmount;
-	export let tokenDecimals: number;
-	export let exchangeRate: number | undefined = undefined;
-	export let name = 'token-input-currency-fiat';
-	export let disabled = false;
-	export let placeholder = '0';
-	export let error = false;
-	export let loading = false;
-	export let autofocus = false;
+	interface Props {
+		tokenAmount: OptionAmount;
+		tokenDecimals: number;
+		exchangeRate?: number;
+		name?: string;
+		disabled?: boolean;
+		placeholder?: string;
+		error?: boolean;
+		loading?: boolean;
+		autofocus?: boolean;
+		onInput: () => void;
+	}
 
-	let displayValue: OptionAmount;
+	let {
+		tokenAmount = $bindable(),
+		tokenDecimals,
+		exchangeRate,
+		name = 'token-input-currency-fiat',
+		disabled = false,
+		placeholder = '0',
+		error = false,
+		loading = false,
+		autofocus = false,
+		onInput = () => {}
+	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
+	let displayValue = $state<OptionAmount>();
 
 	const handleInput = () => {
 		const convertedValue =
@@ -41,7 +54,7 @@
 
 		tokenAmount = nonNullish(convertedValue) ? convertedValue.toFixed(tokenDecimals) : undefined;
 
-		dispatch('nnsInput');
+		onInput();
 	};
 
 	const syncDisplayValueWithTokenAmount = () => {
@@ -62,7 +75,11 @@
 		}
 	};
 
-	$: (tokenAmount, syncDisplayValueWithTokenAmount());
+	$effect(() => {
+		[tokenAmount];
+
+		syncDisplayValueWithTokenAmount();
+	});
 </script>
 
 <TokenInputCurrency
@@ -72,11 +89,11 @@
 	{disabled}
 	{error}
 	{loading}
+	onInput={handleInput}
 	{placeholder}
 	styleClass="no-padding"
 	testId={TOKEN_INPUT_CURRENCY_FIAT}
 	bind:value={displayValue}
-	on:nnsInput={handleInput}
 	on:focus
 	on:blur
 >
@@ -88,9 +105,6 @@
 		>
 			{$currentCurrencySymbol}
 		</span>
-	{/snippet}
-	{#snippet innerEnd()}
-		<slot name="inner-end" />
 	{/snippet}
 </TokenInputCurrency>
 
