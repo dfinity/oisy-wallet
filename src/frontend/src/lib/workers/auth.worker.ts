@@ -3,6 +3,7 @@ import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
 import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
+import { uint8ArraysEqual } from '@dfinity/utils';
 
 export const onAuthMessage = async ({
 	data
@@ -72,8 +73,21 @@ const checkDelegationChain = async (): Promise<{
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 
+	if (delegation === null) {
+		return { valid: false, delegation };
+	}
+
+	const authClient: AuthClient = await createAuthClient();
+	// TODO: remove this part when `authClient` will provide a method to extract the key
+	const authClientKey = authClient?.['_key']['_derKey'];
+	const delegationKey = delegation.delegations[0].delegation.pubkey;
+
+	if (!uint8ArraysEqual({ a: authClientKey, b: delegationKey })) {
+		return { valid: false, delegation };
+	}
+
 	return {
-		valid: delegation !== null && isDelegationValid(delegation),
+		valid: isDelegationValid(delegation),
 		delegation
 	};
 };
