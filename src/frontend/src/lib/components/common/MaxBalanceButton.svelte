@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { run, preventDefault } from 'svelte/legacy';
 	import { ZERO } from '$lib/constants/app.constants';
@@ -14,7 +15,7 @@
 		amountSetToMax?: boolean;
 		error?: boolean;
 		balance: OptionBalance;
-		token?: Token | undefined;
+		token?: Token;
 		fee?: bigint;
 	}
 
@@ -23,23 +24,22 @@
 		amountSetToMax = $bindable(false),
 		error = false,
 		balance,
-		token = undefined,
-		fee = undefined
+		token,
+		fee
 	}: Props = $props();
 
-	let isZeroBalance: boolean = $derived(isNullish(balance) || balance === ZERO);
+	let isZeroBalance = $derived(isNullish(balance) || balance === ZERO);
 
-	let maxAmount: string | undefined = $state();
-	run(() => {
-		maxAmount = nonNullish(token)
+	let maxAmount = $derived(
+		nonNullish(token)
 			? getMaxTransactionAmount({
 					balance,
 					fee,
 					tokenDecimals: token.decimals,
 					tokenStandard: token.standard
 				})
-			: undefined;
-	});
+			: undefined
+	);
 
 	const setMax = () => {
 		if (!isZeroBalance && nonNullish(maxAmount)) {
@@ -49,7 +49,7 @@
 	};
 
 	/**
-	 * Reevaluate max amount if user has used the "Max" button and fee is changing.
+	 * Reevaluate max amount if the user has used the "Max" button and the fee is changing.
 	 */
 	const debounceSetMax = () => {
 		if (!amountSetToMax) {
@@ -58,8 +58,10 @@
 		debounce(() => setMax(), 500)();
 	};
 
-	run(() => {
-		(fee, debounceSetMax());
+	$effect(() => {
+		[fee];
+
+		debounceSetMax();
 	});
 </script>
 

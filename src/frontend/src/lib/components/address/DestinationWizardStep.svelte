@@ -69,7 +69,7 @@
 				{tokenStandard}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 			/>
 		{/snippet}
 	</DestinationWizardStepSection>

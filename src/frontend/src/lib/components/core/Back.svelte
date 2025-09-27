@@ -14,7 +14,7 @@
 
 	let { color = 'primary', onlyArrow = false }: Props = $props();
 
-	let fromRoute: NavigationTarget | null = $state();
+	let fromRoute = $state<NavigationTarget | null | undefined>();
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;

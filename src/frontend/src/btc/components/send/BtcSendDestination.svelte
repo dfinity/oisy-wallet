@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NetworkContacts } from '$lib/types/contacts';
@@ -8,22 +7,22 @@
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
 	interface Props {
-		destination?: string;
+		destination: string;
 		networkId?: NetworkId;
-		invalidDestination?: boolean;
-		knownDestinations?: KnownDestinations | undefined;
-		networkContacts?: NetworkContacts | undefined;
+		invalidDestination: boolean;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+		onQRCodeScan?: () => void;
 	}
 
 	let {
 		destination = $bindable(''),
-		networkId = undefined,
+		networkId,
 		invalidDestination = $bindable(false),
-		knownDestinations = undefined,
-		networkContacts = undefined
+		knownDestinations,
+		networkContacts,
+		onQRCodeScan
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	const isInvalidDestination = (): boolean =>
 		isInvalidDestinationBtc({
@@ -37,8 +36,7 @@
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	onQRButtonClick={onQRCodeScan}
 	bind:destination
 	bind:invalidDestination
-	on:icQRCodeScan
 />
