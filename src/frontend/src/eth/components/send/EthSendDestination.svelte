@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -12,27 +11,36 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 
-	export let token: OptionToken;
-	export let network: Network | undefined = undefined;
-	export let destination = '';
-	export let invalidDestination = false;
-	export let knownDestinations: KnownDestinations | undefined = undefined;
-	export let networkContacts: NetworkContacts | undefined = undefined;
+	interface Props {
+		token: OptionToken;
+		network?: Network;
+		destination: string;
+		invalidDestination: boolean;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+		onQRCodeScan?: () => void;
+	}
 
-	let networkICP = false;
-	$: networkICP = isNetworkICP(network);
+	let {
+		token,
+		network,
+		destination = $bindable(''),
+		invalidDestination = $bindable(false),
+		knownDestinations,
+		networkContacts,
+		onQRCodeScan
+	}: Props = $props();
 
-	let erc20Icp = false;
-	$: erc20Icp = isErc20Icp(token);
+	let networkICP = $derived(isNetworkICP(network));
 
-	const dispatch = createEventDispatcher();
+	let erc20Icp = $derived(isErc20Icp(token));
 
 	const isInvalidDestination = (): boolean => {
 		if (isNullishOrEmpty(destination)) {
 			return false;
 		}
 
-		// Avoid flickering when user enter an address and the network is about to being selected automatically.
+		// Avoid flickering when users enter an address and the network is about to be selected automatically.
 		if (erc20Icp && isNullish(network)) {
 			return false;
 		}
@@ -52,8 +60,7 @@
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	onQRButtonClick={onQRCodeScan}
 	bind:destination
 	bind:invalidDestination
-	on:icQRCodeScan
 />

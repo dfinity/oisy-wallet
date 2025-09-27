@@ -38,7 +38,8 @@ contactsStore.addContact(mapToFrontendContact(mockContacts[1]));
 
 describe('SendDestinationWizardStep', () => {
 	const props = {
-		destination: mockEthAddress
+		destination: mockEthAddress,
+		activeSendDestinationTab: 'recentlyUsed' as const
 	};
 
 	const mockContext = (sendToken: Token) =>
@@ -128,7 +129,7 @@ describe('SendDestinationWizardStep', () => {
 	it('should set selectedContact when a contact is selected', async () => {
 		const selectedContact: Writable<ContactUi> = writable();
 		const { getByText, getByTestId } = render(SendDestinationWizardStepTestHost, {
-			props: { selectedContact },
+			props: { selectedContact, destination: '', activeSendDestinationTab: 'recentlyUsed' },
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
@@ -144,7 +145,11 @@ describe('SendDestinationWizardStep', () => {
 	it('should set selectedContact when a contacts address is entered and next is clicked', async () => {
 		const selectedContact: Writable<ContactUi> = writable();
 		const { getByTestId } = render(SendDestinationWizardStepTestHost, {
-			props: { destination: mockEthAddress3, selectedContact },
+			props: {
+				destination: mockEthAddress3,
+				selectedContact,
+				activeSendDestinationTab: 'recentlyUsed'
+			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
@@ -156,7 +161,11 @@ describe('SendDestinationWizardStep', () => {
 	it('should set selectedContact when selecting a contact without overwriting it with a lookup', async () => {
 		const selectedContact: Writable<ContactUi> = writable();
 		const { getByTestId, getByText } = render(SendDestinationWizardStepTestHost, {
-			props: { destination: mockEthAddress3, selectedContact },
+			props: {
+				destination: mockEthAddress3,
+				selectedContact,
+				activeSendDestinationTab: 'recentlyUsed'
+			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
