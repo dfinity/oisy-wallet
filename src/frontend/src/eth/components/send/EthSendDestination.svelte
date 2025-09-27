@@ -40,7 +40,7 @@
 			return false;
 		}
 
-		// Avoid flickering when users enter an address and the network is about to being selected automatically.
+		// Avoid flickering when users enter an address and the network is about to be selected automatically.
 		if (erc20Icp && isNullish(network)) {
 			return false;
 		}
