@@ -10,7 +10,8 @@ describe('TokenInputCurrencyToken', () => {
 		disabled: false,
 		placeholder: '0',
 		error: false,
-		loading: false
+		loading: false,
+		onInput: vi.fn()
 	};
 
 	it('handles input', async () => {
