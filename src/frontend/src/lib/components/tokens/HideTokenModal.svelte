@@ -107,10 +107,10 @@
 		} as ProgressStep
 	];
 
-	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
+	let hideProgressStep = $state<ProgressStepsHideToken.INITIALIZATION>();
 
-	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
-	let modal: WizardModal<WizardStepsHideToken>;
+	let currentStep = $state<WizardStep<WizardStepsHideToken> | undefined>();
+	let modal = $state<WizardModal<WizardStepsHideToken>>();
 
 	const close = () => {
 		modalStore.close();
