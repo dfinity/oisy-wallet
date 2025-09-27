@@ -51,7 +51,8 @@
 			"switch_currency": "Switch currency"
 		},
 		"warning": {
-			"do_not_close": "Don't close this tab until the transaction is done"
+			"do_not_close": "Don't close this tab until the transaction is done",
+			"standalone_mode": "Your installation is running in standalone Mode. ALARRRRMMM!!"
 		}
 	},
 	"navigation": {

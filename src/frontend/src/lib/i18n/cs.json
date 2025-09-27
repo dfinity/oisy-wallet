@@ -51,7 +51,8 @@
 			"switch_currency": "Přepnout měnu"
 		},
 		"warning": {
-			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
+			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

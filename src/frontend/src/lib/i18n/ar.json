@@ -51,7 +51,8 @@
 			"switch_currency": "تبديل العملة"
 		},
 		"warning": {
-			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة"
+			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

@@ -50,7 +50,7 @@ interface I18nCore {
 		switch_language: string;
 		switch_currency: string;
 	};
-	warning: { do_not_close: string };
+	warning: { do_not_close: string; standalone_mode: string };
 }
 
 interface I18nNavigation {
