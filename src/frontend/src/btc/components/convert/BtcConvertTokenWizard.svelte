@@ -165,13 +165,13 @@
 			bind:receiveAmount
 			bind:amountError
 		>
-			<svelte:fragment slot="cancel">
+			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
 				{:else}
 					<ButtonCancel onclick={close} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>

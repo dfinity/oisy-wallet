@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
+	import {
+		type Snippet,
+		createEventDispatcher,
+		getContext,
+		onMount,
+		setContext,
+		type Snippet
+	} from 'svelte';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';

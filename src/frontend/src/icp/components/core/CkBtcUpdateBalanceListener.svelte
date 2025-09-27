@@ -7,11 +7,12 @@
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let ckBtcToken: IcCkToken | undefined;
-	$: ckBtcToken = findTwinToken({
-		tokenToPair: BTC_MAINNET_TOKEN,
-		tokens: $enabledIcTokens
-	});
+	let ckBtcToken: IcCkToken | undefined = $derived(
+		findTwinToken({
+			tokenToPair: BTC_MAINNET_TOKEN,
+			tokens: $enabledIcTokens
+		})
+	);
 </script>
 
 {#if nonNullish(ckBtcToken)}

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { type Snippet, getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import ConvertReview from '$lib/components/convert/ConvertReview.svelte';
@@ -10,10 +10,17 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		cancel?: Snippet;
+	}
+
+	let { sendAmount, receiveAmount, cancel }: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
@@ -23,6 +30,9 @@
 		{/snippet}
 	</EthFeeDisplay>
 
+	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<div slot="info-message" class="mt-4">
 		<MessageBox>
 			{isTokenErc20($sourceToken)
@@ -33,5 +43,7 @@
 		</MessageBox>
 	</div>
 
-	<slot name="cancel" slot="cancel" />
+	{#snippet cancel()}
+		{@render cancel_render?.()}
+	{/snippet}
 </ConvertReview>

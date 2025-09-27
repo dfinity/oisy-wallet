@@ -64,8 +64,13 @@
 		bind:error={amountError}
 		on:click={onTokensList}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}
+			<span>{$i18n.core.text.amount}</span>
+		{/snippet}
 
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
+		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
 		<svelte:fragment slot="amount-info">
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
@@ -79,7 +84,7 @@
 			{/if}
 		</svelte:fragment>
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -88,6 +93,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

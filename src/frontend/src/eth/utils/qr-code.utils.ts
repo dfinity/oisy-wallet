@@ -14,7 +14,7 @@ export const decodeQrCode = ({
 	erc20Tokens
 }: {
 	status: QrStatus;
-	code?: string | undefined;
+	code?: string;
 	expectedToken: OptionToken;
 	ethereumTokens: Token[];
 	erc20Tokens: Erc20Token[];

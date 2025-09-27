@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -13,7 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
-	let renderQRCodeReader = false;
+	let renderQRCodeReader = $state(false);
 
 	const error = () => {
 		renderQRCodeReader = false;
@@ -23,10 +24,12 @@
 		});
 	};
 
-	let uri = '';
+	let uri = $state('');
 
-	let invalid = true;
-	$: invalid = !uri;
+	let invalid = $state(true);
+	run(() => {
+		invalid = !uri;
+	});
 
 	const dispatch = createEventDispatcher();
 

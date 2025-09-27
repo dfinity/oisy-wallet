@@ -5,7 +5,11 @@
 	import { SWAP_SWITCH_TOKENS_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let disabled = false;
+	interface Props {
+		disabled?: boolean;
+	}
+
+	let { disabled = false }: Props = $props();
 	const dispatch = createEventDispatcher();
 </script>
 

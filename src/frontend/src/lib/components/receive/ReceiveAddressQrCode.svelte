@@ -9,14 +9,25 @@
 	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
-	export let address: undefined | string;
-	export let addressLabel: string | undefined = undefined;
-	export let addressToken: Token | undefined;
+	interface Props {
+		address: undefined | string;
+		addressLabel?: string;
+		addressToken: Token | undefined;
+		network: Network;
+		qrCodeAction: ReceiveQRCodeAction;
+		copyAriaLabel: string;
+		testId?: string;
+	}
 
-	export let network: Network;
-	export let qrCodeAction: ReceiveQRCodeAction;
-	export let copyAriaLabel: string;
-	export let testId: string | undefined = undefined;
+	let {
+		address,
+		addressLabel = undefined,
+		addressToken,
+		network,
+		qrCodeAction,
+		copyAriaLabel,
+		testId = undefined
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 </script>

@@ -24,7 +24,7 @@
 	}
 
 	let {
-		utxosFee = $bindable(undefined),
+		utxosFee = $bindable(),
 		amount = undefined,
 		networkId = undefined,
 		source
