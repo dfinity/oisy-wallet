@@ -83,12 +83,12 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		await waitFor(()=>{
-		expect(removeUserTokenMock).toHaveBeenCalledOnce();
-		expect(toasts).toHaveBeenCalledOnce();
-		expect(idbTokensApi).toHaveBeenCalledOnce();
-		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
-		})
+		await waitFor(() => {
+			expect(removeUserTokenMock).toHaveBeenCalledOnce();
+			expect(toasts).toHaveBeenCalledOnce();
+			expect(idbTokensApi).toHaveBeenCalledOnce();
+			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		});
 	});
 
 	it('saves token after all required steps if indexCanisterId was missing', async () => {
