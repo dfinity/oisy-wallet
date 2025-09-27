@@ -64,8 +64,8 @@
 	const back = () => dispatch('icBack');
 	const next = () => {
 		if (isNullish(selectedContact)) {
-			// if next button is clicked and there is no contact selected,
-			// we manually lookup the contact and select it if one exists
+			// If the next button is clicked and there is no contact selected,
+			// we manually look up the contact and select it if one exists
 			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
 			if (nonNullish(contact)) {
 				selectedContact = contact;
@@ -99,10 +99,10 @@
 				<SendDestinationTabs
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					onNext={next}
 					bind:destination
 					bind:activeSendDestinationTab
 					bind:selectedContact
-					on:icNext={next}
 				/>
 			</CkEthLoader>
 		</div>
@@ -111,18 +111,18 @@
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
@@ -131,17 +131,17 @@
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdSolana($sendTokenNetworkId)}
@@ -149,17 +149,17 @@
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{/if}
