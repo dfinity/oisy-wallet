@@ -11,7 +11,16 @@ interface BitcoinCanisterParams {
 	bitcoinCanisterId: CanisterIdText;
 	network: BitcoinNetwork;
 	address: string;
+}
+
+interface BtcMinConfirmedCanisterParams extends BitcoinCanisterParams {
+	// If not specified, the Bitcoin canister uses its default value (typically 6 confirmations).
 	minConfirmations?: number;
+}
+
+interface BtcPagedCanisterParams extends BitcoinCanisterParams {
+	// Use an empty Uint8Array for the first page, then use the value from
+	page: Uint8Array;
 }
 
 export const getUtxosQuery = async ({
@@ -20,7 +29,7 @@ export const getUtxosQuery = async ({
 	address,
 	network,
 	minConfirmations
-}: BitcoinCanisterParams): Promise<get_utxos_response> => {
+}: BtcMinConfirmedCanisterParams): Promise<get_utxos_response> => {
 	assertNonNullish(identity);
 
 	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
@@ -29,6 +38,26 @@ export const getUtxosQuery = async ({
 		address,
 		network,
 		...(!isNullish(minConfirmations) && { filter: { minConfirmations } })
+	});
+};
+
+export const getUtxosQueryPaged = async ({
+	identity,
+	bitcoinCanisterId,
+	address,
+	network,
+	page
+}: BtcPagedCanisterParams): Promise<get_utxos_response> => {
+	assertNonNullish(identity);
+
+	const { getUtxosQuery } = await bitcoinCanister({ identity, bitcoinCanisterId });
+	// filtering by minConfirmations and by page cannot be combined!
+	return getUtxosQuery({
+		address,
+		network,
+		filter: {
+			page
+		}
 	});
 };
 
