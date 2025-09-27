@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
@@ -45,12 +45,21 @@
 		activeSendDestinationTab: SendDestinationTab;
 		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
 	}
+
 	let {
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
 		selectedContact = $bindable(),
-		formCancelAction = 'back'
+		formCancelAction = 'back',
+		onBack,
+		onNext,
+		onClose,
+		onQRCodeScan
 	}: Props = $props();
 
 	onMount(() => {
@@ -59,9 +68,7 @@
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
-	const back = () => dispatch('icBack');
+	const back = () => onBack();
 	const next = () => {
 		if (isNullish(selectedContact)) {
 			// If the next button is clicked and there is no contact selected,
@@ -71,9 +78,10 @@
 				selectedContact = contact;
 			}
 		}
-		dispatch('icNext');
+
+		onNext();
 	};
-	const close = () => dispatch('icClose');
+	const close = () => onClose();
 
 	let invalidDestination = $state(false);
 
@@ -91,10 +99,10 @@
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
 					bind:invalidDestination
-					on:icQRCodeScan
 				/>
 				<SendDestinationTabs
 					knownDestinations={$ethKnownDestinations}
@@ -111,7 +119,7 @@
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
-				onQRCodeScan={() => dispatch('icQRCodeScan')}
+				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
@@ -131,7 +139,7 @@
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
-				onQRCodeScan={() => dispatch('icQRCodeScan')}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
 			/>
@@ -149,7 +157,7 @@
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
-				onQRCodeScan={() => dispatch('icQRCodeScan')}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
 			/>
