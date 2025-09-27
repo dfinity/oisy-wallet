@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { preventDefault } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { run, preventDefault } from 'svelte/legacy';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { MAX_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
