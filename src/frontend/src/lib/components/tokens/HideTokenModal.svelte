@@ -50,6 +50,10 @@
 			return;
 		}
 
+		if (isNullish(modal)) {
+			return;
+		}
+
 		modal.next();
 
 		try {
@@ -107,7 +111,7 @@
 		} as ProgressStep
 	];
 
-	let hideProgressStep = $state<ProgressStepsHideToken.INITIALIZATION>();
+	let hideProgressStep = $state<ProgressStepsHideToken>(ProgressStepsHideToken.INITIALIZATION);
 
 	let currentStep = $state<WizardStep<WizardStepsHideToken> | undefined>();
 	let modal = $state<WizardModal<WizardStepsHideToken>>();
