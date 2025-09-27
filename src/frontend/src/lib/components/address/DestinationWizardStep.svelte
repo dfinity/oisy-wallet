@@ -66,10 +66,10 @@
 		{#snippet content()}
 			<IcSendDestination
 				{networkId}
+				onQRCodeScan={() => dispatch('icQRCodeScan')}
 				{tokenStandard}
 				bind:destination
 				bind:invalidDestination
-				onQRCodeScan={() => dispatch('icQRCodeScan')}
 			/>
 		{/snippet}
 	</DestinationWizardStepSection>
