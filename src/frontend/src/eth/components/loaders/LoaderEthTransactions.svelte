@@ -108,6 +108,8 @@
 			return;
 		}
 
+		loading = true;
+
 		const {
 			network: { id: networkId },
 			id: tokenId
@@ -120,6 +122,10 @@
 			getIdbTransactions: getIdbEthTransactions,
 			transactionsStore: ethTransactionsStore
 		});
+
+		loading = false;
+
+		await load();
 	});
 </script>
 
