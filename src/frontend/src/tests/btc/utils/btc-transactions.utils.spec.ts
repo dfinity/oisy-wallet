@@ -3,7 +3,7 @@ import {
 	UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS
 } from '$btc/constants/btc.constants';
 import type { BtcTransactionStatus } from '$btc/types/btc';
-import { mapBtcTransaction, sortBtcTransactions } from '$btc/utils/btc-transactions.utils';
+import { mapBtcTransaction, sortBtcTransactions } from '$btc/utils/blockchain-transactions.utils';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
 import {
 	mockBtcTransaction,

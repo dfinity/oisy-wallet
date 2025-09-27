@@ -5,7 +5,7 @@ import {
 	type BtcWalletBalance
 } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
-import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
+import { mapBtcTransaction } from '$btc/utils/blockstream-transactions.utils';
 import type { PendingTransaction } from '$declarations/backend/backend.did';
 import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 import { BITCOIN_CANISTER_IDS } from '$env/networks/networks.icrc.env';
@@ -14,8 +14,7 @@ import { getBtcWalletBalance } from '$icp/utils/btc.utils';
 import { getPendingBtcTransactions } from '$lib/api/backend.api';
 import { getBtcBalance } from '$lib/api/signer.api';
 import { FAILURE_THRESHOLD, WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
-import { btcAddressData } from '$lib/rest/blockchain.rest';
-import { btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
+import { btcAddressTransactions, btcLatestBlockHeight } from '$lib/rest/blockstream.rest';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type { BtcAddress } from '$lib/types/address';
 import type { BitcoinTransaction } from '$lib/types/blockchain';
@@ -120,14 +119,20 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			};
 		}
 	}
-	private async loadBtcTransactionsData({ btcAddress }: { btcAddress: BtcAddress }): Promise<{
+	private async loadBtcTransactionsData({
+		btcAddress,
+		bitcoinNetwork
+	}: {
+		btcAddress: BtcAddress;
+		bitcoinNetwork: BitcoinNetwork;
+	}): Promise<{
 		transactions: CertifiedData<BtcTransactionUi>[];
 		latestBitcoinBlockHeight: number;
 	}> {
 		try {
-			const { txs: fetchedTransactions } = await btcAddressData({ btcAddress });
+			const fetchedTransactions = await btcAddressTransactions({ btcAddress, bitcoinNetwork });
 
-			const latestBitcoinBlockHeight = await btcLatestBlockHeight();
+			const latestBitcoinBlockHeight = await btcLatestBlockHeight({ bitcoinNetwork });
 
 			// Check if the block height has changed since last sync
 			const blockHeightChanged = this.store.latestBitcoinBlockHeight !== latestBitcoinBlockHeight;
@@ -135,7 +140,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 			// Only include transactions when they are not in store or block height has changed
 			const newTransactions = fetchedTransactions.filter((transaction) => {
 				// Include transactions that are NOT already in the store
-				if (isNullish(this.store.transactions[`${transaction.hash}`])) {
+				if (isNullish(this.store.transactions[`${transaction.txid}`])) {
 					return true;
 				}
 
@@ -230,7 +235,7 @@ export class BtcWalletScheduler implements Scheduler<PostMessageDataRequestBtc> 
 	}: LoadBtcWalletParams) => {
 		const transactionData =
 			shouldFetchTransactions && !certified
-				? await this.loadBtcTransactionsData({ btcAddress })
+				? await this.loadBtcTransactionsData({ btcAddress, bitcoinNetwork })
 				: { transactions: [], latestBitcoinBlockHeight: this.store.latestBitcoinBlockHeight };
 
 		const pendingTransactionData =
