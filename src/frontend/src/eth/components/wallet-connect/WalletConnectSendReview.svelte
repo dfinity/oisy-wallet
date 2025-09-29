@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
@@ -55,7 +56,11 @@
 	>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
-		<EthFeeDisplay slot="fee" />
+		<EthFeeDisplay slot="fee">
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
 
 		<SendReviewNetwork slot="network" {sourceNetwork} {targetNetwork} token={$sendToken} />
 	</SendData>
