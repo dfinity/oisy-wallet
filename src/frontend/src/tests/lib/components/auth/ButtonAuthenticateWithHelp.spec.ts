@@ -1,6 +1,7 @@
 import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 import * as auth from '$lib/services/auth.services';
+import { authLocked } from '$lib/stores/locked.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -44,8 +45,10 @@ describe('ButtonAuthenticateWithHelp', () => {
 		expect(get(modalStore)?.type).toBe('auth-help');
 	});
 
-	it('should do nothing on successful sign in', async () => {
+	it('should set the lock store to false on successful sign in', async () => {
 		const authSpy = vi.spyOn(auth, 'signIn').mockResolvedValue({ success: 'ok' });
+
+		vi.spyOn(authLocked, 'unlock').mockImplementationOnce(vi.fn());
 
 		const { container } = render(ButtonAuthenticateWithHelp);
 
@@ -58,5 +61,9 @@ describe('ButtonAuthenticateWithHelp', () => {
 		expect(authSpy).toHaveBeenCalledOnce();
 
 		expect(get(modalStore)?.type).toBeUndefined();
+
+		expect(authLocked.unlock).toHaveBeenCalledExactlyOnceWith({
+			source: 'login from landing page'
+		});
 	});
 });

@@ -39,7 +39,11 @@ contactsStore.addContact(mapToFrontendContact(mockContacts[1]));
 describe('SendDestinationWizardStep', () => {
 	const props = {
 		destination: mockEthAddress,
-		activeSendDestinationTab: 'recentlyUsed' as const
+		activeSendDestinationTab: 'recentlyUsed' as const,
+		onBack: vi.fn(),
+		onNext: vi.fn(),
+		onClose: vi.fn(),
+		onQRCodeScan: vi.fn()
 	};
 
 	const mockContext = (sendToken: Token) =>
@@ -129,7 +133,15 @@ describe('SendDestinationWizardStep', () => {
 	it('should set selectedContact when a contact is selected', async () => {
 		const selectedContact: Writable<ContactUi> = writable();
 		const { getByText, getByTestId } = render(SendDestinationWizardStepTestHost, {
-			props: { selectedContact, destination: '', activeSendDestinationTab: 'recentlyUsed' },
+			props: {
+				selectedContact,
+				destination: '',
+				activeSendDestinationTab: 'recentlyUsed',
+				onBack: vi.fn(),
+				onNext: vi.fn(),
+				onClose: vi.fn(),
+				onQRCodeScan: vi.fn()
+			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
 
@@ -148,7 +160,11 @@ describe('SendDestinationWizardStep', () => {
 			props: {
 				destination: mockEthAddress3,
 				selectedContact,
-				activeSendDestinationTab: 'recentlyUsed'
+				activeSendDestinationTab: 'recentlyUsed',
+				onBack: vi.fn(),
+				onNext: vi.fn(),
+				onClose: vi.fn(),
+				onQRCodeScan: vi.fn()
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
@@ -164,7 +180,11 @@ describe('SendDestinationWizardStep', () => {
 			props: {
 				destination: mockEthAddress3,
 				selectedContact,
-				activeSendDestinationTab: 'recentlyUsed'
+				activeSendDestinationTab: 'recentlyUsed',
+				onBack: vi.fn(),
+				onNext: vi.fn(),
+				onClose: vi.fn(),
+				onQRCodeScan: vi.fn()
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
