@@ -34,9 +34,9 @@
 
 	const init = async () => {
 		/**
-		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * We use `Promise.allSettled` to ensure that all initialisation functions run,
 		 * regardless of whether some of them fail. This avoids blocking the entire app
-		 * if non-critical services like analytics or i18n fail to initialize.
+		 * if non-critical services like analytics or i18n fail to initialise.
 		 *
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
@@ -95,7 +95,7 @@
 	 */
 
 	// To improve the UX while the app is loading on mainnet we display a spinner which is attached statically in the index.html files.
-	// Once the authentication has been initialized we know most JavaScript resources has been loaded and therefore we can hide the spinner, the loading information.
+	// Once the authentication has been initialised, we know most JavaScript resources have been loaded, and therefore we can hide the spinner, the loading information.
 	$effect(() => {
 		if (!browser) {
 			return;
@@ -110,11 +110,19 @@
 		spinner?.remove();
 	});
 
+	const handleBroadcastLoginSuccess = async () => {
+		await authStore.forceSync();
+
+		// TODO: add a toast success for when it is refreshed and logged in, while before it was logged out
+
+		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
+	};
+
 	const openBc = () => {
 		try {
 			const bc = new AuthBroadcastChannel();
 
-			bc.onLoginSuccess(authStore.forceSync);
+			bc.onLoginSuccess(handleBroadcastLoginSuccess);
 
 			return () => {
 				bc?.close();
