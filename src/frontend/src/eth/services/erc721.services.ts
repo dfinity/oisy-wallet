@@ -104,7 +104,10 @@ const loadCustomTokensWithMetadata = async (
 
 					const { symbol } = metadata;
 
-					assertNonNullish(symbol, `Inconsistency in token data: no symbol found for token ${tokenAddress}`);
+					assertNonNullish(
+						symbol,
+						`Inconsistency in token data: no symbol found for token ${tokenAddress}`
+					);
 
 					return {
 						...{
