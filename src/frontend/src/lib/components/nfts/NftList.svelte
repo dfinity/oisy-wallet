@@ -10,14 +10,14 @@
 		icon?: Snippet;
 		nfts: Nft[];
 		testId?: string;
-		isMain?: boolean;
+		asMainSection?: boolean;
 	}
 
-	let { nftListItem, title, icon, nfts, testId, isMain = false }: Props = $props();
+	let { nftListItem, title, icon, nfts, testId, asMainSection = false }: Props = $props();
 </script>
 
 <div data-tid={testId}>
-	{#if nonNullish(title) && (nfts.length > 0 || isMain)}
+	{#if nonNullish(title) && (nfts.length > 0 || asMainSection)}
 		<div class="mt-5 flex items-center gap-2">
 			{@render icon?.()}
 			<h5>{title}</h5>
@@ -30,7 +30,7 @@
 				{@render nftListItem({ nft })}
 			{/each}
 		</div>
-	{:else if isMain}
+	{:else if asMainSection}
 		<EmptyNftsList hideDescription />
 	{/if}
 </div>

@@ -6,32 +6,32 @@
 
 	interface Props {
 		title: string;
-		isMain?: boolean;
+		asMainSection?: boolean;
 		icon?: Snippet;
 		nftCollections: NftCollectionUi[];
 		testId?: string;
 	}
 
-	let { title, isMain = false, icon, nftCollections, testId }: Props = $props();
+	let { title, asMainSection = false, icon, nftCollections, testId }: Props = $props();
 
 	const notEmptyCollections = $derived(nftCollections.filter((c) => c.nfts.length > 0));
 </script>
 
 <div data-tid={testId}>
-	{#if notEmptyCollections.length > 0 || isMain}
+	{#if notEmptyCollections.length > 0 || asMainSection}
 		<div class="mt-2 flex items-center gap-2">
 			{@render icon?.()}
 			<h5>{title}</h5>
 		</div>
-	{/if}
 
-	{#if notEmptyCollections.length > 0}
-		<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
-			{#each notEmptyCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-				<NftCollectionCard {collection} />
-			{/each}
-		</div>
-	{:else if isMain}
-		<EmptyNftsList hideDescription />
+		{#if notEmptyCollections.length > 0}
+			<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
+				{#each notEmptyCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
+					<NftCollectionCard {collection} />
+				{/each}
+			</div>
+		{:else}
+			<EmptyNftsList hideDescription />
+		{/if}
 	{/if}
 </div>
