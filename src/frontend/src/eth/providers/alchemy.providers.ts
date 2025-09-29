@@ -236,7 +236,7 @@ export class AlchemyProvider {
 
 			const newContract = {
 				address: ownedContract.address,
-				...(nonNullish(ownedContract.isSpam) && { isSpam: ownedContract.isSpam }),
+				isSpam: isNullish(ownedContract.isSpam) ? false : ownedContract.isSpam,
 				standard: tokenStandard as TokenStandard
 			};
 			acc.push(newContract);
