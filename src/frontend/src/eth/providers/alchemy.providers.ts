@@ -2,8 +2,7 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import type {
-	AlchemyProviderContract,
-	AlchemyProviderContracts
+	AlchemyProviderContracts, AlchemyProviderContract
 } from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
@@ -236,7 +235,7 @@ export class AlchemyProvider {
 
 			const newContract = {
 				address: ownedContract.address,
-				isSpam: isNullish(ownedContract.isSpam) ? false : ownedContract.isSpam,
+				isSpam: ownedContract.isSpam,
 				standard: tokenStandard as TokenStandard
 			};
 			acc.push(newContract);

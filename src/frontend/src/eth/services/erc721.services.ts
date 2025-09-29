@@ -104,11 +104,6 @@ const loadCustomTokensWithMetadata = async (
 
 					const { symbol } = metadata;
 
-					assertNonNullish(
-						symbol,
-						`Inconsistency in token data: no symbol found for token ${tokenAddress}`
-					);
-
 					return {
 						...{
 							id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),

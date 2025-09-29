@@ -1,19 +1,23 @@
 // https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
-export interface AlchemyProviderContract {
+interface Contract {
 	address: string;
-	name?: string;
-	symbol?: string;
-	isSpam?: boolean;
+	isSpam: boolean;
 	tokenType: string;
-	openSeaMetadata?: OpenSeaMetadata;
 }
 
+export interface AlchemyProviderContracts {
+	contracts: Contract[];
+}
+
+// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
 interface OpenSeaMetadata {
 	bannerImageUrl?: string;
 	collectionName?: string;
 	collectionSlug?: string;
 }
 
-export interface AlchemyProviderContracts {
-	contracts: AlchemyProviderContract[];
+export interface AlchemyProviderContract {
+	name: string;
+	symbol: string;
+	openSeaMetadata?: OpenSeaMetadata;
 }
