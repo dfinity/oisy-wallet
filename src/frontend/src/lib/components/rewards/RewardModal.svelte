@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
@@ -28,6 +28,10 @@
 		isEndedCampaign,
 		normalizeNetworkMultiplier
 	} from '$lib/utils/rewards.utils';
+	import { isNullish } from '@dfinity/utils';
+	import { nullishSignOut } from '$lib/services/auth.services';
+	import { getCampaignEligibilities } from '$lib/services/reward.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -35,9 +39,21 @@
 
 	let { reward }: Props = $props();
 
-	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
+	const { getCampaignEligibility, store } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
+
+	const loadEligibilityReport = async () => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		store.setCampaignEligibilities(campaignEligibilities);
+	}
+
+	onMount(loadEligibilityReport)
 
 	const campaignEligibility = $derived(getCampaignEligibility(reward.id));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
