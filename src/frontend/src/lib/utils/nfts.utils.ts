@@ -246,11 +246,11 @@ const matchesFilter = ({
 			return true;
 		}
 		// search by collections nfts name or id
-		return (item.nfts ?? []).some((nft) => {
-			return (
-				nft.name?.toLowerCase().includes(lower) || String(nft.id)?.toLowerCase().includes(lower)
-			);
-		});
+		return (item.nfts ?? []).some(
+			(nft) =>
+				(nft.name?.toLowerCase().includes(lower) ?? false) ||
+				(String(nft.id)?.toLowerCase().includes(lower) ?? false)
+		);
 	}
 
 	// search nfts by id, name or collection name
