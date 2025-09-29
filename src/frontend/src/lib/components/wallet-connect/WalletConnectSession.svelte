@@ -146,7 +146,7 @@
 	const goToFirstStep = () => modal?.set?.(0);
 
 	// One try to manually sign in by entering the URL manually or scanning a QR code
-	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
+	const userConnect = async (uri: string) => {
 		if (isNullish(modal)) {
 			return;
 		}
@@ -496,7 +496,7 @@
 		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
 			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
-			<WalletConnectForm on:icConnect={userConnect} />
+			<WalletConnectForm onConnect={userConnect} />
 		{/if}
 	</WizardModal>
 {/if}
