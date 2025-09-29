@@ -15,7 +15,6 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import * as rewardServices from '$lib/services/reward.services';
 import type { CampaignEligibility } from '$lib/types/reward';
 
 describe('RewardModal', () => {
@@ -154,7 +153,7 @@ describe('RewardModal', () => {
 		];
 
 		const getCampaignEligibilitiesSpy = vi
-			.spyOn(rewardServices, 'getCampaignEligibilities')
+			.spyOn(rewardService, 'getCampaignEligibilities')
 			.mockResolvedValueOnce(campaignEligibilities);
 
 		const mockedReward: RewardCampaignDescription = { ...mockRewardCampaigns[0] };
