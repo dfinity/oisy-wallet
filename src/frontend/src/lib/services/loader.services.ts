@@ -2,6 +2,8 @@ import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
+import { POW_FEATURE_ENABLED } from '$env/pow.env';
+import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -18,7 +20,7 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { isNullish } from '@dfinity/utils';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -144,7 +146,7 @@ export const initLoader = async ({
 
 	if (FRONTEND_DERIVATION_ENABLED && !POW_FEATURE_ENABLED) {
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
-		initSignerAllowance();
+		await initSignerAllowance();
 	} else {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
