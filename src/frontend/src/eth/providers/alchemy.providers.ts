@@ -2,7 +2,8 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import type {
-	AlchemyProviderContracts, AlchemyProviderContract
+	AlchemyProviderContract,
+	AlchemyProviderContracts
 } from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
