@@ -103,6 +103,7 @@ describe('erc1155.services', () => {
 			);
 
 			alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
+
 			alchemyProvidersSpy.mockReturnValue({
 				getContractMetadata: mockMetadata
 			} as unknown as AlchemyProvider);
