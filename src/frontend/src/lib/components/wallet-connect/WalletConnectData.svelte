@@ -18,7 +18,7 @@
 		{#snippet label()}{labelStr}{/snippet}
 
 		{#snippet mainValue()}
-			<div id="data" class="font-normal flex items-center gap-1">
+			<div id="data" class="flex items-center gap-1 font-normal">
 				{shortenWithMiddleEllipsis({ text: data })}<Copy
 					inline
 					text={$i18n.wallet_connect.text.raw_copied}
