@@ -1189,6 +1189,7 @@
 			"methods": "Métodos",
 			"events": "Eventos",
 			"message": "Mensagem",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",

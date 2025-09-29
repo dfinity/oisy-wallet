@@ -1189,6 +1189,7 @@
 			"methods": "Metody",
 			"events": "Události",
 			"message": "Zpráva",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",

@@ -1189,6 +1189,7 @@
 			"methods": "Hàm",
 			"events": "Sự kiện",
 			"message": "Tin nhắn",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",

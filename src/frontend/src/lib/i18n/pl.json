@@ -1189,6 +1189,7 @@
 			"methods": "Metody",
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",
