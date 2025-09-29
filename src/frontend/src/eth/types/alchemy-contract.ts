@@ -2,7 +2,7 @@
 export interface AlchemyProviderContract {
 	address: string;
 	name?: string;
-	symbol: string;
+	symbol?: string;
 	isSpam: boolean;
 	tokenType: string;
 	openSeaMetadata?: OpenSeaMetadata;
