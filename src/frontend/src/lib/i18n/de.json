@@ -1188,6 +1188,8 @@
 			"methods": "Methoden",
 			"events": "Ereignisse",
 			"message": "Nachricht",
+			"token": "",
+			"network": "",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren"

@@ -1188,6 +1188,8 @@
 			"methods": "方法",
 			"events": "イベント",
 			"message": "メッセージ",
+			"token": "",
+			"network": "",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生の取引データがコピーされました。",
 			"sign_message": "メッセージに署名"

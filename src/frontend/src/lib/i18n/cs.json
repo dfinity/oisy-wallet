@@ -1188,6 +1188,8 @@
 			"methods": "Metody",
 			"events": "Události",
 			"message": "Zpráva",
+			"token": "",
+			"network": "",
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu"

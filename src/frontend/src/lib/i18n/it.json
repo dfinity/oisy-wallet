@@ -1188,6 +1188,8 @@
 			"methods": "Metodi",
 			"events": "Eventi",
 			"message": "Messaggio",
+			"token": "",
+			"network": "",
 			"hex_data": "Dati HEX",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio"
