@@ -6,7 +6,6 @@
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendReview from '$lib/components/send/SendReview.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -40,26 +39,24 @@
 	);
 </script>
 
-<ContentWithToolbar>
-	<SendReview amount={formatToken({ value: amountDisplay })} {destination}>
-		{#snippet info()}
-			<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-		{/snippet}
+<SendReview amount={formatToken({ value: amountDisplay })} {destination}>
+	{#snippet info()}
+		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
+	{/snippet}
 
-		{#snippet fee()}
-			<EthFeeDisplay>
-				{#snippet label()}
-					<Html text={$i18n.fee.text.max_fee_eth} />
-				{/snippet}
-			</EthFeeDisplay>
-		{/snippet}
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
-		{#snippet network()}
-			<ReviewNetwork destinationNetworkId={targetNetwork?.id} {sourceNetwork} />
-		{/snippet}
+	{#snippet network()}
+		<ReviewNetwork destinationNetworkId={targetNetwork?.id} {sourceNetwork} />
+	{/snippet}
 
-		{#snippet replaceToolbar()}
-			<WalletConnectActions {onApprove} {onReject} />
-		{/snippet}
-	</SendReview>
-</ContentWithToolbar>
+	{#snippet replaceToolbar()}
+		<WalletConnectActions {onApprove} {onReject} />
+	{/snippet}
+</SendReview>
