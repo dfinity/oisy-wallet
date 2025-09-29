@@ -118,7 +118,10 @@ export const initPendingTransactionsListener = ({
 };
 
 export class AlchemyProvider {
-	// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	/**
+	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	 * @deprecated This approach works for now but does not align with the new architectural requirements.
+	 */
 	private readonly deprecatedProvider: Alchemy;
 
 	constructor(private readonly network: Network) {
