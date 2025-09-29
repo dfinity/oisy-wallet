@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
@@ -14,7 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
@@ -22,6 +22,7 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 
 	let selectedTransaction = $state<SolTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
@@ -34,6 +35,14 @@
 	});
 
 	let token = $derived($pageToken ?? DEFAULT_SOLANA_TOKEN);
+
+	let groupedTransactions = $derived(
+		nonNullish($solTransactions)
+			? groupTransactionsByDate(
+					$solTransactions.map((trx) => ({ component: 'solana', transaction: trx, token }))
+				)
+			: undefined
+	);
 </script>
 
 <Header>
@@ -43,13 +52,17 @@
 <SolTransactionsSkeletons>
 	{#if $solTransactions.length > 0}
 		<SolTransactionsScroll {token}>
-			{#each $solTransactions as transaction, index (`${transaction.id}-${index}`)}
-				<li in:slide={SLIDE_DURATION}>
-					<SolTransaction {token} {transaction} />
-				</li>
-			{/each}
+			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`sol-transactions-date-group-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
 		</SolTransactionsScroll>
-	{:else if $solTransactions.length === 0}
+	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </SolTransactionsSkeletons>

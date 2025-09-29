@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
@@ -24,7 +24,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 
 	let ckMinterInfoAddresses = $derived(
 		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$nativeEthereumTokenId])
@@ -49,18 +50,32 @@
 				$modalStore
 			}));
 	});
+
+	let token = $derived($tokenWithFallback);
+
+	let groupedTransactions = $derived(
+		nonNullish(sortedTransactionsUi)
+			? groupTransactionsByDate(
+					sortedTransactionsUi.map((trx) => ({ component: 'ethereum', transaction: trx, token }))
+				)
+			: undefined
+	);
 </script>
 
 <Header>{$i18n.transactions.text.title}</Header>
 
 <EthTransactionsSkeletons>
-	{#each sortedTransactionsUi as transaction (transaction.hash)}
-		<div transition:slide={SLIDE_DURATION}>
-			<EthTransaction token={$tokenWithFallback} {transaction} />
-		</div>
-	{/each}
+	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+			<TransactionsDateGroup
+				{formattedDate}
+				testId={`eth-transactions-date-group-${index}`}
+				{transactions}
+			/>
+		{/each}
+	{/if}
 
-	{#if $sortedEthTransactions.length === 0}
+	{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </EthTransactionsSkeletons>

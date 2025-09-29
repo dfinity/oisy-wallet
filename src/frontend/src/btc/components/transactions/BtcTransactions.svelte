@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
@@ -22,7 +22,8 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 
 	let selectedTransaction = $state<BtcTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
@@ -35,18 +36,34 @@
 	});
 
 	let token = $derived($pageToken ?? DEFAULT_BITCOIN_TOKEN);
+
+	let groupedTransactions = $derived(
+		nonNullish($sortedBtcTransactions)
+			? groupTransactionsByDate(
+					$sortedBtcTransactions.map((ctrx) => ({
+						component: 'bitcoin',
+						transaction: ctrx.data,
+						token
+					}))
+				)
+			: undefined
+	);
 </script>
 
 <BtcTransactionsHeader />
 
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
-	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
-		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction {token} transaction={transaction.data} />
-		</div>
-	{/each}
+	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+			<TransactionsDateGroup
+				{formattedDate}
+				testId={`btc-transactions-date-group-${index}`}
+				{transactions}
+			/>
+		{/each}
+	{/if}
 
-	{#if $sortedBtcTransactions.length === 0}
+	{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </TransactionsSkeletons>

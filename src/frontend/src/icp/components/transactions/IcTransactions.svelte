@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
@@ -29,7 +29,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
@@ -48,6 +49,14 @@
 	);
 
 	let token = $derived($pageToken ?? ICP_TOKEN);
+
+	let groupedTransactions = $derived(
+		nonNullish($icTransactions)
+			? groupTransactionsByDate(
+					$icTransactions.map((ctrx) => ({ component: 'ic', transaction: ctrx.data, token }))
+				)
+			: undefined
+	);
 </script>
 
 <Info />
@@ -69,11 +78,15 @@
 <IcTransactionsSkeletons>
 	{#if $icTransactions.length > 0}
 		<IcTransactionsScroll {token}>
-			{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
-				<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-					<IcTransaction {token} transaction={transaction.data} />
-				</li>
-			{/each}
+			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`ic-transactions-date-group-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
 		</IcTransactionsScroll>
 	{/if}
 
@@ -81,7 +94,7 @@
 		<IcNoIndexPlaceholder
 			placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
 		/>
-	{:else if $icTransactions.length === 0}
+	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </IcTransactionsSkeletons>
