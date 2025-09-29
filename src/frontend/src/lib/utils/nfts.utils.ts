@@ -248,7 +248,7 @@ const matchesFilter = ({
 		// search by collections nfts name or id
 		return (item.nfts ?? []).some(
 			(nft) =>
-				nft.name?.toLowerCase().includes(lower) ?? String(nft.id)?.toLowerCase().includes(lower)
+				nft.name?.toLowerCase().includes(lower) || String(nft.id)?.toLowerCase().includes(lower)
 		);
 	}
 
