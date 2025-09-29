@@ -1,8 +1,13 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import type { AlchemyProviderContract, AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type {
+	AlchemyProviderContract,
+	AlchemyProviderContracts
+} from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
+import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
@@ -25,8 +30,6 @@ import {
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
-import type { Erc1155Metadata } from '$eth/types/erc1155';
-import type { Erc721Metadata } from '$eth/types/erc721';
 
 type AlchemyConfig = Pick<AlchemySettings, 'apiKey' | 'network'>;
 
@@ -245,7 +248,7 @@ export class AlchemyProvider {
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
 	getContractMetadata = async (address: EthAddress): Promise<Erc1155Metadata | Erc721Metadata> => {
 		const result: AlchemyProviderContract =
-			await this.deprecatedProvider.nft.getContractMetadata(address)
+			await this.deprecatedProvider.nft.getContractMetadata(address);
 
 		const tokenStandard =
 			result.tokenType === 'ERC721'
@@ -263,8 +266,8 @@ export class AlchemyProvider {
 			...(nonNullish(result.openSeaMetadata?.collectionName) && {name: result.openSeaMetadata?.collectionName}),
 			...(nonNullish(result.symbol) && {symbol: result.symbol}),
 			decimals: 0
-		}
-	}
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = [
