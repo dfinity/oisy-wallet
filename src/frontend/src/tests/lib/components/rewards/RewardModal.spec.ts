@@ -9,13 +9,13 @@ import {
 	initRewardEligibilityStore,
 	REWARD_ELIGIBILITY_CONTEXT_KEY
 } from '$lib/stores/reward.store';
+import type { CampaignEligibility } from '$lib/types/reward';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-import type { CampaignEligibility } from '$lib/types/reward';
 
 describe('RewardModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_MODAL_IMAGE_BANNER}"]`;
@@ -169,6 +169,6 @@ describe('RewardModal', () => {
 
 		await vi.waitFor(() => {
 			expect(get(store).campaignEligibilities).toEqual(campaignEligibilities);
-		})
+		});
 	});
 });
