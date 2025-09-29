@@ -71,7 +71,15 @@
 		// 	return;
 		// }
 
-		modalStore.openSwap(tokenId);
+		busy.start({ msg: $i18n.init.info.hold_loading });
+
+		// // 1. If loadKongSwapTokens succeeds within 10s - show modal.
+		// // 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
+		// // 3. If loadKongSwapTokens throws - show toast, do not show modal.
+		// const kongSwapTokensStatus = await Promise.any([
+		// 	waitReady({ retries: 20, isDisabled }),
+		// 	loadKongSwapTokens()
+		// ]);
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
@@ -80,6 +88,10 @@
 		await loadDisabledIcrcTokensExchanges({
 			disabledIcrcTokens: $allIcrcTokens
 		});
+
+		busy.stop();
+
+		modalStore.openSwap(tokenId);
 	};
 </script>
 

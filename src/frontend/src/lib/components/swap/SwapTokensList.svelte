@@ -44,6 +44,10 @@
 		})
 	);
 
+	$effect(()=>{
+		console.log('Tokens list updated', tokens);
+	})
+
 	$effect(() => {
 		setTokens(tokens);
 	});
