@@ -2,8 +2,12 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import type { AlchemyProviderContracts, AlchemyProviderContract } from '$eth/types/alchemy-contract';
+import type {
+	AlchemyProviderContract,
+	AlchemyProviderContracts
+} from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -11,7 +15,6 @@ import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
-import type { Erc1155Metadata } from '$eth/types/erc1155';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
 
