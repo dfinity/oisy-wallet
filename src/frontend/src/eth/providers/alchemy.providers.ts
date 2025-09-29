@@ -261,7 +261,7 @@ export class AlchemyProvider {
 		return {
 			...(nonNullish(result.name) && {name: result.name}),
 			...(nonNullish(result.openSeaMetadata?.collectionName) && {name: result.openSeaMetadata?.collectionName}),
-			...(nonNullish(result.symbol) && {symbol: result.symbol}),
+			symbol: result.symbol,
 			decimals: 0
 		}
 	}
