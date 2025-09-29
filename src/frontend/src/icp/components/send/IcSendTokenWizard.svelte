@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import IcSendForm from '$icp/components/send/IcSendForm.svelte';
 	import IcSendProgress from '$icp/components/send/IcSendProgress.svelte';
 	import IcSendReview from '$icp/components/send/IcSendReview.svelte';
@@ -29,13 +29,31 @@
 	 * Props
 	 */
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		currentStep?: WizardStep;
+		destination?: string;
+		amount: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		currentStep,
+		destination = '',
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
+	}: Props = $props();
 
 	/**
 	 * Send context store
@@ -70,7 +88,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			const params: IcTransferParams = {
@@ -114,26 +132,22 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 
-	const back = () => dispatch('icSendBack');
-	const close = () => dispatch('icClose');
+	const back = () => onSendBack();
+	const close = () => onClose();
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview
-		{amount}
-		{destination}
-		onBack={() => dispatch('icBack')}
-		onSend={send}
-		{selectedContact}
-	/>
+	<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<IcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm {selectedContact} on:icNext on:icBack on:icTokensList bind:destination bind:amount>
-		<ButtonBack slot="cancel" onclick={back} />
+	<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+		{#snippet cancel()}
+			<ButtonBack onclick={back} />
+		{/snippet}
 	</IcSendForm>
 {/if}

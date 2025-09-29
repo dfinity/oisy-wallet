@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
-	import LoaderEthTransactions from '$eth/components/loaders/LoaderEthTransactions.svelte';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
@@ -54,19 +53,17 @@
 
 <Header>{$i18n.transactions.text.title}</Header>
 
-<LoaderEthTransactions>
-	<EthTransactionsSkeletons>
-		{#each sortedTransactionsUi as transaction (transaction.hash)}
-			<div transition:slide={SLIDE_DURATION}>
-				<EthTransaction token={$tokenWithFallback} {transaction} />
-			</div>
-		{/each}
+<EthTransactionsSkeletons>
+	{#each sortedTransactionsUi as transaction (transaction.hash)}
+		<div transition:slide={SLIDE_DURATION}>
+			<EthTransaction token={$tokenWithFallback} {transaction} />
+		</div>
+	{/each}
 
-		{#if $sortedEthTransactions.length === 0}
-			<TransactionsPlaceholder />
-		{/if}
-	</EthTransactionsSkeletons>
-</LoaderEthTransactions>
+	{#if $sortedEthTransactions.length === 0}
+		<TransactionsPlaceholder />
+	{/if}
+</EthTransactionsSkeletons>
 
 {#if $modalEthTransaction && nonNullish(selectedTransaction)}
 	<EthTransactionModal token={selectedToken} transaction={selectedTransaction} />

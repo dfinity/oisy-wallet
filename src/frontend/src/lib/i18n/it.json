@@ -225,7 +225,7 @@
 				"description": "OpenChat è un'applicazione di chat completa che funziona end-to-end sulla blockchain di Internet Computer.<br/><br/>OpenChat è governata dalla sua comunità come una DAO e ha il suo token CHAT. I token CHAT vengono dati come ricompensa agli utenti per accelerare la crescita e creare un team di milioni di sostenitori che permettano a OpenChat di diventare un valido concorrente per i grandi concorrenti tecnologici centralizzati!",
 				"stats": "80.000+ utenti",
 				"carousel": {
-					"text": "OpenChat - dove il web3 comunica",
+					"text": "",
 					"call_to_action": "Mostra di più"
 				}
 			},
@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Social media decentralizzato - pubblica, guadagna, possiedi.",
 				"call_to_action": "Vai su Taggr",
-				"description": "Taggr è una piattaforma di social media completamente decentralizzata che vive su una rete di calcolo pubblica e distribuita alimentata da Internet Computer. A differenza delle piattaforme di social media tradizionali controllate dalle aziende, Taggr è interamente posseduta e governata dai suoi utenti.",
-				"carousel": {
-					"text": "Social media decentralizzato - pubblica, guadagna, possiedi.",
-					"call_to_action": "Scopri di più"
-				}
+				"description": "Taggr è una piattaforma di social media completamente decentralizzata che vive su una rete di calcolo pubblica e distribuita alimentata da Internet Computer. A differenza delle piattaforme di social media tradizionali controllate dalle aziende, Taggr è interamente posseduta e governata dai suoi utenti."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +340,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
