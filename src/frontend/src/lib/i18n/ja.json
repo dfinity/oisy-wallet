@@ -1191,6 +1191,7 @@
 			"message": "メッセージ",
 			"token": "",
 			"network": "",
+			"amount": "",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生の取引データがコピーされました。",
 			"sign_message": "メッセージに署名"

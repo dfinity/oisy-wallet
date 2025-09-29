@@ -1191,6 +1191,7 @@
 			"message": "Message",
 			"token": "Token",
 			"network": "Network",
+			"amount": "Amount",
 			"hex_data": "HEX Data",
 			"raw_copied": "Raw transaction data copied to clipboard.",
 			"sign_message": "Sign Message"

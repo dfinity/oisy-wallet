@@ -1191,6 +1191,7 @@
 			"message": "الرسالة",
 			"token": "",
 			"network": "",
+			"amount": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة"

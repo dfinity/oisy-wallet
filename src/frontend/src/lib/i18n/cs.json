@@ -1191,6 +1191,7 @@
 			"message": "Zpráva",
 			"token": "",
 			"network": "",
+			"amount": "",
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu"

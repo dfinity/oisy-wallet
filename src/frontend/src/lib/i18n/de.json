@@ -1191,6 +1191,7 @@
 			"message": "Nachricht",
 			"token": "",
 			"network": "",
+			"amount": "",
 			"hex_data": "HEX-Daten",
 			"raw_copied": "Transaktions-Rohdaten in die Zwischenablage kopiert.",
 			"sign_message": "Nachricht signieren"

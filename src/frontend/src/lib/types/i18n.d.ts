@@ -1001,6 +1001,7 @@ interface I18nWallet_connect {
 		message: string;
 		token: string;
 		network: string;
+		amount: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
