@@ -230,6 +230,7 @@ const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
 const isNft = (item: Nft | NftCollectionUi): item is Nft =>
 	'collection' in item && !('nfts' in item);
 
+//@ts-ignore @typescript-eslint/prefer-nullish-coalescing
 const matchesFilter = ({
 	item,
 	filter
