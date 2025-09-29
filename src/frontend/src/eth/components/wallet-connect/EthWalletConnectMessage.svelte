@@ -95,7 +95,8 @@
 				value: amount,
 				unitName: token.decimals,
 				displayDecimals: token.decimals
-			})} {token.symbol}</p
+			})}
+			{token.symbol}</p
 		>
 	{/if}
 {/if}
