@@ -85,7 +85,6 @@ export const mapIcpTransaction = ({
 	});
 
 	if ('Approve' in operation) {
-		const source = mapFrom(operation.Approve.from);
 		const approve = operation.Approve;
 		const approveValue = approve.allowance.e8s;
 		const approveFee = approve.fee?.e8s;
@@ -96,7 +95,7 @@ export const mapIcpTransaction = ({
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
 			value: approveValue,
-			...(nonNullish(approveFee) && source.incoming === false && { fee: approveFee }),
+			...(nonNullish(approveFee) && { fee: approveFee }),
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender
 		};
@@ -131,7 +130,7 @@ export const mapIcpTransaction = ({
 			...source,
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
-			...(nonNullish(transferFee) && source.incoming === false && { fee: transferFee })
+			...(nonNullish(transferFee) && { fee: transferFee })
 		};
 	}
 
