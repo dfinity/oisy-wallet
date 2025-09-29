@@ -15,6 +15,7 @@ import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
 import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 
 export const isInterfaceErc1155 = async ({
 	networkId,
@@ -98,9 +99,8 @@ const loadCustomTokensWithMetadata = async (
 						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 					);
 
-					const metadata = await infuraErc1155Providers(network.id).metadata({
-						address: tokenAddress
-					});
+					const { getContractMetadata } = alchemyProviders(network.id)
+					const metadata = await getContractMetadata(tokenAddress)
 
 					return {
 						...{
