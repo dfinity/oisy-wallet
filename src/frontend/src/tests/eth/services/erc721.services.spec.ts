@@ -2,6 +2,8 @@ import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.services';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721Metadata } from '$eth/types/erc721';
@@ -16,8 +18,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
-import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -100,7 +100,7 @@ describe('erc721.services', () => {
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc721);
 
-			mockMetadata.mockImplementation(( address ) =>
+			mockMetadata.mockImplementation((address) =>
 				address === mockEthAddress ? mockMetadata1 : mockMetadata2
 			);
 
@@ -158,7 +158,7 @@ describe('erc721.services', () => {
 
 			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc721);
 
-			mockMetadata.mockImplementation(( address ) => {
+			mockMetadata.mockImplementation((address) => {
 				assert('Erc721' in mockCustomTokensErc721[0].token);
 
 				return address === mockEthAddress ? mockMetadata1 : mockMetadata2;
@@ -221,7 +221,10 @@ describe('erc721.services', () => {
 					index + 1 + mockCustomTokensErc721.length,
 					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc721.length, token_address);
+				expect(mockMetadata).toHaveBeenNthCalledWith(
+					index + 1 + mockCustomTokensErc721.length,
+					token_address
+				);
 			});
 		});
 
