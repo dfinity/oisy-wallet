@@ -5,7 +5,7 @@ use super::{CandidType, Debug, Deserialize};
 // -------------------------------------------------------------------------------------------------
 // If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
 // of the `allow_signing` function.
-pub const POW_ENABLED: bool = false;
+pub const POW_ENABLED: bool = true;
 
 // If set to `true`, the difficulty for a principal auto-adjusts after each solved challenge,
 // starting at `START_DIFFICULTY`.
@@ -30,7 +30,7 @@ pub const EXPIRY_DURATION_MS: u64 = 900_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
-pub const START_DIFFICULTY: u32 = 1_000_000;
+pub const START_DIFFICULTY: u32 = 2_000_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
