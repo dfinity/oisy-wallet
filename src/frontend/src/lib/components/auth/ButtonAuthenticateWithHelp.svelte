@@ -3,6 +3,7 @@
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
+	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
@@ -18,7 +19,9 @@
 	const onclick = async () => {
 		const { success } = await signIn({});
 
-		if (success === 'cancelled' || success === 'error') {
+		if (success === 'ok') {
+			authLocked.unlock({ source: 'login from landing page' });
+		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};

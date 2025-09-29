@@ -36,7 +36,7 @@ lazy_static = "1.5.0"
 # See:
 # Server version: ~/.cache/dfinity/versions/0.26.0/pocket-ic --version
 # Library version: https://docs.google.com/document/d/1VYmHUTjrgbzRHtsAyRrI5cj-gWGs7ktTnutPvUMJioU/edit?pli=1&tab=t.0#heading=h.5wf28dvt742x
-pocket-ic = "9.0.2"
+pocket-ic = "10.0.0"
 pretty_assertions = "1.4.1"
 strum = "0.26.3"
 strum_macros = "0.26.4"
