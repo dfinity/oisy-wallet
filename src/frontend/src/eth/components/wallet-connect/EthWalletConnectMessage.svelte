@@ -43,7 +43,7 @@
 
 	let token = $derived.by(() => {
 		if (isNullish(address) || isNullish(chainId)) {
-			return undefined;
+			return;
 		}
 
 		const tokens = [...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens];
