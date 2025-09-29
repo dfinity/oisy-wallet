@@ -5,8 +5,11 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftSortStore } from '$lib/stores/settings.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -15,6 +18,14 @@
 	}
 
 	const { collection, disabled, testId }: Props = $props();
+
+	const collectionNfts = $derived(
+		filterSortByCollection({
+			items: collection.nfts,
+			filter: $tokenListStore.filter,
+			sort: $nftSortStore
+		})
+	);
 </script>
 
 <a
@@ -38,7 +49,7 @@
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
 
-				{#each collection.nfts as nft, index (`${nft.id}-${index}`)}
+				{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 					{#if index < 4 && nonNullish(nft.imageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
 							<BgImg
