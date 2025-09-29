@@ -7,6 +7,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import { tokenListStore } from '$lib/stores/token-list.store';
+	import { nftSortStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -38,7 +41,7 @@
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
 
-				{#each collection.nfts as nft, index (`${nft.id}-${index}`)}
+				{#each filterSortByCollection( { items: collection.nfts, filter: $tokenListStore.filter, sort: $nftSortStore } ) as nft, index (`${nft.id}-${index}`)}
 					{#if index < 4 && nonNullish(nft.imageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
 							<BgImg
