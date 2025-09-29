@@ -141,7 +141,7 @@ describe('RewardModal', () => {
 		expect(imageBanner).toBeInTheDocument();
 	});
 
-	it('should update the rewards context', async () => {
+	it('should update the rewards store content', async () => {
 		const campaignEligibilities: CampaignEligibility[] = [
 			{
 				campaignId: 'test',
