@@ -15,6 +15,8 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { mockCampaignEligibilities } from '$tests/mocks/reward-eligibility-report.mock';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+import * as rewardServices from '$lib/services/reward.services';
+import type { CampaignEligibility } from '$lib/types/reward';
 
 describe('RewardModal', () => {
 	const imageBannerSelector = `img[data-tid="${REWARDS_MODAL_IMAGE_BANNER}"]`;
@@ -137,5 +139,37 @@ describe('RewardModal', () => {
 		const imageBanner: HTMLImageElement | null = container.querySelector(imageBannerSelector);
 
 		expect(imageBanner).toBeInTheDocument();
+	});
+
+	it('should update the rewards context', async () => {
+		const campaignEligibilities: CampaignEligibility[] = [
+			{
+				campaignId: 'test',
+				eligible: true,
+				available: true,
+				criteria: [],
+				probabilityMultiplierEnabled: false,
+				probabilityMultiplier: 1
+			}
+		];
+
+		const getCampaignEligibilitiesSpy = vi
+			.spyOn(rewardServices, 'getCampaignEligibilities')
+			.mockResolvedValueOnce(campaignEligibilities);
+
+		const mockedReward: RewardCampaignDescription = { ...mockRewardCampaigns[0] };
+
+		render(RewardModal, {
+			props: {
+				reward: mockedReward
+			},
+			context: mockContext
+		});
+
+		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledOnce();
+
+		await vi.waitFor(() => {
+			expect(get(store).campaignEligibilities).toEqual(campaignEligibilities);
+		})
 	});
 });
