@@ -21,6 +21,7 @@ jobs:
       TITLE: ${{ github.event.pull_request.title }}
     steps:
       - name: 'Check PR Title'
+        if: ${{ github.event_name != 'merge_group' }}
         run: |
           if [[ "$TITLE" =~ ^(feat|fix|chore|build|ci|docs|style|refactor|perf|test)(\([-a-zA-Z0-9,]+\))\!?\: ]]; then
               echo "PR Title passes"
@@ -41,6 +42,7 @@ jobs:
       DESCRIPTION: ${{ github.event.pull_request.body }}
     steps:
       - name: 'Check PR Description for Jira/Atlassian Links'
+        if: ${{ github.event_name != 'merge_group' }}
         run: |
           if [[ "$DESCRIPTION" =~ https:\/\/[a-zA-Z0-9]*\.(atlassian|jira)\.[a-z]{2,3} ]]; then
               echo "PR Description contains a link to Jira or Atlassian, which is not allowed."
@@ -77,6 +79,7 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: 'Check for changed files'
+        if: ${{ github.event_name != 'merge_group' }}
         id: file_check
         run: |
           CHANGED_FILES=$(git diff "origin/$BASE_REF" HEAD --name-only | wc -l)

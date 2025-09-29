@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
@@ -45,12 +45,21 @@
 		activeSendDestinationTab: SendDestinationTab;
 		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
 	}
+
 	let {
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
 		selectedContact = $bindable(),
-		formCancelAction = 'back'
+		formCancelAction = 'back',
+		onBack,
+		onNext,
+		onClose,
+		onQRCodeScan
 	}: Props = $props();
 
 	onMount(() => {
@@ -59,21 +68,20 @@
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
-	const back = () => dispatch('icBack');
+	const back = () => onBack();
 	const next = () => {
 		if (isNullish(selectedContact)) {
-			// if next button is clicked and there is no contact selected,
-			// we manually lookup the contact and select it if one exists
+			// If the next button is clicked and there is no contact selected,
+			// we manually look up the contact and select it if one exists
 			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
 			if (nonNullish(contact)) {
 				selectedContact = contact;
 			}
 		}
-		dispatch('icNext');
+
+		onNext();
 	};
-	const close = () => dispatch('icClose');
+	const close = () => onClose();
 
 	let invalidDestination = $state(false);
 
@@ -91,18 +99,18 @@
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
 					bind:invalidDestination
-					on:icQRCodeScan
 				/>
 				<SendDestinationTabs
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
+					onNext={next}
 					bind:destination
 					bind:activeSendDestinationTab
 					bind:selectedContact
-					on:icNext={next}
 				/>
 			</CkEthLoader>
 		</div>
@@ -111,18 +119,18 @@
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
@@ -131,17 +139,17 @@
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdSolana($sendTokenNetworkId)}
@@ -149,17 +157,17 @@
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{/if}

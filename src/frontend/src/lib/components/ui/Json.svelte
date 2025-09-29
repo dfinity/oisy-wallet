@@ -1,11 +1,23 @@
 <script lang="ts">
+	import { stopPropagation } from '@dfinity/gix-components';
+	import Self from '$lib/components/ui/Json.svelte';
 	import { isHash, stringifyJson, isPrincipal } from '$lib/utils/json.utils';
 
-	export let json: unknown | undefined = undefined;
-	export let defaultExpandedLevel = Infinity;
-	export let _key = '';
-	export let _level = 1;
-	export let _collapsed: boolean | undefined = undefined;
+	interface Props {
+		json?: unknown;
+		defaultExpandedLevel?: number;
+		_key?: string;
+		_level?: number;
+		_collapsed?: boolean;
+	}
+
+	let {
+		json,
+		defaultExpandedLevel = Infinity,
+		_key = '',
+		_level = 1,
+		_collapsed
+	}: Props = $props();
 
 	type ValueType =
 		| 'bigint'
@@ -33,43 +45,30 @@
 		return typeof value;
 	};
 
-	let valueType: ValueType;
-	let value: unknown;
-	let keyLabel: string;
-	let children: [string, unknown][];
-	let hasChildren: boolean;
-	let isExpandable: boolean;
-	let isArray: boolean;
-	let openBracket: string;
-	let closeBracket: string;
-	let root: boolean;
-	let testId: 'json' | undefined;
-	$: {
-		valueType = getValueType(json);
-		isExpandable = valueType === 'object';
-		value = isExpandable ? json : stringifyJson({ value: json });
-		keyLabel = `${_key}${_key.length > 0 ? ': ' : ''}`;
-		children = isExpandable ? Object.entries(json as object) : [];
-		hasChildren = children.length > 0;
-		isArray = Array.isArray(json);
-		openBracket = isArray ? '[' : '{';
-		closeBracket = isArray ? ']' : '}';
-		root = _level === 1;
-		testId = root ? 'json' : undefined;
-	}
+	let valueType = $derived(getValueType(json));
+	let isExpandable = $derived(valueType === 'object');
+	let value = $derived(isExpandable ? json : stringifyJson({ value: json }));
+	let keyLabel = $derived(`${_key}${_key.length > 0 ? ': ' : ''}`);
+	let children = $derived(isExpandable ? Object.entries(json as object) : []);
+	let hasChildren = $derived(children.length > 0);
+	let isArray = $derived(Array.isArray(json));
+	let openBracket = $derived(isArray ? '[' : '{');
+	let closeBracket = $derived(isArray ? ']' : '}');
+	let root = $derived(_level === 1);
+	let testId = $derived(root ? 'json' : undefined);
 
-	let title: string | undefined;
-	$: title = valueType === 'hash' ? (json as number[]).join() : undefined;
+	let title = $derived(valueType === 'hash' ? (json as number[]).join() : undefined);
 
-	let collapsed = true;
-	$: collapsed = _collapsed ?? defaultExpandedLevel < _level;
+	let collapsed = $derived(_collapsed ?? defaultExpandedLevel < _level);
 
-	const toggle = () => (collapsed = !collapsed);
+	const toggle = () => {
+		collapsed = !collapsed;
+	};
 </script>
 
 {#if isExpandable && hasChildren}
 	{#if collapsed}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
@@ -78,14 +77,14 @@
 			class:root
 			aria-label="Toggle"
 			data-tid={testId}
+			onclick={stopPropagation(toggle)}
 			role="button"
 			tabindex="0"
-			on:click|stopPropagation={toggle}
 			>{keyLabel}
 			<span class="bracket">{openBracket} ... {closeBracket}</span>
 		</span>
 	{:else}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<span
 			class="key"
 			class:arrow={isExpandable && hasChildren}
@@ -94,16 +93,15 @@
 			class:root
 			aria-label="Toggle"
 			data-tid={testId}
+			onclick={stopPropagation(toggle)}
 			role="button"
-			tabindex="0"
-			on:click|stopPropagation={toggle}
-			>{keyLabel}<span class="bracket open">{openBracket}</span></span
+			tabindex="0">{keyLabel}<span class="bracket open">{openBracket}</span></span
 		>
 		<!-- children -->
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<svelte:self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
+					<Self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
 				</li>
 			{/each}
 		</ul>
