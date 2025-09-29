@@ -110,11 +110,19 @@
 		spinner?.remove();
 	});
 
+	const handleBroadcastLoginSuccess = async () => {
+		await authStore.forceSync();
+
+		// TODO: add a toast success for when it is refreshed and logged in, while before it was logged out
+
+		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
+	};
+
 	const openBc = () => {
 		try {
 			const bc = new AuthBroadcastChannel();
 
-			bc.onLoginSuccess(authStore.forceSync);
+			bc.onLoginSuccess(handleBroadcastLoginSuccess);
 
 			return () => {
 				bc?.close();
