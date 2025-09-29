@@ -144,18 +144,19 @@ export const initLoader = async ({
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
 
-	if (FRONTEND_DERIVATION_ENABLED && !POW_FEATURE_ENABLED) {
-		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
-		await initSignerAllowance();
-	} else {
-		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
+	if(!POW_FEATURE_ENABLED) {
+		if (FRONTEND_DERIVATION_ENABLED) {
+			// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+			initSignerAllowance();
+		} else {
+			const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
-		if (!initSignerAllowanceSuccess) {
-			// Sign-out is handled within the service.
-			return;
+			if (!initSignerAllowanceSuccess) {
+				// Sign-out is handled within the service.
+				return;
+			}
 		}
 	}
-
 	const errorNetworkIds: NetworkId[] = err?.map(({ networkId }) => networkId) ?? [];
 
 	// We don't need to load the addresses of the disabled networks.
