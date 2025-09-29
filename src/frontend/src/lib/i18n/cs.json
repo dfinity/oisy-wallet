@@ -225,7 +225,7 @@
 				"description": "OpenChat je plnohodnotná chatovací aplikace běžící end-to-end na blockchainu Internet Computer.<br/><br/>OpenChat je řízen svou komunitou jako DAO a má svůj vlastní token CHAT. Tokeny CHAT jsou rozdávány jako odměny uživatelům za účelem urychlení růstu a vytvoření týmu milionů příznivců, což OpenChatu umožňuje stát se životaschopným vyzyvatelem centralizovaných velkých technologických konkurentů!",
 				"stats": "80 000+ uživatelů",
 				"carousel": {
-					"text": "OpenChat - kde web3 komunikuje",
+					"text": "",
 					"call_to_action": "Zobrazit více"
 				}
 			},
@@ -319,11 +319,7 @@
 				"name": "Taggr",
 				"one_liner": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
 				"call_to_action": "Přejít na Taggr",
-				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli.",
-				"carousel": {
-					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
-					"call_to_action": "Zjistit více"
-				}
+				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +340,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
