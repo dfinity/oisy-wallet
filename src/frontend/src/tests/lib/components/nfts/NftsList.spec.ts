@@ -1,9 +1,19 @@
 import NftsList from '$lib/components/nfts/NftsList.svelte';
-import { AppPath } from '$lib/constants/routes.constants';
+import {
+	NFT_COLLECTION_LIST_COMMON,
+	NFT_COLLECTION_LIST_HIDDEN,
+	NFT_COLLECTION_LIST_SPAM,
+	NFT_LIST_COMMON,
+	NFT_LIST_HIDDEN,
+	NFT_LIST_SPAM
+} from '$lib/constants/test-ids.constants';
 import * as networkTokens from '$lib/derived/network-tokens.derived';
+import * as settingsDerived from '$lib/derived/settings.derived';
 import * as tokens from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import {
 	mockNonFungibleToken1,
@@ -21,6 +31,10 @@ describe('NftsList', () => {
 		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
 	];
 
+	beforeAll(() => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
+
 	beforeEach(() => {
 		nftStore.resetAll();
 	});
@@ -29,42 +43,174 @@ describe('NftsList', () => {
 		vi.restoreAllMocks();
 	});
 
-	it('should render a list of the collections', () => {
+	describe('display collections', () => {
+		const commonCollectionListSelector = `div[data-tid="${NFT_COLLECTION_LIST_COMMON}"]`;
+		const hiddenCollectionListSelector = `div[data-tid="${NFT_COLLECTION_LIST_HIDDEN}"]`;
+		const spamCollectionListSelector = `div[data-tid="${NFT_COLLECTION_LIST_SPAM}"]`;
+
+		it('should render common nft collections', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+
+			const { container } = render(NftsList);
+
+			const commonCollectionList: HTMLDivElement | null = container.querySelector(
+				commonCollectionListSelector
+			);
+
+			expect(commonCollectionList).toBeInTheDocument();
+		});
+
+		it('should render hidden nft collections', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.HIDDEN },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.HIDDEN }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const hiddenCollectionList: HTMLDivElement | null = container.querySelector(
+				hiddenCollectionListSelector
+			);
+
+			expect(hiddenCollectionList).toBeInTheDocument();
+		});
+
+		it('should render spam nft collections', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const spamCollectionList: HTMLDivElement | null = container.querySelector(
+				spamCollectionListSelector
+			);
+
+			expect(spamCollectionList).toBeInTheDocument();
+		});
+	});
+
+	describe('display nfts', () => {
+		const commonNftListSelector = `div[data-tid="${NFT_LIST_COMMON}"]`;
+		const hiddenNftListSelector = `div[data-tid="${NFT_LIST_HIDDEN}"]`;
+		const spamNftListSelector = `div[data-tid="${NFT_LIST_SPAM}"]`;
+
+		beforeEach(() => {
+			vi.spyOn(settingsDerived, 'nftGroupByCollection', 'get').mockReturnValue(writable(false));
+		});
+
+		it('should render common nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+
+			const { container } = render(NftsList);
+
+			const commonNftList: HTMLDivElement | null = container.querySelector(commonNftListSelector);
+
+			expect(commonNftList).toBeInTheDocument();
+		});
+
+		it('should render hidden nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showHidden', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.HIDDEN },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.HIDDEN }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const hiddenNftList: HTMLDivElement | null = container.querySelector(hiddenNftListSelector);
+
+			expect(hiddenNftList).toBeInTheDocument();
+		});
+
+		it('should render spam nft lists', () => {
+			nftStore.addAll(mockNfts);
+
+			vi.spyOn(settingsDerived, 'showSpam', 'get').mockReturnValue(writable(true));
+
+			vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
+				writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			);
+			vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
+				writable([
+					{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
+					{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+				])
+			);
+
+			const { container } = render(NftsList);
+
+			const spamNftList: HTMLDivElement | null = container.querySelector(spamNftListSelector);
+
+			expect(spamNftList).toBeInTheDocument();
+		});
+	});
+
+	it('should render a placeholder if no collections', () => {
+		const { getByText } = render(NftsList);
+
+		const h5 = getByText(get(i18n).nfts.text.title_empty);
+
+		assertNonNullish(h5);
+
+		expect(h5).toBeInTheDocument();
+	});
+
+	it('should render a placeholder if no visible collections', () => {
 		nftStore.addAll(mockNfts);
 
 		vi.spyOn(networkTokens, 'enabledNonFungibleNetworkTokens', 'get').mockReturnValue(
 			writable([mockNonFungibleToken1, mockNonFungibleToken2])
 		);
 		vi.spyOn(tokens, 'nonFungibleTokens', 'get').mockReturnValue(
-			writable([mockNonFungibleToken1, mockNonFungibleToken2])
+			writable([
+				{ ...mockNonFungibleToken1, section: CustomTokenSection.SPAM },
+				{ ...mockNonFungibleToken2, section: CustomTokenSection.SPAM }
+			])
 		);
 
-		const { container } = render(NftsList);
-
-		const grid = container.querySelector('.grid');
-
-		assertNonNullish(grid);
-
-		const links = grid.querySelectorAll('a');
-
-		assertNonNullish(links);
-
-		for (let i = 0; i < links.length; i++) {
-			expect(links.item(i).getAttribute('href')).toContain(
-				`${AppPath.Nfts}${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
-			);
-
-			const img = links.item(i).querySelector('.bg-cover');
-
-			assertNonNullish(img);
-
-			expect(img.getAttribute('style')).toContain(
-				`background-image: url("${mockNfts[i].imageUrl}")`
-			);
-		}
-	});
-
-	it('should render a placeholder if no collections', () => {
 		const { getByText } = render(NftsList);
 
 		const h5 = getByText(get(i18n).nfts.text.title_empty);

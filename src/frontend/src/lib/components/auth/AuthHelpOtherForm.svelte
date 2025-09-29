@@ -22,8 +22,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let onBack: () => void;
-	export let onDone: () => void;
+	interface Props {
+		onBack: () => void;
+		onDone: () => void;
+	}
+
+	let { onBack, onDone }: Props = $props();
 </script>
 
 <ContentWithToolbar>

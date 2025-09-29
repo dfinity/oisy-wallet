@@ -6,7 +6,7 @@
 	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -17,7 +17,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
-	import { evmNativeToken } from '$evm/derived/token.derived';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -43,6 +42,8 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
+	import { errorDetailToString } from '$lib/utils/error.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -55,6 +56,8 @@
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
+		onStopTriggerAmount: () => void;
+		onStartTriggerAmount: () => void;
 	}
 
 	let {
@@ -64,6 +67,8 @@
 		swapProgressStep = $bindable(),
 		currentStep,
 		isSwapAmountsLoading,
+		onStopTriggerAmount,
+		onStartTriggerAmount,
 		onShowTokensList,
 		onClose,
 		onNext,
@@ -78,18 +83,13 @@
 	/**
 	 * Fee context store
 	 */
-	let fallbackEvmToken = $derived(
-		nonNullish($sourceToken)
-			? $enabledEvmTokens.find(
-					({ network: { id: networkId } }) => $sourceToken.network.id === networkId
-				)
-			: undefined
-	);
-
-	let evmNativeEthereumToken = $derived($evmNativeToken ?? fallbackEvmToken);
 	const feeStore = initEthFeeStore();
 
-	let nativeEthereumToken = $derived(evmNativeEthereumToken ?? $ethereumToken);
+	let nativeEthereumToken = $derived(
+		[...$enabledEvmTokens, ...$enabledEthereumTokens].find(
+			({ network: { id: networkId } }) => $sourceToken?.network.id === networkId
+		)
+	);
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
@@ -97,13 +97,30 @@
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
 
 	$effect(() => {
-		feeSymbolStore.set(nativeEthereumToken.symbol);
-		feeTokenIdStore.set(nativeEthereumToken.id);
-		feeDecimalsStore.set(nativeEthereumToken.decimals);
+		if (nonNullish(nativeEthereumToken)) {
+			feeSymbolStore.set(nativeEthereumToken.symbol);
+			feeTokenIdStore.set(nativeEthereumToken.id);
+			feeDecimalsStore.set(nativeEthereumToken.decimals);
+		}
 	});
 
 	$effect(() => {
-		feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		if (nonNullish(nativeEthereumToken)) {
+			feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		}
+	});
+
+	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
+	$effect(() => {
+		receiveAmount =
+			nonNullish($destinationToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+				? formatTokenBigintToNumber({
+						value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+						unitName: $destinationToken.decimals,
+						displayDecimals: $destinationToken.decimals
+					})
+				: undefined;
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
@@ -169,6 +186,7 @@
 		}
 
 		onNext();
+		onStopTriggerAmount();
 
 		try {
 			failedSwapError.set(undefined);
@@ -205,7 +223,9 @@
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
 					usdSourceValue: sourceTokenUsdValue ?? '',
-					swapType: $swapAmountsStore.swaps[0].type ?? ''
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
@@ -217,7 +237,10 @@
 					sourceToken: $sourceToken.symbol,
 					destinationToken: $destinationToken.symbol,
 					dApp: $swapAmountsStore.selectedProvider.provider,
-					swapType: $swapAmountsStore.swaps[0].type ?? ''
+					swapType: $swapAmountsStore.swaps[0].type ?? '',
+					error: errorDetailToString(err) ?? '',
+					sourceNetwork: $sourceToken.network.name,
+					destinationNetwork: $destinationToken.network.name
 				}
 			});
 
@@ -229,11 +252,12 @@
 			});
 
 			onBack();
+			onStartTriggerAmount();
 		}
 	};
 </script>
 
-{#if nonNullish($sourceToken)}
+{#if nonNullish($sourceToken) && nonNullish(nativeEthereumToken)}
 	<EthFeeContext
 		bind:this={feeContext}
 		amount={swapAmount}
@@ -256,7 +280,15 @@
 				bind:slippageValue
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+			<SwapReview
+				isSwapAmountsLoading={isSwapAmountsLoading &&
+					receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
+				{onBack}
+				onSwap={swap}
+				{receiveAmount}
+				{slippageValue}
+				{swapAmount}
+			>
 				{#snippet swapFees()}
 					<EthFeeDisplay>
 						{#snippet label()}

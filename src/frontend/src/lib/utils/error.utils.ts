@@ -100,6 +100,14 @@ export const replaceErrorFields = ({
 export const replaceIcErrorFields = (err: unknown): string | undefined =>
 	replaceErrorFields({ err, keysToRemove: ['Request ID'] });
 
+const stripHttpDetails = (text: string): string =>
+	text
+		// Remove from "HTTP details:" + "{" up to the next closing brace on its own line
+		.replace(/HTTP details\s*:\s*\{[\s\S]*?\n}/i, '')
+		// Tidy leftover blank lines/commas
+		.replace(/\n{2,}/g, '\n')
+		.trim();
+
 export const parseIcErrorMessage = (err: unknown): Record<string, string> | undefined => {
 	if (isNullish(err)) {
 		return;
@@ -116,21 +124,26 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 	}
 
 	try {
-		const messageParts = message
-			.replace(/\\n/g, '\n')
-			.replace(/\\'/g, "'")
-			.replace(/\\"/g, '"')
+		const normalisedMsg = stripHttpDetails(
+			message.replace(/\\n/g, '\n').replace(/\\'/g, "'").replace(/\\"/g, '"')
+		);
+
+		const messageParts = normalisedMsg
 			.split('\n')
 			// The first part is just the "Call failed" initial text, we skip it
 			.slice(1);
 
-		if (messageParts.length === 0) {
+		const kvCandidates = messageParts.filter(
+			(part) => !/^\s*at\b/i.test(part) && !/https?:\/\/\S+/i.test(part)
+		);
+
+		if (kvCandidates.length === 0) {
 			return;
 		}
 
-		const cleanRegex = /^\s*['"]?([^'":]+)['"]?\s*:\s*['"]?(.+?)['"]?\s*$/;
+		const cleanRegex = /^\s*['"]?([^'":]+)['"]?\s*:(?!\/\/)\s*['"]?(.+?)['"]?\s*$/;
 
-		const errObj: Record<string, string> = messageParts.reduce<Record<string, string>>(
+		const errObj: Record<string, string> = kvCandidates.reduce<Record<string, string>>(
 			(acc, part) => {
 				const match = part.match(cleanRegex);
 				if (nonNullish(match)) {
@@ -150,6 +163,10 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 			},
 			{}
 		);
+
+		if (Object.keys(errObj).length === 0) {
+			return;
+		}
 
 		// Remove the "Request ID" key if it exists, since it is unique per request, so not useful for general error handling
 		const {

@@ -31,6 +31,7 @@ import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render, waitFor } from '@testing-library/svelte';
@@ -48,6 +49,8 @@ vi.mock('$lib/services/listener.services', () => ({
 describe('LoaderEthTransactions', () => {
 	const mockLoadTransactions = vi.mocked(loadEthereumTransactions);
 	const mockReloadTransactions = vi.mocked(reloadEthereumTransactions);
+
+	const props = { children: mockSnippet };
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -73,7 +76,7 @@ describe('LoaderEthTransactions', () => {
 			mockPage.mock({ token: ETHEREUM_TOKEN.name });
 			token.set(BASE_ETH_TOKEN);
 
-			render(LoaderEthTransactions);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -92,7 +95,7 @@ describe('LoaderEthTransactions', () => {
 
 			mockAuthStore(null);
 
-			render(LoaderEthTransactions);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -105,7 +108,7 @@ describe('LoaderEthTransactions', () => {
 
 			ethTransactionsStore.set({ tokenId: BASE_ETH_TOKEN_ID, transactions: [] });
 
-			render(LoaderEthTransactions);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -119,7 +122,7 @@ describe('LoaderEthTransactions', () => {
 			ethTransactionsStore.reset(BASE_ETH_TOKEN_ID);
 			ethTransactionsStore.set({ tokenId: ETHEREUM_TOKEN_ID, transactions: [] });
 
-			render(LoaderEthTransactions);
+			render(LoaderEthTransactions, props);
 
 			await tick();
 
@@ -134,7 +137,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should not load transactions if token is not initialized', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		await waitFor(() => {
 			expect(loadEthereumTransactions).not.toHaveBeenCalled();
@@ -142,7 +145,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should not load transactions when token is initialized and but no token is set', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: ICP_TOKEN.name });
 
@@ -152,7 +155,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should not load transactions when token is initialized and is not an Ethereum token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: ICP_TOKEN.name });
 		token.set(ICP_TOKEN);
@@ -163,7 +166,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should not load transactions when token is initialized but does not match the network', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: ETHEREUM_TOKEN.name });
 		token.set(BASE_ETH_TOKEN);
@@ -174,7 +177,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should load transactions when token is initialized and is an Ethereum native token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
@@ -189,7 +192,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should load transactions when token is initialized and is an EVM native token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({
 			token: BASE_SEPOLIA_ETH_TOKEN.name,
@@ -207,7 +210,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should load transactions when token is initialized and is an ERC20 token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
@@ -225,7 +228,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should load transactions when token is initialized and is changed to an Ethereum native token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
@@ -244,7 +247,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should load transactions twice when token is changed but still an Ethereum token', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
@@ -275,7 +278,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should not call the load function everytime the token changes but it was already loaded before', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		const n = 3;
 
@@ -296,16 +299,22 @@ describe('LoaderEthTransactions', () => {
 	it('should re-call the load function if it fails the first time but the token is the same', async () => {
 		mockLoadTransactions.mockResolvedValue({ success: false });
 
+		render(LoaderEthTransactions, props);
+
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
 			network: SEPOLIA_PEPE_TOKEN.network.id.description
 		});
 		token.set(SEPOLIA_PEPE_TOKEN);
 
-		render(LoaderEthTransactions);
+		await waitFor(() => {
+			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
+		});
 
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
+
+		await tick();
 
 		mockPage.mock({
 			token: SEPOLIA_PEPE_TOKEN.name,
@@ -319,7 +328,7 @@ describe('LoaderEthTransactions', () => {
 	});
 
 	it('should call the load function everytime it re-renders even if the token is was already loaded in a previous rendering', async () => {
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
@@ -328,10 +337,12 @@ describe('LoaderEthTransactions', () => {
 			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
 		});
 
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: ICP_TOKEN.name, network: ICP_TOKEN.network.id.description });
 		token.set(ICP_TOKEN);
+
+		await tick();
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);
@@ -344,7 +355,7 @@ describe('LoaderEthTransactions', () => {
 	it('should call the load function every interval', async () => {
 		vi.useFakeTimers();
 
-		render(LoaderEthTransactions);
+		render(LoaderEthTransactions, props);
 
 		mockPage.mock({ token: SEPOLIA_TOKEN.name, network: SEPOLIA_TOKEN.network.id.description });
 		token.set(SEPOLIA_TOKEN);

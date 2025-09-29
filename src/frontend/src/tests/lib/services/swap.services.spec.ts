@@ -36,6 +36,7 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
@@ -420,7 +421,29 @@ describe('fetchVeloraDeltaSwap', () => {
 		poolAddress: '0xpool123',
 		bridge: {
 			destinationChainId: 1,
-			outputToken: '0xoutput456'
+			outputToken: '0xoutput456',
+			protocolSelector: 'bridge_protocol',
+			scalingFactor: 1000000,
+			protocolData: '0xprotocol_data'
+		},
+		bridgeInfo: {
+			destAmountAfterBridge: '800000000',
+			destUSDAfterBridge: '795.0',
+			bridgeFee: '50',
+			bridgeFeeUSD: '50.0',
+			poolAddress: '0xpool123',
+			protocolName: 'bridge_protocol',
+			fees: [
+				{
+					name: 'bridge_fee',
+					amount: '50',
+					amountUSD: '50.0',
+					feeToken: '0xoutput456',
+					amountInSrcToken: '50',
+					amountInUSD: '50.0'
+				}
+			],
+			estimatedTimeMs: 300000
 		},
 		// OptimalRate properties
 		blockNumber: 12345,
@@ -728,7 +751,7 @@ describe('loadKongSwapTokens', () => {
 	it('properly updates kongSwapToken store with the fetched tokens', async () => {
 		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue(mockKongBackendTokens);
 
-		await loadKongSwapTokens({ identity: mockIdentity });
+		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({
 			[kongIcToken.symbol]: kongIcToken
@@ -738,7 +761,7 @@ describe('loadKongSwapTokens', () => {
 	it('properly does not update store if no IC kongTokens available', async () => {
 		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue([{ ...mockKongBackendTokens[1] }]);
 
-		await loadKongSwapTokens({ identity: mockIdentity });
+		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({});
 	});

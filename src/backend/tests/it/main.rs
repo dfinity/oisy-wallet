@@ -1,3 +1,4 @@
+mod agreements;
 mod bitcoin;
 mod config;
 mod contacts;

@@ -3,7 +3,7 @@ import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import pepx from '$sol/assets/pepx.svg';
 import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
-import type { RequiredSplToken } from '$sol/types/spl';
+import type { RequiredSpl2022Token } from '$sol/types/spl';
 
 export const PEPX_DECIMALS = 8;
 
@@ -11,7 +11,7 @@ export const PEPX_SYMBOL = 'PEPx';
 
 export const PEPX_TOKEN_ID: TokenId = parseTokenId(PEPX_SYMBOL);
 
-export const PEPX_TOKEN: RequiredSplToken = {
+export const PEPX_TOKEN: RequiredSpl2022Token = {
 	id: PEPX_TOKEN_ID,
 	network: SOLANA_MAINNET_NETWORK,
 	standard: 'spl',

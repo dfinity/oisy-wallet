@@ -71,6 +71,6 @@
 	});
 </script>
 
-<svelte:window on:oisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
+<svelte:window onoisyValidateAddresses={loadSignerAllowanceAndValidateAddresses} />
 
 {@render children()}

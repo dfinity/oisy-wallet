@@ -1,5 +1,6 @@
 export const NAVIGATION_MENU_BUTTON = 'navigation-menu-button';
 export const NAVIGATION_MENU = 'navigation-menu';
+export const NAVIGATION_MENU_RECEIVE_BUTTON = 'navigation-menu-receive-button';
 export const NAVIGATION_MENU_VIP_BUTTON = 'navigation-menu-vip-button';
 export const NAVIGATION_MENU_GOLD_BUTTON = 'navigation-menu-gold-button';
 export const NAVIGATION_MENU_REFERRAL_BUTTON = 'navigation-menu-referral-button';
@@ -31,6 +32,19 @@ export const TOKEN_BALANCE = 'token-balance';
 export const TOKEN_SKELETON_TEXT = 'token-skeleton-text';
 
 export const NFT_CARD = 'nft-card';
+export const NFT_HIDDEN_BADGE = 'nft-hidden-badge';
+export const NFT_SPAM_BADGE = 'nft-hidden-badge';
+export const NFT_COLLECTION_ACTION_SPAM = 'nft-collection-action-spam';
+export const NFT_COLLECTION_ACTION_NOT_SPAM = 'nft-collection-action-not-spam';
+export const NFT_COLLECTION_ACTION_HIDE = 'nft-collection-action-hide';
+export const NFT_COLLECTION_ACTION_UNHIDE = 'nft-collection-action-unhide';
+export const NFT_COLLECTION_LIST_COMMON = 'nft-collection-list-common';
+export const NFT_COLLECTION_LIST_HIDDEN = 'nft-collection-list-hidden';
+export const NFT_COLLECTION_LIST_SPAM = 'nft-collection-list-spam';
+export const NFT_LIST_COMMON = 'nft-list-common';
+export const NFT_LIST_HIDDEN = 'nft-list-hidden';
+export const NFT_LIST_SPAM = 'nft-list-spam';
+export const NFT_ACTION_SEND = 'nft-action-send';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -157,6 +171,7 @@ export const REWARDS_REQUIREMENTS_STATUS = 'reward-requirement-status';
 export const REWARDS_STATUS_BUTTON = 'reward-status-button';
 export const REWARDS_EARNINGS_CARD = 'reward-earnings-card';
 export const REWARDS_EARNINGS_ACTIVITY_BUTTON = 'reward-earnings-activity-button';
+export const REWARDS_NETWORK_MULTIPLIER_IMAGE = 'reward-network-multiplier-image';
 
 export const WELCOME_MODAL_IMAGE_BANNER = 'welcome-modal-image-banner';
 export const WELCOME_MODAL_LEARN_MORE_ANCHOR = 'welcome-modal-learn-more-anchor';
@@ -188,7 +203,6 @@ export const HELP_AUTH_DOCS_LINK = 'help-auth-docs-link';
 export const HELP_AUTH_PRIVATE_KEY_LINK = 'help-auth-private-key-link';
 export const HELP_AUTH_ASSET_CONTROL_LINK = 'help-auth-asset-control-link';
 
-export const AUTH_LICENSE_LINK = 'auth-license-link';
 export const AUTH_SIGNING_IN_HELP_LINK = 'auth-signing-in-help-link';
 
 export const TOKEN_LIST_FILTER = 'token-list-filter';
@@ -272,3 +286,14 @@ export const AI_ASSISTANT_CONSOLE_BUTTON = 'ai-assistant-console-button';
 export const AI_ASSISTANT_SEND_MESSAGE_BUTTON = 'ai-assistant-send-message-button';
 export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button';
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
+
+// Agreements
+export const AGREEMENTS_MODAL = 'agreements-modal';
+export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
+export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
+export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
+	'agreements-modal-checkbox-license-agreement';
+export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
+
+// UI components
+export const DATE_BADGE_ICON = 'date-badge-icon';

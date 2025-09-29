@@ -22,13 +22,17 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
-	export let assertHide: () => { valid: boolean };
-	export let hideToken: (params: { identity: Identity }) => Promise<void>;
-	export let updateUi: (params: { identity: Identity }) => Promise<void>;
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		onAssertHide: () => { valid: boolean };
+		onHideToken: (params: { identity: Identity }) => Promise<void>;
+		onUpdateUi: (params: { identity: Identity }) => Promise<void>;
+		fromRoute?: NavigationTarget;
+	}
+
+	let { onAssertHide, onHideToken, onUpdateUi, fromRoute }: Props = $props();
 
 	const hide = async () => {
-		const { valid } = assertHide();
+		const { valid } = onAssertHide();
 
 		if (!valid) {
 			return;
@@ -46,18 +50,22 @@
 			return;
 		}
 
+		if (isNullish(modal)) {
+			return;
+		}
+
 		modal.next();
 
 		try {
 			hideProgressStep = ProgressStepsHideToken.HIDE;
 
-			await hideToken({
+			await onHideToken({
 				identity: $authIdentity
 			});
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
-			await updateUi({
+			await onUpdateUi({
 				identity: $authIdentity
 			});
 
@@ -103,10 +111,10 @@
 		} as ProgressStep
 	];
 
-	let hideProgressStep: string = ProgressStepsHideToken.INITIALIZATION;
+	let hideProgressStep = $state<ProgressStepsHideToken>(ProgressStepsHideToken.INITIALIZATION);
 
-	let currentStep: WizardStep<WizardStepsHideToken> | undefined;
-	let modal: WizardModal<WizardStepsHideToken>;
+	let currentStep = $state<WizardStep<WizardStepsHideToken> | undefined>();
+	let modal = $state<WizardModal<WizardStepsHideToken>>();
 
 	const close = () => {
 		modalStore.close();
@@ -121,20 +129,20 @@
 
 <WizardModal
 	bind:this={modal}
-	disablePointerEvents={currentStep?.name === 'Hiding'}
+	disablePointerEvents={currentStep?.name === WizardStepsHideToken.HIDING}
 	onClose={close}
 	{steps}
 	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === 'Hiding'}
+	{#if currentStep?.name === WizardStepsHideToken.HIDING}
 		<InProgressWizard
 			progressStep={hideProgressStep}
 			steps={HIDE_TOKEN_STEPS}
 			warningType="manage"
 		/>
-	{:else}
-		<HideTokenReview on:icCancel={close} on:icHide={hide} />
+	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
+		<HideTokenReview onCancel={close} onHide={hide} />
 	{/if}
 </WizardModal>

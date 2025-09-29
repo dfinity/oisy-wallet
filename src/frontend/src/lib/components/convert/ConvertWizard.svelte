@@ -14,13 +14,37 @@
 		isNetworkIdICP
 	} from '$lib/utils/network.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let customDestination = '';
-	export let convertProgressStep: string;
-	export let currentStep: WizardStep | undefined;
-	export let formCancelAction: 'back' | 'close' = 'back';
-	export let onIcQrCodeBack: () => void;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		customDestination?: string;
+		convertProgressStep: string;
+		currentStep?: WizardStep;
+		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onDestination: () => void;
+		onDestinationBack: () => void;
+		onIcQrCodeBack: () => void;
+		onIcQrCodeScan: () => void;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		customDestination = $bindable(''),
+		convertProgressStep = $bindable(),
+		currentStep,
+		formCancelAction = 'back',
+		onBack,
+		onClose,
+		onNext,
+		onDestination,
+		onDestinationBack,
+		onIcQrCodeBack,
+		onIcQrCodeScan
+	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
@@ -29,39 +53,39 @@
 	<BtcConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
+		{onBack}
+		{onClose}
+		{onNext}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
-		on:icBack
-		on:icNext
-		on:icClose
 	/>
 {:else if isNetworkIdEthereum($sourceToken?.network.id)}
 	<EthConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
+		{onBack}
+		{onClose}
+		{onNext}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
-		on:icBack
-		on:icNext
-		on:icClose
 	/>
 {:else if isNetworkIdICP($sourceToken?.network.id)}
 	<IcConvertTokenWizard
 		{currentStep}
 		{formCancelAction}
+		{onBack}
+		{onClose}
+		{onDestination}
+		{onDestinationBack}
 		{onIcQrCodeBack}
+		{onIcQrCodeScan}
+		{onNext}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep
 		bind:customDestination
-		on:icBack
-		on:icNext
-		on:icClose
-		on:icDestination
-		on:icDestinationBack
-		on:icQRCodeScan
 	/>
 {:else}
 	<div class="mt-6"><MessageBox>{$i18n.convert.text.unsupported_token_conversion}</MessageBox></div>

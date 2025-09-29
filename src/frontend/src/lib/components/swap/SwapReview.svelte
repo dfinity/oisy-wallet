@@ -10,6 +10,7 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import {
@@ -25,13 +26,15 @@
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		slippageValue: OptionAmount;
 		onBack: () => void;
 		onClose?: () => void;
 		onSwap: () => Promise<void>;
 		swapFees: Snippet;
+		isSwapAmountsLoading?: boolean;
 	}
+
 	let {
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
@@ -39,7 +42,8 @@
 		onBack,
 		onClose,
 		onSwap,
-		swapFees
+		swapFees,
+		isSwapAmountsLoading
 	}: Props = $props();
 
 	const {
@@ -104,6 +108,8 @@
 	</div>
 
 	{#if nonNullish($destinationToken) && nonNullish($sourceToken) && $sourceToken.network.id !== $destinationToken.network.id}
+		<Hr spacing="md" />
+
 		<MessageBox styleClass="sm:text-sm">
 			<Html
 				text={replacePlaceholders($i18n.swap.text.cross_chain_networks_info, {
@@ -164,7 +170,7 @@
 			{:else}
 				<ButtonBack onclick={handleBack} />
 
-				<Button onclick={onSwap}>
+				<Button disabled={isSwapAmountsLoading} onclick={onSwap}>
 					{nonNullish($failedSwapError?.errorType) && isEmptyString($failedSwapError?.message)
 						? $i18n.transaction.type.withdraw
 						: $i18n.swap.text.swap_button}

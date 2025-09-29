@@ -1,5 +1,6 @@
 import Nft from '$lib/components/nfts/Nft.svelte';
 import { nftStore } from '$lib/stores/nft.store';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -17,6 +18,8 @@ describe('Nft', () => {
 			collectionId: mockValidErc1155Nft.collection.address,
 			nftId: String(mockNft.id)
 		});
+
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
 	});
 
 	it('should render the nft', () => {

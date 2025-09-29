@@ -5,6 +5,7 @@ import type {
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
+import * as authClientApi from '$lib/api/auth-client.api';
 import * as backendApi from '$lib/api/backend.api';
 import {
 	ChallengeCompletionErrorEnum,
@@ -14,7 +15,6 @@ import {
 } from '$lib/canisters/backend.errors';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
-import * as authUtils from '$lib/utils/auth.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
@@ -83,7 +83,7 @@ describe('pow-protector.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 
 		// Mock the allowance API call that hasRequiredCycles depends on
 		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({

@@ -111,7 +111,6 @@ describe('sol-transactions.services', () => {
 
 		const mockInstructions = mockTransactionDetail.transaction.message.instructions;
 		const mockInnerInstructions = mockTransactionDetail.meta?.innerInstructions ?? [];
-		// const mockAllInstructions = [...mockInstructions, ...mockInnerInstructionsRaw.flatMap(({ instructions }) => instructions)];
 		const { allInstructions: mockAllInstructions } = [...mockInnerInstructions]
 			.sort((a, b) => a.index - b.index)
 			.reduce(
@@ -123,6 +122,10 @@ describe('sol-transactions.services', () => {
 				{ allInstructions: [...mockInstructions], offset: 0 }
 			);
 		const nInstructions = mockAllInstructions.length;
+
+		const initialBalance =
+			(mockTransactionDetail.meta?.preBalances[0] ?? ZERO) -
+			(mockTransactionDetail.meta?.postBalances[0] ?? ZERO);
 
 		const expected: SolTransactionUi = {
 			id: mockSignature.signature,
@@ -193,9 +196,11 @@ describe('sol-transactions.services', () => {
 					network,
 					cumulativeBalances:
 						index === 0
-							? {}
+							? {
+									[mockSolAddress]: initialBalance
+								}
 							: {
-									[mockSolAddress]: -mockValue * BigInt(index),
+									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
 					addressToToken: {}
@@ -230,9 +235,11 @@ describe('sol-transactions.services', () => {
 					network,
 					cumulativeBalances:
 						index === 0
-							? {}
+							? {
+									[mockSolAddress]: initialBalance
+								}
 							: {
-									[mockSolAddress]: -mockValue * BigInt(index),
+									[mockSolAddress]: initialBalance - mockValue * BigInt(index),
 									[mockSolAddress2]: mockValue * BigInt(index)
 								},
 					addressToToken: {}
@@ -362,10 +369,13 @@ describe('sol-transactions.services', () => {
 					network,
 					cumulativeBalances:
 						index === 0
-							? {}
+							? {
+									[mockSolAddress]: initialBalance
+								}
 							: {
 									[mockSolAddress]:
-										-mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index),
+										initialBalance -
+										mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index),
 									[mockSolAddress2]:
 										mockValue * BigInt(index >= indexStartAtaMapping ? index - 1 : index)
 								},

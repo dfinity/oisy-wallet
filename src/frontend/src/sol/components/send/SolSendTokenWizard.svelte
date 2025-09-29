@@ -2,7 +2,7 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { assertNonNullish, isNullish } from '@dfinity/utils';
 	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
 		SOLANA_DEVNET_TOKEN,
@@ -29,11 +29,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { OptionSolAddress } from '$lib/types/address';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { Network, NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
 		isNetworkIdSolana,
@@ -53,27 +51,45 @@
 		initFeeStore
 	} from '$sol/stores/sol-fee.store';
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		currentStep?: WizardStep;
+		destination?: string;
+		amount: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
+	}
+
+	let {
+		currentStep,
+		destination = '',
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
+	}: Props = $props();
 
 	const { sendToken, sendTokenDecimals } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let network: Network | undefined = undefined;
-	$: ({ network } = $sendToken);
+	let network = $derived($sendToken?.network);
 
-	let networkId: NetworkId | undefined = undefined;
-	$: ({ id: networkId } = network);
+	let networkId = $derived(network?.id);
 
-	let source: OptionSolAddress;
-	let solanaNativeToken: Token;
-	$: [source, solanaNativeToken] = isNetworkIdSOLDevnet(networkId)
-		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-		: isNetworkIdSOLLocal(networkId)
-			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-			: [$solAddressMainnet, SOLANA_TOKEN];
+	let [source, solanaNativeToken] = $derived(
+		isNetworkIdSOLDevnet(networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+			: isNetworkIdSOLLocal(networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN]
+	);
 
 	/**
 	 * Fee context store
@@ -84,13 +100,14 @@
 	const ataFeeStore = initFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set(solanaNativeToken.symbol);
-
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set(solanaNativeToken.id);
-
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set(solanaNativeToken.decimals);
+
+	$effect(() => {
+		feeSymbolStore.set(solanaNativeToken.symbol);
+		feeTokenIdStore.set(solanaNativeToken.id);
+		feeDecimalsStore.set(solanaNativeToken.decimals);
+	});
 
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
@@ -108,10 +125,8 @@
 	 * Send
 	 */
 
-	const dispatch = createEventDispatcher();
-
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icSendBack');
+	const close = () => onClose();
+	const back = () => onSendBack();
 
 	const send = async () => {
 		if (isNullish($authIdentity)) {
@@ -150,7 +165,7 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
 		try {
 			await sendSol({
@@ -202,29 +217,21 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 </script>
 
 <SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
 	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview {amount} {destination} {network} {selectedContact} on:icBack on:icSend={send} />
+		<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
 	{:else if currentStep?.name === WizardStepsSend.SENDING}
 		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
 	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm
-			{selectedContact}
-			on:icNext
-			on:icClose
-			on:icTokensList
-			on:icBack
-			bind:destination
-			bind:amount
-		>
-			<ButtonBack slot="cancel" onclick={back} />
+		<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</SolSendForm>
-	{:else}
-		<slot />
 	{/if}
 </SolFeeContext>

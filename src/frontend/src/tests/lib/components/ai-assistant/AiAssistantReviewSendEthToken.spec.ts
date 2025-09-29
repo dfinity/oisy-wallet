@@ -75,7 +75,8 @@ describe('AiAssistantReviewSendEthToken', () => {
 		destination: mockEthAddress3,
 		nativeEthereumToken: ETHEREUM_TOKEN,
 		sendCompleted: false,
-		sourceNetwork: ETHEREUM_NETWORK
+		sourceNetwork: ETHEREUM_NETWORK,
+		sendEnabled: true
 	};
 	let sendSpy: MockInstance;
 
@@ -184,6 +185,28 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
 			props,
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should not call send if sendEnabled is false', async () => {
+		mockAuthStore();
+		mockBalance();
+		mockEthAddressStore(null);
+		mockCkEthMinterInfoStore();
+		mockEthFeeStore();
+
+		const { getByTestId } = render(AiAssistantReviewSendEthToken, {
+			props: {
+				...props,
+				sendEnabled: false
+			},
 			context: mockContext()
 		});
 

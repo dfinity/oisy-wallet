@@ -35,7 +35,8 @@ describe('AiAssistantReviewSendBtcToken', () => {
 	const props = {
 		amount: sendAmount,
 		destination: mockBtcAddress,
-		sendCompleted: false
+		sendCompleted: false,
+		sendEnabled: true
 	};
 	const mockSignerApi = () =>
 		vi.spyOn(signerApi, 'sendBtc').mockResolvedValue({ txid: transactionId });
@@ -171,6 +172,30 @@ describe('AiAssistantReviewSendBtcToken', () => {
 			props: {
 				...props,
 				destination: mockEthAddress
+			},
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(btcSendApiSpy).not.toHaveBeenCalled();
+	});
+
+	it('should not call sendBtc if sendEnabled is false', async () => {
+		const btcSendApiSpy = mockSignerApi();
+		mockBackendApi();
+		mockAuthStore();
+		mockBtcAddressStore();
+		mockBalance();
+		mockPrepareBtcSendApi();
+		mockValidateBtcSend();
+
+		const { getByTestId } = render(AiAssistantReviewSendBtcToken, {
+			props: {
+				...props,
+				sendEnabled: false
 			},
 			context: mockContext()
 		});

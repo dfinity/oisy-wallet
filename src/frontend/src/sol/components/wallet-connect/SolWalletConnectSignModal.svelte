@@ -144,13 +144,14 @@
 			progressStep={signProgressStep}
 			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
 		/>
-	{:else}
+	{:else if currentStep?.name === WizardStepsSign.REVIEW}
 		<SolWalletConnectSignReview
 			{amount}
 			{data}
 			destination={destination ?? ''}
 			onApprove={sign}
 			onReject={reject}
+			source={address ?? ''}
 			{token}
 		/>
 	{/if}

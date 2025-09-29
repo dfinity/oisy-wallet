@@ -47,7 +47,7 @@
 
 	let loading: boolean = $derived(isNullish(tokens));
 
-	// Default token / tokengroup list
+	// Default token / tokenGroup list
 	let filteredTokens: TokenUiOrGroupUi[] | undefined = $derived(
 		getFilteredTokenList({ filter: $tokenListStore.filter, list: tokens ?? [] })
 	);
@@ -62,7 +62,7 @@
 		filter: string;
 		selectedNetwork?: Network;
 	}) => {
-		// sort alphabetally and apply filter
+		// Sort alphabetically and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
@@ -70,7 +70,7 @@
 			)
 		});
 
-		// we need to reset modified tokens, since the filter has changed, the selected token(s) may not be visible anymore
+		// We need to reset modified tokens; since the filter has changed, the selected token(s) may not be visible anymore
 		modifiedTokens = {};
 	};
 
@@ -117,7 +117,7 @@
 	};
 </script>
 
-<TokensDisplayHandler bind:tokens>
+<TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}

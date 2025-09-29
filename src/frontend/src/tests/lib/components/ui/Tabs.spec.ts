@@ -1,7 +1,7 @@
 import { goto } from '$app/navigation';
 import Tabs from '$lib/components/ui/Tabs.svelte';
 import type { NonEmptyArray } from '$lib/types/utils';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 
 vi.mock('$app/navigation', () => ({
@@ -19,7 +19,7 @@ describe('Tabs', () => {
 			id: string;
 			path?: string | undefined;
 		}>,
-		children: createMockSnippet('snippet')
+		children: mockSnippet
 	};
 
 	it('renders component correctly', () => {
@@ -27,7 +27,7 @@ describe('Tabs', () => {
 
 		expect(getByText(props.tabs[0].label)).toBeInTheDocument();
 		expect(getByText(props.tabs[1].label)).toBeInTheDocument();
-		expect(getByTestId('snippet')).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 	});
 
 	it('correctly navigates to provided paths', async () => {
@@ -47,7 +47,7 @@ describe('Tabs', () => {
 
 		expect(tab0).toBeInTheDocument();
 		expect(tab1).toBeInTheDocument();
-		expect(getByTestId('snippet')).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 
 		await fireEvent.click(tab0);
 

@@ -18,7 +18,8 @@ describe('AiAssistantReviewSendTokenTool', () => {
 
 	const props = {
 		amount: 1,
-		address: mockEthAddress
+		address: mockEthAddress,
+		sendEnabled: true
 	};
 
 	beforeEach(() => {

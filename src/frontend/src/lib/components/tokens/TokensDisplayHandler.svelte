@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { nonNullish } from '@dfinity/utils';
+	import { onDestroy, type Snippet } from 'svelte';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
@@ -8,11 +8,12 @@
 
 	interface Props {
 		tokens: TokenUiOrGroupUi[] | undefined;
+		animating: boolean;
 		children: Snippet;
 	}
 
 	// We start `tokens` as undefined to avoid showing an empty list before the first update.
-	let { tokens = $bindable(), children }: Props = $props();
+	let { tokens = $bindable(), animating, children }: Props = $props();
 
 	let groupedTokens: TokenUiOrGroupUi[] = $derived(
 		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
@@ -25,14 +26,42 @@
 		})
 	);
 
-	const updateTokensToDisplay = () => (tokens = [...sortedTokensOrGroups]);
+	let timer = $state<NodeJS.Timeout | undefined>();
 
-	const debounceUpdateTokensToDisplay = debounce(updateTokensToDisplay, 500);
+	const clearTimer = () => {
+		if (nonNullish(timer)) {
+			clearTimeout(timer);
+			timer = undefined;
+		}
+	};
+
+	const apply = () => {
+		tokens = [...sortedTokensOrGroups];
+	};
+
+	const updateTokensToDisplay = () => {
+		if (!animating) {
+			apply();
+
+			return;
+		}
+
+		scheduleRetry();
+	};
+
+	const scheduleRetry = () => {
+		timer = setTimeout(updateTokensToDisplay, 500);
+	};
 
 	$effect(() => {
 		[sortedTokensOrGroups];
-		debounceUpdateTokensToDisplay();
+
+		updateTokensToDisplay();
+
+		return clearTimer;
 	});
+
+	onDestroy(clearTimer);
 </script>
 
 {@render children()}

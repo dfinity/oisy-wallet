@@ -26,7 +26,10 @@
 		success: 'bg-success-subtle-20 text-success-primary',
 		outline: 'border border-tertiary bg-primary',
 		disabled: 'bg-tertiary-inverted text-white',
-		'nft-trait': 'border border-secondary bg-primary'
+		'nft-trait': 'border border-secondary bg-primary',
+		'nft-spam': 'bg-warning-primary text-white',
+		eligible: 'bg-success-primary text-white',
+		'not-eligible': 'bg-primary-inverted text-white opacity-16'
 	};
 </script>
 

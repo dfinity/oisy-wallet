@@ -7,7 +7,7 @@
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
-	import NewSwapForm from '$lib/components/swap/NewSwapForm.svelte';
+	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
@@ -103,9 +103,23 @@
 			return 'insufficient-funds-for-fee';
 		}
 	};
+
+	$effect(() => {
+		if (nonNullish($sourceToken) && nonNullish(swapAmount)) {
+			const parsedAmount = parseToken({
+				value: `${swapAmount}`,
+				unitName: $sourceToken.decimals
+			});
+
+			const newErrorType = customValidate(parsedAmount);
+			if (newErrorType !== errorType) {
+				errorType = newErrorType;
+			}
+		}
+	});
 </script>
 
-<NewSwapForm
+<SwapForm
 	{errorType}
 	fee={totalFee}
 	{isSwapAmountsLoading}
@@ -148,4 +162,4 @@
 			</div>
 		{/if}
 	{/snippet}
-</NewSwapForm>
+</SwapForm>

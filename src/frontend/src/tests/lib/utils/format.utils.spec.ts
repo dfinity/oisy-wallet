@@ -530,7 +530,7 @@ describe('format.utils', () => {
 				i18n: {} as unknown as I18n
 			});
 
-			expect(result).toBe('January');
+			expect(result).toBe('Jan');
 		});
 
 		it('formats date to month name in German locale', () => {
@@ -539,7 +539,7 @@ describe('format.utils', () => {
 				i18n: { lang: 'de' } as unknown as I18n
 			});
 
-			expect(result).toBe('Januar');
+			expect(result).toBe('Jan');
 		});
 
 		it('formats date to month name in French locale', () => {
@@ -548,7 +548,7 @@ describe('format.utils', () => {
 				i18n: { lang: 'fr' } as unknown as I18n
 			});
 
-			expect(result).toBe('janvier');
+			expect(result).toBe('janv.');
 		});
 
 		it('handles invalid date input by returning "Invalid Date"', () => {

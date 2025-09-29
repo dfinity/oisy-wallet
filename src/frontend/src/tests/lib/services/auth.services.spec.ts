@@ -1,11 +1,20 @@
+import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import { signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
+import * as eventsUtils from '$lib/utils/events.utils';
+import { emit } from '$lib/utils/events.utils';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
+import * as timeUtils from '$lib/utils/time.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
 
 vi.mock('$lib/utils/idb.utils', () => ({
 	delMultiKeysByPrincipal: vi.fn()
+}));
+
+vi.mock('$lib/utils/time.utils', () => ({
+	randomWait: vi.fn()
 }));
 
 const rootLocation = 'https://oisy.com/';
@@ -25,6 +34,10 @@ describe('auth.services', () => {
 	describe('signOut', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			vi.spyOn(eventsUtils, 'emit');
+
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(vi.fn());
 		});
 
 		it('should call the signOut function of the authStore without resetting the url', async () => {
@@ -76,8 +89,8 @@ describe('auth.services', () => {
 
 			await signOut({});
 
-			// 3 addresses + 3(+1) tokens
-			expect(idbKeyval.del).toHaveBeenCalledTimes(7);
+			// 3 addresses + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
 
 			// 4 transactions + 1 balances
 			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
@@ -86,8 +99,59 @@ describe('auth.services', () => {
 		it('should clean the IDB storage for all principals', async () => {
 			await signOut({ clearAllPrincipalsStorages: true });
 
-			// 3 addresses + 3(+1) tokens + 4 txs + 1 balance
-			expect(idbKeyval.clear).toHaveBeenCalledTimes(12);
+			// 3 addresses + 1(+1) tokens + 4 txs + 1 balance
+			expect(idbKeyval.clear).toHaveBeenCalledTimes(10);
+		});
+
+		it("should disconnect WalletConnect's session", async () => {
+			const signOutSpy = vi.spyOn(authStore, 'signOut');
+
+			await signOut({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(signOutSpy).toHaveBeenCalled();
+		});
+
+		it("should wait for WalletConnect's session to be disconnected", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			let i = 0;
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(async () => {
+				i++;
+				if (i >= maxSeconds / 2) {
+					walletConnectPaired.set(false);
+				}
+				await Promise.resolve();
+			});
+
+			await signOut({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds / 2);
+
+			Array.from({ length: maxSeconds / 2 }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it("should wait for WalletConnect's session to be disconnected for a maximum 10 seconds", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			await signOut({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds);
+
+			Array.from({ length: maxSeconds }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
 		});
 	});
 });

@@ -1,7 +1,6 @@
 {
 	"BURN": {
 		"ledgerCanisterId": "egjwt-lqaaa-aaaak-qi2aa-cai",
-		"indexCanisterId": "nrant-tyaaa-aaaag-atsjq-cai",
 		"decimals": 8,
 		"name": "MSQ Cycle Burn",
 		"symbol": "BURN",
@@ -9,19 +8,8 @@
 			"__bigint__": "10000"
 		}
 	},
-	"CLOUD": {
-		"ledgerCanisterId": "pcj6u-uaaaa-aaaak-aewnq-cai",
-		"indexCanisterId": "72uqs-pqaaa-aaaak-aes7a-cai",
-		"decimals": 8,
-		"name": "Crypto Cloud",
-		"symbol": "CLOUD",
-		"fee": {
-			"__bigint__": "100000000"
-		}
-	},
 	"AAA": {
 		"ledgerCanisterId": "l67es-4iaaa-aaaag-atvda-cai",
-		"indexCanisterId": "lz6cg-rqaaa-aaaag-atvdq-cai",
 		"decimals": 8,
 		"name": "aaaaa-aa ∞",
 		"symbol": "AAA",
@@ -133,15 +121,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"RSIC.OT": {
-		"ledgerCanisterId": "i44ka-paaaa-aaaar-qbonq-cai",
-		"decimals": 0,
-		"name": "RSIC•GENESIS•RUNE",
-		"symbol": "RSIC.OT",
-		"fee": {
-			"__bigint__": "10"
-		}
-	},
 	"BDC.OT": {
 		"ledgerCanisterId": "2ulkl-dqaaa-aaaar-qaijq-cai",
 		"decimals": 0,
@@ -169,13 +148,24 @@
 			"__bigint__": "10"
 		}
 	},
-	"SGLDT": {
-		"ledgerCanisterId": "i2s4q-syaaa-aaaan-qz4sq-cai",
+	"TICRC1": {
+		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
+		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
+		"decimals": 8,
+		"name": "TEST ICRC1",
+		"symbol": "TICRC1",
 		"fee": {
-			"__bigint__": "1000"
-		},
-		"name": "sGLDT - GLDT Wrapper",
-		"symbol": "sGLDT",
-		"decimals": 8
+			"__bigint__": "10000"
+		}
+	},
+	"DYA": {
+		"ledgerCanisterId": "vrsv6-3qaaa-aaaau-abytq-cai",
+		"indexCanisterId": "u44rq-uyaaa-aaaau-abyua-cai",
+		"decimals": 8,
+		"name": "Dyah AI",
+		"symbol": "DYA",
+		"fee": {
+			"__bigint__": "10000"
+		}
 	}
 }

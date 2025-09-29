@@ -11,7 +11,8 @@ export interface NetworkChainId {
 interface NetworkProviders {
 	providers: {
 		infura: Networkish;
-		alchemy: AlchemyNetwork;
+		alchemy: Networkish;
+		alchemyDeprecated: AlchemyNetwork;
 		alchemyJsonRpcUrl: string;
 	};
 }

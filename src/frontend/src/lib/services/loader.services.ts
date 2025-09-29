@@ -1,8 +1,7 @@
+import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
-import { POW_FEATURE_ENABLED } from '$env/pow.env';
-import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
 import {
 	networkBitcoinMainnetEnabled,
@@ -19,7 +18,7 @@ import { loading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
@@ -73,7 +72,6 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 
 		return { success: false };
 	}
-
 	return { success: true };
 };
 
@@ -143,7 +141,11 @@ export const initLoader = async ({
 
 	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
 	setProgressModal(true);
-	if (!POW_FEATURE_ENABLED) {
+
+	if (FRONTEND_DERIVATION_ENABLED && !POW_FEATURE_ENABLED) {
+		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+		initSignerAllowance();
+	} else {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
 
 		if (!initSignerAllowanceSuccess) {

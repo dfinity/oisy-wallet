@@ -11,7 +11,7 @@ import type {
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type IcFee = z.infer<typeof IcFeeSchema>;
 
@@ -35,3 +35,8 @@ export type IcCkInterface = z.infer<typeof IcCkInterfaceSchema>;
 
 export type OptionIcToken = Option<IcToken>;
 export type OptionIcCkToken = Option<IcCkToken>;
+
+export enum IcTokenStandards {
+	icrc1 = 'ICRC-1',
+	icrc2 = 'ICRC-2'
+}

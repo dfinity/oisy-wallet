@@ -17,6 +17,7 @@
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
+		AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
@@ -45,9 +46,11 @@
 		amount: number;
 		destination: Address;
 		sendCompleted: boolean;
+		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable() }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const { sendTokenNetworkId, sendTokenDecimals, sendToken, sendBalance, sendTokenSymbol } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -89,7 +92,8 @@
 	);
 
 	let invalid = $derived(
-		invalidDestination ||
+		!sendEnabled ||
+			invalidDestination ||
 			notEmptyString(amountErrorMessage) ||
 			isNullish(amount) ||
 			isNullish(utxosFee) ||
@@ -102,9 +106,18 @@
 			? mapNetworkIdToBitcoinNetwork($sendTokenNetworkId)
 			: undefined;
 
-		const trackingEventMetadata = {
+		const sharedTrackingEventMetadata = {
 			token: $sendTokenSymbol,
-			network: `${$sendTokenNetworkId.description}`,
+			network: `${$sendTokenNetworkId.description}`
+		};
+
+		trackEvent({
+			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
+			metadata: sharedTrackingEventMetadata
+		});
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
 			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
 		};
 
@@ -170,7 +183,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -192,18 +205,17 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
+			onSendCompleted();
 			loading = false;
-			sendCompleted = true;
 		} catch (err: unknown) {
 			loading = false;
-			sendCompleted = false;
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: trackingEventMetadata
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -243,7 +255,10 @@
 		{$i18n.send.text.send}
 	</Button>
 {:else}
-	<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+	<p
+		class="text-center text-sm text-success-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+	>
 		{$i18n.ai_assistant.text.send_token_succeeded}
 	</p>
 {/if}

@@ -7,7 +7,7 @@ import {
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
 import { BTC_TOKEN_GROUP } from '$env/tokens/groups/groups.btc.env';
-import type { Token, TokenId, TokenWithLinkedData } from '$lib/types/token';
+import type { RequiredToken, RequiredTokenWithLinkedData, TokenId } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 
@@ -17,7 +17,7 @@ export const BTC_MAINNET_SYMBOL = 'BTC';
 
 export const BTC_MAINNET_TOKEN_ID: TokenId = parseTokenId(BTC_MAINNET_SYMBOL);
 
-export const BTC_MAINNET_TOKEN: TokenWithLinkedData = {
+export const BTC_MAINNET_TOKEN: RequiredTokenWithLinkedData = {
 	id: BTC_MAINNET_TOKEN_ID,
 	network: BTC_MAINNET_NETWORK,
 	standard: 'bitcoin',
@@ -36,7 +36,7 @@ export const BTC_TESTNET_SYMBOL = 'BTC (Testnet)';
 
 export const BTC_TESTNET_TOKEN_ID: TokenId = parseTokenId(BTC_TESTNET_SYMBOL);
 
-export const BTC_TESTNET_TOKEN: Token = {
+export const BTC_TESTNET_TOKEN: RequiredToken = {
 	id: BTC_TESTNET_TOKEN_ID,
 	network: BTC_TESTNET_NETWORK,
 	standard: 'bitcoin',
@@ -51,7 +51,7 @@ export const BTC_REGTEST_SYMBOL = 'BTC (Regtest)';
 
 export const BTC_REGTEST_TOKEN_ID: TokenId = parseTokenId(BTC_REGTEST_SYMBOL);
 
-export const BTC_REGTEST_TOKEN: Token = {
+export const BTC_REGTEST_TOKEN: RequiredToken = {
 	id: BTC_REGTEST_TOKEN_ID,
 	network: BTC_REGTEST_NETWORK,
 	standard: 'bitcoin',
@@ -63,8 +63,8 @@ export const BTC_REGTEST_TOKEN: Token = {
 };
 
 // The following tokens are used as fallback for any Bitcoin token defined in the token store.
-// That means that the order of the tokens in the array is important, to have a correct fallback chain.
-export const SUPPORTED_BITCOIN_TOKENS: Token[] = defineSupportedTokens({
+// That means that the order of the tokens in the array is important to have a correct fallback chain.
+export const SUPPORTED_BITCOIN_TOKENS: RequiredToken[] = defineSupportedTokens({
 	mainnetFlag: BTC_MAINNET_ENABLED,
 	mainnetTokens: [BTC_MAINNET_TOKEN],
 	testnetTokens: [BTC_TESTNET_TOKEN],

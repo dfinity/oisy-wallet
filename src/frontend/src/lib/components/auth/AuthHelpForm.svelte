@@ -21,8 +21,12 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let onLostIdentity: () => void;
-	export let onOther: () => void;
+	interface Props {
+		onLostIdentity: () => void;
+		onOther: () => void;
+	}
+
+	let { onLostIdentity, onOther }: Props = $props();
 </script>
 
 <div class="grid gap-6">

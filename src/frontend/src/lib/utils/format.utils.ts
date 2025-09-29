@@ -7,9 +7,8 @@ import type { AmountString } from '$lib/types/amount';
 import type { CurrencyExchangeData } from '$lib/types/currency';
 import { getCurrencyDecimalDigits } from '$lib/utils/currency.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { Utils } from 'alchemy-sdk';
 import Decimal from 'decimal.js';
-import type { BigNumberish } from 'ethers/utils';
+import { formatUnits, type BigNumberish } from 'ethers/utils';
 
 const DEFAULT_DISPLAY_DECIMALS = 4;
 const MAX_DEFAULT_DISPLAY_DECIMALS = 8;
@@ -29,7 +28,14 @@ export const formatToken = ({
 	trailingZeros = false,
 	showPlusSign = false
 }: FormatTokenParams): AmountString => {
-	const res = Utils.formatUnits(value, unitName);
+	const parsedUnitName: BigNumberish =
+		typeof unitName === 'number' || typeof unitName === 'bigint'
+			? unitName
+			: /^\d+$/.test(unitName)
+				? BigInt(unitName)
+				: unitName;
+
+	const res = formatUnits(value, parsedUnitName);
 
 	const match = res.match(/^0\.0*/);
 	const leadingZeros = match ? match[0].length - 2 : 0;
@@ -62,7 +68,7 @@ export const formatTokenBigintToNumber = (params: FormatTokenParams): number =>
 /**
  * Shortens the text from the middle. Ex: "12345678901234567890" -> "1234567...5678901"
  * @param text
- * @param splitLength An optional length for the split. e.g. 12345678 becomes, if splitLength = 2, 12...78
+ * @param splitLength An optional length for the split. e.g. 12,345,678 becomes if splitLength = 2, 12...78
  * @returns text
  */
 export const shortenWithMiddleEllipsis = ({
@@ -72,7 +78,7 @@ export const shortenWithMiddleEllipsis = ({
 	text: string;
 	splitLength?: number;
 }): string => {
-	// Original min length was 16 to extract 7 split
+	// Original min length was 16 to extract split 7
 	const minLength = splitLength * 2 + 2;
 	return text.length > minLength
 		? `${text.slice(0, splitLength)}...${text.slice(-1 * splitLength)}`
@@ -123,12 +129,12 @@ export const formatNanosecondsToTimestamp = (nanoseconds: bigint): number => {
 };
 
 export const formatToShortDateString = ({ date, i18n }: { date: Date; i18n: I18n }): string =>
-	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'long' });
+	date.toLocaleDateString(i18n?.lang ?? Languages.ENGLISH, { month: 'short' });
 
 const getRelativeTimeFormatter = (language?: Languages) =>
 	new Intl.RelativeTimeFormat(language ?? Languages.ENGLISH, { numeric: 'auto' });
 
-/** Formats a number of seconds to a normalized date string.
+/** Formats a number of seconds to a normalised date string.
  *
  * If the date is within the same year, it returns the day and month name.
  * If the date is in a different year, it returns the day, month, and year.
@@ -237,7 +243,7 @@ export const formatCurrency = ({
 			formatted
 				// Remove group separators (thousands)
 				.replaceAll(groupSep, '')
-				// Replace decimal separator with '.'
+				// Replace the decimal separator with '.'
 				.replace(decimalSep, '.')
 		);
 	}

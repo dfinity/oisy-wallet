@@ -1,9 +1,7 @@
 import { BASE_EXPLORER_URL, BASE_SEPOLIA_EXPLORER_URL } from '$env/explorers.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import baseMainnetIconDark from '$lib/assets/networks/dark/base-mainnet.svg';
-import baseSepoliaIconDark from '$lib/assets/networks/dark/base-sepolia.svg';
-import baseMainnetIconLight from '$lib/assets/networks/light/base-mainnet.svg';
-import baseSepoliaIconLight from '$lib/assets/networks/light/base-sepolia.svg';
+import baseMainnetIcon from '$lib/assets/networks/base-mainnet.svg';
+import baseSepoliaIcon from '$lib/assets/networks/base-sepolia.svg';
 import type { NetworkId } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 import { parseEnabledMainnetBoolEnvVar } from '$lib/utils/env.utils';
@@ -23,12 +21,12 @@ export const BASE_NETWORK: EthereumNetwork = {
 	env: 'mainnet',
 	name: 'Base',
 	chainId: 8453n,
-	iconLight: baseMainnetIconLight,
-	iconDark: baseMainnetIconDark,
+	icon: baseMainnetIcon,
 	explorerUrl: BASE_EXPLORER_URL,
 	providers: {
 		infura: 'base',
-		alchemy: Network.BASE_MAINNET,
+		alchemy: 'base',
+		alchemyDeprecated: Network.BASE_MAINNET,
 		alchemyJsonRpcUrl: 'https://base-mainnet.g.alchemy.com/v2'
 	},
 	exchange: { coingeckoId: 'base' },
@@ -44,12 +42,12 @@ export const BASE_SEPOLIA_NETWORK: EthereumNetwork = {
 	env: 'testnet',
 	name: 'Base Sepolia',
 	chainId: 84532n,
-	iconLight: baseSepoliaIconLight,
-	iconDark: baseSepoliaIconDark,
+	icon: baseSepoliaIcon,
 	explorerUrl: BASE_SEPOLIA_EXPLORER_URL,
 	providers: {
 		infura: 'base-sepolia',
-		alchemy: Network.BASE_SEPOLIA,
+		alchemy: 'base-sepolia',
+		alchemyDeprecated: Network.BASE_SEPOLIA,
 		alchemyJsonRpcUrl: 'https://base-sepolia.g.alchemy.com/v2'
 	}
 };

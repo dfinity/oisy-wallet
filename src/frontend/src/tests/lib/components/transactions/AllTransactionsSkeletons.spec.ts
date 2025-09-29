@@ -11,14 +11,12 @@ import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
 describe('AllTransactionsSkeletons', () => {
 	const testIdPrefix = 'skeleton-card';
-
-	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeEach(() => {
 		vi.clearAllMocks();

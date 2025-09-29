@@ -1,5 +1,6 @@
 export enum WizardStepsSend {
 	TOKENS_LIST = 'Tokens List',
+	NFTS_LIST = 'NFTs List',
 	DESTINATION = 'Destination',
 	FILTER_NETWORKS = 'Filter Networks',
 	SEND = 'Send',

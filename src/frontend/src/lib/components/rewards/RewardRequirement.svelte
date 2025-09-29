@@ -57,18 +57,18 @@
 
 {#if nonNullish(criterionText)}
 	<span
-		class="flex w-full flex-row"
+		class="flex w-full flex-row items-center gap-2"
 		class:duration-500={!criterion.satisfied}
 		class:ease-in-out={!criterion.satisfied}
 		class:transition={!criterion.satisfied}
 	>
 		<span
-			class="-mt-0.5 mr-2"
+			class="-mt-0.5"
 			class:text-disabled={!criterion.satisfied}
 			class:text-success-primary={criterion.satisfied}
 			data-tid={testId}
 		>
-			<IconCheckCircleFill size={32} />
+			<IconCheckCircleFill size={24} />
 		</span>
 		<span>
 			{criterionText}

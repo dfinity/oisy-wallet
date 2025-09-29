@@ -4,11 +4,14 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
-import type { Allowance } from '@dfinity/ledger-icp/dist/candid/ledger';
 import {
 	IcrcLedgerCanister,
+	type GetBlocksParams,
 	type IcrcAccount,
+	type IcrcAllowance,
 	type IcrcBlockIndex,
+	type IcrcGetBlocksResult,
+	type IcrcStandardRecord,
 	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
@@ -177,7 +180,7 @@ export const approve = async ({
  * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
  * @param {IcrcAccount} params.owner - The account owner.
  * @param {IcrcAccount} params.spender - The account approved to spend on behalf of the owner.
- * @returns {Promise<Allowance>} The allowance details including amount and expiration.
+ * @returns {Promise<IcrcAllowance>} The allowance details including amount and expiration.
  */
 export const allowance = async ({
 	certified = true,
@@ -191,7 +194,7 @@ export const allowance = async ({
 		owner: IcrcAccount;
 		spender: IcrcAccount;
 	} & QueryParams
->): Promise<Allowance> => {
+>): Promise<IcrcAllowance> => {
 	assertNonNullish(identity);
 	const { allowance } = await ledgerCanister({ identity, ledgerCanisterId });
 
@@ -209,6 +212,46 @@ const toAccount = ({
 	owner,
 	subaccount: toNullable(subaccount)
 });
+
+export const getBlocks = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId,
+	...rest
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & GetBlocksParams): Promise<IcrcGetBlocksResult> => {
+	assertNonNullish(identity);
+
+	const { getBlocks } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return getBlocks({ certified, ...rest });
+};
+
+/**
+ * Retrieves the ledger ICRC1 supported standards.
+ *
+ * @param {Object} params - The parameters for fetching supported standards.
+ * @param {boolean} [params.certified=true] - Whether the data should be certified.
+ * @param {OptionIdentity} params.identity - The identity to use for the request.
+ * @param {CanisterIdText} params.ledgerCanisterId - The ledger canister ID.
+ * @returns {Promise<IcrcStandardRecord[]>} The array of all supported standards.
+ */
+export const icrc1SupportedStandards = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcStandardRecord[]> => {
+	assertNonNullish(identity);
+
+	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	return icrc1SupportedStandards({ certified });
+};
 
 const ledgerCanister = async ({
 	identity,

@@ -1,12 +1,12 @@
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 const policyBlockSchema = z.object({
 	lastUpdatedDate: z.iso.datetime(),
-	lastUpdatedTimestamp: z.number()
+	lastUpdatedTimestamp: z.bigint()
 });
 
 export const EnvAgreementsSchema = z.object({
-	licenceAgreement: policyBlockSchema,
+	licenseAgreement: policyBlockSchema,
 	termsOfUse: policyBlockSchema,
 	privacyPolicy: policyBlockSchema
 });

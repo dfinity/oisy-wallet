@@ -1,6 +1,7 @@
 import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -11,6 +12,10 @@ describe('NftCollectionCard', () => {
 
 	const getImageSelector = (index: number) => `div[data-tid="${testId}-image-${index}"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
+
+	beforeAll(() => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
 
 	it('should render nft collection', () => {
 		const { container, getByText } = render(NftCollectionCard, {

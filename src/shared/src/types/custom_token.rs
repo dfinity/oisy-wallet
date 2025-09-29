@@ -45,7 +45,6 @@ pub type ChainId = u64;
 pub struct ErcToken {
     pub token_address: ErcTokenId,
     pub chain_id: ChainId,
-    pub allow_media_source: Option<bool>,
 }
 
 /// A variant describing any token
@@ -68,6 +67,7 @@ pub struct CustomToken {
     pub enabled: bool,
     pub version: Option<Version>,
     pub section: Option<TokenSection>,
+    pub allow_external_content_source: Option<bool>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

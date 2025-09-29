@@ -5,6 +5,6 @@ export type Erc1155CustomToken = CustomToken<Erc1155Token>;
 
 export type SaveErc1155CustomToken = Pick<
 	Erc1155CustomToken,
-	'enabled' | 'version' | 'address' | 'network'
+	'enabled' | 'version' | 'address' | 'network' | 'section' | 'allowExternalContentSource'
 > &
 	Partial<Pick<Erc1155CustomToken, 'id'>>;

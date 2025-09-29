@@ -1,21 +1,30 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import Copy from '$lib/components/ui/Copy.svelte';
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	export let data: string | undefined;
-	export let label: string;
+	interface Props {
+		data: string | undefined;
+		label: string;
+	}
+
+	let { data, label: labelStr }: Props = $props();
 </script>
 
 {#if nonNullish(data)}
-	<label class="font-bold" for="data">{label}:</label>
+	<ModalValue>
+		{#snippet label()}{labelStr}{/snippet}
 
-	<div id="data" class="mb-4 flex items-center gap-1 font-normal">
-		{shortenWithMiddleEllipsis({ text: data })}<Copy
-			inline
-			text={$i18n.wallet_connect.text.raw_copied}
-			value={data}
-		/>
-	</div>
+		{#snippet mainValue()}
+			<div id="data" class="flex items-center gap-1 font-normal">
+				{shortenWithMiddleEllipsis({ text: data })}<Copy
+					inline
+					text={$i18n.wallet_connect.text.raw_copied}
+					value={data}
+				/>
+			</div>
+		{/snippet}
+	</ModalValue>
 {/if}

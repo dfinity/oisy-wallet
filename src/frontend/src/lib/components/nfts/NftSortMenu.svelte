@@ -6,16 +6,16 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftListSortOrder, nftListSortType } from '$lib/derived/nfts.derived';
+	import { nftSortType, nftSortOrder } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { type NftListSortingType, nftListStore } from '$lib/stores/nft-list.store';
+	import { type NftSortingType, nftSortStore } from '$lib/stores/settings.store';
 
 	let visible = $state(false);
 
 	let button = $state<HTMLButtonElement | undefined>();
 
-	const setSorting = (sort: NftListSortingType) => {
-		nftListStore.setSort(sort);
+	const setSorting = (sort: NftSortingType) => {
+		nftSortStore.set({ key: 'nft-sort', value: sort });
 	};
 </script>
 
@@ -42,7 +42,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'date' })}
 					selectable
-					selected={$nftListSortType === 'date' && $nftListSortOrder === 'asc'}
+					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
 				>
 					{$i18n.nfts.text.recents_first}
 				</ListItemButton>
@@ -51,7 +51,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'date' })}
 					selectable
-					selected={$nftListSortType === 'date' && $nftListSortOrder === 'desc'}
+					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
 				>
 					{$i18n.nfts.text.oldest_first}
 				</ListItemButton>
@@ -60,7 +60,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'asc', type: 'collection-name' })}
 					selectable
-					selected={$nftListSortType === 'collection-name' && $nftListSortOrder === 'asc'}
+					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'asc'}
 				>
 					{$i18n.nfts.text.collection_atoz}
 				</ListItemButton>
@@ -69,7 +69,7 @@
 				<ListItemButton
 					onclick={() => setSorting({ order: 'desc', type: 'collection-name' })}
 					selectable
-					selected={$nftListSortType === 'collection-name' && $nftListSortOrder === 'desc'}
+					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'desc'}
 				>
 					{$i18n.nfts.text.collection_ztoa}
 				</ListItemButton>

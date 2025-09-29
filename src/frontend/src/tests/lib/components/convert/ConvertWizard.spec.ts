@@ -46,6 +46,14 @@ vi.mock('$lib/services/auth.services', () => ({
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
 
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
+	const onDestination = vi.fn();
+	const onDestinationBack = vi.fn();
+	const onIcQrCodeScan = vi.fn();
+	const onIcQrCodeBack = vi.fn();
+
 	const props = {
 		sendAmount,
 		receiveAmount: sendAmount,
@@ -54,7 +62,13 @@ describe('ConvertWizard', () => {
 			name: WizardStepsConvert.CONVERT,
 			title: 'title'
 		},
-		onIcQrCodeBack: () => {}
+		onBack,
+		onClose,
+		onNext,
+		onDestination,
+		onDestinationBack,
+		onIcQrCodeBack,
+		onIcQrCodeScan
 	};
 
 	const mockContext = (sourceToken: Token) =>

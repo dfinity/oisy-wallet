@@ -33,7 +33,8 @@ describe('AiAssistantReviewSendSolToken', () => {
 	const props = {
 		amount: sendAmount,
 		destination: mockSolAddress,
-		sendCompleted: false
+		sendCompleted: false,
+		sendEnabled: true
 	};
 	let sendSpy: MockInstance;
 
@@ -106,6 +107,22 @@ describe('AiAssistantReviewSendSolToken', () => {
 			props: {
 				...props,
 				amount: -1
+			},
+			context: mockContext()
+		});
+
+		const button = getByTestId(AI_ASSISTANT_SEND_TOKENS_BUTTON);
+
+		await fireEvent.click(button);
+
+		expect(sendSpy).not.toHaveBeenCalled();
+	});
+
+	it('should not call send if sendEnabled is false', async () => {
+		const { getByTestId } = render(AiAssistantReviewSendSolToken, {
+			props: {
+				...props,
+				sendEnabled: false
 			},
 			context: mockContext()
 		});

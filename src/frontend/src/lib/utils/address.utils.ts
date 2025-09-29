@@ -32,7 +32,7 @@ export const isBtcAddress = (address: BtcAddress | undefined): boolean => {
 export const invalidBtcAddress = (address: BtcAddress | undefined): boolean =>
 	!isBtcAddress(address);
 
-const mapNetworkIdToAddressType = (
+export const mapNetworkIdToAddressType = (
 	networkId: NetworkId | undefined
 ): TokenAccountIdTypes | undefined => {
 	if (isNullish(networkId)) {
