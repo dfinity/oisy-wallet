@@ -4,6 +4,7 @@
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { authLocked } from '$lib/stores/locked.store';
 
 	interface Props {
 		fullWidth?: boolean;
@@ -18,7 +19,9 @@
 	const onclick = async () => {
 		const { success } = await signIn({});
 
-		if (success === 'cancelled' || success === 'error') {
+		if (success === 'ok') {
+			authLocked.unlock({ source: 'login from landing page' });
+		} else if (success === 'cancelled' || success === 'error') {
 			modalStore.openAuthHelp({ id: modalId, data: false });
 		}
 	};
