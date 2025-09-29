@@ -41,31 +41,7 @@
 		store: icTokenFeeStore
 	});
 
-	const isDisabled = (): boolean => isNullish($kongSwapTokensStore);
-
-	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
-		if (isNullish($authIdentity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		if (!isDisabled()) {
-			return 'ready';
-		}
-
-		try {
-			await loadKongSwapTokensService({
-				identity: $authIdentity,
-				allIcrcTokens: [ICP_TOKEN, ...$allIcrcTokens]
-			});
-
-			return 'ready';
-		} catch (_err: unknown) {
-			console.warn('Failed to load KongSwap tokens.');
-
-			return undefined;
-		}
-	};
+	// const isDisabled = (): boolean => isNullish($kongSwapTokensStore);
 
 	const onOpenSwap = async (tokenId: symbol) => {
 		if (isNullish($authIdentity)) {
@@ -73,36 +49,36 @@
 			return;
 		}
 
-		busy.start({ msg: $i18n.init.info.hold_loading });
+		// busy.start({ msg: $i18n.init.info.hold_loading });
 
-		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
-		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
-		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
-		const kongSwapTokensStatus = await Promise.any([
-			waitReady({ retries: 20, isDisabled }),
-			loadKongSwapTokens()
-		]);
+		// // 1. If loadKongSwapTokens succeeds within 10s - show modal.
+		// // 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
+		// // 3. If loadKongSwapTokens throws - show toast, do not show modal.
+		// const kongSwapTokensStatus = await Promise.any([
+		// 	waitReady({ retries: 20, isDisabled }),
+		// 	loadKongSwapTokens()
+		// ]);
 
-		busy.stop();
+		// busy.stop();
 
-		if (kongSwapTokensStatus !== 'ready') {
-			toastsShow({
-				text: $i18n.swap.error.kong_not_available,
-				level: 'info',
-				duration: 3000
-			});
+		// if (kongSwapTokensStatus !== 'ready') {
+		// 	toastsShow({
+		// 		text: $i18n.swap.error.kong_not_available,
+		// 		level: 'info',
+		// 		duration: 3000
+		// 	});
 
-			return;
-		}
+		// 	return;
+		// }
 
 		modalStore.openSwap(tokenId);
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 	};
 </script>

@@ -2,6 +2,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	allCrossChainSwapTokens,
+	allIcrcTokens,
 	allKongSwapCompatibleIcrcTokens
 } from '$lib/derived/all-tokens.derived';
 import { pageToken } from '$lib/derived/page-token.derived';
@@ -17,14 +18,14 @@ export interface SwappableTokens {
 }
 
 const selectedSwappableToken: Readable<Token | undefined> = derived(
-	[pageToken, allKongSwapCompatibleIcrcTokens, allCrossChainSwapTokens],
-	([$pageToken, $allKongSwapCompatibleIcrcTokens, $allCrossChainSwapTokens]) => {
+	[pageToken, allIcrcTokens, allCrossChainSwapTokens],
+	([$pageToken, $allIcrcTokens, $allCrossChainSwapTokens]) => {
 		if (nonNullish($pageToken)) {
 			const selectedToken = $pageToken;
 
 			const swappableToken: Token | undefined = [
 				{ ...ICP_TOKEN, enabled: true },
-				...$allKongSwapCompatibleIcrcTokens,
+				...$allIcrcTokens,
 				...$allCrossChainSwapTokens
 			].find((t) => t.id === selectedToken.id);
 
