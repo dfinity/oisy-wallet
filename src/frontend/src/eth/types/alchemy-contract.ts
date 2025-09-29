@@ -14,11 +14,12 @@ interface OpenSeaMetadata {
 	bannerImageUrl?: string;
 	collectionName?: string;
 	collectionSlug?: string;
+	description?: string;
 }
 
 export interface AlchemyProviderContract {
-	name: string;
-	symbol: string;
+	name?: string;
+	symbol?: string;
 	tokenType: string;
 	openSeaMetadata?: OpenSeaMetadata;
 }
