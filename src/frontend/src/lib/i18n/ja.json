@@ -1183,6 +1183,7 @@
 			"scan_qr": "QRコードをスキャン",
 			"or_use_link": "またはWalletConnectリンクを使用",
 			"proposer": "提案者",
+			"spender": "",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
 			"methods": "方法",

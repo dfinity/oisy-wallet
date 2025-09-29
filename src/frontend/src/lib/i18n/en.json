@@ -1183,7 +1183,7 @@
 			"scan_qr": "Scan QR code",
 			"or_use_link": "or use WalletConnect link",
 			"proposer": "Proposer",
-          "spender": "Spender",
+			"spender": "Spender",
 			"review": "Review $chain_name ($key) required permissions",
 			"method": "Method",
 			"methods": "Methods",

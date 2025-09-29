@@ -1183,6 +1183,7 @@
 			"scan_qr": "Отсканировать QR-код",
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
+			"spender": "",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
 			"methods": "Методы",
