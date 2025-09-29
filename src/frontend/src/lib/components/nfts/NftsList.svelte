@@ -147,7 +147,12 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList asMainSection nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
+		<NftList
+			asMainSection
+			nfts={commonNfts}
+			testId={NFT_LIST_COMMON}
+			title={$i18n.nfts.text.all_assets}
+		>
 			{#snippet nftListItem({ nft })}
 				<NftCard {nft} type="card-link" />
 			{/snippet}
