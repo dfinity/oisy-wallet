@@ -115,11 +115,6 @@ describe('nfts.utils', () => {
 	const azukiName = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN).name ?? '';
 	const deGodsName = mapTokenToCollection(DE_GODS_TOKEN).name ?? '';
 
-	const filterSub =
-		azukiName && azukiName.length >= 3
-			? azukiName.slice(1, 4).toLowerCase()
-			: azukiName.toLowerCase();
-
 	describe('findNft', () => {
 		it('should return existing nft', () => {
 			const nfts = [mockNft1, mockNft2, mockNft3];

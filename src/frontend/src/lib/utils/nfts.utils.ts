@@ -230,7 +230,13 @@ const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
 const isNft = (item: Nft | NftCollectionUi): item is Nft =>
 	'collection' in item && !('nfts' in item);
 
-const matchesFilter = (item: Nft | NftCollectionUi, filter: string): boolean => {
+const matchesFilter = ({
+	item,
+	filter
+}: {
+	item: Nft | NftCollectionUi;
+	filter: string;
+}): boolean => {
 	const lower = filter.toLowerCase();
 
 	if (isCollectionUi(item)) {
@@ -267,7 +273,7 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	let result = items;
 
 	if (nonNullish(filter)) {
-		result = result.filter((it) => matchesFilter(it, filter));
+		result = result.filter((item) => matchesFilter({ item, filter }));
 	}
 
 	if (nonNullish(sort)) {
