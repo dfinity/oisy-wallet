@@ -9,10 +9,10 @@
 		getSignParamsMessageUtf8
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-	import {formatSecondsToDate, formatToken} from '$lib/utils/format.utils';
-	import {currentLanguage} from "$lib/derived/i18n.derived";
+	import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -94,7 +94,7 @@
 					return;
 				}
 
-				return formatSecondsToDate({seconds:timestamp,	language: $currentLanguage});
+				return formatSecondsToDate({ seconds: timestamp, language: $currentLanguage });
 			} catch (_: unknown) {
 				// It could not be parsed as a BigInt, so we return undefined.
 				console.warn('Could not parse expiration as Date:', details.expiration);
