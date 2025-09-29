@@ -230,7 +230,6 @@ const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
 const isNft = (item: Nft | NftCollectionUi): item is Nft =>
 	'collection' in item && !('nfts' in item);
 
-//@ts-ignore @typescript-eslint/prefer-nullish-coalescing
 const matchesFilter = ({
 	item,
 	filter
@@ -247,10 +246,11 @@ const matchesFilter = ({
 			return true;
 		}
 		// search by collections nfts name or id
-		return (item.nfts ?? []).some(
-			(nft) =>
+		return (item.nfts ?? []).some((nft) => {
+			return (
 				nft.name?.toLowerCase().includes(lower) || String(nft.id)?.toLowerCase().includes(lower)
-		);
+			);
+		});
 	}
 
 	// search nfts by id, name or collection name
