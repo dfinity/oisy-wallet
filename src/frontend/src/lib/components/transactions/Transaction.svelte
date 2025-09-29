@@ -63,8 +63,10 @@
 		approveSpender
 	}: Props = $props();
 
+	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
+
 	const amountWithFee = $derived(
-		nonNullish(cardAmount) && nonNullish(fee) ? cardAmount + fee : cardAmount
+		nonNullish(cardAmount) && nonNullish(fee) && !incoming ? cardAmount + fee : cardAmount
 	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
