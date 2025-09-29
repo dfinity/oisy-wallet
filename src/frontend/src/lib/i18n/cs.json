@@ -9,7 +9,7 @@
 			"close": "Zavřít",
 			"change": "Změnit",
 			"apply": "Použít",
-			"retry": "",
+			"retry": "Zkusit znovu",
 			"refresh": "Aktualizovat",
 			"name": "Název",
 			"symbol": "Symbol",
@@ -39,7 +39,7 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": ""
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -117,7 +117,7 @@
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
 			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
-			"reload_and_retry": ""
+			"reload_and_retry": "Při přihlašování došlo k chybě. Zkuste stránku znovu načíst a zkuste to znovu. Pokud chyba přetrvává, kontaktujte podporu."
 		},
 		"error": {
 			"no_internet_identity": "Žádná internetová identita.",
@@ -206,7 +206,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": ""
+			"ai": "AI"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -225,7 +225,7 @@
 				"description": "OpenChat je plnohodnotná chatovací aplikace běžící end-to-end na blockchainu Internet Computer.<br/><br/>OpenChat je řízen svou komunitou jako DAO a má svůj vlastní token CHAT. Tokeny CHAT jsou rozdávány jako odměny uživatelům za účelem urychlení růstu a vytvoření týmu milionů příznivců, což OpenChatu umožňuje stát se životaschopným vyzyvatelem centralizovaných velkých technologických konkurentů!",
 				"stats": "80 000+ uživatelů",
 				"carousel": {
-					"text": "",
+					"text": "OpenChat - kde web3 komunikuje",
 					"call_to_action": "Zobrazit více"
 				}
 			},
@@ -319,7 +319,11 @@
 				"name": "Taggr",
 				"one_liner": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
 				"call_to_action": "Přejít na Taggr",
-				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli."
+				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli.",
+				"carousel": {
+					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
+					"call_to_action": "Zjistit více"
+				}
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -327,25 +331,25 @@
 				"description": "Toolkit je univerzální sada pro správu systémů SNS (Service Nervous System) a projektů na Internet Computeru. Umožňuje uživatelům bezproblémově inovovat, spolupracovat a decentralizovat - od návrhů na správu až po nasazení kanystrů."
 			},
 			"altitudefi": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Altitude",
+				"one_liner": "Altitude aktivně spravuje dluhy a zajištění uživatelů v reálném čase a optimalizuje tak efektivitu kapitálu.",
+				"description": "DeFi úvěry jsou obvykle nadměrně zajištěné a kapitálově neefektivní. Altitude je neúschovní protokol, který optimalizuje DeFi úvěry. Altitude aktivně spravuje dluhy a kolaterály uživatelů v reálném čase a optimalizuje tak kapitálovou efektivitu."
 			},
 			"usdai": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "USD.AI",
+				"one_liner": "Protokol syntetického dolaru, který zajišťuje USDai pomocí výpočetní infrastruktury umělé inteligence a generuje výnos v sUSDai.",
+				"description": "USD.AI je protokol syntetického dolaru podporovaný výnosovou výpočetní infrastrukturou AI, který vytváří decentralizovanou stabilní měnu nazvanou USDai. Uživatelé mohou držet nebo sázet USDai, aby získali sUSDai, výnosovou verzi, která odráží výnosy protokolu. Systém je navržen tak, aby vytvořil kombinovatelnou, produktivní a decentralizovanou alternativu ke stablecoinům zajištěným fiat měnami."
 			},
 			"caffeine": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": "",
+				"name": "Caffeine",
+				"one_liner": "První platforma pro tvorbu self-writing aplikací.",
+				"call_to_action": "Vyzkoušejte Caffeine",
+				"description": "Caffeine je první platforma pro vytváření aplikací, které se samy píší. Stačí si promluvit s umělou inteligencí na počítači nebo mobilu a ona pro vás vytvoří aplikace a služby – včetně těch, které se připojují k peněžence OISY Wallet. Zažijte budoucnost vývoje aplikací s pomocí umělé inteligence.",
 				"carousel": {
-					"text": "",
-					"call_to_action": ""
+					"text": "Hello, self-writing internet",
+					"call_to_action": "Zjistit více"
 				}
-			}
+		    }
 		}
 	},
 	"rewards": {
@@ -354,7 +358,7 @@
 			"upcoming_campaigns": "Nadcházející kampaně",
 			"active_date": "Končí",
 			"ended_date": "Skončilo",
-			"upcoming_date": "",
+			"upcoming_date": "Začíná",
 			"share": "Sdílet na X",
 			"learn_more": "Zjistit více",
 			"check_status": "Zkontrolovat stav a způsobilost",
@@ -452,27 +456,27 @@
 				"one_liner": "Získejte Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč řetězci. Vaše akce zvyšují vaše odměny a aktivní doporučení je ještě více posilují.<br/>Navíc nyní více řetězců znamená větší šance na výhru.",
 				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
 				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
-				"campaign_href": "",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
 				"win": {
 					"default": {
 						"title": "Byli jste odměněni",
 						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více.",
-						"share_href": ""
+						"share_href": "https://x.com/intent/post?text=Just%20won%20some%20%24BTC%20on%20%40OISY%20Wallet.%0AIt%E2%80%99s%20free.%20It%E2%80%99s%20instant.%0AIt%E2%80%99s%20running%2024%2F7%20at%20OISY.com"
 					},
 					"jackpot": {
 						"title": "Vyhráli jste týdenní bonusový drop",
 						"description": "Právě jste získali jeden z našich týdenních bonusů.<br>Zůstaňte aktivní a doporučujte nás, abyste vyhráli více.",
-						"share_href": ""
+						"share_href": "https://x.com/intent/post?text=Huge%20%24BTC%20drop%20just%20landed%20in%20my%20%40OISY%20Wallet%20%F0%9F%AA%82%0AThese%20big%20Sprinkles%20hit%20randomly%3A%20no%20lockups%2C%20no%20strings.%0A%0AOISY.com%20is%20literally%20giving%20out%20Bitcoin."
 					},
 					"leaderboard": {
 						"title": "Dostali jste se na vrchol žebříčku",
 						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
-						"share_href": ""
+						"share_href": "https://x.com/intent/post?text=Just%20placed%20top%204%20on%20%40OISY%20referrals%20and%20won%20%24200.%0AIt%E2%80%99s%20one%20of%20the%20best%20reward%20systems%20in%20the%20game.%0ACheck%20OISY.com%20today"
 					},
 					"referral": {
 						"title": "Zde je malé poděkování",
 						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
-						"share_href": ""
+						"share_href": "https://x.com/intent/post?text=Referred%20a%20friend%20to%20%40OISY%20Wallet%20-%20and%20won%20free%20%24BTC%20%F0%9F%AA%82%0AIf%20they%20win%2C%20I%20win.%20Simple.%0ATry%20it%20out%20at%20OISY.com"
 					}
 				}
 			}
@@ -550,7 +554,7 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
-			"icrc_canister_loading": "",
+			"icrc_canister_loading": "Token s Ledger kanystrem $ledgerCanisterId nelze načíst, protože v současné době neodpovídá.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
@@ -560,7 +564,7 @@
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
-			"waiting_for_allowed_cycles_aborted": "",
+			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
 			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
 		}
@@ -581,7 +585,7 @@
 	"settings": {
 		"text": {
 			"title": "Nastavení",
-			"general": "",
+			"general": "Obecné",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -605,10 +609,10 @@
 			"git_disclaimer": "Pro vývojové účely zobrazujeme větev a commit pouze v testovacích kanystrech.",
 			"git_branch_name": "Větev:",
 			"git_commit_hash": "Commit:",
-			"beta_features": "",
-			"enable_beta_feature": "",
-			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"beta_features": "Beta funkce",
+			"enable_beta_feature": "Povolit beta funkci",
+			"disable_beta_feature": "Zakázat beta funkci",
+			"save_beta_feature_success": "Vaše nastavení beta funkcí bylo aktualizováno."
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -643,7 +647,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID ICP Účtu",
-				"checking_index_canister_status": "",
+				"checking_index_canister_status": "Kontrola stavu transakcí...",
 				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
 				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
 				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
@@ -744,16 +748,16 @@
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
-			"no_nfts_found": "",
-			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"no_nfts_found": "Nebyly nalezeny žádné NFT",
+			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své NFT.",
+			"select_nft": "Vyberte NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
 			"select_network": "Vybrat síť",
-			"search_nfts": ""
+			"search_nfts": "Hledat NFT"
 		},
 		"info": {
 			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
@@ -795,7 +799,7 @@
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
 			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
-			"no_nft_selected": ""
+			"no_nft_selected": "Pro odeslání nebyl vybrán žádný NFT."
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",
@@ -815,7 +819,7 @@
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
-			"fee_calc_unsupported_standard": ""
+			"fee_calc_unsupported_standard": "Nelze vypočítat poplatek, protože poskytnutý standard tokenu není podporován."
 		}
 	},
 	"convert": {
@@ -1105,28 +1109,28 @@
 			"collections": "Kolekce",
 			"all_assets": "Všechna aktiva",
 			"address_copied": "Adresa $address zkopírována",
-			"spam": "",
-			"not_spam": "",
-			"hide": "",
-			"unhide": "",
-			"hidden": "",
+			"spam": "Spam",
+			"not_spam": "Ne spam",
+			"hide": "Skrýt",
+			"unhide": "Zobrazit",
+			"hidden": "Skryté",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
-			"img_consent_disabled": "",
-			"img_consent_none": "",
-			"review_button": "",
-			"collection_name": "",
-			"media_urls": "",
-			"display_preference": "",
-			"review_preference": "",
-			"media_enabled": "",
-			"media_disabled": "",
-			"enable_media": "",
-			"disable_media": "",
-			"open_in_new_tab": "",
-			"review_title": "",
-			"review_description": "",
-			"learn_more": "",
-			"token_id": ""
+			"img_consent_disabled": "Zakázali jste obrázky z této kolekce",
+			"img_consent_none": "Obrázek je z bezpečnostních důvodů zakázán.",
+			"review_button": "Rekapitulace",
+			"collection_name": "Název kolekce",
+			"media_urls": "URL adresy médií",
+			"display_preference": "Preference zobrazení",
+			"review_preference": "Preference rekapitulace",
+			"media_enabled": "Média povolena",
+			"media_disabled": "Média zakázána",
+			"enable_media": "Povolit média",
+			"disable_media": "Zakázat média",
+			"open_in_new_tab": "Otevřít v nové záložce",
+			"review_title": "Prohlédnout mediální zdroje pro \"$collectionName\"",
+			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",
+			"learn_more": "Zjistěte více",
+			"token_id": "Token ID"
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
@@ -1134,7 +1138,7 @@
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
-			"review_preference": ""
+			"review_preference": "Změnit předvolbu zobrazení"
 		}
 	},
 	"fee": {
@@ -1610,8 +1614,8 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Podmínky použití",
-			"title": "",
-			"body": ""
+			"title": "Podmínky použití",
+			"body": "Datum účinnosti: $date\n\n### 1. Souhlas s podmínkami\n\nPoužíváním peněženky OISY, webových stránek na adrese oisy.com nebo jakýchkoli jiných služeb, ze kterých odkazujeme na tyto Podmínky použití („Služby“), souhlasíte s námi, s Nadací DFINITY, včetně našich přidružených společností a dceřiných společností (souhrnně „DFINITY“), s těmito Podmínkami použití a s naší <a href=\"/license-agreement/\" target=\"_self\">Licenční smlouvou</a> (souhrnně „Smlouva“). V případě jakéhokoli rozporu nebo nesrovnalosti mezi těmito Podmínkami použití a Licenční smlouvou mají přednost Podmínky použití. Pokud s nimi nesouhlasíte, nepoužívejte naše Služby. Používáním našich Služeb prohlašujete, že vám je alespoň 18 let.\n\n### 2. Popis našich Služeb\n\n* Peněženka OISY je decentralizovaná aplikace peněženky založená na prohlížeči, s vlastní správou a více řetězci, hostovaná na veřejné blockchainové síti Internet Computer, která vám umožňuje přístup k určitým tokenům podporovaným peněženkou OISY a dalšími službami třetích stran. Tyto třetí strany nevlastníme, nekontrolujeme ani neprovozujeme a služby třetích stran používáte na vlastní nebezpečí.\n* Některé funkce peněženky OISY jsou experimentální nebo v beta verzi.\n\n### 3. Přístup k účtu a zabezpečení\n\nJste zodpovědní za obojí:\n\n* Provedení všech nezbytných opatření pro váš přístup na webové stránky.\n* Ochrana vašich přístupových údajů, včetně vaší internetové identity.\n\nPokud ztratíte svou internetovou identitu nebo pokud je jinak ohrožena, nebudeme moci obnovit přístup k vašemu účtu.\n\nPro přístup na webové stránky nebo k některým zdrojům, které nabízejí, můžete být požádáni o poskytnutí určitých registračních údajů nebo jiných informací. Podmínkou vašeho používání webových stránek je, aby všechny informace, které na webových stránkách poskytnete, byly správné, aktuální a úplné. Souhlasíte s tím, že veškeré informace, které poskytnete při registraci na těchto webových stránkách nebo jinak, včetně, ale nikoli výhradně, prostřednictvím používání jakýchkoli interaktivních funkcí na webových stránkách, se řídí našimi _<a href=\"/privacy-policy/\" target=\"_self\">Zásadami ochrany osobních údajů</a>_, a souhlasíte se všemi kroky, které podnikneme s ohledem na vaše informace v souladu s našimi Zásadami ochrany osobních údajů.\n\nSouhlasíte s tím, že na konci každé relace opustíte svůj účet. Při přístupu k účtu z veřejného nebo sdíleného počítače byste měli být obzvláště opatrní, aby ostatní nemohli zobrazit nebo zaznamenat vaše heslo nebo jiné osobní údaje.\n\nBerete také na vědomí, že nemáme v úschově, přístupu ani kontrolu nad finančními prostředky ve vaší peněžence OISY. Berete na vědomí, že peněženka OISY je výhradně pod kontrolou uživatele.\n\n### 4. Prohlášení o vyloučení záruky a omezení odpovědnosti\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY JSOU NAŠE SLUŽBY POSKYTOVÁNY „TAK, JAK JSOU“ BEZ ZÁRUKY JAKÉHOKOLI DRUHU, VČETNĚ TOHO, ŽE OISY NEPOSKYTUJE ZÁRUKU ANI GARANCI ZA JAKOUKOLI ZTRÁTU FINANČNÍCH PROSTŘEDKŮ NEBO TECHNICKÉ PORUCHY. PŘEBÍRÁTE RIZIKA SPOJENÁ S POUŽÍVÁNÍM DECENTRALIZOVANÉ INFRASTRUKTURY A BERETE NA VĚDOMÍ, ŽE NEJSME ZODPOVĚDNÍ ZA ŽÁDNOU ZTRÁTU FINANČNÍCH PROSTŘEDKŮ, BEZ OHLEDU NA PŘÍČINU ZTRÁTY.\n\nV MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY SE DFINITY ZŘÍKÁ VEŠKERÝCH ZÁRUK A PODMÍNEK, AŤ UŽ VÝSLOVNÝCH, PŘEDPOKLÁDANÝCH, ZÁKONNÝCH NEBO JINÝCH, VČETNĚ, ALE NEJEN, PŘEDPOKLÁDANÝCH ZÁRUK NEBO PODMÍNEK VHODNOSTI PRO URČITÝ ÚČEL, OBCHODOVATELNOSTI, VLASTNICTVÍ, KVALITY, VÝSLEDKŮ A NEPORUŠENÍ PRÁV. DFINITY NEZÁRUČUJE, ŽE SLUŽBY BUDOU VŽDY DOSTUPNÉ, BEZPEČNÉ NEBO ZAJIŠTĚNÉ (NYNÍ I V BUDOUCNOSTI). SPOLEČNOST DFINITY VÝSLOVNĚ ODMÍTÁ VEŠKERÉ ZÁRUKY JAKÉHOKOLI DRUHU OHLEDNĚ PŘESNOSTI NEBO FUNKČNOSTI SLUŽEB A OHLEDNĚ PŘESNOSTI, PLATNOSTI NEBO ÚPLNOSTI INFORMACÍ NEBO FUNKCÍ (NYNÍ I V BUDOUCNOSTI) ZDOSTUPNĚNÝCH PROSTŘEDNICTVÍM VAŠEHO POUŽÍVÁNÍ SLUŽEB, NEBO KVALITY NEBO KONZISTENCE SLUŽEB NEBO VÝSLEDKŮ ZÍSKANÝCH PROSTŘEDNICTVÍM JEJICH POUŽÍVÁNÍ. SPOLEČNOST DFINITY NEZARUČUJE, ŽE SLUŽBY MOHOU PŘEVÉST VLASTNICTVÍ NEBO PRÁVO K JAKÉMUKOLI TOKENU NEBO DIGITÁLNÍMU AKTIVU, ANI NEPOSKYTUJE JAKÉKOLI ZÁRUKY OHLEDNĚ VLASTNICTVÍ. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PLATNÝMI ZÁKONY NEBUDE SPOLEČNOST DFINITY ZA ŽÁDNÝCH OKOLNOSTÍ ODPOVĚDNÁ ZA ŽÁDNÉ NÁSLEDNÉ, ZVLÁŠTNÍ, NEPŘÍMÉ, NÁHODNÉ NEBO TRESTNÍ ŠKODY JAKÉKOLI VZNIKLÉ Z POUŽÍVÁNÍ NEBO NEMOŽNOSTI POUŽÍVAT A PŘÍSTUPOVAT K SLUŽBÁM NEBO MATERIÁLŮM DFINITY NEBO K JAKÝMKOLI POLOŽKÁM TŘETÍCH STRAN, JAK JE ZDE DEFINOVÁNO, ATO I V PŘÍPADĚ, ŽE SPOLEČNOST DFINITY BYLA NA MOŽNOST TAKOVÝCH ŠKOD UPOZORNĚNA, A BEZ OHLEDU NA JAKÉKOLI SELHÁNÍ ZÁKLADNÍHO ÚČELU JAKÉKOLI OMEZENÉ NÁPRAVY. V MAXIMÁLNÍM ROZSAHU POVOLENÉM PŘÍSLUŠNÝMI ZÁKONY V ŽÁDNÉM PŘÍPADĚ NEPŘEKROČÍ CELKOVÁ ODPOVĚDNOST SPOLEČNOSTI DFINITY ZA ŠKODY VYPLÝVAJÍCÍ Z TÉTO SMLOUVY NEBO Z VAŠEHO POUŽÍVÁNÍ ČI NEMOŽNOSTI POUŽÍVAT SLUŽBY 100 CHF.\n\n### 5. Odškodnění\n\nSouhlasíte s tím, že odškodníte, budete bránit a ochráníte společnost DFINITY a její přidružené společnosti, vedoucí pracovníky, ředitele, dodavatele, poskytovatele licencí a další zákazníky před veškerou odpovědností a náklady, včetně přiměřených poplatků za právní zastoupení, které těmto stranám vzniknou v souvislosti s vaším používáním nebo zneužitím našich Služeb nebo s vaším porušením této Smlouvy nebo jakéhokoli platného zákona či předpisu.\n\n### 6. Programy odměn\n\nÚčastí v našich programech odměn souhlasíte s [INICIATIVA ODMĚN OISY - OBCHODNÍ PODMÍNKY](https://docs.oisy.com/rewards/oisy-sprinkles/t-and-cs), které jsou zde zahrnuty a mohou se změnit. čas od času.\n\n### 7. Dodržování zákonů a přijatelné užívání\n\nV souvislosti s užíváním Služeb budete dodržovat všechny platné zákony a předpisy (včetně, mimo jiné, zákonů a předpisů týkajících se kontroly vývozu, praní špinavých peněz nebo hospodářských sankcí). Naše Služby nebudete používat k žádným nezákonným účelům ani způsobem, který porušuje nebo narušuje práva jakékoli entity DFINITY, jiných uživatelů nebo jiných osob.\n\n### 8. Daňová povinnost\n\nJste zodpovědní za dodržování všech platných federálních, státních a místních zákonů a předpisů týkajících se výběru a placení daní a poplatků.\n\n### 9. Rozhodné právo; místo konání\n\nVeškeré nároky týkající se Služeb se řídí zákony Švýcarska, s vyloučením kolizních norem. Veškeré nároky nebo spory týkající se této Smlouvy nebo v souvislosti s ní (včetně mimosmluvních sporů nebo nároků a jejich výkladu) podléhají výlučné jurisdikci soudů v Curychu ve Švýcarsku s výhradou odvolání u Švýcarského federálního soudu.\n\n### 10. Třetí strany a další aplikace\n\nNevlastníme, nekontrolujeme, neschvalujeme ani nepřijímáme žádný obsah, aplikace, služby, webové stránky ani jiné položky třetích stran („Položky třetích stran“), které můžete vidět nebo se s nimiž se můžete propojit při používání našich Služeb. Zříkáme se jakékoli odpovědnosti související s Položkami třetích stran nebo z nich vyplývající. Vaše užívání, jednání nebo korespondence s třetími stranami a Položkami třetích stran je výhradně mezi vámi a třetí stranou a činíte tak na vlastní nebezpečí.\n\nNic v této Smlouvě, výslovné ani implicitní, není zamýšleno k tomu, aby udělovalo jakákoli práva, výhody nebo opravné prostředky jakékoli třetí straně, včetně ostatních uživatelů našich Služeb, ani jim neuděluje žádná práva, výhody ani opravné prostředky.\n\n### 11. Oddělitelnost\n\nV případě, že bude jakékoli ustanovení těchto Podmínek používání shledáno nezákonným, neplatným nebo nevymahatelným, bude takové ustanovení i přesto vymahatelné v plném rozsahu povoleném platnými právními předpisy a nevymahatelná část bude považována za oddělenou od těchto Podmínek používání. Toto rozhodnutí neovlivní platnost a vymahatelnost jakýchkoli ostatních zbývajících ustanovení.\n\n### 12. Podmínky a ukončení\n\nTato Smlouva zůstává v platnosti až do jejího ukončení. Smlouva a vaše práva a licence z ní vyplývající zaniknou okamžitě po jejím porušení. Společnost DFINITY může tuto Smlouvu kdykoli vypovědět z jakéhokoli důvodu, včetně, mimo jiné, jakéhokoli skutečného nebo domnělého zneužití Služeb z vaší strany nebo jakéhokoli porušení této Smlouvy.\n\n### 13. Celá Smlouva\n\nNeuplatnění nebo nevymáhání jakéhokoli práva nebo ustanovení těchto Podmínek používání z naší strany nepředstavuje vzdání se takového práva nebo ustanovení.\n\nTyto Podmínky používání a jakékoli zásady nebo provozní pravidla zveřejněné námi na těchto stránkách nebo v souvislosti se Službou představují úplnou dohodu a porozumění mezi vámi a námi a upravují vaše používání Služby a nahrazují jakékoli předchozí nebo současné dohody, sdělení a návrhy, ať už ústní nebo písemné, mezi vámi a námi (včetně, mimo jiné, jakýchkoli předchozích verzí Podmínek používání).\n\nJakékoli nejasnosti ve výkladu těchto Podmínek používání nebudou vykládány v neprospěch strany, která je sepsala.\n\n### 14. Osobní údaje\n\nPřečtěte si prosím naše <a href=\"/privacy-policy/\" target=\"_self\">Zásady ochrany osobních údajů zde</a>.\n\nPokud používáte peněženku OISY nebo jiné služby třetích stran a technologie blockchain, sdílíte informace s globální komunitou, která je od nás oddělená a nezávislá a kterou nekontrolujeme. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto technologií blockchain.\n\n### 15. Změny podmínek\n\nTuto smlouvu můžeme aktualizovat dle vlastního uvážení. Pokračování v používání představuje souhlas se změnami.\n\n### 16. Kontakt\n\nS dotazy navštivte [support@oisy.com](mailto:support@oisy.com)."
 		},
 		"alt": {
 			"terms_of_use": "Odkaz na podmínky použití"
@@ -1620,9 +1624,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Zásady ochrany osobních údajů",
-			"title": "",
-			"body": ""
+			"title": "Zásady ochrany osobních údajů",
+			"body": "Datum účinnosti: $date\n\nMy, DFINITY Stiftung, Genferstrasse 11, 8002 Curych, Švýcarsko („**DFINITY**“, „**my**“, „**nás**“ nebo „**naše**“) v těchto Zásadách ochrany osobních údajů OISY („**Zásady ochrany osobních údajů**“) zveřejňujeme, jak zpracováváme osobní údaje, které nám poskytnete nebo které shromažďujeme, když používáte OISY Wallet, webové stránky na adrese oisy.com nebo jakékoli jiné webové stránky, ze které odkazujeme na tyto Zásady ochrany osobních údajů („**Stránky**“).\n\nTyto Zásady ochrany osobních údajů se nevztahují na žádné jiné zpracování dat, včetně, mimo jiné, osobních údajů, které shromažďujeme offline nebo prostřednictvím jiných webových stránek, které neodkazují na tyto Zásady ochrany osobních údajů; osobních údajů, které sdílíte s ostatními uživateli Stránek nebo jiných technologií založených na blockchainu, když tyto technologie používáte; nebo osobních údajů, které sdílíte se službami třetích stran, které nevlastníme ani nekontrolujeme.\n\nPokud používáte OISY Wallet nebo jiné služby třetích stran a technologie blockchainu, sdílíte informace s globální komunitou, která je od nás oddělená a nezávislá a není námi kontrolována. Protože blockchainy jsou decentralizované a služby třetích stran nejsou kontrolovány ani provozovány námi ani našimi přidruženými společnostmi, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 1. Správce údajů\n\nZákony o ochraně osobních údajů v některých jurisdikcích, včetně Švýcarska („**CH**“), Evropského hospodářského prostoru („**EHP**“) a Spojeného království („**UK**“), uznávají roli „správce“ – organizace, která rozhoduje o tom, proč a jak zpracovávat osobní údaje.\n\nDFINITY bude jednat jako správce osobních údajů zpracovávaných prostřednictvím Stránek.\n\nPoužití osobních údajů je nutné pro poskytování služeb OISY Wallet. Další podrobnosti o osobních údajích, které shromažďujeme, naleznete v tabulce níže.\n\nOsobní údaje nám poskytujete přímo, když si u nás vytvoříte účet/nastavíte si OISY Wallet nebo nás kontaktujete s žádostí o informace o našich Stránkách. Některé osobní údaje také vytváříme sami, včetně měření vaší aktivity v peněžence OISY (které nám pomáhají vylepšovat stránky a umožňují vám využívat naše věrnostní programy (např. Sprinkles).\n\nV EHP / Spojeném království jsme ze zákona povinni mít vždy povolený důvod nebo odůvodnění (nazývané „právní základ“) pro zpracování vašich osobních údajů. Existuje šest povolených právních základů pro zpracování standardních osobních údajů. V případě, že zpracováváme osobní údaje zvláštní kategorie (například vaše biometrické údaje), jsme povinni mít další právní základ pro zákonné zpracování těchto údajů.\n\nVe Švýcarsku obecně nejsme povinni mít konkrétní právní základ pro zpracování vašich osobních údajů, za předpokladu, že takové zpracování není protiprávní. To znamená zejména, že nesmí porušovat vaše osobnostní práva a musí být v souladu se zásadami stanovenými ve švýcarském federálním zákoně o ochraně osobních údajů (FADP). Pokud však zpracováváme osobní údaje zvláštní kategorie (například vaše biometrické údaje), musíme mít odůvodnění podle švýcarského práva. Ve většině případů to znamená, že k tomu, aby bylo takové zpracování zákonné, je vyžadován váš výslovný souhlas. Pro účely níže uvedené tabulky by měl být jakýkoli odkaz na „právní základ“ chápán jako odpovídající „odůvodnění“ podle švýcarského práva.\n\nNíže uvedená tabulka vysvětluje různé účely, pro které zpracováváme vaše osobní údaje, z nichž některé mohou být považovány za citlivé v závislosti na vaší jurisdikci, a příslušný právní základ nebo základy, na které se pro toto zpracování spoléháme.\n\n| Účely zpracování osobních údajů | Typ osobních údajů, které k tomu používáme | Náš právní základ |\n| --- | --- | --- |\n| Vytvoření nebo přihlášení do vaší peněženky OISY | „Číslo internetové identity“ – toto je váš jedinečný identifikátor pro přístup k FaceID, TouchID (oba se spoléhají na zpracování vašich biometrických údajů) nebo bezpečnostnímu klíči peněženky OISY | Plnění smlouvy s vámi; a Váš výslovný souhlas se zpracováním biometrických údajů v jurisdikcích, kde jsou považovány za citlivé (pokud jste se rozhodli provést ověření přihlášení pomocí vašich biometrických údajů prostřednictvím FaceID nebo TouchID). |\n| **Uživatelská podpora a řešení problémů** – komunikace s vámi za účelem řešení jakýchkoli dotazů nebo problémů, se kterými se můžete setkat, a také za účelem poskytování technických aktualizací | Jméno E-mailová adresa ID uživatele Discord / zobrazované jméno Podrobnosti o všech problémech, které nahlásíte | Plnění smlouvy s vámi; nebo Naše oprávněné zájmy na zajištění odpovídající úrovně služeb pro naše uživatele |\n| Zpětná vazba pro zlepšení uživatelského prostředí a informování o vývoji webu | ID uživatele Discord / zobrazované jméno Veškerá zpětná vazba, kterou poskytnete našim kanálům zpětné vazby | Naše oprávněné zájmy na vývoji webu a informování naší strategie |\n| Usnadnění našich programů odměn/věrnosti | Přihlašovací aktivita k vašemu účtu/peněžence Vaše objemy/frekvence transakcí | Naše oprávněné zájmy na vývoji a rozšiřování našich služeb a propagaci budoucího používání webů |\n| Usnadnění programu Doporučte své přátele | Váš jedinečný doporučovací kód Přihlašovací aktivita k účtu/peněžence spojená s vašimi doporučeními Objemy/frekvence transakcí k vašim doporučením | Naše oprávněné zájmy na vývoji a rozšiřování našich služeb a propagaci budoucího používání webů |\n| Abychom vám poskytovali naše propagační/marketingové aktualizace (pokud jste se přihlásili k odběru) | Jméno E-mailová adresa ID uživatele Discord / zobrazované jméno | Pokud jste poskytli svůj souhlas |\n| **Měření a zlepšování výkonu stránek** | Typ zařízení/prohlížeče a operační systém; IP adresa a metadata relace; Záznamy o používání a pokusy o ověření [Údaje o geolokaci] | Náš oprávněný zájem optimalizovat výkon našich stránek |\n| Vyřizování mediálních dotazů (pokud nás kontaktujete jako zástupce médií) | Jméno E-mailová adresa Podrobnosti o vašem dotazu | Naše oprávněné zájmy na zajištění silného pracovního vztahu s médii a propagaci stránek |\n\n\nOsobní údaje, které o vás uchováváme, mohou být navíc převedeny na agregovaná a anonymizovaná data, která budeme používat pro účely analýzy dat, vývoje produktů a ke zlepšování našich služeb, pro naše obchodní účely, včetně údajů uvedených v části „Měření a zlepšování výkonu stránek“.\n\nVědomě neshromažďujeme informace o dětech. Pokud zjistíme, že jsme shromáždili nebo obdrželi osobní údaje od dítěte mladšího 13 let, tyto informace neprodleně smažeme. Pokud se domníváte, že bychom mohli mít jakékoli informace od dítěte nebo o dítěti, kontaktujte nás prosím níže uvedenými způsoby.\n\n### 2. Sdílení údajů\n\nVaše údaje můžeme sdílet s dalšími subjekty/členy naší skupiny DFINITY, poskytovateli služeb a vybranými třetími stranami (např. obchodními partnery) za účelem poskytování našich služeb vám a v souvislosti s naším úsilím o prevenci a vyšetřování podvodné činnosti.\n\n### 3. Uchovávání údajů\n\nVaše osobní údaje budeme uchovávat pouze po dobu nezbytně nutnou k plnění našich povinností nebo k dosažení účelů, pro které byly vaše osobní údaje shromážděny, nebo po dobu povolenou platnými právními předpisy. Při určování vhodné doby uchovávání se zohledňuje několik faktorů, včetně: povahy a citlivosti osobních údajů; účelů, pro které jsou informace vyžadovány; veškerých zákonů nebo předpisů, které jsme povinni dodržovat; a doby, během níž lze proti nám vznést jakékoli nároky nebo vznést žaloby na obranu proti takovým nárokům.\n\nTo znamená, že vaše osobní údaje obvykle uchováváme po dobu trvání vašeho vztahu s námi a poté po dobu definovanou právními, účetními nebo reportingovými požadavky. Pokud byste chtěli další informace o našich dobách uchovávání, kontaktujte nás prosím prostřednictvím údajů v sekci „Kontakt“ níže.\n\n### 4. Převody ze Spojeného království/EHP/Švýcarska\n\nVaše osobní údaje uchováváme ve Švýcarsku a na dalších místech, kde pracují naši zaměstnanci a dodavatelé, včetně Spojených států.\n\nV průběhu poskytování našich služeb budeme muset osobní údaje převést na místa mimo jurisdikci, ve které je poskytujete nebo kde si prohlížíte či používáte naše stránky. Pokud máte sídlo ve Spojeném království, EHP nebo Švýcarsku, znamená to, že vaše osobní údaje mohou být převedeny do místa určení mimo Spojené království/EHP/Švýcarsko, z něj mohou být přístupné a/nebo uloženy v místě určení, kde zákony na ochranu osobních údajů nemusí být tak komplexní jako ve Spojeném království/EHP/Švýcarsku.\n\nBez ohledu na místo našeho zpracování budeme uplatňovat stejná ochranná opatření na ochranu osobních údajů, jaká používáme ve Spojeném království/EHP/Švýcarsku, a zavedeme vhodná opatření k zajištění ochrany vašich osobních údajů v souladu s platnými zákony na ochranu osobních údajů.\n\nPodobně v případě, že poskytovatel služeb třetí strany zpracovává osobní údaje obyvatel EHP, Spojeného království nebo Švýcarska naším jménem, ​​zajistíme, aby byla zavedena vhodná opatření k zajištění odpovídající úrovně ochrany vašich osobních údajů.\n\nPokud některá z našich činností zpracování vyžaduje přenos vašich osobních údajů ze Spojeného království, EHP nebo Švýcarska mimo Spojené království/EHP/Švýcarsko, provedeme tento přenos pouze tehdy, pokud:\n- země, do které mají být osobní údaje převedeny, zajišťuje odpovídající úroveň ochrany osobních údajů;\n- zavedli jsme vhodné záruky na ochranu vašich osobních údajů, například příslušná smlouva s příjemcem;\n- přenos je nezbytný z jednoho z důvodů uvedených v právních předpisech o ochraně osobních údajů, například plnění smlouvy mezi námi a vámi; nebo\n- s přenosem výslovně souhlasíte.\n\nPokud si přejete zobrazit kopii konkrétních záruk uplatňovaných na export vašich osobních údajů, kontaktujte nás prosím podle pokynů níže v části „Kontakt“.\n\n### 5. Odkazy na třetí strany\n\nStránky mohou obsahovat odkazy třetích stran na jiné stránky, jako je Discord a naši projektoví partneři. Upozorňujeme, že pokud tyto stránky neprovozuje společnost DFINITY, neneseme odpovědnost za postupy ochrany osobních údajů těchto stránek. Doporučujeme našim uživatelům, aby si byli vědomi toho, kdy opouštějí tyto webové stránky, a aby si přečetli prohlášení o ochraně osobních údajů platná na těchto stránkách. Toto oznámení o ochraně osobních údajů se nevztahuje na informace shromažďované na stránkách třetích stran.\n\n### 6. OISY Sprinkles\n\nAktivní peněženky jsou způsobilé pro OISY Sprinkles, věrnostní program OISY. Body Sprinkles můžete vyhrát na základě každodenního používání a doporučení nebo jiných kritérií. Body Sprinkles se vám vkládají přímo do peněženky, proto je máte nárok pouze v případě, že máte účet OISY.\n\nOISY nespolupracuje s třetími stranami za účelem odměňování bodů Sprinkles. OISY nezpracovává vaše citlivé osobní údaje za účelem správy programu OISY Sprinkles. OISY neprodává ani nezpracovává osobní údaje shromážděné pro účely programu OISY Sprinkles pro účely cílené reklamy.\n\n### 7. Automatizované rozhodování\n\nV současné době nepoužíváme a nepředpokládáme, že budeme používat žádné automatizované rozhodování v souvislosti s vašimi osobními údaji (tj. kdy rozhodnutí činí pouze počítač bez lidského zásahu). Pokud se toto změní, toto oznámení aktualizujeme.\n\n### 8. Uživatelská práva, dotazy a komentáře\n\nZa určitých okolností, včetně případů, kdy jste rezidentem Spojeného království/EHP/CH nebo Colorada, Delaware, Marylandu, Minnesoty, New Jersey nebo Oregonu, máte ze zákona právo:\n- **Požádat o přístup ke svým osobním údajům** (běžně označované jako „žádost subjektu údajů o přístup“). To vám umožní obdržet kopii osobních údajů, které o vás uchováváme, a ověřit si, zda je zpracováváme zákonně. V závislosti na vaší jurisdikci můžete mít také právo získat seznam kategorií třetích stran, kterým jsme vaše osobní údaje zpřístupnili.\n- **Požádat o opravu osobních údajů, které o vás uchováváme.** To vám umožní opravit jakékoli neúplné nebo nepřesné informace, které o vás uchováváme. Sporné osobní údaje můžeme smazat jako alternativu k opravě informací, pokud vás smazání osobních údajů negativně neovlivní nebo s jejich smazáním souhlasíte.\n- **Požádat o výmaz vašich osobních údajů.** To vám umožňuje požádat nás o smazání nebo odstranění osobních údajů, pokud neexistuje právní důvod pro jejich další zpracování. Máte také právo požádat nás o smazání nebo odstranění vašich osobních údajů, pokud jste uplatnili své právo vznést námitku proti zpracování (viz níže).\n- **Vznést námitku proti zpracování vašich osobních údajů.** Máte také právo vznést námitku v případě, že vaše osobní údaje zpracováváme pro účely přímého marketingu.\n- **Vznést námitku proti jakémukoli automatizovanému rozhodování včetně profilování** a požadovat místo toho lidské rozhodování pro stejné zpracování (tj. požádat, abyste nebyli předmětem žádného automatizovaného rozhodování z naší strany na základě vašich osobních údajů nebo vašeho profilování).\n- **Požádat o omezení zpracování vašich osobních údajů.** To vám umožňuje požádat nás o pozastavení zpracování vašich osobních údajů, například pokud chcete, abychom zjistili jejich přesnost nebo důvod jejich zpracování.\n- **Požádat o přenos vašich osobních údajů v elektronické a strukturované podobě vám nebo jiné straně** (běžně známé jako právo na „přenositelnost údajů“). Za určitých podmínek a v maximálním možném rozsahu můžete mít nárok na obdržení osobních údajů v použitelném formátu, který vám umožní předat je jinému subjektu.\n- **Právo odvolat souhlas.** Pokud se spoléháme na souhlas jako na náš právní základ pro zpracování, můžete souhlas kdykoli odvolat kontaktováním na adrese support@oisy.com (Poznámka: toto neovlivňuje zákonnost zpracování založeného na souhlasu před jeho odvoláním). Musíme přestat zpracovávat vaše osobní údaje, pokud neexistuje jiný právní základ, na který se můžeme spolehnout, v takovém případě vás o tom budeme informovat.\n- **<u>Právo odhlásit se z prodeje nebo sdílení osobních údajů (pro obyvatele USA).</u>** V současné době neprodáváme osobní údaje třetím stranám, proto toto právo nenabízíme. Vaše osobní údaje můžeme sdílet s poskytovateli služeb v souladu se zákonem.\n- **Právo odhlásit se ze zpracování pro účely cílené reklamy <u>(pro obyvatele USA)</u>.** V současné době se cílenou reklamou nezabýváme, proto toto právo nenabízíme.\n- <u>**Právo omezit použití, zveřejnění nebo zpracování vašich citlivých osobních údajů (pro obyvatele USA).** To vám umožňuje požádat, abychom vaše citlivé osobní údaje nepoužívali, nezveřejňovali ani nezpracovávali.</u>\n\nPokud je zpracování vašich osobních údajů nezbytné pro naše oprávněné zájmy, můžete proti tomuto zpracování kdykoli vznést námitku. Pokud tak učiníte, budeme muset prokázat buď přesvědčivý důvod, proč by mělo naše zpracování pokračovat, který převažuje nad vašimi zájmy, právy a svobodami, nebo že zpracování je nezbytné pro to, abychom mohli stanovit, uplatnit nebo obhájit právní nárok.\n\nUpozorňujeme, že výše uvedená práva nejsou absolutní, a proto mohou být ve vaší jurisdikci omezena nebo nemusí být dostupná. Pokud se rozhodnete některé z těchto práv uplatnit, nediskriminujeme vás.\n\nPro obyvatele USA: Upozorňujeme, že v závislosti na vaší jurisdikci jsme povinni bezplatně reagovat na žádosti o osobní údaje od stejného spotřebitele pouze dvakrát během 12 měsíců. V závislosti na vaší jurisdikci máme po překročení příslušného počtu žádostí právo účtovat přiměřený poplatek za vyřízení žádosti. Kromě toho můžeme být v souladu s platnými státními zákony o ochraně soukromí a za účelem ochrany vašich osobních údajů omezeni v tom, jaké osobní údaje můžeme zveřejnit.\n\nSvá práva můžete uplatnit kontaktováním nás na adrese support@oisy.com. Před vyřízením vaší žádosti o osobní údaje musíme ověřit vaši totožnost.\n\nV závislosti na vaší jurisdikci můžete také pověřit oprávněného zástupce, aby žádost podal vaším jménem. Pokud žádost podáváte prostřednictvím oprávněného zástupce, musí nám oprávněný zástupce poskytnout váš podepsaný písemný souhlas s tím, že je oprávněn žádost vaším jménem podat. Váš oprávněný zástupce může alternativně doložit, že má plnou moc nebo že za vás jedná jako opatrovník.\n\nPokud se domníváte, že s vašimi údaji nebylo správně nakládáno, nebo nejste spokojeni s naší reakcí na jakékoli vaše žádosti týkající se použití vašich osobních údajů, máte právo podat stížnost u příslušného orgánu.\n\nPokud máte bydliště ve Spojeném království, je příslušným orgánem Úřad komisaře pro informace.\n\nMůžete je kontaktovat telefonicky na čísle 0303 123 1113 nebo online na adrese [www.ico.org.uk/concerns](http://www.ico.org.uk/concerns) (otevře se v novém okně; upozorňujeme, že nemůžeme nést odpovědnost za obsah externích webových stránek).\n\nPokud máte bydliště mimo Spojené království, máte právo podat stížnost u příslušného regulačního orgánu pro ochranu osobních údajů ve vaší zemi bydliště.\n\nPokud máte bydliště ve Švýcarsku, je příslušným orgánem Federální komisař pro ochranu osobních údajů a informace.\n\nMůžete je kontaktovat online na adrese www.edoeb.admin.ch (otevře se v novém okně; upozorňujeme, že nemůžeme nést odpovědnost za obsah externích webových stránek). Upozorňujeme, že podle švýcarského práva neexistuje formální právo podat stížnost, ale můžete nahlásit potenciální porušení ochrany osobních údajů Federálnímu komisaři pro ochranu osobních údajů a informací.\n\nUpozorňujeme však, že nebudete moci uplatňovat práva ani nám podávat stížnosti ohledně údajů zpracovávaných v blockchainech nebo v souvislosti se službami třetích stran, protože tyto údaje nekontrolujeme my ani naše přidružené společnosti. Vzhledem k tomu, že blockchainy jsou decentralizované a služby třetích stran nekontrolujeme ani neprovozujeme my ani naše přidružené společnosti, nejsme schopni kontrolovat, mazat, upravovat ani měnit osobní údaje zpracovávané během používání těchto blockchainových technologií.\n\n### 9. Změny těchto zásad\n\nTyto zásady ochrany osobních údajů můžeme čas od času aktualizovat dle vlastního uvážení a na našich stránkách můžeme zveřejnit nové verze, po kterých aktualizujeme datum účinnosti v horní části těchto zásad ochrany osobních údajů. Proto vám doporučujeme pravidelně kontrolovat Zásady ochrany osobních údajů, zda neobsahují takové aktualizace.\n\n### 10. Kontakt\n\nVítáme jakékoli dotazy nebo připomínky týkající se těchto zásad ochrany osobních údajů a doporučujeme vám zasílat jakoukoli takovou komunikaci nebo žádosti o uplatnění vašich práv na adresu [support@oisy.com](mailto:support@oisy.com)."
 		},
+
 		"alt": {
 			"privacy_policy": "Odkaz na zásady ochrany osobních údajů"
 		}
@@ -1687,15 +1692,15 @@
 			"send_to_message": "Odeslat do $contact_name ($address_info).",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
-			"send_token_on_network_message": "",
-			"send_token_message": "",
-			"send_on_network_message": "",
+			"send_token_on_network_message": "Chtěl bych poslat token $token v síti $network.",
+			"send_token_message": "Chtěl bych poslat token $token.",
+			"send_on_network_message": "Chtěl bych poslat token v síti $network.",
 			"send_token_succeeded": "Transakce dokončena!",
-			"show_total_balance_tool_card_title": "",
+			"show_total_balance_tool_card_title": "Celkový zůstatek",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
 			"loading": "Přemýšlím...",
 			"reset_chat_history": "Obnovit historii chatu",
-			"feature_description": ""
+			"feature_description": "Asistent s umělou inteligencí vám umožňuje ptát se na obecná témata týkající se kryptoměn, získávat pomoc s konkrétními funkcemi OISY a posílat tokeny. Upozorňujeme, že asistentovi se neodesílají žádné citlivé údaje, jako je vaše adresa nebo adresa vašich kontaktů, a že všechny transakce musí být potvrzeny uživatelem. Funkce je stále v beta verzi a pravidelně zavádíme nové funkce."
 		},
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",
