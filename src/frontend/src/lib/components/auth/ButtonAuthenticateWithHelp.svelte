@@ -3,8 +3,8 @@
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { authLocked } from '$lib/stores/locked.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		fullWidth?: boolean;
