@@ -6,6 +6,7 @@ import { erc20DefaultTokensStore } from '$eth/stores/erc20-default-tokens.store'
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import * as walletConnectUtils from '$eth/utils/wallet-connect.utils';
 import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render } from '@testing-library/svelte';
@@ -31,7 +32,7 @@ describe('EthWalletConnectMessage', () => {
 						'"details":' +
 						'{' +
 						'"token":"0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",' +
-						'"amount":"1461501637330902918203684832716283019655932542975",' +
+						'"amount":"123456789123456789123456789123456789123456789",' +
 						'"expiration":"1761743754","nonce":"0"' +
 						'},' +
 						'"spender":"0x66a9893cc07d91d95644aedd05d03f95e1dba8af",' +
@@ -84,6 +85,18 @@ describe('EthWalletConnectMessage', () => {
 
 		expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
 		expect(getByText(USDC_TOKEN.network.name)).toBeInTheDocument();
+
+		expect(getByText(`${en.wallet_connect.text.amount}:`)).toBeInTheDocument();
+
+		expect(
+			getByText(
+				`${formatToken({
+					value: BigInt('123456789123456789123456789123456789123456789'),
+					unitName: USDC_TOKEN.decimals,
+					displayDecimals: USDC_TOKEN.decimals
+				})} ${USDC_TOKEN.symbol}`
+			)
+		).toBeInTheDocument();
 	});
 
 	it('should render the spender', () => {
@@ -113,6 +126,18 @@ describe('EthWalletConnectMessage', () => {
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
+
+		expect(queryByText(`${en.wallet_connect.text.amount}:`)).not.toBeInTheDocument();
+
+		expect(
+			queryByText(
+				`${formatToken({
+					value: BigInt('123456789123456789123456789123456789123456789'),
+					unitName: USDC_TOKEN.decimals,
+					displayDecimals: USDC_TOKEN.decimals
+				})} ${USDC_TOKEN.symbol}`
+			)
+		).not.toBeInTheDocument();
 	});
 
 	it('should handle an empty token in the message', () => {

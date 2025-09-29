@@ -11,6 +11,7 @@
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -64,6 +65,20 @@
 			console.warn('Could not parse token:', address);
 		}
 	});
+
+	let amount = $derived.by(() => {
+		if (
+			'amount' in details &&
+			(typeof details.amount === 'string' || typeof details.amount === 'number')
+		) {
+			try {
+				return BigInt(details.amount);
+			} catch (_: unknown) {
+				// It could not be parsed as a BigInt, so we return undefined.
+				console.warn('Could not parse amount as BigInt:', details.amount);
+			}
+		}
+	});
 </script>
 
 {#if nonNullish(token)}
@@ -72,6 +87,17 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}:</p>
 	<p class="mb-4 font-normal">{token.network.name}</p>
+
+	{#if nonNullish(amount)}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}:</p>
+		<p class="mb-4 font-normal"
+			>{formatToken({
+				value: amount,
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			})} {token.symbol}</p
+		>
+	{/if}
 {/if}
 
 {#if nonNullish(spender)}
