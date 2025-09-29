@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import EthWalletConnectMessage from '$eth/components/wallet-connect/EthWalletConnectMessage.svelte';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
