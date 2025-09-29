@@ -605,6 +605,7 @@ describe('nfts.utils', () => {
 				items: base,
 				filter: 'azu' // lowercase substring
 			});
+
 			expect(res).toEqual([nftAzuki2, nftAzuki1]);
 		});
 
@@ -614,6 +615,7 @@ describe('nfts.utils', () => {
 				items: [custom, nftDeGods],
 				filter: 'special'
 			});
+
 			expect(res).toEqual([custom]);
 		});
 
@@ -623,6 +625,7 @@ describe('nfts.utils', () => {
 				items: [custom, nftDeGods],
 				filter: '987654321'
 			});
+
 			expect(res).toEqual([custom]);
 		});
 
@@ -631,6 +634,7 @@ describe('nfts.utils', () => {
 				items: collections,
 				filter: 'god'
 			});
+
 			expect(res).toHaveLength(1);
 			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
 		});
@@ -643,6 +647,7 @@ describe('nfts.utils', () => {
 				$nftStore: [custom]
 			});
 			const res = filterSortByCollection({ items: ui, filter: 'ultra rare' });
+
 			expect(res).toHaveLength(1);
 			expect(res[0].nfts).toEqual([custom]);
 		});
@@ -655,6 +660,7 @@ describe('nfts.utils', () => {
 				$nftStore: [custom]
 			});
 			const res = filterSortByCollection({ items: ui, filter: '123456789' });
+
 			expect(res).toHaveLength(1);
 			expect(res[0].nfts).toEqual([custom]);
 		});
@@ -664,6 +670,7 @@ describe('nfts.utils', () => {
 				items: base,
 				sort: { type: 'collection-name', order: 'asc' }
 			});
+
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'Azuki Elemental Beans',
 				'Azuki Elemental Beans',
@@ -676,6 +683,7 @@ describe('nfts.utils', () => {
 				items: base,
 				sort: { type: 'collection-name', order: 'desc' }
 			});
+
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'DeGods',
 				'Azuki Elemental Beans',
@@ -689,6 +697,7 @@ describe('nfts.utils', () => {
 				sort: { type: 'collection-name', order: 'asc' }
 			});
 			const expected = [azukiName, deGodsName].sort((a, b) => collator.compare(a ?? '', b ?? ''));
+
 			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
 		});
 
@@ -700,6 +709,7 @@ describe('nfts.utils', () => {
 			const expected = [azukiName, deGodsName]
 				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
 				.reverse();
+
 			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
 		});
 
@@ -709,6 +719,7 @@ describe('nfts.utils', () => {
 				filter: 'god',
 				sort: { type: 'collection-name', order: 'asc' }
 			});
+
 			expect(res).toEqual([nftDeGods]);
 		});
 
@@ -718,6 +729,7 @@ describe('nfts.utils', () => {
 				filter: 'god',
 				sort: { type: 'collection-name', order: 'asc' }
 			});
+
 			expect(res).toHaveLength(1);
 			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
 		});
@@ -725,12 +737,14 @@ describe('nfts.utils', () => {
 		it('returns the same reference when neither filter nor sort is provided (NFTs)', () => {
 			const input = [...base];
 			const res = filterSortByCollection({ items: input });
+
 			expect(res).toBe(input);
 		});
 
 		it('returns the same reference when neither filter nor sort is provided (collections)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({ items: input });
+
 			expect(res).toBe(input);
 		});
 
@@ -740,6 +754,7 @@ describe('nfts.utils', () => {
 				items: input,
 				sort: { type: 'collection-name', order: 'asc' }
 			});
+
 			expect(res).not.toBe(input);
 		});
 
@@ -749,6 +764,7 @@ describe('nfts.utils', () => {
 				items: input,
 				sort: { type: 'collection-name', order: 'asc' }
 			});
+
 			expect(res).not.toBe(input);
 		});
 	});

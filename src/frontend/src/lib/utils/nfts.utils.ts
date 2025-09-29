@@ -242,7 +242,7 @@ const matchesFilter = (item: Nft | NftCollectionUi, filter: string): boolean => 
 		// search by collections nfts name or id
 		return (item.nfts ?? []).some(
 			(nft) =>
-				nft.name?.toLowerCase().includes(lower) || String(nft.id)?.toLowerCase().includes(lower)
+				nft.name?.toLowerCase().includes(lower) ?? String(nft.id)?.toLowerCase().includes(lower)
 		);
 	}
 

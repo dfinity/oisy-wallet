@@ -5,11 +5,11 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftSortStore } from '$lib/stores/settings.store';
+	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-	import { tokenListStore } from '$lib/stores/token-list.store';
-	import { nftSortStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		collection: NftCollectionUi;
