@@ -42,7 +42,6 @@
 	);
 
 	let token = $derived.by(() => {
-		try {
 			if (isNullish(address) || isNullish(chainId)) {
 				return undefined;
 			}
@@ -57,10 +56,6 @@
 						networkId
 					}) && tokenChainId.toString() === chainId
 			);
-		} catch (_: unknown) {
-			// An error occurred during token search; return undefined.
-			console.warn('Could not parse token:', address);
-		}
 	});
 </script>
 
