@@ -11,11 +11,19 @@
 	let {
 		destination,
 		activeSendDestinationTab,
-		selectedContact = $bindable()
+		selectedContact = $bindable(),
+		onBack,
+		onNext,
+		onClose,
+		onQRCodeScan
 	}: {
 		destination: string;
 		activeSendDestinationTab: SendDestinationTab;
 		selectedContact: Writable<ContactUi>;
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
 	} = $props();
 
 	const steps = allSendWizardSteps({ i18n: $i18n });
@@ -27,6 +35,10 @@
 	<SendDestinationWizardStep
 		{activeSendDestinationTab}
 		{destination}
+		{onBack}
+		{onClose}
+		{onNext}
+		{onQRCodeScan}
 		bind:selectedContact={$selectedContact}
 	/>
 </WizardModal>
