@@ -53,7 +53,7 @@
 	let groupedTransactions = $derived(
 		nonNullish(sortedTransactionsUi)
 			? groupTransactionsByDate(
-					sortedTransactionsUi.map((trx) => ({ component: 'ethereum', transaction: trx, token }))
+					sortedTransactionsUi.map((transaction) => ({ component: 'ethereum', transaction, token }))
 				)
 			: undefined
 	);

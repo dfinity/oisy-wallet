@@ -36,7 +36,7 @@
 	let groupedTransactions = $derived(
 		nonNullish($solTransactions)
 			? groupTransactionsByDate(
-					$solTransactions.map((trx) => ({ component: 'solana', transaction: trx, token }))
+					$solTransactions.map((transaction) => ({ component: 'solana', transaction, token }))
 				)
 			: undefined
 	);

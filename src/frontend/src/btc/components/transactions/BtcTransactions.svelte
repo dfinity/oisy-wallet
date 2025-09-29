@@ -37,9 +37,9 @@
 	let groupedTransactions = $derived(
 		nonNullish($sortedBtcTransactions)
 			? groupTransactionsByDate(
-					$sortedBtcTransactions.map((ctrx) => ({
+					$sortedBtcTransactions.map(({ data: transaction }) => ({
 						component: 'bitcoin',
-						transaction: ctrx.data,
+						transaction,
 						token
 					}))
 				)

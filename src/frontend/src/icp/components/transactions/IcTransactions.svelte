@@ -51,7 +51,7 @@
 	let groupedTransactions = $derived(
 		nonNullish($icTransactions)
 			? groupTransactionsByDate(
-					$icTransactions.map((ctrx) => ({ component: 'ic', transaction: ctrx.data, token }))
+					$icTransactions.map(({ data: transaction }) => ({ component: 'ic', transaction, token }))
 				)
 			: undefined
 	);
