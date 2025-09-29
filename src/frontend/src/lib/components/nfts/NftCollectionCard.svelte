@@ -18,6 +18,14 @@
 	}
 
 	const { collection, disabled, testId }: Props = $props();
+
+	const collectionNfts = $derived(
+		filterSortByCollection({
+			items: collection.nfts,
+			filter: $tokenListStore.filter,
+			sort: $nftSortStore
+		})
+	);
 </script>
 
 <a
@@ -41,7 +49,7 @@
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
 
-				{#each filterSortByCollection( { items: collection.nfts, filter: $tokenListStore.filter, sort: $nftSortStore } ) as nft, index (`${nft.id}-${index}`)}
+				{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 					{#if index < 4 && nonNullish(nft.imageUrl)}
 						<div class="relative aspect-square overflow-hidden rounded-lg bg-secondary-alt">
 							<BgImg
