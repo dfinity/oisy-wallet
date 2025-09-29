@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import EthTokenModal from '$eth/components/tokens/EthTokenModal.svelte';
-	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
 	import EthTransactionsSkeletons from '$eth/components/transactions/EthTransactionsSkeletons.svelte';
 	import { sortedEthTransactions } from '$eth/derived/eth-transactions.derived';
@@ -13,7 +11,6 @@
 	import { toCkMinterInfoAddresses } from '$icp-eth/utils/cketh.utils';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalEthTransaction,

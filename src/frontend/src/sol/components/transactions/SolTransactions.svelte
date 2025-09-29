@@ -1,10 +1,8 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import {
 		modalSolToken,
 		modalSolTokenData,
@@ -16,7 +14,6 @@
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
-	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import SolTransactionsScroll from '$sol/components/transactions/SolTransactionsScroll.svelte';
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';

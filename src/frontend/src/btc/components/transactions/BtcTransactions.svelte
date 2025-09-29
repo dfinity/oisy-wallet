@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
 	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
-	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import BtcTransactionsHeader from '$btc/components/transactions/BtcTransactionsHeader.svelte';
 	import {
@@ -13,7 +11,6 @@
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import {
 		modalBtcToken,
 		modalBtcTokenData,
