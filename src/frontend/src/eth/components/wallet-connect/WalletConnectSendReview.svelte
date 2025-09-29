@@ -3,9 +3,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
+	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
 	import SendData from '$lib/components/send/SendData.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
@@ -62,7 +62,7 @@
 			{/snippet}
 		</EthFeeDisplay>
 
-		<SendReviewNetwork slot="network" {sourceNetwork} {targetNetwork} token={$sendToken} />
+		<ReviewNetwork slot="network" destinationNetworkId={targetNetwork?.id} {sourceNetwork} />
 	</SendData>
 
 	{#snippet toolbar()}
