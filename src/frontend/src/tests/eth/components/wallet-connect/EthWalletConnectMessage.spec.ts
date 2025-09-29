@@ -86,7 +86,6 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(USDC_TOKEN.network.name)).toBeInTheDocument();
 	});
 
-
 	it('should render the spender', () => {
 		const { getByText } = render(EthWalletConnectMessage, {
 			props: {
