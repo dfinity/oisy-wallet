@@ -1378,7 +1378,11 @@ interface I18nAi_assistant {
 		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_on_network_message: string;
+		send_token_message: string;
+		send_on_network_message: string;
 		send_token_succeeded: string;
+		show_total_balance_tool_card_title: string;
 		no_contacts_found_message: string;
 		loading: string;
 		reset_chat_history: string;
