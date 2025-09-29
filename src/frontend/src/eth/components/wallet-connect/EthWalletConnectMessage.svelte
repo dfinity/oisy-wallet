@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import {
 		getSignParamsMessageTypedDataV4,
 		getSignParamsMessageUtf8
 	} from '$eth/utils/wallet-connect.utils';
-	import { erc20Tokens } from '$eth/derived/erc20.derived';
-	import { erc721Tokens } from '$eth/derived/erc721.derived';
-	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
