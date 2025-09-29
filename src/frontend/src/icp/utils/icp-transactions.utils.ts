@@ -5,7 +5,6 @@ import type {
 	IcpTransaction
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
@@ -86,6 +85,7 @@ export const mapIcpTransaction = ({
 	});
 
 	if ('Approve' in operation) {
+		const source = mapFrom(operation.Approve.from);
 		const approve = operation.Approve;
 		const approveValue = approve.allowance.e8s;
 		const approveFee = approve.fee?.e8s;
@@ -96,7 +96,7 @@ export const mapIcpTransaction = ({
 			type: 'approve',
 			...mapFrom(operation.Approve.from),
 			value: approveValue,
-			...(nonNullish(approveFee) && { fee: approveFee }),
+			...(nonNullish(approveFee) && source.incoming === false && { fee: approveFee }),
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
 			approveSpender: approve.spender
 		};
@@ -123,6 +123,7 @@ export const mapIcpTransaction = ({
 
 	if ('Transfer' in operation) {
 		const source = mapFrom(operation.Transfer.from);
+		const transferFee = operation.Transfer.fee?.e8s;
 
 		return {
 			...tx,
@@ -130,7 +131,7 @@ export const mapIcpTransaction = ({
 			...source,
 			...mapTo(operation.Transfer.to),
 			value: operation.Transfer.amount.e8s,
-			fee: source.incoming === false ? operation.Transfer.fee.e8s : ZERO
+			...(nonNullish(transferFee) && source.incoming === false && { fee: transferFee })
 		};
 	}
 

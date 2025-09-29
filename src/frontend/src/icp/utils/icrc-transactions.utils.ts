@@ -143,7 +143,7 @@ export const mapIcrcTransaction = ({
 					})
 				: undefined,
 		...(nonNullish(value) && { value }),
-		...(nonNullish(transferFee) && { fee: transferFee }),
+		...(nonNullish(transferFee) && source.incoming === false && { fee: transferFee }),
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),
