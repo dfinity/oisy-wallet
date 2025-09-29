@@ -19,5 +19,6 @@ interface OpenSeaMetadata {
 export interface AlchemyProviderContract {
 	name: string;
 	symbol: string;
+	tokenType: string;
 	openSeaMetadata?: OpenSeaMetadata;
 }
