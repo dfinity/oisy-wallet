@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
@@ -19,7 +20,6 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 
 	let selectedTransaction = $state<SolTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
