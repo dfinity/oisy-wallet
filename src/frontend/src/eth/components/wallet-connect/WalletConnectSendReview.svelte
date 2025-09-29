@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
+    import SendReviewNetwork from "$eth/components/send/SendReviewNetwork.svelte";
 
 	interface Props {
 		amount: bigint;
@@ -47,11 +48,7 @@
 		{/snippet}
 
 		{#snippet fee()}
-			<EthFeeDisplay>
-				{#snippet label()}
-					<Html text={$i18n.fee.text.max_fee_eth} />
-				{/snippet}
-			</EthFeeDisplay>
+            <EthFeeDisplay />
 		{/snippet}
 
 		{#snippet network()}
