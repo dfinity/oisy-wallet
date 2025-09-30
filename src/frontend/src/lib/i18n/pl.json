@@ -1191,6 +1191,8 @@
 			"methods": "Metody",
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
+			"token": "",
+			"network": "",
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość"

@@ -1191,6 +1191,8 @@
 			"methods": "الطرق",
 			"events": "الأحداث",
 			"message": "الرسالة",
+			"token": "",
+			"network": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة"

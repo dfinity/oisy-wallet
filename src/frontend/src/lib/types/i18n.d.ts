@@ -999,6 +999,8 @@ interface I18nWallet_connect {
 		methods: string;
 		events: string;
 		message: string;
+		token: string;
+		network: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
