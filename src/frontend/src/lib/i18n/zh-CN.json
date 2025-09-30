@@ -1186,6 +1186,7 @@
 			"scan_qr": "扫描二维码",
 			"or_use_link": "或使用 WalletConnect 链接",
 			"proposer": "发起方",
+			"spender": "",
 			"review": "查看 $chain_name ($key) 所需权限",
 			"method": "方法",
 			"methods": "方法",

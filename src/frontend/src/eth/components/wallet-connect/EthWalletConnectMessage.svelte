@@ -31,7 +31,9 @@
 		message
 	} = $derived(json ?? { domain: { chainId: undefined }, message: undefined });
 
-	let { details: rawDetails } = $derived(message ?? { details: undefined });
+	let { spender, details: rawDetails } = $derived(
+		message ?? { spender: undefined, details: undefined }
+	);
 
 	let details = $derived(
 		nonNullish(rawDetails) && typeof rawDetails === 'object' ? rawDetails : {}
@@ -65,6 +67,11 @@
 
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}:</p>
 	<p class="mb-4 font-normal">{token.network.name}</p>
+{/if}
+
+{#if nonNullish(spender)}
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}:</p>
+	<p class="mb-4 font-normal">{spender}</p>
 {/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>

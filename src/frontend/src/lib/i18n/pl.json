@@ -1186,6 +1186,7 @@
 			"scan_qr": "Zeskanuj kod QR",
 			"or_use_link": "lub użyj linku WalletConnect",
 			"proposer": "Proponujący",
+			"spender": "",
 			"review": "Przejrzyj wymagane uprawnienia $chain_name ($key)",
 			"method": "Metoda",
 			"methods": "Metody",

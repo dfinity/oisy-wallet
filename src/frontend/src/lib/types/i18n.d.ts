@@ -994,6 +994,7 @@ interface I18nWallet_connect {
 		scan_qr: string;
 		or_use_link: string;
 		proposer: string;
+		spender: string;
 		review: string;
 		method: string;
 		methods: string;

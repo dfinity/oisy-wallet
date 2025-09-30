@@ -1186,6 +1186,7 @@
 			"scan_qr": "Quét mã QR",
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
+			"spender": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
 			"methods": "Hàm",

@@ -1186,6 +1186,7 @@
 			"scan_qr": "Naskenovat QR kód",
 			"or_use_link": "nebo použít odkaz WalletConnect",
 			"proposer": "Navrhovatel",
+			"spender": "",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
 			"methods": "Metody",

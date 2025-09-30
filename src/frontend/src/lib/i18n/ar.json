@@ -1186,6 +1186,7 @@
 			"scan_qr": "مسح رمز QR",
 			"or_use_link": "أو استخدم رابط WalletConnect",
 			"proposer": "المقترح",
+			"spender": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
 			"methods": "الطرق",
