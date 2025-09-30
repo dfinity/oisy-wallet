@@ -3,7 +3,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
-	import SwapEthForm from './SwapEthForm.svelte';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
@@ -44,6 +43,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;

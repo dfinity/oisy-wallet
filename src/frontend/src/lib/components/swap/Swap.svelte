@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import SwapModal from './SwapModal.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -32,6 +31,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()

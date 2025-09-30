@@ -2,7 +2,6 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import SwapTokenWizard from './SwapTokenWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
@@ -42,6 +41,7 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
+	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		setContext<SwapContext>(
