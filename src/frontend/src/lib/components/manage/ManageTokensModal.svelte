@@ -3,6 +3,7 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -42,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -53,8 +55,6 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-	import { isRouteNfts } from '$lib/utils/nav.utils';
-	import { page } from '$app/state';
 
 	let {
 		initialSearch,
@@ -351,10 +351,10 @@
 		<ManageTokens
 			{infoElement}
 			{initialSearch}
+			{isNftsPage}
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
-			{isNftsPage}
 		/>
 	{/if}
 </WizardModal>
