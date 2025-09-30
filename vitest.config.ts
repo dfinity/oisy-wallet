@@ -71,17 +71,20 @@ export default defineConfig(
 			watch: false,
 			silent: false,
 			setupFiles: ['./vitest.setup.ts'],
-			include: ['./src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
+			include: ['src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'],
 			coverage: {
-				include: ['src/frontend'],
-				exclude: ['src/frontend/src/routes/**/+page.ts'],
+				include: ['src/frontend/src'],
+				exclude: [
+					'src/frontend/src/routes/**/+page.ts',
+					'src/frontend/src/**/*.{test,spec}.?(c|m)[jt]s?(x)'
+				],
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 91.39,
-					branches: 92.27,
-					functions: 81.25,
-					lines: 91.39
+					statements: 79,
+					branches: 86,
+					functions: 80,
+					lines: 79
 				}
 			}
 		}

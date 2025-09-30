@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
 			"session_expired": "セッションの有効期限が切れました。ログアウトされました。",
@@ -1191,7 +1194,6 @@
 			"message": "メッセージ",
 			"token": "",
 			"network": "",
-			"amount": "",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生の取引データがコピーされました。",
 			"sign_message": "メッセージに署名"
@@ -1319,7 +1321,6 @@
 		"error": {
 			"loading_transactions": "取引の読み込み中にエラーが発生しました。",
 			"loading_transactions_symbol": "$symbol取引の読み込み中にエラーが発生しました。",
-			"no_token_loading_transaction": "トークンが見つかりません。取引を読み込むことができません。",
 			"uncertified_transactions_removed": "いくつかの未認証の取引が特定され、表示されたリストから削除されました。",
 			"loading_pending_ck_ethereum_transactions": "保留中の$networkトランザクションの取得中に問題が発生しました。",
 			"get_transaction_for_hash": "提供された（ハッシュ：$hash）から取引を取得できませんでした。",
@@ -1691,7 +1692,11 @@
 			"send_to_message": "",
 			"send_message": "メッセージを送信",
 			"send_message_input_placeholder": "何をしたいですか？",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "申し訳ありません、アドレス帳に該当する連絡先が見つかりませんでした。",
 			"loading": "考え中...",
 			"reset_chat_history": "",
