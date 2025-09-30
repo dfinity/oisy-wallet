@@ -36,14 +36,11 @@ const loadEthBalance = async ({
 
 	const {
 		init: {
-			error: { eth_address_unknown, loading_balance }
+			error: { loading_balance }
 		}
 	} = get(i18n);
 
 	if (isNullish(address)) {
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
 
 		return { success: false };
 	}
@@ -86,14 +83,12 @@ const loadErc20Balance = async ({
 
 	const {
 		init: {
-			error: { eth_address_unknown, loading_balance }
+			error: { loading_balance }
 		}
 	} = get(i18n);
 
 	if (isNullish(address)) {
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
+
 
 		return { success: false };
 	}

@@ -12,6 +12,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		children: Snippet;
@@ -29,6 +30,11 @@
 	]);
 
 	const onLoad = async () => {
+		if (isNullish($ethAddress)) {
+			return
+		}
+
+
 		if (loading) {
 			return;
 		}

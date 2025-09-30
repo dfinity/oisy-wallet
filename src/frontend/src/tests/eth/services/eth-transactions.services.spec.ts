@@ -95,9 +95,6 @@ describe('eth-transactions.services', () => {
 					standard: mockStandard
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
-					msg: { text: en.init.error.eth_address_unknown }
-				});
 				expect(result).toEqual({ success: false });
 			});
 

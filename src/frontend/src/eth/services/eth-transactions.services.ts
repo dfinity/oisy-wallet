@@ -70,15 +70,6 @@ const loadEthTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
 
 		return { success: false };
 	}
@@ -143,15 +134,7 @@ const loadErcTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
 
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
 
 		return { success: false };
 	}

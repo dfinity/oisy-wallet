@@ -77,12 +77,6 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
-
-			mockTokens.forEach((_, index) => {
-				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
-					msg: { text: en.init.error.eth_address_unknown }
-				});
-			});
 		});
 
 		it('should call the balance provider', async () => {
@@ -209,11 +203,7 @@ describe('eth-balance.services', () => {
 
 			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 
-			mockErc20DefaultTokens.forEach((_, index) => {
-				expect(toastsError).toHaveBeenNthCalledWith(index + 1, {
-					msg: { text: en.init.error.eth_address_unknown }
-				});
-			});
+
 		});
 
 		it('should use the ETH address store if the input address is nullish', async () => {
