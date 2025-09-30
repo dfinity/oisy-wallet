@@ -17,6 +17,11 @@ export const NftMetadataSchema = z.object({
 	attributes: z.array(NftAttributeSchema).optional()
 });
 
+export const NftNetworkSchema = z.object({
+	...NetworkSchema.shape,
+	...NetworkAppMetadataSchema.shape
+})
+
 export const NftCollectionSchema = z.object({
 	...TokenSchema.pick({ id: true, standard: true }).shape,
 	address: z.string(),
@@ -25,10 +30,7 @@ export const NftCollectionSchema = z.object({
 	bannerImageUrl: z.url().optional(),
 	description: z.string().optional(),
 	acquiredAt: z.date().optional(),
-	network: z.object({
-		...NetworkSchema.shape,
-		...NetworkAppMetadataSchema.shape
-	})
+	network: NftNetworkSchema,
 });
 
 export const NftSchema = z.object({
