@@ -1,9 +1,9 @@
 import { AppPath } from '$lib/constants/routes.constants';
 import { parseNftId } from '$lib/validation/nft.validation';
+import NftListTestHost from '$tests/lib/components/nfts/NftListTestHost.svelte';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import NftListTestHost from './NftListTestHost.svelte';
 
 describe('NftList', () => {
 	const mockNfts = [
