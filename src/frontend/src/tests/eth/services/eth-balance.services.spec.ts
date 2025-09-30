@@ -202,8 +202,6 @@ describe('eth-balance.services', () => {
 			expect(result).toEqual({ success: false });
 
 			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
-
-
 		});
 
 		it('should use the ETH address store if the input address is nullish', async () => {

@@ -8,7 +8,6 @@ import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
@@ -41,7 +40,6 @@ const loadEthBalance = async ({
 	} = get(i18n);
 
 	if (isNullish(address)) {
-
 		return { success: false };
 	}
 
@@ -88,8 +86,6 @@ const loadErc20Balance = async ({
 	} = get(i18n);
 
 	if (isNullish(address)) {
-
-
 		return { success: false };
 	}
 
