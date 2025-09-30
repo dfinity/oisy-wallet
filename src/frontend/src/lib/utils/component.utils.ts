@@ -6,6 +6,7 @@ type ComponentProps<T> = T extends new (options: { target: Element; props?: infe
 		: P
 	: {};
 
+// TODO implement test cases
 export const componentToHtml = <T extends Component>({
 	Component,
 	props
