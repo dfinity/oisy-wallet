@@ -1,6 +1,6 @@
+import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
-import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.schema';
 
 export const NftIdSchema = z.number().brand<'NftId'>();
 
