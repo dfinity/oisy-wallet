@@ -17,11 +17,21 @@
 		altText?: string;
 		altImg?: string;
 		testId?: string;
+		sortByEndDate?: 'asc' | 'desc';
 	}
 
-	let { title, rewards, altText, altImg, testId }: Props = $props();
+	let { title, rewards, altText, altImg, testId, sortByEndDate = 'asc' }: Props = $props();
 
 	const modalId = Symbol();
+
+	const sortedRewards = $derived.by(() => {
+		return [...rewards].sort((a, b) => {
+			const dateA = new Date(a.endDate).getTime();
+			const dateB = new Date(b.endDate).getTime();
+
+			return sortByEndDate === 'asc' ? dateA - dateB : dateB - dateA;
+		});
+	});
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
@@ -29,7 +39,7 @@
 		<span class="text-lg font-bold first-letter:capitalize"><Html text={title} /></span>
 	{/if}
 
-	{#each rewards as reward (reward.id)}
+	{#each sortedRewards as reward (reward.id)}
 		<div class="mt-4" in:slide={SLIDE_DURATION}>
 			<RewardCard
 				onclick={() => {
