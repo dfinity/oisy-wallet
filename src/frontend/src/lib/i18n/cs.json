@@ -1318,7 +1318,6 @@
 		"error": {
 			"loading_transactions": "Chyba při načítání transakcí.",
 			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",
-			"no_token_loading_transaction": "Token nebyl nalezen. Transakce nelze načíst.",
 			"uncertified_transactions_removed": "Bylo identifikováno několik necertifikovaných transakcí, které byly následně odstraněny ze zobrazených seznamů.",
 			"loading_pending_ck_ethereum_transactions": "Při načítání nevyřízených transakcí $network se něco pokazilo.",
 			"get_transaction_for_hash": "Nepodařilo se získat transakci z poskytnutého hashe ($hash).",
