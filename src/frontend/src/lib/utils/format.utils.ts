@@ -109,7 +109,11 @@ export const formatSecondsToDate = ({
 	return date[timeOnly ? 'toLocaleTimeString' : 'toLocaleDateString'](
 		language ?? Languages.ENGLISH,
 		nonNullish(formatOptions)
-			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
+			? {
+					...DATE_TIME_FORMAT_OPTIONS,
+					...formatOptions,
+					...(timeOnly && { day: undefined, month: undefined, year: undefined })
+				}
 			: DATE_TIME_FORMAT_OPTIONS
 	);
 };

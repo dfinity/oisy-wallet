@@ -165,11 +165,9 @@
 							formatOptions: {
 								hour: '2-digit',
 								minute: '2-digit',
-								hour12: undefined,
-								day: undefined,
-								month: undefined,
-								year: undefined
-							}
+								hour12: undefined
+							},
+							timeOnly: true
 						})}
 					</span>
 				{/if}
