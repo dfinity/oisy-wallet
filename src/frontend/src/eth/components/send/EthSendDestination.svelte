@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import { isErc20Icp } from '$eth/utils/token.utils';
 	import SendInputDestination from '$lib/components/send/SendInputDestination.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,40 +13,34 @@
 
 	interface Props {
 		token: OptionToken;
-		network?: Network | undefined;
-		destination?: string;
-		invalidDestination?: boolean;
-		knownDestinations?: KnownDestinations | undefined;
-		networkContacts?: NetworkContacts | undefined;
+		network?: Network;
+		destination: string;
+		invalidDestination: boolean;
+		knownDestinations?: KnownDestinations;
+		networkContacts?: NetworkContacts;
+		onQRCodeScan?: () => void;
 	}
 
 	let {
 		token,
-		network = undefined,
+		network,
 		destination = $bindable(''),
 		invalidDestination = $bindable(false),
-		knownDestinations = undefined,
-		networkContacts = undefined
+		knownDestinations,
+		networkContacts,
+		onQRCodeScan
 	}: Props = $props();
 
-	let networkICP = $state(false);
-	run(() => {
-		networkICP = isNetworkICP(network);
-	});
+	let networkICP = $derived(isNetworkICP(network));
 
-	let erc20Icp = $state(false);
-	run(() => {
-		erc20Icp = isErc20Icp(token);
-	});
-
-	const dispatch = createEventDispatcher();
+	let erc20Icp = $derived(isErc20Icp(token));
 
 	const isInvalidDestination = (): boolean => {
 		if (isNullishOrEmpty(destination)) {
 			return false;
 		}
 
-		// Avoid flickering when user enter an address and the network is about to being selected automatically.
+		// Avoid flickering when users enter an address and the network is about to be selected automatically.
 		if (erc20Icp && isNullish(network)) {
 			return false;
 		}
@@ -68,8 +60,7 @@
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	onQRButtonClick={() => dispatch('icQRCodeScan')}
+	onQRButtonClick={onQRCodeScan}
 	bind:destination
 	bind:invalidDestination
-	on:icQRCodeScan
 />

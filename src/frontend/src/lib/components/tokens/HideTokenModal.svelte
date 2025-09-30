@@ -23,16 +23,16 @@
 	import { back, gotoReplaceRoot } from '$lib/utils/nav.utils';
 
 	interface Props {
-		assertHide: () => { valid: boolean };
-		hideToken: (params: { identity: Identity }) => Promise<void>;
-		updateUi: (params: { identity: Identity }) => Promise<void>;
-		fromRoute: NavigationTarget | undefined;
+		onAssertHide: () => { valid: boolean };
+		onHideToken: (params: { identity: Identity }) => Promise<void>;
+		onUpdateUi: (params: { identity: Identity }) => Promise<void>;
+		fromRoute?: NavigationTarget;
 	}
 
-	let { assertHide, hideToken, updateUi, fromRoute }: Props = $props();
+	let { onAssertHide, onHideToken, onUpdateUi, fromRoute }: Props = $props();
 
 	const hide = async () => {
-		const { valid } = assertHide();
+		const { valid } = onAssertHide();
 
 		if (!valid) {
 			return;
@@ -50,18 +50,22 @@
 			return;
 		}
 
+		if (isNullish(modal)) {
+			return;
+		}
+
 		modal.next();
 
 		try {
 			hideProgressStep = ProgressStepsHideToken.HIDE;
 
-			await hideToken({
+			await onHideToken({
 				identity: $authIdentity
 			});
 
 			hideProgressStep = ProgressStepsHideToken.UPDATE_UI;
 
-			await updateUi({
+			await onUpdateUi({
 				identity: $authIdentity
 			});
 
@@ -107,10 +111,10 @@
 		} as ProgressStep
 	];
 
-	let hideProgressStep: string = $state(ProgressStepsHideToken.INITIALIZATION);
+	let hideProgressStep = $state<ProgressStepsHideToken>(ProgressStepsHideToken.INITIALIZATION);
 
-	let currentStep: WizardStep<WizardStepsHideToken> | undefined = $state();
-	let modal: WizardModal<WizardStepsHideToken> = $state();
+	let currentStep = $state<WizardStep<WizardStepsHideToken> | undefined>();
+	let modal = $state<WizardModal<WizardStepsHideToken>>();
 
 	const close = () => {
 		modalStore.close();
@@ -139,6 +143,6 @@
 			warningType="manage"
 		/>
 	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
-		<HideTokenReview on:icCancel={close} on:icHide={hide} />
+		<HideTokenReview onCancel={close} onHide={hide} />
 	{/if}
 </WizardModal>

@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -13,6 +11,12 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
+
+	interface Props {
+		onConnect: (uri: string) => void;
+	}
+
+	let { onConnect }: Props = $props();
 
 	let renderQRCodeReader = $state(false);
 
@@ -26,12 +30,7 @@
 
 	let uri = $state('');
 
-	let invalid = $state(true);
-	run(() => {
-		invalid = !uri;
-	});
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(!uri);
 
 	const connect = (): 'success' | 'error' => {
 		if (!uri) {
@@ -41,7 +40,7 @@
 			return 'error';
 		}
 
-		dispatch('icConnect', uri);
+		onConnect(uri);
 
 		return 'success';
 	};

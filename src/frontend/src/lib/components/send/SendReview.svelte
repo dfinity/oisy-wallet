@@ -15,7 +15,7 @@
 	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
-	interface Props {
+	interface BaseProps {
 		destination?: string;
 		amount?: OptionAmount;
 		disabled?: boolean;
@@ -24,9 +24,18 @@
 		network?: Snippet;
 		fee?: Snippet;
 		info?: Snippet;
-		onBack: () => void;
-		onSend: () => void;
 	}
+
+	type Props = BaseProps &
+		(
+			| {
+					onBack: () => void;
+					onSend: () => void;
+			  }
+			| {
+					replaceToolbar: Snippet;
+			  }
+		);
 
 	let {
 		destination = '',
@@ -37,8 +46,7 @@
 		network,
 		fee,
 		info,
-		onBack,
-		onSend
+		...rest
 	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -62,11 +70,17 @@
 	{@render info?.()}
 
 	{#snippet toolbar()}
-		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={onBack} />
-			<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
-				{$i18n.send.text.send}
-			</Button>
-		</ButtonGroup>
+		{#if 'replaceToolbar' in rest}
+			{@render rest.replaceToolbar()}
+		{:else}
+			{@const { onBack, onSend } = rest}
+
+			<ButtonGroup testId="toolbar">
+				<ButtonBack onclick={onBack} />
+				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+					{$i18n.send.text.send}
+				</Button>
+			</ButtonGroup>
+		{/if}
 	{/snippet}
 </ContentWithToolbar>

@@ -101,16 +101,13 @@ describe('eth-transactions.services', () => {
 				expect(result).toEqual({ success: false });
 			});
 
-			it('should raise an error if token is not enabled', async () => {
+			it('should return false if token is not enabled', async () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
 					standard: USDT_TOKEN.standard
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
-					msg: { text: en.transactions.error.no_token_loading_transaction }
-				});
 				expect(result).toEqual({ success: false });
 			});
 

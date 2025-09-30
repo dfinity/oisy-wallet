@@ -1,22 +1,22 @@
 <script lang="ts">
-	import { run, stopPropagation } from 'svelte/legacy';
-	import Json from './Json.svelte';
+	import { stopPropagation } from '@dfinity/gix-components';
+	import Self from '$lib/components/ui/Json.svelte';
 	import { isHash, stringifyJson, isPrincipal } from '$lib/utils/json.utils';
 
 	interface Props {
-		json?: unknown | undefined;
-		defaultExpandedLevel?: any;
+		json?: unknown;
+		defaultExpandedLevel?: number;
 		_key?: string;
 		_level?: number;
-		_collapsed?: boolean | undefined;
+		_collapsed?: boolean;
 	}
 
 	let {
-		json = undefined,
+		json,
 		defaultExpandedLevel = Infinity,
 		_key = '',
 		_level = 1,
-		_collapsed = undefined
+		_collapsed
 	}: Props = $props();
 
 	type ValueType =
@@ -45,41 +45,25 @@
 		return typeof value;
 	};
 
-	let valueType: ValueType = $state();
-	let value: unknown = $state();
-	let keyLabel: string = $state();
-	let children: [string, unknown][] = $state();
-	let hasChildren: boolean = $state();
-	let isExpandable: boolean = $state();
-	let isArray: boolean = $state();
-	let openBracket: string = $state();
-	let closeBracket: string = $state();
-	let root: boolean = $state();
-	let testId: 'json' | undefined = $state();
-	run(() => {
-		valueType = getValueType(json);
-		isExpandable = valueType === 'object';
-		value = isExpandable ? json : stringifyJson({ value: json });
-		keyLabel = `${_key}${_key.length > 0 ? ': ' : ''}`;
-		children = isExpandable ? Object.entries(json as object) : [];
-		hasChildren = children.length > 0;
-		isArray = Array.isArray(json);
-		openBracket = isArray ? '[' : '{';
-		closeBracket = isArray ? ']' : '}';
-		root = _level === 1;
-		testId = root ? 'json' : undefined;
-	});
+	let valueType = $derived(getValueType(json));
+	let isExpandable = $derived(valueType === 'object');
+	let value = $derived(isExpandable ? json : stringifyJson({ value: json }));
+	let keyLabel = $derived(`${_key}${_key.length > 0 ? ': ' : ''}`);
+	let children = $derived(isExpandable ? Object.entries(json as object) : []);
+	let hasChildren = $derived(children.length > 0);
+	let isArray = $derived(Array.isArray(json));
+	let openBracket = $derived(isArray ? '[' : '{');
+	let closeBracket = $derived(isArray ? ']' : '}');
+	let root = $derived(_level === 1);
+	let testId = $derived(root ? 'json' : undefined);
 
-	let title: string | undefined = $derived(
-		valueType === 'hash' ? (json as number[]).join() : undefined
-	);
+	let title = $derived(valueType === 'hash' ? (json as number[]).join() : undefined);
 
-	let collapsed = $state(true);
-	run(() => {
-		collapsed = _collapsed ?? defaultExpandedLevel < _level;
-	});
+	let collapsed = $derived(_collapsed ?? defaultExpandedLevel < _level);
 
-	const toggle = () => (collapsed = !collapsed);
+	const toggle = () => {
+		collapsed = !collapsed;
+	};
 </script>
 
 {#if isExpandable && hasChildren}
@@ -117,7 +101,7 @@
 		<ul>
 			{#each children as [key, value] (key)}
 				<li>
-					<Json _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
+					<Self _key={key} _level={_level + 1} {defaultExpandedLevel} json={value} />
 				</li>
 			{/each}
 		</ul>
