@@ -16,7 +16,8 @@ import {
 	isUpcomingCampaign,
 	loadRewardResult,
 	mapEligibilityReport,
-	normalizeNetworkMultiplier, sortRewards
+	normalizeNetworkMultiplier,
+	sortRewards
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
@@ -855,15 +856,23 @@ describe('rewards.utils', () => {
 
 	describe('sortRewards', () => {
 		it('should sort rewards by end date (asc)', () => {
-			const result = sortRewards({rewards: mockRewardCampaigns, sortByEndDate: 'asc'});
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'asc' });
 
-			expect(result.map((reward) => reward.id)).toEqual([SPRINKLES_SEASON_1_EPISODE_5_ID, SPRINKLES_SEASON_1_EPISODE_4_ID, SPRINKLES_SEASON_1_EPISODE_3_ID])
-		})
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_5_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_3_ID
+			]);
+		});
 
 		it('should sort rewards by end date (desc)', () => {
-			const result = sortRewards({rewards: mockRewardCampaigns, sortByEndDate: 'desc'});
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'desc' });
 
-			expect(result.map((reward) => reward.id)).toEqual([SPRINKLES_SEASON_1_EPISODE_3_ID, SPRINKLES_SEASON_1_EPISODE_4_ID, SPRINKLES_SEASON_1_EPISODE_5_ID])
-		})
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_3_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_5_ID
+			]);
+		});
 	});
 });

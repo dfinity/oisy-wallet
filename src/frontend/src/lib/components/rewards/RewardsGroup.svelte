@@ -24,7 +24,7 @@
 
 	const modalId = Symbol();
 
-	const sortedRewards = $derived(sortRewards({rewards, sortByEndDate}));
+	const sortedRewards = $derived(sortRewards({ rewards, sortByEndDate }));
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
