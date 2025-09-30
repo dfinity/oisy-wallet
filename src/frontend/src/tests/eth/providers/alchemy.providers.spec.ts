@@ -17,6 +17,7 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { Alchemy } from 'alchemy-sdk';
+import { AlchemyProvider as AlchemyProviderLib } from 'ethers/providers';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -38,11 +39,17 @@ describe('alchemy.providers', () => {
 	it('should create the correct map of providers', () => {
 		expect(Alchemy).toHaveBeenCalledTimes(networks.length);
 
-		networks.forEach(({ providers: { alchemy: _, alchemyDeprecated } }, index) => {
+		networks.forEach(({ providers: { alchemyDeprecated } }, index) => {
 			expect(Alchemy).toHaveBeenNthCalledWith(index + 1, {
 				apiKey: ALCHEMY_API_KEY,
 				network: alchemyDeprecated
 			});
+		});
+
+		expect(AlchemyProviderLib).toHaveBeenCalledTimes(networks.length);
+
+		networks.forEach(({ providers: { alchemy } }, index) => {
+			expect(AlchemyProviderLib).toHaveBeenNthCalledWith(index + 1, alchemy, ALCHEMY_API_KEY);
 		});
 	});
 
@@ -320,7 +327,7 @@ describe('alchemy.providers', () => {
 				expect(provider).toBeInstanceOf(AlchemyProvider);
 
 				expect(provider).toHaveProperty('deprecatedProvider');
-				expect(provider).not.toHaveProperty('provider');
+				expect(provider).toHaveProperty('provider');
 			});
 		});
 

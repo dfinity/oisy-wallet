@@ -23,7 +23,7 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
-import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import type { TransactionResponse } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { encodePrincipalToEthAddress } from '@dfinity/cketh';
@@ -147,7 +147,7 @@ const loadPendingTransactions = async ({
 
 		const { id: tokenId } = token;
 
-		// There are no pending ETH -> ckETH or Erc20 -> ckErc20, therefore, we reset the store.
+		// There are no pending ETH -> ckETH or Erc20 -> ckErc20; therefore, we reset the store.
 		// This can be useful if there were previous pending transactions displayed and the transaction has now been processed.
 		if (pendingLogs.length === 0) {
 			icPendingTransactionsStore.reset(tokenId);
@@ -155,9 +155,8 @@ const loadPendingTransactions = async ({
 		}
 
 		const { getTransaction } = alchemyProviders(twinTokenNetworkId);
-		const loadTransaction = ({
-			transactionHash
-		}: Log): Promise<TransactionResponseWithBigInt | null> => getTransaction(transactionHash);
+		const loadTransaction = ({ transactionHash }: Log): Promise<TransactionResponse | null> =>
+			getTransaction(transactionHash);
 
 		const pendingTransactions = await Promise.all(pendingLogs.map(loadTransaction));
 

@@ -14,7 +14,7 @@ import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
-import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import type { TransactionResponse } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -28,6 +28,7 @@ import {
 	type AlchemySettings,
 	type Network
 } from 'alchemy-sdk';
+import { AlchemyProvider as AlchemyProviderLib, type Networkish } from 'ethers/providers';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -125,29 +126,34 @@ export const initPendingTransactionsListener = ({
 export class AlchemyProvider {
 	// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
 	private readonly deprecatedProvider: Alchemy;
+	private readonly provider: AlchemyProviderLib;
 
-	constructor(private readonly network: Network) {
+	constructor(
+		private readonly network: Networkish,
+		// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+		private readonly networkDeprecated: Network
+	) {
+		this.provider = new AlchemyProviderLib(this.network, ALCHEMY_API_KEY);
 		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
-			network: this.network
+			network: this.networkDeprecated
 		});
 	}
 
-	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
+	getTransaction = async (hash: string): Promise<TransactionResponse | null> => {
+		const transaction = await this.provider.getTransaction(hash);
 
 		if (isNullish(transaction)) {
 			return transaction;
 		}
 
-		const { value, gasLimit, gasPrice, chainId, ...rest } = transaction;
+		const { to, blockNumber, wait, ...rest } = transaction;
 
 		return {
 			...rest,
-			value: value.toBigInt(),
-			gasLimit: gasLimit.toBigInt(),
-			gasPrice: gasPrice?.toBigInt(),
-			chainId: BigInt(chainId)
+			...(nonNullish(to) && { to }),
+			...(nonNullish(blockNumber) && { blockNumber }),
+			wait
 		};
 	};
 
@@ -276,9 +282,9 @@ const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+	(acc, { id, providers: { alchemy, alchemyDeprecated } }) => ({
 		...acc,
-		[id]: new AlchemyProvider(alchemyDeprecated)
+		[id]: new AlchemyProvider(alchemy, alchemyDeprecated)
 	}),
 	{}
 );
