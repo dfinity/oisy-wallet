@@ -38,7 +38,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * This method:
 	 * 1. Creates a PoW challenge using the given identity.
 	 * 2. Solves the challenge to find a valid `nonce`.
-	 * 3. Uses the solved `nonce` to requestPPo signing permission.
+	 * 3. Uses the solved `nonce` to request signing permission.
 	 *
 	 * @param identity - The user's identity for the operation.
 	 * @throws Errors if any step with no specific error handling in the sequence fails.
