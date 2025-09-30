@@ -24,9 +24,7 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 	console.warn(
 		'cycles: ',
 		allowanceResult.allowance,
-		'within threshold: ',
-		allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD,
-		'difference: ',
+		', difference to threshold: ',
 		allowanceResult.allowance - BigInt(POW_MIN_CYCLES_THRESHOLD)
 	);
 	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
