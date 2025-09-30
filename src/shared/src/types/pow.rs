@@ -30,7 +30,7 @@ pub const EXPIRY_DURATION_MS: u64 = 300_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
-pub const START_DIFFICULTY: u32 = 500_000;
+pub const START_DIFFICULTY: u32 = 2_000_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
@@ -48,7 +48,7 @@ pub const MAX_DIFFICULTY: u32 = 5_000_000;
 // `1_000_000` will grant `10_000 * 1_000_000 = 10,000,000,000` cycles.
 // It is important to find the correct balance here (also taking the cycles used to execute the PoW
 // code itself into account)
-pub const CYCLES_PER_DIFFICULTY: u64 = 5_834_000;
+pub const CYCLES_PER_DIFFICULTY: u64 = 1_458_500;
 
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
