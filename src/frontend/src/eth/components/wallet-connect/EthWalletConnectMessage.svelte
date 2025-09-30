@@ -60,16 +60,13 @@
 </script>
 
 {#if nonNullish(token)}
-	<!-- /* v8 ignore next */ -->
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}:</p>
 	<p class="mb-4 font-normal">{token.symbol}</p>
 
-	<!-- /* v8 ignore next */ -->
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}:</p>
 	<p class="mb-4 font-normal">{token.network.name}</p>
 {/if}
 
-<!-- /* v8 ignore next */ -->
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 {#if nonNullish(json)}
 	<div class="rounded-xs mt-4 bg-disabled p-4">
