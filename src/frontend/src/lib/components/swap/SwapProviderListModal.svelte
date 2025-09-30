@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapProviderListItem from './SwapProviderListItem.svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -17,6 +16,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
+	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
 
 	const dispatch = createEventDispatcher<{
 		icSelectProvider: SwapMappedResult;

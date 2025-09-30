@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
@@ -21,6 +20,7 @@
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { findSwapProvider } from '$lib/utils/swap.utils';
 	import { UrlSchema } from '$lib/validation/url.validation';
+	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 
 	interface Props {
 		slippageValue: OptionAmount;
