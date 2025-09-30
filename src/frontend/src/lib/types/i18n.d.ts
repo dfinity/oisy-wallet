@@ -1377,6 +1377,9 @@ interface I18nAi_assistant {
 		action_button_send_tokens_title: string;
 		action_button_send_tokens_subtitle: string;
 		action_button_send_tokens_prompt: string;
+		action_button_show_balance_title: string;
+		action_button_show_balance_subtitle: string;
+		action_button_show_balance_prompt: string;
 		select_contact_message: string;
 		send_to_message: string;
 		send_message: string;
