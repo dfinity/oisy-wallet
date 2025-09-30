@@ -1,4 +1,4 @@
-import type IcTransactionsCkBTCListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+import type IcTransactionsCkBtcListeners from '$icp/components/transactions/IcTransactionsCkBtcListeners.svelte';
 import type IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 import type { Token } from '$lib/types/token';
 
@@ -9,11 +9,13 @@ export interface WalletWorker {
 	destroy: () => void;
 }
 
-export type InitWalletWorkerFn = (params: { token: Token }) => Promise<WalletWorker>;
+export type InitWalletWorkerFn<T extends Token = Token> = (params: {
+	token: T;
+}) => Promise<WalletWorker>;
 
 export interface TokenToListener {
 	token: Token;
-	listener: typeof IcTransactionsCkBTCListeners | typeof IcTransactionsCkEthereumListeners;
+	listener: typeof IcTransactionsCkBtcListeners | typeof IcTransactionsCkEthereumListeners;
 }
 
 export interface WebSocketListener {

@@ -1,16 +1,18 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import BtcSendForm from '$btc/components/send/BtcSendForm.svelte';
 	import BtcSendProgress from '$btc/components/send/BtcSendProgress.svelte';
 	import BtcSendReview from '$btc/components/send/BtcSendReview.svelte';
-	import { sendBtc } from '$btc/services/btc-send.services';
-	import type { UtxosFee } from '$btc/types/btc-send';
+	import { sendBtc, validateBtcSend } from '$btc/services/btc-send.services';
+	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import {
 		TRACK_COUNT_BTC_SEND_ERROR,
-		TRACK_COUNT_BTC_SEND_SUCCESS
+		TRACK_COUNT_BTC_SEND_SUCCESS,
+		TRACK_COUNT_BTC_VALIDATION_ERROR
 	} from '$lib/constants/analytics.contants';
 	import {
 		btcAddressMainnet,
@@ -26,7 +28,6 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import type { NetworkId } from '$lib/types/network';
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -35,35 +36,54 @@
 		mapNetworkIdToBitcoinNetwork
 	} from '$lib/utils/network.utils';
 
-	export let currentStep: WizardStep | undefined;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let sendProgressStep: string;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		currentStep?: WizardStep;
+		destination?: string;
+		amount: OptionAmount;
+		sendProgressStep: string;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onClose: () => void;
+		onNext: () => void;
+		onSendBack: () => void;
+		onTokensList: () => void;
+	}
+
+	let {
+		currentStep,
+		destination = '',
+		amount = $bindable(),
+		sendProgressStep = $bindable(),
+		selectedContact,
+		onBack,
+		onClose,
+		onNext,
+		onSendBack,
+		onTokensList
+	}: Props = $props();
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const progress = (step: ProgressStepsSendBtc) => (sendProgressStep = step);
 
-	let utxosFee: UtxosFee | undefined = undefined;
+	let utxosFee = $state<UtxosFee | undefined>();
 
-	let networkId: NetworkId | undefined = undefined;
-	$: networkId = $sendToken.network.id;
+	let networkId = $derived($sendToken.network.id);
 
-	let source: string;
-	$: source =
+	let source = $derived(
 		(isNetworkIdBTCTestnet(networkId)
 			? $btcAddressTestnet
 			: isNetworkIdBTCRegtest(networkId)
 				? $btcAddressRegtest
-				: $btcAddressMainnet) ?? '';
+				: $btcAddressMainnet) ?? ''
+	);
 
-	const dispatch = createEventDispatcher();
-
-	const close = () => dispatch('icClose');
-	const back = () => dispatch('icSendBack');
+	const close = () => onClose();
+	const back = () => onSendBack();
 
 	const send = async () => {
+		progress(ProgressStepsSendBtc.INITIALIZATION);
+
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish(network)) {
@@ -106,24 +126,47 @@
 			return;
 		}
 
-		dispatch('icNext');
+		onNext();
 
+		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
+			// Validate UTXOs before proceeding
+			try {
+				await validateBtcSend({
+					utxosFee,
+					source,
+					amount,
+					network,
+					identity: $authIdentity
+				});
+			} catch (err: unknown) {
+				// Handle BtcValidationError with specific toastsError for each type
+				if (err instanceof BtcValidationError) {
+					utxosFee.error = err.type;
+				}
+
+				trackEvent({
+					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
+					metadata: {
+						token: $sendToken.symbol,
+						network: `${networkId?.description ?? 'unknown'}`
+					}
+				});
+
+				// go back to the previous step so the user can correct/ try again
+				onBack();
+
+				return;
+			}
+		}
 		try {
-			// TODO: add tracking
+			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
 				destination,
 				amount,
 				utxosFee,
 				network,
 				source,
-				identity: $authIdentity,
-				onProgress: () => {
-					if (sendProgressStep === ProgressStepsSendBtc.INITIALIZATION) {
-						progress(ProgressStepsSendBtc.SEND);
-					} else if (sendProgressStep === ProgressStepsSendBtc.SEND) {
-						progress(ProgressStepsSendBtc.DONE);
-					}
-				}
+				identity: $authIdentity
 			});
 
 			trackEvent({
@@ -134,7 +177,7 @@
 				}
 			});
 
-			sendProgressStep = ProgressStepsSendBtc.DONE;
+			progress(ProgressStepsSendBtc.DONE);
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
@@ -151,36 +194,27 @@
 				err
 			});
 
-			dispatch('icBack');
+			onBack();
 		}
 	};
 </script>
 
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<BtcSendReview
-		on:icBack
-		on:icSend={send}
-		bind:utxosFee
-		{destination}
-		{selectedContact}
 		{amount}
+		{destination}
+		{onBack}
+		onSend={send}
+		{selectedContact}
 		{source}
+		bind:utxosFee
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
 	<BtcSendProgress bind:sendProgressStep />
 {:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm
-		{source}
-		{selectedContact}
-		on:icNext
-		on:icClose
-		on:icBack
-		on:icTokensList
-		bind:destination
-		bind:amount
-	>
-		<ButtonBack onclick={back} slot="cancel" />
+	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+		{#snippet cancel()}
+			<ButtonBack onclick={back} />
+		{/snippet}
 	</BtcSendForm>
-{:else}
-	<slot />
 {/if}

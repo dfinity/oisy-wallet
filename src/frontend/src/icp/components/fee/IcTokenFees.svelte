@@ -68,9 +68,9 @@
 </script>
 
 <FeeDisplay
-	feeAmount={icTokenFee}
 	decimals={sourceToken.decimals}
 	exchangeRate={sourceTokenExchangeRate}
+	feeAmount={icTokenFee}
 	symbol={sourceToken.symbol}
 	zeroAmountLabel={$i18n.fee.text.zero_fee}
 >
@@ -79,9 +79,9 @@
 
 {#if nonNullish(bitcoinEstimatedFee)}
 	<FeeDisplay
-		feeAmount={bitcoinEstimatedFee}
 		decimals={BTC_DECIMALS}
 		exchangeRate={bitcoinFeeExchangeRate}
+		feeAmount={bitcoinEstimatedFee}
 		symbol={BTC_MAINNET_SYMBOL}
 	>
 		{#snippet label()}{$i18n.fee.text.estimated_btc}{/snippet}
@@ -90,9 +90,9 @@
 
 {#if nonNullish(kytFee)}
 	<FeeDisplay
-		feeAmount={kytFee}
 		decimals={sourceToken.decimals}
 		exchangeRate={sourceTokenExchangeRate}
+		feeAmount={kytFee}
 		symbol={sourceToken.symbol}
 	>
 		{#snippet label()}{$i18n.fee.text.estimated_inter_network}{/snippet}
@@ -101,9 +101,9 @@
 
 {#if nonNullish(ethereumEstimateFee)}
 	<FeeDisplay
-		feeAmount={ethereumEstimateFee}
 		decimals={ethereumFeeToken.decimals}
 		exchangeRate={ethereumFeeExchangeRate}
+		feeAmount={ethereumEstimateFee}
 		symbol={ethereumFeeToken.symbol}
 	>
 		{#snippet label()}{$i18n.fee.text.estimated_eth}{/snippet}

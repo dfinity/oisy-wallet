@@ -18,7 +18,7 @@
 	});
 </script>
 
-<Value ref="amount" element="div">
+<Value element="div" ref="amount">
 	{#snippet label()}
 		{$i18n.core.text.amount}
 	{/snippet}
@@ -30,8 +30,8 @@
 			<ExchangeAmountDisplay
 				amount={bigNumberAmount}
 				decimals={token.decimals}
-				symbol={token.symbol}
 				{exchangeRate}
+				symbol={token.symbol}
 			/>
 		{/if}
 	{/snippet}

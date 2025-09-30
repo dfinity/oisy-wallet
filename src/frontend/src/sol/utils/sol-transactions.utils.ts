@@ -1,6 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
+import type { CompilableTransactionMessage } from '$sol/types/sol-transaction-message';
 import { mapSolInstruction } from '$sol/utils/sol-instructions.utils';
 import { nonNullish } from '@dfinity/utils';
 import {
@@ -8,7 +9,6 @@ import {
 	getBase64Encoder,
 	getCompiledTransactionMessageDecoder,
 	getTransactionDecoder,
-	type CompilableTransactionMessage,
 	type Rpc,
 	type SolanaRpcApi,
 	type Transaction,
@@ -45,9 +45,9 @@ export const mapSolTransactionMessage = ({
 			return {
 				...acc,
 				amount: nonNullish(amount) ? (acc.amount ?? ZERO) + amount : acc.amount,
-				source,
-				destination,
-				payer
+				...(nonNullish(source) && { source }),
+				...(nonNullish(destination) && { destination }),
+				...(nonNullish(payer) && { payer })
 			};
 		},
 		{ amount: undefined }

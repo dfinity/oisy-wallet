@@ -12,6 +12,11 @@ import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/si
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
+import {
+	mapSignerCanisterBtcError,
+	mapSignerCanisterGetEthAddressError,
+	mapSignerCanisterSendBtcError
+} from '$lib/canisters/signer.errors';
 import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
@@ -21,11 +26,6 @@ import type {
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mapDerivationPath } from '$lib/utils/signer.utils';
 import { Canister, createServices, fromDefinedNullable, toNullable } from '@dfinity/utils';
-import {
-	mapSignerCanisterBtcError,
-	mapSignerCanisterGetEthAddressError,
-	mapSignerCanisterSendBtcError
-} from './signer.errors';
 
 export class SignerCanister extends Canister<SignerService> {
 	static async create({

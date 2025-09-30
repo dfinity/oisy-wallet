@@ -1,5 +1,25 @@
 [
 	{
+		"id": "caffeine",
+		"name": "dapps.descriptions.caffeine.name",
+		"oneLiner": "dapps.descriptions.caffeine.one_liner",
+		"callToAction": "dapps.descriptions.caffeine.call_to_action",
+		"website": "https://caffeine.ai/",
+		"twitter": "https://x.com/caffeineai",
+		"tags": ["dapps.categories.ai"],
+		"description": "dapps.descriptions.caffeine.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/caffeine-logo.webp",
+		"screenshots": ["/images/dapps/caffeine-screenshot.webp"],
+		"featured": true,
+		"carousel": {
+			"text": "dapps.descriptions.caffeine.carousel.text",
+			"callToAction": "dapps.descriptions.caffeine.carousel.call_to_action"
+		}
+	},
+	{
 		"id": "kongswap",
 		"name": "dapps.descriptions.kongswap.name",
 		"oneLiner": "dapps.descriptions.kongswap.one_liner",
@@ -15,7 +35,6 @@
 		"stats": "",
 		"logo": "/images/dapps/kong-swap-logo.svg",
 		"screenshots": ["/images/dapps/kong-swap.webp"],
-		"featured": true,
 		"carousel": {
 			"text": "dapps.descriptions.kongswap.carousel.text",
 			"callToAction": "dapps.descriptions.kongswap.carousel.call_to_action"
@@ -251,11 +270,7 @@
 		"display": "Large",
 		"stats": "",
 		"logo": "/images/dapps/taggr.webp",
-		"screenshots": ["/images/dapps/taggr-screenshot.webp"],
-		"carousel": {
-			"text": "dapps.descriptions.taggr.carousel.text",
-			"callToAction": "dapps.descriptions.taggr.carousel.call_to_action"
-		}
+		"screenshots": ["/images/dapps/taggr-screenshot.webp"]
 	},
 	{
 		"id": "toolkit",
@@ -272,5 +287,37 @@
 		"stats": "",
 		"logo": "/images/dapps/toolkit-logo-inv.svg",
 		"screenshots": ["/images/dapps/toolkit-screenshot.webp"]
+	},
+	{
+		"id": "altitudefi",
+		"name": "dapps.descriptions.altitudefi.name",
+		"oneLiner": "dapps.descriptions.altitudefi.one_liner",
+		"website": "https://www.altitude.fi/",
+		"twitter": "https://twitter.com/AltitudeFi_",
+		"discord": "https://twitter.com/AltitudeFi_",
+		"telegram": "https://t.me/altitude_fi",
+		"medium": "https://medium.com/@altitude_labs_ltd",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.altitudefi.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/altitudefi-logo.svg",
+		"screenshots": ["/images/dapps/altitudefi-screenshot.webp"]
+	},
+	{
+		"id": "usdai",
+		"name": "dapps.descriptions.usdai.name",
+		"oneLiner": "dapps.descriptions.usdai.one_liner",
+		"website": "https://usd.ai/",
+		"telegram": "https://t.me/usdaiofficial",
+		"twitter": "https://x.com/USDai_Official",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.usdai.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/usdai-logo.svg",
+		"screenshots": ["/images/dapps/usdai-screenshot.webp"]
 	}
 ]

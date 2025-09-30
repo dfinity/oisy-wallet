@@ -58,28 +58,28 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		onClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}
 			formCancelAction="back"
-			bind:sendAmount
-			bind:receiveAmount
-			bind:convertProgressStep
-			on:icBack={() =>
+			onBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
 					: modal?.back()}
-			on:icNext={modal?.next}
-			on:icClose={close}
+			onClose={close}
+			onNext={modal?.next}
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
 		>
 			<HowToConvertEthereumWizardSteps
 				{currentStep}

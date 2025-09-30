@@ -8,6 +8,7 @@ import type {
 	FullySignedTransaction,
 	GetSignaturesForAddressApi,
 	Signature,
+	Transaction,
 	TransactionWithBlockhashLifetime
 } from '@solana/kit';
 
@@ -42,7 +43,9 @@ export type SolSignature = ReturnType<
 	GetSignaturesForAddressApi['getSignaturesForAddress']
 >[number];
 
-export type SolSignedTransaction = FullySignedTransaction & TransactionWithBlockhashLifetime;
+export type SolSignedTransaction = Transaction &
+	FullySignedTransaction &
+	TransactionWithBlockhashLifetime;
 
 export interface MappedSolTransaction {
 	amount: bigint | undefined;

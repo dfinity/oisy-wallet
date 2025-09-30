@@ -14,12 +14,12 @@
 </script>
 
 <a
+	class={`as-button ${colorStyle} icon flex flex-col text-center text-xs font-normal`}
+	aria-label={ariaLabel}
 	{href}
+	onclick={onClick}
 	rel="external noopener noreferrer"
 	target="_blank"
-	class={`as-button ${colorStyle} icon flex flex-col text-center text-xs font-normal`}
-	onclick={onClick}
-	aria-label={ariaLabel}
 >
 	{@render children()}
 </a>

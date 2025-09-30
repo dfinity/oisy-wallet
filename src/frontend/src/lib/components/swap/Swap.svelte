@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
+	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
 		loadDisabledIcrcTokensBalances,
 		loadDisabledIcrcTokensExchanges
@@ -12,7 +13,10 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
 	import SwapModal from '$lib/components/swap/SwapModal.svelte';
-	import { allDisabledKongSwapCompatibleIcrcTokens } from '$lib/derived/all-tokens.derived';
+	import {
+		allDisabledKongSwapCompatibleIcrcTokens,
+		allIcrcTokens
+	} from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -51,7 +55,8 @@
 
 		try {
 			await loadKongSwapTokensService({
-				identity: $authIdentity
+				identity: $authIdentity,
+				allIcrcTokens: [ICP_TOKEN, ...$allIcrcTokens]
 			});
 
 			return 'ready';
@@ -102,6 +107,6 @@
 	};
 </script>
 
-<SwapButtonWithModal onOpen={onOpenSwap} isOpen={$modalSwap}>
+<SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
 	<SwapModal on:nnsClose />
 </SwapButtonWithModal>

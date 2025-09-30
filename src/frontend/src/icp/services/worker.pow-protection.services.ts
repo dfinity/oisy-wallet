@@ -8,6 +8,7 @@ import type {
 } from '$icp/types/pow-protector-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequest,
 	PostMessageDataResponseError,
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
@@ -59,13 +60,13 @@ export const initPowProtectorWorker: PowProtectorWorker =
 			start: () => {
 				worker?.postMessage({
 					msg: 'startPowProtectionTimer'
-				});
+				} as PostMessage<PostMessageDataRequest>);
 			},
 			stop,
 			trigger: () => {
 				worker?.postMessage({
 					msg: 'triggerPowProtectionTimer'
-				});
+				} as PostMessage<PostMessageDataRequest>);
 			},
 			destroy: () => {
 				if (isDestroying) {

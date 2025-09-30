@@ -4,6 +4,20 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { UserConfig } from 'vite';
 import { readCanisterIds as readIds } from './env.utils';
+import OISY_DOMAINS from './scripts/domains.json' with { type: 'json' };
+
+/**
+ * Get the domain URL for a given DFX network
+ * @param dfx_network - The DFX network name (e.g., 'ic', 'staging', 'beta', etc.)
+ * @returns The domain URL for the network, or a default URL if not found
+ */
+const domain_for_dfx_network = (dfx_network: string): string => {
+	if (dfx_network === 'local') {
+		return 'http://localhost:4943';
+	}
+	const map = OISY_DOMAINS.frontend as Record<string, string>;
+	return map[dfx_network] ?? `https://${dfx_network}.oisy.com`;
+};
 
 /**
  * Read all the locally deployed canister IDs. For example Oisy backend, ckBTC|ETH, ICP etc.
@@ -89,6 +103,7 @@ export const readCanisterIds = (params: { prefix?: string }): Record<string, str
 });
 
 export const defineViteReplacements = (): {
+	VITE_OISY_DOMAIN: string;
 	VITE_APP_VERSION: string;
 	VITE_DFX_NETWORK: string;
 	VITE_GIT_COMMIT_HASH: string;
@@ -112,6 +127,7 @@ export const defineViteReplacements = (): {
 	const branchName = isTestFe ? execSync('git rev-parse --abbrev-ref HEAD').toString().trim() : '';
 
 	return {
+		VITE_OISY_DOMAIN: JSON.stringify(domain_for_dfx_network(network)),
 		VITE_APP_VERSION: JSON.stringify(version),
 		VITE_DFX_NETWORK: JSON.stringify(network),
 		VITE_GIT_COMMIT_HASH: JSON.stringify(commitHash),

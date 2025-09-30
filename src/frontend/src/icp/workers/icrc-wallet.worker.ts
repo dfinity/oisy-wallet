@@ -3,6 +3,7 @@ import { balance } from '$icp/api/icrc-ledger.api';
 import { IcWalletBalanceAndTransactionsScheduler } from '$icp/schedulers/ic-wallet-balance-and-transactions.scheduler';
 import { IcWalletBalanceScheduler } from '$icp/schedulers/ic-wallet-balance.scheduler';
 import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
+import { isIndexCanisterAwake } from '$icp/services/index-canister.services';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { mapCkBTCTransaction } from '$icp/utils/ckbtc-transactions.utils';
 import { mapCkEthereumTransaction } from '$icp/utils/cketh-transactions.utils';
@@ -93,8 +94,8 @@ const getBalance = ({
  *
  * The errors raised by this function are handled directly in the scheduler.
  * If loading the transactions fails, the scheduler restarts using only the Ledger canister.
- * If loading the balance fails, the same happens, and we don't load the transactions anymore.
- * It was deemed not relevant, since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
+ * If loading the balance fails, the same happens, and we don't load the transactions any more.
+ * It was deemed not relevant since the balance is more important than the transactions, and the new balance-only scheduler will handle any errors from that point.
  *
  * @param {SchedulerJobParams<PostMessageDataRequestIcrcStrict>} params - The parameters for the function, including the identity and data.
  * @returns {Promise<GetBalanceAndTransactions>} A promise that resolves to an object containing the balance and transactions of the account.
@@ -106,7 +107,31 @@ const getBalanceAndTransactions = async (
 
 	// Ignoring the balance from the transactions' response.
 	// Even if it could cause some sort of lagged inconsistency, we prefer to always show the latest balance, in case the Index canister is not properly working.
-	const { balance: _, ...rest } = transactions;
+	const { balance: indexCanisterBalance, ...rest } = transactions;
+
+	const indexCanisterIsOutOfSync = balance !== indexCanisterBalance;
+
+	if (indexCanisterIsOutOfSync && nonNullish(params.data)) {
+		const {
+			identity,
+			certified,
+			data: { ledgerCanisterId, indexCanisterId }
+		} = params;
+
+		const indexCanisterAwake = await isIndexCanisterAwake({
+			identity,
+			certified,
+			ledgerCanisterId,
+			indexCanisterId
+		});
+
+		if (!indexCanisterAwake) {
+			// We prefer to make the loading fail since it will be handled with Ledger canister only and Index canister unavailable.
+			throw new Error(
+				`Index canister ${indexCanisterId} for Ledger canister ${ledgerCanisterId} is not awake`
+			);
+		}
+	}
 
 	return { ...rest, balance };
 };

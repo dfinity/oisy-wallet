@@ -33,8 +33,8 @@
 
 <Toggle
 	ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
-	testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 	{disabled}
+	testId={`${testIdPrefix}-${token.symbol}-${token.network.id.description}`}
 	bind:checked
 	on:nnsToggle={toggle}
 />

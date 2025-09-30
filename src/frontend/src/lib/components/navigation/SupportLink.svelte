@@ -15,10 +15,10 @@
 </script>
 
 <ExternalLink
+	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
 	{asMenuItem}
 	{asMenuItemCondensed}
 	href={OISY_SUPPORT_URL}
-	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.support)}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}
 	{testId}

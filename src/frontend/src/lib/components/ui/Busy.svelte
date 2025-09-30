@@ -23,14 +23,14 @@
 
 {#if nonNullish($busy)}
 	<div
-		in:fade
-		out:fade={{ duration: 200 }}
+		class="busy"
+		class:close={$busy.close}
 		onclick={close}
 		onkeydown={keyboardClose}
-		class:close={$busy.close}
-		class="busy"
 		role="button"
 		tabindex="-1"
+		in:fade
+		out:fade={{ duration: 200 }}
 	>
 		<div class="content">
 			{#if $busy.spinner}
@@ -44,7 +44,7 @@
 			{/if}
 
 			{#if $busy.close}
-				<button onclick={stopPropagation(close)} aria-label="Close" class="text-off-white"
+				<button class="text-off-white" aria-label="Close" onclick={stopPropagation(close)}
 					>Cancel</button
 				>
 			{/if}

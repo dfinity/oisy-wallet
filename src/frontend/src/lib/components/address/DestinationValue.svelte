@@ -27,14 +27,14 @@
 		<div class="flex items-center gap-2">
 			{#if !isDestinationCustom}
 				<div
-					class="flex items-center justify-center"
 					style={`width: ${logoSizes['xxs']}; height: ${logoSizes['xxs']};`}
+					class="flex items-center justify-center"
 				>
 					<IconAstronautHelmet />
 				</div>
 				<span>{$i18n.convert.text.default_destination}</span>
 			{:else}
-				<NetworkLogo network={token.network} color="off-white" />
+				<NetworkLogo color="off-white" network={token.network} />
 				<span>{shortenWithMiddleEllipsis({ text: destination ?? '' })}</span>
 			{/if}
 

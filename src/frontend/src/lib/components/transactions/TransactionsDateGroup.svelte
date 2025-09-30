@@ -7,9 +7,13 @@
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 
-	export let formattedDate: string;
-	export let transactions: AllTransactionUiWithCmpNonEmptyList;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		formattedDate: string;
+		transactions: AllTransactionUiWithCmpNonEmptyList;
+		testId?: string;
+	}
+
+	let { formattedDate, transactions, testId }: Props = $props();
 </script>
 
 {#if transactions.length > 0}
@@ -21,13 +25,13 @@
 
 			<div in:slide={SLIDE_DURATION}>
 				{#if component === 'bitcoin'}
-					<BtcTransaction {transaction} {token} iconType="token" />
+					<BtcTransaction iconType="token" {token} {transaction} />
 				{:else if component === 'ethereum'}
-					<EthTransaction {transaction} {token} iconType="token" />
+					<EthTransaction iconType="token" {token} {transaction} />
 				{:else if component === 'solana'}
-					<SolTransaction {transaction} {token} iconType="token" />
+					<SolTransaction iconType="token" {token} {transaction} />
 				{:else}
-					<IcTransaction {transaction} {token} iconType="token" />
+					<IcTransaction iconType="token" {token} {transaction} />
 				{/if}
 			</div>
 		{/each}

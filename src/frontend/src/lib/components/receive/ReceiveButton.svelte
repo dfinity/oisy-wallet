@@ -13,9 +13,9 @@
 </script>
 
 <ButtonHero
-	onclick={onClick}
-	disabled={$isBusy}
 	ariaLabel={$i18n.receive.text.receive}
+	disabled={$isBusy}
+	onclick={onClick}
 	testId={RECEIVE_TOKENS_MODAL_OPEN_BUTTON}
 >
 	{#snippet icon()}

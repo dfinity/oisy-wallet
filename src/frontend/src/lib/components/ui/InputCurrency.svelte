@@ -39,15 +39,15 @@
 <div class="input-currency-container">
 	<Input
 		{name}
-		inputType="currency"
-		{required}
-		bind:value
-		{decimals}
-		{placeholder}
-		spellcheck={false}
 		autocomplete="off"
-		{testId}
+		{decimals}
 		{disabled}
+		inputType="currency"
+		{placeholder}
+		{required}
+		spellcheck={false}
+		{testId}
+		bind:value
 		on:nnsInput
 		on:blur
 		on:focus

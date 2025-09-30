@@ -1,6 +1,8 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { isNullish } from '@dfinity/utils';
+	import { getContext, type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
+	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -10,37 +12,75 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let disabled: boolean | undefined = false;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface BaseProps {
+		destination?: string;
+		amount?: OptionAmount;
+		disabled?: boolean;
+		selectedContact?: ContactUi;
+		nft?: Nft;
+		network?: Snippet;
+		fee?: Snippet;
+		info?: Snippet;
+	}
 
-	const dispatch = createEventDispatcher();
+	type Props = BaseProps &
+		(
+			| {
+					onBack: () => void;
+					onSend: () => void;
+			  }
+			| {
+					replaceToolbar: Snippet;
+			  }
+		);
+
+	let {
+		destination = '',
+		amount,
+		disabled = false,
+		selectedContact,
+		nft,
+		network,
+		fee,
+		info,
+		...rest
+	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview sendAmount={amount} token={$sendToken} exchangeRate={$sendTokenExchangeRate} />
+	{#if isNullish(nft)}
+		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+	{:else}
+		<SendNftReview {nft} />
+	{/if}
 
 	<div class="mb-4">
 		<SendReviewDestination {destination} {selectedContact} />
 	</div>
 
-	<slot name="network" />
+	{@render network?.()}
 
-	<slot name="fee" />
+	{@render fee?.()}
 
-	<slot name="info" />
+	{@render info?.()}
 
 	{#snippet toolbar()}
-		<ButtonGroup testId="toolbar">
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button {disabled} onclick={() => dispatch('icSend')} testId={REVIEW_FORM_SEND_BUTTON}>
-				{$i18n.send.text.send}
-			</Button>
-		</ButtonGroup>
+		{#if 'replaceToolbar' in rest}
+			{@render rest.replaceToolbar()}
+		{:else}
+			{@const { onBack, onSend } = rest}
+
+			<ButtonGroup testId="toolbar">
+				<ButtonBack onclick={onBack} />
+				<Button {disabled} onclick={onSend} testId={REVIEW_FORM_SEND_BUTTON}>
+					{$i18n.send.text.send}
+				</Button>
+			</ButtonGroup>
+		{/if}
 	{/snippet}
 </ContentWithToolbar>

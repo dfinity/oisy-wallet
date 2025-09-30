@@ -9,6 +9,6 @@
 
 <div class="flex items-center">
 	{#each { length: totalSlides } as _, index (`indicator-${index}`)}
-		<Indicator on:click={() => onIndicatorClick(index)} {index} {currentSlide} {totalSlides} />
+		<Indicator {currentSlide} {index} {totalSlides} on:click={() => onIndicatorClick(index)} />
 	{/each}
 </div>

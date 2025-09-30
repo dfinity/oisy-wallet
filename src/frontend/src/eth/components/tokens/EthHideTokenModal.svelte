@@ -17,14 +17,18 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
 
-	let selectedToken: OptionErc20UserToken;
+	let { fromRoute }: Props = $props();
+
+	let selectedToken = $state<OptionErc20UserToken>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as OptionErc20UserToken));
 
-	const assertHide = (): { valid: boolean } => {
+	const onAssertHide = (): { valid: boolean } => {
 		const contractAddress = selectedToken?.address;
 
 		if (isNullishOrEmpty(contractAddress)) {
@@ -37,7 +41,7 @@
 		return { valid: true };
 	};
 
-	const hideToken = async (params: { identity: Identity }) => {
+	const onHideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(selectedToken);
 
 		trackEvent({
@@ -55,7 +59,7 @@
 	};
 
 	// TODO(GIX-2740): no call to Infura - remove only the selected token from stores
-	const updateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
+	const onUpdateUi = (params: { identity: Identity }): Promise<void> => loadErc20UserTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {fromRoute} {onAssertHide} {onHideToken} {onUpdateUi} />

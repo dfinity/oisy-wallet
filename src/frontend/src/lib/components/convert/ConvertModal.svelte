@@ -52,30 +52,30 @@
 		});
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		onClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<ConvertWizard
 			{currentStep}
+			formCancelAction="close"
+			onBack={modal.back}
+			onClose={close}
+			onDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
+			onIcQrCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onIcQrCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
+			onNext={modal.next}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:convertProgressStep
 			bind:customDestination
-			formCancelAction="close"
-			on:icBack={modal.back}
-			on:icNext={modal.next}
-			on:icDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
-			on:icDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
-			on:icQRCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
-			onIcQrCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
-			on:icClose={close}
 		/>
 	</WizardModal>
 </ConvertContexts>

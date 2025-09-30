@@ -31,7 +31,7 @@ export const convertCkBTCToBtc = async ({
 		to
 	});
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await retrieveBtc({
 		identity,
@@ -93,7 +93,7 @@ export const convertCkErc20ToErc20 = async ({
 
 	// 3. Withdraw Erc20
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await withdrawErc20({
 		identity,
@@ -123,7 +123,7 @@ export const convertCkETHToEth = async ({
 		to
 	});
 
-	progress(ProgressStepsSendIc.SEND);
+	progress?.(ProgressStepsSendIc.SEND);
 
 	await withdrawEth({
 		identity,
@@ -145,7 +145,7 @@ const approveTransfer = ({
 } & {
 	canisters: Pick<IcCanisters, 'ledgerCanisterId'> & IcCkMetadata;
 }): Promise<IcrcBlockIndex> => {
-	progress(progressStep);
+	progress?.(progressStep);
 
 	return approve({
 		identity,

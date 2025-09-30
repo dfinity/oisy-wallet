@@ -8,6 +8,8 @@
 		styleClass?: string;
 		condensed?: boolean;
 		noPadding?: boolean;
+		noBorder?: boolean;
+		itemStyleClass?: string;
 		children?: Snippet;
 		testId?: string;
 	}
@@ -18,6 +20,8 @@
 		styleClass = '',
 		condensed = true,
 		noPadding = false,
+		noBorder = false,
+		itemStyleClass = '',
 		children,
 		testId
 	}: Props = $props();
@@ -26,9 +30,17 @@
 		variant: ListVariant;
 		condensed?: boolean;
 		noPadding?: boolean;
+		noBorder?: boolean;
+		itemStyleClass?: string;
 	}
 
-	setContext<ListContext>('list-context', { variant, condensed, noPadding });
+	setContext<ListContext>('list-context', {
+		variant,
+		condensed,
+		noPadding,
+		noBorder,
+		itemStyleClass
+	});
 </script>
 
 {#if element === 'ul'}

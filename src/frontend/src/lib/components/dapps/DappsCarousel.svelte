@@ -24,6 +24,7 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
 	export let styleClass: string | undefined = undefined;
+	export let wrapperStyleClass: string | undefined = undefined;
 
 	// It may happen that the user's settings are refreshed before having been updated.
 	// But for that small instant of time, we could still show the dApp.
@@ -105,20 +106,22 @@
 </script>
 
 {#if $userProfileLoaded && nonNullish(dappsCarouselSlides) && dappsCarouselSlides.length > 0}
-	<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
-	<Carousel
-		bind:this={carousel}
-		controlsWidthStyleClass="w-[calc(100%-5rem)]"
-		styleClass={`w-full ${styleClass ?? ''}`}
-	>
-		{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
-			<DappsCarouselSlide
-				{dappsCarouselSlide}
-				airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
-					? featuredAirdrop
-					: undefined}
-				on:icCloseCarouselSlide={closeSlide}
-			/>
-		{/each}
-	</Carousel>
+	<div class={wrapperStyleClass ?? ''}>
+		<!-- To align controls section with slide text - 100% - logo width (4rem) - margin logo-text (1rem) -->
+		<Carousel
+			bind:this={carousel}
+			controlsWidthStyleClass="w-[calc(100%-5rem)]"
+			styleClass={`w-full ${styleClass ?? ''}`}
+		>
+			{#each dappsCarouselSlides as dappsCarouselSlide (dappsCarouselSlide.id)}
+				<DappsCarouselSlide
+					airdrop={nonNullish(featuredAirdrop) && featuredAirdrop.id === dappsCarouselSlide.id
+						? featuredAirdrop
+						: undefined}
+					{dappsCarouselSlide}
+					on:icCloseCarouselSlide={closeSlide}
+				/>
+			{/each}
+		</Carousel>
+	</div>
 {/if}

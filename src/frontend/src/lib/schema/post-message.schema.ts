@@ -19,7 +19,7 @@ import type { CertifiedData } from '$lib/types/store';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',
@@ -85,6 +85,10 @@ export const PostMessageDataRequestIcrcStrictSchema = z.object({
 
 export const PostMessageDataRequestDip20Schema = z.object({
 	canisterId: CanisterIdTextSchema
+});
+
+export const PostMessageDataRequestIcpSchema = z.object({
+	indexCanisterId: CanisterIdTextSchema
 });
 
 export const PostMessageDataRequestIcCkSchema = IcCkMetadataSchema.pick({

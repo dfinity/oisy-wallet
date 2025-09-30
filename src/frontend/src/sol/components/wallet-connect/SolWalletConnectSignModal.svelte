@@ -132,7 +132,7 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{#snippet title()}
 		<WalletConnectModalTitle>
 			{$i18n.wallet_connect.text.sign_message}
@@ -144,14 +144,15 @@
 			progressStep={signProgressStep}
 			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
 		/>
-	{:else}
+	{:else if currentStep?.name === WizardStepsSign.REVIEW}
 		<SolWalletConnectSignReview
 			{amount}
-			destination={destination ?? ''}
 			{data}
+			destination={destination ?? ''}
+			onApprove={sign}
+			onReject={reject}
+			source={address ?? ''}
 			{token}
-			on:icApprove={sign}
-			on:icReject={reject}
 		/>
 	{/if}
 </WizardModal>

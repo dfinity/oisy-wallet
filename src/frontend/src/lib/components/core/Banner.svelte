@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { IconClose, IconWarning } from '@dfinity/gix-components';
-	import { STAGING } from '$lib/constants/app.constants';
+	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
+	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { isPWAStandalone } from '$lib/utils/device.utils';
+	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let visible = true;
 
@@ -9,17 +12,42 @@
 </script>
 
 {#if STAGING && visible}
-	<div class="flex justify-between gap-4">
+	<div class="test-banner flex justify-between gap-4">
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button on:click={close} aria-label={$i18n.core.text.close}><IconClose /></button>
+		<button aria-label={$i18n.core.text.close} on:click={close}><IconClose /></button>
+	</div>
+{:else if BETA && visible}
+	<div
+		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+	>
+		<WarningBanner>
+			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
+			<button aria-label={$i18n.core.text.close} on:click={close}>
+				<IconClose />
+			</button>
+		</WarningBanner>
+	</div>
+{/if}
+
+<!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
+{#if isPWAStandalone() && visible}
+	<div
+		class="fixed left-[50%] top-6 z-10 flex -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+	>
+		<WarningBanner>
+			<span class="w-full px-2">{replaceOisyPlaceholders($i18n.core.warning.standalone_mode)}</span>
+			<button aria-label={$i18n.core.text.close} on:click={close}>
+				<IconClose />
+			</button>
+		</WarningBanner>
 	</div>
 {/if}
 
 <style lang="scss">
-	div {
+	div.test-banner {
 		position: fixed;
 		top: 0;
 		left: 50%;

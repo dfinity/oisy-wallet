@@ -531,3 +531,15 @@ a.as-button {
 		@apply px-2;
 	}
 }
+
+// Mobile-only increased list item height for selector dropdowns (language, currency)
+@media (max-width: #{media.$breakpoint-medium - 1px}) {
+	.lang-selector,
+	.currency-selector {
+		button {
+			min-height: var(--touch-target-min-height);
+			padding-top: var(--padding-1_5x);
+			padding-bottom: var(--padding-1_5x);
+		}
+	}
+}

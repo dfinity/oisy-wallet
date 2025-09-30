@@ -50,13 +50,13 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalBtcReceive}>
+<ReceiveButtonWithModal isOpen={$modalBtcReceive} open={openReceive}>
 	{#snippet modal()}
 		<ReceiveModal
 			address={addressData?.data}
 			{addressToken}
-			network={addressToken.network}
 			copyAriaLabel={$i18n.receive.bitcoin.text.bitcoin_address_copied}
+			network={addressToken.network}
 		/>
 	{/snippet}
 </ReceiveButtonWithModal>

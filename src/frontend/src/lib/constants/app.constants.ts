@@ -161,6 +161,9 @@ export const EIGHT_DECIMALS = 8;
 
 export const ZERO = 0n;
 
+// NFTs
+export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
+
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
@@ -199,3 +202,6 @@ export const CONTACT_MAX_LABEL_LENGTH = 50;
 
 // Contact validation
 export const CONTACT_MAX_NAME_LENGTH = 100;
+
+// Network bonus multiplier
+export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;

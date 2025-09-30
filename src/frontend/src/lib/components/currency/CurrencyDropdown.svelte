@@ -59,8 +59,8 @@
 		bind:this={dropdown}
 		ariaLabel={$i18n.core.alt.switch_currency}
 		asModalOnMobile
-		buttonFullWidth
 		buttonBorder
+		buttonFullWidth
 		testId={CURRENCY_SWITCHER_BUTTON}
 	>
 		{parseSymbolString({ currency: $currentCurrency, language: $currentLanguage })}
@@ -70,19 +70,19 @@
 		{/snippet}
 
 		{#snippet items()}
-			<List noPadding condensed testId={CURRENCY_SWITCHER_DROPDOWN}>
+			<List condensed noPadding testId={CURRENCY_SWITCHER_DROPDOWN}>
 				{#each sortedCurrencies as { key, currency, name, symbol }, index (index + key)}
 					<ListItem>
 						<Button
-							onclick={() => handleCurrencyChange(currency)}
-							fullWidth
-							contentFullWidth
 							alignLeft
+							colorStyle="tertiary-alt"
+							contentFullWidth
+							fullWidth
+							onclick={() => handleCurrencyChange(currency)}
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
-							colorStyle="tertiary-alt"
-							transparent
 							testId={`${CURRENCY_SWITCHER_DROPDOWN_BUTTON}-${currency}`}
+							transparent
 						>
 							<span class="pt-0.75 w-[20px] text-brand-primary">
 								{#if $currentCurrency === currency}
@@ -90,7 +90,7 @@
 								{/if}
 							</span>
 							<div class="flex w-full flex-row justify-between gap-5">
-								{name}
+								<span class="first-letter:uppercase">{name}</span>
 								<span class="text-right text-tertiary">{symbol}</span>
 							</div>
 						</Button>

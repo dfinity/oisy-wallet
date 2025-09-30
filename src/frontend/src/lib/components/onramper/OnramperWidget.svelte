@@ -107,19 +107,19 @@
 
 <div
 	class="absolute bottom-0 left-0 right-0 top-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
-	class:opacity-100={!themeLoaded}
-	class:opacity-0={themeLoaded}
 	class:invisible={themeLoaded}
+	class:opacity-0={themeLoaded}
+	class:opacity-100={!themeLoaded}
 >
 	<Spinner inline />
 </div>
 
 <iframe
+	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
+	height="680px"
 	onload={changeThemeOnIframeLoad}
+	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 	{src}
 	title={$i18n.buy.onramper.title}
-	height="680px"
 	width="100%"
-	allow="accelerometer; autoplay; camera; gyroscope; payment; microphone"
-	sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
 ></iframe>

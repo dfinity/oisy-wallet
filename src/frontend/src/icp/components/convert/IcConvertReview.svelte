@@ -15,16 +15,16 @@
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
 	<svelte:fragment slot="destination">
-		<DestinationValue token={$destinationToken} {destination} {isDestinationCustom} />
+		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken} />
 	</svelte:fragment>
 
 	<IcTokenFees
+		slot="fee"
+		networkId={$destinationToken.network.id}
 		sourceToken={$sourceToken}
 		sourceTokenExchangeRate={$sourceTokenExchangeRate}
-		networkId={$destinationToken.network.id}
-		slot="fee"
 	/>
 
 	<slot name="cancel" slot="cancel" />

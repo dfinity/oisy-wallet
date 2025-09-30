@@ -11,7 +11,7 @@ import type {
 import type { OptionBalance } from '$lib/types/balance';
 import type { TokenGroup } from '$lib/types/token-group';
 import type { Option, RequiredExcept } from '$lib/types/utils';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type TokenId = z.infer<typeof TokenIdSchema>;
 
@@ -35,7 +35,10 @@ export interface TokenLinkedData {
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup;
+export type NonRequiredProps = TokenAppearance &
+	TokenBuyable &
+	TokenGroup &
+	Pick<Token, 'description'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
 	T,

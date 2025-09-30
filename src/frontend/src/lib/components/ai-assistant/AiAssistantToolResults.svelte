@@ -1,19 +1,34 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import AiAssistantReviewSendTokenTool from '$lib/components/ai-assistant/AiAssistantReviewSendTokenTool.svelte';
+	import AiAssistantShowBalanceTool from '$lib/components/ai-assistant/AiAssistantShowBalanceTool.svelte';
 	import AiAssistantShowContactsTool from '$lib/components/ai-assistant/AiAssistantShowContactsTool.svelte';
-	import type { ToolResult } from '$lib/types/ai-assistant';
+	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
+	import { type ToolResult, ToolResultType } from '$lib/types/ai-assistant';
 
 	interface Props {
 		results: ToolResult[];
+		onSendMessage: (params: { messageText?: string; context?: string }) => Promise<void>;
+		isLastItem: boolean;
+		loading: boolean;
 	}
 
-	let { results }: Props = $props();
+	let { results, onSendMessage, isLastItem, loading }: Props = $props();
 </script>
 
 <div class="mb-5">
 	{#each results as { result, type }, index (index)}
-		{#if type === 'show_contacts' && nonNullish(result)}
-			<AiAssistantShowContactsTool contacts={result} />
+		{#if (type === ToolResultType.SHOW_FILTERED_CONTACTS || type === ToolResultType.SHOW_ALL_CONTACTS) && nonNullish(result) && 'contacts' in result}
+			<AiAssistantShowContactsTool {...result} {loading} {onSendMessage} />
+		{:else if type === ToolResultType.SHOW_BALANCE && nonNullish(result) && 'mainCard' in result}
+			<AiAssistantShowBalanceTool {...result} {loading} {onSendMessage} />
+		{:else if type === ToolResultType.REVIEW_SEND_TOKENS && nonNullish(result) && 'token' in result}
+			<SendTokenContext token={result.token}>
+				<AiAssistantReviewSendTokenTool
+					{...result}
+					sendEnabled={isLastItem && results.length - 1 === index}
+				/>
+			</SendTokenContext>
 		{/if}
 	{/each}
 </div>

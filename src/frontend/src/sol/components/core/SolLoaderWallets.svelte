@@ -32,6 +32,6 @@
 	);
 </script>
 
-<WalletWorkers tokens={walletWorkerTokens} {initWalletWorker}>
+<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
 	{@render children()}
 </WalletWorkers>

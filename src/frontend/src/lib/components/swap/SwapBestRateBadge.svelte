@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 </script>
 
-<Badge variant="success" styleClass="mt-1" width="w-fit">
+<Badge styleClass="mt-1" variant="success" width="w-fit">
 	<span class="flex items-center gap-1">
 		<IconStar />
 		<Responsive up="md">{$i18n.swap.text.best_rate}</Responsive>

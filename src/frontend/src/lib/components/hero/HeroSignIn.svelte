@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
+	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
 	import IconScanFace from '$lib/components/icons/lucide/IconScanFace.svelte';
 	import IconShieldCheck from '$lib/components/icons/lucide/IconShieldCheck.svelte';
 	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
@@ -23,7 +23,7 @@
 	]);
 </script>
 
-<div class="flex flex-col items-center text-center md:items-start md:text-left lg:mb-20">
+<div class="flex flex-col items-center text-center md:items-start md:text-left">
 	<!-- Invite Rewards Banner -->
 	<div class="flex justify-center md:justify-start">
 		<InviteRewardsBanner />
@@ -48,5 +48,5 @@
 		{/each}
 	</div>
 
-	<ButtonAuthenticateWithLicense />
+	<ButtonAuthenticateWithHelp needHelpLink={false} />
 </div>

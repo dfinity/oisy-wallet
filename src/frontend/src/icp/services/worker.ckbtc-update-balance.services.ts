@@ -7,6 +7,7 @@ import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCkBTCUpdateBalance,
 	PostMessageDataResponseBTCAddress,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -80,7 +81,7 @@ export const initCkBTCUpdateBalanceWorker: IcCkWorker = async ({
 					btcAddress,
 					bitcoinNetwork: isNetworkIdBTCMainnet(twinToken?.network.id) ? 'mainnet' : 'testnet'
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>);
 		},
 		stop,
 		trigger: () => {

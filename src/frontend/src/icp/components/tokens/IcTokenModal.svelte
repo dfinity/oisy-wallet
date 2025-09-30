@@ -30,10 +30,10 @@
 </script>
 
 <TokenModal
-	token={$pageToken}
+	{fromRoute}
 	isDeletable={!knownIcrcToken}
 	isEditable={!knownIcrcToken}
-	{fromRoute}
+	token={$pageToken}
 >
 	{#if nonNullish(twinToken)}
 		<ModalListItem>
@@ -44,9 +44,9 @@
 			{#snippet content()}
 				<output>{twinToken.name}</output>
 				<Logo
-					src={twinToken.icon}
 					alt={replacePlaceholders($i18n.core.alt.logo, { $name: twinToken.name })}
 					color="white"
+					src={twinToken.icon}
 				/>
 			{/snippet}
 		</ModalListItem>
@@ -62,9 +62,9 @@
 				{#snippet content()}
 					<output class="break-all">{ckToken.ledgerCanisterId}</output>
 					<Copy
-						value={ckToken.ledgerCanisterId}
-						text={$i18n.tokens.import.text.ledger_canister_id_copied}
 						inline
+						text={$i18n.tokens.import.text.ledger_canister_id_copied}
+						value={ckToken.ledgerCanisterId}
 					/>
 				{/snippet}
 			</ModalListItem>
@@ -81,9 +81,9 @@
 				{#snippet content()}
 					<output>{safeMinterCanisterId}</output>
 					<Copy
-						value={safeMinterCanisterId}
-						text={$i18n.tokens.import.text.minter_canister_id_copied}
 						inline
+						text={$i18n.tokens.import.text.minter_canister_id_copied}
+						value={safeMinterCanisterId}
 					/>
 				{/snippet}
 			</ModalListItem>

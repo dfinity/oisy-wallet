@@ -3,17 +3,15 @@ import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import type { TokenId } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 
 export const checkAnyNonZeroBalance = ($balancesStore: CertifiedStoreData<BalancesData>): boolean =>
 	nonNullish($balancesStore) &&
-	Object.getOwnPropertySymbols($balancesStore).some(
-		(tokenId) =>
-			!(
-				isNullish($balancesStore[tokenId as TokenId]?.data) ||
-				$balancesStore[tokenId as TokenId]?.data === ZERO
-			)
-	);
+	Object.getOwnPropertySymbols($balancesStore).some((tokenId) => {
+		const balance = $balancesStore[tokenId as TokenId]?.data;
+
+		return nonNullish(balance) && balance !== ZERO;
+	});
 
 /**
  * Check if all balances are zero.

@@ -1,7 +1,12 @@
 import { USDC_TOKEN } from '$env/tokens/tokens-evm/tokens-polygon/tokens-erc20/tokens.usdc.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
-import { deleteIdbBalances, getIdbBalances, setIdbBalancesStore } from '$lib/api/idb-balances.api';
+import {
+	clearIdbBalances,
+	deleteIdbBalances,
+	getIdbBalances,
+	setIdbBalancesStore
+} from '$lib/api/idb-balances.api';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Balance } from '$lib/types/balance';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
@@ -221,6 +226,14 @@ describe('idb-balances.api', () => {
 				principal: mockPrincipal,
 				store: expect.any(Object)
 			});
+		});
+	});
+
+	describe('clearIdbBalances', () => {
+		it('should clear balances', async () => {
+			await clearIdbBalances();
+
+			expect(idbKeyval.clear).toHaveBeenCalledExactlyOnceWith(expect.any(Object));
 		});
 	});
 });

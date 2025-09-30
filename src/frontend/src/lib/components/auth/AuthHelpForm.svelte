@@ -21,8 +21,12 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let onLostIdentity: () => void;
-	export let onOther: () => void;
+	interface Props {
+		onLostIdentity: () => void;
+		onOther: () => void;
+	}
+
+	let { onLostIdentity, onOther }: Props = $props();
 </script>
 
 <div class="grid gap-6">
@@ -35,15 +39,15 @@
 		<div class="grid gap-2">
 			<Button
 				colorStyle="secondary"
-				type="button"
 				fullWidth
-				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
 				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_LOST_INTERNET_IDENTITY
 					});
 					onLostIdentity();
 				}}
+				testId={HELP_AUTH_LOST_IDENTITY_BUTTON}
+				type="button"
 			>
 				<span class="text-error-primary"><IconClose size="24" /></span>{$i18n.auth.help.text
 					.lost_identity}
@@ -51,45 +55,45 @@
 
 			<Button
 				colorStyle="secondary"
-				type="button"
 				fullWidth
-				testId={HELP_AUTH_SECURITY_BUTTON}
 				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
 					});
 					onOther();
 				}}
+				testId={HELP_AUTH_SECURITY_BUTTON}
+				type="button"
 			>
 				<span class="text-error-primary"><IconShieldCheck /></span>{$i18n.auth.help.text.security}
 			</Button>
 
 			<Button
 				colorStyle="secondary"
-				type="button"
 				fullWidth
-				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
 				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_GOT_CONFUSED
 					});
 					onOther();
 				}}
+				testId={HELP_AUTH_GOT_CONFUSED_BUTTON}
+				type="button"
 			>
 				<span class="text-error-primary"><IconAnnoyed /></span>{$i18n.auth.help.text.got_confused}
 			</Button>
 
 			<Button
 				colorStyle="secondary"
-				type="button"
 				fullWidth
-				testId={HELP_AUTH_OTHER_BUTTON}
 				onclick={() => {
 					trackEvent({
 						name: TRACK_HELP_OTHER
 					});
 					onOther();
-				}}>{$i18n.auth.help.text.other}</Button
+				}}
+				testId={HELP_AUTH_OTHER_BUTTON}
+				type="button">{$i18n.auth.help.text.other}</Button
 			>
 		</div>
 	</div>

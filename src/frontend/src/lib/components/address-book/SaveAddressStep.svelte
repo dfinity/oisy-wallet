@@ -41,7 +41,7 @@
 
 <ContentWithToolbar>
 	{#if nonNullish(address)}
-		<AddressCard variant="info" items="center">
+		<AddressCard items="center" variant="info">
 			{#snippet logo()}
 				<AvatarWithBadge {address} badge={{ type: 'addressType', address }} variant="sm" />
 			{/snippet}
@@ -56,11 +56,10 @@
 		{#if nonNullish(onCreateContact)}
 			<span class="flex">
 				<Button
-					link
-					paddingSmall
-					onclick={onCreateContact}
 					ariaLabel={$i18n.address.save.create_contact}
-					><IconPlus /> {$i18n.address.save.create_contact}</Button
+					link
+					onclick={onCreateContact}
+					paddingSmall><IconPlus /> {$i18n.address.save.create_contact}</Button
 				>
 			</span>
 		{/if}
@@ -72,20 +71,20 @@
 		<!-- Additionally, we have to avoid placeholders with word "name" as that can bring autofill as well -->
 		<InputTextWithAction
 			name="search_contacts"
+			autofocus
 			placeholder={$i18n.address_book.text.search_contact}
 			bind:value={inputValue}
-			autofocus
 		/>
 	</div>
 
 	{#if filteredContacts.length > 0}
-		<List styleClass="mt-5" noPadding>
+		<List noPadding styleClass="mt-5">
 			{#each filteredContacts as contact, index (`${index}-${contact.id}`)}
 				<ListItem>
 					<ContactCard
 						{contact}
-						onClick={() => onSelectContact(contact)}
 						hideCopyButton
+						onClick={() => onSelectContact(contact)}
 						onSelect={() => onSelectContact(contact)}
 					/>
 				</ListItem>
@@ -98,11 +97,11 @@
 	{#snippet toolbar()}
 		<ButtonGroup>
 			<Button
-				paddingSmall
 				colorStyle="secondary-light"
-				type="button"
 				fullWidth
-				onclick={() => onClose()}>{$i18n.core.text.close}</Button
+				onclick={() => onClose()}
+				paddingSmall
+				type="button">{$i18n.core.text.close}</Button
 			>
 		</ButtonGroup>
 	{/snippet}

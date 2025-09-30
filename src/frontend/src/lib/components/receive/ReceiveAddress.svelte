@@ -39,7 +39,7 @@
 </script>
 
 <div>
-	<Value ref={labelRef} element="div">
+	<Value element="div" ref={labelRef}>
 		{#snippet label()}
 			{@render title()}
 		{/snippet}
@@ -57,7 +57,7 @@
 				data-tid={testId}
 			>
 				<div class="h-8 w-8">
-					<NetworkLogo {network} color="white" size="sm" />
+					<NetworkLogo color="white" {network} size="sm" />
 				</div>
 
 				{#if nonNullish(address)}
@@ -73,7 +73,7 @@
 
 				{#if nonNullish(address)}
 					<div in:fade>
-						<ReceiveActions on:click {address} {copyAriaLabel} {qrCodeAction} {copyButtonTestId} />
+						<ReceiveActions {address} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} on:click />
 					</div>
 				{:else}
 					<div class="min-w-20">&ZeroWidthSpace;</div>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SendContact from '$lib/components/send/SendContact.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -14,15 +14,15 @@
 		destination: string;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
+		onNext: () => void;
 	}
 
 	let {
 		networkContacts,
 		selectedContact = $bindable(),
-		destination = $bindable()
+		destination = $bindable(),
+		onNext
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -50,16 +50,16 @@
 
 <div in:fade>
 	{#if nonNullish(networkContacts) && Object.keys(filteredNetworkContacts).length > 0}
-		<div in:fade class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]">
+		<div class="flex flex-col overflow-y-hidden sm:max-h-[13.5rem]" in:fade>
 			<ul class="list-none overflow-y-auto overscroll-contain">
 				{#each Object.values(filteredNetworkContacts) as { contact, address }, index (index)}
 					<SendContact
-						{contact}
 						{address}
+						{contact}
 						onClick={() => {
 							selectedContact = contact;
 							destination = address;
-							dispatch('icNext');
+							onNext();
 						}}
 					/>
 				{/each}
@@ -67,8 +67,8 @@
 		</div>
 	{:else}
 		<EmptyState
-			title={$i18n.send.text.contacts_empty_state_title}
 			description={$i18n.send.text.contacts_empty_state_description}
+			title={$i18n.send.text.contacts_empty_state_title}
 		/>
 	{/if}
 </div>

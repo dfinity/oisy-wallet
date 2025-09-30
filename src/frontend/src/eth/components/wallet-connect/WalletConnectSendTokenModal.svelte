@@ -7,7 +7,10 @@
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
-	import { ethereumToken, ethereumTokenId } from '$eth/derived/token.derived';
+	import {
+		nativeEthereumTokenWithFallback,
+		nativeEthereumTokenId
+	} from '$eth/derived/token.derived';
 	import { send as sendServices } from '$eth/services/wallet-connect.services';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -38,6 +41,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	export let request: WalletKitTypes.SessionRequest;
 	export let firstTransaction: WalletConnectEthSendTransactionParams;
@@ -153,7 +157,7 @@
 			token: $sendToken,
 			progress: (step: ProgressStep) => (sendProgressStep = step),
 			identity: $authIdentity,
-			minterInfo: $ckEthMinterInfoStore?.[$ethereumTokenId],
+			minterInfo: $ckEthMinterInfoStore?.[$nativeEthereumTokenId],
 			sourceNetwork,
 			targetNetwork
 		});
@@ -162,7 +166,7 @@
 	};
 </script>
 
-<WizardModal {steps} bind:currentStep bind:this={modal} onClose={reject}>
+<WizardModal bind:this={modal} onClose={reject} {steps} bind:currentStep>
 	{@const { data } = firstTransaction}
 
 	{#snippet title()}
@@ -172,14 +176,14 @@
 	{/snippet}
 
 	<EthFeeContext
-		amount={amount.toString()}
+		amount={formatToken({ value: amount, unitName: $sendToken.decimals })}
 		{data}
+		{destination}
+		nativeEthereumToken={$nativeEthereumTokenWithFallback}
+		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		sendToken={$sendToken}
 		sendTokenId={$sendTokenId}
-		{destination}
-		observe={currentStep?.name !== WizardStepsSend.SENDING}
 		{sourceNetwork}
-		nativeEthereumToken={$ethereumToken}
 	>
 		<CkEthLoader nativeTokenId={$sendTokenId}>
 			{#if currentStep?.name === WizardStepsSend.SENDING}
@@ -187,16 +191,16 @@
 					progressStep={sendProgressStep}
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 				/>
-			{:else}
+			{:else if currentStep?.name === WizardStepsSend.REVIEW}
 				<WalletConnectSendReview
 					{amount}
-					{destination}
 					{data}
+					{destination}
 					{erc20Approve}
+					onApprove={send}
+					onReject={reject}
 					{sourceNetwork}
 					{targetNetwork}
-					on:icApprove={send}
-					on:icReject={reject}
 				/>
 			{/if}
 		</CkEthLoader>

@@ -4,7 +4,6 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconMoreVertical from '$lib/components/icons/lucide/IconMoreVertical.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import {
@@ -78,17 +77,16 @@
 </script>
 
 <button
-	data-tid={`${testId}-button`}
-	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	bind:this={button}
-	onclick={() => (visible = true)}
+	class="pointer-events-auto ml-auto flex gap-0.5 font-bold"
 	aria-label={$i18n.tokens.alt.context_menu}
-	disabled={$erc20UserTokensNotInitialized}
+	data-tid={`${testId}-button`}
+	onclick={() => (visible = true)}
 >
 	<IconMoreVertical />
 </button>
 
-<Popover bind:visible anchor={button} invisibleBackdrop direction="rtl">
+<Popover anchor={button} direction="rtl" invisibleBackdrop bind:visible>
 	<div class="flex flex-col gap-1">
 		{#if $pageTokenToggleable}
 			<ButtonMenu ariaLabel={hideTokenLabel} onclick={hideToken}>

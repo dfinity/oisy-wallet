@@ -67,14 +67,14 @@ export const cleanWorkers = ({
  * @param token The token to load the worker for.
  * @param initWalletWorker The initialisation function of a wallet worker.
  */
-export const loadWorker = async ({
+export const loadWorker = async <T extends Token = Token>({
 	workers,
 	token,
 	initWalletWorker
 }: {
 	workers: Map<TokenId, WalletWorker>;
-	token: Token;
-	initWalletWorker: InitWalletWorkerFn;
+	token: T;
+	initWalletWorker: InitWalletWorkerFn<T>;
 }) => {
 	if (!workers.has(token.id)) {
 		const worker = await initWalletWorker({ token });

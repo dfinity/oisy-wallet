@@ -42,6 +42,7 @@ const getTransactions = async ({
 	}
 
 	const { transactions } = await getTransactionsIcp({
+		indexCanisterId,
 		...rest
 	});
 	return transactions.flatMap(mapTransactionIcpToSelf);

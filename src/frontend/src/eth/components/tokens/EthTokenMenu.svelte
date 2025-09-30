@@ -26,11 +26,11 @@
 	{#if nonNullish(explorerUrl) && $erc20UserTokensInitialized}
 		<div in:fade>
 			<ExternalLink
+				ariaLabel={$i18n.tokens.alt.open_etherscan}
 				asMenuItem
 				asMenuItemCondensed
 				fullWidth
 				href={explorerUrl}
-				ariaLabel={$i18n.tokens.alt.open_etherscan}
 				iconVisible={false}
 			>
 				{$i18n.navigation.text.view_on_explorer}

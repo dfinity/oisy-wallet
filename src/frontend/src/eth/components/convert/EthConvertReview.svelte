@@ -16,7 +16,7 @@
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<ConvertReview on:icConvert on:icBack {sendAmount} {receiveAmount}>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
 	<EthFeeDisplay slot="fee">
 		{#snippet label()}
 			<Html text={$i18n.fee.text.convert_fee} />

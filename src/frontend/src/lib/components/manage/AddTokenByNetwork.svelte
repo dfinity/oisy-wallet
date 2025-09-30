@@ -91,10 +91,10 @@
 	).filter(({ id }) => !isNetworkIdBitcoin(id));
 </script>
 
-<form on:submit|preventDefault={() => dispatch('icNext')} method="POST" in:fade class="min-h-auto">
+<form class="min-h-auto" method="POST" on:submit|preventDefault={() => dispatch('icNext')} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
-			<AddTokenByNetworkDropdown bind:networkName {availableNetworks} />
+			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
 		{/if}
 
 		{#if isIcpNetwork}
@@ -102,7 +102,7 @@
 		{:else if isEthereumNetwork || isEvmNetwork}
 			<EthAddTokenForm on:icBack bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
-			<SolAddTokenForm on:icBack bind:tokenAddress={splTokenAddress} />
+			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
 			<span class="mb-6">{$i18n.tokens.import.text.custom_tokens_not_supported}</span>
 		{/if}

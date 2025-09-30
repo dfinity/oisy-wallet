@@ -452,6 +452,10 @@ describe('format.utils', () => {
 	});
 
 	describe('formatSecondsToDate', () => {
+		beforeEach(() => {
+			vi.stubEnv('TZ', 'UTC');
+		});
+
 		it('formats seconds correctly in default (en) locale', () => {
 			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
 
@@ -477,6 +481,35 @@ describe('format.utils', () => {
 			const result = formatSecondsToDate({ seconds: NaN });
 
 			expect(result).toBe('Invalid Date');
+		});
+
+		it('allows to pass custom date formatting', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672531200,
+				formatOptions: { month: 'long', hour: undefined, minute: undefined }
+			});
+
+			expect(result).toBe('January 1, 2023');
+		});
+
+		it('should allow to display only the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535700,
+				formatOptions: { month: 'long' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15');
+		});
+
+		it('should allow to format the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535732,
+				formatOptions: { hour: 'numeric', minute: 'numeric', second: '2-digit' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15:32');
 		});
 	});
 
@@ -521,7 +554,7 @@ describe('format.utils', () => {
 				i18n: {} as unknown as I18n
 			});
 
-			expect(result).toBe('January');
+			expect(result).toBe('Jan');
 		});
 
 		it('formats date to month name in German locale', () => {
@@ -530,7 +563,7 @@ describe('format.utils', () => {
 				i18n: { lang: 'de' } as unknown as I18n
 			});
 
-			expect(result).toBe('Januar');
+			expect(result).toBe('Jan');
 		});
 
 		it('formats date to month name in French locale', () => {
@@ -539,7 +572,7 @@ describe('format.utils', () => {
 				i18n: { lang: 'fr' } as unknown as I18n
 			});
 
-			expect(result).toBe('janvier');
+			expect(result).toBe('janv.');
 		});
 
 		it('handles invalid date input by returning "Invalid Date"', () => {

@@ -1,25 +1,32 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
-	import {
-		batchLoadTransactions,
-		batchResultsToTokenId
-	} from '$eth/services/eth-transactions-batch.services';
+	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens } from '$lib/derived/tokens.derived';
+	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
-	import type { TokenId } from '$lib/types/token';
 
-	// TODO: make it more functional
-	let tokensAlreadyLoaded: TokenId[] = [];
+	interface Props {
+		children: Snippet;
+	}
 
-	let loading = false;
+	let { children }: Props = $props();
+
+	let loading = $state(false);
+
+	let tokens = $derived([
+		...$enabledEthereumTokens,
+		...$enabledErc20Tokens,
+		...$enabledEvmTokens,
+		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
+	]);
 
 	const onLoad = async () => {
 		if (loading) {
@@ -28,21 +35,10 @@
 
 		loading = true;
 
-		if (
-			isNullish($enabledEthereumTokens) ||
-			isNullish($enabledErc20Tokens) ||
-			isNullish($enabledEvmTokens)
-		) {
-			return;
-		}
+		const loader = batchLoadTransactions({ tokens });
 
-		const loader = batchLoadTransactions({
-			tokens: [...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens],
-			tokensAlreadyLoaded
-		});
-
-		for await (const results of loader) {
-			tokensAlreadyLoaded = [...tokensAlreadyLoaded, ...batchResultsToTokenId(results)];
+		for await (const _ of loader) {
+			// We don't need to use the results
 		}
 
 		loading = false;
@@ -50,7 +46,11 @@
 
 	const debounceLoad = debounce(onLoad, 1000);
 
-	$: ($enabledEthereumTokens, $enabledErc20Tokens, $enabledEvmTokens, debounceLoad());
+	$effect(() => {
+		[tokens];
+
+		debounceLoad();
+	});
 
 	onMount(async () => {
 		const principal = $authIdentity?.getPrincipal();
@@ -60,25 +60,23 @@
 		}
 
 		await Promise.allSettled(
-			[...$enabledEthereumTokens, ...$enabledErc20Tokens, ...$enabledEvmTokens].map(
-				async ({ id: tokenId, network: { id: networkId } }) => {
-					if (nonNullish($ethTransactionsStore?.[tokenId])) {
-						return;
-					}
-
-					await syncTransactionsFromCache({
-						principal,
-						tokenId,
-						networkId,
-						getIdbTransactions: getIdbEthTransactions,
-						transactionsStore: ethTransactionsStore
-					});
+			tokens.map(async ({ id: tokenId, network: { id: networkId } }) => {
+				if (nonNullish($ethTransactionsStore?.[tokenId])) {
+					return;
 				}
-			)
+
+				await syncTransactionsFromCache({
+					principal,
+					tokenId,
+					networkId,
+					getIdbTransactions: getIdbEthTransactions,
+					transactionsStore: ethTransactionsStore
+				});
+			})
 		);
 	});
 </script>
 
-<IntervalLoader {onLoad} interval={WALLET_TIMER_INTERVAL_MILLIS}>
-	<slot />
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
+	{@render children()}
 </IntervalLoader>

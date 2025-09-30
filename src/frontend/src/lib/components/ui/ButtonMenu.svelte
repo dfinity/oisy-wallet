@@ -19,11 +19,11 @@
 
 <button
 	class="nav-item nav-item-condensed"
-	data-tid={testId}
-	aria-label={ariaLabel}
-	{onclick}
-	{disabled}
 	class:opacity-50={disabled}
+	aria-label={ariaLabel}
+	data-tid={testId}
+	{disabled}
+	{onclick}
 >
 	{@render children?.()}
 

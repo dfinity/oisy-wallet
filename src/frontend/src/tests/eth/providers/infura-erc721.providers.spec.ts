@@ -120,6 +120,7 @@ describe('infura-erc721.providers', () => {
 			const mockMetadata = {
 				name: 'Elemental Bean #123456',
 				image: 'https://elementals-images.azuki.com/2.gif',
+				description: 'Lorem ipsum...',
 				attributes: [{ trait_type: 'Color', value: 'Blue' }]
 			};
 
@@ -144,10 +145,11 @@ describe('infura-erc721.providers', () => {
 				const metadata = await provider.getNftMetadata(mockParams);
 
 				expect(metadata).toStrictEqual({
-					name: 'Elemental Bean #123456',
+					name: mockMetadata.name,
 					id: 123456,
 					attributes: [{ traitType: 'Color', value: 'Blue' }],
-					imageUrl: 'https://elementals-images.azuki.com/2.gif'
+					imageUrl: mockMetadata.image,
+					description: mockMetadata.description
 				});
 			});
 

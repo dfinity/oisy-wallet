@@ -13,14 +13,13 @@ import {
 	convertCkETHToEth,
 	convertCkErc20ToErc20
 } from '$icp/services/ck.services';
-import type { IcTransferParams } from '$icp/types/ic-send';
+import type { IcSendParams, IcTransferParams } from '$icp/types/ic-send';
 import type { IcToken } from '$icp/types/ic-token';
 import { invalidIcrcAddress } from '$icp/utils/icrc-account.utils';
 import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
 import type { NetworkId } from '$lib/types/network';
-import type { PartialSpecific } from '$lib/types/utils';
 import { invalidIcpAddress } from '$lib/utils/account.utils';
 import { isNetworkIdBitcoin } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
@@ -45,7 +44,7 @@ export const sendIc = async ({
 
 	sendCompleted();
 
-	progress(ProgressStepsSendIc.RELOAD);
+	progress?.(ProgressStepsSendIc.RELOAD);
 
 	await waitAndTriggerWallet();
 };
@@ -101,7 +100,8 @@ const send = async ({
 	}
 
 	await sendIcp({
-		...rest
+		...rest,
+		ledgerCanisterId
 	});
 };
 
@@ -111,8 +111,7 @@ export const sendIcrc = ({
 	identity,
 	ledgerCanisterId,
 	progress
-}: PartialSpecific<IcTransferParams, 'progress'> &
-	Pick<IcToken, 'ledgerCanisterId'>): Promise<IcrcBlockIndex> => {
+}: IcSendParams): Promise<IcrcBlockIndex> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.
@@ -134,8 +133,9 @@ export const sendIcp = ({
 	to,
 	amount,
 	identity,
+	ledgerCanisterId,
 	progress
-}: PartialSpecific<IcTransferParams, 'progress'>): Promise<BlockHeight> => {
+}: IcSendParams): Promise<BlockHeight> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 	const validIcpAddress = !invalidIcpAddress(to);
 
@@ -149,11 +149,13 @@ export const sendIcp = ({
 	return validIcrcAddress
 		? icrc1TransferIcp({
 				identity,
+				ledgerCanisterId,
 				to: decodeIcrcAccount(to),
 				amount
 			})
 		: transferIcp({
 				identity,
+				ledgerCanisterId,
 				to,
 				amount
 			});
@@ -165,8 +167,7 @@ export const sendDip20 = ({
 	identity,
 	ledgerCanisterId,
 	progress
-}: PartialSpecific<IcTransferParams, 'progress'> &
-	Pick<IcToken, 'ledgerCanisterId'>): Promise<bigint> => {
+}: IcSendParams): Promise<bigint> => {
 	const validIcrcAddress = !invalidIcrcAddress(to);
 
 	// UI validates addresses and disable form if not compliant. Therefore, this issue should unlikely happen.

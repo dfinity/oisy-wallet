@@ -12,7 +12,7 @@
 	import { MANAGE_TOKENS_MODAL_SAVE } from '$lib/constants/test-ids.constants';
 	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { pseudoNetworkICPTestnet, selectedNetwork } from '$lib/derived/network.derived';
 	import { tokensToPin } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -24,7 +24,11 @@
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
+	let {
+		initialSearch,
+		infoElement,
+		isNftsPage
+	}: { initialSearch?: string; infoElement?: Snippet; isNftsPage?: boolean } = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -56,7 +60,8 @@
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			filterNfts: isNftsPage
 		})
 	);
 
@@ -116,8 +121,8 @@
 {:else}
 	<ModalTokensList
 		{loading}
-		on:icSelectNetworkFilter={onSelectNetwork}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
+		on:icSelectNetworkFilter={onSelectNetwork}
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
@@ -131,7 +136,7 @@
 
 				{#snippet logo()}
 					<span class="mr-2">
-						<TokenLogo color="white" data={token} badge={{ type: 'network' }} />
+						<TokenLogo badge={{ type: 'network' }} color="white" data={token} />
 					</span>
 				{/snippet}
 
@@ -142,15 +147,21 @@
 				{/snippet}
 
 				{#snippet action()}
-					<EnableTokenToggle {token} {onToggle} />
+					<EnableTokenToggle {onToggle} {token} />
 				{/snippet}
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" onclick={() => dispatch('icAddToken')}
-				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+			<Button
+				colorStyle="secondary-light"
+				disabled={$pseudoNetworkICPTestnet}
+				onclick={() => dispatch('icAddToken')}
+				><IconPlus />
+				{isNftsPage
+					? $i18n.tokens.manage.text.import_nft
+					: $i18n.tokens.manage.text.import_token}</Button
 			>
-			<Button testId={MANAGE_TOKENS_MODAL_SAVE} disabled={saveDisabled} onclick={save}>
+			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}
 			</Button>
 		{/snippet}

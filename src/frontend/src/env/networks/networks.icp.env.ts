@@ -1,5 +1,4 @@
-import icpIconDark from '$lib/assets/networks/dark/icp.svg';
-import icpIconLight from '$lib/assets/networks/light/icp.svg';
+import icpIcon from '$lib/assets/networks/icp.svg';
 import { LOCAL } from '$lib/constants/app.constants';
 import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { Network, NetworkId } from '$lib/types/network';
@@ -28,8 +27,7 @@ export const ICP_NETWORK: Network = {
 	id: ICP_NETWORK_ID,
 	env: 'mainnet',
 	name: 'Internet Computer',
-	iconLight: icpIconLight,
-	iconDark: icpIconDark,
+	icon: icpIcon,
 	buy: { onramperId: 'icp' }
 };
 
@@ -40,7 +38,7 @@ export const ICP_NETWORK: Network = {
  * It will be associated with what we call "testnet" tokens.
  * This allows us to simplify the filters of the token list and avoid polluting "real" ICP balance with the balances of the testnet tokens.
  */
-const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
+export const ICP_PSEUDO_TESTNET_NETWORK_SYMBOL = 'ICP-PSEUDO-TESTNET';
 
 export const ICP_PSEUDO_TESTNET_NETWORK_ID: NetworkId = parseNetworkId(
 	ICP_PSEUDO_TESTNET_NETWORK_SYMBOL
@@ -50,6 +48,5 @@ export const ICP_PSEUDO_TESTNET_NETWORK: Network = {
 	id: ICP_PSEUDO_TESTNET_NETWORK_ID,
 	env: 'testnet',
 	name: 'IC (testnet tokens)',
-	iconLight: icpIconLight,
-	iconDark: icpIconDark
+	icon: icpIcon
 };

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import type { Readable } from 'svelte/store';
 	import BtcReviewNetwork from '$btc/components/send/BtcReviewNetwork.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
@@ -10,6 +9,7 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import type { UtxosFee } from '$btc/types/btc-send';
+	import { BTC_EXTENSION_FEATURE_FLAG_ENABLED } from '$env/btc.env';
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ContactUi } from '$lib/types/contact';
@@ -17,40 +17,64 @@
 	import { invalidAmount } from '$lib/utils/input.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
 
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let source: string;
-	export let utxosFee: UtxosFee | undefined = undefined;
-	export let selectedContact: ContactUi | undefined = undefined;
+	interface Props {
+		destination?: string;
+		amount?: OptionAmount;
+		source: string;
+		utxosFee?: UtxosFee;
+		selectedContact?: ContactUi;
+		onBack: () => void;
+		onSend: () => void;
+	}
+
+	let {
+		destination = '',
+		amount,
+		source,
+		utxosFee = $bindable(),
+		selectedContact,
+		onBack,
+		onSend
+	}: Props = $props();
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
-	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 
-	let disableSend: boolean;
-	// We want to disable send if pending transactions or UTXOs fee isn't available yet, there was an error or there are pending transactions.
-	$: disableSend =
-		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
-		isNullish(utxosFee) ||
-		(nonNullish(utxosFee) && (utxosFee.utxos.length === 0 || nonNullish(utxosFee.error))) ||
-		invalid;
+	// When BTC extension is enabled, we allow parallel transactions, so return NONE status
+	let pendingTransactionsStatus = $derived(
+		BTC_EXTENSION_FEATURE_FLAG_ENABLED
+			? BtcPendingSentTransactionsStatus.NONE
+			: $hasPendingTransactionsStore
+	);
 
-	// Should never happen given that the same checks are performed on previous wizard step
-	let invalid = true;
-	$: invalid =
-		isInvalidDestinationBtc({
-			destination,
-			networkId: $sendTokenNetworkId
-		}) || invalidAmount(amount);
+	// We want to disable sending if pending transactions or UTxOs fee isn't available yet, there was an error, or there are pending transactions.
+	let disableSend = $derived(
+		pendingTransactionsStatus !== BtcPendingSentTransactionsStatus.NONE ||
+			isNullish(utxosFee) ||
+			nonNullish(utxosFee?.error) ||
+			isInvalidDestinationBtc({
+				destination,
+				networkId: $sendTokenNetworkId
+			}) ||
+			invalidAmount(amount) ||
+			utxosFee.utxos.length === 0
+	);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
-	<BtcReviewNetwork networkId={$sendTokenNetworkId} slot="network" />
+<SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
+	{#snippet network()}
+		<BtcReviewNetwork networkId={$sendTokenNetworkId} />
+	{/snippet}
 
-	<BtcUtxosFee slot="fee" bind:utxosFee networkId={$sendTokenNetworkId} {amount} {source} />
+	{#snippet fee()}
+		<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
+	{/snippet}
 
-	<div class="mt-8" slot="info">
-		<BtcSendWarnings {utxosFee} pendingTransactionsStatus={$hasPendingTransactionsStore} />
-	</div>
+	{#snippet info()}
+		<div class="mt-8">
+			<!-- TODO remove pendingTransactionsStatus as soon as parallel BTC transactions are also enabled for BTC convert -->
+			<BtcSendWarnings {pendingTransactionsStatus} {utxosFee} />
+		</div>
+	{/snippet}
 </SendReview>

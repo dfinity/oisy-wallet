@@ -1,24 +1,25 @@
-import { AI_ASSISTANT_SYSTEM_PROMPT } from '$lib/constants/ai-assistant.constants';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
-import type { ChatMessage } from '$lib/types/ai-assistant';
+import { ToolResultType, type ChatMessage, type ToolResult } from '$lib/types/ai-assistant';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
 import { get } from 'svelte/store';
 
 describe('ai-assistant.store', () => {
+	const mockRandomUUID = 'd7775002-80bf-4208-a2f0-84225281677a';
+
 	const defaultState = {
 		isOpen: false,
-		chatHistory: [
-			{
-				role: 'system',
-				data: {
-					text: AI_ASSISTANT_SYSTEM_PROMPT
-				}
-			}
-		]
+		chatHistory: []
 	};
 
+	const message = {
+		role: 'user',
+		data: { text: 'hey' }
+	} as ChatMessage;
+
 	beforeEach(() => {
+		aiAssistantStore.reset();
+
 		mockPage.reset();
 	});
 
@@ -43,17 +44,94 @@ describe('ai-assistant.store', () => {
 		expect(get(aiAssistantStore)).toStrictEqual(defaultState);
 	});
 
-	it('should append a message', () => {
-		const message = {
-			role: 'user',
-			data: { text: 'hey' }
-		} as ChatMessage;
+	it('should reset chat history', () => {
+		aiAssistantStore.appendMessage(message);
+		aiAssistantStore.open();
 
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.resetChatHistory();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			isOpen: true,
+			chatHistory: []
+		});
+	});
+
+	it('should append a message', () => {
 		aiAssistantStore.appendMessage(message);
 
 		expect(get(aiAssistantStore)).toStrictEqual({
 			...defaultState,
 			chatHistory: [...defaultState.chatHistory, message]
+		});
+	});
+
+	it('should remove last message', () => {
+		aiAssistantStore.appendMessage(message);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [...defaultState.chatHistory, message]
+		});
+
+		aiAssistantStore.removeLastMessage();
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: defaultState.chatHistory
+		});
+	});
+
+	it('should update the send status of review_send_token tool correctly', () => {
+		// vi.spyOn(globalThis.crypto, 'randomUUID').mockImplementation(() => mockRandomUUID);
+		const toolMessage = {
+			role: 'assistant',
+			data: {
+				tool: {
+					calls: [],
+					results: [
+						{
+							type: ToolResultType.REVIEW_SEND_TOKENS,
+							result: { sendCompleted: false, id: mockRandomUUID }
+						} as ToolResult
+					]
+				}
+			}
+		} as ChatMessage;
+
+		aiAssistantStore.appendMessage(toolMessage);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [...defaultState.chatHistory, toolMessage]
+		});
+
+		aiAssistantStore.setSendToolActionAsCompleted(mockRandomUUID);
+
+		expect(get(aiAssistantStore)).toStrictEqual({
+			...defaultState,
+			chatHistory: [
+				...defaultState.chatHistory,
+				{
+					...toolMessage,
+					data: {
+						...toolMessage.data,
+						tool: {
+							...toolMessage.data.tool,
+							results: [
+								{
+									type: ToolResultType.REVIEW_SEND_TOKENS,
+									result: { sendCompleted: true, id: mockRandomUUID }
+								} as ToolResult
+							]
+						}
+					}
+				} as ChatMessage
+			]
 		});
 	});
 });

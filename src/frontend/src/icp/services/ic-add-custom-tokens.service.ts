@@ -1,4 +1,4 @@
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { ICP_TOKEN, TESTICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { getLedgerId, getTransactions as getTransactionsIcrc } from '$icp/api/icrc-index-ng.api';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
 import type { IcCanisters, IcToken, IcTokenWithoutId } from '$icp/types/ic-token';
@@ -43,7 +43,7 @@ export const loadAndAssertAddCustomToken = async ({
 	const canisterIds = { ledgerCanisterId, indexCanisterId };
 
 	const { alreadyAvailable } = assertAlreadyAvailable({
-		icrcTokens: [ICP_TOKEN, ...icrcTokens],
+		icrcTokens: [ICP_TOKEN, TESTICP_TOKEN, ...icrcTokens],
 		...canisterIds
 	});
 

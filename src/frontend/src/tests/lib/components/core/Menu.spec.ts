@@ -2,32 +2,30 @@ import type { UserData } from '$declarations/rewards/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {
-	AUTH_LICENSE_LINK,
-	LOCK_BUTTON,
 	LOGIN_BUTTON,
-	LOGOUT_BUTTON,
 	NAVIGATION_MENU_ADDRESS_BOOK_BUTTON,
 	NAVIGATION_MENU_BUTTON,
 	NAVIGATION_MENU_DOC_BUTTON,
 	NAVIGATION_MENU_GOLD_BUTTON,
 	NAVIGATION_MENU_PRIVACY_MODE_BUTTON,
+	NAVIGATION_MENU_RECEIVE_BUTTON,
 	NAVIGATION_MENU_REFERRAL_BUTTON,
 	NAVIGATION_MENU_SUPPORT_BUTTON,
 	NAVIGATION_MENU_VIP_BUTTON,
 	NAVIGATION_MENU_WHY_OISY_BUTTON
 } from '$lib/constants/test-ids.constants';
+import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
+import { getSymbol } from '$lib/utils/modal.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
 import { mockAuthSignedIn, mockAuthStore } from '$tests/mocks/auth.mock';
-import { render, screen, waitFor } from '@testing-library/svelte';
-
-vi.mock('$env/lock-screen.env', () => ({
-	LOCK_SCREEN_ENABLED: false
-}));
+import { assertNonNullish } from '@dfinity/utils';
+import { render, waitFor } from '@testing-library/svelte';
 
 describe('Menu', () => {
 	const menuButtonSelector = `button[data-tid="${NAVIGATION_MENU_BUTTON}"]`;
+	const menuItemReceiveButtonSelector = `button[data-tid="${NAVIGATION_MENU_RECEIVE_BUTTON}"]`;
 	const menuItemPrivacyModeButtonSelector = `button[data-tid="${NAVIGATION_MENU_PRIVACY_MODE_BUTTON}"]`;
 	const menuItemVipButtonSelector = `button[data-tid="${NAVIGATION_MENU_VIP_BUTTON}"]`;
 	const menuItemGoldButtonSelector = `button[data-tid="${NAVIGATION_MENU_GOLD_BUTTON}"]`;
@@ -37,7 +35,6 @@ describe('Menu', () => {
 	const menuItemDocButtonSelector = `a[data-tid="${NAVIGATION_MENU_DOC_BUTTON}"]`;
 	const menuItemSupportButtonSelector = `a[data-tid="${NAVIGATION_MENU_SUPPORT_BUTTON}"]`;
 	const loginOrCreateButton = `button[data-tid="${LOGIN_BUTTON}"]`;
-	const authLicenseLink = `a[data-tid="${AUTH_LICENSE_LINK}"]`;
 
 	let container: HTMLElement;
 
@@ -141,28 +138,20 @@ describe('Menu', () => {
 		await waitForElement({ selector: menuItemWhyOisyButtonSelector });
 		await waitForElement({ selector: menuItemSupportButtonSelector });
 		await waitForElement({ selector: loginOrCreateButton });
-		await waitForElement({ selector: authLicenseLink });
 	});
 
-	it('should show direct logout button when LOCK_SCREEN_ENABLED is false', async () => {
-		vi.doMock('$env/lock-screen.env', () => ({
-			LOCK_SCREEN_ENABLED: false
-		}));
+	it('should open the receive modal', async () => {
+		const openReceiveSpy = vi.spyOn(modalStore, 'openReceive');
 
-		const { default: MenuWithLockDisabled } = await import('$lib/components/core/Menu.svelte');
+		await openMenu();
+		await waitForElement({ selector: menuItemReceiveButtonSelector });
 
-		({ container } = render(MenuWithLockDisabled));
-		const menuButton = container.querySelector(menuButtonSelector) as HTMLElement;
+		const button: HTMLButtonElement | null = container.querySelector(menuItemReceiveButtonSelector);
 
-		expect(menuButton).toBeInTheDocument();
+		assertNonNullish(button);
 
-		menuButton?.click();
+		button.click();
 
-		const logoutButton = await screen.findByTestId(LOGOUT_BUTTON);
-
-		expect(logoutButton).toBeInTheDocument();
-		expect(logoutButton).toHaveTextContent(/logout/i);
-
-		expect(screen.queryByTestId(LOCK_BUTTON)).not.toBeInTheDocument();
+		expect(openReceiveSpy).toHaveBeenCalledWith(getSymbol('menu-addresses'));
 	});
 });

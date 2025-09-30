@@ -7,8 +7,9 @@
 	import { modalVipRewardState, modalVipRewardStateData } from '$lib/derived/modal.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
 	import { claimVipReward, setReferrer } from '$lib/services/reward.services';
-	import { loading } from '$lib/stores/loader.store';
+	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { hasUrlCode } from '$lib/stores/url-code.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
 
 	interface Props {
@@ -21,9 +22,11 @@
 
 	$effect(() => {
 		const handleSearchParams = async () => {
-			if (!$loading && page.url.searchParams.has('code') && nonNullish($authIdentity)) {
+			if (!$initialLoading && page.url.searchParams.has('code') && nonNullish($authIdentity)) {
 				const rewardCode = page.url.searchParams.get('code');
 				if (nonNullish(rewardCode)) {
+					hasUrlCode.set(true);
+
 					const result = await claimVipReward({ identity: $authIdentity, code: rewardCode });
 
 					removeSearchParam({ url: page.url, searchParam: 'code' });
@@ -37,7 +40,7 @@
 				}
 			}
 
-			if (!$loading && page.url.searchParams.has('referrer') && nonNullish($authIdentity)) {
+			if (!$initialLoading && page.url.searchParams.has('referrer') && nonNullish($authIdentity)) {
 				const referrerCode = page.url.searchParams.get('referrer');
 				if (nonNullish(referrerCode)) {
 					const numericalReferrerCode = Number(referrerCode);
@@ -57,7 +60,7 @@
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
 	<VipRewardStateModal
-		isSuccessful={$modalVipRewardStateData.success}
 		codeType={$modalVipRewardStateData.codeType}
+		isSuccessful={$modalVipRewardStateData.success}
 	/>
 {/if}

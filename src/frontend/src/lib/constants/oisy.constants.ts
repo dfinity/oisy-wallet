@@ -10,6 +10,7 @@ export const {
 	OISY_REPO_URL,
 	OISY_TWITTER_URL,
 	OISY_DOCS_URL,
+	OISY_AI_ASSISTANT_DOCS_URL,
 	OISY_SUPPORT_URL,
 	OISY_REWARDS_URL,
 	OISY_REFERRAL_URL,
@@ -29,6 +30,7 @@ export const {
 		OISY_REPO_URL: '',
 		OISY_TWITTER_URL: '',
 		OISY_DOCS_URL: '',
+		OISY_AI_ASSISTANT_DOCS_URL: '',
 		OISY_SUPPORT_URL: '',
 		OISY_REWARDS_URL: '',
 		OISY_REFERRAL_URL: '',
@@ -40,5 +42,6 @@ export const {
 	}
 });
 
-export const OISY_URL = import.meta.env.OISY_IC_DOMAIN;
+export const OISY_URL = VITE_OISY_DOMAIN;
 export const OISY_ICON = `${OISY_URL}/favicons/icon-512x512.png`;
+export const OISY_URL_HOSTNAME = new URL(OISY_URL).hostname;

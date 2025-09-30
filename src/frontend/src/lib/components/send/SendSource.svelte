@@ -13,7 +13,7 @@
 	export let exchangeRate: number | undefined = undefined;
 </script>
 
-<Value ref="source" element="div">
+<Value element="div" ref="source">
 	{#snippet label()}
 		{$i18n.send.text.source}
 	{/snippet}
@@ -23,7 +23,7 @@
 	{/snippet}
 </Value>
 
-<Value ref="balance" element="div">
+<Value element="div" ref="balance">
 	{#snippet label()}
 		{$i18n.send.text.balance}
 	{/snippet}
@@ -33,8 +33,8 @@
 			<ExchangeAmountDisplay
 				amount={balance ?? ZERO}
 				decimals={token.decimals}
-				symbol={token.symbol}
 				{exchangeRate}
+				symbol={token.symbol}
 			/>
 		{:else}
 			&ZeroWidthSpace;

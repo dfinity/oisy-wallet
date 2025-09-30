@@ -18,18 +18,18 @@
 </script>
 
 {#if currentStep?.name === WizardStepsHowToConvert.INFO}
-	<HowToConvertEthereumInfo on:icQRCode on:icConvert on:icBack {formCancelAction} />
+	<HowToConvertEthereumInfo {formCancelAction} on:icQRCode on:icConvert on:icBack />
 {:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
 	<ReceiveAddressQrCode
-		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
 		address={$ethAddress ?? ''}
 		addressToken={ETHEREUM_TOKEN}
+		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 		network={ETHEREUM_NETWORK}
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr
 		}}
-		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
 		on:icBack
 	/>
 {/if}

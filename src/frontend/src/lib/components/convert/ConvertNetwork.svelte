@@ -13,7 +13,7 @@
 
 	{#snippet mainValue()}
 		<div class="flex">
-			<NetworkLogo network={token.network} color="off-white" />
+			<NetworkLogo color="off-white" network={token.network} />
 			<span class="ml-2">{token.network.name}</span>
 		</div>
 	{/snippet}

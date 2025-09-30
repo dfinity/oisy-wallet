@@ -16,7 +16,7 @@ export const initCertifiedSetterStore = <
 	T,
 	Id extends symbol = TokenId
 >(): CertifiedSetterStoreStore<T, Id> & WritableUpdateStore<T, Id> => {
-	const { subscribe, update, reset } = initCertifiedStore<T, Id>();
+	const { subscribe, update, reset, reinitialize } = initCertifiedStore<T, Id>();
 
 	return {
 		set: ({ id, data }: { id: Id; data: T }) =>
@@ -29,6 +29,7 @@ export const initCertifiedSetterStore = <
 			),
 		update,
 		reset,
+		reinitialize,
 		subscribe
 	};
 };

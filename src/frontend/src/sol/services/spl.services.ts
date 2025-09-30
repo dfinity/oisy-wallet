@@ -2,7 +2,6 @@ import type { CustomToken } from '$declarations/backend/backend.did';
 import { SOLANA_DEVNET_NETWORK, SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_DEFAULT_DECIMALS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
-import { getIdbSolTokens, setIdbSolTokens } from '$lib/api/idb-tokens.api';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -60,16 +59,13 @@ export const loadCustomTokens = ({
 				err
 			});
 		},
-		identity,
-		strategy: 'query'
+		identity
 	});
 
 const loadSplCustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token,
-		setIdbTokens: setIdbSolTokens,
-		getIdbTokens: getIdbSolTokens
+		filterTokens: ({ token }) => 'SplMainnet' in token || 'SplDevnet' in token
 	});
 
 const loadCustomTokensWithMetadata = async (

@@ -1,6 +1,6 @@
+import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Utxo } from '@dfinity/ckbtc';
-import { uint8ArrayToHexString } from '@dfinity/utils';
 
 export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];
@@ -9,12 +9,6 @@ export interface UtxoSelectionResult {
 	sufficientFunds: boolean;
 	feeSatoshis: bigint;
 }
-
-/**
- * Converts a UTXO transaction ID (Uint8Array) to a hex string
- */
-export const utxoTxIdToString = (txid: Uint8Array | number[]): string =>
-	uint8ArrayToHexString(txid);
 
 /**
  * Extracts transaction IDs from an array of UTXOs
@@ -54,11 +48,11 @@ export const estimateTransactionSize = ({
 export const calculateUtxoSelection = ({
 	availableUtxos,
 	amountSatoshis,
-	feeRateSatoshisPerVByte
+	feeRateMiliSatoshisPerVByte
 }: {
 	availableUtxos: Utxo[];
 	amountSatoshis: bigint;
-	feeRateSatoshisPerVByte: bigint;
+	feeRateMiliSatoshisPerVByte: bigint;
 }): UtxoSelectionResult => {
 	if (availableUtxos.length === 0) {
 		return {
@@ -92,7 +86,7 @@ export const calculateUtxoSelection = ({
 			numInputs: selectedUtxos.length,
 			numOutputs: 2
 		});
-		estimatedFee = BigInt(txSize) * feeRateSatoshisPerVByte;
+		estimatedFee = (BigInt(txSize) * feeRateMiliSatoshisPerVByte) / 1000n;
 		const totalRequired = amountSatoshis + estimatedFee;
 
 		// Check if we have enough to cover amount and fee
@@ -124,14 +118,14 @@ export const calculateUtxoSelection = ({
  */
 export const filterLockedUtxos = ({
 	utxos,
-	pendingTxIds
+	pendingUtxoTxIds
 }: {
 	utxos: Utxo[];
-	pendingTxIds: string[];
+	pendingUtxoTxIds: string[];
 }): Utxo[] =>
 	utxos.filter((utxo) => {
 		const txIdHex = utxoTxIdToString(utxo.outpoint.txid);
-		return !pendingTxIds.includes(txIdHex);
+		return !pendingUtxoTxIds.includes(txIdHex);
 	});
 
 /**
@@ -144,10 +138,10 @@ export const filterAvailableUtxos = ({
 	utxos: Utxo[];
 	options: {
 		minConfirmations: number;
-		pendingTxIds: string[];
+		pendingUtxoTxIds: string[];
 	};
 }): Utxo[] => {
-	const { minConfirmations, pendingTxIds } = options;
+	const { minConfirmations, pendingUtxoTxIds } = options;
 
 	// First filter by confirmations to ensure transaction security
 	// Note: UTXOs are pre-filtered by the Bitcoin canister endpoint
@@ -164,6 +158,6 @@ export const filterAvailableUtxos = ({
 	// Then filter out locked UTXOs
 	return filterLockedUtxos({
 		utxos: confirmedUtxos,
-		pendingTxIds
+		pendingUtxoTxIds
 	});
 };

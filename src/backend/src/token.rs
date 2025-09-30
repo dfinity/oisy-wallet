@@ -4,7 +4,7 @@ use shared::types::TokenVersion;
 
 use crate::types::{Candid, StoredPrincipal, VMem};
 
-const MAX_TOKEN_LIST_LENGTH: usize = 100;
+const MAX_TOKEN_LIST_LENGTH: usize = 1000;
 
 pub fn add_to_user_token<T>(
     stored_principal: StoredPrincipal,

@@ -1,9 +1,10 @@
 import type { Network, NetworkId } from '$lib/types/network';
+import { nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
 export interface ModalNetworksListData {
 	networks: Network[];
-	allowedNetworkIds: NetworkId[];
+	allowedNetworkIds?: NetworkId[];
 }
 
 export const initModalNetworksListContext = (
@@ -11,13 +12,13 @@ export const initModalNetworksListContext = (
 ): ModalNetworksListContext => {
 	const data = writable<ModalNetworksListData>({
 		networks: initialData.networks,
-		allowedNetworkIds: initialData.allowedNetworkIds ?? []
+		allowedNetworkIds: initialData?.allowedNetworkIds ?? []
 	});
 
 	const { update } = data;
 
 	const filteredNetworks = derived(data, ({ networks, allowedNetworkIds }) =>
-		allowedNetworkIds.length > 0
+		nonNullish(allowedNetworkIds) && allowedNetworkIds.length > 0
 			? networks.filter((network) => allowedNetworkIds.includes(network.id))
 			: networks
 	);

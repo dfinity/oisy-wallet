@@ -20,12 +20,12 @@
 <div class="relative">
 	<div class="mb-2">
 		<ConvertAmountSource
+			{ethereumEstimateFee}
+			{inputUnit}
+			{minFee}
+			{totalFee}
 			bind:sendAmount
 			bind:exchangeValueUnit
-			{inputUnit}
-			{totalFee}
-			{minFee}
-			{ethereumEstimateFee}
 		/>
 	</div>
 
@@ -36,10 +36,10 @@
 	</div>
 
 	<ConvertAmountDestination
-		bind:receiveAmount
-		bind:exchangeValueUnit
-		{sendAmount}
 		{destinationTokenFee}
 		{inputUnit}
+		{sendAmount}
+		bind:receiveAmount
+		bind:exchangeValueUnit
 	/>
 </div>

@@ -3,6 +3,8 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
+	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
 	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
@@ -41,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -59,14 +62,16 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps<WizardStepsManageTokens> = [
+	const isNftsPage = $derived(isRouteNfts(page));
+
+	const steps: WizardSteps<WizardStepsManageTokens> = $derived([
 		{
 			name: WizardStepsManageTokens.MANAGE,
-			title: $i18n.tokens.manage.text.title
+			title: isNftsPage ? $i18n.tokens.manage.text.title_nft : $i18n.tokens.manage.text.title
 		},
 		{
 			name: WizardStepsManageTokens.IMPORT,
-			title: $i18n.tokens.import.text.title
+			title: isNftsPage ? $i18n.tokens.import.text.title_nft : $i18n.tokens.import.text.title
 		},
 		{
 			name: WizardStepsManageTokens.REVIEW,
@@ -76,7 +81,7 @@
 			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
-	];
+	]);
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
@@ -139,26 +144,28 @@
 			enabled: true
 		};
 
-		const isErc721 = await isInterfaceErc721({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+		if (NFTS_ENABLED) {
+			const isErc721 = await isInterfaceErc721({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc721) {
-			await saveErc721([newToken]);
+			if (isErc721) {
+				await saveErc721([newToken]);
 
-			return;
-		}
+				return;
+			}
 
-		const isErc1155 = await isInterfaceErc1155({
-			address: ethContractAddress,
-			networkId: network.id
-		});
+			const isErc1155 = await isInterfaceErc1155({
+				address: ethContractAddress,
+				networkId: network.id
+			});
 
-		if (isErc1155) {
-			await saveErc1155([newToken]);
+			if (isErc1155) {
+				await saveErc1155([newToken]);
 
-			return;
+				return;
+			}
 		}
 
 		if (ethMetadata.decimals > 0) {
@@ -297,56 +304,57 @@
 </script>
 
 <WizardModal
-	{steps}
-	bind:currentStep
 	bind:this={modal}
+	disablePointerEvents={currentStep?.name === WizardStepsManageTokens.SAVING}
 	onClose={close}
-	disablePointerEvents={currentStep?.name === 'Saving'}
+	{steps}
 	testId={MANAGE_TOKENS_MODAL}
+	bind:currentStep
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === 'Review'}
+	{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
 		{#if isNetworkIdICP(network?.id)}
 			<IcAddTokenReview
+				{indexCanisterId}
+				{ledgerCanisterId}
 				on:icBack={modal.back}
 				on:icSave={addIcrcToken}
-				{ledgerCanisterId}
-				{indexCanisterId}
 				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
-				on:icBack={modal.back}
-				on:icSave={saveEthToken}
 				contractAddress={ethContractAddress}
 				{network}
+				on:icBack={modal.back}
+				on:icSave={saveEthToken}
 				bind:metadata={ethMetadata}
 			/>
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
 			<SolAddTokenReview
-				on:icBack={modal.back}
-				on:icSave={saveSplToken}
-				tokenAddress={splTokenAddress}
 				{network}
+				onBack={modal.back}
+				onSave={saveSplToken}
+				tokenAddress={splTokenAddress}
 				bind:metadata={splMetadata}
 			/>
 		{/if}
-	{:else if currentStep?.name === 'Saving'}
+	{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
 		<InProgressWizard
 			progressStep={saveProgressStep}
 			steps={addTokenSteps($i18n)}
 			warningType="manage"
 		/>
-	{:else if currentStep?.name === 'Import'}
+	{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
 		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
-	{:else}
+	{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
 		<ManageTokens
+			{infoElement}
+			{initialSearch}
+			{isNftsPage}
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
-			{initialSearch}
-			{infoElement}
 		/>
 	{/if}
 </WizardModal>

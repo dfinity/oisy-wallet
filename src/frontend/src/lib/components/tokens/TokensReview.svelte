@@ -25,7 +25,7 @@
 </script>
 
 <div class="mb-6 rounded-lg border border-solid border-tertiary bg-primary p-4 shadow-sm">
-	<SwapToken token={sourceToken} amount={sendAmount} exchangeRate={sourceTokenExchangeRate}>
+	<SwapToken amount={sendAmount} exchangeRate={sourceTokenExchangeRate} token={sourceToken}>
 		{#snippet title()}
 			{$i18n.tokens.text.source_token_title}
 		{/snippet}
@@ -38,9 +38,9 @@
 	</div>
 
 	<SwapToken
-		token={destinationToken}
 		amount={receiveAmount}
 		exchangeRate={destinationTokenExchangeRate}
+		token={destinationToken}
 	>
 		{#snippet title()}
 			{$i18n.tokens.text.destination_token_title}

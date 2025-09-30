@@ -14,10 +14,10 @@
 
 <span
 	class="flex"
-	class:items-center={!description}
-	class:gap-2={logo === 'start'}
-	class:gap-1={logo === 'end'}
 	class:flex-row-reverse={logo === 'start'}
+	class:gap-1={logo === 'end'}
+	class:gap-2={logo === 'start'}
+	class:items-center={!description}
 >
 	<span class="flex flex-col gap-0.5">
 		<span class="leading-5">{name}</span>

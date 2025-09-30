@@ -11,17 +11,19 @@
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let usesIdentityHelp = false;
+	interface Props {
+		usesIdentityHelp?: boolean;
+	}
 
-	let modal: WizardModal<WizardStepsAuthHelp>;
+	let { usesIdentityHelp = false }: Props = $props();
 
-	let steps: WizardSteps<WizardStepsAuthHelp>;
-	$: steps = authHelpWizardSteps({ i18n: $i18n });
+	let modal = $state<WizardModal<WizardStepsAuthHelp>>();
 
-	let currentStep: WizardStep<WizardStepsAuthHelp> | undefined;
+	let steps: WizardSteps<WizardStepsAuthHelp> = $derived(authHelpWizardSteps({ i18n: $i18n }));
 
-	let titleString: string;
-	$: titleString = currentStep?.title ?? $i18n.auth.help.text.title;
+	let currentStep = $state<WizardStep<WizardStepsAuthHelp> | undefined>();
+
+	let titleString = $derived(currentStep?.title ?? $i18n.auth.help.text.title);
 
 	onMount(() => {
 		if (usesIdentityHelp && nonNullish(modal) && nonNullish(steps)) {
@@ -34,13 +36,21 @@
 			currentStep = undefined;
 		});
 
-	const onBack = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW });
+	const onBack = () =>
+		nonNullish(modal)
+			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.OVERVIEW })
+			: undefined;
 	const onLostIdentity = () =>
-		goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY });
-	const onOther = () => goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER });
+		nonNullish(modal)
+			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_IDENTITY })
+			: undefined;
+	const onOther = () =>
+		nonNullish(modal)
+			? goToWizardStep({ modal, steps, stepName: WizardStepsAuthHelp.HELP_OTHER })
+			: undefined;
 </script>
 
-<WizardModal {steps} bind:this={modal} bind:currentStep onClose={close}>
+<WizardModal bind:this={modal} onClose={close} {steps} bind:currentStep>
 	{#snippet title()}
 		<span class="text-xl">{titleString}</span>
 	{/snippet}

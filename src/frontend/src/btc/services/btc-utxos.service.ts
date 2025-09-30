@@ -1,15 +1,16 @@
-import { UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
+import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
 import { BITCOIN_CANISTER_IDS, IC_CKBTC_MINTER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { getUtxosQuery } from '$icp/api/bitcoin.api';
-import { getPendingTransactionIds } from '$icp/utils/btc.utils';
+import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
-import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
+import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
@@ -33,16 +34,29 @@ export const prepareBtcSend = async ({
 }: BtcReviewServiceParams): Promise<UtxosFee> => {
 	const bitcoinCanisterId = BITCOIN_CANISTER_IDS[IC_CKBTC_MINTER_CANISTER_ID];
 
-	const requiredMinConfirmations = UNCONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
+	const requiredMinConfirmations = CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS;
 
-	// Get pending transactions to exclude locked UTXOs
-	const pendingTxIds = getPendingTransactionIds(source);
+	// Get pending UTXO transaction IDs to exclude locked UTXOs
+	// It is very important that the pending transactions are updated before validating the UTXOs
+	await loadBtcPendingSentTransactions({
+		identity,
+		networkId: mapBitcoinNetworkToNetworkId(network), // we want to avoid having to pass redundant data to the function
+		address: source
+	});
+	const pendingUtxoTxIds = getPendingTransactionUtxoTxIds(source);
+	if (isNullish(pendingUtxoTxIds)) {
+		return {
+			feeSatoshis: ZERO,
+			utxos: [],
+			error: BtcPrepareSendError.PendingTransactionsNotAvailable
+		};
+	}
 
 	// Convert amount to satoshis
 	const amountSatoshis = convertNumberToSatoshis({ amount });
 
 	// Step 1: Get current fee percentiles from backend
-	const feeRateSatoshisPerVByte = await getFeeRateFromPercentiles({
+	const feeRateMiliSatoshisPerVByte = await getFeeRateFromPercentiles({
 		identity,
 		network
 	});
@@ -71,7 +85,7 @@ export const prepareBtcSend = async ({
 		utxos: allUtxos,
 		options: {
 			minConfirmations: requiredMinConfirmations,
-			pendingTxIds
+			pendingUtxoTxIds
 		}
 	});
 
@@ -79,7 +93,7 @@ export const prepareBtcSend = async ({
 		return {
 			feeSatoshis: ZERO,
 			utxos: [],
-			error: BtcPrepareSendError.InsufficientBalance
+			error: BtcPrepareSendError.UtxoLocked
 		};
 	}
 
@@ -87,7 +101,7 @@ export const prepareBtcSend = async ({
 	const selection = calculateUtxoSelection({
 		availableUtxos: filteredUtxos,
 		amountSatoshis,
-		feeRateSatoshisPerVByte
+		feeRateMiliSatoshisPerVByte
 	});
 
 	// Check if there were insufficient funds during UTXO selection
@@ -126,22 +140,21 @@ export const getFeeRateFromPercentiles = async ({
 
 	// Use median fee percentile
 	const medianIndex = Math.floor(fee_percentiles.length / 2);
+
+	// Use median fee percentile
 	const medianFeeMillisatsPerVByte = fee_percentiles[medianIndex];
 
-	// Convert from millisats to sats (divide by 1000)
-	const feeRateSatsPerVByte = medianFeeMillisatsPerVByte / 1000n;
-
 	// Apply minimum and maximum limits
-	const MIN_FEE_RATE = 1n; // 1 sat/vbyte minimum
-	const MAX_FEE_RATE = 100n; // 100 sat/vbyte maximum
+	const MIN_FEE_RATE = 1_000n; // 1 sat/vbyte minimum
+	const MAX_FEE_RATE = 100_000n; // 100 sat/vbyte maximum
 
-	if (feeRateSatsPerVByte < MIN_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte < MIN_FEE_RATE) {
 		return MIN_FEE_RATE;
 	}
 
-	if (feeRateSatsPerVByte > MAX_FEE_RATE) {
+	if (medianFeeMillisatsPerVByte > MAX_FEE_RATE) {
 		return MAX_FEE_RATE;
 	}
 
-	return feeRateSatsPerVByte;
+	return medianFeeMillisatsPerVByte;
 };

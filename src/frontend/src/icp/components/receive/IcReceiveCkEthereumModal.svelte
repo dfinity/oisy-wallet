@@ -15,7 +15,8 @@
 	import {
 		WizardStepsConvert,
 		WizardStepsHowToConvert,
-		WizardStepsReceive
+		WizardStepsReceive,
+		WizardStepsSend
 	} from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
@@ -58,9 +59,7 @@
 			dispatch('nnsClose');
 		});
 
-	const goToStep = (
-		stepName: WizardStepsHowToConvert | WizardStepsConvert | WizardStepsReceive
-	) => {
+	const goToStep = (stepName: WizardStepsReceiveComplete) => {
 		if (nonNullish(modal)) {
 			goToWizardStep({
 				modal,
@@ -71,28 +70,28 @@
 	};
 </script>
 
-<ConvertContexts {sourceToken} {destinationToken}>
+<ConvertContexts {destinationToken} {sourceToken}>
 	<WizardModal
+		bind:this={modal}
+		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
+		onClose={close}
 		{steps}
 		bind:currentStep
-		bind:this={modal}
-		onClose={close}
-		disablePointerEvents={currentStep?.name === WizardStepsConvert.CONVERTING}
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
 		<EthConvertTokenWizard
 			{currentStep}
 			formCancelAction="back"
-			bind:sendAmount
-			bind:receiveAmount
-			bind:convertProgressStep
-			on:icBack={() =>
+			onBack={() =>
 				currentStep?.name === WizardStepsConvert.CONVERT
 					? goToStep(WizardStepsHowToConvert.INFO)
 					: modal?.back()}
-			on:icNext={modal?.next}
-			on:icClose={close}
+			onClose={close}
+			onNext={modal?.next}
+			bind:sendAmount
+			bind:receiveAmount
+			bind:convertProgressStep
 		>
 			{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
 				<HowToConvertEthereumWizardSteps
@@ -109,14 +108,14 @@
 				/>
 			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
 				<ReceiveAddressQrCode
-					on:icBack={modal?.back}
 					address={$icrcAccountIdentifierText ?? ''}
 					addressToken={ICP_TOKEN}
+					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 					network={ICP_NETWORK}
 					qrCodeAction={{ enabled: false }}
-					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+					on:icBack={modal?.back}
 				/>
-			{:else}
+			{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 				<IcReceiveInfoCkEthereum
 					on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
 					on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}

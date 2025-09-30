@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
 	ICP_SWAP_PROVIDER,
@@ -15,16 +16,18 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { SwapErrorCodes, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import { SwapErrorCodes, SwapProvider, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
 	getKongIcTokenIdentifier,
 	getLiquidityFees,
 	getNetworkFee,
 	getSwapRoute,
+	getWithdrawableToken,
 	isSwapError,
 	mapIcpSwapResult,
 	mapKongSwapResult,
@@ -34,7 +37,7 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { BridgePrice, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
+import type { Bridge, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -341,7 +344,8 @@ describe('swap utils', () => {
 				destUSDBeforeFee: '915.2',
 				partner: 'PartnerName',
 				partnerFee: 0.25,
-				hmac: 'abcd1234'
+				hmac: 'abcd1234',
+				bridge: {} as Bridge
 			};
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
@@ -353,37 +357,29 @@ describe('swap utils', () => {
 		});
 
 		it('should map BridgePrice swap result correctly', () => {
-			const mockBridgeSwap: BridgePrice = {
+			const mockDeltaSwap: DeltaPrice = {
 				srcToken: '0x123',
 				destToken: '0x456',
 				srcAmount: '1000',
-				destAmount: '850',
-				destAmountBeforeFee: '870',
-				gasCost: '60000',
-				gasCostBeforeFee: '58000',
-				gasCostUSD: '18.0',
-				gasCostUSDBeforeFee: '17.4',
+				destAmount: '900',
+				destAmountBeforeFee: '920',
+				gasCost: '50000',
+				gasCostBeforeFee: '48000',
+				gasCostUSD: '15.5',
+				gasCostUSDBeforeFee: '14.8',
 				srcUSD: '1000.0',
-				destUSD: '845.0',
-				destUSDBeforeFee: '865.0',
-				partner: 'BridgePartner',
-				partnerFee: 0.5,
-				hmac: 'bridge1234',
-				destAmountAfterBridge: '800',
-				destUSDAfterBridge: '795.0',
-				bridgeFee: '50',
-				bridgeFeeUSD: '50.0',
-				poolAddress: '0xpool123',
-				bridge: {
-					destinationChainId: 1,
-					outputToken: '0xoutput456'
-				}
+				destUSD: '895.5',
+				destUSDBeforeFee: '915.2',
+				partner: 'PartnerName',
+				partnerFee: 0.25,
+				hmac: 'abcd1234',
+				bridge: {} as Bridge
 			};
-			const result = mapVeloraSwapResult(mockBridgeSwap);
+			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
-			expect(result.receiveAmount).toBe(800n);
-			expect(result.swapDetails).toBe(mockBridgeSwap);
+			expect(result.receiveAmount).toBe(900n);
+			expect(result.swapDetails).toBe(mockDeltaSwap);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});
@@ -471,6 +467,96 @@ describe('swap utils', () => {
 			expect(isSwapError(undefined)).toBeFalsy();
 			expect(isSwapError('string')).toBeFalsy();
 			expect(isSwapError({ code: 'deposit_error' })).toBeFalsy();
+		});
+	});
+
+	describe('getWithdrawableToken', () => {
+		const sourceToken = {
+			ledgerCanisterId: 'source-ledger-id',
+			name: 'Source Token'
+		} as IcTokenToggleable;
+
+		const destinationToken = {
+			ledgerCanisterId: 'destination-ledger-id',
+			name: 'Destination Token'
+		} as IcTokenToggleable;
+
+		it('should return sourceToken if tokenAddress matches sourceToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'source-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(sourceToken);
+		});
+
+		it('should return destinationToken if tokenAddress matches destinationToken.ledgerCanisterId', () => {
+			const result = getWithdrawableToken({
+				tokenAddress: 'destination-ledger-id',
+				sourceToken,
+				destinationToken
+			});
+
+			expect(result).toBe(destinationToken);
+		});
+
+		it('should throw an error if tokenAddress matches neither', () => {
+			expect(() =>
+				getWithdrawableToken({
+					tokenAddress: 'unknown-ledger-id',
+					sourceToken,
+					destinationToken
+				})
+			).toThrow('Unknown token address');
+		});
+	});
+
+	describe('findSwapProviderDetails', () => {
+		it('returns Velora provider details when given SwapProvider.VELORA', () => {
+			const result = findSwapProvider(SwapProvider.VELORA);
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Velora provider details when given the string VELORA', () => {
+			const result = findSwapProvider('VELORA');
+
+			expect(result).include({
+				id: 'velora',
+				website: 'https://app.velora.xyz/',
+				logo: '/images/dapps/velora-logo.svg'
+			});
+		});
+
+		it('returns Kongswap provider details when given kongswap', () => {
+			const result = findSwapProvider(SwapProvider.KONG_SWAP);
+
+			expect(result).include({
+				id: 'kongswap',
+				logo: '/images/dapps/kong-swap-logo.svg',
+				website: 'https://www.kongswap.io/'
+			});
+		});
+
+		it('returns ICPSWAP provider details when given icpSwap', () => {
+			const result = findSwapProvider(SwapProvider.ICP_SWAP);
+
+			expect(result).include({
+				id: 'icpswap',
+				website: 'https://icpswap.com',
+				logo: '/images/dapps/icp-swap-logo.svg'
+			});
+		});
+
+		it('should return undefined if dapp is not found', () => {
+			const result = findSwapProvider('test');
+
+			expect(result).toBeUndefined();
 		});
 	});
 });

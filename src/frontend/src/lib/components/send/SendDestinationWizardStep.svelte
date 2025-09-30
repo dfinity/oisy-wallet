@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount } from 'svelte';
+	import { getContext, onMount } from 'svelte';
 	import BtcSendDestination from '$btc/components/send/BtcSendDestination.svelte';
 	import { btcNetworkContacts } from '$btc/derived/btc-contacts.derived';
 	import { btcKnownDestinations } from '$btc/derived/btc-transactions.derived';
-	import LoaderMultipleEthTransactions from '$eth/components/loaders/LoaderMultipleEthTransactions.svelte';
 	import EthSendDestination from '$eth/components/send/EthSendDestination.svelte';
 	import { ethNetworkContacts } from '$eth/derived/eth-contacts.derived';
 	import { ethKnownDestinations } from '$eth/derived/eth-transactions.derived';
-	import { ethereumTokenId } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import { icNetworkContacts } from '$icp/derived/ic-contacts.derived';
 	import { icKnownDestinations } from '$icp/derived/ic-transactions.derived';
@@ -46,12 +45,21 @@
 		activeSendDestinationTab: SendDestinationTab;
 		selectedContact?: ContactUi;
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
 	}
+
 	let {
 		destination = $bindable(),
 		activeSendDestinationTab = $bindable(),
 		selectedContact = $bindable(),
-		formCancelAction = 'back'
+		formCancelAction = 'back',
+		onBack,
+		onNext,
+		onClose,
+		onQRCodeScan
 	}: Props = $props();
 
 	onMount(() => {
@@ -60,21 +68,20 @@
 
 	const { sendToken, sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
-	const back = () => dispatch('icBack');
+	const back = () => onBack();
 	const next = () => {
 		if (isNullish(selectedContact)) {
-			// if next button is clicked and there is no contact selected,
-			// we manually lookup the contact and select it if one exists
+			// If the next button is clicked and there is no contact selected,
+			// we manually look up the contact and select it if one exists
 			const contact = getContactForAddress({ addressString: destination, contactList: $contacts });
 			if (nonNullish(contact)) {
 				selectedContact = contact;
 			}
 		}
-		dispatch('icNext');
+
+		onNext();
 	};
-	const close = () => dispatch('icClose');
+	const close = () => onClose();
 
 	let invalidDestination = $state(false);
 
@@ -88,81 +95,79 @@
 <ContentWithToolbar>
 	{#if isNetworkIdEthereum($sendTokenNetworkId) || isNetworkIdEvm($sendTokenNetworkId)}
 		<div data-tid={testId}>
-			<CkEthLoader nativeTokenId={$ethereumTokenId} isSendFlow={true}>
-				<LoaderMultipleEthTransactions>
-					<EthSendDestination
-						token={$sendToken}
-						knownDestinations={$ethKnownDestinations}
-						networkContacts={$ethNetworkContacts}
-						bind:destination
-						bind:invalidDestination
-						on:icQRCodeScan
-					/>
-					<SendDestinationTabs
-						knownDestinations={$ethKnownDestinations}
-						networkContacts={$ethNetworkContacts}
-						bind:destination
-						bind:activeSendDestinationTab
-						bind:selectedContact
-						on:icNext={next}
-					/>
-				</LoaderMultipleEthTransactions>
+			<CkEthLoader isSendFlow={true} nativeTokenId={$nativeEthereumTokenId}>
+				<EthSendDestination
+					knownDestinations={$ethKnownDestinations}
+					networkContacts={$ethNetworkContacts}
+					{onQRCodeScan}
+					token={$sendToken}
+					bind:destination
+					bind:invalidDestination
+				/>
+				<SendDestinationTabs
+					knownDestinations={$ethKnownDestinations}
+					networkContacts={$ethNetworkContacts}
+					onNext={next}
+					bind:destination
+					bind:activeSendDestinationTab
+					bind:selectedContact
+				/>
 			</CkEthLoader>
 		</div>
 	{:else if isNetworkIdICP($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<IcSendDestination
-				tokenStandard={$sendToken.standard}
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				{onQRCodeScan}
+				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
-				on:icQRCodeScan
 			/>
 			<SendDestinationTabs
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdBitcoin($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<BtcSendDestination
-				bind:destination
-				bind:invalidDestination
-				on:icQRCodeScan
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
 			/>
 			<SendDestinationTabs
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{:else if isNetworkIdSolana($sendTokenNetworkId)}
 		<div data-tid={testId}>
 			<SolSendDestination
-				bind:destination
-				bind:invalidDestination
-				on:icQRCodeScan
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				{onQRCodeScan}
+				bind:destination
+				bind:invalidDestination
 			/>
 			<SendDestinationTabs
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
+				onNext={next}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icNext={next}
 			/>
 		</div>
 	{/if}
@@ -175,7 +180,7 @@
 				<ButtonCancel onclick={close} />
 			{/if}
 
-			<Button onclick={next} {disabled} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
+			<Button {disabled} onclick={next} testId={SEND_FORM_DESTINATION_NEXT_BUTTON}>
 				{$i18n.core.text.next}
 			</Button>
 		</ButtonGroup>

@@ -6,15 +6,23 @@ import {
 	ICONFUCIUS_LEDGER_CANISTER_ID,
 	ODINDOG_LEDGER_CANISTER_ID
 } from '$env/networks/networks.icrc.env';
+import { icrc1SupportedStandards } from '$icp/api/icrc-ledger.api';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import type { IcCkInterface, IcFee, IcInterface, IcToken } from '$icp/types/ic-token';
+import {
+	IcTokenStandards,
+	type IcCkInterface,
+	type IcFee,
+	type IcInterface,
+	type IcToken
+} from '$icp/types/ic-token';
 import type {
 	IcTokenExtended,
 	IcTokenWithoutIdExtended,
 	IcrcCustomToken
 } from '$icp/types/icrc-custom-token';
-import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
+import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
+import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -64,7 +72,7 @@ const CUSTOM_SYMBOLS_BY_LEDGER_CANISTER_ID: Record<LedgerCanisterIdText, string>
  *          - `ICP_PSEUDO_TESTNET_NETWORK` for known "testnet" tokens
  */
 const mapIcNetwork = (ledgerCanisterId: LedgerCanisterIdText) =>
-	isTokenIcrcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
+	isTokenIcTestnet({ ledgerCanisterId }) ? ICP_PSEUDO_TESTNET_NETWORK : ICP_NETWORK;
 
 export const mapIcrcToken = ({
 	metadata,
@@ -168,6 +176,21 @@ export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token i
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
+
+export const isIcrcTokenSupportIcrc2 = async ({
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+}) => {
+	const supportedStandards = await icrc1SupportedStandards({
+		identity,
+		ledgerCanisterId
+	});
+
+	return supportedStandards.some(({ name }) => name === IcTokenStandards.icrc2);
+};
 
 // TODO: create tests
 export const mapTokenOisyName = (token: IcInterface): IcInterface => ({

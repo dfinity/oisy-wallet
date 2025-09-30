@@ -94,7 +94,9 @@ describe('custom-token.services', () => {
 								index_id: isNullish(indexCanisterId) ? [] : [Principal.fromText(indexCanisterId)],
 								ledger_id: Principal.fromText(mockSendToken.ledgerCanisterId)
 							}
-						}
+						},
+						section: toNullable(),
+						allow_external_content_source: toNullable()
 					}
 				});
 
@@ -144,7 +146,9 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
@@ -243,7 +247,9 @@ describe('custom-token.services', () => {
 								}
 							},
 							version: [1n],
-							enabled: true
+							enabled: true,
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					]);
 
@@ -297,7 +303,9 @@ describe('custom-token.services', () => {
 										isNullish(indexCanisterId) ? undefined : Principal.fromText(indexCanisterId)
 									)
 								}
-							}
+							},
+							section: toNullable(),
+							allow_external_content_source: toNullable()
 						}
 					});
 				});

@@ -17,15 +17,26 @@ import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
-import { pageToken, pageTokenStandard, pageTokenToggleable } from '$lib/derived/page-token.derived';
+import { pageNft } from '$lib/derived/page-nft.derived';
+import {
+	pageNonFungibleToken,
+	pageToken,
+	pageTokenStandard,
+	pageTokenToggleable
+} from '$lib/derived/page-token.derived';
 import { testnetsEnabled } from '$lib/derived/testnets.derived';
+import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+import type { NonFungibleToken } from '$lib/types/nft';
 import type { RequiredTokenWithLinkedData } from '$lib/types/token';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import type { SplCustomToken } from '$sol/types/spl-custom-token';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { get } from 'svelte/store';
 
@@ -378,6 +389,44 @@ describe('page-token.derived', () => {
 			mockPage.mockToken({ ...SOLANA_TOKEN, enabled: true } as SplCustomToken);
 
 			expect(get(pageTokenToggleable)).toBeFalsy();
+		});
+	});
+
+	describe('pageNonFungibleToken', () => {
+		const mockNonFungibleToken: NonFungibleToken = mockValidErc721Token;
+		const mockNft = {
+			...mockValidErc721Nft,
+			collection: mapTokenToCollection(mockNonFungibleToken)
+		};
+
+		beforeEach(() => {
+			vi.resetAllMocks();
+
+			mockPage.reset();
+
+			vi.spyOn(nonFungibleTokens, 'subscribe').mockImplementation((fn) => {
+				fn([mockNonFungibleToken]);
+				return () => {};
+			});
+		});
+
+		it('should return undefined if not set', () => {
+			mockPage.mockDynamicRoutes({ collectionId: undefined as unknown as string });
+
+			expect(get(pageNonFungibleToken)).toBeUndefined();
+		});
+
+		it('should return the nonFungibleToken if were on an Nft page', () => {
+			vi.spyOn(pageNft, 'subscribe').mockImplementation((fn) => {
+				fn(mockNft);
+				return () => {};
+			});
+
+			mockPage.mockDynamicRoutes({
+				collectionId: `${mockNft.collection.network.name}-${mockNft.collection.address}`
+			});
+
+			expect(get(pageNonFungibleToken)?.address).toBe(mockNft.collection.address);
 		});
 	});
 });

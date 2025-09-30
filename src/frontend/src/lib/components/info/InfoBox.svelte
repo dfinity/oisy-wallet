@@ -21,8 +21,8 @@
 	>
 		<button
 			class="absolute right-2 top-2 text-tertiary"
-			onclick={onClick}
-			aria-label={$i18n.core.text.close}><IconClose /></button
+			aria-label={$i18n.core.text.close}
+			onclick={onClick}><IconClose /></button
 		>
 		{@render children()}
 	</div>

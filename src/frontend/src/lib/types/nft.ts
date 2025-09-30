@@ -1,11 +1,12 @@
 import type { Erc1155Token } from '$eth/types/erc1155';
 import type { Erc721Token } from '$eth/types/erc721';
 import type {
-	CollectionSchema,
 	NftAttributeSchema,
+	NftCollectionSchema,
 	NftIdSchema,
 	NftMetadataSchema,
-	NftSchema
+	NftSchema,
+	OwnedContractSchema
 } from '$lib/schema/nft.schema';
 import type { NetworkId } from '$lib/types/network';
 import type * as z from 'zod';
@@ -16,10 +17,17 @@ export type NftAttributes = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 
-export type Collection = z.infer<typeof CollectionSchema>;
+export type NftCollection = z.infer<typeof NftCollectionSchema>;
+
+export interface NftCollectionUi {
+	collection: NftCollection;
+	nfts: Nft[];
+}
 
 export type Nft = z.infer<typeof NftSchema>;
 
-export type NftsByNetwork = Record<NetworkId, Record<string, Nft[]>>;
+export type OwnedContract = z.infer<typeof OwnedContractSchema>;
+
+export type NonFungibleTokensByNetwork = Map<NetworkId, NonFungibleToken[]>;
 
 export type NonFungibleToken = Erc721Token | Erc1155Token;

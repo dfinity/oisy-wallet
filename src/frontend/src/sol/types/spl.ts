@@ -14,3 +14,5 @@ export type SplToken = Token & {
 } & SplAuthorities;
 
 export type RequiredSplToken = RequiredToken<SplToken, SplAuthorities>;
+
+export type RequiredSpl2022Token = RequiredToken<SplToken>;

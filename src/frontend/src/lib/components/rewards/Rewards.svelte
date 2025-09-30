@@ -24,10 +24,9 @@
 <div class="flex flex-row items-center">
 	{#if EARNING_ENABLED}
 		<ButtonIcon
-			styleClass="mr-3"
+			ariaLabel="icon"
 			colorStyle="secondary-light"
 			link={false}
-			ariaLabel="icon"
 			onclick={() =>
 				goto(
 					networkUrl({
@@ -37,6 +36,7 @@
 						fromRoute
 					})
 				)}
+			styleClass="mr-3"
 		>
 			{#snippet icon()}
 				<IconBackArrow />
@@ -47,10 +47,10 @@
 	<PageTitle>{$i18n.rewards.text.title}</PageTitle>
 
 	<ExternalLink
-		href={OISY_REWARDS_URL}
 		ariaLabel={$i18n.rewards.text.learn_more}
-		iconVisible={false}
 		color="blue"
+		href={OISY_REWARDS_URL}
+		iconVisible={false}
 		styleClass="ml-auto font-semibold"
 		trackEvent={{ name: TRACK_REWARD_LEARN_MORE }}
 	>

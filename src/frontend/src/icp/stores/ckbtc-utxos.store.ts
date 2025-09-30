@@ -15,7 +15,8 @@ interface CkBtcPendingUtxosStore extends CertifiedSetterStoreStore<CkBtcPendingU
 }
 
 const initCkBtcPendingUtxosStore = (): CkBtcPendingUtxosStore => {
-	const { subscribe, set, reset, update } = initCertifiedSetterStore<CkBtcPendingUtxosData>();
+	const { subscribe, set, reset, reinitialize, update } =
+		initCertifiedSetterStore<CkBtcPendingUtxosData>();
 
 	return {
 		filter: ({
@@ -37,6 +38,7 @@ const initCkBtcPendingUtxosStore = (): CkBtcPendingUtxosStore => {
 			})),
 		set,
 		reset,
+		reinitialize,
 		subscribe
 	};
 };

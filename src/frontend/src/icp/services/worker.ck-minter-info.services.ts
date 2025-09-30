@@ -13,6 +13,7 @@ import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/ty
 import type { IcCkMetadata } from '$icp/types/ic-token';
 import type {
 	PostMessage,
+	PostMessageDataRequestIcCk,
 	PostMessageDataResponseError,
 	PostMessageJsonDataResponse,
 	PostMessageSyncState
@@ -95,7 +96,7 @@ const initCkMinterInfoWorker = async ({
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		stop,
 		trigger: () => {
@@ -104,7 +105,7 @@ const initCkMinterInfoWorker = async ({
 				data: {
 					minterCanisterId
 				}
-			});
+			} as PostMessage<PostMessageDataRequestIcCk>);
 		},
 		destroy: () => {
 			if (isDestroying) {

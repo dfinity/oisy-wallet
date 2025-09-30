@@ -32,13 +32,13 @@
 	};
 </script>
 
-<ReceiveButtonWithModal open={openReceive} isOpen={$modalEthReceive}>
+<ReceiveButtonWithModal isOpen={$modalEthReceive} open={openReceive}>
 	{#snippet modal()}
 		<ReceiveModal
 			address={$networkAddress}
 			addressToken={token}
-			network={token.network}
 			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+			network={token.network}
 		>
 			{#snippet content()}
 				{#if $networkEthereum}

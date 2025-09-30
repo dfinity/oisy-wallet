@@ -30,6 +30,6 @@
 	};
 </script>
 
-<svelte:window on:oisyRefreshContacts={reload} />
+<svelte:window onoisyRefreshContacts={reload} />
 
 {@render children?.()}

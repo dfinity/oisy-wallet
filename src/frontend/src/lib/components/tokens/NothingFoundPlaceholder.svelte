@@ -7,7 +7,7 @@
 <div class="py-12">
 	<div class="mb-2 flex justify-center p-2">
 		<span class="z-0 -mr-4">
-			<Img src={shocked} width="64" height="64"></Img>
+			<Img height="64" src={shocked} width="64"></Img>
 		</span>
 	</div>
 

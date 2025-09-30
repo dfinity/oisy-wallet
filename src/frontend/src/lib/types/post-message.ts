@@ -5,6 +5,7 @@ import type {
 	PostMessageDataRequestExchangeTimerSchema,
 	PostMessageDataRequestIcCkBTCUpdateBalanceSchema,
 	PostMessageDataRequestIcCkSchema,
+	PostMessageDataRequestIcpSchema,
 	PostMessageDataRequestIcrcSchema,
 	PostMessageDataRequestIcrcStrictSchema,
 	PostMessageDataRequestSchema,
@@ -25,8 +26,8 @@ import type {
 	PostMessageSyncStateSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-import type * as z from 'zod/v4';
-import type { ZodType } from 'zod/v4';
+import type * as z from 'zod';
+import type { ZodType } from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
 type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
@@ -42,6 +43,8 @@ export type PostMessageDataRequestIcrcStrict = z.infer<
 >;
 
 export type PostMessageDataRequestDip20 = z.infer<typeof PostMessageDataRequestDip20Schema>;
+
+export type PostMessageDataRequestIcp = z.infer<typeof PostMessageDataRequestIcpSchema>;
 
 export type PostMessageDataRequestIcCk = z.infer<typeof PostMessageDataRequestIcCkSchema>;
 

@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
+	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
+	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
+	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import MaxBalanceButton from '$lib/components/common/MaxBalanceButton.svelte';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
@@ -10,16 +13,20 @@
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountError?: BtcAmountAssertionError;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -32,6 +39,14 @@
 			return new BtcAmountAssertionError($i18n.send.assertion.amount_invalid);
 		}
 
+		if (invalidSendAmount(Number(userAmount))) {
+			return new BtcAmountAssertionError(
+				replacePlaceholders($i18n.send.assertion.minimum_btc_amount, {
+					$amount: convertSatoshisToBtc(BTC_MINIMUM_AMOUNT)
+				})
+			);
+		}
+
 		if (userAmount > ($sendBalance ?? ZERO)) {
 			return new BtcAmountAssertionError($i18n.send.assertion.insufficient_funds);
 		}
@@ -40,16 +55,14 @@
 
 <div class="mb-4">
 	<TokenInput
-		token={$sendToken}
-		bind:amount
+		autofocus={nonNullish($sendToken)}
+		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		token={$sendToken}
+		bind:amount
 		bind:error={amountError}
-		customErrorValidate={customValidate}
-		autofocus={nonNullish($sendToken)}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
+		on:click={onTokensList}
 	>
 		<span slot="title">{$i18n.core.text.amount}</span>
 
@@ -69,10 +82,10 @@
 		<svelte:fragment slot="balance">
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
-					bind:amount
 					balance={$sendBalance}
-					token={$sendToken}
 					error={nonNullish(amountError)}
+					token={$sendToken}
+					bind:amount
 				/>
 			{/if}
 		</svelte:fragment>

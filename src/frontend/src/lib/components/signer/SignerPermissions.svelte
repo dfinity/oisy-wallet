@@ -86,7 +86,7 @@
 </script>
 
 {#if nonNullish($payload)}
-	<form in:fade on:submit={onApprove} method="POST">
+	<form method="POST" on:submit={onApprove} in:fade>
 		<h2 class="mb-4 text-center">{$i18n.signer.permissions.text.title}</h2>
 
 		<SignerOrigin payload={$payload} />

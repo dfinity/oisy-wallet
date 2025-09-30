@@ -11,12 +11,12 @@
 </script>
 
 <ButtonIcon
-	colorStyle="tertiary-alt"
 	ariaLabel={$i18n.settings.alt[
 		`appearance_${$themeStore === Theme.LIGHT ? Theme.DARK : Theme.LIGHT}`
 	]}
-	onclick={handleClick}
+	colorStyle="tertiary-alt"
 	link={false}
+	onclick={handleClick}
 >
 	{#snippet icon()}
 		<span>

@@ -9,12 +9,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 
-	let explorerUrl: string | undefined;
-	$: explorerUrl = notEmptyString($ethAddress)
-		? `${getExplorerUrl({
-				network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
-			})}/address/${$ethAddress}`
-		: undefined;
+	let explorerUrl = $derived(
+		notEmptyString($ethAddress)
+			? `${getExplorerUrl({
+					network: nonNullish($selectedEvmNetwork) ? $selectedEvmNetwork : $selectedEthereumNetwork
+				})}/address/${$ethAddress}`
+			: undefined
+	);
 </script>
 
 <div class="p-3">
@@ -22,13 +23,13 @@
 		>{$i18n.wallet.text.wallet_address}:</label
 	>
 
-	<output class="break-all" id="eth-wallet-address"
+	<output id="eth-wallet-address" class="break-all"
 		>{shortenWithMiddleEllipsis({ text: $ethAddress ?? '' })}</output
-	><Copy inline value={$ethAddress ?? ''} text={$i18n.wallet.text.address_copied} />
+	><Copy inline text={$i18n.wallet.text.address_copied} value={$ethAddress ?? ''} />
 </div>
 
 {#if nonNullish(explorerUrl)}
-	<ExternalLink asMenuItem href={explorerUrl} ariaLabel={$i18n.wallet.alt.open_etherscan}>
+	<ExternalLink ariaLabel={$i18n.wallet.alt.open_etherscan} asMenuItem href={explorerUrl}>
 		{$i18n.navigation.text.view_on_explorer}
 	</ExternalLink>
 {/if}

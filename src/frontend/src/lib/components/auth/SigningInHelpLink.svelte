@@ -5,8 +5,12 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let styleClass = '';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+		testId?: string;
+	}
+
+	let { styleClass = '', testId }: Props = $props();
 
 	const modalId = Symbol();
 
@@ -18,7 +22,7 @@
 	};
 </script>
 
-<span data-tid={testId} class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`}>
+<span class={`${styleClass} flex flex-row justify-center gap-1 md:justify-start`} data-tid={testId}>
 	{$i18n.auth.help.text.need_help}
-	<Button link inlineLink onclick={onClick}>{$i18n.auth.help.text.sign_in}</Button>
+	<Button inlineLink link onclick={onClick}>{$i18n.auth.help.text.sign_in}</Button>
 </span>

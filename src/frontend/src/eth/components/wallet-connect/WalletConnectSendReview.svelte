@@ -1,50 +1,62 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
-	import SendReviewNetwork from '$eth/components/send/SendReviewNetwork.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-	import SendData from '$lib/components/send/SendData.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
+	import SendReview from '$lib/components/send/SendReview.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let amount: bigint;
-	export let destination: string;
-	export let data: string | undefined;
-	export let erc20Approve: boolean;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
+	interface Props {
+		amount: bigint;
+		destination: string;
+		data?: string;
+		erc20Approve: boolean;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		onApprove: () => void;
+		onReject: () => void;
+	}
 
-	let amountDisplay: bigint;
-	$: amountDisplay = erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount;
+	let {
+		amount,
+		destination,
+		data,
+		erc20Approve,
+		sourceNetwork,
+		targetNetwork,
+		onApprove,
+		onReject
+	}: Props = $props();
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	let amountDisplay = $derived(
+		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
+	);
 </script>
 
-<ContentWithToolbar>
-	<SendData
-		amount={formatToken({ value: amountDisplay })}
-		{destination}
-		token={$sendToken}
-		balance={$balance}
-		source={$ethAddress ?? ''}
-	>
+<SendReview amount={formatToken({ value: amountDisplay })} {destination}>
+	{#snippet info()}
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-
-		<EthFeeDisplay slot="fee" />
-
-		<SendReviewNetwork {sourceNetwork} {targetNetwork} token={$sendToken} slot="network" />
-	</SendData>
-
-	{#snippet toolbar()}
-		<WalletConnectActions on:icApprove on:icReject />
 	{/snippet}
-</ContentWithToolbar>
+
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.max_fee_eth} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
+
+	{#snippet network()}
+		<ReviewNetwork destinationNetworkId={targetNetwork?.id} {sourceNetwork} />
+	{/snippet}
+
+	{#snippet replaceToolbar()}
+		<WalletConnectActions {onApprove} {onReject} />
+	{/snippet}
+</SendReview>

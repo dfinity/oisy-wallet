@@ -7,10 +7,10 @@
 </script>
 
 <ButtonIcon
+	ariaLabel={ariaLabel ?? $i18n.convert.text.input_reset_button}
 	colorStyle="muted"
 	link={false}
 	{onclick}
-	ariaLabel={ariaLabel ?? $i18n.convert.text.input_reset_button}
 >
 	{#snippet icon()}
 		<IconClose size="24" />

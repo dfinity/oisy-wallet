@@ -20,9 +20,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let onBack: () => void;
-	export let onDone: () => void;
-	export let hideBack = false;
+	interface Props {
+		onBack: () => void;
+		onDone: () => void;
+		hideBack?: boolean;
+	}
+
+	let { onBack, onDone, hideBack = false }: Props = $props();
 
 	const onLegacySignIn = async () => {
 		onDone();
@@ -34,10 +38,10 @@
 <ContentWithToolbar>
 	<div class="grid gap-6">
 		<Img
+			alt={$i18n.auth.help.alt.internet_identity}
 			src={helpAuthIdentityBanner}
 			styleClass="w-full"
 			testId={HELP_AUTH_IDENTITY_IMAGE_BANNER}
-			alt={$i18n.auth.help.alt.internet_identity}
 		/>
 
 		<div>
@@ -54,11 +58,11 @@
 			</p>
 			<p class="mb-0">
 				<ExternalLink
-					styleClass="font-semibold"
 					ariaLabel={$i18n.auth.help.alt.identity_learn_more}
 					href={OISY_FIND_INTERNET_IDENTITY_URL}
-					testId={HELP_AUTH_LEARN_MORE_LINK}
 					iconAsLast
+					styleClass="font-semibold"
+					testId={HELP_AUTH_LEARN_MORE_LINK}
 				>
 					{replaceOisyPlaceholders($i18n.auth.help.text.identity_learn_more)}
 				</ExternalLink>

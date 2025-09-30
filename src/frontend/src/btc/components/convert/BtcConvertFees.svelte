@@ -36,17 +36,17 @@
 <ModalExpandableValues>
 	{#snippet listHeader()}
 		<ConvertFeeTotal
-			feeAmount={totalFee}
 			decimals={$sourceToken.decimals}
 			exchangeRate={$sourceTokenExchangeRate}
+			feeAmount={totalFee}
 		/>
 	{/snippet}
 
 	{#snippet listItems()}
 		<FeeDisplay
-			feeAmount={BTC_CONVERT_FEE}
 			decimals={$sourceToken.decimals}
 			exchangeRate={$sourceTokenExchangeRate}
+			feeAmount={BTC_CONVERT_FEE}
 			symbol={$sourceToken.symbol}
 			zeroAmountLabel={$i18n.fee.text.zero_fee}
 		>
@@ -54,18 +54,18 @@
 		</FeeDisplay>
 
 		<FeeDisplay
-			feeAmount={kytFee}
 			decimals={$sourceToken.decimals}
 			exchangeRate={$sourceTokenExchangeRate}
+			feeAmount={kytFee}
 			symbol={$sourceToken.symbol}
 		>
 			{#snippet label()}{$i18n.fee.text.convert_inter_network_fee}{/snippet}
 		</FeeDisplay>
 
 		<FeeDisplay
-			feeAmount={satoshisFee}
 			decimals={$sourceToken.decimals}
 			exchangeRate={$sourceTokenExchangeRate}
+			feeAmount={satoshisFee}
 			symbol={$sourceToken.symbol}
 		>
 			{#snippet label()}{$i18n.fee.text.convert_btc_network_fee}{/snippet}

@@ -26,10 +26,10 @@
 		{address}
 		{addressLabel}
 		{addressToken}
-		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
+		{copyAriaLabel}
 		{network}
 		{qrCodeAction}
-		{copyAriaLabel}
+		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
 		on:click
 	/>
 

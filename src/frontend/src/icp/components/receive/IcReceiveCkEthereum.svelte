@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import FeeStoreContext from '$eth/components/fee/FeeStoreContext.svelte';
+	import EthFeeStoreContext from '$eth/components/fee/EthFeeStoreContext.svelte';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
-	import { ethereumToken } from '$eth/derived/token.derived';
+	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import IcReceiveCkEthereumModal from '$icp/components/receive/IcReceiveCkEthereumModal.svelte';
 	import {
 		RECEIVE_TOKEN_CONTEXT_KEY,
@@ -42,12 +42,12 @@
 	const openModal = async (modalId: symbol) => await open(async () => await openReceive(modalId));
 </script>
 
-<ReceiveButtonWithModal open={openModal} isOpen={$modalCkETHReceive}>
+<ReceiveButtonWithModal isOpen={$modalCkETHReceive} open={openModal}>
 	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
-			<FeeStoreContext token={$ethereumToken}>
-				<IcReceiveCkEthereumModal on:nnsClose={close} {sourceToken} {destinationToken} />
-			</FeeStoreContext>
+			<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
+				<IcReceiveCkEthereumModal {destinationToken} {sourceToken} on:nnsClose={close} />
+			</EthFeeStoreContext>
 		{/if}
 	{/snippet}
 </ReceiveButtonWithModal>

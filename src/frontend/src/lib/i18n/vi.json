@@ -9,11 +9,13 @@
 			"close": "Đóng",
 			"change": "Thay đổi",
 			"apply": "Áp dụng",
+			"retry": "Thử lại",
 			"refresh": "Làm mới",
 			"name": "Tên",
 			"symbol": "Ký hiệu",
 			"decimals": "Số thập phân",
 			"amount": "Số lượng",
+			"tokenId": "Token id",
 			"max": "Tối đa",
 			"destination": "Đích",
 			"reject": "Từ chối",
@@ -36,7 +38,8 @@
 			"currency": "Tiền tệ"
 		},
 		"info": {
-			"test_banner": "Chỉ dành cho mục đích thử nghiệm!"
+			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
+			"test_banner_beta": "Đây là phiên bản thử nghiệm. Bạn có thể gặp một số lỗi. Tài sản thật đang được sử dụng - vui lòng cẩn trọng."
 		},
 		"alt": {
 			"logo": "Logo $name",
@@ -48,7 +51,8 @@
 			"switch_currency": "Chuyển đổi tiền tệ"
 		},
 		"warning": {
-			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất"
+			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -102,7 +106,7 @@
 			"title_part_1": "$oisy_name",
 			"title_part_2": "100% Phi tập trung",
 			"logout": "Đăng xuất",
-			"lock": "",
+			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
 			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
 			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
@@ -111,9 +115,13 @@
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
-			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn."
+			"session_expired": "Bạn đã bị đăng xuất vì phiên của bạn đã hết hạn.",
+			"reload_and_retry": "Đã xảy ra lỗi trong quá trình đăng nhập. Vui lòng tải lại trang và thử lại. Nếu lỗi này vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ."
 		},
 		"error": {
 			"no_internet_identity": "Không có Internet Identity.",
@@ -161,6 +169,16 @@
 			}
 		}
 	},
+	"lock": {
+		"text": {
+			"title_part_1": "Mở khóa để tiếp tục",
+			"title_part_2": "Trước đó, bạn đã khóa ví để giữ an toàn. Hãy tiếp tục từ chỗ bạn đã dừng hoặc đăng xuất.",
+			"unlock": "Mở khóa",
+			"logout": "Đăng xuất",
+			"logout_clear_cash_message": "Đăng xuất sẽ xóa tất cả dữ liệu được lưu trong bộ nhớ đệm",
+			"learn_more": "Tìm hiểu thêm"
+		}
+	},
 	"dapps": {
 		"text": {
 			"all_dapps": "Tất cả ứng dụng",
@@ -191,7 +209,8 @@
 			"staking": "Staking",
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
-			"tools": "Khí cụ"
+			"tools": "Công cụ",
+			"ai": "AI"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -210,7 +229,7 @@
 				"description": "OpenChat là một ứng dụng trò chuyện đầy đủ tính năng từ đầu tới cuối trên blockchain Internet Computer.<br/><br/>OpenChat được quản lý bởi cộng đồng của nó như một DAO và có token CHAT riêng. Token CHAT được trao làm phần thưởng cho người dùng để thúc đẩy tăng trưởng và tạo ra một đội ngũ hàng triệu người ủng hộ cho phép OpenChat trở thành một đối thủ cạnh tranh khả thi với các đối thủ công nghệ lớn tập trung!",
 				"stats": "Hơn 80.000 người dùng",
 				"carousel": {
-					"text": "OpenChat - nơi web3 giao tiếp",
+					"text": "OpenChat - tin nhắn bảo mật",
 					"call_to_action": "Hiển thị thêm"
 				}
 			},
@@ -304,25 +323,42 @@
 				"name": "Taggr",
 				"one_liner": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
 				"call_to_action": "Đến Taggr",
-				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý.",
-				"carousel": {
-					"text": "Mạng xã hội phi tập trung - đăng bài, kiếm tiền, sở hữu.",
-					"call_to_action": "Tìm hiểu thêm"
-				}
+				"description": "Taggr là một nền tảng truyền thông xã hội phi tập trung hoàn toàn hoạt động trên một mạng máy tính phân tán công cộng được cung cấp bởi Internet Computer. Không giống như các nền tảng truyền thông xã hội truyền thống do các tập đoàn kiểm soát, Taggr hoàn toàn do người dùng sở hữu và quản lý."
 			},
 			"toolkit": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Toolkit",
+				"one_liner": "Một sự đổi mới trong quản trị DAO",
+				"description": "Toolkit là bộ công cụ đa năng để quản lý các Service Nervous Systems (SNS) và dự án trên Internet Computer. Từ các đề xuất quản trị đến việc triển khai canister, nó trao quyền cho người dùng để đổi mới, hợp tác và phân quyền một cách liền mạch"
+			},
+			"altitudefi": {
+				"name": "Altitude",
+				"one_liner": "Altitude chủ động quản lý nợ và tài sản thế chấp của người dùng theo thời gian thực, tối ưu hóa hiệu quả sử dụng vốn.",
+				"description": "Các khoản vay trong DeFi (Tài chính phi tập trung) thường yêu cầu thế chấp quá mức và kém hiệu quả về vốn. Altitude là một giao thức phi lưu ký (non-custodial protocol) giúp tối ưu hóa các khoản vay DeFi. Altitude chủ động quản lý nợ và tài sản thế chấp của người dùng theo thời gian thực, tối ưu hóa hiệu quả sử dụng vốn."
+			},
+			"usdai": {
+				"name": "USD.AI",
+				"one_liner": "Một giao thức đồng đô la tổng hợp, hỗ trợ USDai bằng cơ sở hạ tầng tính toán AI tạo ra thu nhập và mang lại lợi nhuận thông qua sUSDai.",
+				"description": "USD.AI là một giao thức đồng đô la tổng hợp, được hỗ trợ bởi cơ sở hạ tầng tính toán AI tạo ra thu nhập, tạo ra một stablecoin phi tập trung có tên là USDai. Người dùng có thể giữ hoặc stake USDai để kiếm sUSDai, một phiên bản sinh lời phản ánh thu nhập của giao thức. Hệ thống này được thiết kế để tạo ra một giải pháp thay thế phi tập trung, hiệu quả và có thể kết hợp cho các stablecoin được hỗ trợ bằng tiền pháp định."
+			},
+			"caffeine": {
+				"name": "Caffeine",
+				"one_liner": "Nền tảng đầu tiên để xây dựng các ứng dụng tự viết.",
+				"call_to_action": "Thử Caffeine",
+				"description": "Caffeine là nền tảng đầu tiên để xây dựng các ứng dụng tự viết. Chỉ cần trò chuyện với AI trên máy tính hoặc điện thoại, nó sẽ tạo ra các ứng dụng và dịch vụ cho bạn – bao gồm cả những ứng dụng kết nối với Ví OISY. Trải nghiệm tương lai của việc phát triển ứng dụng với khả năng sáng tạo được hỗ trợ bởi AI.",
+				"carousel": {
+					"text": "Xin chào, internet tự viết",
+					"call_to_action": "Tìm hiểu thêm"
+				}
 			}
 		}
 	},
 	"rewards": {
 		"text": {
 			"title": "Phần thưởng",
-			"upcoming_campaigns": "$oisy_short Sprinkles: Phần 4 sắp ra mắt!<br>Hãy theo dõi để cập nhật",
+			"upcoming_campaigns": "Chiến dịch sắp tới",
 			"active_date": "Kết thúc vào",
 			"ended_date": "Kết thúc vào",
+			"upcoming_date": "Bắt đầu vào",
 			"share": "Chia sẻ trên X",
 			"learn_more": "Tìm hiểu thêm",
 			"check_status": "Kiểm tra trạng thái & tư cách đủ điều kiện",
@@ -331,16 +367,18 @@
 			"activity_button_text": "Kiểm tra hoạt động gần đây",
 			"activity_button_text_short": "Kiểm tra hoạt động",
 			"open_wallet": "Đưa tôi đến ví",
-			"carousel_slide_title": "$oisy_short Sprinkles Tập 4 hiện đã có!",
+			"carousel_slide_title": "$oisy_short Sprinkles Tập 5 hiện đã có!",
 			"carousel_slide_cta": "Tìm hiểu thêm",
 			"sprinkles_earned": "Bạn đã kiếm được $noOfSprinkles sprinkles, tổng cộng $amount! 🎉",
 			"youre_eligible": "Bạn đủ điều kiện!",
+			"not_eligible": "Không đủ điều kiện",
 			"ongoing": "Đang diễn ra",
 			"ended": "Đã kết thúc ($amount)",
 			"banner_text": "Kiếm phần thưởng hàng ngày với OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Tiêu chí đủ điều kiện",
+			"network_bonus_info": "Mỗi mạng lưới mà bạn nắm giữ tài sản sẽ mang lại cho bạn một hệ số thưởng. Bạn càng sử dụng nhiều mạng lưới, bạn càng nhận được nhiều phần thưởng!",
 			"min_logins": "Đăng nhập $loginsx lần trong $days ngày qua",
 			"min_transactions": "Hoàn thành $transactions giao dịch trong $days ngày qua",
 			"min_total_assets_usd": "Giữ $$usd giá trị token tại thời điểm phát hành",
@@ -348,7 +386,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Hãy theo dõi các đợt phát token sắp tới! <a href=\"https://x.com/oisy\" target=\"_blank\">Theo dõi chúng tôi trên X</a>, tham gia <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a> của chúng tôi hoặc tham gia <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> để cập nhật thông tin.",
-			"coming_soon": "Phần 4 của $oisy_short sắp ra mắt",
+			"coming_soon": "Phần 6 của $oisy_short sắp ra mắt",
 			"reward_banner": "Biểu ngữ của chiến dịch $campaignName"
 		},
 		"campaigns": {
@@ -411,6 +449,36 @@
 						"share_href": "https://x.com/intent/post?text=I%20signed%20up%20for%20%40OISY%20and%20got%20Sprinkles.%0ASo%20did%20the%20friend%20who%20referred%20me.%20Win-win.%0ACheck%20OISY.com"
 					}
 				}
+			},
+			"sprinkles_s1e5": {
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Tập 5 đã có mặt 🎊",
+				"one_liner": "Nhận Sprinkles khi hoạt động tích cực, giới thiệu người khác và sử dụng OISY trên nhiều chuỗi. Hành động của bạn sẽ giúp tăng phần thưởng, và lượt giới thiệu tích cực sẽ giúp tăng thêm phần thưởng.<br/>Thêm vào đó, giờ đây, càng nhiều chuỗi thì cơ hội chiến thắng càng cao.",
+				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
+				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"win": {
+					"default": {
+						"title": "Bạn đã được thưởng",
+						"description": "Phần thưởng của bạn vừa được gửi vào ví của bạn.<br>Đừng quên giới thiệu và duy trì hoạt động để giành được nhiều hơn.",
+						"share_href": ""
+					},
+					"jackpot": {
+						"title": "Bạn đã giành được phần thưởng hàng tuần",
+						"description": "Bạn vừa nhận được một trong những phần thưởng hàng tuần của chúng tôi.<br>Hãy tích cực và tiếp tục giới thiệu để giành được nhiều phần thưởng hơn.",
+						"share_href": ""
+					},
+					"leaderboard": {
+						"title": "Bạn đã đứng đầu Bảng xếp hạng",
+						"description": "Bạn đã được xếp hạng trong top 4 người giới thiệu hàng đầu mùa này<br>200$ đã được thêm vào ví của bạn",
+						"share_href": ""
+					},
+					"referral": {
+						"title": "Đây là một lời cảm ơn nhỏ",
+						"description": "Một trong những người dùng được bạn giới thiệu vừa nhận được một số sprinkles.",
+						"share_href": ""
+					}
+				}
 			}
 		}
 	},
@@ -420,7 +488,7 @@
 			"by": "bởi",
 			"dfinity_foundation": "DFINITY Foundation",
 			"copyright": "© 2025",
-			"ai_assistant_console_button": ""
+			"ai_assistant_console_button": "Trợ lý $oisy_short"
 		},
 		"alt": {
 			"dfinity": "Truy cập trang web DFINITY Foundation"
@@ -468,7 +536,6 @@
 			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
-			"eth_address_unknown": "Địa chỉ ETH không xác định.",
 			"loading_address": "Lỗi khi tải địa chỉ $symbol.",
 			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
 			"erc20_contracts": "Lỗi khi tải các hợp đồng ERC20.",
@@ -486,15 +553,17 @@
 			"btc_withdrawal_statuses": "Lỗi khi tìm nạp trạng thái rút BTC.",
 			"transaction_price": "Lỗi khi tải ước tính giá của một giao dịch.",
 			"icrc_canisters": "Lỗi khi tải các canister ICRC.",
-			"erc20_custom_tokens": "",
-			"erc721_custom_tokens": "",
-			"erc1155_custom_tokens": "",
+			"icrc_canister_loading": "Token với canister Ledger $ledgerCanisterId không thể được tải vì hiện tại nó không phản hồi.",
+			"erc20_custom_tokens": "Lỗi khi tải các token ERC20.",
+			"erc721_custom_tokens": "Lỗi khi tải các token ERC721.",
+			"erc1155_custom_tokens": "Lỗi khi tải các token ERC1155.",
 			"erc20_user_tokens": "Lỗi khi tải các token người dùng ERC20.",
-			"spl_custom_tokens": "",
+			"spl_custom_tokens": "Lỗi khi tải các token tùy chỉnh SPL.",
 			"erc20_user_token": "Lỗi khi bật token đôi ERC20.",
 			"icrc_custom_token": "Lỗi khi tải token tùy chỉnh ICRC.",
 			"loading_wallet_timeout": "Ví của bạn yêu cầu một số dữ liệu ban đầu chưa được tải. Vui lòng thử lại.",
 			"allow_signing": "Đã xảy ra sự cố khi thiết lập ví của bạn để ký. Bạn đã bị đăng xuất. Nếu sự cố vẫn tiếp diễn, hãy liên hệ bộ phận hỗ trợ.",
+			"waiting_for_allowed_cycles_aborted": "Đã hủy bỏ quá trình chuẩn bị cycles ledger. Vui lòng thử đăng nhập lại sau.",
 			"btc_wallet_error": "Lỗi khi tải thông tin ví BTC.",
 			"sol_wallet_error": "Lỗi khi tải thông tin ví SOL."
 		}
@@ -509,12 +578,13 @@
 			"tooltip_toggle_balance": "Nhấp đúp để ẩn/hiện số dư"
 		},
 		"alt": {
-			"toggle_privacy_mode": ""
+			"toggle_privacy_mode": "Bật chế độ riêng tư để ẩn số dư của bạn"
 		}
 	},
 	"settings": {
 		"text": {
 			"title": "Cài đặt",
+			"general": "Chung",
 			"principal": "Principal của bạn",
 			"principal_copied": "Principal đã được sao chép vào khay nhớ tạm",
 			"principal_description": "ID của bạn cho $oisy_name. Được tạo bởi Internet Identity của bạn.",
@@ -537,7 +607,11 @@
 			"appearance_system": "Hệ thống",
 			"git_disclaimer": "Vì mục đích phát triển, chúng tôi chỉ hiển thị branch và commit trong các canister thử nghiệm.",
 			"git_branch_name": "Branch:",
-			"git_commit_hash": "Commit:"
+			"git_commit_hash": "Commit:",
+			"beta_features": "Tính năng Beta",
+			"enable_beta_feature": "Bật tính tăng beta",
+			"disable_beta_feature": "Tắt tính năng beta",
+			"save_beta_feature_success": "Tính năng beta của bạn đã được cập nhật"
 		},
 		"alt": {
 			"testnets_toggle": "Chuyển đổi để hiển thị hoặc ẩn testnets",
@@ -572,6 +646,7 @@
 		"icp": {
 			"text": {
 				"account_id": "Địa chỉ ICP (Account Id)",
+				"checking_index_canister_status": "Đang kiểm tra trạng thái giao dịch...",
 				"use_for_all_tokens": "Sử dụng cho tất cả các token khi nhận từ ví, người dùng hoặc các ứng dụng khác hỗ trợ định dạng địa chỉ này.",
 				"use_for_icrc_deposit": "Sử dụng để nhận token ICRC-1 trong mạng ICP, chẳng hạn như token SMS, ck, v.v.",
 				"use_for_icp_deposit": "Sử dụng để gửi tiền ICP từ các sàn giao dịch hoặc các ví khác chỉ hỗ trợ Account Id.",
@@ -671,13 +746,17 @@
 			"recently_used_empty_state_description": "Hãy gửi lần đầu tiên ngay bây giờ!",
 			"contacts_empty_state_title": "Danh bạ của bạn sẽ xuất hiện ở đây",
 			"contacts_empty_state_description": "Có vẻ như bạn chưa thêm liên hệ nào",
-			"send_review_subtitle": "Bạn gửi"
+			"send_review_subtitle": "Bạn gửi",
+			"no_nfts_found": "Không NFT nào được tìm thấy",
+			"no_nfts_found_desc": "Điều chỉnh tìm kiếm hoặc mạng của bạn để tìm NFT",
+			"select_nft": "Chọn NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Nhập địa chỉ công khai (0x), tên hoặc biệt danh",
 			"enter_recipient_address": "Nhập địa chỉ người nhận, tên hoặc biệt danh",
 			"enter_wallet_address": "Nhập địa chỉ ví, tên hoặc biệt danh",
-			"select_network": "Chọn mạng"
+			"select_network": "Chọn mạng",
+			"search_nfts": "Tìm kiếm NFT"
 		},
 		"info": {
 			"ckbtc_certified": "Vui lòng đợi cho đến khi các tham số ckBTC được chứng nhận.",
@@ -712,7 +791,14 @@
 			"minter_info_not_certified": "Thử lại sau vài giây, tham số cấu hình ckETH chưa được chứng nhận.",
 			"cketh_max_transaction_fee_missing": "Phí giao dịch tối đa cho ckETH bị thiếu.",
 			"utxos_fee_missing": "Phí UTXO bị thiếu.",
-			"minimum_btc_amount": "Số tiền tối thiểu là $amount BTC."
+			"minimum_btc_amount": "Số tiền quá nhỏ. Vui lòng nhập ít nhất $amount BTC.",
+			"btc_insufficient_balance": "Không có Bitcoin UTXOs khả dụng cho giao dịch",
+			"btc_insufficient_balance_for_fee": "Số dư Bitcoin không đủ để chi trả phí giao dịch",
+			"btc_invalid_utxo_data": "Dữ liệu giao dịch Bitcoin không hợp lệ",
+			"btc_utxo_locked": "Tiền Bitcoin bị khóa bởi các giao dịch đang chờ xử lý",
+			"btc_invalid_fee_calculation": "Xác thực phí giao dịch Bitcoin thất bại",
+			"pending_transactions_not_available": "Dịch vụ giao dịch đang chờ xử lý hiện không khả dụng. Vui lòng thử lại sau.",
+			"no_nft_selected": "Không NFT đã được chọn để gửi"
 		},
 		"error": {
 			"unexpected": "Đã xảy ra lỗi trong khi gửi giao dịch.",
@@ -731,7 +817,8 @@
 			"unexpected_utxos_fee": "Đã xảy ra lỗi trong khi tính phí giao dịch.",
 			"unable_to_retrieve_amount": "không có (không thể truy xuất)",
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
-			"solana_confirmation_failed": ""
+			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
+			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},
 	"convert": {
@@ -795,9 +882,9 @@
 			"approval_fee": "Phí chấp thuận",
 			"gas_fee": "Phí gas",
 			"lp_fee": "Phí LP",
-			"max_slippage_info": "Nhập giá trị từ 0% đến 50%",
+			"max_slippage_info": "Nhập giá trị từ 0% đến $maxSlippage%",
 			"max_slippage_warning": "Cảnh báo rủi ro: độ trượt cao có thể dẫn đến thua lỗ do biến động thị trường",
-			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá 50%",
+			"max_slippage_error": "Dung sai trượt giá không được bằng 0% hoặc vượt quá $maxSlippage%",
 			"swap_button": "Hoán đổi ngay",
 			"swap_is_not_offered": "Hoán đổi này hiện không được cung cấp.",
 			"executing_transaction": "Đang thực hiện giao dịch...",
@@ -815,10 +902,14 @@
 			"select": "Chọn >",
 			"select_swap_provider": "Chọn nhà cung cấp hoán đổi",
 			"open_icp_swap": "Mở trang web ICP Swap",
-			"open_instructions_link": "",
-			"select_token": "",
-			"select_network_filter": "",
-			"withdrawing": ""
+			"open_instructions_link": "Mở liên kết hướng dẫn",
+			"select_token": "Chọn token",
+			"select_network_filter": "Chọn mạng",
+			"withdrawing": "Đang rút...",
+			"network_cost": "Phí mặng lưới",
+			"gasless": "Không phí gas",
+			"swap_fees": "Phí giao dịch",
+			"cross_chain_networks_info": "Bạn di chuyển token từ mạng <b>$sourceNetwork</b> sang mạng <b>$destinationNetwork</b>"
 		},
 		"error": {
 			"kong_not_available": "Hiện tại không có sàn giao dịch nào có sẵn để hoán đổi token. Vui lòng thử lại sau.",
@@ -826,16 +917,16 @@
 			"unexpected_missing_data": "Đã xảy ra lỗi không mong muốn khi khởi tạo giao dịch hoán đổi.",
 			"slippage_exceeded": "$oisy_short bảo vệ bạn: Giao dịch nằm ngoài giới hạn trượt giá $maxSlippage% của bạn. Vui lòng điều chỉnh độ trượt tối đa và thử lại.",
 			"pool_not_found": "Hoán đổi thất bại. Không tìm thấy bể thanh khoản.",
-			"deposit_error": "",
+			"deposit_error": "Nạp tiền cho giao dịch hoán đổi (swap) của bạn không thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
 			"withdraw_failed": "Hoán đổi thất bại và rút tiền cũng thất bại. Vui lòng kiểm tra số dư chưa sử dụng của bạn và thử rút tiền thủ công: ",
-			"swap_failed_withdraw_success": "",
-			"withdraw_failed_first_part": "",
-			"withdraw_failed_second_part": "",
-			"swap_failed_instruction_link": "",
-			"manually_withdraw_success": "",
-			"manually_withdraw_failed": "",
-			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": ""
+			"swap_failed_withdraw_success": "Giao dịch hoán đổi không thành công và token của bạn đã được hoàn lại thành công. Vui lòng thử lại hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
+			"withdraw_failed_first_part": "Giao dịch hoán đổi không thành công và token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
+			"withdraw_failed_second_part": "để rút tiền bất cứ lúc nào sau đó trực tiếp từ trang web của họ: ",
+			"swap_failed_instruction_link": "các hướng dẫn này ",
+			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
+			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
+			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này."
 		}
 	},
 	"buy": {
@@ -898,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Nhập token",
+				"title_nft": "",
 				"review": "Xem lại",
 				"saving": "Đang lưu...",
 				"updating": "Đang cập nhật danh sách token",
@@ -914,7 +1006,7 @@
 				"custom_tokens_not_supported": "Mạng đã chọn không hỗ trợ token tùy chỉnh."
 			},
 			"error": {
-				"loading_metadata": "",
+				"loading_metadata": "Địa chỉ được chỉ định không phải là một token hợp lệ trong mạng đã chọn.",
 				"no_metadata": "Không có metadata nào được cung cấp cho token. Điều này không mong muốn.",
 				"unexpected_ledger": "Đã xảy ra lỗi trong khi xác thực ledger canister.",
 				"unexpected_index": "Đã xảy ra lỗi trong khi xác thực index canister.",
@@ -932,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Quản lý token",
+				"title_nft": "",
 				"manage_list": "Quản lý token",
 				"list_settings": "Cài đặt danh sách",
 				"import_token": "Nhập token",
+				"import_nft": "",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
 				"enable_more_assets": "Kích hoạt thêm token"
@@ -979,7 +1073,7 @@
 			"invalid_contract_address": "Địa chỉ hợp đồng không hợp lệ.",
 			"invalid_token_address": "Địa chỉ token không hợp lệ.",
 			"invalid_ledger": "Token đã chọn không được liên kết với canister ledger của Icrc.",
-			"unrecognised_erc_interface": "",
+			"unrecognised_erc_interface": "Không nhận diện được giao diện ERC20.",
 			"no_metadata": "Không có metadata nào được tìm thấy.",
 			"unexpected": "Đã xảy ra lỗi trong khi lưu token.",
 			"unexpected_hiding": "Đã xảy ra lỗi trong khi ẩn token.",
@@ -994,15 +1088,59 @@
 	},
 	"nfts": {
 		"text": {
-			"title": "",
-			"title_empty": "",
-			"description_empty": ""
+			"title": "NFTs",
+			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
+			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
+			"grouping": "Nhóm",
+			"as_plain_list": "Hiển thị dưới dạng danh sách đơn giản",
+			"by_collection": "Nhóm theo bộ sưu tập",
+			"show_spam": "Hiển thị spam",
+			"show_hidden": "Hiển thị ẩn",
+			"sorting": "Sắp xếp",
+			"recents_first": "Gần đây trước",
+			"oldest_first": "Cũ nhất trước",
+			"collection_atoz": "Tên bộ sưu tập A-Z",
+			"collection_ztoa": "Tên bộ sưu tập Z-A",
+			"collection_items_count": "$count vật phẩm",
+			"collection_address": "Địa chỉ hợp đồng của bộ sưu tập",
+			"token_standard": "Tiêu chuẩn token",
+			"quantity": "Số lượng",
+			"item_traits": "Đặc điểm vật phẩm",
+			"collection_not_loaded": "Không thể hiển thị bộ sưu tập do chưa được tải",
+			"nft_not_loaded": "Không thể hiển thị NFT do chưa được tải",
+			"collections": "Các bộ sưu tập",
+			"all_assets": "Tất cả tài sản",
+			"address_copied": "Đã sao chép địa chỉ $address",
+			"spam": "Spam",
+			"not_spam": "Không phải spam",
+			"hide": "Ẩn",
+			"unhide": "Bỏ ẩn",
+			"hidden": "Đã ẩn",
+			"open_explorer": "Mở hợp đồng này trong trình khám phá blockchain",
+			"img_consent_disabled": "Bạn đã tắt hình ảnh từ bộ sưu tập này",
+			"img_consent_none": "Hình ảnh bị tắt vì lý do bảo mật",
+			"review_button": "Xem lại",
+			"collection_name": "Tên bộ sưu tập",
+			"media_urls": "URL media",
+			"display_preference": "Tùy chọn hiển thị",
+			"review_preference": "Tùy chọn xem lại",
+			"media_enabled": "Media đã bật",
+			"media_disabled": "Media đã tắt",
+			"enable_media": "Bật media",
+			"disable_media": "Tắt media",
+			"open_in_new_tab": "Mở trong tab mới",
+			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
+			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
+			"learn_more": "Tìm hiểu thêm",
+			"token_id": "ID token"
 		},
 		"alt": {
-			"placeholder_image": "",
+			"placeholder_image": "Chưa có NFT nào",
 			"card": {
-				"image": ""
-			}
+				"image": "Hình ảnh NFT với ID token: $tokenId"
+			},
+			"copy_address": "Sao chép địa chỉ này vào clipboard",
+			"review_preference": "Thay đổi tùy chọn hiển thị"
 		}
 	},
 	"fee": {
@@ -1051,11 +1189,16 @@
 			"scan_qr": "Quét mã QR",
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
+			"spender": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
 			"methods": "Hàm",
 			"events": "Sự kiện",
 			"message": "Tin nhắn",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dữ liệu HEX",
 			"raw_copied": "Dữ liệu giao dịch thô đã được sao chép vào khay nhớ tạm.",
 			"sign_message": "Ký Tin Nhắn"
@@ -1142,8 +1285,8 @@
 			"withdraw": "Rút",
 			"deposit": "Tiền gửi",
 			"approve": "Chấp thuận",
-			"burn": "",
-			"mint": ""
+			"burn": "Đốt",
+			"mint": "Tạo"
 		},
 		"label": {
 			"reimbursement": "Hoàn tiền",
@@ -1183,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Lỗi khi tải các giao dịch.",
 			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",
-			"no_token_loading_transaction": "Không tìm thấy token. Không thể tải các giao dịch.",
 			"uncertified_transactions_removed": "Một số giao dịch chưa được chứng nhận đã được xác định và sau đó bị xóa khỏi danh sách hiển thị.",
 			"loading_pending_ck_ethereum_transactions": "Đã xảy ra lỗi trong khi tìm nạp các giao dịch $network đang chờ xử lý.",
 			"get_transaction_for_hash": "Không thể lấy giao dịch từ (hash: $hash) được cung cấp.",
@@ -1233,12 +1375,12 @@
 				"reward_received": "Chào mừng đến với $oisy_short!",
 				"reward_failed": "Mã đã hết hạn",
 				"reward_received_description": "Bạn sẽ nhận được món quà chào mừng của mình bất cứ lúc nào.",
+				"brand_reward_received_description": "Bạn muốn kiếm thêm thu nhập? Hãy giới thiệu bạn bè và nhận thưởng cho mỗi người tham gia.",
 				"reward_failed_description": "Yêu cầu một cái mới và thử lại"
 			},
 			"error": {
 				"loading_reward": "Lỗi khi tải mã phần thưởng mới.",
 				"loading_user_data": "Không tải được dữ liệu người dùng từ canister phần thưởng.",
-				"claiming_reward": "Lỗi khi yêu cầu phần thưởng.",
 				"loading_eligibility": "Lỗi khi tải tính đủ điều kiện của chiến dịch."
 			}
 		},
@@ -1292,7 +1434,7 @@
 		"avatar": {
 			"default": "Ảnh đại diện mặc định",
 			"avatar_for": "Ảnh đại diện cho",
-			"avatar_loading": ""
+			"avatar_loading": "Ảnh đại diện đang tải..."
 		},
 		"edit_avatar": {
 			"menu_title": "Chỉnh sửa hình đại diện",
@@ -1434,10 +1576,24 @@
 			"indicator": "Chuyển đến trang chiếu $index"
 		}
 	},
+	"agreements": {
+		"text": {
+			"review_title": "Xem Điều khoản & Điều kiện",
+			"review_updated_title": " Xem Điều khoản & Điều kiện đã cập nhật",
+			"review_description": "Trước khi sử dụng OISY Wallet, bạn phải xem và đồng ý với Điều khoản Dịch vụ và Chính sách Quyền riêng tư của chúng tôi. Các tài liệu này giải thích các quy tắc của dịch vụ và cách chúng tôi bảo vệ dữ liệu của bạn.",
+			"review_updated_description": "Để tiếp tục sử dụng OISY Wallet, vui lòng xem và đồng ý với Điều khoản Dịch vụ và Chính sách Quyền riêng tư đã cập nhật của chúng tôi. Những thay đổi này rất quan trọng để giữ cho dịch vụ của chúng tôi an toàn và tuân thủ.",
+			"reject_warning": "Bạn phải chấp nhận Điều khoản và Điều kiện để tiếp tục. Bạn có thể thử lại bất cứ lúc nào.",
+			"i_have_accepted": "Tôi đã đọc và đồng ý với",
+			"i_have_accepted_updated": "Tôi đã đọc và đồng ý với phiên bản cập nhật của",
+			"accept_and_continue": "Chấp nhận và tiếp tục"
+		},
+		"error": {
+			"cannot_update_user_agreements": "Đã xảy ra lỗi khi cập nhật các thỏa thuận của bạn."
+		}
+	},
 	"license_agreement": {
 		"text": {
-			"accept_terms": "Bằng cách nhấp vào nút này, bạn đồng ý với",
-			"accept_terms_link": "Thỏa thuận cấp phép",
+			"license_agreement": "Thỏa thuận cấp phép",
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
 			"paragraph_1": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung ví đa chuỗi, tự quản lý dựa trên trình duyệt được lưu trữ trên mạng blockchain công khai Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ GitHub của $oisy_short tại đây: $oisy_repo_url.",
 			"paragraph_2": "Thỏa thuận cấp phép này điều chỉnh việc bạn (“Bạn”) sử dụng $oisy_short. BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.",
@@ -1454,10 +1610,31 @@
 			"entire_agreement": "<strong>10. TOÀN BỘ THỎA THUẬN VÀ TÍNH KHẢ PHÂN.</strong> Thỏa thuận cấp phép này là toàn bộ thỏa thuận giữa Bạn và DFINITY và thay thế bất kỳ và tất cả các thỏa thuận, đàm phán hoặc thông tin liên lạc trước đó giữa Bạn và DFINITY, dù bằng lời nói hay văn bản, liên quan đến vấn đề này. DFINITY có thể thực hiện các thay đổi đối với Thỏa thuận cấp phép này khi các phiên bản mới của $oisy_short được cung cấp. Trong trường hợp bất kỳ điều khoản nào của Thỏa thuận cấp phép này được coi là không hợp lệ hoặc không thể thực thi, thì: (a) điều khoản đó sẽ được coi là đã được sửa đổi trong phạm vi cần thiết để làm cho điều khoản đó hợp lệ và có thể thực thi, hoặc nếu không thể sửa đổi, sẽ được coi là tách rời khỏi Thỏa thuận cấp phép này; và (b) tính hợp lệ và khả năng thực thi của tất cả các điều khoản khác của tài liệu này sẽ không bị ảnh hưởng hoặc suy giảm dưới bất kỳ hình thức nào.",
 			"assignment": "<strong>11. CHUYỂN NHƯỢNG.</strong> Bạn không được chuyển nhượng Thỏa thuận cấp phép này mà không có sự đồng ý trước bằng văn bản của DFINITY, dù rõ ràng hay theo quy định của pháp luật, bao gồm cả việc sáp nhập hoặc thay đổi quyền kiểm soát, và bất kỳ nỗ lực chuyển nhượng nào như vậy sẽ vô hiệu. DFINITY có thể chuyển nhượng Thỏa thuận cấp phép này mà không bị hạn chế và không cần thông báo cho bạn. Theo đó, Thỏa thuận cấp phép này sẽ ràng buộc các bên và những người kế nhiệm và người được chỉ định hợp pháp của họ.",
 			"no_waiver": "<strong>12. KHÔNG TỪ BỎ.</strong> Việc không thực hiện hoặc trì hoãn thực hiện một quyền, quyền hạn hoặc biện pháp khắc phục được quy định trong Thỏa thuận cấp phép này hoặc theo luật sẽ không cấu thành việc từ bỏ quyền, quyền hạn hoặc biện pháp khắc phục đó. Việc DFINITY từ bỏ bất kỳ nghĩa vụ hoặc vi phạm nào của Thỏa thuận cấp phép này sẽ không được coi là từ bỏ bất kỳ nghĩa vụ nào khác hoặc vi phạm tiếp theo của Thỏa thuận cấp phép.",
-			"english_version": "<strong>13. PHIÊN BẢN TIẾNG ANH.</strong> Phiên bản tiếng Anh của Thỏa thuận cấp phép này sẽ là phiên bản chính thức và có giá trị chi phối của thỏa thuận nếu có bất kỳ xung đột nào phát sinh. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận cấp phép này phải bằng tiếng Anh."
+			"english_version": "<strong>13. PHIÊN BẢN TIẾNG ANH.</strong> Phiên bản tiếng Anh của Thỏa thuận cấp phép này sẽ là phiên bản chính thức và có giá trị chi phối của thỏa thuận nếu có bất kỳ xung đột nào phát sinh. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận cấp phép này phải bằng tiếng Anh.",
+			"body": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung dạng ví tự quản lý, chạy trên trình duyệt và đa chuỗi, được lưu trữ trên mạng lưới blockchain công cộng Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ github của $oisy_short tại đây: $oisy_repo_url.\n\nThỏa thuận Cấp phép này điều chỉnh việc bạn sử dụng $oisy_short (\\\"Bạn\\\"). BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.\n\nNếu Bạn chọn sử dụng $oisy_short, Bạn và Quỹ DFINITY, bao gồm các chi nhánh và công ty con của nó (gọi chung là “DFINITY”), thừa nhận và đồng ý với các điều sau:\n\n### 1. GIẤY PHÉP CÓ GIỚI HẠN.\n\nTheo các điều khoản và điều kiện trong Thỏa thuận Cấp phép này, DFINITY cấp cho Bạn một giấy phép có giới hạn, không độc quyền, không thể chuyển nhượng, không thể cấp phép lại và có thể hủy bỏ để sử dụng $oisy_short chỉ với mục đích nhận, giữ và gửi các token như ICP gốc, ICRC-1, ETH và các token ERC20, cũng như các token khác có thể được cung cấp theo thời gian. Bạn có thể tạo các tác phẩm phái sinh trong phạm vi được cho phép bởi các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần mã nguồn mở nào có trong $oisy_short.\n\n### 2. CÁC HẠN CHẾ.\n\nBạn chịu trách nhiệm cho tất cả các hoạt động liên quan đến việc sử dụng $oisy_short, bất kể các hoạt động đó có được Bạn cho phép hay do Bạn, nhân viên của Bạn hoặc một bên thứ ba thay mặt Bạn thực hiện. BẠN HIỂU RẰNG DFINITY KHÔNG CHỊU TRÁCH NHIỆM VỚI BẤT KỲ HOẠT ĐỘNG HOẶC GIAO DỊCH NÀO (DÙ ĐÃ HOÀN TẤT HAY CHƯA) LIÊN QUAN ĐẾN $oisy_name CỦA BẠN. Bạn sẽ không trình bày sai hoặc phóng đại mối quan hệ giữa Bạn và DFINITY, bao gồm việc thể hiện hoặc ngụ ý rằng DFINITY hỗ trợ, tài trợ, xác nhận hoặc đóng góp cho Bạn hoặc các hoạt động kinh doanh của Bạn thông qua việc sử dụng $oisy_short. Bạn sẽ không ngụ ý bất kỳ mối quan hệ hoặc liên kết nào với DFINITY ngoại trừ những gì được Thỏa thuận Cấp phép này cho phép một cách rõ ràng. Bạn bị cấm sử dụng tên, logo $oisy_short hoặc bất kỳ nhãn hiệu nào khác liên quan đến $oisy_short theo bất kỳ cách nào có thể ngụ ý sự xác nhận hoặc liên kết, trình bày sai mối quan hệ của bạn với $oisy_short hoặc tạo ra sự nhầm lẫn về nguồn gốc của $oisy_short.\n\n### 3. CÁC LUẬT ÁP DỤNG.\n\nBạn sẽ tuân thủ tất cả các luật và quy định hiện hành (bao gồm nhưng không giới hạn các luật và quy định liên quan đến kiểm soát xuất khẩu, rửa tiền hoặc trừng phạt kinh tế) liên quan đến việc sử dụng $oisy_short và bất kỳ giao dịch nào liên quan đến $oisy_name của bạn.\n\n### 4. BẢO LƯU QUYỀN CỦA DFINITY.\n\n$oisy_short thuộc sở hữu của DFINITY và được cấp phép, không phải bán, cho Bạn. Nội dung, giao diện trực quan, tính năng tương tác, thông tin, đồ họa, thiết kế, bản biên soạn, mã máy tính, sản phẩm, dịch vụ và tất cả các yếu tố khác của $oisy_short và các tài liệu liên quan đều được bảo vệ bởi các luật sở hữu trí tuệ hiện hành. Giữa Bạn và DFINITY, tất cả các tài liệu của DFINITY và $oisy_short, bao gồm các quyền sở hữu trí tuệ trong và đối với chúng, là tài sản duy nhất và độc quyền của DFINITY hoặc các công ty con hoặc công ty liên kết và/hoặc các bên cấp phép bên thứ ba của nó, tuân theo bất kỳ giấy phép phần mềm mã nguồn mở nào. DFINITY bảo lưu tất cả các quyền không được cấp rõ ràng trong Thỏa thuận Cấp phép này. Bạn không có được bất kỳ quyền, quyền sở hữu hoặc lợi ích nào đối với các tài liệu của DFINITY hoặc $oisy_short, dù là do ngụ ý, cấm đoán hay cách khác, ngoại trừ các quyền giới hạn được nêu trong Thỏa thuận Cấp phép này và các quyền được trao bởi các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần mã nguồn mở nào có trong $oisy_short. Thỏa thuận Cấp phép này không cấp cho bạn bất kỳ quyền nào để sử dụng tên, logo $oisy_short hoặc các nhãn hiệu khác liên quan đến $oisy_short hoặc DFINITY.\n\n### 5. PHẢN HỒI.\n\nNếu Bạn cung cấp cho DFINITY bất kỳ nhận xét, ý tưởng, báo cáo lỗi, phản hồi, cải tiến, đề xuất hoặc sửa đổi nào liên quan đến $oisy_short (\\\"Phản hồi\\\"), Phản hồi đó được cung cấp trên cơ sở không bảo mật và DFINITY sẽ có quyền sử dụng Phản hồi đó theo ý mình, bao gồm nhưng không giới hạn việc kết hợp các thay đổi được đề xuất đó vào các tài liệu của DFINITY, $oisy_short hoặc các dịch vụ khác. Bạn theo đây cấp cho DFINITY một giấy phép vĩnh viễn, không thể hủy ngang, có thể chuyển nhượng, có thể cấp phép lại, không độc quyền, miễn phí bản quyền theo tất cả các quyền cần thiết để kết hợp và sử dụng Phản hồi của bạn cho bất kỳ mục đích nào, bao gồm cả việc tạo và bán các sản phẩm và dịch vụ, và đồng ý cung cấp cho DFINITY bất kỳ sự hỗ trợ nào cần thiết để ghi chép, hoàn thiện và duy trì các quyền của DFINITY đối với Phản hồi. Bạn đồng ý cho phép DFINITY liên hệ với Bạn để lấy Phản hồi theo thời gian, nhưng có thể từ chối bằng cách gửi thông báo bằng văn bản đến legalnotice@dfinity.org.\n\n### 6. ĐIỀU KHOẢN VÀ CHẤM DỨT.\n\nThỏa thuận Cấp phép này sẽ có hiệu lực cho đến khi bị chấm dứt. Thỏa thuận Cấp phép và các quyền và giấy phép của bạn theo đây sẽ chấm dứt ngay lập tức khi bạn vi phạm Thỏa thuận Cấp phép. Bạn có thể chấm dứt Thỏa thuận Cấp phép bất cứ lúc nào bằng cách xóa hết token khỏi $oisy_name của bạn và ngừng mọi hoạt động sử dụng $oisy_short. DFINITY có thể chấm dứt Thỏa thuận Cấp phép này bất cứ lúc nào vì bất kỳ lý do gì, bao gồm nhưng không giới hạn bất kỳ hành vi lạm dụng hoặc sử dụng sai mục đích nào của Bạn đối với $oisy_short hoặc bất kỳ vi phạm nào của Thỏa thuận Cấp phép này. Các mục từ 3 đến 13 sẽ vẫn có hiệu lực sau khi Thỏa thuận Cấp phép này chấm dứt.\n\n### 7. TUYÊN BỐ MIỄN TRỪ BẢO HÀNH VÀ GIỚI HẠN TRÁCH NHIỆM.\n\nĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, $oisy_short ĐƯỢC CUNG CẤP TRÊN CƠ SỞ \\\"NGUYÊN TRẠNG\\\", KHÔNG CÓ BẤT KỲ BẢO HÀNH NÀO. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, DFINITY TỪ CHỐI TẤT CẢ CÁC BẢO HÀNH VÀ ĐIỀU KIỆN, DÙ RÕ RÀNG, NGỤ Ý, THEO LUẬT ĐỊNH HAY CÁCH KHÁC, BAO GỒM NHƯNG KHÔNG GIỚI HẠN CÁC BẢO HÀNH HOẶC ĐIỀU KIỆN NGỤ Ý VỀ SỰ PHÙ HỢP CHO MỘT MỤC ĐÍCH CỤ THỂ, KHẢ NĂNG TIÊU THỤ, QUYỀN SỞ HỮU, CHẤT LƯỢNG, KẾT QUẢ VÀ KHÔNG VI PHẠM. DFINITY KHÔNG ĐẢM BẢO RẰNG $oisy_short SẼ LUÔN LUÔN CÓ SẴN, AN TOÀN HOẶC BẢO MẬT (HIỆN TẠI VÀ TRONG TƯƠNG LAI). DFINITY TUYÊN BỐ MIỄN TRỪ BẤT KỲ BẢO HÀNH NÀO DƯỚI BẤT KỲ HÌNH THỨC NÀO ĐỐI VỚI TÍNH CHÍNH XÁC HOẶC CHỨC NĂNG CỦA $oisy_short, VÀ ĐỐI VỚI TÍNH CHÍNH XÁC, TÍNH HỢP LỆ HOẶC TÍNH ĐẦY ĐỦ CỦA BẤT KỲ THÔNG TIN HOẶC TÍNH NĂNG NÀO (HIỆN TẠI VÀ TRONG TƯƠNG LAI) ĐƯỢC CUNG CẤP THÔNG QUA VIỆC SỬ DỤNG $oisy_short CỦA BẠN, HOẶC CHẤT LƯỢNG HOẶC TÍNH NHẤT QUÁN CỦA $oisy_short HOẶC CÁC KẾT QUẢ CÓ ĐƯỢC TỪ VIỆC SỬ DỤNG NÓ. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, TRONG MỌI TRƯỜNG HỢP DFINITY SẼ KHÔNG CHỊU TRÁCH NHIỆM VỚI BẤT KỲ THIỆT HẠI NÀO DO HẬU QUẢ, ĐẶC BIỆT, GIÁN TIẾP, NGẪU NHIÊN HOẶC TRỪNG PHẠT PHÁT SINH TỪ VIỆC SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG VÀ TRUY CẬP $oisy_short HOẶC TÀI LIỆU CỦA DFINITY, NGAY CẢ KHI DFINITY ĐÃ ĐƯỢC TƯ VẤN VỀ KHẢ NĂNG XẢY RA THIỆT HẠI NHƯ VẬY, VÀ BẤT KỂ VIỆC KHÔNG ĐẠT ĐƯỢC MỤC ĐÍCH CỐT LÕI CỦA BẤT KỲ BIỆN PHÁP KHẮC PHỤC HẠN CHẾ NÀO. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, TRONG MỌI TRƯỜNG HỢP, TỔNG TRÁCH NHIỆM PHÁP LÝ CỦA DFINITY ĐỐI VỚI THIỆT HẠI PHÁT SINH TỪ THỎA THUẬN CẤP PHÉP NÀY HOẶC VIỆC BẠN SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG $oisy_short SẼ KHÔNG VƯỢT QUÁ 100 CHF.\n\n### 8. BỒI THƯỜNG.\n\nBạn đồng ý bồi thường, bảo vệ và giữ cho DFINITY và các chi nhánh, cán bộ, giám đốc, nhà cung cấp, bên cấp phép và các khách hàng khác của họ không bị tổn hại trước và chống lại bất kỳ và tất cả trách nhiệm pháp lý và chi phí nào, bao gồm cả phí luật sư hợp lý mà các bên đó phải chịu, liên quan đến việc bạn sử dụng hoặc lạm dụng $oisy_short hoặc việc bạn vi phạm Thỏa thuận Cấp phép này hoặc bất kỳ luật hoặc quy định hiện hành nào.\n\n### 9. LUẬT ĐIỀU CHỈNH; ĐỊA ĐIỂM.\n\nBất kỳ khiếu nại nào liên quan đến $oisy_short sẽ được điều chỉnh bởi luật pháp của Thụy Sĩ, không bao gồm các quy tắc về xung đột pháp luật. Bất kỳ khiếu nại hoặc tranh chấp nào liên quan đến Thỏa thuận Cấp phép này hoặc liên quan đến nó (bao gồm cả các tranh chấp hoặc khiếu nại ngoài hợp đồng và việc giải thích chúng) sẽ thuộc thẩm quyền độc quyền của Tòa án Zurich, Thụy Sĩ, có thể kháng cáo tại Tòa án Liên bang Thụy Sĩ.\n\n### 10. TOÀN BỘ THỎA THUẬN VÀ TÍNH KHẢ PHÂN TÁCH.\n\nThỏa thuận Cấp phép này là toàn bộ thỏa thuận giữa Bạn và DFINITY, và thay thế bất kỳ và tất cả các thỏa thuận, đàm phán hoặc thông tin liên lạc khác trước đó giữa Bạn và DFINITY, dù bằng lời nói hay bằng văn bản, liên quan đến chủ đề của tài liệu này. DFINITY có thể thực hiện các thay đổi đối với Thỏa thuận Cấp phép này khi các phiên bản mới của $oisy_short được cung cấp. Trong trường hợp bất kỳ điều khoản nào của Thỏa thuận Cấp phép này bị coi là không hợp lệ hoặc không thể thực thi, thì: (a) điều khoản đó sẽ được coi là đã được sửa đổi trong phạm vi cần thiết để làm cho điều khoản đó hợp lệ và có thể thực thi, hoặc nếu không thể sửa đổi như vậy sẽ được coi là bị tách ra khỏi Thỏa thuận Cấp phép này; và (b) tính hợp lệ và khả năng thực thi của tất cả các điều khoản khác của tài liệu này sẽ không bị ảnh hưởng hoặc suy giảm theo bất kỳ cách nào.\n\n### 11. CHUYỂN NHƯỢNG.\n\nBạn không được chuyển nhượng Thỏa thuận Cấp phép này nếu không có sự đồng ý trước bằng văn bản của DFINITY, dù là rõ ràng hay do luật định, bao gồm cả trong trường hợp sáp nhập hoặc thay đổi quyền kiểm soát, và bất kỳ nỗ lực chuyển nhượng nào như vậy sẽ vô hiệu và không có hiệu lực. DFINITY có thể chuyển nhượng Thỏa thuận Cấp phép này mà không bị hạn chế và không cần thông báo cho Bạn. Tuân theo các điều khoản trên, Thỏa thuận Cấp phép này sẽ ràng buộc các bên và những người kế thừa và người được chuyển nhượng hợp pháp của họ.\n\n### 12. KHÔNG TỪ BỎ.\n\nViệc không thực hiện, hoặc trì hoãn việc thực hiện, một quyền, quyền lực hoặc biện pháp khắc phục được quy định trong Thỏa thuận Cấp phép này hoặc theo luật pháp sẽ không cấu thành sự từ bỏ quyền, quyền lực hoặc biện pháp khắc phục đó. Việc DFINITY từ bỏ bất kỳ nghĩa vụ hoặc vi phạm nào của Thỏa thuận Cấp phép này sẽ không có tác dụng như một sự từ bỏ bất kỳ nghĩa vụ nào khác hoặc vi phạm tiếp theo của Thỏa thuận Cấp phép.\n\n### 13. PHIÊN BẢN TIẾNG ANH.\n\nNếu có bất kỳ xung đột nào phát sinh, phiên bản tiếng Anh của Thỏa thuận Cấp phép này sẽ là phiên bản chính thức và kiểm soát của thỏa thuận. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận Cấp phép này phải bằng tiếng Anh."
 		},
 		"alt": {
 			"license_agreement": "Thỏa thuận cấp phép $oisy_name"
+		}
+	},
+	"terms_of_use": {
+		"text": {
+			"terms_of_use": "Điều khoản sử dụng",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"terms_of_use": "Liên kết đến Điều khoản sử dụng"
+		}
+	},
+	"privacy_policy": {
+		"text": {
+			"privacy_policy": "Chính sách quyền riêng tư",
+			"title": "",
+			"body": ""
+		},
+		"alt": {
+			"privacy_policy": "Liên kết đến Chính sách bảo mật"
 		}
 	},
 	"activity": {
@@ -1488,7 +1665,7 @@
 	"welcome": {
 		"title": "Chào mừng đến với $oisy_short!",
 		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {
@@ -1509,14 +1686,29 @@
 	"ai_assistant": {
 		"text": {
 			"title": "Trợ lý AI $oisy_short",
-			"welcome_message": "Xin chào! 👋 Tôi là OISY, trợ lý AI cá nhân của bạn. Đây là cách tôi có thể giúp bạn:",
+			"welcome_message": "Xin chào! 👋 Tôi là chuyên gia AI cá nhân của bạn. Tôi có thể giúp gì cho bạn?",
 			"action_button_contacts_title": "Hiển thị danh bạ",
 			"action_button_contacts_subtitle": "Hiển thị danh bạ đã lưu của bạn",
 			"action_button_contacts_prompt": "Hiện danh bạ của tôi.",
+			"action_button_send_tokens_title": "Gửi token",
+			"action_button_send_tokens_subtitle": "Chuẩn bị để gửi trong tích tắc",
+			"action_button_send_tokens_prompt": "Tôi muốn gửi một số token",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
+			"select_contact_message": "Chọn một liên hệ để bắt đầu quá trình gửi:",
+			"send_to_message": "Gửi đến $contact_name ($address_info).",
 			"send_message": "Gửi tin nhắn",
 			"send_message_input_placeholder": "Bạn muốn làm gì?",
-			"no_contacts_found_message": "",
-			"loading": "Đang suy nghĩ..."
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
+			"send_token_succeeded": "Giao dịch đã hoàn tất!",
+			"show_total_balance_tool_card_title": "",
+			"no_contacts_found_message": "Rất tiếc, tôi không thể tìm thấy bất kỳ liên hệ phù hợp nào trong sổ địa chỉ của bạn.",
+			"loading": "Đang suy nghĩ...",
+			"reset_chat_history": "Đặt lại lịch sử trò chuyện",
+			"feature_description": "Trợ lý AI cho phép bạn hỏi về các chủ đề tiền điện tử chung, nhận trợ giúp về các tính năng OISY cụ thể và gửi token. Lưu ý rằng không có dữ liệu nhạy cảm nào như địa chỉ của bạn hoặc của các liên hệ của bạn được gửi đến trợ lý và tất cả các giao dịch phải được người dùng xác nhận. Tính năng này vẫn đang trong giai đoạn beta và chúng tôi đang tung ra các tính năng mới một cách thường xuyên."
 		},
 		"errors": {
 			"unknown": "Xin lỗi, đã xảy ra lỗi khi nhận phản hồi từ LLM.",

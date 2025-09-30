@@ -19,9 +19,18 @@
 		amount: OptionAmount;
 		network?: Network;
 		selectedContact?: ContactUi;
+		onBack: () => void;
+		onSend: () => void;
 	}
 
-	const { destination = '', amount, network, selectedContact }: Props = $props();
+	const {
+		destination = '',
+		amount,
+		network: sourceNetwork,
+		selectedContact,
+		onBack,
+		onSend
+	}: Props = $props();
 
 	const {
 		feeStore: fee,
@@ -44,14 +53,18 @@
 	let disableSend = $derived(insufficientFundsForFee || invalid);
 </script>
 
-<SendReview on:icBack on:icSend {amount} {destination} {selectedContact} disabled={disableSend}>
-	<ReviewNetwork sourceNetwork={network} slot="network" />
+<SendReview {amount} {destination} disabled={disableSend} {onBack} {onSend} {selectedContact}>
+	{#snippet network()}
+		<ReviewNetwork {sourceNetwork} />
+	{/snippet}
 
-	<SolFeeDisplay slot="fee" />
+	{#snippet fee()}
+		<SolFeeDisplay />
+	{/snippet}
 
-	<svelte:fragment slot="info">
+	{#snippet info()}
 		{#if insufficientFundsForFee}
 			<InsufficientFundsForFee testId="sol-send-form-insufficient-funds-for-fee" />
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 </SendReview>

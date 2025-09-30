@@ -5,7 +5,6 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import type { LedgerCanisterIdText } from '$icp/types/canister';
 	import type { OptionIcrcCustomToken } from '$icp/types/icrc-custom-token';
 	import { setCustomToken } from '$lib/api/backend.api';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';
@@ -19,23 +18,24 @@
 	import { token } from '$lib/stores/token.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
 
-	let selectedToken: OptionIcrcCustomToken;
+	let { fromRoute }: Props = $props();
+
+	let selectedToken = $state<OptionIcrcCustomToken>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as OptionIcrcCustomToken));
 
-	let ledgerCanisterId: LedgerCanisterIdText | undefined;
-	$: ledgerCanisterId = selectedToken?.ledgerCanisterId;
+	let ledgerCanisterId = $derived(selectedToken?.ledgerCanisterId);
 
-	let indexCanisterId: LedgerCanisterIdText | undefined;
-	$: indexCanisterId = selectedToken?.indexCanisterId;
+	let indexCanisterId = $derived(selectedToken?.indexCanisterId);
 
-	let version: bigint | undefined;
-	$: version = selectedToken?.version;
+	let version = $derived(selectedToken?.version);
 
-	const assertHide = (): { valid: boolean } => {
+	const onAssertHide = (): { valid: boolean } => {
 		if (isNullishOrEmpty(ledgerCanisterId)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.invalid_ledger }
@@ -46,7 +46,7 @@
 		return { valid: true };
 	};
 
-	const hideToken = async (params: { identity: Identity }) => {
+	const onHideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(ledgerCanisterId);
 
 		trackEvent({
@@ -64,6 +64,8 @@
 			token: {
 				enabled: false,
 				version: toNullable(version),
+				section: toNullable(),
+				allow_external_content_source: toNullable(),
 				token: {
 					Icrc: {
 						ledger_id: Principal.fromText(ledgerCanisterId),
@@ -77,7 +79,7 @@
 		});
 	};
 
-	const updateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
+	const onUpdateUi = (params: { identity: Identity }): Promise<void> => loadCustomTokens(params);
 </script>
 
-<HideTokenModal {assertHide} {hideToken} {updateUi} {fromRoute} />
+<HideTokenModal {fromRoute} {onAssertHide} {onHideToken} {onUpdateUi} />

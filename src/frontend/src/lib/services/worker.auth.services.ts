@@ -21,16 +21,17 @@ export const initAuthWorker = async () => {
 		}
 	};
 
+	// TODO Investigate extra 'signOutIdleTimer' tick after lock
+	// syncAuthIdle stop the idle timer when the user is logOut or locked
+
 	return {
-		syncAuthIdle: (auth: AuthStoreData) => {
-			if (!auth.identity) {
+		syncAuthIdle: ({ auth, locked = false }: { auth: AuthStoreData; locked?: boolean }) => {
+			if (locked || !auth.identity) {
 				authWorker.postMessage({ msg: 'stopIdleTimer' });
 				return;
 			}
 
-			authWorker.postMessage({
-				msg: 'startIdleTimer'
-			});
+			authWorker.postMessage({ msg: 'startIdleTimer' });
 		}
 	};
 };

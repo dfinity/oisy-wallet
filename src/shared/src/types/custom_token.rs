@@ -66,6 +66,14 @@ pub struct CustomToken {
     pub token: Token,
     pub enabled: bool,
     pub version: Option<Version>,
+    pub section: Option<TokenSection>,
+    pub allow_external_content_source: Option<bool>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+pub enum TokenSection {
+    Hidden = 0,
+    Spam = 1,
 }
 
 /// A cross-chain token identifier.

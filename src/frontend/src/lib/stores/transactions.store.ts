@@ -44,7 +44,7 @@ export interface TransactionsStore<T extends TransactionTypes>
 }
 
 export const initTransactionsStore = <T extends TransactionTypes>(): TransactionsStore<T> => {
-	const { subscribe, update, reset } = initCertifiedStore<TransactionsData<T>>();
+	const { subscribe, update, reset, reinitialize } = initCertifiedStore<TransactionsData<T>>();
 
 	const isTransactionUi = (transaction: TransactionTypes): transaction is UiTransactionTypes =>
 		'id' in transaction;
@@ -118,6 +118,7 @@ export const initTransactionsStore = <T extends TransactionTypes>(): Transaction
 				[tokenId]: null
 			})),
 		reset,
+		reinitialize,
 		subscribe
 	};
 };

@@ -32,7 +32,9 @@ describe('IcNoIndexPlaceholder', () => {
 		it('should render the correct icon', () => {
 			const { container } = render(IcNoIndexPlaceholder, { placeholderType: 'missing' });
 
-			const { container: iconContainer } = render(IconSearchClose, { styleClass: '' });
+			const { container: iconContainer } = render(IconSearchClose, {
+				size: '16'
+			});
 
 			expect(container.innerHTML).toContain(iconContainer.innerHTML);
 		});
@@ -56,7 +58,9 @@ describe('IcNoIndexPlaceholder', () => {
 				placeholderType: 'not-working'
 			});
 
-			const { container: iconContainer } = render(IconAlertTriangle, { styleClass: '' });
+			const { container: iconContainer } = render(IconAlertTriangle, {
+				size: '16'
+			});
 
 			expect(container.innerHTML).toContain(iconContainer.innerHTML);
 		});

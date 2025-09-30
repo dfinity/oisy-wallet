@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -12,16 +11,21 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onCancel: () => void;
+		onHide: () => void;
+	}
+
+	let { onCancel, onHide }: Props = $props();
 </script>
 
 <ContentWithToolbar>
 	<div class="icon flex flex-col items-center gap-3">
 		<Logo
-			src={$token?.icon}
-			size="xl"
 			alt={replacePlaceholders($i18n.core.alt.logo, { $name: $token?.name ?? '' })}
 			color="off-white"
+			size="xl"
+			src={$token?.icon}
 		/>
 
 		<p class="text-center font-bold">
@@ -39,8 +43,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonCancel onclick={() => dispatch('icCancel')} />
-			<Button onclick={() => dispatch('icHide')}>
+			<ButtonCancel onclick={onCancel} />
+			<Button onclick={onHide}>
 				{$i18n.tokens.hide.confirm}
 			</Button>
 		</ButtonGroup>

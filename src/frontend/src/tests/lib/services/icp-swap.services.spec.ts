@@ -1,3 +1,4 @@
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
@@ -7,11 +8,19 @@ import { setCustomToken } from '$lib/api/backend.api';
 import * as factoryApi from '$lib/api/icp-swap-factory.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import * as poolApi from '$lib/api/icp-swap-pool.api';
-import { deposit, depositFrom, swap as swapIcp, withdraw } from '$lib/api/icp-swap-pool.api';
+import {
+	deposit,
+	depositFrom,
+	getUserUnusedBalance,
+	swap as swapIcp,
+	withdraw
+} from '$lib/api/icp-swap-pool.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { icpSwapAmounts } from '$lib/services/icp-swap.services';
 import { fetchIcpSwap } from '$lib/services/swap.services';
 import { SwapErrorCodes } from '$lib/types/swap';
+import * as swapUtils from '$lib/utils/swap.utils';
 import { isSwapError } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import en from '$tests/mocks/i18n.mock';
@@ -193,6 +202,19 @@ describe('fetchIcpSwap', () => {
 
 	it('Handles tryToWithdraw with withdrawDestinationTokens = false', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+
+		vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: 'token0', standard: 'icrc' },
+			token1: { address: 'token1', standard: 'icrc' }
+		} as PoolMetadata);
+
+		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: ZERO });
+
+		vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
+			ledgerCanisterId: 'ledger-0',
+			fee: 0n
+		} as unknown as IcTokenToggleable);
+
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
 		try {
@@ -210,6 +232,19 @@ describe('fetchIcpSwap', () => {
 
 	it('Handles tryToWithdraw with withdrawDestinationTokens = true', async () => {
 		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+
+		vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: 'token0', standard: 'icrc' },
+			token1: { address: 'token1', standard: 'icrc' }
+		} as PoolMetadata);
+
+		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: ZERO, balance1: 1n });
+
+		vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
+			ledgerCanisterId: 'ledger-1',
+			fee: 0n
+		} as unknown as IcTokenToggleable);
+
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
 
 		try {
@@ -223,5 +258,75 @@ describe('fetchIcpSwap', () => {
 				expect(err.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
 			}
 		}
+	});
+
+	it('Handles tryToWithdraw with assets for sourceToken and destinationToken', async () => {
+		vi.mocked(getPoolCanister).mockResolvedValue(mockPool);
+
+		vi.mocked(poolApi.getPoolMetadata).mockResolvedValueOnce({
+			token0: { address: 'token0', standard: 'icrc' },
+			token1: { address: 'token1', standard: 'icrc' }
+		} as PoolMetadata);
+
+		vi.mocked(getUserUnusedBalance).mockResolvedValueOnce({ balance0: 1n, balance1: 1n });
+
+		const tokenFor0: IcTokenToggleable = {
+			...mockValidIcToken,
+			ledgerCanisterId: 'ledger-0',
+			fee: 0n
+		} as IcTokenToggleable;
+
+		const tokenFor1: IcTokenToggleable = {
+			...mockValidIcrcToken,
+			ledgerCanisterId: 'ledger-1',
+			fee: 0n
+		} as IcTokenToggleable;
+
+		const getWithdrawableTokenSpy = vi
+			.spyOn(swapUtils, 'getWithdrawableToken')
+			.mockImplementation(({ tokenAddress }) => {
+				if (tokenAddress === 'token0') {
+					return tokenFor0;
+				}
+				if (tokenAddress === 'token1') {
+					return tokenFor1;
+				}
+				throw new Error('Unknown token address');
+			});
+
+		vi.mocked(withdraw).mockResolvedValueOnce(1n).mockResolvedValueOnce(1n);
+
+		try {
+			await fetchIcpSwap({
+				...swapArgs,
+				tryToWithdraw: true,
+				withdrawDestinationTokens: true
+			});
+		} catch (err: unknown) {
+			if (isSwapError(err)) {
+				expect(err.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+			}
+		}
+
+		expect(getWithdrawableTokenSpy).toHaveBeenCalledTimes(2);
+		expect(withdraw).toHaveBeenCalledTimes(2);
+
+		expect(withdraw).toHaveBeenNthCalledWith(
+			1,
+			expect.objectContaining({
+				token: 'ledger-0',
+				amount: 1n,
+				fee: 0n
+			})
+		);
+
+		expect(withdraw).toHaveBeenNthCalledWith(
+			2,
+			expect.objectContaining({
+				token: 'ledger-1',
+				amount: 1n,
+				fee: 0n
+			})
+		);
 	});
 });

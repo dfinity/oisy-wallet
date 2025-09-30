@@ -1,9 +1,12 @@
 import type {
+	Agreements,
 	DappSettings,
+	ExperimentalFeaturesSettings,
 	NetworkSettings,
 	NetworkSettingsFor,
 	NetworksSettings,
 	Settings,
+	UserAgreement,
 	UserProfile
 } from '$declarations/backend/backend.did';
 import { toNullable } from '@dfinity/utils';
@@ -24,11 +27,50 @@ export const mockNetworksSettings: NetworksSettings = {
 	testnets: { show_testnets: false }
 };
 
+export const mockExperimentalFeaturesSettings: ExperimentalFeaturesSettings = {
+	experimental_features: [[{ AiAssistantBeta: null }, { enabled: true }]]
+};
+
 export const mockDappSettings: DappSettings = { dapp_carousel: { hidden_dapp_ids: [] } };
 
 export const mockUserSettings: Settings = {
 	networks: mockNetworksSettings,
-	dapp: mockDappSettings
+	dapp: mockDappSettings,
+	experimental_features: mockExperimentalFeaturesSettings
+};
+
+const mockUserAgreement: UserAgreement = {
+	last_accepted_at_ns: toNullable(),
+	last_updated_at_ms: toNullable(),
+	accepted: toNullable()
+};
+
+export const mockUserAgreements: Agreements = {
+	agreements: {
+		license_agreement: mockUserAgreement,
+		privacy_policy: mockUserAgreement,
+		terms_of_use: mockUserAgreement
+	}
+};
+
+export const mockDefinedUserAgreements: Agreements = {
+	agreements: {
+		license_agreement: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		},
+		privacy_policy: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		},
+		terms_of_use: {
+			last_accepted_at_ns: toNullable(1677628801n),
+			last_updated_at_ms: toNullable(1677628800n),
+			accepted: toNullable(true)
+		}
+	}
 };
 
 export const mockUserProfileVersion = 1n;
@@ -37,6 +79,7 @@ export const mockUserProfile: UserProfile = {
 	credentials: [],
 	version: toNullable(mockUserProfileVersion),
 	settings: toNullable(mockUserSettings),
+	agreements: toNullable(mockUserAgreements),
 	created_timestamp: 1234n,
 	updated_timestamp: 1234n
 };
