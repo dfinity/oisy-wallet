@@ -2,4 +2,4 @@
 export const POW_CHALLENGE_INTERVAL_MILLIS = 60_000;
 
 // Minimum cycles threshold that users must have available for signer operations
-export const POW_MIN_CYCLES_THRESHOLD = 2_817_000_000_000;
+export const POW_MIN_CYCLES_THRESHOLD = 2_916_000_000_000;
