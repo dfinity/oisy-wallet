@@ -820,6 +820,7 @@ interface I18nTokens {
 	import: {
 		text: {
 			title: string;
+			title_nft: string;
 			review: string;
 			saving: string;
 			updating: string;
@@ -852,9 +853,11 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
+			title_nft: string;
 			manage_list: string;
 			list_settings: string;
 			import_token: string;
+			import_nft: string;
 			network: string;
 			all_tokens_zero_balance: string;
 			enable_more_assets: string;

@@ -988,6 +988,7 @@
 		"import": {
 			"text": {
 				"title": "Импортировать токен",
+				"title_nft": "",
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
@@ -1022,9 +1023,11 @@
 		"manage": {
 			"text": {
 				"title": "Управление токенами",
+				"title_nft": "",
 				"manage_list": "Управление токенами",
 				"list_settings": "Настройки списка",
 				"import_token": "Импортировать токен",
+				"import_nft": "",
 				"network": "Сеть",
 				"all_tokens_zero_balance": "Все токены имеют нулевой баланс.",
 				"enable_more_assets": "Включить больше активов"

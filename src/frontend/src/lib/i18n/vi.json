@@ -988,6 +988,7 @@
 		"import": {
 			"text": {
 				"title": "Nhập token",
+				"title_nft": "",
 				"review": "Xem lại",
 				"saving": "Đang lưu...",
 				"updating": "Đang cập nhật danh sách token",
@@ -1022,9 +1023,11 @@
 		"manage": {
 			"text": {
 				"title": "Quản lý token",
+				"title_nft": "",
 				"manage_list": "Quản lý token",
 				"list_settings": "Cài đặt danh sách",
 				"import_token": "Nhập token",
+				"import_nft": "",
 				"network": "Mạng",
 				"all_tokens_zero_balance": "Tất cả các token có số dư bằng 0.",
 				"enable_more_assets": "Kích hoạt thêm token"

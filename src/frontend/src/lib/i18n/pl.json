@@ -988,6 +988,7 @@
 		"import": {
 			"text": {
 				"title": "Importuj token",
+				"title_nft": "",
 				"review": "Przegląd",
 				"saving": "Zapisywanie...",
 				"updating": "Aktualizacja listy tokenów",
@@ -1022,9 +1023,11 @@
 		"manage": {
 			"text": {
 				"title": "Zarządzaj tokenami",
+				"title_nft": "",
 				"manage_list": "Zarządzaj tokenami",
 				"list_settings": "Ustawienia listy",
 				"import_token": "Importuj token",
+				"import_nft": "",
 				"network": "Sieć",
 				"all_tokens_zero_balance": "Wszystkie tokeny mają zerowe saldo.",
 				"enable_more_assets": "Włącz więcej tokenów"

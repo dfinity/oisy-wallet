@@ -988,6 +988,7 @@
 		"import": {
 			"text": {
 				"title": "トークンをインポート",
+				"title_nft": "",
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
@@ -1022,9 +1023,11 @@
 		"manage": {
 			"text": {
 				"title": "トークンの管理",
+				"title_nft": "",
 				"manage_list": "トークンの管理",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
+				"import_nft": "",
 				"network": "ネットワーク",
 				"all_tokens_zero_balance": "すべてのトークンの残高がゼロです。",
 				"enable_more_assets": "さらに多くのトークンを有効にする"

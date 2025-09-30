@@ -988,6 +988,7 @@
 		"import": {
 			"text": {
 				"title": "استيراد التوكن",
+				"title_nft": "",
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
@@ -1022,9 +1023,11 @@
 		"manage": {
 			"text": {
 				"title": "إدارة التوكنات",
+				"title_nft": "",
 				"manage_list": "إدارة التوكنات",
 				"list_settings": "إعدادات القائمة",
 				"import_token": "استيراد توكن",
+				"import_nft": "",
 				"network": "الشبكة",
 				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
 				"enable_more_assets": "تمكين المزيد من التوكنات"
