@@ -76,7 +76,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 				identity,
 				request: { nonce }
 			});
-
+			this.postMessagePowProgress({
+				progress: 'CYCLES_GRANTED'
+			});
 			if (allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {
 				this.postMessagePowNextAllowance({
 					nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms
