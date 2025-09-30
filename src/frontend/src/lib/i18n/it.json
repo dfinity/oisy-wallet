@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
 			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
@@ -1183,11 +1186,15 @@
 			"scan_qr": "Scansiona codice QR",
 			"or_use_link": "o usa il link WalletConnect",
 			"proposer": "Proponente",
+			"spender": "",
 			"review": "Rivedi i permessi richiesti per $chain_name ($key)",
 			"method": "Metodo",
 			"methods": "Metodi",
 			"events": "Eventi",
 			"message": "Messaggio",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dati HEX",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio"
@@ -1315,7 +1322,6 @@
 		"error": {
 			"loading_transactions": "Errore durante il caricamento delle transazioni.",
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",
-			"no_token_loading_transaction": "Token non trovato. Impossibile caricare le transazioni.",
 			"uncertified_transactions_removed": "Diverse transazioni non certificate sono state identificate e successivamente rimosse dagli elenchi visualizzati.",
 			"loading_pending_ck_ethereum_transactions": "Qualcosa è andato storto durante il recupero delle transazioni in sospeso di $network.",
 			"get_transaction_for_hash": "Impossibile ottenere la transazione dall'hash fornito ($hash).",
@@ -1683,11 +1689,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "",
 			"reset_chat_history": "",

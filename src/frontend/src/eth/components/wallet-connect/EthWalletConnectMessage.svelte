@@ -1,12 +1,17 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
+	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
+	import { erc20Tokens } from '$eth/derived/erc20.derived';
+	import { erc721Tokens } from '$eth/derived/erc721.derived';
 	import {
-		getSignParamsMessageUtf8,
-		getSignParamsMessageTypedDataV4
+		getSignParamsMessageTypedDataV4,
+		getSignParamsMessageUtf8
 	} from '$eth/utils/wallet-connect.utils';
 	import Json from '$lib/components/ui/Json.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { areAddressesEqual } from '$lib/utils/address.utils';
+	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		request: WalletKitTypes.SessionRequest;
@@ -21,7 +26,80 @@
 			return undefined;
 		}
 	});
+
+	let {
+		domain: { chainId },
+		message
+	} = $derived(json ?? { domain: { chainId: undefined }, message: undefined });
+
+	let { spender, details: rawDetails } = $derived(
+		message ?? { spender: undefined, details: undefined }
+	);
+
+	let details = $derived(
+		nonNullish(rawDetails) && typeof rawDetails === 'object' ? rawDetails : {}
+	);
+
+	let address = $derived(
+		'token' in details && typeof details.token === 'string' ? details.token : undefined
+	);
+
+	let token = $derived.by(() => {
+		if (isNullish(address) || isNullish(chainId)) {
+			return;
+		}
+
+		const tokens = [...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens];
+
+		return tokens.find(
+			({ address: tokenAddress, network: { id: networkId, chainId: tokenChainId } }) =>
+				areAddressesEqual({
+					address1: tokenAddress,
+					address2: address,
+					networkId
+				}) && tokenChainId.toString() === chainId
+		);
+	});
+
+	let amount = $derived.by(() => {
+		if (
+			'amount' in details &&
+			(typeof details.amount === 'string' || typeof details.amount === 'number')
+		) {
+			try {
+				return BigInt(details.amount);
+			} catch (_: unknown) {
+				// It could not be parsed as a BigInt, so we return undefined.
+				console.warn('Could not parse amount as BigInt:', details.amount);
+			}
+		}
+	});
 </script>
+
+{#if nonNullish(token)}
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}:</p>
+	<p class="mb-4 font-normal">{token.symbol}</p>
+
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.network}:</p>
+	<p class="mb-4 font-normal">{token.network.name}</p>
+
+	{#if nonNullish(amount)}
+		<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.amount}:</p>
+		<p class="mb-4 font-normal"
+			>{formatToken({
+				value: amount,
+				unitName: token.decimals,
+				displayDecimals: token.decimals
+			})}
+			{token.symbol}</p
+		>
+	{/if}
+{/if}
+
+{#if nonNullish(spender)}
+	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}:</p>
+	<p class="mb-4 font-normal">{spender}</p>
+{/if}
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 {#if nonNullish(json)}

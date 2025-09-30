@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
 			"session_expired": "由于会话已过期，您已被登出。",
@@ -1183,11 +1186,15 @@
 			"scan_qr": "扫描二维码",
 			"or_use_link": "或使用 WalletConnect 链接",
 			"proposer": "发起方",
+			"spender": "",
 			"review": "查看 $chain_name ($key) 所需权限",
 			"method": "方法",
 			"methods": "方法",
 			"events": "事件",
 			"message": "消息",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签名消息"
@@ -1315,7 +1322,6 @@
 		"error": {
 			"loading_transactions": "加载交易记录时出错。",
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",
-			"no_token_loading_transaction": "未找到代币，无法加载交易记录。",
 			"uncertified_transactions_removed": "检测到一些未经认证的交易，已从显示列表中移除。",
 			"loading_pending_ck_ethereum_transactions": "获取 $network 待处理交易时发生错误。",
 			"get_transaction_for_hash": "根据提供的哈希值（hash: $hash）获取交易失败。",
@@ -1683,11 +1689,18 @@
 			"action_button_send_tokens_title": "发送资产",
 			"action_button_send_tokens_subtitle": "几秒内完成发送设置",
 			"action_button_send_tokens_prompt": "我想发送代币。",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "选择一个联系人以开始发送流程：",
 			"send_to_message": "发送给 $contact_name ($address_info)。",
 			"send_message": "发送消息",
 			"send_message_input_placeholder": "你想做什么？",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "交易已完成！",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "抱歉，我在你的地址簿中找不到合适的联系人。",
 			"loading": "思考中...",
 			"reset_chat_history": "重置聊天记录",
