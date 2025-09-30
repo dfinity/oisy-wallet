@@ -40,7 +40,7 @@ const main = async () => {
 			const fileBasename = basename(potentialUnusedFile);
 
 			if (content.includes(`./${fileBasename}`)) {
-				console.log(`${RED}Relative import of '${fileBasename}' found in '${file}${NC}'`);
+				console.log(`${RED}Relative import of '${fileBasename}' found in ${file}${NC}`);
 				return false;
 			}
 
@@ -70,6 +70,8 @@ const main = async () => {
 			);
 			await main();
 		}
+
+		console.log();
 
 		process.exit(1);
 	}
