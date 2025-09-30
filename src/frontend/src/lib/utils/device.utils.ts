@@ -18,7 +18,7 @@ export const isDesktop = () => !isMobile();
 
 export const isPWAStandalone = () => {
 	if ('standalone' in navigator && nonNullish(navigator.standalone)) {
-		return navigator.standalone === true;
+		return navigator.standalone;
 	}
 
 	return window.matchMedia('(display-mode: standalone)').matches;
