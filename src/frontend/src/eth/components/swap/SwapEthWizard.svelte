@@ -5,6 +5,7 @@
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
+	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import {
 		ETH_FEE_CONTEXT_KEY,
@@ -43,7 +44,6 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;

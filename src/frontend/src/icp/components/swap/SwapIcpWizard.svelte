@@ -3,6 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
@@ -34,7 +35,6 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
-	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;

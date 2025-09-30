@@ -4,6 +4,7 @@
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
@@ -41,7 +42,6 @@
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
-	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 
 	const { setSourceToken, setDestinationToken, sourceToken, destinationToken } =
 		setContext<SwapContext>(

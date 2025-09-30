@@ -12,6 +12,7 @@
 		icTokenFeeStore
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
+	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 	import {
 		allDisabledKongSwapCompatibleIcrcTokens,
 		allIcrcTokens
@@ -31,7 +32,6 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
-	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
