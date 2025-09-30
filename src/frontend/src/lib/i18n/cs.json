@@ -1263,7 +1263,8 @@
 			"block": "Blok",
 			"interacted_with": "Interakce s (do)",
 			"status": "Stav",
-			"confirmations": "Potvrzení"
+			"confirmations": "Potvrzení",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Potvrzeno",

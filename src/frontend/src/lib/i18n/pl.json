@@ -1263,7 +1263,8 @@
 			"block": "Blok",
 			"interacted_with": "Interakcja z (Do)",
 			"status": "Status",
-			"confirmations": "Potwierdzenia"
+			"confirmations": "Potwierdzenia",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Potwierdzono",

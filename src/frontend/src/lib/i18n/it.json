@@ -1263,7 +1263,8 @@
 			"block": "Blocco",
 			"interacted_with": "Interagito con (A)",
 			"status": "Stato",
-			"confirmations": "Conferme"
+			"confirmations": "Conferme",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Confermato",

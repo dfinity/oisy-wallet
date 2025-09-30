@@ -1263,7 +1263,8 @@
 			"block": "Блок",
 			"interacted_with": "Взаимодействовали с (Получатель)",
 			"status": "Статус",
-			"confirmations": "Подтверждения"
+			"confirmations": "Подтверждения",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",

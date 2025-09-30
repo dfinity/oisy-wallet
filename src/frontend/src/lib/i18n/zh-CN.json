@@ -1263,7 +1263,8 @@
 			"block": "区块",
 			"interacted_with": "交互对象（接收方）",
 			"status": "状态",
-			"confirmations": "确认数"
+			"confirmations": "确认数",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "已确认",

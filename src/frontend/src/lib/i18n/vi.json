@@ -1263,7 +1263,8 @@
 			"block": "Khối",
 			"interacted_with": "Đã tương tác với (Đến)",
 			"status": "Trạng thái",
-			"confirmations": "Xác nhận"
+			"confirmations": "Xác nhận",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",
