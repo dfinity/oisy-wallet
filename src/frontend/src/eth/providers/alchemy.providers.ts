@@ -264,11 +264,14 @@ export class AlchemyProvider {
 			throw new Error('Invalid token standard');
 		}
 
+		const maybeName = nonNullish(result.openSeaMetadata?.collectionName) && !result.openSeaMetadata?.collectionName.toLowerCase().includes('unidentified')
+			? result.openSeaMetadata?.collectionName
+			: nonNullish(result.name)
+				? result.name
+				: undefined;
+
 		return {
-			...(nonNullish(result.name) && { name: result.name }),
-			...(nonNullish(result.openSeaMetadata?.collectionName) && {
-				name: result.openSeaMetadata?.collectionName
-			}),
+			...(nonNullish(maybeName) && { name: maybeName }),
 			...(nonNullish(result.symbol) && { symbol: result.symbol }),
 			decimals: 0
 		};
