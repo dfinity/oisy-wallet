@@ -52,7 +52,7 @@
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "Your installation is running in standalone Mode. ALARRRRMMM!!"
+			"standalone_mode": "Your $oisy_short Wallet is currently installed as standalone app on your mobile phone, which prevents it from connecting to other ICP dapps. You can delete $oisy_short from your homescreen, and do the installation again. This will install $oisy_short in a different way, which will then allow to connect to other dapps and sign transactions."
 		}
 	},
 	"navigation": {
