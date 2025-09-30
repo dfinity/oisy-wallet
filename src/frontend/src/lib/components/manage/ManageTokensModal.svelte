@@ -53,6 +53,8 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
+	import { page } from '$app/state';
 
 	let {
 		initialSearch,
@@ -60,14 +62,16 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps<WizardStepsManageTokens> = [
+	const isNftsPage = $derived(isRouteNfts(page));
+
+	const steps: WizardSteps<WizardStepsManageTokens> = $derived([
 		{
 			name: WizardStepsManageTokens.MANAGE,
-			title: $i18n.tokens.manage.text.title
+			title: isNftsPage ? $i18n.tokens.manage.text.title_nft : $i18n.tokens.manage.text.title
 		},
 		{
 			name: WizardStepsManageTokens.IMPORT,
-			title: $i18n.tokens.import.text.title
+			title: isNftsPage ? $i18n.tokens.import.text.title_nft : $i18n.tokens.import.text.title
 		},
 		{
 			name: WizardStepsManageTokens.REVIEW,
@@ -77,7 +81,7 @@
 			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
-	];
+	]);
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
@@ -350,6 +354,7 @@
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
+			{isNftsPage}
 		/>
 	{/if}
 </WizardModal>

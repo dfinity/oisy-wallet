@@ -985,7 +985,8 @@
 		},
 		"import": {
 			"text": {
-				"title": "Import token",
+                "title": "Import token",
+                "title_nft": "Import NFT collection",
 				"review": "Review",
 				"saving": "Saving...",
 				"updating": "Updating token list",
@@ -1019,10 +1020,12 @@
 		},
 		"manage": {
 			"text": {
-				"title": "Manage tokens",
+                "title": "Manage tokens",
+                "title_nft": "Manage NFT collections",
 				"manage_list": "Manage tokens",
 				"list_settings": "List settings",
-				"import_token": "Import token",
+                "import_token": "Import token",
+                "import_nft": "Import NFT collection",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
 				"enable_more_assets": "Enable more tokens"
