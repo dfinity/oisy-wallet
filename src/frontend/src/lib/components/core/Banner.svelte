@@ -30,7 +30,9 @@
 			</button>
 		</WarningBanner>
 	</div>
-{:else if isPWAStandalone()}
+{/if}
+
+{#if isPWAStandalone()}
 	<!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
 	<div
 		class="fixed left-[50%] top-6 z-10 flex -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
