@@ -1315,7 +1315,6 @@
 		"error": {
 			"loading_transactions": "Błąd podczas ładowania transakcji.",
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",
-			"no_token_loading_transaction": "Nie znaleziono tokena. Nie można załadować transakcji.",
 			"uncertified_transactions_removed": "Zidentyfikowano kilka niecertyfikowanych transakcji, które następnie usunięto z wyświetlanych list.",
 			"loading_pending_ck_ethereum_transactions": "Coś poszło nie tak podczas pobierania oczekujących transakcji $network.",
 			"get_transaction_for_hash": "Nie udało się pobrać transakcji z podanego hasha ($hash).",

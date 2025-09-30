@@ -1315,7 +1315,6 @@
 		"error": {
 			"loading_transactions": "लेनदेन लोड करते समय त्रुटि।",
 			"loading_transactions_symbol": "$symbol लेनदेन लोड करते समय त्रुटि।",
-			"no_token_loading_transaction": "टोकन नहीं मिला। लेनदेन लोड नहीं किए जा सकते।",
 			"uncertified_transactions_removed": "कई अप्रमाणित लेनदेन की पहचान की गई और बाद में प्रदर्शित सूचियों से हटा दिया गया।",
 			"loading_pending_ck_ethereum_transactions": "लंबित $network लेनदेन लाते समय कुछ गलत हो गया।",
 			"get_transaction_for_hash": "प्रदान किए गए (हैश: $hash) से लेनदेन प्राप्त करने में विफल रहा।",
