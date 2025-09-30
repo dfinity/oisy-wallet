@@ -23,13 +23,13 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 

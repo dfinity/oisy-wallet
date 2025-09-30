@@ -11,6 +11,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import {
 		modalBtcToken,
@@ -21,7 +22,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let selectedTransaction = $state<BtcTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();

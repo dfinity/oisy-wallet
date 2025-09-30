@@ -3,6 +3,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import {
 		modalSolToken,
@@ -20,7 +21,6 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let selectedTransaction = $state<SolTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();

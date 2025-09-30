@@ -12,6 +12,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalEthTransaction,
@@ -23,7 +24,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
-	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let ckMinterInfoAddresses = $derived(
 		toCkMinterInfoAddresses($ckEthMinterInfoStore?.[$nativeEthereumTokenId])
