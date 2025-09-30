@@ -205,7 +205,8 @@ export const sortRewards = ({
 }: {
 	rewards: RewardCampaignDescription[];
 	sortByEndDate: 'asc' | 'desc';
-}): RewardCampaignDescription[] => [...rewards].sort((a, b) => {
+}): RewardCampaignDescription[] =>
+	[...rewards].sort((a, b) => {
 		const dateA = new Date(a.endDate).getTime();
 		const dateB = new Date(b.endDate).getTime();
 
