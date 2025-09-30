@@ -14,9 +14,7 @@
 
 	let { mainCard, secondaryCards, onSendMessage, loading }: Props = $props();
 
-	let mainCardToken = $derived(mainCard.token);
-
-	let mainCardNetwork = $derived(mainCard.network);
+	let { token: mainCardToken, network: mainCardNetwork } = $derived(mainCard);
 
 	let mainCardMessageParams = $derived(
 		nonNullish(mainCardToken) && (nonNullish(mainCardNetwork) || (secondaryCards ?? []).length < 1)
