@@ -104,7 +104,7 @@ export const formatSecondsToDate = ({
 	formatOptions?: Intl.DateTimeFormatOptions;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(
+	return date.toLocaleTimeString(
 		language ?? Languages.ENGLISH,
 		nonNullish(formatOptions)
 			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
