@@ -8,6 +8,7 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
+	import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import {
 		erc1155CustomTokensInitialized,
@@ -69,7 +70,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import {FRONTEND_DERIVATION_ENABLED} from "$env/address.env";
 
 	interface Props {
 		children: Snippet;
