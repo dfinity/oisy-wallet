@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Token importieren",
+				"title_nft": "",
 				"review": "Überprüfen",
 				"saving": "Speichere...",
 				"updating": "Aktualisiere Token-Liste",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Token verwalten",
+				"title_nft": "",
 				"manage_list": "Token verwalten",
 				"list_settings": "Listen-Einstellungen",
 				"import_token": "Token importieren",
+				"import_nft": "",
 				"network": "Netzwerk",
 				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
 				"enable_more_assets": "Weitere Token aktivieren"

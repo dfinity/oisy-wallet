@@ -265,7 +265,8 @@ describe('alchemy.providers', () => {
 		const expectedMetadata: Erc1155Metadata = {
 			name: 'My mega contract',
 			symbol: 'MC',
-			decimals: 0
+			decimals: 0,
+			description: 'This is a description'
 		};
 
 		beforeEach(() => {
