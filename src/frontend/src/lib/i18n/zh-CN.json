@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "",
-			"description": "",
-			"request_challenge": "",
-			"solve_challenge": "",
-			"grant_cycles": ""
+			"title": "准备签名器",
+			"description": "验证您不是机器人",
+			"request_challenge": "等待新挑战",
+			"solve_challenge": "解决挑战",
+			"grant_cycles": "启用签名"
 		}
 	},
 	"signer": {

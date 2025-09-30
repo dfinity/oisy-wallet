@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "",
-			"description": "",
-			"request_challenge": "",
-			"solve_challenge": "",
-			"grant_cycles": ""
+			"title": "साइनर तैयार करना",
+			"description": "सत्यापन कि आप रोबोट नहीं हैं",
+			"request_challenge": "नई चुनौती का इंतजार",
+			"solve_challenge": "चुनौती हल करना",
+			"grant_cycles": "साइनिंग सक्षम करना"
 		}
 	},
 	"signer": {

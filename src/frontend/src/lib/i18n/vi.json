@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "",
-			"description": "",
-			"request_challenge": "",
-			"solve_challenge": "",
-			"grant_cycles": ""
+			"title": "Đang chuẩn bị người ký",
+			"description": "Xác minh rằng bạn không phải robot",
+			"request_challenge": "Đang chờ thử thách mới",
+			"solve_challenge": "Đang giải quyết thử thách",
+			"grant_cycles": "Đang kích hoạt ký"
 		}
 	},
 	"signer": {

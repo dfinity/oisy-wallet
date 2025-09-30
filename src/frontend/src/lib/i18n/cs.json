@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "",
-			"description": "",
-			"request_challenge": "",
-			"solve_challenge": "",
-			"grant_cycles": ""
+			"title": "Příprava podpisovatele",
+			"description": "Ověřování, že nejste robot",
+			"request_challenge": "Čekání na novou výzvu",
+			"solve_challenge": "Řešení výzvy",
+			"grant_cycles": "Povolování podepisování"
 		}
 	},
 	"signer": {
