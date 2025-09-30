@@ -72,7 +72,6 @@ describe('eth-balance.services', () => {
 			const result = await loadEthBalances(mockTokens);
 
 			expect(result).toEqual({ success: false });
-
 		});
 
 		it('should call the balance provider', async () => {
@@ -195,7 +194,6 @@ describe('eth-balance.services', () => {
 			const result = await loadErc20Balances({ ...mockParams, address: null });
 
 			expect(result).toEqual({ success: false });
-
 		});
 
 		it('should use the ETH address store if the input address is nullish', async () => {
@@ -204,7 +202,6 @@ describe('eth-balance.services', () => {
 			const result = await loadErc20Balances({ ...mockParams, address: null });
 
 			expect(result).toEqual({ success: true });
-
 		});
 
 		it('should call the balance provider', async () => {

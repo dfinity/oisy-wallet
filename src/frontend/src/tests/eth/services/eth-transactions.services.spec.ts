@@ -35,7 +35,6 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 describe('eth-transactions.services', () => {
-
 	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
 		certified: false
