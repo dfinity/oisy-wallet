@@ -1,10 +1,15 @@
 <script lang="ts">
 	import SigningInHelpLink from '$lib/components/auth/SigningInHelpLink.svelte';
+	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonAuthenticate from '$lib/components/ui/ButtonAuthenticate.svelte';
 	import { AUTH_SIGNING_IN_HELP_LINK } from '$lib/constants/test-ids.constants';
 	import { signIn } from '$lib/services/auth.services';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { authLocked } from '$lib/stores/locked.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { Html } from '@dfinity/gix-components';
+	import { componentToHtml } from '$lib/utils/component.utils';
 
 	interface Props {
 		fullWidth?: boolean;
@@ -38,6 +43,10 @@
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}
 	>
+		<Html text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
+			$link: componentToHtml({Component: TermsOfUseLink})
+		})} />
+
 		{#if needHelpLink}
 			<SigningInHelpLink styleClass="mt-4" testId={AUTH_SIGNING_IN_HELP_LINK} />
 		{/if}
