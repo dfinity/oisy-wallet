@@ -9,7 +9,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { getCampaignState } from '$lib/utils/rewards.utils';
+	import { getCampaignState, sortRewards } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		title?: string;
@@ -24,15 +24,7 @@
 
 	const modalId = Symbol();
 
-	const sortRewards = () =>
-		[...rewards].sort((a, b) => {
-			const dateA = new Date(a.endDate).getTime();
-			const dateB = new Date(b.endDate).getTime();
-
-			return sortByEndDate === 'asc' ? dateA - dateB : dateB - dateA;
-		});
-
-	const sortedRewards = $derived(sortRewards());
+	const sortedRewards = $derived(sortRewards({rewards, sortByEndDate}));
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
