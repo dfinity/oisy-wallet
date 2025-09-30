@@ -275,6 +275,9 @@ export class AlchemyProvider {
 		return {
 			...(nonNullish(maybeName) && { name: maybeName }),
 			...(nonNullish(result.symbol) && { symbol: result.symbol }),
+			...(nonNullish(result.openSeaMetadata?.description) && {
+				description: result.openSeaMetadata.description
+			}),
 			decimals: 0
 		};
 	};

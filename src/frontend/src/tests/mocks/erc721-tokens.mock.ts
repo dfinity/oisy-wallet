@@ -24,7 +24,8 @@ export const AZUKI_ELEMENTAL_BEANS_TOKEN: RequiredEvmErc721Token = {
 	symbol: AZUKI_ELEMENTAL_BEANS_SYMBOL,
 	decimals: 0,
 	icon: usdc,
-	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582'
+	address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+	description: 'Azuki description'
 };
 
 const DE_GODS_SYMBOL = 'DGods';

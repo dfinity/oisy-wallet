@@ -51,7 +51,8 @@
 			"switch_currency": "Währung wechseln"
 		},
 		"warning": {
-			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
+			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "Kein Infura-ERC1155-Anbieter für Netzwerk $network",
 			"no_infura_erc20_icp_provider": "Kein Infura-ERC20-ICP-Anbieter für Netzwerk $network",
 			"no_solana_network": "Kein Solana-Netzwerk für Netzwerk $network",
-			"eth_address_unknown": "ETH-Adresse ist unbekannt.",
 			"loading_address": "Fehler beim Laden der Adresse für $symbol.",
 			"loading_balance": "Fehler beim Laden des $symbol-Saldos für Netzwerk $network.",
 			"erc20_contracts": "Fehler beim Laden der ERC20-Verträge.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Token importieren",
+				"title_nft": "",
 				"review": "Überprüfen",
 				"saving": "Speichere...",
 				"updating": "Aktualisiere Token-Liste",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Token verwalten",
+				"title_nft": "",
 				"manage_list": "Token verwalten",
 				"list_settings": "Listen-Einstellungen",
 				"import_token": "Token importieren",
+				"import_nft": "",
 				"network": "Netzwerk",
 				"all_tokens_zero_balance": "Alle Token haben Nullsaldo.",
 				"enable_more_assets": "Weitere Token aktivieren"

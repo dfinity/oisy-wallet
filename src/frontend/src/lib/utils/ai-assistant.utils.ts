@@ -275,15 +275,18 @@ export const parseShowBalanceToolArguments = ({
 
 export const generateAiAssistantResponseEventMetadata = ({
 	requestStartTimestamp,
-	toolName
+	toolName,
+	additionalMetadata
 }: {
 	requestStartTimestamp: number;
 	toolName?: string;
+	additionalMetadata?: Record<string, string>;
 }) => {
 	const responseTimeMs = Date.now() - requestStartTimestamp;
 
 	return {
 		...(notEmptyString(toolName) && { toolName }),
+		...(nonNullish(additionalMetadata) && additionalMetadata),
 		responseTime: `${responseTimeMs / 1000}s`,
 		responseTimeCategory:
 			responseTimeMs <= 100

@@ -14,6 +14,13 @@ export default [
 	},
 
 	{
+		files: ['src/frontend/src/**/*'],
+		rules: {
+			'local-rules/no-relative-imports': 'error'
+		}
+	},
+
+	{
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',
