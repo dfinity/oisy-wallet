@@ -48,7 +48,7 @@ pub const MAX_DIFFICULTY: u32 = 5_000_000;
 // `1_000_000` will grant `10_000 * 1_000_000 = 10,000,000,000` cycles.
 // It is important to find the correct balance here (also taking the cycles used to execute the PoW
 // code itself into account)
-pub const CYCLES_PER_DIFFICULTY: u64 = 1_045_800;
+pub const CYCLES_PER_DIFFICULTY: u64 = 5_832_000;
 
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
