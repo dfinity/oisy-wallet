@@ -1318,7 +1318,6 @@
 		"error": {
 			"loading_transactions": "Lỗi khi tải các giao dịch.",
 			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",
-			"no_token_loading_transaction": "Không tìm thấy token. Không thể tải các giao dịch.",
 			"uncertified_transactions_removed": "Một số giao dịch chưa được chứng nhận đã được xác định và sau đó bị xóa khỏi danh sách hiển thị.",
 			"loading_pending_ck_ethereum_transactions": "Đã xảy ra lỗi trong khi tìm nạp các giao dịch $network đang chờ xử lý.",
 			"get_transaction_for_hash": "Không thể lấy giao dịch từ (hash: $hash) được cung cấp.",
