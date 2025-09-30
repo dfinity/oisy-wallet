@@ -29,7 +29,7 @@
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
-	const MAX_CHECK_ATTEMPTS = 20;
+	const MAX_CHECK_ATTEMPTS = 40;
 	const CHECK_INTERVAL_MS = 5000;
 
 	// Initialize with default value, but it will be reactively updated from the store
