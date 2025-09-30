@@ -2,8 +2,12 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { ETHEREUM_NETWORK, SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { AlchemyProvider, alchemyProviders } from '$eth/providers/alchemy.providers';
-import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type {
+	AlchemyProviderContract,
+	AlchemyProviderContracts
+} from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -244,6 +248,67 @@ describe('alchemy.providers', () => {
 			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledOnce();
 
 			expect(contracts).toStrictEqual(expectedContracts);
+		});
+	});
+
+	describe('getContractMetadata', () => {
+		const mockApiResponse: AlchemyProviderContract = {
+			name: 'MyContract',
+			symbol: 'MC',
+			tokenType: 'ERC721',
+			openSeaMetadata: {
+				description: 'This is a description',
+				collectionName: 'My mega contract'
+			}
+		};
+
+		const expectedMetadata: Erc1155Metadata = {
+			name: 'My mega contract',
+			symbol: 'MC',
+			decimals: 0
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should fetch and map contract metadata correctly', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractMetadata: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const metadata = await provider.getContractMetadata(mockEthAddress);
+
+			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledOnce();
+
+			expect(metadata).toStrictEqual(expectedMetadata);
+		});
+
+		it('should handle incorrect token type correctly', async () => {
+			const updatedMockApiResponse = {
+				...mockApiResponse,
+				tokenType: 'NO_SUPPORTED_NFT_STANDARD'
+			};
+
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getContractMetadata: vi.fn().mockResolvedValue(updatedMockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(provider.getContractMetadata(mockEthAddress)).rejects.toThrow(
+				'Invalid token standard'
+			);
+
+			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledOnce();
 		});
 	});
 
