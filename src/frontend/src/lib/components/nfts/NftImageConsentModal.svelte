@@ -183,8 +183,10 @@
 								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
 									$address: collection.bannerImageUrl
 								})}
-								externalLink={collection.bannerImageUrl}
-								externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+								{...hasConsent && {
+									externalLink: collection.bannerImageUrl,
+									externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
+								}}
 							/>
 						</span>
 					{/if}
@@ -200,8 +202,10 @@
 									copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
 										$address: nft.imageUrl
 									})}
-									externalLink={nft.imageUrl}
-									externalLinkAriaLabel={$i18n.nfts.text.open_in_new_tab}
+									{...hasConsent && {
+										externalLink: nft.imageUrl,
+										externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
+									}}
 								/>
 							</span>
 						{/if}
