@@ -7,6 +7,10 @@ import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
 
+const formatBigIntWithApostrophes = (value: bigint): string => {
+	return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
+};
+
 export const hasRequiredCycles = async ({ identity }: { identity: Identity }): Promise<boolean> => {
 	const allowanceResult = await allowance({
 		identity,
@@ -23,9 +27,9 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 	});
 	console.warn(
 		'cycles: ',
-		allowanceResult.allowance,
+		formatBigIntWithApostrophes(allowanceResult.allowance),
 		', difference to threshold: ',
-		allowanceResult.allowance - BigInt(POW_MIN_CYCLES_THRESHOLD)
+		formatBigIntWithApostrophes(allowanceResult.allowance - BigInt(POW_MIN_CYCLES_THRESHOLD))
 	);
 	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
 };
