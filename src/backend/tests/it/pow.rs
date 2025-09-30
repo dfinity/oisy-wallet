@@ -415,7 +415,7 @@ fn test_allow_signing_should_approve_the_correct_cycles_amount() {
     let result_allow_signing = call_allow_signing(&pic_setup, caller, nonce);
     assert!(result_allow_signing.is_ok());
     let response: AllowSigningResponse = result_allow_signing.unwrap();
-    assert_eq!(response.allowed_cycles, 7000000000);
+    assert_eq!(response.allowed_cycles, 2920000000000);
     /*
     TODO uncomment this when the IC Pocker server supports an API to interact with the cycles ledger
     let backend_principle = pic_setup.canister_id;
