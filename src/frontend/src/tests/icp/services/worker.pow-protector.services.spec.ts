@@ -186,11 +186,7 @@ describe('worker.pow-protection.services', () => {
 					}
 				};
 
-				const progressStates = [
-					'REQUEST_CHALLENGE',
-					'SOLVE_CHALLENGE',
-					'GRANT_CYCLES'
-				] as const;
+				const progressStates = ['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'] as const;
 
 				progressStates.forEach((progress) => {
 					const payload = {
