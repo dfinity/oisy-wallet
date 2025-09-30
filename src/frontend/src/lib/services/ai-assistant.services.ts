@@ -9,6 +9,8 @@ import {
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
 } from '$lib/constants/analytics.contants';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
+import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
+import { networks } from '$lib/derived/networks.derived';
 import { enabledTokens, enabledUniqueTokensSymbols } from '$lib/derived/tokens.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import {
@@ -20,6 +22,7 @@ import {
 import {
 	generateAiAssistantResponseEventMetadata,
 	parseReviewSendTokensToolArguments,
+	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
 import type { Identity } from '@dfinity/agent';
@@ -110,6 +113,12 @@ export const executeTool = ({
 		result = parseShowFilteredContactsToolArguments({
 			filterParams,
 			extendedAddressContacts: get(extendedAddressContactsStore)
+		});
+	} else if (name === ToolResultType.SHOW_BALANCE) {
+		result = parseShowBalanceToolArguments({
+			filterParams,
+			tokensUi: get(combinedDerivedSortedFungibleNetworkTokensUi),
+			networks: get(networks)
 		});
 	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
 		result = parseReviewSendTokensToolArguments({

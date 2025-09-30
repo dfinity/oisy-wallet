@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
 			"session_expired": "आपकी सत्र अवधि समाप्त होने के कारण आपको लॉग आउट कर दिया गया है।",
@@ -1318,7 +1321,6 @@
 		"error": {
 			"loading_transactions": "लेनदेन लोड करते समय त्रुटि।",
 			"loading_transactions_symbol": "$symbol लेनदेन लोड करते समय त्रुटि।",
-			"no_token_loading_transaction": "टोकन नहीं मिला। लेनदेन लोड नहीं किए जा सकते।",
 			"uncertified_transactions_removed": "कई अप्रमाणित लेनदेन की पहचान की गई और बाद में प्रदर्शित सूचियों से हटा दिया गया।",
 			"loading_pending_ck_ethereum_transactions": "लंबित $network लेनदेन लाते समय कुछ गलत हो गया।",
 			"get_transaction_for_hash": "प्रदान किए गए (हैश: $hash) से लेनदेन प्राप्त करने में विफल रहा।",
@@ -1690,7 +1692,11 @@
 			"send_to_message": "$contact_name ($address_info) को भेजें।",
 			"send_message": "संदेश भेजें",
 			"send_message_input_placeholder": "आप क्या करना चाहते हैं?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",
 			"loading": "सोच रहा है...",
 			"reset_chat_history": "",

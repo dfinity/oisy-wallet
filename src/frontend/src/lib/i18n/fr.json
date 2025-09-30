@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
 			"session_expired": "Vous avez été déconnecté car votre session a expiré.",
@@ -1318,7 +1321,6 @@
 		"error": {
 			"loading_transactions": "Erreur lors du chargement des transactions.",
 			"loading_transactions_symbol": "Erreur lors du chargement des transactions de $symbol.",
-			"no_token_loading_transaction": "Token introuvable. Les transactions ne peuvent pas être chargées.",
 			"uncertified_transactions_removed": "Plusieurs transactions non certifiées ont été identifiées et par la suite supprimées des listes affichées.",
 			"loading_pending_ck_ethereum_transactions": "Quelque chose s'est mal passé lors de la récupération des transactions en attente de $network.",
 			"get_transaction_for_hash": "Échec de l'obtention de la transaction à partir du hachage fourni ($hash).",
@@ -1690,7 +1692,11 @@
 			"send_to_message": "Envoyer à $contact_name ($address_info).",
 			"send_message": "Envoyer un message",
 			"send_message_input_placeholder": "Que voulez-vous faire ?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "Transaction terminée !",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Désolé, je n'ai pas pu trouver de contacts appropriés dans votre carnet d'adresses.",
 			"loading": "Réflexion...",
 			"reset_chat_history": "Réinitialiser l'historique de discussion",

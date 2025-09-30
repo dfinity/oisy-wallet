@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",
 			"session_expired": "Вы были автоматически выведены из системы, так как срок действия вашей сессии истек.",
@@ -1318,7 +1321,6 @@
 		"error": {
 			"loading_transactions": "Ошибка при загрузке транзакций.",
 			"loading_transactions_symbol": "Ошибка при загрузке транзакций $symbol.",
-			"no_token_loading_transaction": "Токен не найден. Транзакции не могут быть загружены.",
 			"uncertified_transactions_removed": "Были идентифицированы несколько несертифицированных транзакций, которые впоследствии были удалены из отображаемых списков.",
 			"loading_pending_ck_ethereum_transactions": "Что-то пошло не так при получении ожидающих транзакций $network.",
 			"get_transaction_for_hash": "Не удалось получить транзакцию по предоставленному хешу ($hash).",
@@ -1690,7 +1692,11 @@
 			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "",
 			"reset_chat_history": "",

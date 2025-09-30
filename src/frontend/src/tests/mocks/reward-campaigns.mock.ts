@@ -1,6 +1,7 @@
 import {
 	SPRINKLES_SEASON_1_EPISODE_3_ID,
-	SPRINKLES_SEASON_1_EPISODE_4_ID
+	SPRINKLES_SEASON_1_EPISODE_4_ID,
+	SPRINKLES_SEASON_1_EPISODE_5_ID
 } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 
@@ -98,7 +99,7 @@ export const mockRewardCampaigns: RewardCampaignDescription[] = [
 		}
 	},
 	{
-		id: 'sprinkles_s1e5',
+		id: SPRINKLES_SEASON_1_EPISODE_5_ID,
 		title: 'OISY Airdrop',
 		cardTitle: 'OISY Rewards Season is Now Active!',
 		oneLiner: 'The one stop token shop - Trade tokens across all chains with ease using KongSwap.',
