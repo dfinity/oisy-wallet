@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "टोकन आयात करें",
+				"title_nft": "",
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "टोकन मैनेज करें",
+				"title_nft": "",
 				"manage_list": "टोकन मैनेज करें",
 				"list_settings": "सूची सेटिंग्स",
 				"import_token": "टोकन आयात करें",
+				"import_nft": "",
 				"network": "नेटवर्क",
 				"all_tokens_zero_balance": "सभी टोकन में शून्य बैलेंस है।",
 				"enable_more_assets": "अधिक टोकन सक्षम करें"

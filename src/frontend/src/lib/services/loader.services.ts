@@ -15,7 +15,7 @@ import { errorSignOut, nullishSignOut, signOut } from '$lib/services/auth.servic
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
@@ -131,7 +131,7 @@ export const initLoader = async ({
 	const { success: addressIdbSuccess, err } = await loadIdbAddresses(enabledNetworkIds);
 
 	if (addressIdbSuccess) {
-		loading.set(false);
+		initialLoading.set(false);
 
 		await progressAndLoad();
 
