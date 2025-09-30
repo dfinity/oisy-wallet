@@ -419,3 +419,17 @@ export const saveAllCustomTokens = async ({
 			: [])
 	]);
 };
+
+export const filterTokensByNft = ({
+	tokens,
+	filterNfts
+}: {
+	tokens: Token[];
+	filterNfts?: boolean;
+}): Token[] =>
+	isNullish(filterNfts)
+		? tokens
+		: tokens.filter((t) => {
+				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				return filterNfts ? isNft : !isNft;
+			});
