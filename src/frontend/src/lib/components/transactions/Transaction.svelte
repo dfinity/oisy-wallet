@@ -165,7 +165,7 @@
 							formatOptions: {
 								hour: '2-digit',
 								minute: '2-digit',
-								hour12: undefined
+								hour12: false
 							},
 							timeOnly: true
 						})}
