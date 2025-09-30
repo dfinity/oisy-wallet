@@ -994,11 +994,14 @@ interface I18nWallet_connect {
 		scan_qr: string;
 		or_use_link: string;
 		proposer: string;
+		spender: string;
 		review: string;
 		method: string;
 		methods: string;
 		events: string;
 		message: string;
+		token: string;
+		network: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
@@ -1123,7 +1126,6 @@ interface I18nTransactions {
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
-		no_token_loading_transaction: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
@@ -1385,6 +1387,9 @@ interface I18nAi_assistant {
 		action_button_send_tokens_title: string;
 		action_button_send_tokens_subtitle: string;
 		action_button_send_tokens_prompt: string;
+		action_button_show_balance_title: string;
+		action_button_show_balance_subtitle: string;
+		action_button_show_balance_prompt: string;
 		select_contact_message: string;
 		send_to_message: string;
 		send_message: string;
