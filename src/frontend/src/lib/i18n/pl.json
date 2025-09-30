@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
 			"session_expired": "Zostałeś wylogowany, ponieważ Twoja sesja wygasła.",
@@ -1189,10 +1192,6 @@
 			"methods": "Metody",
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
-			"expiration": "",
-			"token": "",
-			"network": "",
-			"amount": "",
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość"
@@ -1320,7 +1319,6 @@
 		"error": {
 			"loading_transactions": "Błąd podczas ładowania transakcji.",
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",
-			"no_token_loading_transaction": "Nie znaleziono tokena. Nie można załadować transakcji.",
 			"uncertified_transactions_removed": "Zidentyfikowano kilka niecertyfikowanych transakcji, które następnie usunięto z wyświetlanych list.",
 			"loading_pending_ck_ethereum_transactions": "Coś poszło nie tak podczas pobierania oczekujących transakcji $network.",
 			"get_transaction_for_hash": "Nie udało się pobrać transakcji z podanego hasha ($hash).",
@@ -1688,11 +1686,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Wyślij wiadomość",
 			"send_message_input_placeholder": "Co chcesz zrobić?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
 			"loading": "Myślenie...",
 			"reset_chat_history": "",

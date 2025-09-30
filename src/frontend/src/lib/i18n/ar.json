@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
 			"session_expired": "تم تسجيل خروجك لانتهاء صلاحية جلستك.",
@@ -1189,10 +1192,6 @@
 			"methods": "الطرق",
 			"events": "الأحداث",
 			"message": "الرسالة",
-			"expiration": "",
-			"token": "",
-			"network": "",
-			"amount": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة"
@@ -1320,7 +1319,6 @@
 		"error": {
 			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
-			"no_token_loading_transaction": "لم يتم العثور على التوكن. لا يمكن تحميل المعاملات.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
 			"get_transaction_for_hash": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم.",
@@ -1688,11 +1686,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "إرسال رسالة",
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "جارٍ التفكير...",
 			"reset_chat_history": "",

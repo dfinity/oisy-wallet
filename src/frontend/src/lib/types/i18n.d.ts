@@ -110,6 +110,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
+	message: { refreshed_authentication: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -999,10 +1000,6 @@ interface I18nWallet_connect {
 		methods: string;
 		events: string;
 		message: string;
-		expiration: string;
-		token: string;
-		network: string;
-		amount: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
@@ -1127,7 +1124,6 @@ interface I18nTransactions {
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
-		no_token_loading_transaction: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
@@ -1379,11 +1375,18 @@ interface I18nAi_assistant {
 		action_button_send_tokens_title: string;
 		action_button_send_tokens_subtitle: string;
 		action_button_send_tokens_prompt: string;
+		action_button_show_balance_title: string;
+		action_button_show_balance_subtitle: string;
+		action_button_show_balance_prompt: string;
 		select_contact_message: string;
 		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_on_network_message: string;
+		send_token_message: string;
+		send_on_network_message: string;
 		send_token_succeeded: string;
+		show_total_balance_tool_card_title: string;
 		no_contacts_found_message: string;
 		loading: string;
 		reset_chat_history: string;
