@@ -54,7 +54,11 @@
 			title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
 		/>
 	{:else if selectedRewardState === RewardStates.ENDED}
-		<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} sortByEndDate="desc" />
+		<RewardsGroup
+			rewards={endedCampaigns}
+			sortByEndDate="desc"
+			testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER}
+		/>
 	{/if}
 
 	{#if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
