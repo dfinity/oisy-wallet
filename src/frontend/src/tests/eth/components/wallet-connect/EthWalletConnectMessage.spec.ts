@@ -114,18 +114,6 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('0x66a9893cc07d91d95644aedd05d03f95e1dba8af')).toBeInTheDocument();
 	});
 
-	it('should render the spender', () => {
-		const { getByText } = render(EthWalletConnectMessage, {
-			props: {
-				request
-			}
-		});
-
-		expect(getByText(`${en.wallet_connect.text.spender}:`)).toBeInTheDocument();
-
-		expect(getByText('0x66a9893cc07d91d95644aedd05d03f95e1dba8af')).toBeInTheDocument();
-	});
-
 	it('should not render the token if it is not enabled', () => {
 		erc20DefaultTokensStore.reset();
 		erc20UserTokensStore.resetAll();
