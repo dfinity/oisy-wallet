@@ -24,7 +24,11 @@
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
+	let {
+		initialSearch,
+		infoElement,
+		isNftsPage
+	}: { initialSearch?: string; infoElement?: Snippet; isNftsPage?: boolean } = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -56,7 +60,8 @@
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			filterNfts: isNftsPage
 		})
 	);
 
@@ -151,7 +156,10 @@
 				colorStyle="secondary-light"
 				disabled={$pseudoNetworkICPTestnet}
 				onclick={() => dispatch('icAddToken')}
-				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+				><IconPlus />
+				{isNftsPage
+					? $i18n.tokens.manage.text.import_nft
+					: $i18n.tokens.manage.text.import_token}</Button
 			>
 			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}

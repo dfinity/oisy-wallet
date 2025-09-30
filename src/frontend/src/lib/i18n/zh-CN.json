@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "导入代币",
+				"title_nft": "",
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "管理代币",
+				"title_nft": "",
 				"manage_list": "管理代币",
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
+				"import_nft": "",
 				"network": "网络",
 				"all_tokens_zero_balance": "所有代币余额均为零。",
 				"enable_more_assets": "启用更多代币"
