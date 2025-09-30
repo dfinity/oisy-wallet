@@ -535,7 +535,6 @@
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
-			"eth_address_unknown": "ETH पता अज्ञात है।",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
 			"erc20_contracts": "ERC20 कॉन्ट्रैक्ट लोड करते समय त्रुटि।",

@@ -535,7 +535,6 @@
 			"no_infura_erc1155_provider": "Brak dostawcy Infura ERC1155 dla sieci $network",
 			"no_infura_erc20_icp_provider": "Brak dostawcy Infura ERC20 ICP dla sieci $network",
 			"no_solana_network": "Brak sieci Solana dla sieci $network",
-			"eth_address_unknown": "Nieznany adres ETH.",
 			"loading_address": "Błąd podczas ładowania adresu $symbol.",
 			"loading_balance": "Błąd podczas ładowania salda $symbol dla sieci $network.",
 			"erc20_contracts": "Błąd podczas ładowania kontraktów ERC20.",

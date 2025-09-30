@@ -535,7 +535,6 @@
 			"no_infura_erc1155_provider": "Không có nhà cung cấp Infura ERC1155 cho mạng $network",
 			"no_infura_erc20_icp_provider": "Không có nhà cung cấp Infura ERC20 Icp cho mạng $network",
 			"no_solana_network": "Không có mạng Solana cho mạng $network",
-			"eth_address_unknown": "Địa chỉ ETH không xác định.",
 			"loading_address": "Lỗi khi tải địa chỉ $symbol.",
 			"loading_balance": "Lỗi khi tải số dư $symbol cho mạng $network.",
 			"erc20_contracts": "Lỗi khi tải các hợp đồng ERC20.",

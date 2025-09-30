@@ -387,7 +387,6 @@ interface I18nInit {
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
-		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
 		erc20_contracts: string;
