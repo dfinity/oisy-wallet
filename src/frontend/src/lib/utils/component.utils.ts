@@ -1,12 +1,10 @@
 import { mount, unmount } from 'svelte';
 
-type SvelteComponent<T = never> = new (options: { target: Element; props?: T }) => never;
-
 type ComponentProps<T> = T extends new (options: { target: Element; props?: infer P }) => never
 	? P
 	: never;
 
-export const componentToHtml = <T extends SvelteComponent>({
+export const componentToHtml = <T extends Component>({
 	Component,
 	props
 }: {
