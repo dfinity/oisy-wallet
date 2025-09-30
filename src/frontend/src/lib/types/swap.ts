@@ -5,7 +5,10 @@ import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import type { EthAddress, OptionEthAddress } from '$lib/types/address';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { Identity } from '@dfinity/agent';
 import type {
 	BridgePrice,
@@ -14,9 +17,6 @@ import type {
 	QuoteParams,
 	SimpleFetchSDK
 } from '@velora-dex/sdk';
-import type { EthAddress, OptionEthAddress } from './address';
-import type { Amount, OptionAmount } from './send';
-import type { RequiredTransactionFeeData } from './transaction';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
