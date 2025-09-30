@@ -23,9 +23,9 @@ import { assertNonNullish, isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 /**
- * Retrieves and checks if the required number of cycles are available for the user.
+ * Retrieves and checks if the required number of cycles is available for the user.
  *
- * This asynchronous function verifies whether the user has sufficient cycles to proceed with further operations.
+ * This asynchronous function verifies whether the user has enough cycles to proceed with further operations.
  * It retrieves the user's identity and calculates the number of allowed cycles. If the number of allowed cycles
  * meets or exceeds the defined threshold (`POW_MIN_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
  * it performs necessary error handling and signs the user out in the event of insufficient cycles or any other
@@ -47,10 +47,10 @@ export const handleInsufficientCycles = async (): Promise<boolean> => {
 };
 
 /**
- * Initializes the signer allowance by calling `allow_signing`.
+ * Initialises the signer allowance by calling `allow_signing`.
  *
  * This function should be called once during boot time before retrieving ETH or BTC addresses.
- * It allocates a cycles budget sufficient for a reasonable number of signer calls.
+ * It allocates a cycles' budget sufficient for a reasonable number of signer calls.
  * A "reasonable" number is currently defined as 30 calls, allowing the user to retrieve their ETH and BTC addresses
  * and perform up to 28 additional transactions.
  *
@@ -77,7 +77,7 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
 };
 
 /**
- * Initializes the loader by loading the user profile settings and addresses.
+ * Initialises the loader by loading the user profile settings and addresses.
  *
  * If the user profile settings cannot be loaded, the user will be signed out.
  * If the addresses are loaded from the IDB:
@@ -85,16 +85,16 @@ export const initSignerAllowance = async (): Promise<ResultSuccess> => {
  * - The additional data will be loaded.
  * - The progress modal will not be displayed.
  * If the addresses are loaded from the backend:
- * - The signer allowance will be initialized.
+ * - The signer allowance will be initialised.
  * - The additional data will be loaded.
  * - The progress modal will be displayed.
  *
- * @param {Object} params The parameters to initialize the loader.
+ * @param {Object} params The parameters to initialise the loader.
  * @param {OptionIdentity} params.identity The identity to use for the request.
  * @param {Function} params.validateAddresses The function to validate the addresses.
  * @param {Function} params.progressAndLoad The function to set the next step of the Progress modal and load the additional data.
  * @param {Function} params.setProgressModal The function to set the progress modal.
- * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialized (user profile settings and addresses are loaded).
+ * @returns {Promise<void>} Returns a promise that resolves when the loader is correctly initialised (user profile settings and addresses are loaded).
  */
 export const initLoader = async ({
 	identity,
@@ -121,7 +121,7 @@ export const initLoader = async ({
 		return;
 	}
 
-	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function, when loading the user profile.
+	// We can fetch these values imperatively because these stores were just updated at the beginning of this same function when loading the user profile.
 	const enabledNetworkIds: NetworkId[] = [
 		...(get(networkBitcoinMainnetEnabled) ? [BTC_MAINNET_NETWORK_ID] : []),
 		...(get(networkEthereumEnabled) || get(networkEvmMainnetEnabled) ? [ETHEREUM_NETWORK_ID] : []),
@@ -140,11 +140,13 @@ export const initLoader = async ({
 		return;
 	}
 
-	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-	setProgressModal(true);
+	if (!FRONTEND_DERIVATION_ENABLED) {
+		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+		setProgressModal(true);
+	}
 
 	if (FRONTEND_DERIVATION_ENABLED) {
-		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.
+		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialisation.
 		initSignerAllowance();
 	} else {
 		const { success: initSignerAllowanceSuccess } = await initSignerAllowance();
