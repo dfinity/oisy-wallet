@@ -1504,9 +1504,9 @@
 		"text": {
 			"title": "Preparing Signer",
 			"description": "Verifying that you are not a robot",
-			"request_challenge": "Waiting for new Challenge",
+			"request_challenge": "Waiting for new challenge",
 			"solve_challenge": "Solving challenge",
-			"grant_cycles": "Enabling Signing"
+			"grant_cycles": "Enabling signing"
 		}
 	},
 	"signer": {
