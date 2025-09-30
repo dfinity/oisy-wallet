@@ -5,7 +5,8 @@ import { KongSwapTokenSchema, type KongSwapToken } from '$lib/types/kongswap';
 const fetchKongSwap = async <T>(endpoint: string): Promise<T | null> => {
 	const response = await fetch(`${KONGSWAP_API_URL}/${endpoint}`, {
 		method: 'GET',
-		headers: { 'Content-Type': 'application/json' }
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ limit: 1000 })
 	});
 
 	if (!response.ok) {
