@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
 			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
