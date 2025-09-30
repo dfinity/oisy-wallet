@@ -54,6 +54,7 @@ jobs:
           });
           fs.writeFileSync(file, updated);
           "
+
       # The coverage thresholds should never decrease
       - name: Update thresholds only if increased
         run: |
