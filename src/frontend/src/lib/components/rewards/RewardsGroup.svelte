@@ -9,7 +9,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { getCampaignState } from '$lib/utils/rewards.utils';
+	import { getCampaignState, sortRewards } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		title?: string;
@@ -17,11 +17,14 @@
 		altText?: string;
 		altImg?: string;
 		testId?: string;
+		sortByEndDate?: 'asc' | 'desc';
 	}
 
-	let { title, rewards, altText, altImg, testId }: Props = $props();
+	let { title, rewards, altText, altImg, testId, sortByEndDate = 'asc' }: Props = $props();
 
 	const modalId = Symbol();
+
+	const sortedRewards = $derived(sortRewards({ rewards, sortByEndDate }));
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
@@ -29,7 +32,7 @@
 		<span class="text-lg font-bold first-letter:capitalize"><Html text={title} /></span>
 	{/if}
 
-	{#each rewards as reward (reward.id)}
+	{#each sortedRewards as reward (reward.id)}
 		<div class="mt-4" in:slide={SLIDE_DURATION}>
 			<RewardCard
 				onclick={() => {
