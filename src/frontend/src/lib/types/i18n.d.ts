@@ -1000,6 +1000,10 @@ interface I18nWallet_connect {
 		methods: string;
 		events: string;
 		message: string;
+		expiration: string;
+		token: string;
+		network: string;
+		amount: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;

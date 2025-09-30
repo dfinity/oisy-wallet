@@ -1192,6 +1192,10 @@
 			"methods": "Méthodes",
 			"events": "Événements",
 			"message": "Message",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Données HEX",
 			"raw_copied": "Données de transaction brutes copiées dans le presse-papiers.",
 			"sign_message": "Signer le message"

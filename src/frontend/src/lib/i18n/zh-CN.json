@@ -1192,6 +1192,10 @@
 			"methods": "方法",
 			"events": "事件",
 			"message": "消息",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签名消息"

@@ -1192,6 +1192,10 @@
 			"methods": "Métodos",
 			"events": "Eventos",
 			"message": "Mensagem",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dados HEX",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem"
