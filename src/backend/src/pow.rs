@@ -98,17 +98,21 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     }
 
     // Retrieve or initialize new challenge
+    // Retrieve or initialize new challenge
     let difficulty: u32;
-    #[allow(unreachable_code)]
-    if DIFFICULTY_AUTO_ADJUSTMENT && get_pow_challenge().is_some() {
-        let stored_challenge = get_pow_challenge().unwrap();
+    if let Some(stored_challenge) = get_pow_challenge() {
         debug_println!(
             "create_pow_challenge() -> Found existing challenge: {:?}",
             format_challenge(&stored_challenge),
         );
 
-        // we re-use the previous challenge so we can dynamically adapt the difficulty
-        difficulty = stored_challenge.difficulty;
+        // If auto-adjustment is disabled, always use START_DIFFICULTY
+        if !DIFFICULTY_AUTO_ADJUSTMENT {
+            difficulty = START_DIFFICULTY;
+        } else {
+            // we re-use the previous challenge so we can dynamically adapt the difficulty
+            difficulty = stored_challenge.difficulty;
+        }
 
         // to protect this service from overflow the service, it can only be called by a principle
         // again once the challenge has expired.
@@ -119,6 +123,9 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
+        debug_println!(
+            "create_pow_challenge() -> No existing challenge found. Initializing new one..",
+        );
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
     }
