@@ -1320,7 +1320,6 @@
 		"error": {
 			"loading_transactions": "Ошибка при загрузке транзакций.",
 			"loading_transactions_symbol": "Ошибка при загрузке транзакций $symbol.",
-			"no_token_loading_transaction": "Токен не найден. Транзакции не могут быть загружены.",
 			"uncertified_transactions_removed": "Были идентифицированы несколько несертифицированных транзакций, которые впоследствии были удалены из отображаемых списков.",
 			"loading_pending_ck_ethereum_transactions": "Что-то пошло не так при получении ожидающих транзакций $network.",
 			"get_transaction_for_hash": "Не удалось получить транзакцию по предоставленному хешу ($hash).",

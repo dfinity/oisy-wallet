@@ -1320,7 +1320,6 @@
 		"error": {
 			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
-			"no_token_loading_transaction": "لم يتم العثور على التوكن. لا يمكن تحميل المعاملات.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
 			"get_transaction_for_hash": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم.",

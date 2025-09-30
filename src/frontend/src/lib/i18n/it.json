@@ -1320,7 +1320,6 @@
 		"error": {
 			"loading_transactions": "Errore durante il caricamento delle transazioni.",
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",
-			"no_token_loading_transaction": "Token non trovato. Impossibile caricare le transazioni.",
 			"uncertified_transactions_removed": "Diverse transazioni non certificate sono state identificate e successivamente rimosse dagli elenchi visualizzati.",
 			"loading_pending_ck_ethereum_transactions": "Qualcosa è andato storto durante il recupero delle transazioni in sospeso di $network.",
 			"get_transaction_for_hash": "Impossibile ottenere la transazione dall'hash fornito ($hash).",
