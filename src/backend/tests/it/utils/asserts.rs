@@ -38,14 +38,14 @@ pub fn assert_deviation<T>(value: T, expected_value: T, max_deviation: T)
 where
     T: PartialOrd + std::fmt::Debug + Sub<Output = T> + Add<Output = T> + Clone,
 {
-
     // Handle underflow by using saturating subtraction concept
     let min_value = if expected_value >= max_deviation {
         expected_value.clone() - max_deviation.clone()
     } else {
         // If subtraction would underflow, use a default minimum (typically zero for unsigned types)
         // For this case, we'll use the expected_value itself as the minimum bound
-        expected_value.clone() - expected_value.clone() // This effectively gives us zero for numeric types
+        expected_value.clone() - expected_value.clone() // This effectively gives us zero for
+                                                        // numeric types
     };
 
     let max_value = expected_value.clone() + max_deviation.clone();
