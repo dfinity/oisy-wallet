@@ -69,7 +69,6 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
-	import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 
 	interface Props {
 		children: Snippet;
