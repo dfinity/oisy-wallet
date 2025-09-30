@@ -44,9 +44,11 @@
 		})
 	);
 
-	$effect(()=>{
+	$effect(() => {
+		console.log('$exchanges:', $exchanges);
+		console.log('$balances:', $balancesStore);
 		console.log('Tokens list updated', tokens);
-	})
+	});
 
 	$effect(() => {
 		setTokens(tokens);
