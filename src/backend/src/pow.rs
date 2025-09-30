@@ -99,7 +99,9 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
 
     // Retrieve or initialize new challenge
     let difficulty: u32;
-    if let Some(stored_challenge) = get_pow_challenge() {
+    #[allow(unreachable_code)]
+    if DIFFICULTY_AUTO_ADJUSTMENT && get_pow_challenge().is_some() {
+        let stored_challenge = get_pow_challenge().unwrap();
         debug_println!(
             "create_pow_challenge() -> Found existing challenge: {:?}",
             format_challenge(&stored_challenge),
@@ -117,9 +119,6 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             return Err(CreateChallengeError::ChallengeInProgress);
         }
     } else {
-        debug_println!(
-            "create_pow_challenge() -> No existing challenge found. Initializing new one..",
-        );
         // if the challenge is requested the first time we use the start difficulty
         difficulty = START_DIFFICULTY;
     }
