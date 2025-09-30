@@ -535,7 +535,6 @@
 			"no_infura_erc1155_provider": "Nenhum provedor Infura ERC1155 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
-			"eth_address_unknown": "Endereço ETH desconhecido.",
 			"loading_address": "Erro ao carregar o endereço $symbol.",
 			"loading_balance": "Erro ao carregar o saldo $symbol para a rede $network.",
 			"erc20_contracts": "Erro ao carregar os contratos ERC20.",
