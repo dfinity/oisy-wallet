@@ -79,9 +79,10 @@ export const initModalTokensListContext = (
 				isNullish($filterNetwork)
 			]);
 
-			const filteredByNft = nonNullish($filterNfts)
-				? filterTokensByNft({ tokens: filteredByNetwork, filterNfts: $filterNfts })
-				: filteredByNetwork;
+			const filteredByNft = filterTokensByNft({
+				tokens: filteredByNetwork,
+				filterNfts: $filterNfts
+			});
 
 			if (!$sortByBalance) {
 				return filteredByNft;

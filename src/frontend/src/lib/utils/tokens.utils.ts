@@ -425,9 +425,11 @@ export const filterTokensByNft = ({
 	filterNfts
 }: {
 	tokens: Token[];
-	filterNfts: boolean;
-}) =>
-	tokens.filter((t) => {
-		const isNft = isTokenErc1155(t) || isTokenErc721(t);
-		return filterNfts ? isNft : !isNft;
-	});
+	filterNfts?: boolean;
+}): Token[] =>
+	isNullish(filterNfts)
+		? tokens
+		: tokens.filter((t) => {
+				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				return filterNfts ? isNft : !isNft;
+			});
