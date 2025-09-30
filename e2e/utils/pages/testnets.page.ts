@@ -81,7 +81,7 @@ export class TestnetsPage extends HomepageLoggedIn {
 			const countBalances = await balances.count();
 			await Promise.all(
 				Array.from({ length: countBalances }, (_, i) =>
-					skeletons.nth(i).waitFor({ state: 'visible', timeout: 60000 })
+					balances.nth(i).waitFor({ state: 'visible', timeout: 60000 })
 				)
 			);
 		}
