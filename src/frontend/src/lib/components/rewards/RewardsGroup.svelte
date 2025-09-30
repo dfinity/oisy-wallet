@@ -24,14 +24,16 @@
 
 	const modalId = Symbol();
 
-	const sortedRewards = $derived.by(() => {
+	const sortRewards = () => {
 		return [...rewards].sort((a, b) => {
 			const dateA = new Date(a.endDate).getTime();
 			const dateB = new Date(b.endDate).getTime();
 
 			return sortByEndDate === 'asc' ? dateA - dateB : dateB - dateA;
 		});
-	});
+	}
+
+	const sortedRewards = $derived(sortRewards());
 </script>
 
 <div class="mb-10 flex flex-col gap-4" data-tid={testId}>
