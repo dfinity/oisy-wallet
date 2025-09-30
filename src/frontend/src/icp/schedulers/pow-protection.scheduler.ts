@@ -82,6 +82,9 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 					nextAllowanceMs: allowSigningResponse.challenge_completion[0].next_allowance_ms
 				});
 			}
+			this.postMessagePowProgress({
+				progress: 'CYCLES_GRANTED'
+			});
 		} catch (err: unknown) {
 			// We can skip the "Challenge already in progress" since we are already in the middle of a challenge. This
 			// usually happens when:
@@ -100,7 +103,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	private postMessagePowProgress({
 		progress
 	}: {
-		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES' | 'CYCLES_GRANTED';
 	}) {
 		const data: PostMessageDataResponsePowProtectorProgress = {
 			progress

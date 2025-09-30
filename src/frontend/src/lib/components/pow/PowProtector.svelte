@@ -9,7 +9,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
-	import { handleInsufficientCycles } from '$lib/services/loader.services';
+	import { hasEnoughCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import type { StaticStep } from '$lib/types/steps';
@@ -48,6 +48,7 @@
 					break;
 				case 'GRANT_CYCLES':
 					progressStep = ProgressStepsPowProtectorLoader.GRANT_CYCLES;
+					hasCycles = true;
 					break;
 				default:
 					// Fallback to initialization if unknown value
@@ -82,7 +83,7 @@
 	 */
 	const checkCycles = async (): Promise<void> => {
 		// Check current cycles status and update the reactive state
-		hasCycles = await handleInsufficientCycles();
+		hasCycles = await hasEnoughCycles();
 
 		// Increment attempt counter to track how many times we've checked
 		checkAttempts++;
@@ -116,7 +117,7 @@
 	onMount(async () => {
 		if (POW_FEATURE_ENABLED) {
 			// Initial check
-			hasCycles = await handleInsufficientCycles();
+			hasCycles = await hasEnoughCycles();
 			loading = true;
 
 			// Always initialize the worker regardless of cycles status
