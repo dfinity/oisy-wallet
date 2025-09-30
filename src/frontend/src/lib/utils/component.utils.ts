@@ -6,11 +6,13 @@ type ComponentProps<T> = T extends new (options: { target: Element; props?: infe
 	? P
 	: never;
 
-export const componentToHtml = <T extends SvelteComponent>(
-	{Component, props}:
-	{Component: T,
-		props?: ComponentProps<T>}
-): string => {
+export const componentToHtml = <T extends SvelteComponent>({
+	Component,
+	props
+}: {
+	Component: T;
+	props?: ComponentProps<T>;
+}): string => {
 	const container = document.createElement('div');
 
 	try {
@@ -30,4 +32,4 @@ export const componentToHtml = <T extends SvelteComponent>(
 	} finally {
 		container.remove();
 	}
-}
+};
