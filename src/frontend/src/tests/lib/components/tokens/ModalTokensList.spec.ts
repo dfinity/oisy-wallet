@@ -151,7 +151,7 @@ describe('ModalTokensList', () => {
 		}
 	});
 
-	it('should only render Nfts if filterNfts is true', async () => {
+	it('should only render Nfts if filterNfts is true', () => {
 		const { container, getByTestId } = render(ModalTokensListHost, {
 			props: {
 				tokens: [
