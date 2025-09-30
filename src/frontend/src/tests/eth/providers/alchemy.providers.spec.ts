@@ -266,7 +266,7 @@ describe('alchemy.providers', () => {
 			name: 'My mega contract',
 			symbol: 'MC',
 			decimals: 0,
-			description: 'This is a description',
+			description: 'This is a description'
 		};
 
 		beforeEach(() => {

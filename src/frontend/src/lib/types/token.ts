@@ -35,7 +35,10 @@ export interface TokenLinkedData {
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup & Pick<Token, 'description'>;
+export type NonRequiredProps = TokenAppearance &
+	TokenBuyable &
+	TokenGroup &
+	Pick<Token, 'description'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
 	T,
