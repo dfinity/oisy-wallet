@@ -466,12 +466,18 @@ describe('nfts.utils', () => {
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
-				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
 			});
 		});
 
-		it('should not map empty name and symbol', () => {
-			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+		it('should not map empty name, symbol and description', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN,
+				name: '',
+				symbol: '',
+				description: ''
+			});
 
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
