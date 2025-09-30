@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
+		"message": {
+			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab."
+		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
 			"session_expired": "You have been logged out because your session has expired.",

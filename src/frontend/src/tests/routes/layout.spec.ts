@@ -4,9 +4,13 @@ import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
 import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
+import * as toastsStore from '$lib/stores/toasts.store';
+import { toastsShow } from '$lib/stores/toasts.store';
 import App from '$routes/+layout.svelte';
+import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
+import { default as en } from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
 vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -151,10 +155,18 @@ describe('App Layout', () => {
 		describe('on login success message', () => {
 			beforeEach(() => {
 				vi.clearAllMocks();
+
+				vi.spyOn(toastsStore, 'toastsShow');
 			});
 
 			it('should trigger the forced re-synchronization', () => {
-				const spy = vi.spyOn(authStore, 'forceSync');
+				mockAuthSignedIn(false);
+
+				const spy = vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
+					mockAuthSignedIn();
+
+					await Promise.resolve();
+				});
 
 				render(App, { children: mockSnippet });
 
@@ -165,6 +177,43 @@ describe('App Layout', () => {
 				newBc.postMessage(loginSuccessMessage);
 
 				expect(spy).toHaveBeenCalledExactlyOnceWith();
+			});
+
+			it('should show a toast if the page was logged out before the re-synchronization', async () => {
+				mockAuthSignedIn(false);
+
+				vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
+					mockAuthSignedIn();
+
+					await Promise.resolve();
+				});
+
+				render(App, { children: mockSnippet });
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				await waitFor(() => {
+					expect(toastsShow).toHaveBeenCalledExactlyOnceWith({
+						text: en.auth.message.refreshed_authentication,
+						level: 'success'
+					});
+				});
+			});
+
+			it('should do nothing if after the re-synchronization it is logged out', async () => {
+				mockAuthSignedIn(false);
+
+				render(App, { children: mockSnippet });
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				await waitFor(() => {
+					expect(toastsShow).not.toHaveBeenCalled();
+				});
 			});
 		});
 	});
