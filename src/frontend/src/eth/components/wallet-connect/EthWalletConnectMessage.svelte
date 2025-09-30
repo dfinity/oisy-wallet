@@ -101,11 +101,6 @@
 	<p class="mb-4 font-normal">{spender}</p>
 {/if}
 
-{#if nonNullish(spender)}
-	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.spender}:</p>
-	<p class="mb-4 font-normal">{spender}</p>
-{/if}
-
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.message}:</p>
 {#if nonNullish(json)}
 	<div class="rounded-xs mt-4 bg-disabled p-4">
