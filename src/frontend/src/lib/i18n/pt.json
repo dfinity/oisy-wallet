@@ -1507,6 +1507,15 @@
 			"title": "Scan do QR code"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "",
+			"description": "",
+			"request_challenge": "",
+			"solve_challenge": "",
+			"grant_cycles": ""
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {

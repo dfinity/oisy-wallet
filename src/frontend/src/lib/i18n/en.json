@@ -1507,6 +1507,15 @@
 			"title": "Scan QR code"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
