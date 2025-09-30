@@ -535,7 +535,6 @@
 			"no_infura_erc1155_provider": "ネットワーク$networkのInfura ERC1155プロバイダーが存在しません",
 			"no_infura_erc20_icp_provider": "ネットワーク$networkのInfura ERC20 ICPプロバイダーが存在しません",
 			"no_solana_network": "ネットワーク$networkのSolanaネットワークが存在しません",
-			"eth_address_unknown": "ETHアドレスが不明です",
 			"loading_address": "$symbolアドレスの読み込み中にエラーが発生しました",
 			"loading_balance": "ネットワーク$networkの$symbol残高の読み込み中にエラーが発生しました",
 			"erc20_contracts": "ERC20コントラクトの読み込み中にエラーが発生しました",
