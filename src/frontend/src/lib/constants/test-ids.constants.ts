@@ -183,6 +183,7 @@ export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anc
 export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';

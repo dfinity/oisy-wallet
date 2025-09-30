@@ -115,6 +115,9 @@
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
 			"session_expired": "Zostałeś wylogowany, ponieważ Twoja sesja wygasła.",
@@ -226,7 +229,7 @@
 				"description": "OpenChat to w pełni funkcjonalna aplikacja do czatu działająca w całości na blockchainie Internet Computer.<br/><br/>OpenChat jest zarządzany przez swoją społeczność jako DAO i ma własny token CHAT. Tokeny CHAT są przyznawane jako nagrody dla użytkowników w celu przyspieszenia rozwoju i stworzenia zespołu milionów zwolenników, co pozwoli OpenChat stać się realnym konkurentem dla scentralizowanych gigantów technologicznych!",
 				"stats": "Ponad 80 000 użytkowników",
 				"carousel": {
-					"text": "OpenChat - gdzie komunikuje się web3",
+					"text": "",
 					"call_to_action": "Pokaż więcej"
 				}
 			},
@@ -320,11 +323,7 @@
 				"name": "Taggr",
 				"one_liner": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
 				"call_to_action": "Przejdź do Taggr",
-				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników.",
-				"carousel": {
-					"text": "Zdecentralizowane media społecznościowe - publikuj, zarabiaj, posiadaj.",
-					"call_to_action": "Dowiedz się więcej"
-				}
+				"description": "Taggr to w pełni zdecentralizowana platforma mediów społecznościowych, która działa w publicznej rozproszonej sieci obliczeniowej zasilanej przez Internet Computer. W przeciwieństwie do tradycyjnych platform mediów społecznościowych kontrolowanych przez korporacje, Taggr jest w całości własnością i jest zarządzany przez swoich użytkowników."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -345,7 +344,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -368,14 +371,14 @@
 			"carousel_slide_cta": "Dowiedz się więcej",
 			"sprinkles_earned": "Zdobyłeś $noOfSprinkles sprinkles o łącznej wartości $amount! 🎊",
 			"youre_eligible": "Jesteś uprawniony!",
-			"not_eligible": "",
+			"not_eligible": "Nie uprawniony",
 			"ongoing": "Trwa",
 			"ended": "Zakończono ($amount)",
 			"banner_text": "Zdobywaj codzienne nagrody z OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kryteria kwalifikacji",
-			"network_bonus_info": "",
+			"network_bonus_info": "Każda sieć, w której przechowujesz aktywa, daje Ci mnożnik nagród. Im więcej sieci używasz, tym więcej nagród otrzymujesz!",
 			"min_logins": "Zaloguj się $loginsx razy w ciągu ostatnich $days dni",
 			"min_transactions": "Wykonaj $transactions transakcji w ciągu ostatnich $days dni",
 			"min_total_assets_usd": "Posiadaj tokeny o wartości $$usd w momencie emisji",
@@ -448,31 +451,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Odcinek 5 już dostępny 🎊",
+				"one_liner": "Zdobywaj Sprinkles za aktywność, polecanie innych i korzystanie z OISY w sieciach. Twoje działania zwiększają Twoje nagrody, a aktywne polecenia dodatkowo je wzmacniają.<br/>Dodatkowo, teraz więcej sieci oznacza większe szanse na wygraną.",
+				"participate_title": "Zdobywaj żetony za aktywność i polecenia. Więcej łańcuchów oznacza więcej szans.",
+				"description": "Pozostań aktywny przez ponad 10 dni, aby się zakwalifikować: loguj się często, wykonuj działania w portfelu i utrzymuj na koncie co najmniej 20 USD.<br/>Każdy aktywny łańcuch zwiększa Twoje szanse dzięki mnożnikowi Multichain.<br/>Zarób 10% od znajomych, którzy się zakwalifikują, i znajdź się w pierwszej trójce, aby wygrać Super Sprinkle o wartości 200 USD.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Zostałeś nagrodzony",
+						"description": "Twoje nagrody właśnie wylądowały w Twoim portfelu.<br>Nie zapomnij polecać i pozostać aktywnym, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Wygrałeś cotygodniowy bonus",
+						"description": "Właśnie zdobyłeś jeden z naszych cotygodniowych bonusów.<br>Bądź aktywny i polecaj nas regularnie, aby wygrać więcej.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Znalazłeś się na szczycie tabeli liderów",
+						"description": "Znalazłeś się w pierwszej czwórce polecających w tym sezonie.<br>200 USD zostało dodane do Twojego portfela.",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Oto małe podziękowanie",
+						"description": "Jeden z Twoich poleconych użytkowników właśnie dostał trochę sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -533,7 +536,6 @@
 			"no_infura_erc1155_provider": "Brak dostawcy Infura ERC1155 dla sieci $network",
 			"no_infura_erc20_icp_provider": "Brak dostawcy Infura ERC20 ICP dla sieci $network",
 			"no_solana_network": "Brak sieci Solana dla sieci $network",
-			"eth_address_unknown": "Nieznany adres ETH.",
 			"loading_address": "Błąd podczas ładowania adresu $symbol.",
 			"loading_balance": "Błąd podczas ładowania salda $symbol dla sieci $network.",
 			"erc20_contracts": "Błąd podczas ładowania kontraktów ERC20.",
@@ -582,6 +584,7 @@
 	"settings": {
 		"text": {
 			"title": "Ustawienia",
+			"general": "",
 			"principal": "Twój Principal",
 			"principal_copied": "Principal skopiowany do schowka",
 			"principal_description": "Twój identyfikator dla $oisy_name. Utworzony przez Twoją tożsamość internetową.",
@@ -986,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importuj token",
+				"title_nft": "",
 				"review": "Przegląd",
 				"saving": "Zapisywanie...",
 				"updating": "Aktualizacja listy tokenów",
@@ -1020,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Zarządzaj tokenami",
+				"title_nft": "",
 				"manage_list": "Zarządzaj tokenami",
 				"list_settings": "Ustawienia listy",
 				"import_token": "Importuj token",
+				"import_nft": "",
 				"network": "Sieć",
 				"all_tokens_zero_balance": "Wszystkie tokeny mają zerowe saldo.",
 				"enable_more_assets": "Włącz więcej tokenów"
@@ -1183,11 +1189,16 @@
 			"scan_qr": "Zeskanuj kod QR",
 			"or_use_link": "lub użyj linku WalletConnect",
 			"proposer": "Proponujący",
+			"spender": "",
 			"review": "Przejrzyj wymagane uprawnienia $chain_name ($key)",
 			"method": "Metoda",
 			"methods": "Metody",
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość"
@@ -1315,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Błąd podczas ładowania transakcji.",
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",
-			"no_token_loading_transaction": "Nie znaleziono tokena. Nie można załadować transakcji.",
 			"uncertified_transactions_removed": "Zidentyfikowano kilka niecertyfikowanych transakcji, które następnie usunięto z wyświetlanych list.",
 			"loading_pending_ck_ethereum_transactions": "Coś poszło nie tak podczas pobierania oczekujących transakcji $network.",
 			"get_transaction_for_hash": "Nie udało się pobrać transakcji z podanego hasha ($hash).",
@@ -1683,11 +1693,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Wyślij wiadomość",
 			"send_message_input_placeholder": "Co chcesz zrobić?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
 			"loading": "Myślenie...",
 			"reset_chat_history": "",

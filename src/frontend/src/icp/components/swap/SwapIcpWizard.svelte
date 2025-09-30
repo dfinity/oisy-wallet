@@ -2,8 +2,8 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import SwapIcpForm from './SwapIcpForm.svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
+	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 	import {
 		IC_TOKEN_FEE_CONTEXT_KEY,
 		type IcTokenFeeContext as IcTokenFeeContextType
@@ -31,7 +31,7 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { SwapErrorCodes } from '$lib/types/swap';
+	import { SwapErrorCodes, SwapProvider } from '$lib/types/swap';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
@@ -237,6 +237,10 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress bind:swapProgressStep />
+		<SwapProgress
+			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
+			bind:swapProgressStep
+			bind:failedSteps={swapFailedProgressSteps}
+		/>
 	{/if}
 </IcTokenFeeContext>

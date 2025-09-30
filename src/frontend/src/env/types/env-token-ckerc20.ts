@@ -5,7 +5,7 @@ import type {
 	EnvCkErc20TokensWithMetadataSchema,
 	EnvTokensCkErc20Schema
 } from '$env/schema/env-token-ckerc20.schema';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type EnvCkErc20TokenData = z.infer<typeof EnvCkErc20TokenDataSchema>;
 

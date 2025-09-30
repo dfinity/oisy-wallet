@@ -198,3 +198,17 @@ export const normalizeNetworkMultiplier = (value: number): 1 | 2 | 3 | 4 | 5 | 6
 
 	return value as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 };
+
+export const sortRewards = ({
+	rewards,
+	sortByEndDate
+}: {
+	rewards: RewardCampaignDescription[];
+	sortByEndDate: 'asc' | 'desc';
+}): RewardCampaignDescription[] =>
+	[...rewards].sort((a, b) => {
+		const dateA = new Date(a.endDate).getTime();
+		const dateB = new Date(b.endDate).getTime();
+
+		return sortByEndDate === 'asc' ? dateA - dateB : dateB - dateA;
+	});

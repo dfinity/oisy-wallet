@@ -25,8 +25,19 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
-		$derived(transaction);
+	let {
+		id,
+		from,
+		to,
+		value,
+		timestamp,
+		type,
+		txExplorerUrl,
+		fromExplorerUrl,
+		toExplorerUrl,
+		fee,
+		incoming
+	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -78,6 +89,16 @@
 		{/if}
 
 		<List styleClass="mt-5">
+			{#if nonNullish(token?.network)}
+				<ListItem>
+					<span>
+						{$i18n.networks.network}
+					</span>
+
+					<NetworkWithLogo network={token.network} />
+				</ListItem>
+			{/if}
+
 			{#if nonNullish(timestamp)}
 				<ListItem>
 					<span>{$i18n.transaction.text.timestamp}</span>
@@ -87,13 +108,6 @@
 							language: $currentLanguage
 						})}</output
 					>
-				</ListItem>
-			{/if}
-
-			{#if nonNullish(token)}
-				<ListItem>
-					<span>{$i18n.networks.network}</span>
-					<span><NetworkWithLogo logo="start" network={token.network} /></span>
 				</ListItem>
 			{/if}
 
@@ -110,6 +124,21 @@
 					/>
 				</span>
 			</ListItem>
+
+			{#if nonNullish(fee) && nonNullish(token) && !incoming}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
 		</List>
 
 		{#snippet toolbar()}

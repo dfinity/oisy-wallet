@@ -9,7 +9,7 @@
 			"close": "Zavřít",
 			"change": "Změnit",
 			"apply": "Použít",
-			"retry": "",
+			"retry": "Zkusit znovu",
 			"refresh": "Aktualizovat",
 			"name": "Název",
 			"symbol": "Symbol",
@@ -39,7 +39,7 @@
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
-			"test_banner_beta": ""
+			"test_banner_beta": "Toto je beta verze. Může se vyskytnout chyba. V sázce jsou skutečné prostředky – používejte prosím s opatrností."
 		},
 		"alt": {
 			"logo": "logo $name",
@@ -115,10 +115,13 @@
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
 			"session_expired": "Byli jste odhlášeni, protože vaše relace vypršela.",
-			"reload_and_retry": ""
+			"reload_and_retry": "Při přihlašování došlo k chybě. Zkuste stránku znovu načíst a zkuste to znovu. Pokud chyba přetrvává, kontaktujte podporu."
 		},
 		"error": {
 			"no_internet_identity": "Žádná internetová identita.",
@@ -207,7 +210,7 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": ""
+			"ai": "AI"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -320,11 +323,7 @@
 				"name": "Taggr",
 				"one_liner": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
 				"call_to_action": "Přejít na Taggr",
-				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli.",
-				"carousel": {
-					"text": "Decentralizovaná sociální média - zveřejňujte, vydělávejte, vlastněte.",
-					"call_to_action": "Zjistit více"
-				}
+				"description": "Taggr je plně decentralizovaná platforma sociálních médií, která žije ve veřejné distribuované výpočetní síti poháněné Internet Computerem. Na rozdíl od tradičních platforem sociálních médií ovládaných korporacemi je Taggr zcela vlastněn a řízen svými uživateli."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -332,20 +331,24 @@
 				"description": "Toolkit je univerzální sada pro správu systémů SNS (Service Nervous System) a projektů na Internet Computeru. Umožňuje uživatelům bezproblémově inovovat, spolupracovat a decentralizovat - od návrhů na správu až po nasazení kanystrů."
 			},
 			"altitudefi": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "Altitude",
+				"one_liner": "Altitude aktivně spravuje dluhy a zajištění uživatelů v reálném čase a optimalizuje tak efektivitu kapitálu.",
+				"description": "DeFi úvěry jsou obvykle nadměrně zajištěné a kapitálově neefektivní. Altitude je neúschovní protokol, který optimalizuje DeFi úvěry. Altitude aktivně spravuje dluhy a kolaterály uživatelů v reálném čase a optimalizuje tak kapitálovou efektivitu."
 			},
 			"usdai": {
-				"name": "",
-				"one_liner": "",
-				"description": ""
+				"name": "USD.AI",
+				"one_liner": "Protokol syntetického dolaru, který zajišťuje USDai pomocí výpočetní infrastruktury umělé inteligence a generuje výnos v sUSDai.",
+				"description": "USD.AI je protokol syntetického dolaru podporovaný výnosovou výpočetní infrastrukturou AI, který vytváří decentralizovanou stabilní měnu nazvanou USDai. Uživatelé mohou držet nebo sázet USDai, aby získali sUSDai, výnosovou verzi, která odráží výnosy protokolu. Systém je navržen tak, aby vytvořil kombinovatelnou, produktivní a decentralizovanou alternativu ke stablecoinům zajištěným fiat měnami."
 			},
 			"caffeine": {
-				"name": "",
-				"one_liner": "",
-				"call_to_action": "",
-				"description": ""
+				"name": "Caffeine",
+				"one_liner": "První platforma pro tvorbu self-writing aplikací.",
+				"call_to_action": "Vyzkoušejte Caffeine",
+				"description": "Caffeine je první platforma pro vytváření aplikací, které se samy píší. Stačí si promluvit s umělou inteligencí na počítači nebo mobilu a ona pro vás vytvoří aplikace a služby – včetně těch, které se připojují k peněžence OISY Wallet. Zažijte budoucnost vývoje aplikací s pomocí umělé inteligence.",
+				"carousel": {
+					"text": "Hello, self-writing internet",
+					"call_to_action": "Zjistit více"
+				}
 			}
 		}
 	},
@@ -355,7 +358,7 @@
 			"upcoming_campaigns": "Nadcházející kampaně",
 			"active_date": "Končí",
 			"ended_date": "Skončilo",
-			"upcoming_date": "",
+			"upcoming_date": "Začíná",
 			"share": "Sdílet na X",
 			"learn_more": "Zjistit více",
 			"check_status": "Zkontrolovat stav a způsobilost",
@@ -368,14 +371,14 @@
 			"carousel_slide_cta": "Zjistit více",
 			"sprinkles_earned": "Získali jste $noOfSprinkles sprinkles v celkové výši $amount! 🎊",
 			"youre_eligible": "Jste způsobilí!",
-			"not_eligible": "",
+			"not_eligible": "Není způsobilé",
 			"ongoing": "Probíhá",
 			"ended": "Skončeno ($amount)",
 			"banner_text": "Získejte denní odměny s OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Kritéria způsobilosti",
-			"network_bonus_info": "",
+			"network_bonus_info": "Každá síť, ve které držíte aktiva, vám dává multiplikátor odměn. Čím více sítí používáte, tím více odměn získáte!",
 			"min_logins": "Přihlaste se $loginsx za posledních $days dní",
 			"min_transactions": "Dokončete $transactions transakcí za posledních $days dní",
 			"min_total_assets_usd": "V době vydání držte tokeny v hodnotě $$usd",
@@ -448,31 +451,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
-				"campaign_href": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Epizoda 5 nyní běží 🎊",
+				"one_liner": "Získejte Sprinkles za aktivitu, doporučování ostatních a používání OISY napříč řetězci. Vaše akce zvyšují vaše odměny a aktivní doporučení je ještě více posilují.<br/>Navíc nyní více řetězců znamená větší šance na výhru.",
+				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
+				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
+				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Byli jste odměněni",
+						"description": "Vaše odměny právě dorazily do vaší peněženky<br>Nezapomeňte doporučovat a zůstat aktivní, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Vyhráli jste týdenní bonusový drop",
+						"description": "Právě jste získali jeden z našich týdenních bonusů.<br>Zůstaňte aktivní a doporučujte nás, abyste vyhráli více.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Dostali jste se na vrchol žebříčku",
+						"description": "V této sezóně jste se umístili mezi čtyřmi nejlepšími doporučovateli<br>Do vaší peněženky bylo přidáno 200 dolarů",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Zde je malé poděkování",
+						"description": "Jeden z vašich doporučených uživatelů právě dostal nějaké sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -533,7 +536,6 @@
 			"no_infura_erc1155_provider": "Žádný poskytovatel Infura ERC1155 pro síť $network",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
-			"eth_address_unknown": "Adresa ETH je neznámá.",
 			"loading_address": "Chyba při načítání adresy $symbol.",
 			"loading_balance": "Chyba při načítání zůstatku $symbol pro síť $network.",
 			"erc20_contracts": "Chyba při načítání smluv ERC20.",
@@ -551,7 +553,7 @@
 			"btc_withdrawal_statuses": "Chyba při načítání stavů výběru BTC.",
 			"transaction_price": "Chyba při načítání odhadu ceny transakce.",
 			"icrc_canisters": "Chyba při načítání kanystrů ICRC.",
-			"icrc_canister_loading": "",
+			"icrc_canister_loading": "Token s Ledger kanystrem $ledgerCanisterId nelze načíst, protože v současné době neodpovídá.",
 			"erc20_custom_tokens": "Chyba při načítání vlastních tokenů ERC20",
 			"erc721_custom_tokens": "Chyba při načítání vlastních tokenů ERC721.",
 			"erc1155_custom_tokens": "Chyba při načítání vlastních tokenů ERC1155.",
@@ -561,7 +563,7 @@
 			"icrc_custom_token": "Chyba při načítání vlastního tokenu ICRC.",
 			"loading_wallet_timeout": "Vaše peněženka vyžaduje některá počáteční data, která ještě nebyla načtena. Zkuste to prosím znovu.",
 			"allow_signing": "Při nastavování vaší peněženky pro podepisování došlo k problému. Byli jste odhlášeni. Pokud problém přetrvává, obraťte se na podporu.",
-			"waiting_for_allowed_cycles_aborted": "",
+			"waiting_for_allowed_cycles_aborted": "Příprava cyklů účetní knihy byla přerušena. Zkuste se prosím přihlásit později.",
 			"btc_wallet_error": "Chyba při načítání informací o peněžence BTC.",
 			"sol_wallet_error": "Chyba při načítání informací o peněžence SOL."
 		}
@@ -582,6 +584,7 @@
 	"settings": {
 		"text": {
 			"title": "Nastavení",
+			"general": "Obecné",
 			"principal": "Váše Hlavní ICP ID",
 			"principal_copied": "Hlavní ICP ID zkopírováno do schránky",
 			"principal_description": "Vaše ID pro $oisy_name. Vytvořeno vaší Internetovou Identitou.",
@@ -605,10 +608,10 @@
 			"git_disclaimer": "Pro vývojové účely zobrazujeme větev a commit pouze v testovacích kanystrech.",
 			"git_branch_name": "Větev:",
 			"git_commit_hash": "Commit:",
-			"beta_features": "",
-			"enable_beta_feature": "",
-			"disable_beta_feature": "",
-			"save_beta_feature_success": ""
+			"beta_features": "Beta funkce",
+			"enable_beta_feature": "Povolit beta funkci",
+			"disable_beta_feature": "Zakázat beta funkci",
+			"save_beta_feature_success": "Vaše nastavení beta funkcí bylo aktualizováno."
 		},
 		"alt": {
 			"testnets_toggle": "Přepnout pro zobrazení nebo skrytí testovacích sítí",
@@ -643,7 +646,7 @@
 		"icp": {
 			"text": {
 				"account_id": "ID ICP Účtu",
-				"checking_index_canister_status": "",
+				"checking_index_canister_status": "Kontrola stavu transakcí...",
 				"use_for_all_tokens": "Použijte pro všechny tokeny při přijímání z peněženek, od uživatelů nebo z jiných aplikací, které podporují tento formát adresy.",
 				"use_for_icrc_deposit": "Použijte pro příjem tokenů ICRC-1 v síti ICP, jako jsou SNS, ck tokeny atd.",
 				"use_for_icp_deposit": "Použijte pro vklady ICP z burz nebo jiných peněženek, které podporují pouze ID ICP Účtu.",
@@ -744,16 +747,16 @@
 			"contacts_empty_state_title": "Vaše kontakty se zobrazí zde",
 			"contacts_empty_state_description": "Zdá se, že jste ještě nepřidali žádné kontakty",
 			"send_review_subtitle": "Odesíláte",
-			"no_nfts_found": "",
-			"no_nfts_found_desc": "",
-			"select_nft": ""
+			"no_nfts_found": "Nebyly nalezeny žádné NFT",
+			"no_nfts_found_desc": "Upravte své vyhledávání nebo síť, abyste našli své NFT.",
+			"select_nft": "Vyberte NFT"
 		},
 		"placeholder": {
 			"enter_eth_address": "Zadejte veřejnou adresu (0x), jméno nebo alias",
 			"enter_recipient_address": "Zadejte adresu příjemce, jméno nebo alias",
 			"enter_wallet_address": "Zadejte adresu peněženky, jméno nebo alias",
 			"select_network": "Vybrat síť",
-			"search_nfts": ""
+			"search_nfts": "Hledat NFT"
 		},
 		"info": {
 			"ckbtc_certified": "Počkejte prosím, dokud nebudou certifikovány parametry ckBTC.",
@@ -795,7 +798,7 @@
 			"btc_utxo_locked": "Bitcoin prostředky jsou uzamčeny čekajícími transakcemi",
 			"btc_invalid_fee_calculation": "Ověření poplatku za Bitcoin transakci se nezdařilo",
 			"pending_transactions_not_available": "Služba čekajících transakcí není v tuto chvíli dostupná. Zkuste to prosím znovu později.",
-			"no_nft_selected": ""
+			"no_nft_selected": "Pro odeslání nebyl vybrán žádný NFT."
 		},
 		"error": {
 			"unexpected": "Při odesílání transakce se něco pokazilo.",
@@ -815,7 +818,7 @@
 			"unable_to_retrieve_amount": "není k dispozici (nelze načíst)",
 			"solana_transaction_expired": "Vaše odeslaná transakce nebyla zpracována sítí Solana a vypršela, s největší pravděpodobností proto, že poskytnutý prioritní poplatek nebyl dostatečný. Aktualizovali jsme jej na nejnovější doporučenou částku, takže jej zkuste odeslat znovu.",
 			"solana_confirmation_failed": "Neobdrželi jsme potvrzení právě vytvořené transakce. Počkejte prosím několik sekund a poté zkontrolujte seznam transakcí svého tokenu, jestli byla transakce vytvořena správně.",
-			"fee_calc_unsupported_standard": ""
+			"fee_calc_unsupported_standard": "Nelze vypočítat poplatek, protože poskytnutý standard tokenu není podporován."
 		}
 	},
 	"convert": {
@@ -986,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importovat token",
+				"title_nft": "",
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
@@ -1020,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Spravovat tokeny",
+				"title_nft": "",
 				"manage_list": "Spravovat tokeny",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
+				"import_nft": "",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
 				"enable_more_assets": "Povolit další tokeny"
@@ -1105,28 +1111,28 @@
 			"collections": "Kolekce",
 			"all_assets": "Všechna aktiva",
 			"address_copied": "Adresa $address zkopírována",
-			"spam": "",
-			"not_spam": "",
-			"hide": "",
-			"unhide": "",
-			"hidden": "",
+			"spam": "Spam",
+			"not_spam": "Ne spam",
+			"hide": "Skrýt",
+			"unhide": "Zobrazit",
+			"hidden": "Skryté",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
-			"img_consent_disabled": "",
-			"img_consent_none": "",
-			"review_button": "",
-			"collection_name": "",
-			"media_urls": "",
-			"display_preference": "",
-			"review_preference": "",
-			"media_enabled": "",
-			"media_disabled": "",
-			"enable_media": "",
-			"disable_media": "",
-			"open_in_new_tab": "",
-			"review_title": "",
-			"review_description": "",
-			"learn_more": "",
-			"token_id": ""
+			"img_consent_disabled": "Zakázali jste obrázky z této kolekce",
+			"img_consent_none": "Obrázek je z bezpečnostních důvodů zakázán.",
+			"review_button": "Rekapitulace",
+			"collection_name": "Název kolekce",
+			"media_urls": "URL adresy médií",
+			"display_preference": "Preference zobrazení",
+			"review_preference": "Preference rekapitulace",
+			"media_enabled": "Média povolena",
+			"media_disabled": "Média zakázána",
+			"enable_media": "Povolit média",
+			"disable_media": "Zakázat média",
+			"open_in_new_tab": "Otevřít v nové záložce",
+			"review_title": "Prohlédnout mediální zdroje pro \"$collectionName\"",
+			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",
+			"learn_more": "Zjistěte více",
+			"token_id": "Token ID"
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
@@ -1134,7 +1140,7 @@
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
-			"review_preference": ""
+			"review_preference": "Změnit předvolbu zobrazení"
 		}
 	},
 	"fee": {
@@ -1183,11 +1189,16 @@
 			"scan_qr": "Naskenovat QR kód",
 			"or_use_link": "nebo použít odkaz WalletConnect",
 			"proposer": "Navrhovatel",
+			"spender": "",
 			"review": "Zkontrolovat požadovaná oprávnění $chain_name ($key)",
 			"method": "Metoda",
 			"methods": "Metody",
 			"events": "Události",
 			"message": "Zpráva",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEX data",
 			"raw_copied": "Nezpracovaná data transakce zkopírována do schránky.",
 			"sign_message": "Podepsat zprávu"
@@ -1315,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Chyba při načítání transakcí.",
 			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",
-			"no_token_loading_transaction": "Token nebyl nalezen. Transakce nelze načíst.",
 			"uncertified_transactions_removed": "Bylo identifikováno několik necertifikovaných transakcí, které byly následně odstraněny ze zobrazených seznamů.",
 			"loading_pending_ck_ethereum_transactions": "Při načítání nevyřízených transakcí $network se něco pokazilo.",
 			"get_transaction_for_hash": "Nepodařilo se získat transakci z poskytnutého hashe ($hash).",
@@ -1683,15 +1693,22 @@
 			"action_button_send_tokens_title": "Odeslat aktiva",
 			"action_button_send_tokens_subtitle": "Nastavení odeslání během několika sekund",
 			"action_button_send_tokens_prompt": "Chtěl bych poslat tokeny.",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "Vyberte kontakt pro zahájení procesu odeslání:",
 			"send_to_message": "Odeslat do $contact_name ($address_info).",
 			"send_message": "Poslat zprávu",
 			"send_message_input_placeholder": "Co chcete dělat?",
+			"send_token_on_network_message": "Chtěl bych poslat token $token v síti $network.",
+			"send_token_message": "Chtěl bych poslat token $token.",
+			"send_on_network_message": "Chtěl bych poslat token v síti $network.",
 			"send_token_succeeded": "Transakce dokončena!",
+			"show_total_balance_tool_card_title": "Celkový zůstatek",
 			"no_contacts_found_message": "Omlouvám se, ale ve vašem adresáři jsem nenašel žádné vhodné kontakty.",
 			"loading": "Přemýšlím...",
 			"reset_chat_history": "Obnovit historii chatu",
-			"feature_description": ""
+			"feature_description": "Asistent s umělou inteligencí vám umožňuje ptát se na obecná témata týkající se kryptoměn, získávat pomoc s konkrétními funkcemi OISY a posílat tokeny. Upozorňujeme, že asistentovi se neodesílají žádné citlivé údaje, jako je vaše adresa nebo adresa vašich kontaktů, a že všechny transakce musí být potvrzeny uživatelem. Funkce je stále v beta verzi a pravidelně zavádíme nové funkce."
 		},
 		"errors": {
 			"unknown": "Omlouvám se, něco se pokazilo při získávání odpovědi od LLM.",

@@ -1,7 +1,7 @@
 import rewardCampaignsJson from '$env/reward-campaigns.json';
 import { RewardCampaignSchema } from '$env/schema/env-reward-campaign.schema';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 const parseResult = z.array(RewardCampaignSchema).safeParse(rewardCampaignsJson);
 export const rewardCampaigns: RewardCampaignDescription[] = parseResult.success
