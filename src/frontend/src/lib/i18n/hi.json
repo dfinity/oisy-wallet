@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
 			"session_expired": "आपकी सत्र अवधि समाप्त होने के कारण आपको लॉग आउट कर दिया गया है।",
@@ -1696,7 +1699,11 @@
 			"send_to_message": "$contact_name ($address_info) को भेजें।",
 			"send_message": "संदेश भेजें",
 			"send_message_input_placeholder": "आप क्या करना चाहते हैं?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "लेनदेन पूरा हुआ!",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "क्षमा करें, मुझे आपकी पता पुस्तिका में कोई उपयुक्त संपर्क नहीं मिला।",
 			"loading": "सोच रहा है...",
 			"reset_chat_history": "",

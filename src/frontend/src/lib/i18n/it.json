@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
 			"session_expired": "Sei stato disconnesso perché la tua sessione è scaduta.",
@@ -1696,7 +1699,11 @@
 			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "",
 			"reset_chat_history": "",

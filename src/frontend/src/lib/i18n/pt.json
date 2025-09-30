@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
 			"session_expired": "Você foi desconectado porque sua sessão expirou.",
@@ -1696,7 +1699,11 @@
 			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar...",
 			"reset_chat_history": "",

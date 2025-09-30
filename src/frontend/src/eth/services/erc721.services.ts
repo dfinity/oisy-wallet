@@ -1,6 +1,7 @@
 import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
@@ -98,10 +99,15 @@ const loadCustomTokensWithMetadata = async (
 						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 					);
 
-					const metadata = await infuraErc721Providers(network.id).metadata({
-						address: tokenAddress
-					});
+					const { getContractMetadata } = alchemyProviders(network.id);
+					const metadata = await getContractMetadata(tokenAddress);
+
 					const { symbol } = metadata;
+
+					assertNonNullish(
+						symbol,
+						`Inconsistency in token data: no symbol found for token ${tokenAddress}`
+					);
 
 					return {
 						...{

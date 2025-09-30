@@ -114,6 +114,9 @@
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
+		"message": {
+			"refreshed_authentication": ""
+		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
 			"session_expired": "由于会话已过期，您已被登出。",
@@ -1696,7 +1699,11 @@
 			"send_to_message": "发送给 $contact_name ($address_info)。",
 			"send_message": "发送消息",
 			"send_message_input_placeholder": "你想做什么？",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "交易已完成！",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "抱歉，我在你的地址簿中找不到合适的联系人。",
 			"loading": "思考中...",
 			"reset_chat_history": "重置聊天记录",
