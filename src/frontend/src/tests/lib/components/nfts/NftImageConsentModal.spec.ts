@@ -144,7 +144,7 @@ describe('NftImageConsentModal', () => {
 		}
 	});
 
-	it('should conditionally render media link icon or not depending if consent has been given', () => {
+	it('should not render media link icon if consent has not been given', () => {
 		getAllowMediaSpy.mockReturnValue(false);
 		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
 		getCollectionUiSpy.mockReturnValue([
@@ -155,7 +155,7 @@ describe('NftImageConsentModal', () => {
 		]);
 
 		const TEST_ID = 'nft-modal';
-		const { rerender } = render(NftImageConsentModal, {
+		render(NftImageConsentModal, {
 			props: { collection: nftAzuki1.collection, testId: TEST_ID }
 		});
 
@@ -167,10 +167,24 @@ describe('NftImageConsentModal', () => {
 			// open in explorer link
 			expect(icons.querySelector('a')).not.toBeInTheDocument();
 		});
+	});
 
+	it('should render media link icon if consent has been given', () => {
 		getAllowMediaSpy.mockReturnValue(true);
+		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
+		getCollectionUiSpy.mockReturnValue([
+			{
+				collection: nftAzuki1.collection,
+				nfts: [nftAzuki1, nftAzuki2]
+			}
+		]);
 
-		rerender({ collection: nftAzuki1.collection, testId: TEST_ID });
+		const TEST_ID = 'nft-modal';
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const mediaContainer = screen.getByTestId(`${TEST_ID}-nfts-media`);
 
 		mediaContainer.querySelectorAll('span.float-right').forEach((icons) => {
 			// copy button
