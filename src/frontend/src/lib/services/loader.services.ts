@@ -140,10 +140,8 @@ export const initLoader = async ({
 		return;
 	}
 
-	if (!FRONTEND_DERIVATION_ENABLED) {
-		// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
-		setProgressModal(true);
-	}
+	// We are loading the addresses from the backend. Consequently, we aim to animate this operation and offer the user an explanation of what is happening. To achieve this, we will present this information within a modal.
+	setProgressModal(true);
 
 	if (FRONTEND_DERIVATION_ENABLED) {
 		// We do not need to await this call, as it is required for signing transactions only and not for the generic initialization.

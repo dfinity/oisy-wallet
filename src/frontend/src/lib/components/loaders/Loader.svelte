@@ -69,6 +69,7 @@
 		loadSolAddressMainnet
 	} from '$sol/services/sol-address.services';
 	import { loadSplTokens } from '$sol/services/spl.services';
+	import {FRONTEND_DERIVATION_ENABLED} from "$env/address.env";
 
 	interface Props {
 		children: Snippet;
@@ -256,7 +257,7 @@
 	});
 </script>
 
-{#if $loading}
+{#if $loading && !FRONTEND_DERIVATION_ENABLED}
 	{#if progressModal}
 		<div class="login-modal" in:fade={{ delay: 0, duration: 250 }}>
 			<Modal testId={LOADER_MODAL}>
