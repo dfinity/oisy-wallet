@@ -44,25 +44,20 @@
 	);
 
 	let token = $derived.by(() => {
-		try {
-			if (isNullish(address) || isNullish(chainId)) {
-				return undefined;
-			}
-
-			const tokens = [...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens];
-
-			return tokens.find(
-				({ address: tokenAddress, network: { id: networkId, chainId: tokenChainId } }) =>
-					areAddressesEqual({
-						address1: tokenAddress,
-						address2: address,
-						networkId
-					}) && tokenChainId.toString() === chainId
-			);
-		} catch (_: unknown) {
-			// An error occurred during token search; return undefined.
-			console.warn('Could not parse token:', address);
+		if (isNullish(address) || isNullish(chainId)) {
+			return;
 		}
+
+		const tokens = [...$erc20Tokens, ...$erc721Tokens, ...$erc1155Tokens];
+
+		return tokens.find(
+			({ address: tokenAddress, network: { id: networkId, chainId: tokenChainId } }) =>
+				areAddressesEqual({
+					address1: tokenAddress,
+					address2: address,
+					networkId
+				}) && tokenChainId.toString() === chainId
+		);
 	});
 </script>
 
