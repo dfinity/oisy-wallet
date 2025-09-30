@@ -270,6 +270,7 @@ export class AlchemyProvider {
 				name: result.openSeaMetadata?.collectionName
 			}),
 			...(nonNullish(result.symbol) && { symbol: result.symbol }),
+			...(nonNullish(result.openSeaMetadata?.description) && {description: result.openSeaMetadata.description}),
 			decimals: 0
 		};
 	};
