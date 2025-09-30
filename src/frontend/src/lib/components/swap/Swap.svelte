@@ -81,6 +81,8 @@
 		// 	loadKongSwapTokens()
 		// ]);
 
+		modalStore.openSwap(tokenId);
+
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
 			disabledIcrcTokens: $allIcrcTokens
@@ -90,8 +92,6 @@
 		});
 
 		// busy.stop();
-
-		modalStore.openSwap(tokenId);
 	};
 </script>
 
