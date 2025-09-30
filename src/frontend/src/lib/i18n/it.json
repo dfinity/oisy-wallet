@@ -1194,6 +1194,7 @@
 			"message": "Messaggio",
 			"token": "",
 			"network": "",
+			"amount": "",
 			"hex_data": "Dati HEX",
 			"raw_copied": "Dati transazione raw copiati negli appunti.",
 			"sign_message": "Firma messaggio"
