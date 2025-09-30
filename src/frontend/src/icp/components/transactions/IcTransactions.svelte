@@ -29,6 +29,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
@@ -80,7 +81,7 @@
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
-						testId={`ic-transactions-date-group-${index}`}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-ic-${index}`}
 						{transactions}
 					/>
 				{/each}

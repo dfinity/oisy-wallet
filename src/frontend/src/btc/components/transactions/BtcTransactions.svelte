@@ -21,6 +21,7 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let selectedTransaction = $state<BtcTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
@@ -54,7 +55,7 @@
 		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
 				{formattedDate}
-				testId={`btc-transactions-date-group-${index}`}
+				testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-btc-${index}`}
 				{transactions}
 			/>
 		{/each}

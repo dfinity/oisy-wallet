@@ -20,6 +20,7 @@
 	import SolTransactionsSkeletons from '$sol/components/transactions/SolTransactionsSkeletons.svelte';
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 
 	let selectedTransaction = $state<SolTransactionUi | undefined>();
 	let selectedToken = $state<OptionToken>();
@@ -53,7 +54,7 @@
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
-						testId={`sol-transactions-date-group-${index}`}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-sol-${index}`}
 						{transactions}
 					/>
 				{/each}
