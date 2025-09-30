@@ -9,7 +9,8 @@ import {
 	getSignParamsMessageTypedDataV4,
 	getSignParamsMessageUtf8
 } from '$eth/utils/wallet-connect.utils';
-import { formatToken } from '$lib/utils/format.utils';
+import { Languages } from '$lib/enums/languages';
+import { formatSecondsToDate, formatToken } from '$lib/utils/format.utils';
 import en from '$tests/mocks/i18n.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import { render } from '@testing-library/svelte';
@@ -112,6 +113,23 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(`${en.wallet_connect.text.spender}:`)).toBeInTheDocument();
 
 		expect(getByText('0x66a9893cc07d91d95644aedd05d03f95e1dba8af')).toBeInTheDocument();
+	});
+
+	it('should render the expiration', () => {
+		const { getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		const expected = formatSecondsToDate({
+			seconds: Number('1761743754'),
+			language: Languages.ENGLISH
+		});
+
+		expect(getByText(`${en.wallet_connect.text.expiration}:`)).toBeInTheDocument();
+
+		expect(getByText(expected)).toBeInTheDocument();
 	});
 
 	it('should not render the token if it is not enabled', () => {

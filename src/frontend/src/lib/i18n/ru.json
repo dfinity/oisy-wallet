@@ -1192,6 +1192,7 @@
 			"methods": "Методы",
 			"events": "События",
 			"message": "Сообщение",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",
