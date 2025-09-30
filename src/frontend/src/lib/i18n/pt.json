@@ -51,7 +51,8 @@
 			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
-			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
+			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

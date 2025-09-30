@@ -51,7 +51,8 @@
 			"switch_currency": "मुद्रा बदलें"
 		},
 		"warning": {
-			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें"
+			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {

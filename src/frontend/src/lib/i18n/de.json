@@ -51,7 +51,8 @@
 			"switch_currency": "Währung wechseln"
 		},
 		"warning": {
-			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist"
+			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
