@@ -24,7 +24,8 @@
 
 	const modalId = Symbol();
 
-	const sortRewards = () => [...rewards].sort((a, b) => {
+	const sortRewards = () =>
+		[...rewards].sort((a, b) => {
 			const dateA = new Date(a.endDate).getTime();
 			const dateB = new Date(b.endDate).getTime();
 
