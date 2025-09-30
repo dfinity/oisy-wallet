@@ -23,6 +23,8 @@
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
+	import { page } from '$app/state';
 
 	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
 
@@ -56,7 +58,8 @@
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			filterNfts: isRouteNfts(page)
 		})
 	);
 
