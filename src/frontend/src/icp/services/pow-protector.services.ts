@@ -21,7 +21,7 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 			subaccount: getIcrcSubaccount(identity.getPrincipal())
 		}
 	});
-
+	console.warn('cycles: ', allowanceResult.allowance);
 	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
 };
 
