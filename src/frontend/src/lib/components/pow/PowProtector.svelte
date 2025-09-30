@@ -41,7 +41,6 @@
 		if (progressStoreData?.progress) {
 			switch (progressStoreData.progress) {
 				case 'REQUEST_CHALLENGE':
-					hasCycles = false;
 					progressStep = ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE;
 					break;
 				case 'SOLVE_CHALLENGE':
