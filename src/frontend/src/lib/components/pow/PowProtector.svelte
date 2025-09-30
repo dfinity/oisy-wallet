@@ -41,6 +41,7 @@
 		if (progressStoreData?.progress) {
 			switch (progressStoreData.progress) {
 				case 'REQUEST_CHALLENGE':
+					hasCycles = false;
 					progressStep = ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE;
 					break;
 				case 'SOLVE_CHALLENGE':
@@ -48,6 +49,9 @@
 					break;
 				case 'GRANT_CYCLES':
 					progressStep = ProgressStepsPowProtectorLoader.GRANT_CYCLES;
+					break;
+				case 'CYCLES_GRANTED':
+					hasCycles = true;
 					break;
 				default:
 					// Fallback to initialization if unknown value

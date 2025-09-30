@@ -1,7 +1,7 @@
 import { writable, type Readable } from 'svelte/store';
 
 export interface PowProtectorProgressData {
-	progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+	progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES' | 'CYCLES_GRANTED';
 }
 
 export interface PowProtectorNextAllowanceData {
