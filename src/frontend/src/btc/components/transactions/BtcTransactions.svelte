@@ -11,6 +11,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
 	import {
 		modalBtcToken,
@@ -54,7 +55,7 @@
 		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
 				{formattedDate}
-				testId={`btc-transactions-date-group-${index}`}
+				testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-btc-${index}`}
 				{transactions}
 			/>
 		{/each}

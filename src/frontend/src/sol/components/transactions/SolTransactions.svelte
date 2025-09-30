@@ -3,6 +3,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_SOLANA_TOKEN } from '$lib/constants/tokens.constants';
 	import {
 		modalSolToken,
@@ -53,7 +54,7 @@
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
-						testId={`sol-transactions-date-group-${index}`}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-sol-${index}`}
 						{transactions}
 					/>
 				{/each}

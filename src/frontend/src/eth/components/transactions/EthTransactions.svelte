@@ -12,6 +12,7 @@
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import {
 		modalEthTransaction,
@@ -66,7 +67,7 @@
 		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 			<TransactionsDateGroup
 				{formattedDate}
-				testId={`eth-transactions-date-group-${index}`}
+				testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-eth-${index}`}
 				{transactions}
 			/>
 		{/each}
