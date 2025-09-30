@@ -18,6 +18,9 @@ const fetchKongSwap = async <T>(endpoint: string): Promise<T | null> => {
 export const getKongSwapTokenById = (id: LedgerCanisterIdText): Promise<KongSwapToken | null> =>
 	fetchKongSwap<KongSwapToken>(`tokens/${id.toLowerCase()}`);
 
+export const getKongSwapTokens = (): Promise<KongSwapToken | null> =>
+	fetchKongSwap<KongSwapToken>(`tokens`);
+
 export const fetchBatchKongSwapPrices = async (
 	canisterIds: LedgerCanisterIdText[]
 ): Promise<KongSwapToken[]> => {

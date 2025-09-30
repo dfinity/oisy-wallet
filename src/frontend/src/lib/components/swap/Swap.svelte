@@ -32,6 +32,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { getKongSwapTokens } from '$lib/rest/kongswap.rest';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
@@ -82,6 +83,10 @@
 		// ]);
 
 		modalStore.openSwap(tokenId);
+
+		const kongTokens = await getKongSwapTokens();
+
+		console.log('KongSwap tokens:', kongTokens);
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
