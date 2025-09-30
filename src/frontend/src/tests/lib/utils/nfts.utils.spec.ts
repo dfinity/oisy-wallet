@@ -5,7 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NetworkSchema } from '$lib/schema/network.schema';
+import { NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
@@ -29,7 +29,6 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { NftNetworkSchema } from '$lib/schema/nft.schema';
 
 describe('nfts.utils', () => {
 	const mockNft1: Nft = {
