@@ -29,8 +29,8 @@
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
-	const MAX_CHECK_ATTEMPTS = 50;
-	const CHECK_INTERVAL_MS = 5000;
+	const MAX_CHECK_ATTEMPTS = 100;
+	const CHECK_INTERVAL_MS = 7000;
 
 	// Initialize with default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
@@ -48,6 +48,8 @@
 					break;
 				case 'GRANT_CYCLES':
 					progressStep = ProgressStepsPowProtectorLoader.GRANT_CYCLES;
+					break;
+				case 'CYCLES_GRANTED':
 					hasCycles = true;
 					break;
 				default:

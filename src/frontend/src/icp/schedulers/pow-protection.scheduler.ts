@@ -38,7 +38,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * This method:
 	 * 1. Creates a PoW challenge using the given identity.
 	 * 2. Solves the challenge to find a valid `nonce`.
-	 * 3. Uses the solved `nonce` to request signing permission.
+	 * 3. Uses the solved `nonce` to requestPPo signing permission.
 	 *
 	 * @param identity - The user's identity for the operation.
 	 * @throws Errors if any step with no specific error handling in the sequence fails.
@@ -62,7 +62,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			}
 
 			// Step 2: Solve the PoW challenge.
-			this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
+			this.postMessagePowProgress({ progress: 'CYCLES_GRANTED' });
 			const nonce = await solvePowChallenge({
 				timestamp: createChallengeResponse.start_timestamp_ms,
 				difficulty: createChallengeResponse.difficulty
@@ -100,7 +100,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	private postMessagePowProgress({
 		progress
 	}: {
-		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
+		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES' | 'CYCLES_GRANTED';
 	}) {
 		const data: PostMessageDataResponsePowProtectorProgress = {
 			progress
