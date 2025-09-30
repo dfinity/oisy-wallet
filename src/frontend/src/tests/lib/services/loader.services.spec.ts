@@ -9,7 +9,7 @@ import { nullishSignOut, signOut } from '$lib/services/auth.services';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { initLoader, initSignerAllowance } from '$lib/services/loader.services';
 import { authStore } from '$lib/stores/auth.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { LoadIdbAddressError } from '$lib/types/errors';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -158,7 +158,7 @@ describe('loader.services', () => {
 			expect(mockProgressAndLoad).toHaveBeenCalledOnce();
 			expect(mockValidateAddresses).toHaveBeenCalledOnce();
 
-			expect(get(loading)).toBeFalsy();
+			expect(get(initialLoading)).toBeFalsy();
 		});
 
 		it('should not load addresses from the backend if the IDB addresses are loaded', async () => {
