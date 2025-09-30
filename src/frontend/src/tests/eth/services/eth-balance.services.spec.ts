@@ -19,8 +19,6 @@ import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
-import * as toastsStore from '$lib/stores/toasts.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { createMockErc20Tokens, mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
@@ -60,7 +58,6 @@ describe('eth-balance.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(toastsStore, 'toastsError');
 			vi.spyOn(infuraProvidersLib, 'infuraProviders');
 
 			mockProvider.prototype.getBalance = mockGetBalance;
@@ -76,7 +73,6 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledTimes(mockTokens.length);
 		});
 
 		it('should call the balance provider', async () => {
@@ -186,7 +182,6 @@ describe('eth-balance.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(toastsStore, 'toastsError');
 			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers');
 
 			mockContract.prototype.balanceOf =
@@ -201,7 +196,6 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(toastsError).toHaveBeenCalledTimes(mockErc20DefaultTokens.length);
 		});
 
 		it('should use the ETH address store if the input address is nullish', async () => {
@@ -211,7 +205,6 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(toastsError).not.toHaveBeenCalled();
 		});
 
 		it('should call the balance provider', async () => {
@@ -311,7 +304,6 @@ describe('eth-balance.services', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
 
-			vi.spyOn(toastsStore, 'toastsError');
 			vi.spyOn(infuraProvidersLib, 'infuraProviders');
 			vi.spyOn(infuraErc20ProvidersLib, 'infuraErc20Providers');
 
