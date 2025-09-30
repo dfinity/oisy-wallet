@@ -13,7 +13,11 @@
 		MODAL_TOKEN_LIST_TOOLBAR
 	} from '$tests/lib/components/tokens/ModalTokensList.spec';
 
-	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
+	let {
+		tokens,
+		renderNoResults,
+		filterNfts = false
+	}: { tokens: Token[]; renderNoResults: boolean; filterNfts?: boolean } = $props();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -21,7 +25,8 @@
 			tokens,
 			filterZeroBalance: false,
 			filterNetwork: undefined,
-			filterQuery: ''
+			filterQuery: '',
+			filterNfts
 		})
 	);
 </script>
