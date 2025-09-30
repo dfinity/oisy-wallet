@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import { page } from '$app/state';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
@@ -23,7 +22,6 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token } from '$lib/types/token';
-	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	let {
