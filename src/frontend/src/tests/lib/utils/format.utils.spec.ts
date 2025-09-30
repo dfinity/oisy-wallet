@@ -452,6 +452,10 @@ describe('format.utils', () => {
 	});
 
 	describe('formatSecondsToDate', () => {
+		beforeEach(() => {
+			vi.stubEnv('TZ', 'UTC');
+		});
+
 		it('formats seconds correctly in default (en) locale', () => {
 			const result = formatSecondsToDate({ seconds: 1672531200 }); // Jan 1, 2023
 
@@ -486,6 +490,26 @@ describe('format.utils', () => {
 			});
 
 			expect(result).toBe('January 1, 2023');
+		});
+
+		it('should allow to display only the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535700,
+				formatOptions: { month: 'long' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15');
+		});
+
+		it('should allow to format the time if timeOnly is passed', () => {
+			const result = formatSecondsToDate({
+				seconds: 1672535732,
+				formatOptions: { hour: 'numeric', minute: 'numeric', second: '2-digit' },
+				timeOnly: true
+			});
+
+			expect(result).toBe('01:15:32');
 		});
 	});
 
