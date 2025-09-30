@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importovat token",
+				"title_nft": "",
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Spravovat tokeny",
+				"title_nft": "",
 				"manage_list": "Spravovat tokeny",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
+				"import_nft": "",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
 				"enable_more_assets": "Povolit další tokeny"
