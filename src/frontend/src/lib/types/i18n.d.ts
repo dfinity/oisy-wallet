@@ -1066,6 +1066,7 @@ interface I18nTransaction {
 		interacted_with: string;
 		status: string;
 		confirmations: string;
+		expiration: string;
 	};
 	status: {
 		confirmed: string;

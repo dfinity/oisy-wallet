@@ -1256,7 +1256,8 @@
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
-			"confirmations": "Confirmations"
+			"confirmations": "Confirmations",
+			"expiration": "Expiration"
 		},
 		"status": {
 			"confirmed": "Confirmed",

@@ -15,18 +15,33 @@
 	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
-		type: 'send' | 'receive';
+		type: 'send' | 'receive' | 'approve';
 		to: string | undefined;
 		toExplorerUrl?: string;
 		from: string | undefined;
 		fromExplorerUrl?: string;
+		approveSpender?: string;
 		onSaveAddressComplete?: (data: OpenTransactionParams<AnyTransactionUi>) => void;
 	}
 
-	const { type, to, from, toExplorerUrl, fromExplorerUrl, onSaveAddressComplete }: Props = $props();
+	const {
+		type,
+		to,
+		from,
+		toExplorerUrl,
+		fromExplorerUrl,
+		approveSpender,
+		onSaveAddressComplete
+	}: Props = $props();
 
 	let address: string | undefined = $derived(
-		type === 'send' && nonNullish(to) ? to : type !== 'send' && nonNullish(from) ? from : undefined
+		type === 'send' && nonNullish(to)
+			? to
+			: type === 'receive' && nonNullish(from)
+				? from
+				: type === 'approve' && nonNullish(approveSpender)
+					? approveSpender
+					: undefined
 	);
 
 	let contact: ContactUi | undefined = $derived(
