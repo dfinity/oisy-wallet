@@ -1318,7 +1318,6 @@
 		"error": {
 			"loading_transactions": "加载交易记录时出错。",
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",
-			"no_token_loading_transaction": "未找到代币，无法加载交易记录。",
 			"uncertified_transactions_removed": "检测到一些未经认证的交易，已从显示列表中移除。",
 			"loading_pending_ck_ethereum_transactions": "获取 $network 待处理交易时发生错误。",
 			"get_transaction_for_hash": "根据提供的哈希值（hash: $hash）获取交易失败。",
