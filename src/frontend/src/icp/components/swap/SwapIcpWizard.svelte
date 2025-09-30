@@ -237,6 +237,10 @@
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress bind:swapProgressStep />
+		<SwapProgress
+			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
+			bind:swapProgressStep
+			bind:failedSteps={swapFailedProgressSteps}
+		/>
 	{/if}
 </IcTokenFeeContext>
