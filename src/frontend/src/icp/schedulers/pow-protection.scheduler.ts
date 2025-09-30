@@ -100,7 +100,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	private postMessagePowProgress({
 		progress
 	}: {
-		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES' | 'CYCLES_GRANTED';
+		progress: 'REQUEST_CHALLENGE' | 'SOLVE_CHALLENGE' | 'GRANT_CYCLES';
 	}) {
 		const data: PostMessageDataResponsePowProtectorProgress = {
 			progress

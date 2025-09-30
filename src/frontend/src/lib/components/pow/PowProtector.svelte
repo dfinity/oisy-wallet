@@ -49,9 +49,6 @@
 				case 'GRANT_CYCLES':
 					progressStep = ProgressStepsPowProtectorLoader.GRANT_CYCLES;
 					break;
-				case 'CYCLES_GRANTED':
-					hasCycles = true;
-					break;
 				default:
 					// Fallback to initialization if unknown value
 					console.error('Unknown value: ', progressStoreData.progress);

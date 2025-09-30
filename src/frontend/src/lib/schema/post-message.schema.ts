@@ -225,7 +225,7 @@ export const PostMessageDataResponseBTCAddressSchema = PostMessageDataResponseSc
 
 export const PostMessageDataResponsePowProtectorProgressSchema =
 	PostMessageDataResponseSchema.extend({
-		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES', 'CYCLES_GRANTED'])
+		progress: z.enum(['REQUEST_CHALLENGE', 'SOLVE_CHALLENGE', 'GRANT_CYCLES'])
 	});
 
 export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
