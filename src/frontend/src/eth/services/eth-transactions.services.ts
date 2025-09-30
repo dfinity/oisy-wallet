@@ -167,16 +167,6 @@ const loadErcTransactions = async ({
 	);
 
 	if (isNullish(token)) {
-		const {
-			transactions: {
-				error: { no_token_loading_transaction }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: no_token_loading_transaction }
-		});
-
 		return { success: false };
 	}
 
