@@ -1,9 +1,9 @@
 import type {
 	AllowSigningRequest,
-	BitcoinNetwork,
 	Contact,
 	CredentialSpec,
 	GetUserProfileError,
+	Network,
 	UserProfile,
 	Utxo
 } from '$declarations/backend/backend.did';
@@ -37,13 +37,13 @@ export interface AllowSigningParams {
 }
 
 export interface BtcSelectUserUtxosFeeParams {
-	network: BitcoinNetwork;
+	network: Network;
 	amountSatoshis: bigint;
 	minConfirmations: [number];
 }
 
 export interface BtcGetPendingTransactionParams {
-	network: BitcoinNetwork;
+	network: Network;
 	address: BtcAddress;
 }
 
@@ -146,7 +146,7 @@ export interface ICPSwapAmountReply {
 }
 
 export interface BtcGetFeePercentilesParams {
-	network: BitcoinNetwork;
+	network: Network;
 }
 
 export interface GetContactParams {

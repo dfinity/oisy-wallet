@@ -1,7 +1,7 @@
 //! Methods for Bitcoin data transfer objects
 
 use candid::Deserialize;
-use ic_cdk::api::management_canister::bitcoin::Utxo;
+use ic_cdk::bitcoin_canister::Utxo;
 use serde::{de, Deserializer};
 
 use super::{

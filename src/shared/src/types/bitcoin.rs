@@ -3,7 +3,7 @@ pub mod impls;
 use std::time::Duration;
 
 use candid::CandidType;
-use ic_cdk::api::management_canister::bitcoin::{BitcoinNetwork, MillisatoshiPerByte, Utxo};
+use ic_cdk::bitcoin_canister::{MillisatoshiPerByte, Network, Utxo};
 use serde::Deserialize;
 
 /// The maximum length of a bitcoin address, expressed as a string.
@@ -29,7 +29,7 @@ pub const FEE_PERCENTILES_UPDATE_INTERVAL: Duration = Duration::from_secs(60);
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct BtcGetFeePercentilesRequest {
-    pub network: BitcoinNetwork,
+    pub network: Network,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -40,7 +40,7 @@ pub struct BtcGetFeePercentilesResponse {
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct SelectedUtxosFeeRequest {
     pub amount_satoshis: u64,
-    pub network: BitcoinNetwork,
+    pub network: Network,
     pub min_confirmations: Option<u32>,
 }
 
@@ -63,7 +63,7 @@ pub struct BtcAddPendingTransactionRequest {
     pub txid: Vec<u8>,
     pub utxos: Vec<Utxo>,
     pub address: String,
-    pub network: BitcoinNetwork,
+    pub network: Network,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
@@ -75,7 +75,7 @@ pub enum BtcAddPendingTransactionError {
 #[serde(remote = "Self")]
 pub struct BtcGetPendingTransactionsRequest {
     pub address: String,
-    pub network: BitcoinNetwork,
+    pub network: Network,
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

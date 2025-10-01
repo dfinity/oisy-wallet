@@ -1,4 +1,4 @@
-import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
+import type { Network as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
