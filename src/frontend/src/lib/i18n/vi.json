@@ -1621,7 +1621,7 @@
 		"text": {
 			"terms_of_use": "Điều khoản sử dụng",
 			"title": "",
-			"instruction": "",
+			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {
