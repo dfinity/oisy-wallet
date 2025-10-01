@@ -1621,7 +1621,7 @@
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
 			"title": "",
-			"instruction": "Durch klicken auf Einloggen stimmst du den $link zu",
+			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {
