@@ -20,7 +20,7 @@ export const componentToHtml = <T extends Component>({
 		unmount(component, { outro: false });
 
 		return html;
-	} catch (error) {
+	} catch (error: unknown) {
 		console.error('Error rendering component to HTML:', error);
 		return '';
 	} finally {
