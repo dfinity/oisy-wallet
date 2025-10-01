@@ -12,6 +12,11 @@
 
 	$effect(() => {
 		console.log($pageToken);
+
+		console.log({
+			source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
+			token: nonNullish($pageToken) ? $pageToken.symbol : 'test'
+		});
 	});
 </script>
 
