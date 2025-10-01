@@ -107,7 +107,7 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} helpAlignment="center" />
+				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
 			<Hr />
 
