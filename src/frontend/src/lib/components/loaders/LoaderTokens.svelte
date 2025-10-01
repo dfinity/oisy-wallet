@@ -57,19 +57,19 @@
 				$networkEvmMainnetEnabled ||
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
-
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
-
 	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
-
 	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
 
+	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
+	let loadSplDevnet = $derived(
+		$testnetsEnabled && nonNullish($solAddressDevnet) && $networkSolanaDevnetEnabled
+	);
+	let loadSplLocal = $derived(
+		$testnetsEnabled && LOCAL && nonNullish($solAddressLocal) && $networkSolanaLocalEnabled
+	);
 	let loadSpl = $derived(
-		((nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled) ||
-			($testnetsEnabled &&
-				((nonNullish($solAddressDevnet) && $networkSolanaDevnetEnabled) ||
-					(LOCAL && nonNullish($solAddressLocal) && $networkSolanaLocalEnabled)))) &&
-			$splCustomTokensNotInitialized
+		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
 	);
 
 	$effect(() => {
