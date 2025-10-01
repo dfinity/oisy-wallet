@@ -7,6 +7,7 @@
 	import { agreementsToAccept } from '$lib/derived/user-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements.utils';
+	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let visible = $state(true);
 
@@ -20,7 +21,16 @@
 		})
 	);
 
-	let warning = $derived(notEmptyString(formattedAgreements) ? '' : '');
+	let warning = $derived(
+		notEmptyString(formattedAgreements)
+			? replacePlaceholders(
+					replaceOisyPlaceholders($i18n.agreements.text.updated_agreements_warning),
+					{
+						$agreements: formattedAgreements
+					}
+				)
+			: ''
+	);
 </script>
 
 {#if visible && notEmptyString(warning)}
