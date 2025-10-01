@@ -21,8 +21,8 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { noAgreementVisionedYet, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { acceptAgreements } from '$lib/services/user-agreements.services';
 	import { warnSignOut } from '$lib/services/auth.services';
+	import { acceptAgreements } from '$lib/services/user-agreements.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 
