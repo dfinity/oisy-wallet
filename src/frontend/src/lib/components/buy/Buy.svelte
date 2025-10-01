@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import BuyButton from '$lib/components/buy/BuyButton.svelte';
 	import BuyModal from '$lib/components/buy/BuyModal.svelte';
 	import {
@@ -10,7 +11,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { nonNullish } from '@dfinity/utils';
 
 	const modalId = Symbol();
 </script>
