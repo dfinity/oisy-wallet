@@ -251,8 +251,12 @@ const fetchSwapAmountsICP = async ({
 		(acc, provider, index) => {
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
+				console.log('Failed result', result);
+
 				return acc;
 			}
+
+			console.log('Successful result', result);
 
 			let mapped: SwapMappedResult | undefined;
 
