@@ -8,6 +8,7 @@
 		loadBtcAddressRegtest,
 		loadBtcAddressTestnet
 	} from '$btc/services/btc-address.services';
+	import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import {
 		erc1155CustomTokensInitialized,
@@ -256,7 +257,7 @@
 	});
 </script>
 
-{#if $initialLoading}
+{#if $initialLoading && !FRONTEND_DERIVATION_ENABLED}
 	{#if progressModal}
 		<div class="login-modal" in:fade={{ delay: 0, duration: 250 }}>
 			<Modal testId={LOADER_MODAL}>
