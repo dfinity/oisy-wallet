@@ -1291,6 +1291,7 @@ interface I18nAgreements {
 		i_have_accepted: string;
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
+		updated_agreements_warning: string;
 	};
 	error: { cannot_update_user_agreements: string };
 }
@@ -1298,6 +1299,7 @@ interface I18nAgreements {
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
+		det: { article: string; possessive: string };
 		title: string;
 		paragraph_1: string;
 		paragraph_2: string;
@@ -1332,7 +1334,12 @@ interface I18nTerms_of_use {
 }
 
 interface I18nPrivacy_policy {
-	text: { privacy_policy: string; title: string; body: string };
+	text: {
+		privacy_policy: string;
+		det: { article: string; possessive: string };
+		title: string;
+		body: string;
+	};
 	alt: { privacy_policy: string };
 }
 

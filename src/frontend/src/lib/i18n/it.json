@@ -1585,7 +1585,8 @@
 			"reject_warning": "Devi accettare i Termini e Condizioni per procedere. Riprova in qualsiasi momento.",
 			"i_have_accepted": "Ho letto e accetto i",
 			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
-			"accept_and_continue": "Accetta e continua"
+			"accept_and_continue": "Accetta e continua",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
@@ -1594,6 +1595,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Accordo di Licenza",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
 			"paragraph_1": "Grazie per il tuo interesse in $oisy_name, un'applicazione decentralizzata di wallet multi-chain, self-custody basata su browser, hostata sulla rete blockchain pubblica Internet Computer (\"$oisy_short\"). Per maggiori informazioni su $oisy_short, il suo codice open-source e le licenze correlate, fai riferimento al repository GitHub di $oisy_short qui: $oisy_repo_url.",
 			"paragraph_2": "Il presente Accordo di Licenza regola l'utilizzo di $oisy_short da parte dell'Utente (di seguito, \"Utente\"). UTILIZZANDO $oisy_short, L'UTENTE DICHIARA DI AVER LETTO, COMPRESO E ACCETTATO DI ESSERE VINCOLATO DAL PRESENTE ACCORDO DI LICENZA. SE L'UTENTE NON ACCETTA, NON PUÒ UTILIZZARE $oisy_short.",
@@ -1635,6 +1640,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Politica sulla riservatezza",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
