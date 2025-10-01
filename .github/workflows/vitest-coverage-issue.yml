@@ -61,6 +61,9 @@ jobs:
           pattern: av-vitest-coverage-report-*
           merge-multiple: true
 
+      - name: Set Environment Variables
+        run: echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}" >> $GITHUB_ENV
+
       - name: Merge Coverage Reports
         run: npm run test:merge
 
