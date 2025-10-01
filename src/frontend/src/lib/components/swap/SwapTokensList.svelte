@@ -53,7 +53,6 @@
 </script>
 
 <ModalTokensList
-	loading={false}
 	networkSelectorViewOnly={!VELORA_SWAP_ENABLED}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}

@@ -10,14 +10,12 @@
 
 	const dispatch = createEventDispatcher();
 
-
 	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<Token>) => {
 		dispatch('icSendToken', token);
 	};
 </script>
 
 <ModalTokensList
-	loading={false}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}
