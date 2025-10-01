@@ -1,4 +1,3 @@
-import type * as PowEnv from '$env/pow.env';
 import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 import PowProtector from '$lib/components/pow/PowProtector.svelte';
@@ -13,14 +12,6 @@ import en from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
-// Mock the POW feature environment variable with a getter function
-vi.mock('$env/pow.env', () => ({
-	get POW_FEATURE_ENABLED() {
-		// This will be overridden in tests using vi.mocked
-		return true;
-	}
-}));
 
 vi.mock('$icp/services/worker.pow-protection.services', () => ({
 	initPowProtectorWorker: vi.fn()
@@ -72,12 +63,12 @@ describe('PowProtector', () => {
 	});
 
 	describe('when POW feature is disabled', () => {
-		let originalPowEnv: typeof PowEnv;
-
 		beforeEach(async () => {
-			// Store original and create a spy that returns false
-			originalPowEnv = await import('$env/pow.env');
-			vi.spyOn(originalPowEnv, 'POW_FEATURE_ENABLED', 'get').mockReturnValue(false);
+			// Create a spy that returns false
+			const powEnv = await import('$env/pow.env');
+			vi.spyOn(powEnv, 'POW_FEATURE_ENABLED', 'get').mockImplementation(
+				(() => false) as unknown as () => true
+			);
 		});
 
 		afterEach(() => {
@@ -384,7 +375,7 @@ describe('PowProtector', () => {
 				});
 
 				// Trigger a re-render
-				rerender({ children: mockSnippet });
+				await rerender({ children: mockSnippet });
 
 				await waitFor(() => {
 					// Should still only be called once
