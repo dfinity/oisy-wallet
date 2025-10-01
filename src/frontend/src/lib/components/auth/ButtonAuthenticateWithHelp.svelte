@@ -40,9 +40,9 @@
 
 	<span
 		class="mt-4 flex flex-col text-sm text-tertiary"
+		class:sm:w-80={!fullWidth}
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}
-		class:sm:w-80={!fullWidth}
 	>
 		<span class="inline-block">
 			<Html
