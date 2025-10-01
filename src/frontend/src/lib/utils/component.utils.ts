@@ -1,8 +1,4 @@
-import { mount, unmount } from 'svelte';
-
-type ComponentProps<T> = T extends new (options: { target: Element; props?: infer P }) => never
-	? P
-	: never;
+import { mount, unmount, type Component, type ComponentProps } from 'svelte';
 
 export const componentToHtml = <T extends Component>({
 	Component,
@@ -21,7 +17,7 @@ export const componentToHtml = <T extends Component>({
 
 		const html = container.innerHTML;
 
-		unmount(component);
+		unmount(component, { outro: false });
 
 		return html;
 	} catch (error) {
