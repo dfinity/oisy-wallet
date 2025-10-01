@@ -1596,8 +1596,8 @@
 		"text": {
 			"license_agreement": "Accordo di Licenza",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "l'",
+				"possessive": "il nostro "
 			},
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
 			"paragraph_1": "Grazie per il tuo interesse in $oisy_name, un'applicazione decentralizzata di wallet multi-chain, self-custody basata su browser, hostata sulla rete blockchain pubblica Internet Computer (\"$oisy_short\"). Per maggiori informazioni su $oisy_short, il suo codice open-source e le licenze correlate, fai riferimento al repository GitHub di $oisy_short qui: $oisy_repo_url.",
@@ -1626,8 +1626,8 @@
 		"text": {
 			"terms_of_use": "Termini di utilizzo",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "i ",
+				"possessive": "i nostri "
 			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
@@ -1641,8 +1641,8 @@
 		"text": {
 			"privacy_policy": "Politica sulla riservatezza",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "la ",
+				"possessive": "la nostra "
 			},
 			"title": "",
 			"body": ""

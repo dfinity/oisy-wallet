@@ -1596,7 +1596,7 @@
 		"text": {
 			"license_agreement": "License Agreement",
 			"det": {
-				"article": "",
+				"article": "the ",
 				"possessive": "our "
 			},
 			"title": "$oisy_name License Agreement (“License Agreement”)",
@@ -1626,7 +1626,7 @@
 		"text": {
 			"terms_of_use": "Terms of Use",
 			"det": {
-				"article": "",
+				"article": "the ",
 				"possessive": "our "
 			},
 			"title": "Terms Of Use",
@@ -1641,7 +1641,7 @@
 		"text": {
 			"privacy_policy": "Privacy Policy",
 			"det": {
-				"article": "",
+				"article": "the ",
 				"possessive": "our "
 			},
 			"title": "Privacy Policy",
