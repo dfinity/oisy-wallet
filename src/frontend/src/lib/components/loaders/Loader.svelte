@@ -282,11 +282,11 @@
 		</div>
 	{/if}
 {:else}
-		<LoaderCollections>
-			<LoaderNfts>
-				{@render children()}
-			</LoaderNfts>
-		</LoaderCollections>
+	<LoaderCollections>
+		<LoaderNfts>
+			{@render children()}
+		</LoaderNfts>
+	</LoaderCollections>
 {/if}
 
 <style lang="scss">
