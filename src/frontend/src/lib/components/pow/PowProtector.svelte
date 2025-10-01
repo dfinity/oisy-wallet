@@ -106,25 +106,29 @@
 	};
 
 	onMount(async () => {
-		if (POW_FEATURE_ENABLED) {
-			try {
-				// Initial check
-				hasCycles = await handleInsufficientCycles();
-			} catch (error) {
-				// Log error but continue (assume no cycles on error)
-				console.error('Error checking initial cycles:', error);
-				hasCycles = false;
-			}
-
+		if (!POW_FEATURE_ENABLED) {
 			loading = true;
+			hasCycles = true;
+			return;
+		}
 
-			// Always initialize the worker regardless of cycles status
-			await initWorker();
+		loading = true;
 
-			if (!hasCycles) {
-				// If the user does not have the required cycles amount granted, we need to poll until he has
-				checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
-			}
+		try {
+			// Initial check
+			hasCycles = await handleInsufficientCycles();
+		} catch (error) {
+			// Log error but continue (assume no cycles on error)
+			console.error('Error checking initial cycles:', error);
+			hasCycles = false;
+		}
+
+		// Always initialize the worker regardless of cycles status
+		await initWorker();
+
+		if (!hasCycles) {
+			// If the user does not have the required cycles amount granted, we need to poll until he has
+			checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
 		}
 	});
 
@@ -144,13 +148,11 @@
 	});
 </script>
 
-{#if !POW_FEATURE_ENABLED}
-	<!-- POW feature is globally disabled. So we bypass all protection logic and render the app content directly -->
-	{@render children?.()}
-{:else if hasCycles}
-	<!-- User has sufficient cycles so, user can proceed normally -->
-	{@render children?.()}
-{:else if loading}
+<!-- Alwways render children to preserve state -->
+{@render children?.()}
+
+<!-- Overlay POW modal when cycles are insufficient and POW is enabled -->
+{#if POW_FEATURE_ENABLED && loading && !hasCycles}
 	<!-- 
 		POW feature is enabled but user lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
 		This modal will be displayed until either:
