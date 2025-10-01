@@ -128,9 +128,8 @@
 						<IconDots />
 					{:else}
 						<Amount
-							amount={cardAmount}
+							amount={cardAmount * -1n}
 							decimals={token.decimals}
-							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}
 						/>
 					{/if}
