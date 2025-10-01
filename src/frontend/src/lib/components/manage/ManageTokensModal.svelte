@@ -3,6 +3,7 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -42,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -60,14 +62,16 @@
 		infoElement
 	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
 
-	const steps: WizardSteps<WizardStepsManageTokens> = [
+	const isNftsPage = $derived(isRouteNfts(page));
+
+	const steps: WizardSteps<WizardStepsManageTokens> = $derived([
 		{
 			name: WizardStepsManageTokens.MANAGE,
-			title: $i18n.tokens.manage.text.title
+			title: isNftsPage ? $i18n.tokens.manage.text.title_nft : $i18n.tokens.manage.text.title
 		},
 		{
 			name: WizardStepsManageTokens.IMPORT,
-			title: $i18n.tokens.import.text.title
+			title: isNftsPage ? $i18n.tokens.import.text.title_nft : $i18n.tokens.import.text.title
 		},
 		{
 			name: WizardStepsManageTokens.REVIEW,
@@ -77,7 +81,7 @@
 			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
-	];
+	]);
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
@@ -347,6 +351,7 @@
 		<ManageTokens
 			{infoElement}
 			{initialSearch}
+			{isNftsPage}
 			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}

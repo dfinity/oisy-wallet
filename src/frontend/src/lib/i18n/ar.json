@@ -51,7 +51,8 @@
 			"switch_currency": "تبديل العملة"
 		},
 		"warning": {
-			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة"
+			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "لا يوجد مزود Infura ERC1155 لشبكة $network",
 			"no_infura_erc20_icp_provider": "لا يوجد مزود Infura ERC20 ICP لشبكة $network",
 			"no_solana_network": "لا يوجد شبكة Solana لشبكة $network",
-			"eth_address_unknown": "عنوان ETH غير معروف.",
 			"loading_address": "خطأ أثناء تحميل عنوان $symbol.",
 			"loading_balance": "خطأ أثناء تحميل رصيد $symbol لشبكة $network.",
 			"erc20_contracts": "خطأ أثناء تحميل عقود ERC20.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "استيراد التوكن",
+				"title_nft": "",
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "إدارة التوكنات",
+				"title_nft": "",
 				"manage_list": "إدارة التوكنات",
 				"list_settings": "إعدادات القائمة",
 				"import_token": "استيراد توكن",
+				"import_nft": "",
 				"network": "الشبكة",
 				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
 				"enable_more_assets": "تمكين المزيد من التوكنات"
@@ -1192,6 +1195,7 @@
 			"methods": "الطرق",
 			"events": "الأحداث",
 			"message": "الرسالة",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",
@@ -1618,6 +1622,7 @@
 		"text": {
 			"terms_of_use": "",
 			"title": "",
+			"instruction": "",
 			"body": ""
 		},
 		"alt": {

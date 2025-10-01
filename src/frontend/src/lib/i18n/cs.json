@@ -51,7 +51,8 @@
 			"switch_currency": "Přepnout měnu"
 		},
 		"warning": {
-			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena"
+			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "Žádný poskytovatel Infura ERC1155 pro síť $network",
 			"no_infura_erc20_icp_provider": "Žádný poskytovatel Infura ERC20 ICP pro síť $network",
 			"no_solana_network": "Žádná síť Solana pro síť $network",
-			"eth_address_unknown": "Adresa ETH je neznámá.",
 			"loading_address": "Chyba při načítání adresy $symbol.",
 			"loading_balance": "Chyba při načítání zůstatku $symbol pro síť $network.",
 			"erc20_contracts": "Chyba při načítání smluv ERC20.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importovat token",
+				"title_nft": "",
 				"review": "Zkontrolovat",
 				"saving": "Ukládání...",
 				"updating": "Aktualizace seznamu tokenů",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Spravovat tokeny",
+				"title_nft": "",
 				"manage_list": "Spravovat tokeny",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
+				"import_nft": "",
 				"network": "Síť",
 				"all_tokens_zero_balance": "Všechny tokeny mají nulový zůstatek.",
 				"enable_more_assets": "Povolit další tokeny"
@@ -1192,6 +1195,7 @@
 			"methods": "Metody",
 			"events": "Události",
 			"message": "Zpráva",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",
@@ -1618,6 +1622,7 @@
 		"text": {
 			"terms_of_use": "Podmínky použití",
 			"title": "",
+			"instruction": "",
 			"body": ""
 		},
 		"alt": {

@@ -106,6 +106,7 @@ export const executeTool = ({
 	} = toolCall;
 
 	let result: ToolResult['result'] | undefined;
+	let additionalTrackingMetadata: Record<string, string> = {};
 
 	if (name === ToolResultType.SHOW_ALL_CONTACTS) {
 		result = { contacts: Object.values(get(extendedAddressContactsStore)) };
@@ -120,17 +121,30 @@ export const executeTool = ({
 			tokensUi: get(combinedDerivedSortedFungibleNetworkTokensUi),
 			networks: get(networks)
 		});
+
+		additionalTrackingMetadata = {
+			...(nonNullish(result.mainCard.token) && { requestedToken: result.mainCard.token.symbol }),
+			...(nonNullish(result.mainCard.network) && { requestedNetwork: result.mainCard.network.name })
+		};
 	} else if (name === ToolResultType.REVIEW_SEND_TOKENS) {
 		result = parseReviewSendTokensToolArguments({
 			filterParams,
 			extendedAddressContacts: get(extendedAddressContactsStore),
 			tokens: get(enabledTokens)
 		});
+
+		additionalTrackingMetadata = {
+			requestedToken: result.token.symbol
+		};
 	}
 
 	trackEvent({
 		name: AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED,
-		metadata: generateAiAssistantResponseEventMetadata({ toolName: name, requestStartTimestamp })
+		metadata: generateAiAssistantResponseEventMetadata({
+			toolName: name,
+			requestStartTimestamp,
+			additionalMetadata: additionalTrackingMetadata
+		})
 	});
 
 	return { type: name as ToolResult['type'], result };

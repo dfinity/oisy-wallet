@@ -1,5 +1,6 @@
 import { resetRouteParams, type RouteParams } from '$lib/utils/nav.utils';
 import type { LoadEvent } from '@sveltejs/kit';
+// eslint-disable-next-line local-rules/no-relative-imports
 import type { PageLoad } from './$types';
 
 // We reset the data because a public route operates without a network or token selected.

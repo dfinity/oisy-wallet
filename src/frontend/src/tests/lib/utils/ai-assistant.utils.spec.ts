@@ -213,18 +213,21 @@ describe('ai-assistant.utils', () => {
 		});
 
 		it('returns correct result with a tool name', () => {
+			const additionalMetadata = { testParam: 'test' };
 			const requestStartTimestamp = 1000000;
 			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 4000000);
 
 			expect(
 				generateAiAssistantResponseEventMetadata({
 					toolName: 'test',
-					requestStartTimestamp
+					requestStartTimestamp,
+					additionalMetadata
 				})
 			).toEqual({
 				toolName: 'test',
 				responseTime: '4000s',
-				responseTimeCategory: '100000+'
+				responseTimeCategory: '100000+',
+				...additionalMetadata
 			});
 		});
 

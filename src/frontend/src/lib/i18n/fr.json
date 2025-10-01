@@ -51,7 +51,8 @@
 			"switch_currency": "Changer de devise"
 		},
 		"warning": {
-			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée"
+			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "Pas de fournisseur Infura ERC1155 pour le réseau $network",
 			"no_infura_erc20_icp_provider": "Pas de fournisseur Infura ERC20 ICP pour le réseau $network",
 			"no_solana_network": "Pas de réseau Solana pour le réseau $network",
-			"eth_address_unknown": "L'adresse ETH est inconnue.",
 			"loading_address": "Erreur lors du chargement de l'adresse $symbol.",
 			"loading_balance": "Erreur lors du chargement du solde $symbol pour le réseau $network.",
 			"erc20_contracts": "Erreur lors du chargement des contrats ERC20.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importer un token",
+				"title_nft": "",
 				"review": "Aperçu",
 				"saving": "Enregistrement...",
 				"updating": "Mise à jour de la liste des tokens",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Gérer les tokens",
+				"title_nft": "",
 				"manage_list": "Gérer les tokens",
 				"list_settings": "Paramètres de la liste",
 				"import_token": "Importer un token",
+				"import_nft": "",
 				"network": "Réseau",
 				"all_tokens_zero_balance": "Tous les tokens ont un solde nul.",
 				"enable_more_assets": "Activer plus de tokens"
@@ -1192,6 +1195,7 @@
 			"methods": "Méthodes",
 			"events": "Événements",
 			"message": "Message",
+			"expiration": "",
 			"token": "",
 			"network": "",
 			"amount": "",
@@ -1618,6 +1622,7 @@
 		"text": {
 			"terms_of_use": "Conditions d'utilisation",
 			"title": "",
+			"instruction": "",
 			"body": ""
 		},
 		"alt": {

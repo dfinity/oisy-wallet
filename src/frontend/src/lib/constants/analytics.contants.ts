@@ -135,6 +135,7 @@ export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
+export const TOKEN_VIEW_ROUTE = 'token-view';
 
 // Privacymode change
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
@@ -166,3 +167,6 @@ export const AI_ASSISTANT_MESSAGE_SENT = 'ai_assistant_message_sent';
 export const AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED = 'ai_assistant_message_failed_to_be_parsed';
 export const AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED = 'ai_assistant_tool_execution_triggered';
 export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_response_received';
+
+// Buy
+export const TRACK_BUY_TOKEN = 'buy_token';
