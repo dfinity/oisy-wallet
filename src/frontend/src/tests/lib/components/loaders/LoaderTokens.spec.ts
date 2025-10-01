@@ -30,7 +30,6 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
 import { writable } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
@@ -113,7 +112,7 @@ describe('LoaderTokens', () => {
 		vi.spyOn(splDerived, 'splCustomTokensNotInitialized', 'get').mockReturnValue(splNotInitStore);
 	});
 
-	it('should always load ICRC tokens on init', async () => {
+	it('should always load ICRC tokens', async () => {
 		render(LoaderTokens, { children: mockSnippet });
 
 		await waitFor(() => {
@@ -121,7 +120,7 @@ describe('LoaderTokens', () => {
 		});
 	});
 
-	it('should not load non-ICRC tokens on init if networks are all disabled', async () => {
+	it('should not load non-ICRC tokens if networks are all disabled', async () => {
 		render(LoaderTokens, { children: mockSnippet });
 
 		await waitFor(() => {
@@ -132,12 +131,10 @@ describe('LoaderTokens', () => {
 		});
 	});
 
-	it('should load non-ICRC tokens on init if networks are all enabled', async () => {
+	it('should load non-ICRC tokens if networks are all enabled', async () => {
 		render(LoaderTokens, { children: mockSnippet });
 
 		setupUserNetworksStore('allEnabled');
-
-		await tick();
 
 		await waitFor(() => {
 			expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
