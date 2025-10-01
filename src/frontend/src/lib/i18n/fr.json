@@ -1269,6 +1269,7 @@
 			"status": "Statut",
 			"confirmations": "Confirmations",
 			"for": "",
+			"for_copied": "",
 			"expiration": ""
 		},
 		"status": {
@@ -1307,7 +1308,8 @@
 		"alt": {
 			"open_block_explorer": "Ouvrir cette transaction sur un explorateur de blocs",
 			"open_from_block_explorer": "Ouvrir l'adresse 'De' sur un explorateur de blocs",
-			"open_to_block_explorer": "Ouvrir l'adresse 'À' sur un explorateur de blocs"
+			"open_to_block_explorer": "Ouvrir l'adresse 'À' sur un explorateur de blocs",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Impossible d'obtenir le numéro de bloc.",

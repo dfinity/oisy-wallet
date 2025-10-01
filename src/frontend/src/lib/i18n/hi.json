@@ -1269,6 +1269,7 @@
 			"status": "स्थिति",
 			"confirmations": "पुष्टियां",
 			"for": "",
+			"for_copied": "",
 			"expiration": ""
 		},
 		"status": {
@@ -1307,7 +1308,8 @@
 		"alt": {
 			"open_block_explorer": "इस लेनदेन को ब्लॉक एक्सप्लोरर पर खोलें",
 			"open_from_block_explorer": "'से' पते को ब्लॉक एक्सप्लोरर पर खोलें",
-			"open_to_block_explorer": "'को' पते को ब्लॉक एक्सप्लोरर पर खोलें"
+			"open_to_block_explorer": "'को' पते को ब्लॉक एक्सप्लोरर पर खोलें",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "ब्लॉक नंबर प्राप्त नहीं कर सकता।",

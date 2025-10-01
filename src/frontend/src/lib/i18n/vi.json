@@ -1269,6 +1269,7 @@
 			"status": "Trạng thái",
 			"confirmations": "Xác nhận",
 			"for": "",
+			"for_copied": "",
 			"expiration": ""
 		},
 		"status": {
@@ -1307,7 +1308,8 @@
 		"alt": {
 			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",
 			"open_from_block_explorer": "Mở địa chỉ 'Từ' trên trình khám phá khối",
-			"open_to_block_explorer": "Mở địa chỉ 'Đến' trên trình khám phá khối"
+			"open_to_block_explorer": "Mở địa chỉ 'Đến' trên trình khám phá khối",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Không thể lấy số khối.",
