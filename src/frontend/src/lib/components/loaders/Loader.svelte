@@ -282,13 +282,11 @@
 		</div>
 	{/if}
 {:else}
-	<div in:fade>
-		<LoaderCollections>
-			<LoaderNfts>
-				{@render children()}
-			</LoaderNfts>
-		</LoaderCollections>
-	</div>
+	<LoaderCollections>
+		<LoaderNfts>
+			{@render children()}
+		</LoaderNfts>
+	</LoaderCollections>
 {/if}
 
 <style lang="scss">
