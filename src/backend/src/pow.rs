@@ -98,6 +98,7 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     }
 
     // Retrieve or initialize new challenge
+    // Retrieve or initialize new challenge
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
         debug_println!(
@@ -105,8 +106,13 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             format_challenge(&stored_challenge),
         );
 
-        // we re-use the previous challenge so we can dynamically adapt the difficulty
-        difficulty = stored_challenge.difficulty;
+        // If auto-adjustment is disabled, always use START_DIFFICULTY
+        if !DIFFICULTY_AUTO_ADJUSTMENT {
+            difficulty = START_DIFFICULTY;
+        } else {
+            // we re-use the previous challenge so we can dynamically adapt the difficulty
+            difficulty = stored_challenge.difficulty;
+        }
 
         // to protect this service from overflow the service, it can only be called by a principle
         // again once the challenge has expired.
