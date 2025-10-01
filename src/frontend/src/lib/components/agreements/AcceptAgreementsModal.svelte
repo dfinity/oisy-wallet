@@ -28,21 +28,17 @@
 	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type { UserAgreements } from '$lib/types/user-agreements';
+	import type { AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 	import { emit } from '$lib/utils/events.utils';
 
-	type AgreementsToAcceptType = {
-		[K in keyof EnvAgreements]?: boolean;
-	};
-
-	let agreementsToAccept = $state<AgreementsToAcceptType>({});
+	let agreementsToAccept = $state<AgreementsToAccept>({});
 
 	let updatingAgreements = $state(true);
 
 	$effect(() => {
 		updatingAgreements = true;
 
-		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAcceptType>(
+		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAccept>(
 			(acc, agreementType) => ({
 				...acc,
 				[agreementType as keyof EnvAgreements]: false
@@ -59,7 +55,7 @@
 
 	let disabled = $derived(!acceptedAllAgreements || updatingAgreements);
 
-	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
+	const toggleAccept = (type: keyof AgreementsToAccept) => {
 		agreementsToAccept[type] = !agreementsToAccept[type];
 	};
 
