@@ -228,11 +228,18 @@ export const parseShowBalanceToolArguments = ({
 
 	// only the token symbol filter provided -> search for matching tokens on different networks
 	if (nonNullish(tokenSymbolFilter)) {
-		const filteredBySymbolTokens = tokensUi.filter(({ symbol }) => symbol === tokenSymbolFilter);
+		const filteredBySymbolTokens: TokenUi[] = [];
+		let ckTwinToken: TokenUi | undefined;
 
-		const filteredBySymbolAndBalanceTokens = filteredBySymbolTokens.filter(
-			({ usdBalance }) => (usdBalance ?? 0) > 0
-		);
+		tokensUi.forEach((token) => {
+			token.symbol === tokenSymbolFilter && filteredBySymbolTokens.push(token);
+			token.symbol === `ck${tokenSymbolFilter}` && (ckTwinToken = token);
+		});
+
+		const filteredBySymbolAndBalanceTokens = [
+			...filteredBySymbolTokens,
+			...(nonNullish(ckTwinToken) ? [ckTwinToken] : [])
+		].filter(({ usdBalance }) => (usdBalance ?? 0) > 0);
 
 		return {
 			mainCard: {
