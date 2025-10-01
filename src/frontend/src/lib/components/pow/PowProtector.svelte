@@ -29,8 +29,8 @@
 	let checkAttempts = $state(0);
 	let powWorker = $state<PowProtectorWorkerInitResult | undefined>();
 
-	// Initialize with default value, but it will be reactively updated from the store
-	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
+	// Progress step is undefined until the store provides actual progress data
+	let progressStep = $state<ProgressStepsPowProtectorLoader | undefined>();
 
 	// Subscribe to the store and update progressStep reactively
 	$effect(() => {
@@ -161,7 +161,9 @@
 				<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
 				<p class="mt-3">{$i18n.pow_protector.text.description}</p>
 
-				<InProgress {progressStep} {steps} />
+				{#if progressStep}
+					<InProgress {progressStep} {steps} />
+				{/if}
 			</div>
 		</Modal>
 	</div>
