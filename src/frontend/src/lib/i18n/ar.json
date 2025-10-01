@@ -1267,7 +1267,9 @@
 			"block": "الكتلة",
 			"interacted_with": "تم التفاعل مع (إلى)",
 			"status": "الحالة",
-			"confirmations": "التأكيدات"
+			"confirmations": "التأكيدات",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "تم التأكيد",

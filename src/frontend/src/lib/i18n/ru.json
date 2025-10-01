@@ -1267,7 +1267,9 @@
 			"block": "Блок",
 			"interacted_with": "Взаимодействовали с (Получатель)",
 			"status": "Статус",
-			"confirmations": "Подтверждения"
+			"confirmations": "Подтверждения",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",

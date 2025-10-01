@@ -1267,7 +1267,9 @@
 			"block": "Blok",
 			"interacted_with": "Interakce s (do)",
 			"status": "Stav",
-			"confirmations": "Potvrzení"
+			"confirmations": "Potvrzení",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Potvrzeno",

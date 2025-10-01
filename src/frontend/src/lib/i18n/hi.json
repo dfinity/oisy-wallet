@@ -1267,7 +1267,9 @@
 			"block": "ब्लॉक",
 			"interacted_with": "के साथ इंटरैक्ट किया गया (को)",
 			"status": "स्थिति",
-			"confirmations": "पुष्टियां"
+			"confirmations": "पुष्टियां",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "पुष्टि",

@@ -1267,7 +1267,9 @@
 			"block": "ブロック",
 			"interacted_with": "相互作用した相手（宛先）",
 			"status": "ステータス",
-			"confirmations": "確認数"
+			"confirmations": "確認数",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "確認済み",

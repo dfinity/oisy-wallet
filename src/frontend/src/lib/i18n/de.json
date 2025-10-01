@@ -1267,7 +1267,9 @@
 			"block": "Block",
 			"interacted_with": "Interagierte mit (Ziel)",
 			"status": "Status",
-			"confirmations": "Bestätigungen"
+			"confirmations": "Bestätigungen",
+			"for": "",
+			"expiration": ""
 		},
 		"status": {
 			"confirmed": "Bestätigt",

@@ -1268,8 +1268,8 @@
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
 			"confirmations": "Confirmations",
-            "for": "For",
-            "expiration": "Expiration"
+			"for": "For",
+			"expiration": "Expiration"
 		},
 		"status": {
 			"confirmed": "Confirmed",
