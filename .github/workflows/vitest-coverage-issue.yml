@@ -24,9 +24,6 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
 
-      - name: Set Environment Variables
-        run: echo "VITE_ALCHEMY_API_KEY=${{ secrets.VITE_ALCHEMY_API_KEY_TEST_FE }}" >> $GITHUB_ENV
-
       - name: Test
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }}
 
