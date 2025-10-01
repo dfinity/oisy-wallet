@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
+	import { Modal, themeStore } from '@dfinity/gix-components';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
@@ -7,14 +7,13 @@
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { powProtectorSteps } from '$lib/config/pow.config';
 	import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { handleInsufficientCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
-	import type { StaticStep } from '$lib/types/steps';
-	import type { NonEmptyArray } from '$lib/types/utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -54,24 +53,8 @@
 		}
 	});
 
-	// Using $derived for reactive steps array
-	let steps = $derived([
-		{
-			step: ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE,
-			text: $i18n.pow_protector.text.request_challenge,
-			state: 'completed'
-		} as ProgressStep,
-		{
-			step: ProgressStepsPowProtectorLoader.SOLVE_CHALLENGE,
-			text: $i18n.pow_protector.text.solve_challenge,
-			state: 'completed'
-		} as ProgressStep,
-		{
-			step: ProgressStepsPowProtectorLoader.GRANT_CYCLES,
-			text: $i18n.pow_protector.text.grant_cycles,
-			state: 'completed'
-		} as ProgressStep
-	] as NonEmptyArray<ProgressStep | StaticStep>);
+	// Using $derived for reactive steps array from config
+	let steps = $derived(powProtectorSteps({ i18n: $i18n }));
 
 	/**
 	 * Is periodically checks if the user has sufficient cycles for POW protection.

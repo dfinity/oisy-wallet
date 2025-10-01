@@ -2,6 +2,7 @@ import type * as PowEnv from '$env/pow.env';
 import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 import PowProtector from '$lib/components/pow/PowProtector.svelte';
+import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 import { errorSignOut } from '$lib/services/auth.services';
 import { handleInsufficientCycles } from '$lib/services/loader.services';
@@ -131,7 +132,7 @@ describe('PowProtector', () => {
 			it('should not start polling for cycles', async () => {
 				render(PowProtector, { children: mockSnippet });
 
-				vi.advanceTimersByTime(8000); // More than CHECK_INTERVAL_MS
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS + 1000); // More than CHECK_INTERVAL_MS
 
 				await waitFor(() => {
 					expect(handleInsufficientCycles).toHaveBeenCalledOnce(); // Only initial call
@@ -183,13 +184,13 @@ describe('PowProtector', () => {
 					expect(handleInsufficientCycles).toHaveBeenCalledOnce();
 				});
 
-				vi.advanceTimersByTime(7000); // CHECK_INTERVAL_MS
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 
 				await waitFor(() => {
 					expect(handleInsufficientCycles).toHaveBeenCalledTimes(2);
 				});
 
-				vi.advanceTimersByTime(7000);
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 
 				await waitFor(() => {
 					expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
@@ -212,9 +213,9 @@ describe('PowProtector', () => {
 				});
 
 				// Advance time twice to trigger the successful check
-				vi.advanceTimersByTime(7000);
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 				await vi.runAllTimersAsync();
-				vi.advanceTimersByTime(7000);
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 				await vi.runAllTimersAsync();
 
 				// Should now render children and hide modal
@@ -224,7 +225,7 @@ describe('PowProtector', () => {
 				});
 
 				// No more polling should happen
-				vi.advanceTimersByTime(7000);
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 				await vi.runAllTimersAsync();
 
 				expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
@@ -235,9 +236,9 @@ describe('PowProtector', () => {
 
 				render(PowProtector, { children: mockSnippet });
 
-				// Advance time for 100 attempts (MAX_CHECK_ATTEMPTS)
-				for (let i = 0; i < 100; i++) {
-					vi.advanceTimersByTime(7000);
+				// Advance time for MAX_CHECK_ATTEMPTS
+				for (let i = 0; i < MAX_CHECK_ATTEMPTS; i++) {
+					vi.advanceTimersByTime(CHECK_INTERVAL_MS);
 					await vi.runAllTimersAsync();
 				}
 
@@ -245,7 +246,7 @@ describe('PowProtector', () => {
 					expect(errorSignOut).toHaveBeenCalledWith(
 						en.init.error.waiting_for_allowed_cycles_aborted
 					);
-					expect(handleInsufficientCycles).toHaveBeenCalledTimes(101); // Initial + 100 polls
+					expect(handleInsufficientCycles).toHaveBeenCalledTimes(MAX_CHECK_ATTEMPTS + 1); // Initial + MAX_CHECK_ATTEMPTS polls
 				});
 			});
 		});
