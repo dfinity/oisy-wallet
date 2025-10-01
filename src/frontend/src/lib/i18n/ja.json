@@ -1621,7 +1621,7 @@
 		"text": {
 			"terms_of_use": "",
 			"title": "",
-			"instruction": "",
+			"instruction": "このボタンをクリックすると、以下に同意したことになります。",
 			"body": ""
 		},
 		"alt": {
