@@ -56,11 +56,13 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
-	let {
-		initialSearch,
-		onClose = () => {},
-		infoElement
-	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
+	interface Props {
+		initialSearch?: string;
+		onClose?: () => void;
+		infoElement?: Snippet;
+	}
+
+	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 

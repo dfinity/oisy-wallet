@@ -18,15 +18,7 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	let {
-		token,
-		tokenCount,
-		totalUsdBalance,
-		styleClass,
-		network,
-		cardDescription,
-		onClick
-	}: {
+	interface Props {
 		totalUsdBalance: number;
 		tokenCount?: number;
 		token?: TokenUi;
@@ -34,7 +26,10 @@
 		network?: Network;
 		cardDescription?: Snippet;
 		onClick: () => void;
-	} = $props();
+	}
+
+	let { token, tokenCount, totalUsdBalance, styleClass, network, cardDescription, onClick }: Props =
+		$props();
 
 	let formattedTotalUsdBalance = $derived(
 		formatCurrency({
