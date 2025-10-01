@@ -1623,7 +1623,7 @@
 		"text": {
 			"terms_of_use": "",
 			"title": "",
-			"instruction": "",
+			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {
