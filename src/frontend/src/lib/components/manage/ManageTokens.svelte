@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -71,8 +70,6 @@
 		setTokens(allTokensSorted);
 	});
 
-	let loading = $derived($erc20UserTokensNotInitialized);
-
 	let showNetworks = $state(false);
 
 	const onSelectNetwork = () => {
@@ -120,7 +117,7 @@
 	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
-		{loading}
+		loading={false}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
 		on:icSelectNetworkFilter={onSelectNetwork}
 	>
