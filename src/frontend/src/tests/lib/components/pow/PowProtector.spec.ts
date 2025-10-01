@@ -4,7 +4,7 @@ import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-list
 import PowProtector from '$lib/components/pow/PowProtector.svelte';
 import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 import { errorSignOut } from '$lib/services/auth.services';
-import { hasEnoughCycles } from '$lib/services/loader.services';
+import { handleInsufficientCycles } from '$lib/services/loader.services';
 import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -62,7 +62,7 @@ describe('PowProtector', () => {
 
 		// Default mocks
 		vi.mocked(initPowProtectorWorker).mockResolvedValue(mockWorker);
-		vi.mocked(hasEnoughCycles).mockResolvedValue(true);
+		vi.mocked(handleInsufficientCycles).mockResolvedValue(true);
 	});
 
 	afterEach(() => {
@@ -92,7 +92,7 @@ describe('PowProtector', () => {
 			});
 
 			expect(initPowProtectorWorker).not.toHaveBeenCalled();
-			expect(hasEnoughCycles).not.toHaveBeenCalled();
+			expect(handleInsufficientCycles).not.toHaveBeenCalled();
 		});
 	});
 
@@ -110,13 +110,13 @@ describe('PowProtector', () => {
 			render(PowProtector, { children: mockSnippet });
 
 			await waitFor(() => {
-				expect(hasEnoughCycles).toHaveBeenCalledOnce();
+				expect(handleInsufficientCycles).toHaveBeenCalledOnce();
 			});
 		});
 
 		describe('when the user has sufficient cycles', () => {
 			beforeEach(() => {
-				vi.mocked(hasEnoughCycles).mockResolvedValue(true);
+				vi.mocked(handleInsufficientCycles).mockResolvedValue(true);
 			});
 
 			it('should render children directly without a modal', async () => {
@@ -134,14 +134,14 @@ describe('PowProtector', () => {
 				vi.advanceTimersByTime(8000); // More than CHECK_INTERVAL_MS
 
 				await waitFor(() => {
-					expect(hasEnoughCycles).toHaveBeenCalledOnce(); // Only initial call
+					expect(handleInsufficientCycles).toHaveBeenCalledOnce(); // Only initial call
 				});
 			});
 		});
 
 		describe('when the user lacks sufficient cycles', () => {
 			beforeEach(() => {
-				vi.mocked(hasEnoughCycles).mockResolvedValue(false);
+				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
 			});
 
 			it('should render a modal with insufficient cycles message', async () => {
@@ -180,24 +180,24 @@ describe('PowProtector', () => {
 				render(PowProtector, { children: mockSnippet });
 
 				await waitFor(() => {
-					expect(hasEnoughCycles).toHaveBeenCalledOnce();
+					expect(handleInsufficientCycles).toHaveBeenCalledOnce();
 				});
 
 				vi.advanceTimersByTime(7000); // CHECK_INTERVAL_MS
 
 				await waitFor(() => {
-					expect(hasEnoughCycles).toHaveBeenCalledTimes(2);
+					expect(handleInsufficientCycles).toHaveBeenCalledTimes(2);
 				});
 
 				vi.advanceTimersByTime(7000);
 
 				await waitFor(() => {
-					expect(hasEnoughCycles).toHaveBeenCalledTimes(3);
+					expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
 				});
 			});
 
 			it('should stop polling and render children when cycles become available', async () => {
-				vi.mocked(hasEnoughCycles)
+				vi.mocked(handleInsufficientCycles)
 					.mockResolvedValueOnce(false) // Initial check
 					.mockResolvedValueOnce(false) // First poll
 					.mockResolvedValueOnce(true); // Second poll - now has cycles
@@ -227,11 +227,11 @@ describe('PowProtector', () => {
 				vi.advanceTimersByTime(7000);
 				await vi.runAllTimersAsync();
 
-				expect(hasEnoughCycles).toHaveBeenCalledTimes(3);
+				expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
 			});
 
 			it('should sign out the user after max retry attempts', async () => {
-				vi.mocked(hasEnoughCycles).mockResolvedValue(false);
+				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
 
 				render(PowProtector, { children: mockSnippet });
 
@@ -245,14 +245,14 @@ describe('PowProtector', () => {
 					expect(errorSignOut).toHaveBeenCalledWith(
 						en.init.error.waiting_for_allowed_cycles_aborted
 					);
-					expect(hasEnoughCycles).toHaveBeenCalledTimes(101); // Initial + 100 polls
+					expect(handleInsufficientCycles).toHaveBeenCalledTimes(101); // Initial + 100 polls
 				});
 			});
 		});
 
 		describe('progress steps', () => {
 			beforeEach(() => {
-				vi.mocked(hasEnoughCycles).mockResolvedValue(false);
+				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
 			});
 
 			it('should update the progress step based on store', async () => {
@@ -299,7 +299,7 @@ describe('PowProtector', () => {
 
 		describe('lifecycle management', () => {
 			it('should clean up interval and worker on destroy', async () => {
-				vi.mocked(hasEnoughCycles).mockResolvedValue(false);
+				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
 
 				const { unmount } = render(PowProtector, { children: mockSnippet });
 
@@ -338,7 +338,7 @@ describe('PowProtector', () => {
 		describe('edge cases', () => {
 			it('should handle a cycles check failure gracefully', async () => {
 				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-				vi.mocked(hasEnoughCycles).mockRejectedValue(new Error('Cycles check failed'));
+				vi.mocked(handleInsufficientCycles).mockRejectedValue(new Error('Cycles check failed'));
 
 				render(PowProtector, { children: mockSnippet });
 

@@ -34,7 +34,7 @@ import { get } from 'svelte/store';
  * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
  * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
  */
-export const hasEnoughCycles = async (): Promise<boolean> => {
+export const handleInsufficientCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 		assertNonNullish(identity, 'Cannot continue without an identity.');

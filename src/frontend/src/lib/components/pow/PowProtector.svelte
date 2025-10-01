@@ -9,7 +9,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
-	import { hasEnoughCycles } from '$lib/services/loader.services';
+	import { handleInsufficientCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import type { StaticStep } from '$lib/types/steps';
@@ -83,7 +83,7 @@
 	const checkCycles = async (): Promise<void> => {
 		try {
 			// Check current cycles status and update the reactive state
-			hasCycles = await hasEnoughCycles();
+			hasCycles = await handleInsufficientCycles();
 
 			// Increment attempt counter to track how many times we've checked
 			checkAttempts++;
@@ -128,7 +128,7 @@
 		if (POW_FEATURE_ENABLED) {
 			try {
 				// Initial check
-				hasCycles = await hasEnoughCycles();
+				hasCycles = await handleInsufficientCycles();
 			} catch (error) {
 				// Log error but continue (assume no cycles on error)
 				console.error('Error checking initial cycles:', error);
