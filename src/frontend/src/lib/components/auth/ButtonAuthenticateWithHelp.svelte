@@ -42,12 +42,15 @@
 		class="mt-4 flex flex-col text-sm text-tertiary"
 		class:text-center={helpAlignment === 'center'}
 		class:w-full={fullWidth}
+		class:sm:w-80={!fullWidth}
 	>
-		<Html
-			text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
-				$link: componentToHtml({ Component: TermsOfUseLink })
-			})}
-		/>
+		<span class="inline-block">
+			<Html
+				text={replacePlaceholders($i18n.terms_of_use.text.instruction, {
+					$link: componentToHtml({ Component: TermsOfUseLink })
+				})}
+			/>
+		</span>
 
 		{#if needHelpLink}
 			<SigningInHelpLink styleClass="mt-4" testId={AUTH_SIGNING_IN_HELP_LINK} />
