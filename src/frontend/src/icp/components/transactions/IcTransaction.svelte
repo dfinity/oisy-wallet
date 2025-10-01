@@ -46,6 +46,7 @@
 <Transaction
 	{amount}
 	{approveSpender}
+	{fee}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
@@ -55,7 +56,6 @@
 	{to}
 	{token}
 	{type}
-	{fee}
 >
 	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
 </Transaction>
