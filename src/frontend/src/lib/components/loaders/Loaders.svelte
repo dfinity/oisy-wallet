@@ -35,33 +35,33 @@
 			<AddressGuard>
 				<Loader>
 					<LoaderTokens>
-					<UrlGuard>
-						<ShortcutGuard>
-							<RewardGuard>
-								<LoaderEthBalances>
-									<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-										<LoaderMultipleEthTransactions>
-											<LoaderWallets>
-												<ExchangeWorker>
-													<LoaderMetamask>
-														<UserSnapshotWorker>
-															<LoaderContacts>
-																<TransactionsIdbSetter>
-																	<BalancesIdbSetter>
-																		{@render children()}
-																	</BalancesIdbSetter>
-																</TransactionsIdbSetter>
-															</LoaderContacts>
-														</UserSnapshotWorker>
-													</LoaderMetamask>
-												</ExchangeWorker>
-											</LoaderWallets>
-										</LoaderMultipleEthTransactions>
-									</MultipleListeners>
-								</LoaderEthBalances>
-							</RewardGuard>
-						</ShortcutGuard>
-					</UrlGuard>
+						<UrlGuard>
+							<ShortcutGuard>
+								<RewardGuard>
+									<LoaderEthBalances>
+										<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
+											<LoaderMultipleEthTransactions>
+												<LoaderWallets>
+													<ExchangeWorker>
+														<LoaderMetamask>
+															<UserSnapshotWorker>
+																<LoaderContacts>
+																	<TransactionsIdbSetter>
+																		<BalancesIdbSetter>
+																			{@render children()}
+																		</BalancesIdbSetter>
+																	</TransactionsIdbSetter>
+																</LoaderContacts>
+															</UserSnapshotWorker>
+														</LoaderMetamask>
+													</ExchangeWorker>
+												</LoaderWallets>
+											</LoaderMultipleEthTransactions>
+										</MultipleListeners>
+									</LoaderEthBalances>
+								</RewardGuard>
+							</ShortcutGuard>
+						</UrlGuard>
 					</LoaderTokens>
 				</Loader>
 			</AddressGuard>
