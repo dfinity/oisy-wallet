@@ -31,7 +31,7 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 vi.mock('$lib/services/loader.services', () => ({
-	hasEnoughCycles: vi.fn()
+	handleInsufficientCycles: vi.fn()
 }));
 
 vi.mock('@dfinity/utils', async () => {
@@ -123,20 +123,27 @@ describe('PowProtector', () => {
 			it('should render children directly without a modal', async () => {
 				const { queryByTestId, getByText } = render(PowProtector, { children: mockSnippet });
 
-				await waitFor(() => {
-					expect(queryByTestId(POW_PROTECTOR_MODAL)).toBeNull();
-					expect(getByText('Mock Snippet')).toBeInTheDocument();
-				});
+				// Wait for component to mount and initialize
+				await vi.runAllTimersAsync();
+
+				// Children are always rendered
+				expect(getByText('Mock Snippet')).toBeInTheDocument();
+				// Modal should not be shown when user has cycles
+				expect(queryByTestId(POW_PROTECTOR_MODAL)).toBeNull();
 			});
 
 			it('should not start polling for cycles', async () => {
 				render(PowProtector, { children: mockSnippet });
 
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS + 1000); // More than CHECK_INTERVAL_MS
+				// Wait for initial mount to complete
+				await vi.runAllTimersAsync();
 
-				await waitFor(() => {
-					expect(handleInsufficientCycles).toHaveBeenCalledOnce(); // Only initial call
-				});
+				// Advance time to check if polling starts
+				vi.advanceTimersByTime(CHECK_INTERVAL_MS + 1000);
+				await vi.runAllTimersAsync();
+
+				// Should only have been called once (initial check), no polling
+				expect(handleInsufficientCycles).toHaveBeenCalledOnce();
 			});
 		});
 
@@ -146,12 +153,15 @@ describe('PowProtector', () => {
 			});
 
 			it('should render a modal with insufficient cycles message', async () => {
-				const { getByTestId, queryByText } = render(PowProtector, { children: mockSnippet });
+				const { getByTestId, getByText } = render(PowProtector, { children: mockSnippet });
 
 				await waitFor(() => {
+					// Modal should be shown when user lacks cycles
 					expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
-					expect(queryByText('Mock Snippet')).toBeNull();
 				});
+
+				// Children are still rendered (just overlaid by modal)
+				expect(getByText('Mock Snippet')).toBeInTheDocument();
 			});
 
 			it('should render the banner image', async () => {
