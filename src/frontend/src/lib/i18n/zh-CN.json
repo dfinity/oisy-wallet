@@ -1630,7 +1630,7 @@
 		"text": {
 			"terms_of_use": "使用条款",
 			"title": "",
-			"instruction": "",
+			"instruction": "点击此按钮即表示你同意$link",
 			"body": ""
 		},
 		"alt": {
