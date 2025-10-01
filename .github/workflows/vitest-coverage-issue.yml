@@ -3,13 +3,9 @@ name: Try to Reproduce Issue with Vitest Coverage Reports
 on:
   pull_request:
 
-permissions: {}
-
 jobs:
   test:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
@@ -38,8 +34,6 @@ jobs:
 
   test-coverage:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: read
     needs: [test]
 
     steps:
@@ -71,18 +65,8 @@ jobs:
 
   entire-test:
     runs-on: ubuntu-24.04
-    permissions:
-      contents: write
-      pull-requests: write
 
     steps:
-      - name: Create GitHub App Token
-        uses: actions/create-github-app-token@67018539274d69449ef7c02e8e71183d1719ab42 # v2.1.4
-        id: app-token
-        with:
-          app-id: ${{ vars.PR_AUTOMATION_BOT_PUBLIC_APP_ID }}
-          private-key: ${{ secrets.PR_AUTOMATION_BOT_PUBLIC_PRIVATE_KEY }}
-
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -101,19 +85,3 @@ jobs:
           name: av-vitest-coverage-report-entire
           path: coverage/
           retention-days: 3
-
-  frontend-checks-pass:
-    if: always()
-    needs: ['test', 'test-coverage', 'entire-test']
-    runs-on: ubuntu-24.04
-    permissions:
-      contents: read
-
-    steps:
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-        with:
-          persist-credentials: false
-
-      - uses: ./.github/actions/needs_success
-        with:
-          needs: '${{ toJson(needs) }}'
