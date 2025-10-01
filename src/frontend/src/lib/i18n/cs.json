@@ -1620,6 +1620,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Podmínky použití",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
 			"body": ""

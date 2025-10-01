@@ -1321,7 +1321,13 @@ interface I18nLicense_agreement {
 }
 
 interface I18nTerms_of_use {
-	text: { terms_of_use: string; title: string; instruction: string; body: string };
+	text: {
+		terms_of_use: string;
+		det: { article: string; possessive: string };
+		title: string;
+		instruction: string;
+		body: string;
+	};
 	alt: { terms_of_use: string };
 }
 

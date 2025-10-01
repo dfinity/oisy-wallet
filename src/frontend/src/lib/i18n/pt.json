@@ -1620,6 +1620,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Termos de Uso",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
 			"body": ""
