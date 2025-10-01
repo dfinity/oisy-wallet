@@ -147,41 +147,38 @@
 {#if !POW_FEATURE_ENABLED}
 	<!-- POW feature is globally disabled. So we bypass all protection logic and render the app content directly -->
 	{@render children?.()}
+{:else if hasCycles}
+	<!-- User has sufficient cycles so, user can proceed normally -->
+	{@render children?.()}
 {:else if loading}
-	<!-- POW feature is enabled and component has started loading -->
-	{#if hasCycles}
-		<!-- User has sufficient cycles so, user can proceed normally -->
-		{@render children?.()}
-	{:else}
-		<!-- 
-			User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
-			This modal will be displayed until either:
-			- User obtains sufficient cycles (checkCycles polling succeeds)
-			- Maximum retry attempts reached (user gets signed out)
-		-->
-		<div class="insufficient-cycles-modal">
-			<Modal testId="pow-protector-modal">
-				<div class="stretch">
-					<div class="banner-container mb-8 block">
-						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
-							<ImgBanner
-								alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
-									$theme: $themeStore ?? 'light'
-								})}
-								{src}
-								styleClass="aspect-auto"
-							/>
-						{/await}
-					</div>
-
-					<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
-					<p class="mt-3">{$i18n.pow_protector.text.description}</p>
-
-					<InProgress {progressStep} {steps} />
+	<!-- 
+		POW feature is enabled but user lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
+		This modal will be displayed until either:
+		- User obtains sufficient cycles (checkCycles polling succeeds)
+		- Maximum retry attempts reached (user gets signed out)
+	-->
+	<div class="insufficient-cycles-modal">
+		<Modal testId="pow-protector-modal">
+			<div class="stretch">
+				<div class="banner-container mb-8 block">
+					{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
+						<ImgBanner
+							alt={replacePlaceholders(replaceOisyPlaceholders($i18n.init.alt.loader_banner), {
+								$theme: $themeStore ?? 'light'
+							})}
+							{src}
+							styleClass="aspect-auto"
+						/>
+					{/await}
 				</div>
-			</Modal>
-		</div>
-	{/if}
+
+				<h3 class="my-3">{$i18n.pow_protector.text.title}</h3>
+				<p class="mt-3">{$i18n.pow_protector.text.description}</p>
+
+				<InProgress {progressStep} {steps} />
+			</div>
+		</Modal>
+	</div>
 {/if}
 
 <style lang="scss">
