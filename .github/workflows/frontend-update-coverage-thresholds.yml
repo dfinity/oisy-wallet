@@ -1,4 +1,4 @@
-name: Try to Reproduce Issue with Vitest Coverage Reports
+name: Update Frontend Test Coverage Thresholds
 
 on:
   push:
