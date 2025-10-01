@@ -27,7 +27,7 @@
 	let loading = $state(false);
 	let checkInterval = $state<NodeJS.Timeout | undefined>();
 	let checkAttempts = $state(0);
-	let powWorker= $state<PowProtectorWorkerInitResult | undefined>();
+	let powWorker = $state<PowProtectorWorkerInitResult | undefined>();
 
 	// Initialize with default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
