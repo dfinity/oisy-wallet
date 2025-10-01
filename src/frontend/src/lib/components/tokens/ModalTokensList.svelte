@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
@@ -16,21 +16,25 @@
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 
-	let {
-		networkSelectorViewOnly = false,
-		loading,
-		tokenListItem,
-		toolbar,
-		noResults
-	}: {
+	interface Props {
 		networkSelectorViewOnly: boolean;
 		loading: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
-	} = $props();
+		onSelectNetworkFilter: () => void;
+		onTokenButtonClick?: (token: Token) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		networkSelectorViewOnly = false,
+		loading,
+		tokenListItem,
+		toolbar,
+		noResults,
+		onSelectNetworkFilter,
+		onTokenButtonClick
+	}: Props = $props();
 
 	const { filteredTokens, filterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -61,7 +65,7 @@
 			class:hover:border-brand-primary={networkSelectorViewOnly}
 			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
-			onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter()}
 		>
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
@@ -84,7 +88,7 @@
 				<List noPadding>
 					{#each $filteredTokens as token (token.id)}
 						<ListItem styleClass="first-of-type:border-t-1">
-							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
+							{@render tokenListItem(token, () => onTokenButtonClick?.(token))}
 						</ListItem>
 					{/each}
 				</List>

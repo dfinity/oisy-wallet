@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -8,18 +7,23 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onSendToken: (token: Token) => void;
+		onSelectNetworkFilter: () => void;
+	}
 
-	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<Token>) => {
-		dispatch('icSendToken', token);
+	let { onSendToken, onSelectNetworkFilter }: Props = $props();
+
+	const onTokenButtonClick = (token: Token) => {
+		onSendToken(token);
 	};
 </script>
 
 <ModalTokensList
 	loading={false}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
-	on:icSelectNetworkFilter
-	on:icTokenButtonClick={onIcTokenButtonClick}
+	{onSelectNetworkFilter}
+	{onTokenButtonClick}
 >
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />

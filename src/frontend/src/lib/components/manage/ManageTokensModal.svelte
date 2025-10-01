@@ -88,7 +88,7 @@
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+	const saveTokens = async (tokens: Record<string, Token>) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
@@ -352,9 +352,8 @@
 			{infoElement}
 			{initialSearch}
 			{isNftsPage}
-			on:icClose={close}
-			on:icAddToken={modal.next}
-			on:icSave={saveTokens}
+			onAddToken={modal.next}
+			onSave={saveTokens}
 		/>
 	{/if}
 </WizardModal>
