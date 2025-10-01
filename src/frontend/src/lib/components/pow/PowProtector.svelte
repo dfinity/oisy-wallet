@@ -81,42 +81,60 @@
 	 * if maximum retry attempts are exceeded.
 	 */
 	const checkCycles = async (): Promise<void> => {
-		// Check current cycles status and update the reactive state
-		hasCycles = await hasEnoughCycles();
+		try {
+			// Check current cycles status and update the reactive state
+			hasCycles = await hasEnoughCycles();
 
-		// Increment attempt counter to track how many times we've checked
-		checkAttempts++;
+			// Increment attempt counter to track how many times we've checked
+			checkAttempts++;
 
-		if (hasCycles) {
-			// Success: User now has sufficient cycles, stop polling
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
+			if (hasCycles) {
+				// Success: User now has sufficient cycles, stop polling
+				if (checkInterval) {
+					clearInterval(checkInterval);
+					checkInterval = undefined;
+				}
+			} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
+				// Failure: Too many failed attempts, clean up and sign out user
+				if (checkInterval) {
+					clearInterval(checkInterval);
+					checkInterval = undefined;
+				}
+				// Sign out with appropriate error message about cycle waiting timeout
+				await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 			}
-		} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
-			// Failure: Too many failed attempts, clean up and sign out user
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
-			// Sign out with appropriate error message about cycle waiting timeout
-			await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+		} catch (error) {
+			// Log error but continue polling (network issues shouldn't stop the process)
+			console.error('Error checking cycles:', error);
+			checkAttempts++;
 		}
 	};
 
 	const initWorker = async (): Promise<void> => {
 		if (!powWorker) {
-			// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
-			// a challenge to grant cycles when needed
-			powWorker = await initPowProtectorWorker();
-			powWorker.start();
+			try {
+				// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
+				// a challenge to grant cycles when needed
+				powWorker = await initPowProtectorWorker();
+				powWorker.start();
+			} catch (error) {
+				// Log error but don't crash
+				console.error('Failed to initialize POW worker:', error);
+			}
 		}
 	};
 
 	onMount(async () => {
 		if (POW_FEATURE_ENABLED) {
-			// Initial check
-			hasCycles = await hasEnoughCycles();
+			try {
+				// Initial check
+				hasCycles = await hasEnoughCycles();
+			} catch (error) {
+				// Log error but continue (assume no cycles on error)
+				console.error('Error checking initial cycles:', error);
+				hasCycles = false;
+			}
+
 			loading = true;
 
 			// Always initialize the worker regardless of cycles status
@@ -139,7 +157,7 @@
 
 			// Stop the worker if it was started
 			if (powWorker) {
-				onDestroy(() => powWorker?.destroy());
+				powWorker.destroy();
 			}
 		}
 	});
@@ -161,7 +179,7 @@
 			- Maximum retry attempts reached (user gets signed out)
 		-->
 		<div class="insufficient-cycles-modal">
-			<Modal>
+			<Modal testId="pow-protector-modal">
 				<div class="stretch">
 					<div class="banner-container mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
