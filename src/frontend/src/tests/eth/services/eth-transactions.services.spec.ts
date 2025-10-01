@@ -16,7 +16,6 @@ import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
-import * as toastsStore from '$lib/stores/toasts.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -36,8 +35,6 @@ vi.mock('$lib/services/analytics.services', () => ({
 }));
 
 describe('eth-transactions.services', () => {
-	let spyToastsError: MockInstance;
-
 	const mockErc20UserTokens = [USDC_TOKEN, LINK_TOKEN, PEPE_TOKEN].map((token) => ({
 		data: { ...token, enabled: true },
 		certified: false
@@ -45,8 +42,6 @@ describe('eth-transactions.services', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-
-		spyToastsError = vi.spyOn(toastsStore, 'toastsError');
 
 		ethAddressStore.set({ data: mockEthAddress, certified: false });
 		erc20UserTokensStore.setAll(mockErc20UserTokens);
@@ -95,22 +90,16 @@ describe('eth-transactions.services', () => {
 					standard: mockStandard
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
-					msg: { text: en.init.error.eth_address_unknown }
-				});
 				expect(result).toEqual({ success: false });
 			});
 
-			it('should raise an error if token is not enabled', async () => {
+			it('should return false if token is not enabled', async () => {
 				const result = await loadEthereumTransactions({
 					networkId: ETHEREUM_NETWORK_ID,
 					tokenId: USDT_TOKEN_ID,
 					standard: USDT_TOKEN.standard
 				});
 
-				expect(spyToastsError).toHaveBeenCalledWith({
-					msg: { text: en.transactions.error.no_token_loading_transaction }
-				});
 				expect(result).toEqual({ success: false });
 			});
 

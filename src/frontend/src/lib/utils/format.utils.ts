@@ -97,17 +97,23 @@ const DATE_TIME_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
 export const formatSecondsToDate = ({
 	seconds,
 	language,
-	formatOptions
+	formatOptions,
+	timeOnly = false
 }: {
 	seconds: number;
 	language?: Languages;
 	formatOptions?: Intl.DateTimeFormatOptions;
+	timeOnly?: boolean;
 }): string => {
 	const date = new Date(seconds * 1000);
-	return date.toLocaleDateString(
+	return date[timeOnly ? 'toLocaleTimeString' : 'toLocaleDateString'](
 		language ?? Languages.ENGLISH,
 		nonNullish(formatOptions)
-			? { ...DATE_TIME_FORMAT_OPTIONS, ...formatOptions }
+			? {
+					...DATE_TIME_FORMAT_OPTIONS,
+					...formatOptions,
+					...(timeOnly && { day: undefined, month: undefined, year: undefined })
+				}
 			: DATE_TIME_FORMAT_OPTIONS
 	);
 };

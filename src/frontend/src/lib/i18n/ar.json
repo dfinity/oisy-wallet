@@ -51,7 +51,8 @@
 			"switch_currency": "تبديل العملة"
 		},
 		"warning": {
-			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة"
+			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -113,6 +114,9 @@
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
+		},
+		"message": {
+			"refreshed_authentication": ""
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
@@ -225,7 +229,7 @@
 				"description": "OpenChat هو تطبيق دردشة كامل الميزات يعمل بالكامل من طرف إلى طرف على بلوكتشين Internet Computer.<br/><br/>يتم إدارة OpenChat من قبل مجتمعه كمنظمة مستقلة لامركزية (DAO) وله توكن خاص به يسمى CHAT. تُمنح توكنات CHAT كمكافآت للمستخدمين لتسريع النمو وإنشاء فريق من ملايين المؤيدين مما يسمح لـ OpenChat بأن يصبح منافسًا قويًا للمنافسين الكبار في مجال التكنولوجيا المركزية!",
 				"stats": "أكثر من 80,000 مستخدم",
 				"carousel": {
-					"text": "OpenChat - حيث يتواصل web3",
+					"text": "",
 					"call_to_action": "عرض المزيد"
 				}
 			},
@@ -319,11 +323,7 @@
 				"name": "Taggr",
 				"one_liner": "وسائل تواصل اجتماعي لامركزية - انشر، اكسب، امتلك.",
 				"call_to_action": "اذهب إلى Taggr",
-				"description": "Taggr هي منصة وسائط اجتماعية لامركزية بالكامل تعيش على شبكة حوسبة موزعة عامة مدعومة من Internet Computer. على عكس منصات الوسائط الاجتماعية التقليدية التي تسيطر عليها الشركات، فإن Taggr مملوكة ومحكومة بالكامل من قبل مستخدميها.",
-				"carousel": {
-					"text": "وسائل تواصل اجتماعي لامركزية - انشر، اكسب، امتلك.",
-					"call_to_action": "تعلم المزيد"
-				}
+				"description": "Taggr هي منصة وسائط اجتماعية لامركزية بالكامل تعيش على شبكة حوسبة موزعة عامة مدعومة من Internet Computer. على عكس منصات الوسائط الاجتماعية التقليدية التي تسيطر عليها الشركات، فإن Taggr مملوكة ومحكومة بالكامل من قبل مستخدميها."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +344,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -354,6 +358,7 @@
 			"upcoming_campaigns": "الحملات القادمة",
 			"active_date": "ينتهي في",
 			"ended_date": "انتهى في",
+			"upcoming_date": "",
 			"share": "شارك على X",
 			"learn_more": "تعلم المزيد",
 			"check_status": "تحقق من الحالة والأهلية",
@@ -531,7 +536,6 @@
 			"no_infura_erc1155_provider": "لا يوجد مزود Infura ERC1155 لشبكة $network",
 			"no_infura_erc20_icp_provider": "لا يوجد مزود Infura ERC20 ICP لشبكة $network",
 			"no_solana_network": "لا يوجد شبكة Solana لشبكة $network",
-			"eth_address_unknown": "عنوان ETH غير معروف.",
 			"loading_address": "خطأ أثناء تحميل عنوان $symbol.",
 			"loading_balance": "خطأ أثناء تحميل رصيد $symbol لشبكة $network.",
 			"erc20_contracts": "خطأ أثناء تحميل عقود ERC20.",
@@ -580,6 +584,7 @@
 	"settings": {
 		"text": {
 			"title": "الإعدادات",
+			"general": "",
 			"principal": "العنوان الاساسي الخاص بك",
 			"principal_copied": "تم نسخ العنوان الأساسي",
 			"principal_description": "معرفك لـ $oisy_name. تم إنشاؤه بواسطة هويتك على الإنترنت.",
@@ -984,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "استيراد التوكن",
+				"title_nft": "",
 				"review": "مراجعة",
 				"saving": "جاري الحفظ...",
 				"updating": "جاري تحديث قائمة التوكنات",
@@ -1018,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "إدارة التوكنات",
+				"title_nft": "",
 				"manage_list": "إدارة التوكنات",
 				"list_settings": "إعدادات القائمة",
 				"import_token": "استيراد توكن",
+				"import_nft": "",
 				"network": "الشبكة",
 				"all_tokens_zero_balance": "جميع التوكنات ذات رصيد صفري.",
 				"enable_more_assets": "تمكين المزيد من التوكنات"
@@ -1181,11 +1189,16 @@
 			"scan_qr": "مسح رمز QR",
 			"or_use_link": "أو استخدم رابط WalletConnect",
 			"proposer": "المقترح",
+			"spender": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
 			"methods": "الطرق",
 			"events": "الأحداث",
 			"message": "الرسالة",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "بيانات HEX",
 			"raw_copied": "تم نسخ بيانات المعاملة الخام إلى الحافظة.",
 			"sign_message": "توقيع الرسالة"
@@ -1313,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
-			"no_token_loading_transaction": "لم يتم العثور على التوكن. لا يمكن تحميل المعاملات.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
 			"get_transaction_for_hash": "فشل في الحصول على المعاملة من الرمز (hash: $hash) المقدم.",
@@ -1681,11 +1693,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "إرسال رسالة",
 			"send_message_input_placeholder": "ماذا تريد أن تفعل؟",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "جارٍ التفكير...",
 			"reset_chat_history": "",

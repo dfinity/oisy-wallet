@@ -96,13 +96,13 @@
 	);
 
 	const isEmptyList = $derived.by(() => {
-		const hasNoCollections = nftCollections.length === 0;
+		const hasOnlyEmptyCollections = nftCollections.filter((c) => c.nfts.length > 0).length === 0;
 		const hasCommonCollections = commonCollections.length > 0;
 		const hasVisibleSpamCollections = $showSpam && spamCollections.length > 0;
 		const hasVisibleHiddenCollections = $showHidden && hiddenCollections.length > 0;
 
 		return (
-			hasNoCollections ||
+			hasOnlyEmptyCollections ||
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});
@@ -114,6 +114,7 @@
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList
+				asMainSection
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -146,7 +147,12 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets}>
+		<NftList
+			asMainSection
+			nfts={commonNfts}
+			testId={NFT_LIST_COMMON}
+			title={$i18n.nfts.text.all_assets}
+		>
 			{#snippet nftListItem({ nft })}
 				<NftCard {nft} type="card-link" />
 			{/snippet}

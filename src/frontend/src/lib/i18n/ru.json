@@ -51,7 +51,8 @@
 			"switch_currency": "Сменить валюту"
 		},
 		"warning": {
-			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится"
+			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -113,6 +114,9 @@
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
+		},
+		"message": {
+			"refreshed_authentication": ""
 		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",
@@ -225,7 +229,7 @@
 				"description": "OpenChat - это полнофункциональное приложение для чата, работающее полностью на блокчейне Internet Computer.<br/><br/>OpenChat управляется своим сообществом как DAO и имеет собственный токен CHAT. Токены CHAT выдаются в качестве вознаграждения пользователям для ускорения роста и создания команды из миллионов сторонников, что позволяет OpenChat стать достойным конкурентом централизованным крупным технологическим компаниям!",
 				"stats": "80,000+ пользователей",
 				"carousel": {
-					"text": "OpenChat - где общается web3",
+					"text": "",
 					"call_to_action": "Показать больше"
 				}
 			},
@@ -319,11 +323,7 @@
 				"name": "Taggr",
 				"one_liner": "Децентрализованная социальная сеть - публикуй, зарабатывай, владей.",
 				"call_to_action": "Перейти в Taggr",
-				"description": "Taggr - это полностью децентрализованная социальная медиа-платформа, которая работает на общедоступной распределенной вычислительной сети, работающей на базе Internet Computer. В отличие от традиционных социальных медиа-платформ, контролируемых корпорациями, Taggr полностью принадлежит и управляется ее пользователями.",
-				"carousel": {
-					"text": "Децентрализованная социальная сеть - публикуй, зарабатывай, владей.",
-					"call_to_action": "Узнать больше"
-				}
+				"description": "Taggr - это полностью децентрализованная социальная медиа-платформа, которая работает на общедоступной распределенной вычислительной сети, работающей на базе Internet Computer. В отличие от традиционных социальных медиа-платформ, контролируемых корпорациями, Taggr полностью принадлежит и управляется ее пользователями."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +344,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -354,6 +358,7 @@
 			"upcoming_campaigns": "Предстоящие кампании",
 			"active_date": "Заканчивается",
 			"ended_date": "Закончилось",
+			"upcoming_date": "",
 			"share": "Поделиться в X",
 			"learn_more": "Узнать больше",
 			"check_status": "Проверить статус и право на участие",
@@ -531,7 +536,6 @@
 			"no_infura_erc1155_provider": "Нет поставщика Infura ERC1155 для сети $network",
 			"no_infura_erc20_icp_provider": "Нет поставщика Infura ERC20 ICP для сети $network",
 			"no_solana_network": "Нет сети Solana для сети $network",
-			"eth_address_unknown": "Адрес ETH неизвестен.",
 			"loading_address": "Ошибка при загрузке адреса $symbol.",
 			"loading_balance": "Ошибка при загрузке баланса $symbol для сети $network.",
 			"erc20_contracts": "Ошибка при загрузке контрактов ERC20.",
@@ -580,6 +584,7 @@
 	"settings": {
 		"text": {
 			"title": "Настройки",
+			"general": "",
 			"principal": "Ваш Принципал",
 			"principal_copied": "Принципал скопирован в буфер обмена",
 			"principal_description": "Ваш ID для $oisy_name. Создан вашей Internet Identity.",
@@ -984,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Импортировать токен",
+				"title_nft": "",
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
@@ -1018,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Управление токенами",
+				"title_nft": "",
 				"manage_list": "Управление токенами",
 				"list_settings": "Настройки списка",
 				"import_token": "Импортировать токен",
+				"import_nft": "",
 				"network": "Сеть",
 				"all_tokens_zero_balance": "Все токены имеют нулевой баланс.",
 				"enable_more_assets": "Включить больше активов"
@@ -1181,11 +1189,16 @@
 			"scan_qr": "Отсканировать QR-код",
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
+			"spender": "",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
 			"methods": "Методы",
 			"events": "События",
 			"message": "Сообщение",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEX-данные",
 			"raw_copied": "Необработанные данные транзакции скопированы в буфер обмена.",
 			"sign_message": "Подписать сообщение"
@@ -1313,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Ошибка при загрузке транзакций.",
 			"loading_transactions_symbol": "Ошибка при загрузке транзакций $symbol.",
-			"no_token_loading_transaction": "Токен не найден. Транзакции не могут быть загружены.",
 			"uncertified_transactions_removed": "Были идентифицированы несколько несертифицированных транзакций, которые впоследствии были удалены из отображаемых списков.",
 			"loading_pending_ck_ethereum_transactions": "Что-то пошло не так при получении ожидающих транзакций $network.",
 			"get_transaction_for_hash": "Не удалось получить транзакцию по предоставленному хешу ($hash).",
@@ -1681,11 +1693,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "",
 			"send_message_input_placeholder": "",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "",
 			"loading": "",
 			"reset_chat_history": "",

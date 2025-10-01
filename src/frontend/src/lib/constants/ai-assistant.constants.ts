@@ -12,8 +12,8 @@ export const getAiAssistantSystemPrompt = ({
 	availableContacts: string;
 }) =>
 	`GENERAL:
-	- You are OISY Wallet, the world’s first fully on-chain digital asset wallet, consolidating chains, identities, and primitives into a single immutable DeFi terminal.
-	- Powered by ICP’s Chain Fusion technology, OISY delivers security, transparency, and scalability by default.
+	- You are OISY Wallet, the world's first fully on-chain digital asset wallet, consolidating chains, identities, and primitives into a single immutable DeFi terminal.
+	- Powered by ICP's Chain Fusion technology, OISY delivers security, transparency, and scalability by default.
 	- You support BTC, ETH, SOL, ICP, Polygon, Arbitrum, BNB Chain & Base without bridges.
 	- Core Identity: Browser-based wallet requiring no downloads. Uses network custody - private keys distributed across ICP nodes via threshold ECDSA, never controlled by a single entity.
 	
@@ -30,7 +30,8 @@ export const getAiAssistantSystemPrompt = ({
 			1. First, always extract a numeric string into "amountNumber". It must contain only a number (e.g., "10", "0.5").
 			2. Then, always check if the token string matches one of the AVAILABLE TOKENS exactly before assigning it to "tokenSymbol".
 			3. If the token is not in AVAILABLE TOKENS, do not proceed further.
-		- If the user wants to send tokens to a contact, find all addresses of that contact whose addressType matches the token’s networkId:
+		- If the user wants to send tokens to a contact, find all addresses of that contact whose addressType matches the token's networkId and whose acceptedTokenStandards includes the token's standard.
+		- Only when both addressType matches with token's networkId and acceptedTokenStandards includes token's standard:
 			- If there is exactly one matching address, use it as selectedContactAddressId.
 			- If there are multiple matching addresses, call the show_filtered_contacts tool with the addressIds of all matching addresses, then wait for the user to select one before proceeding.	
 		- Only call when all 4 arguments "amountNumber" (string), "tokenSymbol" (string), "networkId" (string), and either "selectedContactAddressId" (string) or "address" (string) are provided.
@@ -44,10 +45,20 @@ export const getAiAssistantSystemPrompt = ({
 
 	- For 'show_filtered_contacts':
 		- Call only when filters are given (e.g. "Show me my ETH contacts") or when resolving a contact name together with a known token.
-		- Return only "addressIds" (addresses[].id) from the user’s contacts. If no matches, return [].
+		- Return only "addressIds" (addresses[].id) from the user's contacts. If no matches, do not call any tools and tell to user that not suitable contacts were found with the given filters.
 
+	- For 'show_balance':
+		- If the user asks for their total balance, call with no arguments (e.g. "Show me my balance").  
+		- If the user asks for balance of a specific token, provide only "tokenSymbol" (e.g. "Show me my balance of USDC token").    
+		- If the user asks for balance of a specific network, provide only "networkId" (e.g. "Show me my balance of Base network").    
+		- If the user asks for balance of a token on a specific network, provide both "tokenSymbol" and "networkId" (e.g. "Show me my balance of USDC token on ETH network").
+		- Token must be one of the AVAILABLE TOKENS.
+		- Network must be one of the AVAILABLE TOKENS.
+		- Never request tokenSymbol or networkId from the user unless they explicitly mentioned them; default to total balance instead.  
+  
 	MEMORY & CHAINING BEHAVIOR:
 	- Always remember values from earlier in the conversation (address, selectedContactAddressId, amountNumber, tokenSymbol, networkId) until the send action is complete.
+	- Token's network id and standard are 2 different things: network id can only be used for the "Network ID → addressType" mapping, standard - for validating if a contact address can be used for sending the token ("acceptedTokenStandards" list).
 	- If user confirms a contact/address after calling show_all_contacts or show_filtered_contacts tool, that "selectedContactAddressId" will be used for "review_send_tokens" tool after all other arguments are provided by the user.
 	
 	Network ID → addressType mapping:
@@ -118,7 +129,7 @@ export const getAiAssistantToolsDescription = ({
 			function: {
 				name: 'show_filtered_contacts',
 				description: toNullable(
-					'Filter the provided contacts list by semantic meaning and return only matching addressIds. Always return only { "addressIds": [...] }. If no matches, return an empty array. Never include any other fields.'
+					'Filter the provided contacts list by semantic meaning and return only matching addressIds. If no matches, do not call any tools and tell to user that not suitable contacts were found with the given filters.'
 				),
 				parameters: toNullable({
 					type: 'object',
@@ -148,7 +159,7 @@ export const getAiAssistantToolsDescription = ({
 							name: 'selectedContactAddressId',
 							enum: toNullable(),
 							description: toNullable(
-								'Unique ID of the specific blockchain address from a contact (addresses[].id).'
+								`Unique ID of the specific blockchain address from a contact (addresses[].id). Must match one of the token's "matchingAddressTypes".`
 							)
 						},
 						{
@@ -185,6 +196,36 @@ export const getAiAssistantToolsDescription = ({
 						}
 					]),
 					required: toNullable(['amountNumber', 'tokenSymbol', 'networkId'])
+				})
+			}
+		},
+		{
+			function: {
+				name: 'show_balance',
+				description: toNullable(
+					`Show user's wallet balance with a possibility to filter by token, network or both at the same time.`
+				),
+				parameters: toNullable({
+					type: 'object',
+					properties: toNullable([
+						{
+							type: 'string',
+							name: 'tokenSymbol',
+							enum: toNullable(enabledTokensSymbols),
+							description: toNullable(
+								"Token symbol or identifier for which the balance should be shown. Example: 'ICP', 'BTC', 'ckUSDC'. Must be one of the AVAILABLE TOKENS."
+							)
+						},
+						{
+							type: 'string',
+							name: 'networkId',
+							enum: toNullable(enabledNetworksSymbols),
+							description: toNullable(
+								'The blockchain network for which the balance should be shown (e.g., ETH, BASE, ARB, ICP, SOL, BTC). Optional argument, no need to ask user to provide it specifically. Must come from AVAILABLE TOKENS.'
+							)
+						}
+					]),
+					required: toNullable()
 				})
 			}
 		}

@@ -50,7 +50,7 @@ interface I18nCore {
 		switch_language: string;
 		switch_currency: string;
 	};
-	warning: { do_not_close: string };
+	warning: { do_not_close: string; standalone_mode: string };
 }
 
 interface I18nNavigation {
@@ -110,6 +110,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
+	message: { refreshed_authentication: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -248,17 +249,17 @@ interface I18nDapps {
 		raydium: { name: string; one_liner: string; call_to_action: string; description: string };
 		jupiter: { name: string; one_liner: string; call_to_action: string; description: string };
 		waterneuron: { name: string; one_liner: string; description: string };
-		taggr: {
+		taggr: { name: string; one_liner: string; call_to_action: string; description: string };
+		toolkit: { name: string; one_liner: string; description: string };
+		altitudefi: { name: string; one_liner: string; description: string };
+		usdai: { name: string; one_liner: string; description: string };
+		caffeine: {
 			name: string;
 			one_liner: string;
 			call_to_action: string;
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
-		toolkit: { name: string; one_liner: string; description: string };
-		altitudefi: { name: string; one_liner: string; description: string };
-		usdai: { name: string; one_liner: string; description: string };
-		caffeine: { name: string; one_liner: string; call_to_action: string; description: string };
 	};
 }
 
@@ -268,6 +269,7 @@ interface I18nRewards {
 		upcoming_campaigns: string;
 		active_date: string;
 		ended_date: string;
+		upcoming_date: string;
 		share: string;
 		learn_more: string;
 		check_status: string;
@@ -385,7 +387,6 @@ interface I18nInit {
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
-		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
 		erc20_contracts: string;
@@ -434,6 +435,7 @@ interface I18nHero {
 interface I18nSettings {
 	text: {
 		title: string;
+		general: string;
 		principal: string;
 		principal_copied: string;
 		principal_description: string;
@@ -818,6 +820,7 @@ interface I18nTokens {
 	import: {
 		text: {
 			title: string;
+			title_nft: string;
 			review: string;
 			saving: string;
 			updating: string;
@@ -850,9 +853,11 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
+			title_nft: string;
 			manage_list: string;
 			list_settings: string;
 			import_token: string;
+			import_nft: string;
 			network: string;
 			all_tokens_zero_balance: string;
 			enable_more_assets: string;
@@ -991,11 +996,16 @@ interface I18nWallet_connect {
 		scan_qr: string;
 		or_use_link: string;
 		proposer: string;
+		spender: string;
 		review: string;
 		method: string;
 		methods: string;
 		events: string;
 		message: string;
+		expiration: string;
+		token: string;
+		network: string;
+		amount: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
@@ -1120,7 +1130,6 @@ interface I18nTransactions {
 	error: {
 		loading_transactions: string;
 		loading_transactions_symbol: string;
-		no_token_loading_transaction: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;
 		get_transaction_for_hash: string;
@@ -1372,11 +1381,18 @@ interface I18nAi_assistant {
 		action_button_send_tokens_title: string;
 		action_button_send_tokens_subtitle: string;
 		action_button_send_tokens_prompt: string;
+		action_button_show_balance_title: string;
+		action_button_show_balance_subtitle: string;
+		action_button_show_balance_prompt: string;
 		select_contact_message: string;
 		send_to_message: string;
 		send_message: string;
 		send_message_input_placeholder: string;
+		send_token_on_network_message: string;
+		send_token_message: string;
+		send_on_network_message: string;
 		send_token_succeeded: string;
+		show_total_balance_tool_card_title: string;
 		no_contacts_found_message: string;
 		loading: string;
 		reset_chat_history: string;

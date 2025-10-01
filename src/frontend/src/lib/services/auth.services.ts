@@ -1,3 +1,4 @@
+import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	clearIdbBtcAddressMainnet,
 	clearIdbEthAddress,
@@ -39,8 +40,10 @@ import { i18n } from '$lib/stores/i18n.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
+import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
+import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
@@ -58,7 +61,7 @@ export const signIn = async (
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
 		});
 
-		// We clean previous messages in case user was signed out automatically before sign-in again.
+		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
 
 		return { success: 'ok' };
@@ -232,6 +235,17 @@ const clearSessionStorage = async () => {
 	sessionStorage.clear();
 };
 
+const disconnectWalletConnect = async () => {
+	emit({ message: 'oisyDisconnectWalletConnect' });
+
+	// Wait until WalletConnect is not connected or until a certain max number of attempts is made.
+	let count = 0;
+	while (get(walletConnectPaired) && count < 10) {
+		await randomWait({ min: 1000, max: 1000 });
+		count++;
+	}
+};
+
 const logout = async ({
 	msg = undefined,
 	clearCurrentPrincipalStorages = true,
@@ -245,6 +259,8 @@ const logout = async ({
 }) => {
 	// To mask not operational UI (a side effect of sometimes slow JS loading after window.reload because of service worker and no cache).
 	busy.start();
+
+	await disconnectWalletConnect();
 
 	if (clearCurrentPrincipalStorages) {
 		await Promise.all(deleteIdbStoreList.map(emptyPrincipalIdbStore));
@@ -296,7 +312,7 @@ const appendMsgToUrl = (msg: ToastMsg) => {
 };
 
 /**
- * If the url contains a msg that has been provided on logout, display it as a toast message. Cleanup url afterwards - we don't want the user to see the message again if reloads the browser
+ * If the url contains a msg that has been provided on logout, display it as a toast message. Clean up the url afterwards - we don't want the user to see the message again if reloads the browser
  */
 export const displayAndCleanLogoutMsg = () => {
 	const urlParams: URLSearchParams = new URLSearchParams(window.location.search);

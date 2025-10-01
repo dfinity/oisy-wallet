@@ -42,6 +42,8 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
+		fee?: bigint;
+		approveSpender?: string;
 	}
 
 	const {
@@ -56,15 +58,29 @@
 		from,
 		tokenId,
 		children,
-		onClick
+		onClick,
+		fee,
+		approveSpender
 	}: Props = $props();
+
+	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
+
+	const amountWithFee = $derived(
+		nonNullish(cardAmount) && nonNullish(fee) && !incoming ? cardAmount + fee : cardAmount
+	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
 	const contactAddress: string | undefined = $derived(
-		type === 'send' ? to : type === 'receive' ? from : undefined
+		type === 'send'
+			? to
+			: type === 'receive'
+				? from
+				: type === 'approve'
+					? approveSpender
+					: undefined
 	);
 
 	const contact: ContactUi | undefined = $derived(
@@ -127,12 +143,12 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount) && !isTokenErc721(token)}
+				{#if nonNullish(amountWithFee) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={cardAmount}
+							amount={amountWithFee}
 							decimals={token.decimals}
 							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}
@@ -150,7 +166,8 @@
 								hour: '2-digit',
 								minute: '2-digit',
 								hour12: false
-							}
+							},
+							timeOnly: true
 						})}
 					</span>
 				{/if}

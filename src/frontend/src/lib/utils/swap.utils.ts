@@ -29,11 +29,11 @@ import {
 	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { DeltaPrice, OptimalRate } from '@velora-dex/sdk';
-import { formatToken } from './format.utils';
-import { isNullishOrEmpty } from './input.utils';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0

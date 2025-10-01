@@ -3,6 +3,8 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
 import type { Token } from '$lib/types/token';
 import ModalTokensListHost from '$tests/lib/components/tokens/ModalTokensListTestHost.svelte';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 // Test IDs
@@ -147,5 +149,26 @@ describe('ModalTokensList', () => {
 
 			expect(handler).toHaveBeenCalledOnce();
 		}
+	});
+
+	it('should only render Nfts if filterNfts is true', () => {
+		const { container, getByTestId } = render(ModalTokensListHost, {
+			props: {
+				tokens: [
+					...mockTokens,
+					{ ...mockValidErc1155Token, symbol: 'ERC1155' },
+					{ ...mockValidErc721Token, symbol: 'ERC721' }
+				],
+				renderNoResults: false,
+				filterNfts: true
+			}
+		});
+
+		const items = container.querySelectorAll('ul>li');
+
+		expect(items).toHaveLength(2);
+
+		expect(getByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ERC1155`)).toBeInTheDocument();
+		expect(getByTestId(`${MODAL_TOKEN_LIST_ITEM_PREFIX}ERC721`)).toBeInTheDocument();
 	});
 });

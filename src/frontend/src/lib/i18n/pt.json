@@ -51,7 +51,8 @@
 			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
-			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
+			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -113,6 +114,9 @@
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
+		},
+		"message": {
+			"refreshed_authentication": ""
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
@@ -225,7 +229,7 @@
 				"description": "O OpenChat é uma aplicação de chat completa, que funciona de ponta a ponta na blockchain Internet Computer. <br/><br/>O OpenChat é governado pela sua comunidade através de um DAO e tem o seu próprio token CHAT. Os tokens CHAT são dados como recompensa aos utilizadores para impulsionar crescimento e criar uma equipa de milhões de defensores da descentralização, permitindo que o OpenChat se torne um concorrente viável para os grandes concorrentes de tecnologias centralizadas!",
 				"stats": "80,000+ utilizadores",
 				"carousel": {
-					"text": "OpenChat – Onde a web3 comunica",
+					"text": "",
 					"call_to_action": "Mostrar mais"
 				}
 			},
@@ -319,11 +323,7 @@
 				"name": "Taggr",
 				"one_liner": "Redes sociais descentralizadas: publique, ganhe, possua.",
 				"call_to_action": "Viajar até ao Taggr",
-				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores.",
-				"carousel": {
-					"text": "Mídias social descentralizada - publique, ganhe, possua.",
-					"call_to_action": "Aprender mais"
-				}
+				"description": "Taggr é uma plataforma de mídia social totalmente descentralizada que reside em uma rede pública de computação distribuída alimentada pelo Internet Computer. Ao contrário das plataformas de mídia social tradicionais controladas por corporações, o Taggr é de propriedade e governado inteiramente pelos seus utilizadores."
 			},
 			"toolkit": {
 				"name": "Toolkit",
@@ -344,7 +344,11 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
-				"description": ""
+				"description": "",
+				"carousel": {
+					"text": "",
+					"call_to_action": ""
+				}
 			}
 		}
 	},
@@ -354,6 +358,7 @@
 			"upcoming_campaigns": "Próximas campanhas",
 			"active_date": "Termina em",
 			"ended_date": "Terminou em",
+			"upcoming_date": "",
 			"share": "Partilhar no X",
 			"learn_more": "Saiba mais",
 			"check_status": "Verificar Status e Elegibilidade",
@@ -362,18 +367,18 @@
 			"activity_button_text": "Verificar Atividade Recente",
 			"activity_button_text_short": "Verificar atividade",
 			"open_wallet": "Leve-me para a carteira",
-			"carousel_slide_title": "$oisy_short Sprinkles estão agora ativas!",
+			"carousel_slide_title": "$oisy_short Sprinkles episódio 5 agora ativas!",
 			"carousel_slide_cta": "Saiba mais",
 			"sprinkles_earned": "Você ganhou $noOfSprinkles sprinkles, totalizando $amount! ?",
 			"youre_eligible": "Você é elegível!",
-			"not_eligible": "",
+			"not_eligible": "Não elegível",
 			"ongoing": "Em andamento",
 			"ended": "Finalizado ($amount)",
 			"banner_text": "Ganhe recompensas diárias com OISY Sprinkles"
 		},
 		"requirements": {
 			"requirements_title": "Critérios de elegibilidade",
-			"network_bonus_info": "",
+			"network_bonus_info": "Cada rede na qual você mantém ativos lhe dá um multiplicador de recompensas. Quanto mais redes você usar, mais recompensas você receberá!",
 			"min_logins": "Login $loginsx vezes nos últimos $days dias",
 			"min_transactions": "Terá que ter completo mínimo de $transactions transações nos últimos $days dias",
 			"min_total_assets_usd": "Mantenha $$usd em tokens no momento da emissão",
@@ -381,7 +386,7 @@
 		},
 		"alt": {
 			"upcoming_campaigns": "Fique de olho nos próximos lançamentos de tokens! <a href=\"https://x.com/oisy\" target=\"_blank\">Siga-nos no X</a>, junte-se ao nosso <a href=\"https://www.reddit.com/r/OISY/\" target=\"_blank\">Reddit</a>, ou entre no nosso <a href=\"https://discord.com/invite/ejBT7dQneK\" target=\"_blank\">Discord</a> para ficar por dentro das últimas novidades.",
-			"coming_soon": "O episódio 4 de $oisy_short está chegando",
+			"coming_soon": "O episódio 6 de $oisy_short está chegando",
 			"reward_banner": "Banner da campanha $campaignName"
 		},
 		"campaigns": {
@@ -446,31 +451,31 @@
 				}
 			},
 			"sprinkles_s1e5": {
-				"title": "",
-				"card_title": "",
-				"one_liner": "",
-				"participate_title": "",
-				"description": "",
+				"title": "OISY Sprinkles",
+				"card_title": "OISY Sprinkles: Episódio 5 está no ar 🎉",
+				"one_liner": "Ganhe Sprinkles por ser ativo, indicar outras pessoas e usar o OISY em diferentes redes. Suas ações aumentam suas recompensas, e indicações ativas as impulsionam ainda mais.<br/>Além disso, agora mais redes significam mais chances de ganhar.",
+				"participate_title": "Ganhe tokens por atividades e indicações. Mais cadeias significam mais chances.",
+				"description": "Permaneça ativo por mais de 10 dias para se qualificar: faça login com frequência, conclua ações da carteira e mantenha pelo menos US$ 20.<br/>Cada cadeia ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% de amigos que se qualificarem e fique entre os 3 primeiros para ganhar um Super Sprinkle de US$ 200.",
 				"campaign_href": "",
 				"win": {
 					"default": {
-						"title": "",
-						"description": "",
+						"title": "Você foi recompensado",
+						"description": "As suas recompensas acabaram de chegar à sua carteira<br>Não se esqueça de indicar amigos e manter-se ativo para ganhar ainda mais",
 						"share_href": ""
 					},
 					"jackpot": {
-						"title": "",
-						"description": "",
+						"title": "Você ganhou o bônus semanal",
+						"description": "Você acabou de ganhar um de nossos bônus semanais.<br>Mantenha-se ativo e continue indicando para ganhar mais.",
 						"share_href": ""
 					},
 					"leaderboard": {
-						"title": "",
-						"description": "",
+						"title": "Você chegou ao topo da tabela de classificação",
+						"description": "Você ficou entre os 4 melhores indicadores desta temporada<br>$200 foram adicionados à sua carteira",
 						"share_href": ""
 					},
 					"referral": {
-						"title": "",
-						"description": "",
+						"title": "Aqui está um pequeno agradecimento",
+						"description": "Um dos seus utilizadores indicados acabou de ganhar alguns sprinkles.",
 						"share_href": ""
 					}
 				}
@@ -531,7 +536,6 @@
 			"no_infura_erc1155_provider": "Nenhum provedor Infura ERC1155 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
-			"eth_address_unknown": "Endereço ETH desconhecido.",
 			"loading_address": "Erro ao carregar o endereço $symbol.",
 			"loading_balance": "Erro ao carregar o saldo $symbol para a rede $network.",
 			"erc20_contracts": "Erro ao carregar os contratos ERC20.",
@@ -580,6 +584,7 @@
 	"settings": {
 		"text": {
 			"title": "Configurações",
+			"general": "",
 			"principal": "Seu Principal",
 			"principal_copied": "Principal copiado para a área de transferência",
 			"principal_description": "Seu ID para $oisy_name. Criado pela sua Internet Identity.",
@@ -984,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importar token",
+				"title_nft": "",
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
@@ -1018,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Gerir tokens",
+				"title_nft": "",
 				"manage_list": "Gerir tokens",
 				"list_settings": "Configurações da lista",
 				"import_token": "Importar token",
+				"import_nft": "",
 				"network": "Rede",
 				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
 				"enable_more_assets": "Habilitar mais tokens"
@@ -1181,11 +1189,16 @@
 			"scan_qr": "Fazer scan de QR code",
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
+			"spender": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
 			"methods": "Métodos",
 			"events": "Eventos",
 			"message": "Mensagem",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dados HEX",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem"
@@ -1313,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Erro ao carregar as transações.",
 			"loading_transactions_symbol": "Erro ao carregar as transações $symbol.",
-			"no_token_loading_transaction": "Token não encontrado. Transações não podem ser carregadas.",
 			"uncertified_transactions_removed": "Várias transações não certificadas foram identificadas e subsequentemente removidas das listas exibidas.",
 			"loading_pending_ck_ethereum_transactions": "Algo deu errado ao buscar as transações pendentes de $network.",
 			"get_transaction_for_hash": "Falha ao obter a transação a partir do hash fornecido ($hash).",
@@ -1681,11 +1693,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Enviar mensagem",
 			"send_message_input_placeholder": "O que você quer fazer?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Desculpe, não consegui encontrar nenhum contato adequado na sua lista de contatos.",
 			"loading": "A pensar...",
 			"reset_chat_history": "",

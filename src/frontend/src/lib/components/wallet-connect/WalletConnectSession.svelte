@@ -26,7 +26,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { loading } from '$lib/stores/loader.store';
+	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
@@ -146,7 +146,7 @@
 	const goToFirstStep = () => modal?.set?.(0);
 
 	// One try to manually sign in by entering the URL manually or scanning a QR code
-	const userConnect = async ({ detail: uri }: CustomEvent<string>) => {
+	const userConnect = async (uri: string) => {
 		if (isNullish(modal)) {
 			return;
 		}
@@ -167,7 +167,7 @@
 		}
 
 		// We are still loading ETH address and other data. Boot screen load.
-		if ($loading) {
+		if ($initialLoading) {
 			return;
 		}
 
@@ -197,7 +197,7 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $walletConnectUri, $loading];
+		[$ethAddress, $solAddressMainnet, $walletConnectUri, $initialLoading];
 
 		untrack(() => uriConnect());
 	});
@@ -413,7 +413,7 @@
 			return;
 		}
 
-		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+		if ($initialLoading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
 			reconnecting = false;
 
 			return;
@@ -451,7 +451,7 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $loading];
+		[$ethAddress, $solAddressMainnet, $initialLoading];
 
 		untrack(() => reconnect());
 	});
@@ -466,6 +466,8 @@
 		});
 	};
 </script>
+
+<svelte:window onoisyDisconnectWalletConnect={disconnect} />
 
 {#if nonNullish(listener)}
 	<WalletConnectButton onclick={disconnect}>
@@ -494,7 +496,7 @@
 		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
 			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
 		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
-			<WalletConnectForm on:icConnect={userConnect} />
+			<WalletConnectForm onConnect={userConnect} />
 		{/if}
 	</WizardModal>
 {/if}

@@ -4,7 +4,7 @@ import {
 	PostMessageDataResponseSchema
 } from '$lib/schema/post-message.schema';
 import type { CertifiedData } from '$lib/types/store';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 const BtcPostMessageWalletDataSchema = z.object({
 	balance: z.custom<CertifiedData<BtcWalletBalance | null>>(),

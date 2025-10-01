@@ -3,7 +3,7 @@ import type { NetworkBuy } from '$lib/types/network';
 import type { OnramperNetworkId } from '$lib/types/onramper';
 import type { AtLeastOne } from '$lib/types/utils';
 import { UrlSchema } from '$lib/validation/url.validation';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 
@@ -44,9 +44,7 @@ export const NetworkSchema = z.object({
 	id: NetworkIdSchema,
 	env: NetworkEnvironmentSchema,
 	name: z.string(),
-	iconLight: IconSchema.optional(),
-	iconDark: IconSchema.optional(),
-	iconTransparent: IconSchema.optional(),
+	icon: IconSchema.optional(),
 	exchange: NetworkExchangeSchema.optional(),
 	buy: z.custom<AtLeastOne<NetworkBuy>>().optional()
 });
