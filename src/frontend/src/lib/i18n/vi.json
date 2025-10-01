@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Phi tập trung",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
-			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
-			"advanced_cryptography": "100% onchain: yên tâm với công nghê bảo mật hàng đầu"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"

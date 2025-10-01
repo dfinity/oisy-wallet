@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Decentralizzato",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
-			"instant_and_private": "Accesso istantaneo e privato ovunque",
-			"advanced_cryptography": "100% onchain: tranquillità grazie alla crittografia avanzata"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"

@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Zdecentralizowany",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "Wyloguj",
 			"lock": "Zablokuj",
 			"authenticate": "Otwórz lub Utwórz",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP i więcej",
-			"instant_and_private": "Natychmiastowy i prywatny dostęp w dowolnym miejscu",
-			"advanced_cryptography": "100% na łańcuchu: spokój ducha dzięki zaawansowanej kryptografii"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"

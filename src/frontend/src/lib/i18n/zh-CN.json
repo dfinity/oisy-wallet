@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% 去中心化",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"asset_types": "比特币、Solana、以太坊、ICP 等",
-			"instant_and_private": "随时随地实现即时且私密的访问",
-			"advanced_cryptography": "100% 上链：通过先进加密技术确保安心使用"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"

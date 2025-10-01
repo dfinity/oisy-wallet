@@ -102,14 +102,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% विकेन्द्रीकृत",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
-			"asset_types": "बिटकॉइन, सोलाना, एथेरियम, ICP, और बहुत कुछ",
-			"instant_and_private": "कहीं भी तत्काल और निजी पहुँच",
-			"advanced_cryptography": "100% ऑनचेन: उन्नत क्रिप्टोग्राफी के माध्यम से मन की शांति"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
