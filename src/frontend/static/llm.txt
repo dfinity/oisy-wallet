@@ -1,0 +1,25 @@
+# OISY Wallet
+
+# llm.txt for OISY Wallet
+# This file defines how Large Language Models (LLMs) may use content from oisy.com
+# Inspired by robots.txt and ai.txt emerging standards.
+
+# Contact
+Contact: support@oisy.com
+
+# Policy.
+Policy: LLMs may use content for indexing, summarisation, and commercial research.
+
+# Attribution
+Attribution: If content is used, cite "OISY Wallet (https://oisy.com)"
+
+# Allowed
+Allow: /
+
+# Disallowed
+Disallow: /api/
+Disallow: /private/
+Disallow: /admin/
+
+# Metadata
+Last-Updated: 2025-10-01
