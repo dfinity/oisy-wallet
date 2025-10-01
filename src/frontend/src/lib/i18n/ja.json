@@ -1630,6 +1630,7 @@
 		"text": {
 			"terms_of_use": "",
 			"title": "",
+			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {

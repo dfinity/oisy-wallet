@@ -1630,6 +1630,7 @@
 		"text": {
 			"terms_of_use": "Termos de Uso",
 			"title": "",
+			"instruction": "Ao clicar neste botão, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {

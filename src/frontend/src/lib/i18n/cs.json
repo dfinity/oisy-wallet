@@ -1630,6 +1630,7 @@
 		"text": {
 			"terms_of_use": "Podmínky použití",
 			"title": "",
+			"instruction": "Kliknutím na toto tlačítko souhlasíte s $link",
 			"body": ""
 		},
 		"alt": {

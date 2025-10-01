@@ -105,7 +105,7 @@ export const initLoader = async ({
 }: {
 	identity: OptionIdentity;
 	validateAddresses: () => void;
-	progressAndLoad: () => Promise<void>;
+	progressAndLoad: () => void;
 	setProgressModal: (value: boolean) => void;
 }): Promise<void> => {
 	if (isNullish(identity)) {
@@ -134,7 +134,7 @@ export const initLoader = async ({
 	if (addressIdbSuccess) {
 		initialLoading.set(false);
 
-		await progressAndLoad();
+		progressAndLoad();
 
 		validateAddresses();
 

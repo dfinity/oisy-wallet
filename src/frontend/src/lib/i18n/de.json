@@ -1630,6 +1630,7 @@
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
 			"title": "",
+			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
 			"body": ""
 		},
 		"alt": {
