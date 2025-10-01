@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount, type Snippet } from 'svelte';
+	import { type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
