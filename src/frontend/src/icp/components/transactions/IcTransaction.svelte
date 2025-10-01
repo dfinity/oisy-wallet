@@ -3,7 +3,7 @@
 	import IcTransactionLabel from '$icp/components/transactions/IcTransactionLabel.svelte';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import Transaction from '$lib/components/transactions/Transaction.svelte';
-	import { NANO_SECONDS_IN_SECOND, ZERO } from '$lib/constants/app.constants';
+	import { NANO_SECONDS_IN_SECOND } from '$lib/constants/app.constants';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus } from '$lib/types/transaction';
