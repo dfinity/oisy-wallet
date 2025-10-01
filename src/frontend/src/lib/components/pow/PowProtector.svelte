@@ -9,6 +9,7 @@
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { powProtectorSteps } from '$lib/config/pow.config';
 	import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
+	import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { handleInsufficientCycles } from '$lib/services/loader.services';
@@ -158,7 +159,7 @@
 		- Maximum retry attempts reached (user gets signed out)
 	-->
 	<div class="insufficient-cycles-modal">
-		<Modal testId="pow-protector-modal">
+		<Modal testId={POW_PROTECTOR_MODAL}>
 			<div class="stretch">
 				<div class="banner-container mb-8 block">
 					{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
