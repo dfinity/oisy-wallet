@@ -65,8 +65,14 @@
 
 	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
 
-	const amountWithFee = $derived(
-		nonNullish(cardAmount) && nonNullish(fee) && !incoming ? cardAmount + fee : cardAmount
+	const displayAmount = $derived(
+		nonNullish(cardAmount) && nonNullish(fee)
+			? type === 'approve'
+				? fee * -1n
+				: !incoming
+					? cardAmount + fee * -1n
+					: cardAmount
+			: undefined
 	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
@@ -109,9 +115,21 @@
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
 				{#if nonNullish(contact)}
-					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
+					{type === 'send'
+						? $i18n.transaction.type.send
+						: type === 'approve'
+							? $i18n.transaction.type.approve
+							: $i18n.transaction.type.receive}
 				{:else}
 					{@render children?.()}
+				{/if}
+				{#if type === 'approve' && nonNullish(cardAmount)}
+					<Amount
+						amount={cardAmount}
+						decimals={token.decimals}
+						formatPositiveAmount
+						symbol={getTokenDisplaySymbol(token)}
+					/>
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
@@ -143,12 +161,12 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(amountWithFee) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={amountWithFee}
+							amount={displayAmount}
 							decimals={token.decimals}
 							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}
@@ -182,6 +200,8 @@
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
 						{:else if type === 'receive'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{:else if type === 'approve'}
+							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
 						{#if nonNullish(contact)}

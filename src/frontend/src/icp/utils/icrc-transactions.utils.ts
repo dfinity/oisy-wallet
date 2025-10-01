@@ -1,3 +1,4 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import type {
 	IcTransactionType,
 	IcTransactionUi,
@@ -147,6 +148,9 @@ export const mapIcrcTransaction = ({
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),
+		...(nonNullish(approveSpender) && {
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
+		}),
 		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
 	};
 };

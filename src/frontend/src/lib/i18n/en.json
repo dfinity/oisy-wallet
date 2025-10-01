@@ -1267,7 +1267,9 @@
 			"block": "Block",
 			"interacted_with": "Interacted With (To)",
 			"status": "Status",
-			"confirmations": "Confirmations"
+			"confirmations": "Confirmations",
+            "for": "For",
+            "expiration": "Expiration"
 		},
 		"status": {
 			"confirmed": "Confirmed",

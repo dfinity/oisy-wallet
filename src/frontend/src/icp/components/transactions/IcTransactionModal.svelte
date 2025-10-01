@@ -36,7 +36,9 @@
 		fromExplorerUrl,
 		toExplorerUrl,
 		fee,
-		incoming
+		incoming,
+		approveSpender,
+		approveExpiresAt
 	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -77,14 +79,15 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}
-				type={type === 'receive' ? 'receive' : 'send'}
+				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
+				{approveSpender}
 			/>
 		{/if}
 
@@ -136,6 +139,17 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+			{#if nonNullish(approveExpiresAt)}
+				<ListItem>
+					<span>{$i18n.transaction?.text?.expiration}</span>
+					<output>
+						{formatNanosecondsToDate({
+							nanoseconds: approveExpiresAt,
+							language: $currentLanguage
+						})}
 					</output>
 				</ListItem>
 			{/if}

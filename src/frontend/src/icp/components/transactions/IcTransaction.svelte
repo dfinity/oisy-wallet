@@ -32,15 +32,7 @@
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount = $derived(
-		type === 'approve'
-			? (fee ?? ZERO) * -1n
-			: nonNullish(value)
-				? incoming
-					? value
-					: (value + (fee ?? ZERO)) * -1n
-				: value
-	);
+	let amount = $derived(nonNullish(value) ? (incoming ? value : value * -1n) : value);
 
 	let timestamp = $derived(
 		nonNullish(timestampNanoseconds)
@@ -63,6 +55,7 @@
 	{to}
 	{token}
 	{type}
+	{fee}
 >
 	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
 </Transaction>
