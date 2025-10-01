@@ -7,11 +7,13 @@
 	let visible = $state(true);
 
 	const close = () => (visible = false);
+
+	let warning = $derived(visible);
 </script>
 
 {#if visible}
 	<WarningBanner testId={AGREEMENTS_WARNING_BANNER}>
-		<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
+		<span class="w-full px-2">{warning}</span>
 		<button aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose />
 		</button>
