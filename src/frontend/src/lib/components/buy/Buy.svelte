@@ -9,26 +9,25 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	const modalId = Symbol();
+	
+</script>
 
-	$effect(() => {
+<BuyButton
+	onclick={() => {
+		// trackEvent({
+		// 	name: TRACK_BUY_TOKEN,
+		// 	metadata: {
+		// 		source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
+		// 		token: nonNullish($pageToken) ? $pageToken.symbol : ''
+		// 		// network: nonNullish($pageToken) ? $pageToken.network : ''
+		// 	}
+		// });
+
 		console.log($pageToken);
 
 		console.log({
 			source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
 			token: nonNullish($pageToken) ? $pageToken.symbol : 'test'
-		});
-	});
-</script>
-
-<BuyButton
-	onclick={() => {
-		trackEvent({
-			name: TRACK_BUY_TOKEN,
-			metadata: {
-				source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
-				token: nonNullish($pageToken) ? $pageToken.symbol : ''
-				// network: nonNullish($pageToken) ? $pageToken.network : ''
-			}
 		});
 
 		modalStore.openBuy(modalId);
