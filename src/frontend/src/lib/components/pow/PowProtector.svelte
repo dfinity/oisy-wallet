@@ -7,6 +7,7 @@
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { handleInsufficientCycles } from '$lib/services/loader.services';
@@ -28,9 +29,6 @@
 	let checkInterval: ReturnType<typeof setInterval> | undefined;
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
-
-	const MAX_CHECK_ATTEMPTS = 100;
-	const CHECK_INTERVAL_MS = 7000;
 
 	// Initialize with default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
