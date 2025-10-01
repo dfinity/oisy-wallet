@@ -8,9 +8,6 @@ import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 import * as appContants from '$lib/constants/app.constants';
 import {
-	btcAddressMainnetStore,
-	btcAddressRegtestStore,
-	btcAddressTestnetStore,
 	ethAddressStore,
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -20,7 +17,6 @@ import { userProfileStore } from '$lib/stores/user-profile.store';
 import * as splDerived from '$sol/derived/spl.derived';
 import { loadSplTokens } from '$sol/services/spl.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
@@ -34,6 +30,7 @@ import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 import { writable } from 'svelte/store';
 
 vi.mock('@dfinity/utils', async () => {
@@ -43,52 +40,6 @@ vi.mock('@dfinity/utils', async () => {
 		debounce: (fn: unknown) => fn
 	};
 });
-
-vi.mock('$lib/services/loader.services', () => ({
-	initSignerAllowance: vi.fn(() => Promise.resolve({ success: true })),
-	initLoader: vi
-		.fn()
-		.mockImplementation(async ({ progressAndLoad }: { progressAndLoad: () => Promise<void> }) => {
-			await progressAndLoad();
-		})
-}));
-
-vi.mock('$btc/services/btc-address.services', () => ({
-	loadBtcAddressMainnet: vi.fn(() => {
-		btcAddressMainnetStore.set({ data: mockBtcAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadBtcAddressTestnet: vi.fn(() => {
-		btcAddressTestnetStore.set({ data: mockBtcAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadBtcAddressRegtest: vi.fn(() => {
-		btcAddressRegtestStore.set({ data: mockBtcAddress, certified: false });
-		return Promise.resolve({ success: true });
-	})
-}));
-
-vi.mock('$eth/services/eth-address.services', () => ({
-	loadEthAddress: vi.fn(() => {
-		ethAddressStore.set({ data: mockEthAddress, certified: false });
-		return Promise.resolve({ success: true });
-	})
-}));
-
-vi.mock('$sol/services/sol-address.services', () => ({
-	loadSolAddressMainnet: vi.fn(() => {
-		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadSolAddressDevnet: vi.fn(() => {
-		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	}),
-	loadSolAddressLocal: vi.fn(() => {
-		solAddressLocalnetStore.set({ data: mockSolAddress, certified: false });
-		return Promise.resolve({ success: true });
-	})
-}));
 
 vi.mock('$eth/services/erc20.services', () => ({
 	loadErc20Tokens: vi.fn(() => Promise.resolve())
@@ -125,6 +76,12 @@ describe('LoaderTokens', () => {
 
 		setupTestnetsStore('disabled');
 		setupUserNetworksStore('allDisabled');
+
+		ethAddressStore.set({ data: mockEthAddress, certified: false });
+
+		solAddressMainnetStore.set({ data: mockSolAddress, certified: false });
+		solAddressDevnetStore.set({ data: mockSolAddress, certified: false });
+		solAddressLocalnetStore.set({ data: mockSolAddress, certified: false });
 
 		erc20NotInitStore.set(true);
 		erc721NotInitStore.set(true);
@@ -180,6 +137,8 @@ describe('LoaderTokens', () => {
 
 		setupUserNetworksStore('allEnabled');
 
+		await tick();
+
 		await waitFor(() => {
 			expect(loadErc20Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 			expect(loadErc721Tokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
@@ -189,7 +148,7 @@ describe('LoaderTokens', () => {
 	});
 
 	describe('ERC tokens', () => {
-		it('loads ERC tokens when Ethereum or EVM is enabled and the stores are not initialized', async () => {
+		it('should load ERC tokens when Ethereum or EVM is enabled and the stores are not initialized', async () => {
 			erc20NotInitStore.set(true);
 			erc721NotInitStore.set(true);
 			erc1155NotInitStore.set(true);
@@ -223,7 +182,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('does not load ERC if the stores are already initialized', async () => {
+		it('should not load ERC if the stores are already initialized', async () => {
 			setupUserNetworksStore('allEnabled');
 
 			erc20NotInitStore.set(false);
@@ -239,7 +198,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('loads ERC tokens only when an Ethereum or EVM network is actually enabled', async () => {
+		it('should load ERC tokens only when an Ethereum or EVM network is actually enabled', async () => {
 			render(LoaderTokens, { children: mockSnippet });
 
 			userProfileStore.set({
@@ -266,7 +225,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('loads ERC tokens for testnets if testnets are enabled and the stores are not initialized', async () => {
+		it('should load ERC tokens for testnets if testnets are enabled and the stores are not initialized', async () => {
 			render(LoaderTokens, { children: mockSnippet });
 
 			await waitFor(() => {
@@ -304,7 +263,7 @@ describe('LoaderTokens', () => {
 	});
 
 	describe('SPL tokens', () => {
-		it('loads SPL tokens on Solana mainnet when the stores are not initialized', async () => {
+		it('should load SPL tokens on Solana mainnet when the stores are not initialized', async () => {
 			splNotInitStore.set(true);
 
 			render(LoaderTokens, { children: mockSnippet });
@@ -332,7 +291,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('does not load SPL tokens if the stores are already initialized', async () => {
+		it('should not load SPL tokens if the stores are already initialized', async () => {
 			setupUserNetworksStore('allEnabled');
 
 			splNotInitStore.set(false);
@@ -344,7 +303,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('loads SPL tokens on Solana devnet when testnets are enabled and the stores are not initialized', async () => {
+		it('should load SPL tokens on Solana devnet when testnets are enabled and the stores are not initialized', async () => {
 			render(LoaderTokens, { children: mockSnippet });
 
 			await waitFor(() => {
@@ -374,7 +333,7 @@ describe('LoaderTokens', () => {
 			});
 		});
 
-		it('loads SPL tokens on Solana localnet only when LOCAL is true and the stores are not initialized', async () => {
+		it('should load SPL tokens on Solana localnet only when LOCAL is true and the stores are not initialized', async () => {
 			render(LoaderTokens, { children: mockSnippet });
 
 			await waitFor(() => {
