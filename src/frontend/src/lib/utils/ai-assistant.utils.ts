@@ -10,7 +10,7 @@ import type {
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenUi } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token, TokenUi } from '$lib/types/token';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
@@ -228,18 +228,20 @@ export const parseShowBalanceToolArguments = ({
 
 	// only the token symbol filter provided -> search for matching tokens on different networks
 	if (nonNullish(tokenSymbolFilter)) {
-		const filteredBySymbolTokens: TokenUi[] = [];
-		let ckTwinToken: TokenUi | undefined;
+		const filteredBySymbolTokens = tokensUi.filter(({ symbol }) => symbol === tokenSymbolFilter);
 
-		tokensUi.forEach((token) => {
-			token.symbol === tokenSymbolFilter && filteredBySymbolTokens.push(token);
-			token.symbol === `ck${tokenSymbolFilter}` && (ckTwinToken = token);
-		});
+		const ckTwinTokenSymbols = filteredBySymbolTokens.reduce<Set<string>>(
+			(acc, token) =>
+				'twinTokenSymbol' in token && nonNullish(token.twinTokenSymbol)
+					? acc.add((token as RequiredTokenWithLinkedData).twinTokenSymbol)
+					: acc,
+			new Set()
+		);
+		const ckTwinTokens = tokensUi.filter(({ symbol }) => ckTwinTokenSymbols.has(symbol));
 
-		const filteredBySymbolAndBalanceTokens = [
-			...filteredBySymbolTokens,
-			...(nonNullish(ckTwinToken) ? [ckTwinToken] : [])
-		].filter(({ usdBalance }) => (usdBalance ?? 0) > 0);
+		const filteredBySymbolAndBalanceTokens = [...filteredBySymbolTokens, ...ckTwinTokens].filter(
+			({ usdBalance }) => (usdBalance ?? 0) > 0
+		);
 
 		return {
 			mainCard: {
