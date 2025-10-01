@@ -14,6 +14,7 @@
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
+	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import UserSnapshotWorker from '$lib/components/rewards/UserSnapshotWorker.svelte';
@@ -31,33 +32,35 @@
 	<AgreementsGuard>
 		<AddressGuard>
 			<Loader>
-				<UrlGuard>
-					<ShortcutGuard>
-						<RewardGuard>
-							<LoaderEthBalances>
-								<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-									<LoaderMultipleEthTransactions>
-										<LoaderWallets>
-											<ExchangeWorker>
-												<LoaderMetamask>
-													<UserSnapshotWorker>
-														<LoaderContacts>
-															<TransactionsIdbSetter>
-																<BalancesIdbSetter>
-																	{@render children()}
-																</BalancesIdbSetter>
-															</TransactionsIdbSetter>
-														</LoaderContacts>
-													</UserSnapshotWorker>
-												</LoaderMetamask>
-											</ExchangeWorker>
-										</LoaderWallets>
-									</LoaderMultipleEthTransactions>
-								</MultipleListeners>
-							</LoaderEthBalances>
-						</RewardGuard>
-					</ShortcutGuard>
-				</UrlGuard>
+				<LoaderTokens>
+					<UrlGuard>
+						<ShortcutGuard>
+							<RewardGuard>
+								<LoaderEthBalances>
+									<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
+										<LoaderMultipleEthTransactions>
+											<LoaderWallets>
+												<ExchangeWorker>
+													<LoaderMetamask>
+														<UserSnapshotWorker>
+															<LoaderContacts>
+																<TransactionsIdbSetter>
+																	<BalancesIdbSetter>
+																		{@render children()}
+																	</BalancesIdbSetter>
+																</TransactionsIdbSetter>
+															</LoaderContacts>
+														</UserSnapshotWorker>
+													</LoaderMetamask>
+												</ExchangeWorker>
+											</LoaderWallets>
+										</LoaderMultipleEthTransactions>
+									</MultipleListeners>
+								</LoaderEthBalances>
+							</RewardGuard>
+						</ShortcutGuard>
+					</UrlGuard>
+				</LoaderTokens>
 			</Loader>
 		</AddressGuard>
 	</AgreementsGuard>
