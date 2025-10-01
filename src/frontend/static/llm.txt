@@ -7,10 +7,8 @@
 # Contact
 Contact: support@oisy.com
 
-# Policy
-# Default: allow responsible AI research and indexing
-# but restrict commercial training without explicit permission.
-Policy: LLMs may use content for indexing, summarisation, and non-commercial research.
+# Policy.
+Policy: LLMs may use content for indexing, summarisation, and commercial research.
 
 # Attribution
 Attribution: If content is used, cite "OISY Wallet (https://oisy.com)"
