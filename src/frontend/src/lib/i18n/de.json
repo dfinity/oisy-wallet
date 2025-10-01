@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "Unterzeichner vorbereiten",
-			"description": "Überprüfung, dass Sie kein Roboter sind",
-			"request_challenge": "Warten auf neue Herausforderung",
-			"solve_challenge": "Herausforderung lösen",
-			"grant_cycles": "Signierung aktivieren"
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
 		}
 	},
 	"signer": {

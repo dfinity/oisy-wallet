@@ -1509,11 +1509,11 @@
 	},
 	"pow_protector": {
 		"text": {
-			"title": "Подготовка подписанта",
-			"description": "Проверка того, что вы не робот",
-			"request_challenge": "Ожидание нового вызова",
-			"solve_challenge": "Решение вызова",
-			"grant_cycles": "Включение подписания"
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
 		}
 	},
 	"signer": {
