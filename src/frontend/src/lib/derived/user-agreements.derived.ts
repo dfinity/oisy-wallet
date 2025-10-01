@@ -82,7 +82,7 @@ export const agreementsToAccept: Readable<AgreementsToAccept> = derived(
 		const result: AgreementsToAccept = {};
 		Object.keys($outdatedAgreements).forEach((agreementType) => {
 			result[agreementType as keyof EnvAgreements] = true;
-		})
+		});
 		return result;
 	}
 );
