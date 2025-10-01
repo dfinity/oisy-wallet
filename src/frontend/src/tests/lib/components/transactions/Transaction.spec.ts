@@ -149,7 +149,7 @@ describe('Transaction (single)', () => {
 	it('renders token logo in token icon mode for fungible tokens (amount visible)', async () => {
 		mockIsNonFungible = false;
 
-		const { container } = render(Transaction, {
+		render(Transaction, {
 			type: 'receive',
 			status: 'confirmed',
 			token: ICP_TOKEN,
