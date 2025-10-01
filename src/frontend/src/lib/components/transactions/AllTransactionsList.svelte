@@ -53,10 +53,6 @@
 		})
 	);
 
-	$effect(() => {
-		console.log($icTransactionsStore);
-	});
-
 	let sortedTransactions = $derived(
 		nonNullish(transactions)
 			? transactions.sort(({ transaction: a }, { transaction: b }) =>
