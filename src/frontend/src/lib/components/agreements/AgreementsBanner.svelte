@@ -6,7 +6,7 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { agreementsToAccept } from '$lib/derived/user-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements.utils';
+	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements-formatter.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	let visible = $state(true);

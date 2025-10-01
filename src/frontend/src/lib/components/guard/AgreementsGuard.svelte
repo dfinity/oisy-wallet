@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		agreementsToAccept,
@@ -17,23 +16,38 @@
 
 	let { children }: Props = $props();
 
+	let accepting = false;
+
 	$effect(() => {
 		if ($hasAcceptedAllLatestAgreements) {
 			return;
 		}
 
 		if ($noAgreementVisionedYet || $hasOutdatedAgreements) {
+			if (accepting) {
+				return;
+			}
+
+			accepting = true;
+
+			console.log(
+				'Accepting agreements',
+				$noAgreementVisionedYet,
+				$hasOutdatedAgreements,
+				$agreementsToAccept
+			);
 			acceptAgreements({
 				identity: $authIdentity,
 				agreementsToAccept: $agreementsToAccept,
 				currentUserVersion: $userProfileVersion
 			});
 		}
+
+		// FIXME: it stills loads twice...
+		return () => {
+			accepting = false;
+		};
 	});
 </script>
 
 {@render children()}
-
-{#if $hasOutdatedAgreements}
-	<AgreementsBanner />
-{/if}
