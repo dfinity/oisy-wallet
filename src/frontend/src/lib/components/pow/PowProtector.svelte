@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { Modal, themeStore } from '@dfinity/gix-components';
-	import { onDestroy, onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
 	import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
+	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { powProtectorSteps } from '$lib/config/pow.config';
@@ -25,7 +26,6 @@
 
 	let hasCycles = $state(false);
 	let loading = $state(false);
-	let checkInterval = $state<NodeJS.Timeout | undefined>();
 	let checkAttempts = $state(0);
 	let powWorker = $state<PowProtectorWorkerInitResult | undefined>();
 
@@ -57,9 +57,8 @@
 	let steps = $derived(powProtectorSteps({ i18n: $i18n }));
 
 	/**
-	 * Is periodically checks if the user has sufficient cycles for POW protection.
-	 * It will either clear the interval when cycles are sufficient, or sign out the user
-	 * if maximum retry attempts are exceeded.
+	 * Periodically checks if the user has sufficient cycles for POW protection.
+	 * Updates hasCycles state and signs out the user if maximum retry attempts are exceeded.
 	 */
 	const checkCycles = async (): Promise<void> => {
 		try {
@@ -69,19 +68,8 @@
 			// Increment attempt counter to track how many times we've checked
 			checkAttempts++;
 
-			if (hasCycles) {
-				// Success: User now has sufficient cycles, stop polling
-				if (checkInterval) {
-					clearInterval(checkInterval);
-					checkInterval = undefined;
-				}
-			} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
-				// Failure: Too many failed attempts, clean up and sign out user
-				if (checkInterval) {
-					clearInterval(checkInterval);
-					checkInterval = undefined;
-				}
-				// Sign out with appropriate error message about cycle waiting timeout
+			if (!hasCycles && checkAttempts >= MAX_CHECK_ATTEMPTS) {
+				// Failure: Too many failed attempts, sign out user
 				await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 			}
 		} catch (error) {
@@ -125,31 +113,27 @@
 
 		// Always initialize the worker regardless of cycles status
 		await initWorker();
-
-		if (!hasCycles) {
-			// If the user does not have the required cycles amount granted, we need to poll until he has
-			checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
-		}
 	});
 
-	onDestroy(() => {
-		if (POW_FEATURE_ENABLED) {
-			// Clear interval if component is destroyed
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
-
+	// We need a separate onMount here because the first onMount above is async.
+	// An async `onMount` cannot return a cleanup function.
+	// By returning a cleanup function here, Svelte guarantees cleanup will happen
+	// when the component unmounts, avoiding race conditions.
+	onMount(() => () => {
+		if (POW_FEATURE_ENABLED && powWorker) {
 			// Stop the worker if it was started
-			if (powWorker) {
-				powWorker.destroy();
-			}
+			powWorker.destroy();
 		}
 	});
 </script>
 
-<!-- Alwways render children to preserve state -->
+<!-- Always render children to preserve state -->
 {@render children?.()}
+
+<!-- Use IntervalLoader to poll for cycles when  -->
+{#if POW_FEATURE_ENABLED && loading && !hasCycles}
+	<IntervalLoader interval={CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
+{/if}
 
 <!-- Overlay POW modal when cycles are insufficient and POW is enabled -->
 {#if POW_FEATURE_ENABLED && loading && !hasCycles}
