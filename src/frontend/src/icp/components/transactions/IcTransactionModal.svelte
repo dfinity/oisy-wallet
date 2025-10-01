@@ -81,13 +81,13 @@
 
 		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
+				{approveSpender}
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}
 				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
-				{approveSpender}
 			/>
 		{/if}
 
