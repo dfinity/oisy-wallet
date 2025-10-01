@@ -18,7 +18,12 @@
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
 	import { LOCAL } from '$lib/constants/app.constants';
-	import { ethAddress } from '$lib/derived/address.derived';
+	import {
+		ethAddress,
+		solAddressDevnet,
+		solAddressLocal,
+		solAddressMainnet
+	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledNonFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import {
@@ -46,10 +51,11 @@
 		loadIcrcTokens({ identity: $authIdentity });
 	});
 
-	let loadErc = $derived(nonNullish($ethAddress) && (
-		$networkEthereumEnabled ||
-			$networkEvmMainnetEnabled ||
-			($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
+	let loadErc = $derived(
+		nonNullish($ethAddress) &&
+			($networkEthereumEnabled ||
+				$networkEvmMainnetEnabled ||
+				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
@@ -59,9 +65,10 @@
 	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
 
 	let loadSpl = $derived(
-		($networkSolanaMainnetEnabled ||
+		((nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled) ||
 			($testnetsEnabled &&
-				($networkSolanaDevnetEnabled || (LOCAL && $networkSolanaLocalEnabled)))) &&
+				((nonNullish($solAddressDevnet) && $networkSolanaDevnetEnabled) ||
+					(LOCAL && nonNullish($solAddressLocal) && $networkSolanaLocalEnabled)))) &&
 			$splCustomTokensNotInitialized
 	);
 
