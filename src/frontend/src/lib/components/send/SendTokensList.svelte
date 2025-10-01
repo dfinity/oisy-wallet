@@ -10,7 +10,6 @@
 
 	const dispatch = createEventDispatcher();
 
-
 	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<Token>) => {
 		dispatch('icSendToken', token);
 	};
