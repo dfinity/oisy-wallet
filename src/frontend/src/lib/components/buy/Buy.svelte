@@ -1,7 +1,11 @@
 <script lang="ts">
 	import BuyButton from '$lib/components/buy/BuyButton.svelte';
 	import BuyModal from '$lib/components/buy/BuyModal.svelte';
-	import { TRACK_BUY_TOKEN } from '$lib/constants/analytics.contants';
+	import {
+		HOME_PAGE_ROUTE,
+		TOKEN_VIEW_ROUTE,
+		TRACK_BUY_TOKEN
+	} from '$lib/constants/analytics.contants';
 	import { modalBuy } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -9,25 +13,17 @@
 	import { nonNullish } from '@dfinity/utils';
 
 	const modalId = Symbol();
-	
 </script>
 
 <BuyButton
 	onclick={() => {
-		// trackEvent({
-		// 	name: TRACK_BUY_TOKEN,
-		// 	metadata: {
-		// 		source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
-		// 		token: nonNullish($pageToken) ? $pageToken.symbol : ''
-		// 		// network: nonNullish($pageToken) ? $pageToken.network : ''
-		// 	}
-		// });
-
-		console.log($pageToken);
-
-		console.log({
-			source: nonNullish($pageToken) ? 'tokenView' : 'homepage',
-			token: nonNullish($pageToken) ? $pageToken.symbol : 'test'
+		trackEvent({
+			name: TRACK_BUY_TOKEN,
+			metadata: {
+				source: nonNullish($pageToken) ? TOKEN_VIEW_ROUTE : HOME_PAGE_ROUTE,
+				token: nonNullish($pageToken) ? $pageToken.symbol : '',
+				network: nonNullish($pageToken) ? $pageToken.network.name : ''
+			}
 		});
 
 		modalStore.openBuy(modalId);

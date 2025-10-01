@@ -135,6 +135,7 @@ export const HOME_PAGE_ROUTE = 'home-page';
 export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
+export const TOKEN_VIEW_ROUTE = 'token-view';
 
 // Privacymode change
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
