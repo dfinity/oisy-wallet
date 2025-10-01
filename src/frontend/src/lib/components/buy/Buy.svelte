@@ -19,11 +19,13 @@
 	onclick={() => {
 		trackEvent({
 			name: TRACK_BUY_TOKEN,
-			metadata: {
-				source: nonNullish($pageToken) ? TOKEN_VIEW_ROUTE : HOME_PAGE_ROUTE,
-				token: nonNullish($pageToken) ? $pageToken.symbol : '',
-				network: nonNullish($pageToken) ? $pageToken.network.name : ''
-			}
+			metadata: nonNullish($pageToken)
+				? {
+						source: TOKEN_VIEW_ROUTE,
+						token: $pageToken.symbol,
+						network: $pageToken.network.name
+					}
+				: { source: HOME_PAGE_ROUTE }
 		});
 
 		modalStore.openBuy(modalId);
