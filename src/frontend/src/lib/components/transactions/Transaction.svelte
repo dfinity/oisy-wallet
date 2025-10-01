@@ -124,12 +124,16 @@
 					{@render children?.()}
 				{/if}
 				{#if type === 'approve' && nonNullish(cardAmount)}
-					<Amount
-						amount={cardAmount}
-						decimals={token.decimals}
-						formatPositiveAmount
-						symbol={getTokenDisplaySymbol(token)}
-					/>
+					{#if $isPrivacyMode}
+						<IconDots />
+					{:else}
+						<Amount
+							amount={cardAmount}
+							decimals={token.decimals}
+							formatPositiveAmount
+							symbol={getTokenDisplaySymbol(token)}
+						/>
+					{/if}
 				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
