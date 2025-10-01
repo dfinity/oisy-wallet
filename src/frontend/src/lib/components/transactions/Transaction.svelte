@@ -66,10 +66,10 @@
 	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
 
 	const displayAmount = $derived(
-		nonNullish(cardAmount) && nonNullish(fee)
-			? type === 'approve'
+		nonNullish(cardAmount)
+			? type === 'approve' && nonNullish(fee)
 				? fee * -1n
-				: !incoming
+				: !incoming && nonNullish(fee)
 					? cardAmount + fee * -1n
 					: cardAmount
 			: undefined
