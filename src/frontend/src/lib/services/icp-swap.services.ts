@@ -10,20 +10,25 @@ export const icpSwapAmounts = async ({
 	sourceAmount,
 	fee = ICP_SWAP_POOL_FEE // The only supported pool fee on ICPSwap at the moment (0.3%)
 }: ICPSwapQuoteParams): Promise<ICPSwapAmountReply> => {
-	const pool = await getPoolCanister({
-		identity,
-		token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
-		token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
-		fee
-	});
+	try {
+		const pool = await getPoolCanister({
+			identity,
+			token0: { address: sourceToken.ledgerCanisterId, standard: sourceToken.standard },
+			token1: { address: destinationToken.ledgerCanisterId, standard: destinationToken.standard },
+			fee
+		});
 
-	const quote = await getQuote({
-		identity,
-		canisterId: pool.canisterId.toString(),
-		amountIn: sourceAmount.toString(),
-		zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
-		amountOutMinimum: '0' // No minimum here as this is just a quote; slippage protection applies only during actual swap
-	});
+		const quote = await getQuote({
+			identity,
+			canisterId: pool.canisterId.toString(),
+			amountIn: sourceAmount.toString(),
+			zeroForOne: pool.token0.address === sourceToken.ledgerCanisterId,
+			amountOutMinimum: '0' // No minimum here as this is just a quote; slippage protection applies only during actual swap
+		});
 
-	return { receiveAmount: quote };
+		return { receiveAmount: quote };
+	} catch (error) {
+		console.error('Error fetching ICP swap amounts:', error);
+		throw error;
+	}
 };

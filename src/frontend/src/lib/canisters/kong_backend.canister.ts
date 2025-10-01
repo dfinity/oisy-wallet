@@ -50,6 +50,8 @@ export class KongBackendCanister extends Canister<KongBackendService> {
 			return response.Ok;
 		}
 
+		console.log('Error response from kong swap amounts:', response.Err);
+
 		throw mapKongBackendCanisterError(response.Err);
 	};
 
