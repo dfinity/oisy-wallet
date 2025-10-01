@@ -295,6 +295,7 @@ export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkb
 export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
 	'agreements-modal-checkbox-license-agreement';
 export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
+export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
 
 // UI components
 export const DATE_BADGE_ICON = 'date-badge-icon';

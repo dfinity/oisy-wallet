@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
-	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
+	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		agreementsToAccept,
@@ -23,7 +22,7 @@
 			return;
 		}
 
-		if ($noAgreementVisionedYet) {
+		if ($noAgreementVisionedYet || $hasOutdatedAgreements) {
 			acceptAgreements({
 				identity: $authIdentity,
 				agreementsToAccept: $agreementsToAccept,
@@ -33,10 +32,8 @@
 	});
 </script>
 
-{#if $hasAcceptedAllLatestAgreements || $noAgreementVisionedYet}
-	{@render children()}
-{:else if $hasOutdatedAgreements}
-	<div in:fade={{ delay: 0, duration: 250 }}>
-		<AcceptAgreementsModal />
-	</div>
+{@render children()}
+
+{#if $hasOutdatedAgreements}
+	<AgreementsBanner />
 {/if}
