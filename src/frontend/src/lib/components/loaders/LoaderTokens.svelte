@@ -46,10 +46,10 @@
 		loadIcrcTokens({ identity: $authIdentity });
 	});
 
-	let loadErc = $derived(nonNullish($ethAddress) &&
+	let loadErc = $derived(nonNullish($ethAddress) && (
 		$networkEthereumEnabled ||
 			$networkEvmMainnetEnabled ||
-			($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled))
+			($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
