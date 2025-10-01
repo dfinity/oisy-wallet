@@ -25,7 +25,7 @@
 	// Use let with $state() for variables that need to be reassigned
 	let hasCycles = $state(false);
 	let loading = $state(false);
-	let checkInterval: ReturnType<typeof setInterval> | undefined;
+	let checkInterval = $state<NodeJS.Timeout | undefined>();
 	let checkAttempts = $state(0);
 	let powWorker= $state<PowProtectorWorkerInitResult | undefined>();
 
