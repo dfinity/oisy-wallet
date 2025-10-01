@@ -5,6 +5,7 @@ import { SOLANA_MAINNET_NETWORK_ID } from '$env/networks/networks.sol.env';
 import { POW_FEATURE_ENABLED } from '$env/pow.env';
 import { hasRequiredCycles } from '$icp/services/pow-protector.services';
 import { allowSigning } from '$lib/api/backend.api';
+import { POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import {
 	networkBitcoinMainnetEnabled,
 	networkEthereumEnabled,
@@ -35,11 +36,11 @@ import { get } from 'svelte/store';
  * @returns {Promise<boolean>} A promise resolving to `true` if the required cycles are met or exceeded,
  * otherwise `false` if insufficient cycles are detected or an error occurs during processing.
  */
-export const handleInsufficientCycles = async (): Promise<boolean> => {
+export const hasZeroCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return await hasRequiredCycles({ identity });
+		return await hasRequiredCycles({ identity, requiredCycles: POW_ZERO_CYCLES_THRESHOLD });
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
 		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);

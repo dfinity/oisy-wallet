@@ -9,11 +9,11 @@
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { powProtectorSteps } from '$lib/config/pow.config';
-	import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
+	import { POW_CHECK_INTERVAL_MS, POW_MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 	import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
-	import { handleInsufficientCycles } from '$lib/services/loader.services';
+	import { hasZeroCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -65,7 +65,7 @@
 	const checkCycles = async (): Promise<void> => {
 		try {
 			// Check current cycles status and update the reactive state
-			hasNoCycles = await handleInsufficientCycles();
+			hasNoCycles = await hasZeroCycles();
 
 			// Increment attempt counter to track how many times we've checked
 			checkAttempts++;
@@ -76,7 +76,7 @@
 					clearInterval(checkInterval);
 					checkInterval = undefined;
 				}
-			} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
+			} else if (checkAttempts >= POW_MAX_CHECK_ATTEMPTS) {
 				// Failure: Too many failed attempts, clean up and sign out user
 				if (checkInterval) {
 					clearInterval(checkInterval);
@@ -110,7 +110,7 @@
 		if (POW_FEATURE_ENABLED) {
 			try {
 				// Initial check
-				hasNoCycles = await handleInsufficientCycles();
+				hasNoCycles = await hasZeroCycles();
 			} catch (error) {
 				// Log error but continue (assume no cycles on error)
 				console.error('Error checking initial cycles:', error);
@@ -140,7 +140,7 @@
 
 <!-- Use IntervalLoader to poll for cycles when  -->
 {#if POW_FEATURE_ENABLED}
-	<IntervalLoader interval={CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
+	<IntervalLoader interval={POW_CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
 {/if}
 
 {#if !POW_FEATURE_ENABLED && hasNoCycles}
