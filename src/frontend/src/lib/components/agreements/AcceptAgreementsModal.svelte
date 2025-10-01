@@ -1,10 +1,6 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
-	import { isNullish } from '@dfinity/utils';
-	import { agreementsData } from '$env/agreements.env';
 	import type { EnvAgreements } from '$env/types/env-agreements';
-	import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-	import { updateUserAgreements } from '$lib/api/backend.api';
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
@@ -25,24 +21,19 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { noAgreementVisionedYet, outdatedAgreements } from '$lib/derived/user-agreements.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut, warnSignOut } from '$lib/services/auth.services';
+	import { warnSignOut } from '$lib/services/auth.services';
+	import { acceptAgreements } from '$lib/services/user-agreements.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
-	import type { UserAgreements } from '$lib/types/user-agreements';
-	import { emit } from '$lib/utils/events.utils';
+	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 
-	type AgreementsToAcceptType = {
-		[K in keyof EnvAgreements]?: boolean;
-	};
-
-	let agreementsToAccept = $state<AgreementsToAcceptType>({});
+	let agreementsToAccept = $state<AgreementsToAccept>({});
 
 	let updatingAgreements = $state(true);
 
 	$effect(() => {
 		updatingAgreements = true;
 
-		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAcceptType>(
+		agreementsToAccept = Object.keys($outdatedAgreements).reduce<AgreementsToAccept>(
 			(acc, agreementType) => ({
 				...acc,
 				[agreementType as keyof EnvAgreements]: false
@@ -59,7 +50,7 @@
 
 	let disabled = $derived(!acceptedAllAgreements || updatingAgreements);
 
-	const toggleAccept = (type: keyof AgreementsToAcceptType) => {
+	const toggleAccept = (type: keyof AgreementsToAccept) => {
 		agreementsToAccept[type] = !agreementsToAccept[type];
 	};
 
@@ -72,47 +63,15 @@
 	};
 
 	const onAccept = async () => {
-		if (isNullish($authIdentity)) {
-			await nullishSignOut();
-			return;
-		}
-
 		savingAgreements = true;
 
-		const agreements: UserAgreements = Object.entries(agreementsToAccept).reduce<UserAgreements>(
-			(acc, [agreement, accepted]) => {
-				if (accepted) {
-					return {
-						...acc,
-						[agreement]: {
-							accepted,
-							lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
-							lastUpdatedTimestamp:
-								agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
-						}
-					};
-				}
-				return acc;
-			},
-			{} as UserAgreements
-		);
+		await acceptAgreements({
+			identity: $authIdentity,
+			agreementsToAccept,
+			currentUserVersion: $userProfileVersion
+		});
 
-		try {
-			await updateUserAgreements({
-				identity: $authIdentity,
-				agreements,
-				currentUserVersion: $userProfileVersion
-			});
-
-			emit({ message: 'oisyRefreshUserProfile' });
-		} catch (err: unknown) {
-			toastsError({
-				msg: { text: $i18n.agreements.error.cannot_update_user_agreements },
-				err
-			});
-		} finally {
-			savingAgreements = false;
-		}
+		savingAgreements = false;
 	};
 </script>
 
