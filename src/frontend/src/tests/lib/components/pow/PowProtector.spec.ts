@@ -246,11 +246,15 @@ describe('PowProtector', () => {
 
 				render(PowProtector, { children: mockSnippet });
 
-				// Advance time for MAX_CHECK_ATTEMPTS
-				for (let i = 0; i < MAX_CHECK_ATTEMPTS; i++) {
-					vi.advanceTimersByTime(CHECK_INTERVAL_MS);
-					await vi.runAllTimersAsync();
-				}
+				// Wait for initial mount
+				await vi.runAllTimersAsync();
+
+				// Advance time for MAX_CHECK_ATTEMPTS polls (without runAllTimersAsync to avoid infinite loop)
+				const totalTime = CHECK_INTERVAL_MS * MAX_CHECK_ATTEMPTS;
+				vi.advanceTimersByTime(totalTime);
+
+				// Now run pending timers to execute the callbacks
+				await vi.advanceTimersByTimeAsync(0);
 
 				await waitFor(() => {
 					expect(errorSignOut).toHaveBeenCalledWith(
@@ -319,9 +323,11 @@ describe('PowProtector', () => {
 					expect(mockWorker.start).toHaveBeenCalledOnce();
 				});
 
-				// Unmount and wait for async cleanup
+				// Unmount the component
 				unmount();
-				await vi.runAllTimersAsync();
+
+				// Wait a tick for cleanup to execute
+				await new Promise((resolve) => setTimeout(resolve, 0));
 
 				// Worker should be destroyed
 				expect(mockWorker.destroy).toHaveBeenCalledOnce();
