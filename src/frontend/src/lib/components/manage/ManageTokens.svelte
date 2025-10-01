@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -24,7 +23,11 @@
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let { initialSearch, infoElement }: { initialSearch?: string; infoElement?: Snippet } = $props();
+	let {
+		initialSearch,
+		infoElement,
+		isNftsPage
+	}: { initialSearch?: string; infoElement?: Snippet; isNftsPage?: boolean } = $props();
 
 	const dispatch = createEventDispatcher();
 
@@ -56,7 +59,8 @@
 			filterZeroBalance: false,
 			filterNetwork: $selectedNetwork,
 			filterQuery: nonNullish(initialSearch) ? initialSearch : '',
-			sortByBalance: false
+			sortByBalance: false,
+			filterNfts: isNftsPage
 		})
 	);
 
@@ -65,8 +69,6 @@
 	$effect(() => {
 		setTokens(allTokensSorted);
 	});
-
-	let loading = $derived($erc20UserTokensNotInitialized);
 
 	let showNetworks = $state(false);
 
@@ -115,7 +117,7 @@
 	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
-		{loading}
+		loading={false}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
 		on:icSelectNetworkFilter={onSelectNetwork}
 	>
@@ -151,7 +153,10 @@
 				colorStyle="secondary-light"
 				disabled={$pseudoNetworkICPTestnet}
 				onclick={() => dispatch('icAddToken')}
-				><IconPlus /> {$i18n.tokens.manage.text.import_token}</Button
+				><IconPlus />
+				{isNftsPage
+					? $i18n.tokens.manage.text.import_nft
+					: $i18n.tokens.manage.text.import_token}</Button
 			>
 			<Button disabled={saveDisabled} onclick={save} testId={MANAGE_TOKENS_MODAL_SAVE}>
 				{$i18n.core.text.save}

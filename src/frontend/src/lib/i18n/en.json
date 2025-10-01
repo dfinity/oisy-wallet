@@ -51,7 +51,8 @@
 			"switch_currency": "Switch currency"
 		},
 		"warning": {
-			"do_not_close": "Don't close this tab until the transaction is done"
+			"do_not_close": "Don't close this tab until the transaction is done",
+			"standalone_mode": "Your $oisy_short Wallet is currently installed as standalone app on your mobile phone, which prevents it from connecting to other ICP dapps. You can delete $oisy_short from your homescreen, and do the installation again. This will install $oisy_short in a different way, which will then allow to connect to other dapps and sign transactions."
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "No Infura ERC1155 provider for network $network",
 			"no_infura_erc20_icp_provider": "No Infura ERC20 ICP provider for network $network",
 			"no_solana_network": "No Solana network for network $network",
-			"eth_address_unknown": "ETH address is unknown.",
 			"loading_address": "Error while loading the $symbol address.",
 			"loading_balance": "Error while loading $symbol balance for network $network.",
 			"erc20_contracts": "Error while loading the ERC20 contracts.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Import token",
+				"title_nft": "Import NFT collection",
 				"review": "Review",
 				"saving": "Saving...",
 				"updating": "Updating token list",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Manage tokens",
+				"title_nft": "Manage NFT collections",
 				"manage_list": "Manage tokens",
 				"list_settings": "List settings",
 				"import_token": "Import token",
+				"import_nft": "Import NFT collection",
 				"network": "Network",
 				"all_tokens_zero_balance": "All tokens have zero balance.",
 				"enable_more_assets": "Enable more tokens"

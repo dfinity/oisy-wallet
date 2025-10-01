@@ -50,7 +50,7 @@ interface I18nCore {
 		switch_language: string;
 		switch_currency: string;
 	};
-	warning: { do_not_close: string };
+	warning: { do_not_close: string; standalone_mode: string };
 }
 
 interface I18nNavigation {
@@ -387,7 +387,6 @@ interface I18nInit {
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
-		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
 		erc20_contracts: string;
@@ -821,6 +820,7 @@ interface I18nTokens {
 	import: {
 		text: {
 			title: string;
+			title_nft: string;
 			review: string;
 			saving: string;
 			updating: string;
@@ -853,9 +853,11 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
+			title_nft: string;
 			manage_list: string;
 			list_settings: string;
 			import_token: string;
+			import_nft: string;
 			network: string;
 			all_tokens_zero_balance: string;
 			enable_more_assets: string;

@@ -24,7 +24,7 @@ import {
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import * as splDerived from '$sol/derived/spl.derived';
@@ -142,7 +142,7 @@ describe('Loader', () => {
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
 
-			expect(get(loading)).toBeFalsy();
+			expect(get(initialLoading)).toBeFalsy();
 		});
 	});
 
@@ -156,7 +156,7 @@ describe('Loader', () => {
 
 	describe('while loading', () => {
 		beforeEach(() => {
-			loading.set(true);
+			initialLoading.set(true);
 			vi.mocked(initLoader).mockImplementationOnce(
 				async ({ setProgressModal }: { setProgressModal: (value: boolean) => void }) => {
 					setProgressModal(true);

@@ -26,7 +26,7 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { loading } from '$lib/stores/loader.store';
+	import { initialLoading } from '$lib/stores/loader.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import type { Option } from '$lib/types/utils';
@@ -167,7 +167,7 @@
 		}
 
 		// We are still loading ETH address and other data. Boot screen load.
-		if ($loading) {
+		if ($initialLoading) {
 			return;
 		}
 
@@ -197,7 +197,7 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $walletConnectUri, $loading];
+		[$ethAddress, $solAddressMainnet, $walletConnectUri, $initialLoading];
 
 		untrack(() => uriConnect());
 	});
@@ -413,7 +413,7 @@
 			return;
 		}
 
-		if ($loading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
+		if ($initialLoading || (isNullish($ethAddress) && isNullish($solAddressMainnet))) {
 			reconnecting = false;
 
 			return;
@@ -451,7 +451,7 @@
 	};
 
 	$effect(() => {
-		[$ethAddress, $solAddressMainnet, $loading];
+		[$ethAddress, $solAddressMainnet, $initialLoading];
 
 		untrack(() => reconnect());
 	});

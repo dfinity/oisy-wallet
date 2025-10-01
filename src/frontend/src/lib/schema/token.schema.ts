@@ -26,7 +26,8 @@ export const TokenMetadataSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
 	decimals: z.number(),
-	icon: z.string().optional()
+	icon: z.string().optional(),
+	description: z.string().optional()
 });
 
 const TokenOisySymbolSchema = z.object({

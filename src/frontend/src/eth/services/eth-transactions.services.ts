@@ -17,7 +17,6 @@ import { ethAddress as addressStore } from '$lib/derived/address.derived';
 import { trackEvent } from '$lib/services/analytics.services';
 import { retryWithDelay } from '$lib/services/rest.services';
 import { i18n } from '$lib/stores/i18n.store';
-import { toastsError } from '$lib/stores/toasts.store';
 import type { Address } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TokenId, TokenStandard } from '$lib/types/token';
@@ -70,16 +69,6 @@ const loadEthTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 
@@ -143,16 +132,6 @@ const loadErcTransactions = async ({
 	const address = get(addressStore);
 
 	if (isNullish(address)) {
-		const {
-			init: {
-				error: { eth_address_unknown }
-			}
-		} = get(i18n);
-
-		toastsError({
-			msg: { text: eth_address_unknown }
-		});
-
 		return { success: false };
 	}
 
