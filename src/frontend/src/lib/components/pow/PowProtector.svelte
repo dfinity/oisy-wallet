@@ -23,7 +23,6 @@
 
 	let { children }: Props = $props();
 
-	// Use let with $state() for variables that need to be reassigned
 	let hasCycles = $state(false);
 	let loading = $state(false);
 	let checkInterval = $state<NodeJS.Timeout | undefined>();
