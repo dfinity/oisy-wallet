@@ -29,7 +29,7 @@ import { get } from 'svelte/store';
  *
  * This asynchronous function verifies whether the user has sufficient cycles to proceed with further operations.
  * It retrieves the user's identity and calculates the number of allowed cycles. If the number of allowed cycles
- * meets or exceeds the defined threshold (`POW_MIN_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
+ * meets or exceeds the defined threshold (`POW_ZERO_CYCLES_THRESHOLD`), the function returns `true`. Otherwise,
  * it performs necessary error handling and signs the user out in the event of insufficient cycles or any other
  * encountered error.
  *
@@ -40,7 +40,7 @@ export const hasZeroCycles = async (): Promise<boolean> => {
 	try {
 		const { identity } = get(authStore);
 		assertNonNullish(identity, 'Cannot continue without an identity.');
-		return await hasRequiredCycles({ identity, requiredCycles: POW_ZERO_CYCLES_THRESHOLD });
+		return !(await hasRequiredCycles({ identity, requiredCycles: POW_ZERO_CYCLES_THRESHOLD }));
 	} catch (_err: unknown) {
 		// In the event of any error, we sign the user out, since do not know whether the user has enough cycles to continue.
 		await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);

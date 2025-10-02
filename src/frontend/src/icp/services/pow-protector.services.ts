@@ -30,9 +30,11 @@ export const hasRequiredCycles = async ({
 		}
 	});
 	console.warn(
-		'cycles: ',
+		'available cycles: ',
 		formatBigIntWithApostrophes(allowanceResult.allowance),
-		', difference to threshold: ',
+		'required cycles (threshold): ',
+		formatBigIntWithApostrophes(requiredCycles),
+		', difference to required: ',
 		formatBigIntWithApostrophes(allowanceResult.allowance - requiredCycles)
 	);
 	return allowanceResult.allowance >= requiredCycles;
