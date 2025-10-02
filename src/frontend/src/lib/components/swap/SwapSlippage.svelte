@@ -93,6 +93,7 @@
 						bind:value={slippageValue}
 						on:focus={onFocus}
 						on:blur={onBlur}
+						onInput={() => {}}
 					>
 						{#snippet innerEnd()}
 							<span class="text-tertiary">%</span>
