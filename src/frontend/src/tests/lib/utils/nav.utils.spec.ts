@@ -51,11 +51,13 @@ describe('nav.utils', () => {
 	describe('pathToHref', () => {
 		it('should return the same path if it does not end with a slash', () => {
 			const path = '/example/path';
+
 			expect(pathToHref(path as AppPath)).toBe(path);
 		});
 
 		it('should remove the trailing slash if the path ends with one', () => {
 			const path = '/example/path/';
+
 			expect(pathToHref(path as AppPath)).toBe(path.slice(0, -1));
 		});
 	});
