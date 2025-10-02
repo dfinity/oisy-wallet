@@ -20,7 +20,6 @@
 </script>
 
 <ModalTokensList
-	loading={false}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	{onSelectNetworkFilter}
 	{onTokenButtonClick}
