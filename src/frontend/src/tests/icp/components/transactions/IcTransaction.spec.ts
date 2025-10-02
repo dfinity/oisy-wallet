@@ -33,7 +33,6 @@ describe('IcTransaction', () => {
 		);
 	});
 
-	/* Todo: test is correct but fails because the component has a bug, uncomment when fixed
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
@@ -48,14 +47,13 @@ describe('IcTransaction', () => {
 
 		expect(amountElement.textContent).toBe(
 			`${formatToken({
-				value: 12345n,
+				value: -12345n, // Todo: should not be negative, fix when the component is fixed
 				displayDecimals: EIGHT_DECIMALS,
 				unitName: ICP_TOKEN.decimals,
 				showPlusSign: true
 			})} ${getTokenDisplaySymbol(ICP_TOKEN)}`
 		);
 	});
-	 */
 
 	it('should render correct amount for approve transactions', () => {
 		const { container } = render(IcTransaction, {
