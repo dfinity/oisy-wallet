@@ -36,7 +36,6 @@
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
-	import { ICP_TOKEN_ID } from '$env/tokens/tokens.icp.env';
 
 	let transactions = $derived(
 		mapAllTransactionsUi({
@@ -47,66 +46,7 @@
 			$ethAddress,
 			$btcStatuses: $btcStatusesStore,
 			$solTransactions: $solTransactionsStore,
-			$icTransactionsStore: {
-				[ICP_TOKEN_ID]: [
-					{
-						certified: true,
-						data: {
-							fee: 10000n,
-							from: '14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							fromExplorerUrl:
-								'https://dashboard.internetcomputer.org/account/14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							id: '27901108-self',
-							incoming: true,
-							status: 'executed',
-							timestamp: 1758110798548354276n,
-							to: '14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							toExplorerUrl:
-								'https://dashboard.internetcomputer.org/account/14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							txExplorerUrl: 'https://dashboard.internetcomputer.org/transaction/27901108',
-							type: 'receive',
-							value: 100000000n
-						}
-					},
-					{
-						certified: false,
-						data: {
-							fee: 10000n,
-							from: '14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							fromExplorerUrl:
-								'https://dashboard.internetcomputer.org/account/14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							id: '26874204',
-							incoming: false,
-							status: 'executed',
-							timestamp: 1754909722282586025n,
-							to: 'a498bfac62d235242a60c2141bdad25c7924b62676af755286fa3b8eead72889',
-							toExplorerUrl:
-								'https://dashboard.internetcomputer.org/account/a498bfac62d235242a60c2141bdad25c7924b62676af755286fa3b8eead72889',
-							txExplorerUrl: 'https://dashboard.internetcomputer.org/transaction/26874204',
-							type: 'send',
-							value: 1000000n
-						}
-					},
-					{
-						certified: false,
-						data: {
-							approveExpiresAt: 1754910013783000000n,
-							approveSpender: 'a498bfac62d235242a60c2141bdad25c7924b62676af755286fa3b8eead72889',
-							fee: 10000n,
-							from: '14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							fromExplorerUrl:
-								'https://dashboard.internetcomputer.org/account/14e471fced95943d4698b5d11f7ee57dde47053b4480451edf1bd4e3507caaac',
-							id: '26874195',
-							incoming: false,
-							status: 'executed',
-							timestamp: 1754909714274293859n,
-							txExplorerUrl: 'https://dashboard.internetcomputer.org/transaction/26874195',
-							type: 'approve',
-							value: 1020000n
-						}
-					}
-				]
-			},
+			$icTransactionsStore,
 			$ckBtcMinterInfoStore,
 			$icPendingTransactionsStore,
 			$ckBtcPendingUtxosStore
