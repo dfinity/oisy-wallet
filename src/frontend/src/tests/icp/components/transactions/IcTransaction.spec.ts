@@ -47,7 +47,7 @@ describe('IcTransaction', () => {
 
 		expect(amountElement.textContent).toBe(
 			`${formatToken({
-				value: -12345n, // Todo: should not be negative, fix when the component is fixed
+				value: 12345n,
 				displayDecimals: EIGHT_DECIMALS,
 				unitName: ICP_TOKEN.decimals,
 				showPlusSign: true
