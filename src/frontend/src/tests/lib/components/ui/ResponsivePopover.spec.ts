@@ -1,5 +1,5 @@
+import ResponsivePopoverTest from '$tests/lib/components/ui/ResponsivePopoverTest.svelte';
 import { render, waitFor } from '@testing-library/svelte';
-import ResponsivePopoverTest from './ResponsivePopoverTest.svelte';
 
 describe('ResponsivePopover', () => {
 	const setWindowWidth = (width: number) => {

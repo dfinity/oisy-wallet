@@ -1,4 +1,4 @@
-import { CoingeckoCoinsIdSchema } from '$lib/validation/coingecko.validation';
+import { CoingeckoCoinsIdSchema } from '$lib/schema/coingecko.schema';
 
 describe('CoingeckoCoinsIdSchema', () => {
 	it('should pass validation for "ethereum"', () => {

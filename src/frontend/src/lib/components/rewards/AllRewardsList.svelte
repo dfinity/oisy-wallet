@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import oisyEpisodeFour from '$lib/assets/oisy-episode-four-coming.svg';
+	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
 	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import RewardsFilter from '$lib/components/rewards/RewardsFilter.svelte';
 	import RewardsGroup from '$lib/components/rewards/RewardsGroup.svelte';
@@ -10,6 +12,7 @@
 		REWARDS_ENDED_CAMPAIGNS_CONTAINER,
 		REWARDS_UPCOMING_CAMPAIGNS_CONTAINER
 	} from '$lib/constants/test-ids.constants';
+	import { modalRewardDetails, modalRewardDetailsData } from '$lib/derived/modal.derived';
 	import { RewardStates } from '$lib/enums/reward-states';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -51,6 +54,14 @@
 			title={replaceOisyPlaceholders($i18n.rewards.text.upcoming_campaigns)}
 		/>
 	{:else if selectedRewardState === RewardStates.ENDED}
-		<RewardsGroup rewards={endedCampaigns} testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER} />
+		<RewardsGroup
+			rewards={endedCampaigns}
+			sortByEndDate="desc"
+			testId={REWARDS_ENDED_CAMPAIGNS_CONTAINER}
+		/>
+	{/if}
+
+	{#if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
+		<RewardModal reward={$modalRewardDetailsData} />
 	{/if}
 </RewardsEligibilityContext>

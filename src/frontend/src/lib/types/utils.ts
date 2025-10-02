@@ -14,9 +14,6 @@ export type ResultSuccessReduced<T = unknown> = ResultSuccess<T[]>;
 // eslint-disable-next-line local-rules/use-option-type-wrapper
 export type Option<T> = T | null | undefined;
 
-export type AtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
-	{ [K in Keys]-?: Required<Pick<T, K>> & Partial<Omit<T, K>> }[Keys];
-
 export type PartialSpecific<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 export type NonEmptyArray<T> = [T, ...T[]];

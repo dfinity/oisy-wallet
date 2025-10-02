@@ -4,12 +4,15 @@ import type {
 	AiAssistantContactUiMap,
 	AiAssistantToken,
 	ReviewSendTokensToolResult,
+	ShowBalanceToolResult,
 	ShowContactsToolResult,
 	ToolCallArgument
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
-import type { Token } from '$lib/types/token';
+import type { Network } from '$lib/types/network';
+import type { RequiredTokenWithLinkedData, Token, TokenUi } from '$lib/types/token';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
+import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const parseToAiAssistantContacts = (
@@ -186,17 +189,113 @@ export const parseReviewSendTokensToolArguments = ({
 	};
 };
 
+export const parseShowBalanceToolArguments = ({
+	filterParams,
+	tokensUi,
+	networks
+}: {
+	filterParams: ToolCallArgument[];
+	tokensUi: TokenUi[];
+	networks: Network[];
+}): ShowBalanceToolResult => {
+	const { tokenSymbolFilter, networkIdFilter } = filterParams.reduce<{
+		tokenSymbolFilter?: string;
+		networkIdFilter?: string;
+	}>(
+		(acc, { value, name }) => ({
+			tokenSymbolFilter: name === 'tokenSymbol' ? value : acc.tokenSymbolFilter,
+			networkIdFilter: name === 'networkId' ? value : acc.networkIdFilter
+		}),
+		{
+			tokenSymbolFilter: undefined,
+			networkIdFilter: undefined
+		}
+	);
+
+	// both token symbol and network id filters provided -> search for a single token
+	if (nonNullish(tokenSymbolFilter) && nonNullish(networkIdFilter)) {
+		const filteredToken = tokensUi.find(
+			({ symbol, network: { id: networkId } }) =>
+				symbol === tokenSymbolFilter && networkId.description === networkIdFilter
+		);
+		return {
+			mainCard: {
+				totalUsdBalance: filteredToken?.usdBalance ?? 0,
+				token: filteredToken
+			}
+		};
+	}
+
+	// only the token symbol filter provided -> search for matching tokens on different networks
+	if (nonNullish(tokenSymbolFilter)) {
+		const filteredBySymbolTokens = tokensUi.filter(({ symbol }) => symbol === tokenSymbolFilter);
+
+		const ckTwinTokenSymbols = filteredBySymbolTokens.reduce<Set<string>>(
+			(acc, token) =>
+				'twinTokenSymbol' in token && nonNullish(token.twinTokenSymbol)
+					? acc.add((token as RequiredTokenWithLinkedData).twinTokenSymbol)
+					: acc,
+			new Set()
+		);
+		const ckTwinTokens = tokensUi.filter(({ symbol }) => ckTwinTokenSymbols.has(symbol));
+
+		const filteredBySymbolAndBalanceTokens = [...filteredBySymbolTokens, ...ckTwinTokens].filter(
+			({ usdBalance }) => (usdBalance ?? 0) > 0
+		);
+
+		return {
+			mainCard: {
+				totalUsdBalance: sumTokensUiUsdBalance(filteredBySymbolAndBalanceTokens),
+				token: filteredBySymbolAndBalanceTokens[0] ?? filteredBySymbolTokens[0]
+			},
+			...(filteredBySymbolAndBalanceTokens.length > 1 && {
+				secondaryCards: filteredBySymbolAndBalanceTokens
+			})
+		};
+	}
+
+	// only the network id filter provided -> search for all tokens on this network
+	if (nonNullish(networkIdFilter)) {
+		const filteredNetwork = networks.find(({ id }) => id.description === networkIdFilter);
+
+		const secondaryCards = tokensUi.filter(
+			(token) =>
+				token.network.id.description === filteredNetwork?.id.description &&
+				nonNullish(token.usdBalance) &&
+				token.usdBalance > 0
+		);
+
+		// no filters provided -> calculate total balance
+		return {
+			mainCard: {
+				totalUsdBalance: sumTokensUiUsdBalance(secondaryCards),
+				network: filteredNetwork
+			},
+			secondaryCards
+		};
+	}
+
+	return {
+		mainCard: {
+			totalUsdBalance: sumTokensUiUsdBalance(tokensUi)
+		}
+	};
+};
+
 export const generateAiAssistantResponseEventMetadata = ({
 	requestStartTimestamp,
-	toolName
+	toolName,
+	additionalMetadata
 }: {
 	requestStartTimestamp: number;
 	toolName?: string;
+	additionalMetadata?: Record<string, string>;
 }) => {
 	const responseTimeMs = Date.now() - requestStartTimestamp;
 
 	return {
 		...(notEmptyString(toolName) && { toolName }),
+		...(nonNullish(additionalMetadata) && additionalMetadata),
 		responseTime: `${responseTimeMs / 1000}s`,
 		responseTimeCategory:
 			responseTimeMs <= 100
