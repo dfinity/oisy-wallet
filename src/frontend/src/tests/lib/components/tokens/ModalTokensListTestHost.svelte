@@ -33,12 +33,7 @@
 	);
 </script>
 
-<ModalTokensList
-	loading={false}
-	networkSelectorViewOnly={false}
-	on:icTokenButtonClick
-	on:icSelectNetworkFilter
->
+<ModalTokensList networkSelectorViewOnly={false} on:icTokenButtonClick on:icSelectNetworkFilter>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>
