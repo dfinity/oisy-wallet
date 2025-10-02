@@ -109,6 +109,7 @@
 			}
 
 			// Always initialize the worker regardless of cycles status
+			console.warn('Initializing POW worker');
 			await initWorker();
 		}
 	});
@@ -127,6 +128,10 @@
 
 <!-- Use IntervalLoader to poll for cycles when  -->
 {#if POW_FEATURE_ENABLED}
+	{(() => {
+		console.warn('IntervalLoader started');
+		return '';
+	})()}
 	<IntervalLoader interval={POW_CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
 {/if}
 
