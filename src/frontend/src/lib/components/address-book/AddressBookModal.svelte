@@ -440,7 +440,7 @@
 				currentAddressIndex = undefined;
 				handleClose();
 			}}
-			onQRCodeScan={() =>
+			onQrCodeScan={() =>
 				nonNullish(modal) &&
 				goToWizardStep({ modal, steps, stepName: AddressBookSteps.QR_CODE_SCAN })}
 			onSaveAddress={handleSaveAddress}

@@ -17,7 +17,7 @@ describe('EditAddressStep', () => {
 		updateTimestampNs: BigInt(Date.now())
 	};
 
-	const onQRCodeScan = vi.fn(); // ✅ NEW SHARED MOCK
+	const onQrCodeScan = vi.fn(); // ✅ NEW SHARED MOCK
 
 	it('should render the edit address step with form and buttons', () => {
 		const onSaveAddress = vi.fn();
@@ -29,7 +29,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -52,7 +52,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -71,7 +71,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -91,7 +91,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true,
 				address
@@ -117,7 +117,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true,
 				address
@@ -157,7 +157,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: false,
 				address
@@ -179,7 +179,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -200,7 +200,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -230,7 +230,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: true
 			}
@@ -264,7 +264,7 @@ describe('EditAddressStep', () => {
 				contact: mockContact,
 				onSaveAddress,
 				onAddAddress,
-				onQRCodeScan,
+				onQrCodeScan,
 				onClose,
 				isNewAddress: false,
 				address: initialAddress

@@ -62,7 +62,7 @@ describe('InputAddress', () => {
 		expect(successMessage).toHaveTextContent('Bitcoin');
 	});
 
-	it('does not show QR button when onQRCodeScan is not provided', () => {
+	it('does not show QR button when onQrCodeScan is not provided', () => {
 		const { queryByRole } = render(InputAddress, defaultProps);
 
 		// The QR button should not be present
@@ -71,11 +71,11 @@ describe('InputAddress', () => {
 		expect(qrButton).not.toBeInTheDocument();
 	});
 
-	it('shows QR button when onQRCodeScan is provided', () => {
-		const onQRCodeScan = vi.fn();
+	it('shows QR button when onQrCodeScan is provided', () => {
+		const onQrCodeScan = vi.fn();
 		const props = {
 			...defaultProps,
-			onQRCodeScan
+			onQrCodeScan
 		};
 
 		const { getByRole } = render(InputAddress, props);
@@ -86,11 +86,11 @@ describe('InputAddress', () => {
 		expect(qrButton).toBeInTheDocument();
 	});
 
-	it('calls onQRCodeScan when QR button is clicked', async () => {
-		const onQRCodeScan = vi.fn();
+	it('calls onQrCodeScan when QR button is clicked', async () => {
+		const onQrCodeScan = vi.fn();
 		const props = {
 			...defaultProps,
-			onQRCodeScan
+			onQrCodeScan
 		};
 
 		const { getByRole } = render(InputAddress, props);
@@ -98,7 +98,7 @@ describe('InputAddress', () => {
 
 		await fireEvent.click(qrButton);
 
-		expect(onQRCodeScan).toHaveBeenCalled();
+		expect(onQrCodeScan).toHaveBeenCalled();
 	});
 
 	it('applies custom border color based on validation state', async () => {

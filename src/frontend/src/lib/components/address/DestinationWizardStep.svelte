@@ -53,7 +53,7 @@
 		<IcSendDestination
 			slot="content"
 			{networkId}
-			onQRCodeScan={() => dispatch('icQRCodeScan')}
+			onQrCodeScan={() => dispatch('icQRCodeScan')}
 			{tokenStandard}
 			bind:destination
 			bind:invalidDestination

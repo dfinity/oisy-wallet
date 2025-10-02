@@ -23,7 +23,7 @@
 		onSaveAddress: (address: ContactAddressUi) => void;
 		onAddAddress: (address: ContactAddressUi) => void;
 		onClose: () => void;
-		onQRCodeScan: () => void;
+		onQrCodeScan: () => void;
 		isNewAddress: boolean;
 		disabled?: boolean;
 	}
@@ -34,7 +34,7 @@
 		onSaveAddress,
 		onAddAddress,
 		onClose,
-		onQRCodeScan,
+		onQrCodeScan,
 		isNewAddress,
 		disabled = false
 	}: Props = $props();
@@ -101,7 +101,7 @@
 				disableAddressField={!isNewAddress || nonNullish(modalDataAddress)}
 				{disabled}
 				{focusField}
-				{onQRCodeScan}
+				{onQrCodeScan}
 				bind:isValid={isFormValid}
 			/>
 		</div>

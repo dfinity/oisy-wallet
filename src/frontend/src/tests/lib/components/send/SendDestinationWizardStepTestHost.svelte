@@ -15,7 +15,7 @@
 		onBack: () => void;
 		onNext: () => void;
 		onClose: () => void;
-		onQRCodeScan: () => void;
+		onQrCodeScan: () => void;
 	}
 
 	let {
@@ -25,7 +25,7 @@
 		onBack,
 		onNext,
 		onClose,
-		onQRCodeScan
+		onQrCodeScan
 	}: Props = $props();
 
 	const steps = allSendWizardSteps({ i18n: $i18n });
@@ -40,7 +40,7 @@
 		{onBack}
 		{onClose}
 		{onNext}
-		{onQRCodeScan}
+		{onQrCodeScan}
 		bind:selectedContact={$selectedContact}
 	/>
 </WizardModal>
