@@ -123,17 +123,6 @@
 				{:else}
 					{@render children?.()}
 				{/if}
-				{#if type === 'approve' && nonNullish(cardAmount)}
-					{#if $isPrivacyMode}
-						<IconDots />
-					{:else}
-						<Amount
-							amount={cardAmount * -1n}
-							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
-						/>
-					{/if}
-				{/if}
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo {network} testId="transaction-network" transparent />
@@ -203,8 +192,6 @@
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
 						{:else if type === 'receive'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
-						{:else if type === 'approve'}
-							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
 						{#if nonNullish(contact)}
