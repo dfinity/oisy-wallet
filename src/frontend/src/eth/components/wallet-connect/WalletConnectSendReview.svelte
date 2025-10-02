@@ -8,8 +8,10 @@
 	import SendReview from '$lib/components/send/SendReview.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -37,9 +39,13 @@
 	let amountDisplay = $derived(
 		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
 	);
+
+	let selectedContact = $derived(
+		getContactForAddress({ addressString: destination, contactList: $contacts })
+	);
 </script>
 
-<SendReview amount={formatToken({ value: amountDisplay })} {destination}>
+<SendReview amount={formatToken({ value: amountDisplay })} {destination} {selectedContact}>
 	{#snippet info()}
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	{/snippet}
