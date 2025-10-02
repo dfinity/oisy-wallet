@@ -76,7 +76,7 @@ export default defineConfig(
 				include: ['src/frontend/src'],
 				exclude: [
 					'src/frontend/src/routes/**/+page.ts',
-					'src/frontend/src/tests'
+					'src/frontend/src/tests/**/*'
 				],
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
