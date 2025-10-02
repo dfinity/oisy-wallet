@@ -13,7 +13,21 @@
 		MODAL_TOKEN_LIST_TOOLBAR
 	} from '$tests/lib/components/tokens/ModalTokensList.spec';
 
-	let { tokens, renderNoResults }: { tokens: Token[]; renderNoResults: boolean } = $props();
+	interface Props {
+		tokens: Token[];
+		renderNoResults: boolean;
+		filterNfts?: boolean;
+		onSelectNetworkFilter: () => void;
+		onTokenButtonClick: (token: Token) => void;
+	}
+
+	let {
+		tokens,
+		renderNoResults,
+		filterNfts = false,
+		onSelectNetworkFilter,
+		onTokenButtonClick
+	}: Props = $props();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -21,7 +35,8 @@
 			tokens,
 			filterZeroBalance: false,
 			filterNetwork: undefined,
-			filterQuery: ''
+			filterQuery: '',
+			filterNfts
 		})
 	);
 </script>
@@ -29,8 +44,8 @@
 <ModalTokensList
 	loading={false}
 	networkSelectorViewOnly={false}
-	on:icTokenButtonClick
-	on:icSelectNetworkFilter
+	{onSelectNetworkFilter}
+	{onTokenButtonClick}
 >
 	{#snippet noResults()}
 		{#if renderNoResults}

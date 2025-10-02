@@ -3,6 +3,7 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
@@ -42,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -54,20 +56,24 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
-	let {
-		initialSearch,
-		onClose = () => {},
-		infoElement
-	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
+	interface Props {
+		initialSearch?: string;
+		onClose?: () => void;
+		infoElement?: Snippet;
+	}
 
-	const steps: WizardSteps<WizardStepsManageTokens> = [
+	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+
+	const isNftsPage = $derived(isRouteNfts(page));
+
+	const steps: WizardSteps<WizardStepsManageTokens> = $derived([
 		{
 			name: WizardStepsManageTokens.MANAGE,
-			title: $i18n.tokens.manage.text.title
+			title: isNftsPage ? $i18n.tokens.manage.text.title_nft : $i18n.tokens.manage.text.title
 		},
 		{
 			name: WizardStepsManageTokens.IMPORT,
-			title: $i18n.tokens.import.text.title
+			title: isNftsPage ? $i18n.tokens.import.text.title_nft : $i18n.tokens.import.text.title
 		},
 		{
 			name: WizardStepsManageTokens.REVIEW,
@@ -77,14 +83,14 @@
 			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
-	];
+	]);
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+	const saveTokens = async (tokens: Record<string, Token>) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
@@ -347,9 +353,9 @@
 		<ManageTokens
 			{infoElement}
 			{initialSearch}
-			on:icClose={close}
-			on:icAddToken={modal.next}
-			on:icSave={saveTokens}
+			{isNftsPage}
+			onAddToken={modal.next}
+			onSave={saveTokens}
 		/>
 	{/if}
 </WizardModal>

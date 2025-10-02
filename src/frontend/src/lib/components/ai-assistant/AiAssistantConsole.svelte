@@ -9,6 +9,7 @@
 	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
 	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
 	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import {
 		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
 		AI_ASSISTANT_MESSAGE_SENT
@@ -210,6 +211,19 @@
 					>
 						{#snippet icon()}
 							<IconSend size="24" />
+						{/snippet}
+					</AiAssistantActionButton>
+					<AiAssistantActionButton
+						onClick={() => {
+							sendMessage({
+								messageText: $i18n.ai_assistant.text.action_button_show_balance_prompt
+							});
+						}}
+						subtitle={$i18n.ai_assistant.text.action_button_show_balance_subtitle}
+						title={$i18n.ai_assistant.text.action_button_show_balance_title}
+					>
+						{#snippet icon()}
+							<IconWallet size="24" />
 						{/snippet}
 					</AiAssistantActionButton>
 				</div>

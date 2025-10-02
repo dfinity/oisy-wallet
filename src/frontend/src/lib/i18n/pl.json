@@ -51,7 +51,8 @@
 			"switch_currency": "Zmień walutę"
 		},
 		"warning": {
-			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona"
+			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -113,6 +114,9 @@
 		},
 		"alt": {
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
+		},
+		"message": {
+			"refreshed_authentication": ""
 		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
@@ -532,7 +536,6 @@
 			"no_infura_erc1155_provider": "Brak dostawcy Infura ERC1155 dla sieci $network",
 			"no_infura_erc20_icp_provider": "Brak dostawcy Infura ERC20 ICP dla sieci $network",
 			"no_solana_network": "Brak sieci Solana dla sieci $network",
-			"eth_address_unknown": "Nieznany adres ETH.",
 			"loading_address": "Błąd podczas ładowania adresu $symbol.",
 			"loading_balance": "Błąd podczas ładowania salda $symbol dla sieci $network.",
 			"erc20_contracts": "Błąd podczas ładowania kontraktów ERC20.",
@@ -986,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importuj token",
+				"title_nft": "",
 				"review": "Przegląd",
 				"saving": "Zapisywanie...",
 				"updating": "Aktualizacja listy tokenów",
@@ -1020,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Zarządzaj tokenami",
+				"title_nft": "",
 				"manage_list": "Zarządzaj tokenami",
 				"list_settings": "Ustawienia listy",
 				"import_token": "Importuj token",
+				"import_nft": "",
 				"network": "Sieć",
 				"all_tokens_zero_balance": "Wszystkie tokeny mają zerowe saldo.",
 				"enable_more_assets": "Włącz więcej tokenów"
@@ -1183,11 +1189,16 @@
 			"scan_qr": "Zeskanuj kod QR",
 			"or_use_link": "lub użyj linku WalletConnect",
 			"proposer": "Proponujący",
+			"spender": "",
 			"review": "Przejrzyj wymagane uprawnienia $chain_name ($key)",
 			"method": "Metoda",
 			"methods": "Metody",
 			"events": "Wydarzenia",
 			"message": "Wiadomość",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dane HEX",
 			"raw_copied": "Surowe dane transakcji skopiowane do schowka.",
 			"sign_message": "Podpisz wiadomość"
@@ -1315,7 +1326,6 @@
 		"error": {
 			"loading_transactions": "Błąd podczas ładowania transakcji.",
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",
-			"no_token_loading_transaction": "Nie znaleziono tokena. Nie można załadować transakcji.",
 			"uncertified_transactions_removed": "Zidentyfikowano kilka niecertyfikowanych transakcji, które następnie usunięto z wyświetlanych list.",
 			"loading_pending_ck_ethereum_transactions": "Coś poszło nie tak podczas pobierania oczekujących transakcji $network.",
 			"get_transaction_for_hash": "Nie udało się pobrać transakcji z podanego hasha ($hash).",
@@ -1611,6 +1621,7 @@
 		"text": {
 			"terms_of_use": "Warunki użytkowania",
 			"title": "",
+			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
 			"body": ""
 		},
 		"alt": {
@@ -1683,11 +1694,18 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Wyślij wiadomość",
 			"send_message_input_placeholder": "Co chcesz zrobić?",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
 			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
 			"no_contacts_found_message": "Przepraszamy, nie udało mi się znaleźć odpowiednich kontaktów w Twojej książce adresowej.",
 			"loading": "Myślenie...",
 			"reset_chat_history": "",

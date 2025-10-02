@@ -1,6 +1,5 @@
 import {
 	NetworkAppMetadataSchema,
-	NetworkBuySchema,
 	NetworkEnvironmentSchema,
 	NetworkIdSchema,
 	NetworkSchema
@@ -39,28 +38,6 @@ describe('network.schema', () => {
 			const invalidEnv = 'unsupported-env';
 
 			expect(() => NetworkEnvironmentSchema.parse(invalidEnv)).toThrow();
-		});
-	});
-
-	describe('NetworkBuySchema', () => {
-		it('should validate with an optional onramperId', () => {
-			const validBuy = { onramperId: 'icp' };
-
-			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
-		});
-
-		it('should validate with an empty object (onramperId optional)', () => {
-			const validBuy = {};
-
-			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
-		});
-
-		// TODO: unskip the below when we have a way to validate OnramperNetworkId
-		// For now this test is failing because the OnramperNetworkId is not correctly validated
-		it.skip('should fail validation with an invalid onramperId', () => {
-			const invalidBuy = { onramperId: 'invalid-id' };
-
-			expect(() => NetworkBuySchema.parse(invalidBuy)).toThrow();
 		});
 	});
 

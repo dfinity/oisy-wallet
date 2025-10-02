@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext } from 'svelte';
-	import SwapBestRateBadge from './SwapBestRateBadge.svelte';
+	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
 	import SwapDetailsVelora from '$lib/components/swap/SwapDetailsVelora.svelte';
