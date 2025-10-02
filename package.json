@@ -31,7 +31,7 @@
 		"test:coverage": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage",
 		"test:debug": "ALLOW_LOGGING_FOR_DEBUGGING=true npm run test",
 		"test:merge": "tsc --project tsconfig.spec.json --noEmit && vitest run --coverage --merge-reports"
-    },
+	},
 	"dependencies": {
 		"@dfinity/agent": "^3.2.6",
 		"@dfinity/auth-client": "^3.2.6",
@@ -70,11 +70,9 @@
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
-		"@dfinity/eslint-config-oisy-wallet": "^0.2.2",
 		"@dfinity/ic-management": "^7.0.2",
 		"@dfinity/identity-secp256k1": "^3.2.6",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
-		"@playwright/test": "^1.55.1",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.9",
 		"@sveltejs/kit": "^2.43.5",
@@ -91,11 +89,6 @@
 		"jsqr": "^1.4.0",
 		"pem-file": "^1.0.1",
 		"postcss": "^8.5.6",
-		"prettier": "^3.5.3",
-		"prettier-plugin-motoko": "^0.12.1",
-		"prettier-plugin-organize-imports": "^4.3.0",
-		"prettier-plugin-svelte": "^3.4.0",
-		"prettier-plugin-tailwindcss": "^0.6.14",
 		"sass": "^1.93.2",
 		"svelte": "^5.33.18",
 		"svelte-check": "^4.3.2",
