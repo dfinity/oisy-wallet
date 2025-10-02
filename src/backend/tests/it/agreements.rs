@@ -339,7 +339,6 @@ fn test_update_user_agreements_accepts_valid_sha256_hex() {
 
     let valid_sha256 = "a".repeat(64);
 
-
     let arg = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
         agreements: UserAgreements {
@@ -373,14 +372,11 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
     let pic_setup = setup();
     let caller = Principal::from_text(CALLER).unwrap();
 
-
     let profile = pic_setup
         .update::<UserProfile>(caller, "create_user_profile", ())
         .expect("Create failed");
 
-
     let invalid_sha256 = "deadbeef00".to_string();
-
 
     let arg = UpdateUserAgreementsRequest {
         current_user_version: profile.version,
@@ -400,7 +396,6 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
     );
 
     assert!(matches!(resp, Ok(Err(_))));
-
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
