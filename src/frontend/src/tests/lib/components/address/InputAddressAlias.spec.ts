@@ -16,7 +16,7 @@ describe('InputAddressAlias', () => {
 			props: {
 				address,
 				isValid: false,
-				onQrCodeScan: () => {}
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -40,7 +40,7 @@ describe('InputAddressAlias', () => {
 				address,
 				disableAddressField: true,
 				isValid: false,
-				onQrCodeScan: () => {}
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -57,7 +57,7 @@ describe('InputAddressAlias', () => {
 				address,
 				disableAddressField: false,
 				isValid: false,
-				onQrCodeScan: () => {}
+				onQRCodeScan: () => {}
 			}
 		});
 
@@ -71,7 +71,7 @@ describe('InputAddressAlias', () => {
 			props: {
 				address: {},
 				isValid: false,
-				onQrCodeScan: () => {}
+				onQRCodeScan: () => {}
 			}
 		});
 

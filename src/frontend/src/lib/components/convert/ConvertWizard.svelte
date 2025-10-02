@@ -26,8 +26,8 @@
 		onNext: () => void;
 		onDestination: () => void;
 		onDestinationBack: () => void;
-		onQrCodeBack: () => void;
-		onQrCodeScan: () => void;
+		onQRCodeBack: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
@@ -42,8 +42,8 @@
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onQrCodeBack,
-		onQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -80,8 +80,8 @@
 		{onDestination}
 		{onDestinationBack}
 		{onNext}
-		{onQrCodeBack}
-		{onQrCodeScan}
+		{onQRCodeBack}
+		{onQRCodeScan}
 		bind:sendAmount
 		bind:receiveAmount
 		bind:convertProgressStep

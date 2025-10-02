@@ -23,7 +23,7 @@
 			code?: string;
 			expectedToken: OptionToken;
 		}) => QrResponse;
-		onQrCodeBack: () => void;
+		onQRCodeBack: () => void;
 	}
 
 	let {
@@ -31,7 +31,7 @@
 		destination = $bindable(),
 		amount = $bindable(),
 		onDecodeQrCode,
-		onQrCodeBack
+		onQRCodeBack
 	}: Props = $props();
 
 	const onScan = ({ status, code }: { status: QrStatus; code?: string }) => {
@@ -39,7 +39,7 @@
 
 		if (qrResponse.status === 'token_incompatible') {
 			toastsError({ msg: { text: $i18n.send.error.incompatible_token } });
-			onQrCodeBack();
+			onQRCodeBack();
 			return;
 		}
 
@@ -51,16 +51,16 @@
 			({ amount } = qrResponse);
 		}
 
-		onQrCodeBack();
+		onQRCodeBack();
 	};
 </script>
 
 <ContentWithToolbar styleClass="flex flex-col items-center gap-3 md:gap-4 w-full">
-	<QrCodeScanner onBack={onQrCodeBack} {onScan} />
+	<QrCodeScanner onBack={onQRCodeBack} {onScan} />
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={onQrCodeBack} />
+			<ButtonBack onclick={onQRCodeBack} />
 		</ButtonGroup>
 	{/snippet}
 </ContentWithToolbar>

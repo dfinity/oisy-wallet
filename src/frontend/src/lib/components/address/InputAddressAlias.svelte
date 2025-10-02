@@ -17,7 +17,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		onQrCodeScan?: () => void;
+		onQRCodeScan?: () => void;
 		address: Partial<ContactAddressUi>;
 		disableAddressField?: boolean;
 		isValid: boolean;
@@ -26,7 +26,7 @@
 	}
 
 	let {
-		onQrCodeScan,
+		onQRCodeScan,
 		address = $bindable(),
 		disableAddressField = false,
 		isValid = $bindable(),
@@ -64,7 +64,7 @@
 		name="address"
 		autofocus={isDesktop() && focusField === 'address'}
 		disabled={disableAddressField || disabled}
-		{onQrCodeScan}
+		{onQRCodeScan}
 		placeholder={$i18n.address.form.address_placeholder}
 		showPasteButton={!disableAddressField && !disabled}
 		showResetButton={!disableAddressField && !disabled}

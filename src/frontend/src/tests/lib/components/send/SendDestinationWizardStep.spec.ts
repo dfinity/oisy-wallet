@@ -43,7 +43,7 @@ describe('SendDestinationWizardStep', () => {
 		onBack: vi.fn(),
 		onNext: vi.fn(),
 		onClose: vi.fn(),
-		onQrCodeScan: vi.fn()
+		onQRCodeScan: vi.fn()
 	};
 
 	const mockContext = (sendToken: Token) =>
@@ -140,7 +140,7 @@ describe('SendDestinationWizardStep', () => {
 				onBack: vi.fn(),
 				onNext: vi.fn(),
 				onClose: vi.fn(),
-				onQrCodeScan: vi.fn()
+				onQRCodeScan: vi.fn()
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
@@ -164,7 +164,7 @@ describe('SendDestinationWizardStep', () => {
 				onBack: vi.fn(),
 				onNext: vi.fn(),
 				onClose: vi.fn(),
-				onQrCodeScan: vi.fn()
+				onQRCodeScan: vi.fn()
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});
@@ -184,7 +184,7 @@ describe('SendDestinationWizardStep', () => {
 				onBack: vi.fn(),
 				onNext: vi.fn(),
 				onClose: vi.fn(),
-				onQrCodeScan: vi.fn()
+				onQRCodeScan: vi.fn()
 			},
 			context: mockContext(ETHEREUM_TOKEN)
 		});

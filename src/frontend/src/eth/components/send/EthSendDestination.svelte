@@ -18,7 +18,7 @@
 		invalidDestination: boolean;
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
-		onQrCodeScan?: () => void;
+		onQRCodeScan?: () => void;
 	}
 
 	let {
@@ -28,7 +28,7 @@
 		invalidDestination = $bindable(false),
 		knownDestinations,
 		networkContacts,
-		onQrCodeScan
+		onQRCodeScan
 	}: Props = $props();
 
 	let networkICP = $derived(isNetworkICP(network));
@@ -60,7 +60,7 @@
 	{knownDestinations}
 	{networkContacts}
 	onInvalidDestination={isInvalidDestination}
-	onQRButtonClick={onQrCodeScan}
+	onQRButtonClick={onQRCodeScan}
 	bind:destination
 	bind:invalidDestination
 />

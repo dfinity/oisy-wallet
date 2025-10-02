@@ -226,7 +226,7 @@
 				onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
 				onClose={close}
 				onNext={modal.next}
-				onQrCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+				onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
@@ -235,7 +235,7 @@
 			<SendQrCodeScan
 				expectedToken={$token}
 				{onDecodeQrCode}
-				onQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 				bind:destination
 				bind:amount
 			/>

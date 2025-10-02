@@ -64,8 +64,8 @@
 		onNext: () => void;
 		onDestination: () => void;
 		onDestinationBack: () => void;
-		onQrCodeBack: () => void;
-		onQrCodeScan: () => void;
+		onQRCodeBack: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
@@ -80,8 +80,8 @@
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onQrCodeBack,
-		onQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	}: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -241,7 +241,7 @@
 				tokenStandard={$destinationToken.standard}
 				on:icBack={back}
 				bind:customDestination
-				on:icQRCodeScan={onQrCodeScan}
+				on:icQRCodeScan={onQRCodeScan}
 				on:icDestinationBack={onDestinationBack}
 			>
 				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
@@ -250,7 +250,7 @@
 			<SendQrCodeScan
 				expectedToken={$destinationToken}
 				onDecodeQrCode={decodeQrCode}
-				{onQrCodeBack}
+				{onQRCodeBack}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
 			/>

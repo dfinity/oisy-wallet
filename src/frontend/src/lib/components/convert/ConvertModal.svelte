@@ -70,8 +70,8 @@
 			onDestination={() => goToStep(WizardStepsConvert.DESTINATION)}
 			onDestinationBack={() => goToStep(WizardStepsConvert.CONVERT)}
 			onNext={modal.next}
-			onQrCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
-			onQrCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
+			onQRCodeBack={() => goToStep(WizardStepsConvert.DESTINATION)}
+			onQRCodeScan={() => goToStep(WizardStepsConvert.QR_CODE_SCAN)}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:convertProgressStep

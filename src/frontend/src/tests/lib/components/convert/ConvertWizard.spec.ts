@@ -51,8 +51,8 @@ describe('ConvertWizard', () => {
 	const onNext = vi.fn();
 	const onDestination = vi.fn();
 	const onDestinationBack = vi.fn();
-	const onQrCodeScan = vi.fn();
-	const onQrCodeBack = vi.fn();
+	const onQRCodeScan = vi.fn();
+	const onQRCodeBack = vi.fn();
 
 	const props = {
 		sendAmount,
@@ -67,8 +67,8 @@ describe('ConvertWizard', () => {
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onQrCodeBack,
-		onQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	};
 
 	const mockContext = (sourceToken: Token) =>

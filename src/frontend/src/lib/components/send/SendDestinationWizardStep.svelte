@@ -48,7 +48,7 @@
 		onBack: () => void;
 		onNext: () => void;
 		onClose: () => void;
-		onQrCodeScan: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
@@ -59,7 +59,7 @@
 		onBack,
 		onNext,
 		onClose,
-		onQrCodeScan
+		onQRCodeScan
 	}: Props = $props();
 
 	onMount(() => {
@@ -99,7 +99,7 @@
 				<EthSendDestination
 					knownDestinations={$ethKnownDestinations}
 					networkContacts={$ethNetworkContacts}
-					{onQrCodeScan}
+					{onQRCodeScan}
 					token={$sendToken}
 					bind:destination
 					bind:invalidDestination
@@ -119,7 +119,7 @@
 			<IcSendDestination
 				knownDestinations={$icKnownDestinations}
 				networkContacts={$icNetworkContacts}
-				{onQrCodeScan}
+				{onQRCodeScan}
 				tokenStandard={$sendToken.standard}
 				bind:destination
 				bind:invalidDestination
@@ -139,7 +139,7 @@
 				knownDestinations={$btcKnownDestinations}
 				networkContacts={$btcNetworkContacts}
 				networkId={$sendTokenNetworkId}
-				{onQrCodeScan}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
 			/>
@@ -157,7 +157,7 @@
 			<SolSendDestination
 				knownDestinations={$solKnownDestinations}
 				networkContacts={$solNetworkContacts}
-				{onQrCodeScan}
+				{onQRCodeScan}
 				bind:destination
 				bind:invalidDestination
 			/>

@@ -15,7 +15,7 @@
 	} from '$lib/utils/token-account-id.utils';
 
 	interface InputAddressProps {
-		onQrCodeScan?: () => void;
+		onQRCodeScan?: () => void;
 		value?: string;
 		addressType?: TokenAccountIdTypes;
 		parseError?: ZodError;
@@ -23,7 +23,7 @@
 	}
 
 	let {
-		onQrCodeScan,
+		onQRCodeScan,
 		value = $bindable(),
 		addressType = $bindable(),
 		parseError = $bindable(),
@@ -61,8 +61,8 @@
 </script>
 
 {#snippet qrButton()}
-	{#if nonNullish(onQrCodeScan) && !disabled}
-		<QrButton on:click={onQrCodeScan} />
+	{#if nonNullish(onQRCodeScan) && !disabled}
+		<QrButton on:click={onQRCodeScan} />
 	{/if}
 {/snippet}
 

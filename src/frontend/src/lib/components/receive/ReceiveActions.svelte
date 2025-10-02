@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconQrCodeScanner } from '@dfinity/gix-components';
+	import { IconQRCodeScanner } from '@dfinity/gix-components';
 	import { createEventDispatcher } from 'svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
@@ -31,7 +31,7 @@
 			testId={qrCodeAction?.testId}
 		>
 			{#snippet icon()}
-				<IconQrCodeScanner size="24" />
+				<IconQRCodeScanner size="24" />
 			{/snippet}
 		</ButtonIcon>
 	{/if}
