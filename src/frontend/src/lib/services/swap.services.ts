@@ -38,6 +38,10 @@ import {
 } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { trackEvent } from '$lib/services/analytics.services';
+import { retryWithDelay } from '$lib/services/rest.services';
+import { throwSwapError } from '$lib/services/swap-errors.services';
+import { autoLoadSingleToken } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
@@ -80,10 +84,6 @@ import {
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
-import { trackEvent } from './analytics.services';
-import { retryWithDelay } from './rest.services';
-import { throwSwapError } from './swap-errors.services';
-import { autoLoadSingleToken } from './token.services';
 
 export const fetchKongSwap = async ({
 	identity,

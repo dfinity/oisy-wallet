@@ -5,7 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NetworkSchema } from '$lib/schema/network.schema';
+import { NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
@@ -114,11 +114,6 @@ describe('nfts.utils', () => {
 	// Build a case-insensitive substring from the Azuki name for filtering
 	const azukiName = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN).name ?? '';
 	const deGodsName = mapTokenToCollection(DE_GODS_TOKEN).name ?? '';
-
-	const filterSub =
-		azukiName && azukiName.length >= 3
-			? azukiName.slice(1, 4).toLowerCase()
-			: azukiName.toLowerCase();
 
 	describe('findNft', () => {
 		it('should return existing nft', () => {
@@ -470,18 +465,24 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
-				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
 			});
 		});
 
-		it('should not map empty name and symbol', () => {
-			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+		it('should not map empty name, symbol and description', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN,
+				name: '',
+				symbol: '',
+				description: ''
+			});
 
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});
@@ -600,22 +601,77 @@ describe('nfts.utils', () => {
 			return [ui[1], ui[0]];
 		})();
 
-		it('filters by collection name (case-insensitive substring)', () => {
+		it('filters NFTs by collection.name (case-insensitive substring)', () => {
 			const res = filterSortByCollection({
 				items: base,
-				filter: 'azu' // lowercase
+				filter: 'azu' // lowercase substring
 			});
 
 			expect(res).toEqual([nftAzuki2, nftAzuki1]);
 		});
 
-		it('sorts by collection name ascending', () => {
+		it('filters NFTs by nft.name', () => {
+			const custom = { ...nftAzuki1, name: 'Super Special NFT' };
+			const res = filterSortByCollection({
+				items: [custom, nftDeGods],
+				filter: 'special'
+			});
+
+			expect(res).toEqual([custom]);
+		});
+
+		it('filters NFTs by nft.id', () => {
+			const custom = { ...nftAzuki1, id: parseNftId(987654321) };
+			const res = filterSortByCollection({
+				items: [custom, nftDeGods],
+				filter: '987654321'
+			});
+
+			expect(res).toEqual([custom]);
+		});
+
+		it('filters collection UIs by collection.name', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				filter: 'god'
+			});
+
+			expect(res).toHaveLength(1);
+			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
+		});
+
+		it('filters collection UIs by inner nft.name', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
+			const custom = { ...nftAzuki1, name: 'Ultra Rare Azuki' };
+			const ui = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [custom]
+			});
+			const res = filterSortByCollection({ items: ui, filter: 'ultra rare' });
+
+			expect(res).toHaveLength(1);
+			expect(res[0].nfts).toEqual([custom]);
+		});
+
+		it('filters collection UIs by inner nft.id', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
+			const custom = { ...nftAzuki1, id: parseNftId(123456789) };
+			const ui = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [custom]
+			});
+			const res = filterSortByCollection({ items: ui, filter: '123456789' });
+
+			expect(res).toHaveLength(1);
+			expect(res[0].nfts).toEqual([custom]);
+		});
+
+		it('sorts NFTs by collection name ascending', () => {
 			const res = filterSortByCollection({
 				items: base,
 				sort: { type: 'collection-name', order: 'asc' }
 			});
 
-			// "Azuki..." then "DeGods"
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'Azuki Elemental Beans',
 				'Azuki Elemental Beans',
@@ -623,13 +679,12 @@ describe('nfts.utils', () => {
 			]);
 		});
 
-		it('sorts by collection name descending', () => {
+		it('sorts NFTs by collection name descending', () => {
 			const res = filterSortByCollection({
 				items: base,
 				sort: { type: 'collection-name', order: 'desc' }
 			});
 
-			// "DeGods" then "Azuki..."
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'DeGods',
 				'Azuki Elemental Beans',
@@ -637,71 +692,39 @@ describe('nfts.utils', () => {
 			]);
 		});
 
-		it('applies filter then sort', () => {
+		it('sorts collection UIs by name ascending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+			const expected = [azukiName, deGodsName].sort((a, b) => collator.compare(a ?? '', b ?? ''));
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
+		});
+
+		it('sorts collection UIs by name descending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'desc' }
+			});
+			const expected = [azukiName, deGodsName]
+				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
+				.reverse();
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
+		});
+
+		it('applies filter then sort for NFTs', () => {
 			const res = filterSortByCollection({
 				items: base,
 				filter: 'god',
 				sort: { type: 'collection-name', order: 'asc' }
 			});
 
-			// Only DeGods remains; sorted trivially
 			expect(res).toEqual([nftDeGods]);
 		});
 
-		it('returns the same reference when neither filter nor sort is provided', () => {
-			const input = [...base];
-			const res = filterSortByCollection({ items: input });
-
-			expect(res).toBe(input);
-		});
-
-		it('returns a new array when sort is provided (immutability)', () => {
-			const input = [...base];
-			const res = filterSortByCollection({
-				items: input,
-				sort: { type: 'collection-name', order: 'asc' }
-			});
-
-			expect(res).not.toBe(input);
-		});
-
-		it('filters collections by collection.name (case-insensitive substring)', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				filter: filterSub
-			});
-
-			expect(res).toHaveLength(1);
-			expect(res[0].collection.address).toBe(AZUKI_ELEMENTAL_BEANS_TOKEN.address);
-		});
-
-		it('sorts collections by name ascending', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				sort: { type: 'collection-name', order: 'asc' }
-			});
-
-			const expectedOrder = [azukiName, deGodsName].sort((a, b) =>
-				collator.compare(a ?? '', b ?? '')
-			);
-
-			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
-		});
-
-		it('sorts collections by name descending', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				sort: { type: 'collection-name', order: 'desc' }
-			});
-
-			const expectedOrder = [azukiName, deGodsName]
-				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
-				.reverse();
-
-			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
-		});
-
-		it('applies filter for collection then sort', () => {
+		it('applies filter then sort for collections', () => {
 			const res = filterSortByCollection({
 				items: collections,
 				filter: 'god',
@@ -712,14 +735,31 @@ describe('nfts.utils', () => {
 			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
 		});
 
-		it('returns the same reference when neither filter nor sort is provided for collections', () => {
+		it('returns the same reference when neither filter nor sort is provided (NFTs)', () => {
+			const input = [...base];
+			const res = filterSortByCollection({ items: input });
+
+			expect(res).toBe(input);
+		});
+
+		it('returns the same reference when neither filter nor sort is provided (collections)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({ items: input });
 
 			expect(res).toBe(input);
 		});
 
-		it('returns a new array when sort is provided for collections (immutability)', () => {
+		it('returns a new array when sort is provided (NFTs)', () => {
+			const input = [...base];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			expect(res).not.toBe(input);
+		});
+
+		it('returns a new array when sort is provided (collections)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({
 				items: input,
