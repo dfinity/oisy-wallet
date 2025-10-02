@@ -6,26 +6,30 @@
 	import { isPWAStandalone } from '$lib/utils/device.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
-	let visible = true;
+	let envBannerVisible = $state(true);
 
-	const close = () => (visible = false);
+	const closeEnvBanner = () => (envBannerVisible = false);
+
+	let pwaBannerVisible = $state(true);
+
+	const closePwaBanner = () => (pwaBannerVisible = false);
 </script>
 
-{#if STAGING && visible}
+{#if STAGING && envBannerVisible}
 	<div class="test-banner flex justify-between gap-4">
 		<span class="flex items-center justify-center gap-4">
 			<IconWarning size="48px" />
 			<h3 class="clamp-4">{$i18n.core.info.test_banner}</h3>
 		</span>
-		<button aria-label={$i18n.core.text.close} on:click={close}><IconClose /></button>
+		<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}><IconClose /></button>
 	</div>
-{:else if BETA && visible}
+{:else if BETA && envBannerVisible}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>
-			<button aria-label={$i18n.core.text.close} on:click={close}>
+			<button aria-label={$i18n.core.text.close} onclick={closeEnvBanner}>
 				<IconClose />
 			</button>
 		</WarningBanner>
@@ -33,13 +37,13 @@
 {/if}
 
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-{#if isPWAStandalone() && visible}
+{#if isPWAStandalone() && pwaBannerVisible}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{replaceOisyPlaceholders($i18n.core.warning.standalone_mode)}</span>
-			<button aria-label={$i18n.core.text.close} on:click={close}>
+			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
 				<IconClose />
 			</button>
 		</WarningBanner>

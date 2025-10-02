@@ -18,7 +18,6 @@
 
 	interface Props {
 		networkSelectorViewOnly: boolean;
-		loading: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
@@ -28,7 +27,6 @@
 
 	let {
 		networkSelectorViewOnly = false,
-		loading,
 		tokenListItem,
 		toolbar,
 		noResults,
