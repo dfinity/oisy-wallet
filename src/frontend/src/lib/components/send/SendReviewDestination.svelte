@@ -3,10 +3,10 @@
 	import AddressCard from '$lib/components/address/AddressCard.svelte';
 	import AvatarWithBadge from '$lib/components/contact/AvatarWithBadge.svelte';
 	import SendContactName from '$lib/components/send/SendContactName.svelte';
+	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ContactUi } from '$lib/types/contact';
-	import {getContactForAddress} from "$lib/utils/contact.utils";
-	import {contacts} from "$lib/derived/contacts.derived";
+	import { getContactForAddress } from '$lib/utils/contact.utils';
 
 	interface Props {
 		destination: string;
@@ -16,7 +16,9 @@
 
 	const { destination, selectedContact, aiAssistantConsoleView }: Props = $props();
 
-	let contact = $derived(selectedContact ?? getContactForAddress({ addressString: destination, contactList: $contacts }));
+	let contact = $derived(
+		selectedContact ?? getContactForAddress({ addressString: destination, contactList: $contacts })
+	);
 </script>
 
 <AddressCard>
