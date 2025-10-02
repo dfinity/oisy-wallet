@@ -70,7 +70,7 @@ pub const START_DIFFICULTY: u32 = 500_000;
 
 // The minimum allowed difficulty. Auto-adjustment will not reduce difficulty below this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
-pub const MIN_DIFFICULTY: u32 = 100_000;
+pub const MIN_DIFFICULTY: u32 = 500_000;
 
 // The maximum allowed difficulty. Auto-adjustment will not raise difficulty above this value.
 // Restricting difficulty may cause actual solving times to deviate from `TARGET_DURATION_MS`.
@@ -84,7 +84,7 @@ pub const MAX_DIFFICULTY: u32 = 5_000_000;
 // `1_000_000` will grant `10_000 * 1_000_000 = 10,000,000,000` cycles.
 // It is important to find the correct balance here (also taking the cycles used to execute the PoW
 // code itself into account)
-pub const CYCLES_PER_DIFFICULTY: u64 = 1_000_000;
+pub const CYCLES_PER_DIFFICULTY: u64 = 1000;
 
 // ---------------------------------------------------------------------------------------------
 // - Error-structures and -enums
