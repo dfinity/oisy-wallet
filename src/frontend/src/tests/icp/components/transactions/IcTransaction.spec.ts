@@ -97,7 +97,7 @@ describe('IcTransaction', () => {
 				displayDecimals: EIGHT_DECIMALS,
 				unitName: ICP_TOKEN.decimals,
 				showPlusSign: false
-			})} ${getTokenDisplaySymbol(ICP_TOKEN)}`
+			})} ${getTokenDisplaySymbol(ICP_TOKEN)} `
 		);
 	});
 });
