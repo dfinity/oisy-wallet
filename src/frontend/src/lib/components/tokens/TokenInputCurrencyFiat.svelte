@@ -39,7 +39,7 @@
 		error = false,
 		loading = false,
 		autofocus = false,
-		onInput = () => {}
+		onInput
 	}: Props = $props();
 
 	let displayValue = $state<OptionAmount>();
