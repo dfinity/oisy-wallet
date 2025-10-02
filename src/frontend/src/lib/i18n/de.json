@@ -1588,7 +1588,8 @@
 			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
 			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
 			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
-			"accept_and_continue": "Zustimmen und weiterfahren"
+			"accept_and_continue": "Zustimmen und weiterfahren",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
@@ -1597,6 +1598,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Lizenzvereinbarung",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
 			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
 			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
 			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",
@@ -1623,6 +1628,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
 			"body": ""
@@ -1634,6 +1643,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Datenschutzrichtlinie",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
 			"title": "",
 			"body": ""
 		},
