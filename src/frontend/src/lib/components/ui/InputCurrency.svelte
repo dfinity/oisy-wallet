@@ -13,7 +13,7 @@
 		decimals?: number;
 		testId?: string;
 		autofocus?: boolean;
-		onInput?: () => void;
+		onInput: () => void;
 	}
 
 	let {
@@ -50,7 +50,7 @@
 		spellcheck={false}
 		{testId}
 		bind:value
-		on:nnsInput={() => onInput?.()}
+		on:nnsInput={() => onInput()}
 		on:blur
 		on:focus
 		bind:inputElement

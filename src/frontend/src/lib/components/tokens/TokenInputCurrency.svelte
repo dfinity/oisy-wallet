@@ -16,7 +16,7 @@
 		testId?: string;
 		styleClass?: string;
 		autofocus?: boolean;
-		onInput?: () => void;
+		onInput: () => void;
 	}
 
 	let {
