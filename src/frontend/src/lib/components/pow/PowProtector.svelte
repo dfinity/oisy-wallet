@@ -15,7 +15,6 @@
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { hasZeroCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -99,8 +98,6 @@
 	};
 
 	onMount(async () => {
-		modalStore.openAboutWhyOisy(Symbol('test'));
-
 		if (POW_FEATURE_ENABLED) {
 			try {
 				// Initial check
@@ -138,13 +135,9 @@
 	<IntervalLoader interval={POW_CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
 {/if}
 
-<!-- Always render children to preserve component state (e.g., form inputs) -->
-{@render children?.()}
-
 {#if POW_FEATURE_ENABLED && hasNoCycles}
 	<!--
 	User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
-	This modal overlays on top of the existing content without destroying it, preserving form state.
 	This modal will be displayed until either:
 	- User obtains sufficient cycles (checkCycles polling succeeds)
 	- Maximum retry attempts reached (user gets signed out)
@@ -171,18 +164,12 @@
 			</div>
 		</Modal>
 	</div>
+{:else}
+	<!-- POW feature is globally disabled and user has sufficient cycles. So we bypass all protection logic and render the app content directly -->
+	{@render children?.()}
 {/if}
 
 <style lang="scss">
-	.insufficient-cycles-modal {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		z-index: 9999;
-	}
-
 	:root:has(.insufficient-cycles-modal) {
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;
