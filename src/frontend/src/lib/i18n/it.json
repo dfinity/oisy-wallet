@@ -1269,8 +1269,7 @@
 			"status": "Stato",
 			"confirmations": "Conferme",
 			"for": "",
-			"for_copied": "",
-			"expiration": ""
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Confermato",

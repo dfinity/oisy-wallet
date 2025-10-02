@@ -1269,8 +1269,7 @@
 			"status": "الحالة",
 			"confirmations": "التأكيدات",
 			"for": "",
-			"for_copied": "",
-			"expiration": ""
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "تم التأكيد",

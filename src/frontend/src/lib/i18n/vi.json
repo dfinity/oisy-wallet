@@ -1269,8 +1269,7 @@
 			"status": "Trạng thái",
 			"confirmations": "Xác nhận",
 			"for": "",
-			"for_copied": "",
-			"expiration": ""
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",

@@ -1269,8 +1269,7 @@
 			"status": "ステータス",
 			"confirmations": "確認数",
 			"for": "",
-			"for_copied": "",
-			"expiration": ""
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "確認済み",

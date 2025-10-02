@@ -1269,8 +1269,7 @@
 			"status": "Status",
 			"confirmations": "Bestätigungen",
 			"for": "",
-			"for_copied": "",
-			"expiration": ""
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Bestätigt",

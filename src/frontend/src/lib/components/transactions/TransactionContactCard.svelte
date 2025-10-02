@@ -16,9 +16,9 @@
 
 	interface Props {
 		type: 'send' | 'receive' | 'approve';
-		to: string | undefined;
+		to?: string;
 		toExplorerUrl?: string;
-		from: string | undefined;
+		from?: string;
 		fromExplorerUrl?: string;
 		approveSpender?: string;
 		approveSpenderExplorerUrl?: string;

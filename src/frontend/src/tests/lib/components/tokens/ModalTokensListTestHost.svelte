@@ -17,9 +17,17 @@
 		tokens: Token[];
 		renderNoResults: boolean;
 		filterNfts?: boolean;
+		onSelectNetworkFilter: () => void;
+		onTokenButtonClick: (token: Token) => void;
 	}
 
-	let { tokens, renderNoResults, filterNfts = false }: Props = $props();
+	let {
+		tokens,
+		renderNoResults,
+		filterNfts = false,
+		onSelectNetworkFilter,
+		onTokenButtonClick
+	}: Props = $props();
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -33,7 +41,12 @@
 	);
 </script>
 
-<ModalTokensList networkSelectorViewOnly={false} on:icTokenButtonClick on:icSelectNetworkFilter>
+<ModalTokensList
+	loading={false}
+	networkSelectorViewOnly={false}
+	{onSelectNetworkFilter}
+	{onTokenButtonClick}
+>
 	{#snippet noResults()}
 		{#if renderNoResults}
 			<div data-tid={MODAL_TOKEN_LIST_CUSTOM_NO_RESULTS}>No results custom message</div>
