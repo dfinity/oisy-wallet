@@ -24,7 +24,7 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadCustomTokens: vi.fn()
@@ -83,10 +83,12 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).toHaveBeenCalledOnce();
-		expect(toasts).toHaveBeenCalledOnce();
-		expect(idbTokensApi).toHaveBeenCalledOnce();
-		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		await waitFor(() => {
+			expect(removeUserTokenMock).toHaveBeenCalledOnce();
+			expect(toasts).toHaveBeenCalledOnce();
+			expect(idbTokensApi).toHaveBeenCalledOnce();
+			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		});
 	});
 
 	it('saves token after all required steps if indexCanisterId was missing', async () => {
