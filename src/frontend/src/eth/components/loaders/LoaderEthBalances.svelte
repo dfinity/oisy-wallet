@@ -27,6 +27,7 @@
 		if (loading) {
 			return;
 		}
+
 		loading = true;
 
 		await Promise.allSettled([
@@ -46,7 +47,6 @@
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
 		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
-		console.log('debounceLoad');
 		debounceLoad();
 	});
 
