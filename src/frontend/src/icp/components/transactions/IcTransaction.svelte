@@ -44,7 +44,7 @@
 </script>
 
 <Transaction
-	{amount}
+	amount={type === 'approve' ? 0n : amount}
 	{approveSpender}
 	{fee}
 	{from}
@@ -57,5 +57,5 @@
 	{token}
 	{type}
 >
-	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
+	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} approveAmount={amount} />
 </Transaction>
