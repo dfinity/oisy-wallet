@@ -12,6 +12,8 @@ pub struct UserAgreement {
     pub last_accepted_at_ns: Option<Timestamp>,
     /// When the agreement itself was last updated (millis since epoch).
     pub last_updated_at_ms: Option<Timestamp>,
+    /// Sha256 hash of the agreement text, to detect changes.
+    pub text_sha256: Option<String>,
 }
 
 /// The user agreements tracked by the system.
