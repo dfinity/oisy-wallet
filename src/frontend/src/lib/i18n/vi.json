@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
+			"title_part_1": "Tài sản số của bạn",
+			"title_part_2": "Riêng tư và An toàn",
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
+			"instant_and_private": "Trợ lý AI tích hợp — Quyền riêng tư là tiêu chuẩn",
+			"advanced_cryptography": "Được bảo mật bằng mật mã tiên tiến — 100% onchain"
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
