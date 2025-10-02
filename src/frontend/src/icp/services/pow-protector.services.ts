@@ -5,7 +5,6 @@ import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/a
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
-
 const formatBigIntWithApostrophes = (value: bigint): string =>
 	value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 
