@@ -18,7 +18,11 @@
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
 
-	let { tokenGroup }: { tokenGroup: TokenUiGroup } = $props();
+	interface Props {
+		tokenGroup: TokenUiGroup;
+	}
+
+	let { tokenGroup }: Props = $props();
 
 	const isExpanded: boolean = $derived(
 		($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false

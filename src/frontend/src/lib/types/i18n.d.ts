@@ -50,7 +50,7 @@ interface I18nCore {
 		switch_language: string;
 		switch_currency: string;
 	};
-	warning: { do_not_close: string };
+	warning: { do_not_close: string; standalone_mode: string };
 }
 
 interface I18nNavigation {
@@ -387,7 +387,6 @@ interface I18nInit {
 		no_infura_erc1155_provider: string;
 		no_infura_erc20_icp_provider: string;
 		no_solana_network: string;
-		eth_address_unknown: string;
 		loading_address: string;
 		loading_balance: string;
 		erc20_contracts: string;
@@ -821,6 +820,7 @@ interface I18nTokens {
 	import: {
 		text: {
 			title: string;
+			title_nft: string;
 			review: string;
 			saving: string;
 			updating: string;
@@ -853,9 +853,11 @@ interface I18nTokens {
 	manage: {
 		text: {
 			title: string;
+			title_nft: string;
 			manage_list: string;
 			list_settings: string;
 			import_token: string;
+			import_nft: string;
 			network: string;
 			all_tokens_zero_balance: string;
 			enable_more_assets: string;
@@ -994,11 +996,16 @@ interface I18nWallet_connect {
 		scan_qr: string;
 		or_use_link: string;
 		proposer: string;
+		spender: string;
 		review: string;
 		method: string;
 		methods: string;
 		events: string;
 		message: string;
+		expiration: string;
+		token: string;
+		network: string;
+		amount: string;
 		hex_data: string;
 		raw_copied: string;
 		sign_message: string;
@@ -1314,7 +1321,7 @@ interface I18nLicense_agreement {
 }
 
 interface I18nTerms_of_use {
-	text: { terms_of_use: string; title: string; body: string };
+	text: { terms_of_use: string; title: string; instruction: string; body: string };
 	alt: { terms_of_use: string };
 }
 
@@ -1374,6 +1381,9 @@ interface I18nAi_assistant {
 		action_button_send_tokens_title: string;
 		action_button_send_tokens_subtitle: string;
 		action_button_send_tokens_prompt: string;
+		action_button_show_balance_title: string;
+		action_button_show_balance_subtitle: string;
+		action_button_show_balance_prompt: string;
 		select_contact_message: string;
 		send_to_message: string;
 		send_message: string;

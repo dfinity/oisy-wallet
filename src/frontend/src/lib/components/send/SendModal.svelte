@@ -120,7 +120,7 @@
 									? $solAddressLocalnetNotLoaded
 									: false;
 
-	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
+	const onSendToken = async (token: Token) => {
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -201,8 +201,8 @@
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList
-				on:icSendToken={onIcSendToken}
-				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				{onSendToken}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 			<SendNftsList

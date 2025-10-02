@@ -23,7 +23,7 @@
 </script>
 
 <a
-	class="flex items-center gap-1"
+	class="inline-flex items-center gap-1"
 	class:no-underline={noUnderline}
 	aria-label={replaceOisyPlaceholders($i18n.terms_of_use.alt.terms_of_use)}
 	data-tid={testId}

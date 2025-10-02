@@ -51,7 +51,8 @@
 			"switch_currency": "切换货币"
 		},
 		"warning": {
-			"do_not_close": "交易完成前请勿关闭此标签页"
+			"do_not_close": "交易完成前请勿关闭此标签页",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "没有 $network 网络的 Infura ERC1155 提供商",
 			"no_infura_erc20_icp_provider": "没有 $network 网络的 Infura ERC20 ICP 提供商",
 			"no_solana_network": "没有 $network 网络的 Solana 网络配置",
-			"eth_address_unknown": "ETH 地址未知。",
 			"loading_address": "加载 $symbol 地址时出错。",
 			"loading_balance": "加载 $network 网络上的 $symbol 余额时出错。",
 			"erc20_contracts": "加载 ERC20 合约时出错。",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "导入代币",
+				"title_nft": "",
 				"review": "审查",
 				"saving": "正在保存...",
 				"updating": "正在更新代币列表",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "管理代币",
+				"title_nft": "",
 				"manage_list": "管理代币",
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
+				"import_nft": "",
 				"network": "网络",
 				"all_tokens_zero_balance": "所有代币余额均为零。",
 				"enable_more_assets": "启用更多代币"
@@ -1186,11 +1189,16 @@
 			"scan_qr": "扫描二维码",
 			"or_use_link": "或使用 WalletConnect 链接",
 			"proposer": "发起方",
+			"spender": "",
 			"review": "查看 $chain_name ($key) 所需权限",
 			"method": "方法",
 			"methods": "方法",
 			"events": "事件",
 			"message": "消息",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEX 数据",
 			"raw_copied": "原始交易数据已复制到剪贴板。",
 			"sign_message": "签名消息"
@@ -1613,6 +1621,7 @@
 		"text": {
 			"terms_of_use": "使用条款",
 			"title": "",
+			"instruction": "点击此按钮即表示你同意$link",
 			"body": ""
 		},
 		"alt": {
@@ -1685,6 +1694,9 @@
 			"action_button_send_tokens_title": "发送资产",
 			"action_button_send_tokens_subtitle": "几秒内完成发送设置",
 			"action_button_send_tokens_prompt": "我想发送代币。",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "选择一个联系人以开始发送流程：",
 			"send_to_message": "发送给 $contact_name ($address_info)。",
 			"send_message": "发送消息",

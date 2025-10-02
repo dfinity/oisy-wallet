@@ -5,7 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NetworkSchema } from '$lib/schema/network.schema';
+import { NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
@@ -465,18 +465,24 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
-				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
 			});
 		});
 
-		it('should not map empty name and symbol', () => {
-			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+		it('should not map empty name, symbol and description', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN,
+				name: '',
+				symbol: '',
+				description: ''
+			});
 
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});

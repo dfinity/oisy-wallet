@@ -20,14 +20,15 @@
 	let loading = $state(false);
 
 	const onLoad = async () => {
-		if (loading) {
-			return;
-		}
-		loading = true;
-
 		if (isNullish($ethAddress)) {
 			return;
 		}
+
+		if (loading) {
+			return;
+		}
+
+		loading = true;
 
 		await Promise.allSettled([
 			// We might require Ethereum balance on IC network as well given that one can convert ckETH to ETH.

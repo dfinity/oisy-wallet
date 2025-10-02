@@ -51,7 +51,8 @@
 			"switch_currency": "मुद्रा बदलें"
 		},
 		"warning": {
-			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें"
+			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC1155 प्रदाता नहीं है",
 			"no_infura_erc20_icp_provider": "नेटवर्क $network के लिए कोई इंफुरा ERC20 ICP प्रदाता नहीं है",
 			"no_solana_network": "नेटवर्क $network के लिए कोई सोलाना नेटवर्क नहीं है",
-			"eth_address_unknown": "ETH पता अज्ञात है।",
 			"loading_address": "$symbol पता लोड करते समय त्रुटि।",
 			"loading_balance": "नेटवर्क $network के लिए $symbol बैलेंस लोड करते समय त्रुटि।",
 			"erc20_contracts": "ERC20 कॉन्ट्रैक्ट लोड करते समय त्रुटि।",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "टोकन आयात करें",
+				"title_nft": "",
 				"review": "समीक्षा",
 				"saving": "सहेज रहा है...",
 				"updating": "टोकन सूची अपडेट कर रहा है",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "टोकन मैनेज करें",
+				"title_nft": "",
 				"manage_list": "टोकन मैनेज करें",
 				"list_settings": "सूची सेटिंग्स",
 				"import_token": "टोकन आयात करें",
+				"import_nft": "",
 				"network": "नेटवर्क",
 				"all_tokens_zero_balance": "सभी टोकन में शून्य बैलेंस है।",
 				"enable_more_assets": "अधिक टोकन सक्षम करें"
@@ -1186,11 +1189,16 @@
 			"scan_qr": "क्यूआर कोड स्कैन करें",
 			"or_use_link": "या वॉलेटकनेक्ट लिंक का उपयोग करें",
 			"proposer": "प्रस्तावक",
+			"spender": "",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
 			"methods": "विधियाँ",
 			"events": "घटनाएँ",
 			"message": "संदेश",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "हेक्स डेटा",
 			"raw_copied": "कच्चा लेनदेन डेटा क्लिपबोर्ड पर कॉपी किया गया।",
 			"sign_message": "संदेश पर हस्ताक्षर करें"
@@ -1613,6 +1621,7 @@
 		"text": {
 			"terms_of_use": "उपयोग की शर्तें",
 			"title": "",
+			"instruction": "",
 			"body": ""
 		},
 		"alt": {
@@ -1685,6 +1694,9 @@
 			"action_button_send_tokens_title": "एसेट्स भेजें",
 			"action_button_send_tokens_subtitle": "कुछ ही सेकंड में भेजें सेट करें",
 			"action_button_send_tokens_prompt": "मैं टोकन भेजना चाहता हूँ।",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "भेजने की प्रक्रिया शुरू करने के लिए एक संपर्क चुनें:",
 			"send_to_message": "$contact_name ($address_info) को भेजें।",
 			"send_message": "संदेश भेजें",

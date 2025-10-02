@@ -5,7 +5,11 @@
 	import IconAddressType from '$lib/components/address/IconAddressType.svelte';
 	import type { ContactAddressUi } from '$lib/types/contact';
 
-	const { address }: { address: ContactAddressUi } = $props();
+	interface Props {
+		address: ContactAddressUi;
+	}
+
+	const { address }: Props = $props();
 
 	let render = $state(true);
 

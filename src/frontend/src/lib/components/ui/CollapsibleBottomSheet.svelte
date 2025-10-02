@@ -8,17 +8,14 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let {
-		content,
-		contentHeader,
-		contentFooter,
-		showContentHeader = false
-	}: {
+	interface Props {
 		content: Snippet;
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
-	} = $props();
+	}
+
+	let { content, contentHeader, contentFooter, showContentHeader = false }: Props = $props();
 
 	let expanded = $state(false);
 </script>

@@ -51,7 +51,8 @@
 			"switch_currency": "通貨を切り替え"
 		},
 		"warning": {
-			"do_not_close": "取引完了までタブを閉じないでください"
+			"do_not_close": "取引完了までタブを閉じないでください",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "ネットワーク$networkのInfura ERC1155プロバイダーが存在しません",
 			"no_infura_erc20_icp_provider": "ネットワーク$networkのInfura ERC20 ICPプロバイダーが存在しません",
 			"no_solana_network": "ネットワーク$networkのSolanaネットワークが存在しません",
-			"eth_address_unknown": "ETHアドレスが不明です",
 			"loading_address": "$symbolアドレスの読み込み中にエラーが発生しました",
 			"loading_balance": "ネットワーク$networkの$symbol残高の読み込み中にエラーが発生しました",
 			"erc20_contracts": "ERC20コントラクトの読み込み中にエラーが発生しました",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "トークンをインポート",
+				"title_nft": "",
 				"review": "確認",
 				"saving": "保存中...",
 				"updating": "トークンリストを更新中",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "トークンの管理",
+				"title_nft": "",
 				"manage_list": "トークンの管理",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
+				"import_nft": "",
 				"network": "ネットワーク",
 				"all_tokens_zero_balance": "すべてのトークンの残高がゼロです。",
 				"enable_more_assets": "さらに多くのトークンを有効にする"
@@ -1186,11 +1189,16 @@
 			"scan_qr": "QRコードをスキャン",
 			"or_use_link": "またはWalletConnectリンクを使用",
 			"proposer": "提案者",
+			"spender": "",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
 			"methods": "方法",
 			"events": "イベント",
 			"message": "メッセージ",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "HEXデータ",
 			"raw_copied": "生の取引データがコピーされました。",
 			"sign_message": "メッセージに署名"
@@ -1613,6 +1621,7 @@
 		"text": {
 			"terms_of_use": "",
 			"title": "",
+			"instruction": "このボタンをクリックすると、以下に同意したことになります。$link",
 			"body": ""
 		},
 		"alt": {
@@ -1685,6 +1694,9 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "メッセージを送信",

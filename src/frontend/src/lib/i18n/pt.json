@@ -51,7 +51,8 @@
 			"switch_currency": "Mudar moeda"
 		},
 		"warning": {
-			"do_not_close": "Não feche esta aba até que a transação esteja concluída"
+			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -535,7 +536,6 @@
 			"no_infura_erc1155_provider": "Nenhum provedor Infura ERC1155 para a rede $network",
 			"no_infura_erc20_icp_provider": "Nenhum provedor Infura ERC20 ICP para a rede $network",
 			"no_solana_network": "Nenhuma rede Solana para a rede $network",
-			"eth_address_unknown": "Endereço ETH desconhecido.",
 			"loading_address": "Erro ao carregar o endereço $symbol.",
 			"loading_balance": "Erro ao carregar o saldo $symbol para a rede $network.",
 			"erc20_contracts": "Erro ao carregar os contratos ERC20.",
@@ -989,6 +989,7 @@
 		"import": {
 			"text": {
 				"title": "Importar token",
+				"title_nft": "",
 				"review": "Rever",
 				"saving": "Salvando...",
 				"updating": "Atualizando lista de tokens",
@@ -1023,9 +1024,11 @@
 		"manage": {
 			"text": {
 				"title": "Gerir tokens",
+				"title_nft": "",
 				"manage_list": "Gerir tokens",
 				"list_settings": "Configurações da lista",
 				"import_token": "Importar token",
+				"import_nft": "",
 				"network": "Rede",
 				"all_tokens_zero_balance": "Todos os tokens têm saldo zero.",
 				"enable_more_assets": "Habilitar mais tokens"
@@ -1186,11 +1189,16 @@
 			"scan_qr": "Fazer scan de QR code",
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
+			"spender": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
 			"methods": "Métodos",
 			"events": "Eventos",
 			"message": "Mensagem",
+			"expiration": "",
+			"token": "",
+			"network": "",
+			"amount": "",
 			"hex_data": "Dados HEX",
 			"raw_copied": "Dados da transação brutos copiados para a área de transferência.",
 			"sign_message": "Assinar Mensagem"
@@ -1613,6 +1621,7 @@
 		"text": {
 			"terms_of_use": "Termos de Uso",
 			"title": "",
+			"instruction": "Ao clicar neste botão, você concorda com os $link",
 			"body": ""
 		},
 		"alt": {
@@ -1685,6 +1694,9 @@
 			"action_button_send_tokens_title": "",
 			"action_button_send_tokens_subtitle": "",
 			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
 			"select_contact_message": "",
 			"send_to_message": "",
 			"send_message": "Enviar mensagem",

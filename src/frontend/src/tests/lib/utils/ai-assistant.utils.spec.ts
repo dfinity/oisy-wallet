@@ -213,18 +213,21 @@ describe('ai-assistant.utils', () => {
 		});
 
 		it('returns correct result with a tool name', () => {
+			const additionalMetadata = { testParam: 'test' };
 			const requestStartTimestamp = 1000000;
 			vi.spyOn(Date, 'now').mockReturnValue(requestStartTimestamp + 4000000);
 
 			expect(
 				generateAiAssistantResponseEventMetadata({
 					toolName: 'test',
-					requestStartTimestamp
+					requestStartTimestamp,
+					additionalMetadata
 				})
 			).toEqual({
 				toolName: 'test',
 				responseTime: '4000s',
-				responseTimeCategory: '100000+'
+				responseTimeCategory: '100000+',
+				...additionalMetadata
 			});
 		});
 
@@ -246,6 +249,13 @@ describe('ai-assistant.utils', () => {
 	describe('parseShowBalanceToolArguments', () => {
 		const icpTokenUi = { ...ICP_TOKEN, usdBalance: 1000, balance: 1000n };
 		const usdcErc20TokenUi = { ...USDC_TOKEN_ERC20, usdBalance: 1000, balance: 1000n };
+		const ckUsdcTokenUi = {
+			...USDC_TOKEN_ERC20,
+			symbol: 'ckUSDC',
+			network: ICP_NETWORK,
+			usdBalance: 1000,
+			balance: 1000n
+		};
 		const usdcBep20TokenUi = { ...USDC_TOKEN_BEP20, usdBalance: 1000, balance: 1000n };
 		const usdcSplTokenUi = { ...USDC_TOKEN_SPL, usdBalance: 1000, balance: 1000n };
 
@@ -286,16 +296,19 @@ describe('ai-assistant.utils', () => {
 							name: 'tokenSymbol'
 						}
 					],
-					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi],
+					tokensUi: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi, ckUsdcTokenUi],
 					networks: [ETHEREUM_NETWORK, SOLANA_MAINNET_NETWORK, BSC_MAINNET_NETWORK]
 				})
 			).toEqual({
 				mainCard: {
 					token: usdcErc20TokenUi,
 					totalUsdBalance:
-						usdcErc20TokenUi.usdBalance + usdcBep20TokenUi.usdBalance + usdcSplTokenUi.usdBalance
+						usdcErc20TokenUi.usdBalance +
+						usdcBep20TokenUi.usdBalance +
+						usdcSplTokenUi.usdBalance +
+						ckUsdcTokenUi.usdBalance
 				},
-				secondaryCards: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi]
+				secondaryCards: [usdcErc20TokenUi, usdcBep20TokenUi, usdcSplTokenUi, ckUsdcTokenUi]
 			});
 		});
 
