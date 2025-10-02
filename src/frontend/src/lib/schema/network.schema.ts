@@ -1,7 +1,5 @@
+import { OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
 import type { CoingeckoPlatformId } from '$lib/types/coingecko';
-import type { NetworkBuy } from '$lib/types/network';
-import type { OnramperNetworkId } from '$lib/types/onramper';
-import type { AtLeastOne } from '$lib/types/utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
 
@@ -15,8 +13,8 @@ export const NetworkExchangeSchema = z.object({
 });
 
 // TODO: use Zod to validate the OnramperNetworkId
-export const NetworkBuySchema = z.object({
-	onramperId: z.custom<OnramperNetworkId>().optional()
+const NetworkBuySchema = z.object({
+	onramperId: OnramperNetworkIdSchema
 });
 
 export const NetworkAppMetadataSchema = z.object({
@@ -32,8 +30,8 @@ const IconSchema = z
 /**
  * Zod schema defining the shape of a network-like object.
  *
- * This schema represents both actual networks (e.g., the Internet Computer, Ethereum, Bitcoin mainnet)
- * and "pseudo-networks" used for development or simulation purposes. For example, the
+ * This schema represents both actual networks (e.g. the Internet Computer, Ethereum, Bitcoin mainnet)
+ * and "pseudo-networks" used for development or simulation. For example, the
  * `ICP_PSEUDO_TESTNET_NETWORK` mimics the structure of the IC network but is used to
  * isolate testnet tokens such as `ckSepoliaETH` from production data.
  *
@@ -46,5 +44,5 @@ export const NetworkSchema = z.object({
 	name: z.string(),
 	icon: IconSchema.optional(),
 	exchange: NetworkExchangeSchema.optional(),
-	buy: z.custom<AtLeastOne<NetworkBuy>>().optional()
+	buy: NetworkBuySchema.optional()
 });

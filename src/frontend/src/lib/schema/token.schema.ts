@@ -1,8 +1,6 @@
 import { NetworkSchema } from '$lib/schema/network.schema';
+import { OnramperIdSchema } from '$lib/schema/onramper.schema';
 import { TokenGroupPropSchema } from '$lib/schema/token-group.schema';
-import type { OnramperId } from '$lib/types/onramper';
-import type { TokenBuy } from '$lib/types/token';
-import type { AtLeastOne } from '$lib/types/utils';
 import * as z from 'zod';
 
 export const TokenIdSchema = z.symbol().brand<'TokenId'>();
@@ -45,13 +43,12 @@ export const TokenAppearanceSchema = z.object({
 	alwaysShowInTokenGroup: z.boolean().optional()
 });
 
-// TODO: use Zod to validate the OnramperId
-export const TokenBuySchema = z.object({
-	onramperId: z.custom<OnramperId>().optional()
+const TokenBuySchema = z.object({
+	onramperId: OnramperIdSchema
 });
 
 export const TokenBuyableSchema = z.object({
-	buy: z.custom<AtLeastOne<TokenBuy>>().optional()
+	buy: TokenBuySchema.optional()
 });
 
 export const TokenSchema = z.object({
