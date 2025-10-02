@@ -1267,7 +1267,9 @@
 			"block": "الكتلة",
 			"interacted_with": "تم التفاعل مع (إلى)",
 			"status": "الحالة",
-			"confirmations": "التأكيدات"
+			"confirmations": "التأكيدات",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "تم التأكيد",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "افتح هذه المعاملة في مستكشف الكتل",
 			"open_from_block_explorer": "افتح عنوان 'من' في مستكشف الكتل",
-			"open_to_block_explorer": "افتح عنوان 'إلى' في مستكشف الكتل"
+			"open_to_block_explorer": "افتح عنوان 'إلى' في مستكشف الكتل",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "لا يمكن الحصول على رقم الكتلة.",
