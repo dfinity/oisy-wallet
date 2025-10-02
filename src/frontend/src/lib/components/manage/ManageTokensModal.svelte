@@ -352,7 +352,6 @@
 			{infoElement}
 			{initialSearch}
 			{isNftsPage}
-			on:icClose={close}
 			on:icAddToken={modal.next}
 			on:icSave={saveTokens}
 		/>
