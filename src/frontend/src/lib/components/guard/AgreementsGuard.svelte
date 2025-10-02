@@ -38,10 +38,10 @@
 				return;
 			}
 
-            // The $effect rune cannot await async functions (in this case acceptAgreements).
-            // That causes the `accepting` flag to be set to `false` before the async function is finished.
-            // To avoid it, we use the service queryAndUpdate,
-            // which handles the state of the request internally and has callbacks in case of awaited success or failure.
+			// The $effect rune cannot await async functions (in this case acceptAgreements).
+			// That causes the `accepting` flag to be set to `false` before the async function is finished.
+			// To avoid it, we use the service queryAndUpdate,
+			// which handles the state of the request internally and has callbacks in case of awaited success or failure.
 			queryAndUpdate({
 				request: async ({ identity }) => {
 					accepting = true;
