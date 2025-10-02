@@ -47,7 +47,7 @@
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-4 font-bold"> {@render title()}</div>
+	<div class="mb-4 font-bold">{@render title()}</div>
 
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'default'}
