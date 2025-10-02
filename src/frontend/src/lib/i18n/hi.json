@@ -1589,7 +1589,8 @@
 			"reject_warning": "",
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"accept_and_continue": "",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": ""
@@ -1598,6 +1599,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "लाइसेंस समझौता",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "$oisy_name लाइसेंस समझौता (“लाइसेंस समझौता”)",
 			"paragraph_1": "$oisy_name में आपकी रुचि के लिए धन्यवाद, एक ब्राउज़र-आधारित, स्व-हिरासत और मल्टी-चेन वॉलेट विकेन्द्रीकृत एप्लिकेशन जो इंटरनेट कंप्यूटर सार्वजनिक ब्लॉकचेन नेटवर्क (“$oisy_short”) पर होस्ट किया गया है। $oisy_short, इसके ओपन-सोर्स कोड और संबंधित लाइसेंस के बारे में अधिक जानकारी के लिए, कृपया $oisy_short गिटहब रिपॉजिटरी देखें: $oisy_repo_url।",
 			"paragraph_2": "यह लाइसेंस समझौता आपके $oisy_short (“आप”) के उपयोग को नियंत्रित करता है। $oisy_short का उपयोग करके, आप सहमत हैं कि आपने इस लाइसेंस समझौते को पढ़ा, समझा और स्वीकार किया है। यदि आप सहमत नहीं हैं, तो आप $oisy_short का उपयोग नहीं कर सकते हैं।",
@@ -1624,6 +1629,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "उपयोग की शर्तें",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "",
 			"body": ""
@@ -1635,6 +1644,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "गोपनीयता नीति",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
