@@ -139,7 +139,8 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		network: token.network,
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-		...(notEmptyString(token.name) && { name: token.name })
+		...(notEmptyString(token.name) && { name: token.name }),
+		...(notEmptyString(token.description) && { description: token.description })
 	});
 
 export const getEnabledNfts = ({
@@ -225,6 +226,46 @@ interface FilterSortByCollection {
 	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
 }
 
+const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
+	'nfts' in item && 'collection' in item;
+const isNft = (item: Nft | NftCollectionUi): item is Nft =>
+	'collection' in item && !('nfts' in item);
+
+const matchesFilter = ({
+	item,
+	filter
+}: {
+	item: Nft | NftCollectionUi;
+	filter: string;
+}): boolean => {
+	const lower = filter.toLowerCase();
+
+	if (isCollectionUi(item)) {
+		// search by collection name
+		const collectionName = item.collection?.name?.toLowerCase() ?? '';
+		if (collectionName.includes(lower)) {
+			return true;
+		}
+		// search by collections nfts name or id
+		return (item.nfts ?? []).some(
+			(nft) =>
+				(nft.name?.toLowerCase().includes(lower) ?? false) ||
+				(String(nft.id)?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	// search nfts by id, name or collection name
+	if (isNft(item)) {
+		return (
+			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
+			(item.name?.toLowerCase().includes(lower) ?? false) ||
+			(item.collection?.name?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	return false;
+};
+
 // Single implementation (T is Nft or NftCollectionUi)
 export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
 	items,
@@ -234,9 +275,7 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	let result = items;
 
 	if (nonNullish(filter)) {
-		result = result.filter((it) =>
-			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
-		);
+		result = result.filter((item) => matchesFilter({ item, filter }));
 	}
 
 	if (nonNullish(sort)) {

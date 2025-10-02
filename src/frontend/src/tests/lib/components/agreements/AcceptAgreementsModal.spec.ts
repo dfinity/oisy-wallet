@@ -171,17 +171,14 @@ describe('AcceptAgreementsModal', () => {
 		expect(emit).not.toHaveBeenCalled();
 	});
 
-	it('clicking Accept calls updateUserAgreements with no selected agreement', async () => {
+	it('clicking Accept does not call updateUserAgreements if there are not outdated agreements', async () => {
 		const { getByTestId } = render(AcceptAgreementsModal);
 
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
-		expect(backendApi.updateUserAgreements).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity,
-			agreements: {}
-		});
+		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
 
-		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it('clicking Accept calls updateUserAgreements with some agreements selected', async () => {
@@ -216,6 +213,8 @@ describe('AcceptAgreementsModal', () => {
 
 		const { getByTestId } = render(AcceptAgreementsModal);
 
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE));
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY));
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
 		expect(toastsError).toHaveBeenCalledWith({

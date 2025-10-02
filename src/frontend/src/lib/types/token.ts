@@ -1,6 +1,5 @@
 import type {
 	TokenAppearanceSchema,
-	TokenBuySchema,
 	TokenBuyableSchema,
 	TokenCategorySchema,
 	TokenIdSchema,
@@ -27,15 +26,16 @@ export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
 
-export type TokenBuy = z.infer<typeof TokenBuySchema>;
-
 export interface TokenLinkedData {
 	twinTokenSymbol?: string;
 }
 
 export type TokenWithLinkedData = Token & TokenLinkedData;
 
-export type NonRequiredProps = TokenAppearance & TokenBuyable & TokenGroup;
+export type NonRequiredProps = TokenAppearance &
+	TokenBuyable &
+	TokenGroup &
+	Pick<Token, 'description'>;
 
 export type RequiredToken<T extends Token = Token, M extends object = {}> = RequiredExcept<
 	T,

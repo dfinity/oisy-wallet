@@ -127,7 +127,7 @@
 									? $solAddressLocalnetNotLoaded
 									: false;
 
-	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
+	const onSendToken = async (token: Token) => {
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -208,8 +208,8 @@
 
 		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
 			<SendTokensList
-				on:icSendToken={onIcSendToken}
-				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				{onSendToken}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
 			<SendNftsList
@@ -223,13 +223,13 @@
 				formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
 					? 'close'
 					: 'back'}
+				onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+				onClose={close}
+				onNext={modal.next}
+				onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
 				bind:destination
 				bind:activeSendDestinationTab
 				bind:selectedContact
-				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icNext={modal.next}
-				on:icClose={close}
-				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
 			/>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
