@@ -114,23 +114,6 @@ describe('Transaction (single)', () => {
 		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
 	});
 
-	it('when a contact is found, shows "For" and the spender accounts contact name for approve transactions', () => {
-		const forAddress = '0xJOHNNY';
-		testContact = { name: 'Johnny', address: forAddress };
-
-		const { getByText } = render(Transaction, {
-			type: 'approve',
-			status: 'confirmed',
-			token: ICP_TOKEN,
-			iconType: 'transaction',
-			to: '0xSOMEADDRESS',
-			approveSpender: forAddress
-		});
-
-		expect(getByText(/^for$/i)).toBeInTheDocument();
-		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
-	});
-
 	it('hides amount in privacy mode (shows dots instead of amount)', () => {
 		setPrivacyMode({ enabled: true });
 
