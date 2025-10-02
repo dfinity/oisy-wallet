@@ -1,12 +1,14 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+import { i18n } from '$lib/stores/i18n.store';
 import { formatToken } from '$lib/utils/format.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('IcTransaction', () => {
 	const [mockTrx] = createMockIcTransactionsUi(1);
@@ -70,6 +72,28 @@ describe('IcTransaction', () => {
 		expect(amountElement.textContent).toBe(
 			`${formatToken({
 				value: -5000n,
+				displayDecimals: EIGHT_DECIMALS,
+				unitName: ICP_TOKEN.decimals,
+				showPlusSign: false
+			})} ${getTokenDisplaySymbol(ICP_TOKEN)}`
+		);
+	});
+
+	it('should render correct label for approve transactions including full allowance amount', () => {
+		const { container } = render(IcTransaction, {
+			props: {
+				transaction: { ...mockTrx, value: 12345n, type: 'approve' },
+				token: ICP_TOKEN
+			}
+		});
+
+		const labelElement = container.querySelector('div.leading-5>span.text-left');
+
+		assertNonNullish(labelElement);
+
+		expect(labelElement.textContent).toBe(
+			`${get(i18n).transaction.type.approve} ${formatToken({
+				value: 12345n,
 				displayDecimals: EIGHT_DECIMALS,
 				unitName: ICP_TOKEN.decimals,
 				showPlusSign: false
