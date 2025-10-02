@@ -15,13 +15,6 @@
 		"./tailwind.config.ts",
 		"./svelte.config.js",
 		"./postcss.config.mjs",
-		"./playwright.config.ts",
-		"./e2e/**/*.js",
-		"./e2e/**/*.ts",
-		"./scripts/*.mjs",
-		"./scripts/*.ts",
-		"./eslint.config.mjs",
-		"./eslint-local-rules.cjs"
 	],
 	"exclude": [
 		"./node_modules/**",
