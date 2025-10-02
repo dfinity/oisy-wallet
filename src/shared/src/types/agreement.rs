@@ -1,6 +1,11 @@
 use candid::{CandidType, Deserialize};
 
-use crate::types::{Timestamp, Version};
+use crate::{
+    types::{Timestamp, Version},
+    validate::Validate,
+};
+
+pub const SHA256_HEX_LENGTH: usize = 64;
 
 /// Per-agreement status/metadata.
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
@@ -14,6 +19,22 @@ pub struct UserAgreement {
     pub last_updated_at_ms: Option<Timestamp>,
     /// SHA256 hash of the agreement text, to detect changes.
     pub text_sha256: Option<String>,
+}
+
+impl Validate for UserAgreement {
+    /// Verifies that agreement text SHA256 is valid hex of expected length, if provided.
+    fn validate(&self) -> Result<(), candid::Error> {
+        if let Some(ref hash) = self.text_sha256 {
+            if hash.len() != SHA256_HEX_LENGTH {
+                return Err(candid::Error::msg(format!(
+                    "Invalid SHA256 hex length: {}, expected {}",
+                    hash.len(),
+                    SHA256_HEX_LENGTH
+                )));
+            }
+        }
+        Ok(())
+    }
 }
 
 /// The user agreements tracked by the system.
