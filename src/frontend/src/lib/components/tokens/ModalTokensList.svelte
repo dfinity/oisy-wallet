@@ -76,19 +76,15 @@
 			{#if noResults}
 				{@render noResults()}
 			{:else}
-				<List noPadding>
-					{#each $filteredTokens as token (token.id)}
-						<ListItem styleClass="first-of-type:border-t-1">
-							{@render tokenListItem(token, () => onTokenButtonClick?.(token))}
-						</ListItem>
-					{/each}
-				</List>
+				<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
+					{$i18n.core.text.no_results}
+				</p>
 			{/if}
 		{:else}
 			<List noPadding>
 				{#each $filteredTokens as token (token.id)}
 					<ListItem styleClass="first-of-type:border-t-1">
-						{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
+						{@render tokenListItem(token, () => onTokenButtonClick?.(token))}
 					</ListItem>
 				{/each}
 			</List>
