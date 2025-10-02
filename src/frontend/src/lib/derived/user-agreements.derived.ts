@@ -56,7 +56,8 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 						[key]: {
 							accepted: undefined,
 							lastAcceptedTimestamp: undefined,
-							lastUpdatedTimestamp: undefined
+							lastUpdatedTimestamp: undefined,
+							textSha256: undefined
 						}
 					};
 				}
