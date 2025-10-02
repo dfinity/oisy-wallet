@@ -16,7 +16,6 @@
 </script>
 
 <ModalTokensList
-	loading={false}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
 	on:icSelectNetworkFilter
 	on:icTokenButtonClick={onIcTokenButtonClick}

@@ -10,6 +10,16 @@
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 
+	interface Props {
+		inputValue: string;
+		inputPlaceholder: string;
+		ariaLabel: string;
+		testIdPrefix?: string;
+		disabled?: boolean;
+		icon: Snippet;
+		overflowableContent?: Snippet;
+	}
+
 	let {
 		inputValue = $bindable(''),
 		inputPlaceholder,
@@ -18,15 +28,7 @@
 		disabled = false,
 		icon: slidingIcon,
 		overflowableContent
-	}: {
-		inputValue: string;
-		inputPlaceholder: string;
-		ariaLabel: string;
-		testIdPrefix?: string;
-		disabled?: boolean;
-		icon: Snippet;
-		overflowableContent?: Snippet;
-	} = $props();
+	}: Props = $props();
 
 	let visible = $state(false);
 
