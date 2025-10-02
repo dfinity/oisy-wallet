@@ -2,10 +2,10 @@ import type * as PowEnv from '$env/pow.env';
 import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 import PowProtector from '$lib/components/pow/PowProtector.svelte';
-import { CHECK_INTERVAL_MS, MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
+import { POW_CHECK_INTERVAL_MS, POW_MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
 import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 import { errorSignOut } from '$lib/services/auth.services';
-import { handleInsufficientCycles } from '$lib/services/loader.services';
+import { isCyclesAllowanceSpent } from '$lib/services/loader.services';
 import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -16,7 +16,7 @@ import { get } from 'svelte/store';
 
 // Mock the POW feature environment variable with a getter function
 vi.mock('$env/pow.env', () => ({
-	get POW_FEATURE_ENABLED() {
+	get POW_FEATURE_ENABLED(): boolean {
 		// This will be overridden in tests using vi.mocked
 		return true;
 	}
@@ -31,7 +31,7 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 vi.mock('$lib/services/loader.services', () => ({
-	handleInsufficientCycles: vi.fn()
+	isCyclesAllowanceSpent: vi.fn()
 }));
 
 vi.mock('@dfinity/utils', async () => {
@@ -63,13 +63,23 @@ describe('PowProtector', () => {
 
 		// Default mocks
 		vi.mocked(initPowProtectorWorker).mockResolvedValue(mockWorker);
-		vi.mocked(handleInsufficientCycles).mockResolvedValue(true);
+		// Default: cycles allowance is NOT spent (user has sufficient cycles)
+		vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(false);
 	});
 
 	afterEach(() => {
-		vi.runOnlyPendingTimers();
+		try {
+			vi.runOnlyPendingTimers();
+		} catch {
+			// Ignore error if timers are not mocked
+		}
 		vi.useRealTimers();
 	});
+
+	// Helper to flush microtasks with fake timers
+	const flushMicrotasks = async () => {
+		await vi.advanceTimersByTimeAsync(0);
+	};
 
 	describe('when POW feature is disabled', () => {
 		let originalPowEnv: typeof PowEnv;
@@ -93,7 +103,7 @@ describe('PowProtector', () => {
 			});
 
 			expect(initPowProtectorWorker).not.toHaveBeenCalled();
-			expect(handleInsufficientCycles).not.toHaveBeenCalled();
+			expect(isCyclesAllowanceSpent).not.toHaveBeenCalled();
 		});
 	});
 
@@ -101,175 +111,179 @@ describe('PowProtector', () => {
 		it('should initialize worker on mount', async () => {
 			render(PowProtector, { children: mockSnippet });
 
-			await waitFor(() => {
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				expect(mockWorker.start).toHaveBeenCalledOnce();
-			});
+			// Flush microtasks to allow onMount to complete
+			await flushMicrotasks();
+
+			expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+			expect(mockWorker.start).toHaveBeenCalledOnce();
 		});
 
 		it('should check cycles on mount', async () => {
 			render(PowProtector, { children: mockSnippet });
 
-			await waitFor(() => {
-				expect(handleInsufficientCycles).toHaveBeenCalledOnce();
-			});
+			// Flush microtasks to allow onMount to complete
+			await flushMicrotasks();
+
+			expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
 		});
 
 		describe('when the user has sufficient cycles', () => {
 			beforeEach(() => {
-				vi.mocked(handleInsufficientCycles).mockResolvedValue(true);
+				// Cycles allowance is NOT spent (user has sufficient cycles)
+				vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(false);
 			});
 
 			it('should render children directly without a modal', async () => {
 				const { queryByTestId, getByText } = render(PowProtector, { children: mockSnippet });
 
-				// Wait for component to mount and initialize
-				await vi.runAllTimersAsync();
+				await flushMicrotasks();
 
-				// Children are always rendered
-				expect(getByText('Mock Snippet')).toBeInTheDocument();
-				// Modal should not be shown when user has cycles
 				expect(queryByTestId(POW_PROTECTOR_MODAL)).toBeNull();
+				expect(getByText('Mock Snippet')).toBeInTheDocument();
 			});
 
 			it('should not start polling for cycles', async () => {
 				render(PowProtector, { children: mockSnippet });
 
-				// Wait for initial mount to complete
-				await vi.runAllTimersAsync();
+				await flushMicrotasks();
 
-				// Advance time to check if polling starts
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS + 1000);
-				await vi.runAllTimersAsync();
+				// Initial check should have happened
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
 
-				// Should only have been called once (initial check), no polling
-				expect(handleInsufficientCycles).toHaveBeenCalledOnce();
+				// Advance time - should not trigger more checks since cycles are available
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS * 2);
+
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce(); // Only initial call
 			});
 		});
 
 		describe('when the user lacks sufficient cycles', () => {
 			beforeEach(() => {
-				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
+				// Cycles allowance IS spent (user lacks sufficient cycles)
+				vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(true);
 			});
 
 			it('should render a modal with insufficient cycles message', async () => {
-				const { getByTestId, getByText } = render(PowProtector, { children: mockSnippet });
+				const { getByTestId, queryByText } = render(PowProtector, { children: mockSnippet });
 
-				await waitFor(() => {
-					// Modal should be shown when user lacks cycles
-					expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
-				});
+				await flushMicrotasks();
 
-				// Children are still rendered (just overlaid by modal)
-				expect(getByText('Mock Snippet')).toBeInTheDocument();
+				expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
+				// Children are NOT rendered when modal is showing (they're in the else branch)
+				expect(queryByText('Mock Snippet')).toBeNull();
 			});
 
 			it('should render the banner image', async () => {
 				const { getByAltText } = render(PowProtector, { children: mockSnippet });
 
+				await flushMicrotasks();
+
 				const altText = replacePlaceholders(replaceOisyPlaceholders(en.init.alt.loader_banner), {
 					$theme: 'light'
 				});
 
-				await waitFor(() => {
-					const banner = getByAltText(altText);
+				const banner = getByAltText(altText);
 
-					expect(banner).toBeInTheDocument();
-				});
+				expect(banner).toBeInTheDocument();
 			});
 
 			it('should display the POW protector title and description', async () => {
 				const { getByText } = render(PowProtector, { children: mockSnippet });
 
-				await waitFor(() => {
-					expect(getByText(en.pow_protector.text.title)).toBeInTheDocument();
-					expect(getByText(en.pow_protector.text.description)).toBeInTheDocument();
-				});
+				await flushMicrotasks();
+
+				expect(getByText(en.pow_protector.text.title)).toBeInTheDocument();
+				expect(getByText(en.pow_protector.text.description)).toBeInTheDocument();
 			});
 
 			it('should start polling for cycles', async () => {
 				render(PowProtector, { children: mockSnippet });
 
-				await waitFor(() => {
-					expect(handleInsufficientCycles).toHaveBeenCalledOnce();
-				});
+				await flushMicrotasks();
 
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
+				// Initial check
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
 
-				await waitFor(() => {
-					expect(handleInsufficientCycles).toHaveBeenCalledTimes(2);
-				});
+				// Advance time by one interval
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
 
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(2);
 
-				await waitFor(() => {
-					expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
-				});
+				// Advance time by another interval
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
+
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(3);
 			});
 
 			it('should stop polling and render children when cycles become available', async () => {
-				vi.mocked(handleInsufficientCycles)
-					.mockResolvedValueOnce(false) // Initial check
-					.mockResolvedValueOnce(false) // First poll
-					.mockResolvedValueOnce(true); // Second poll - now has cycles
+				vi.mocked(isCyclesAllowanceSpent)
+					.mockResolvedValueOnce(true) // Initial check - cycles spent
+					.mockResolvedValueOnce(true) // First poll - still spent
+					.mockResolvedValueOnce(false); // Second poll - now has cycles
 
 				const { getByTestId, getByText, queryByTestId } = render(PowProtector, {
 					children: mockSnippet
 				});
 
-				// Initially should show modal
-				await waitFor(() => {
-					expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
-				});
+				await flushMicrotasks();
 
-				// Advance time twice to trigger the successful check
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
-				await vi.runAllTimersAsync();
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
-				await vi.runAllTimersAsync();
+				// Initially should show modal
+				expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
+
+				// Advance time to trigger first poll - still no cycles
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
+				await flushMicrotasks();
+
+				expect(getByTestId(POW_PROTECTOR_MODAL)).toBeInTheDocument();
+
+				// Advance time to trigger second poll - cycles now available
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
+				await flushMicrotasks();
+
+				// Poll for DOM update with small time advances to let Svelte react
+				let attempts = 0;
+				const maxAttempts = 50;
+				while (queryByTestId(POW_PROTECTOR_MODAL) !== null && attempts < maxAttempts) {
+					await vi.advanceTimersByTimeAsync(10);
+					await flushMicrotasks();
+					attempts++;
+				}
 
 				// Should now render children and hide modal
-				await waitFor(() => {
-					expect(queryByTestId(POW_PROTECTOR_MODAL)).toBeNull();
-					expect(getByText('Mock Snippet')).toBeInTheDocument();
-				});
+				expect(queryByTestId(POW_PROTECTOR_MODAL)).toBeNull();
+				expect(getByText('Mock Snippet')).toBeInTheDocument();
 
 				// No more polling should happen
-				vi.advanceTimersByTime(CHECK_INTERVAL_MS);
-				await vi.runAllTimersAsync();
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
 
-				expect(handleInsufficientCycles).toHaveBeenCalledTimes(3);
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(3);
 			});
 
-			// TODO: This test causes infinite loops with IntervalLoader and fake timers
-			// Need to refactor either the component or the test approach
-			it.skip('should sign out the user after max retry attempts', async () => {
-				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
+			it('should sign out the user after max retry attempts', async () => {
+				vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(true);
 
 				render(PowProtector, { children: mockSnippet });
 
-				// Wait for initial mount
-				await vi.runAllTimersAsync();
+				await flushMicrotasks();
 
-				// Advance time for MAX_CHECK_ATTEMPTS polls (without runAllTimersAsync to avoid infinite loop)
-				const totalTime = CHECK_INTERVAL_MS * MAX_CHECK_ATTEMPTS;
-				vi.advanceTimersByTime(totalTime);
+				// Initial check should have happened
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
 
-				// Now run pending timers to execute the callbacks
-				await vi.advanceTimersByTimeAsync(0);
+				// Advance time for POW_MAX_CHECK_ATTEMPTS - 1 more attempts
+				for (let i = 0; i < POW_MAX_CHECK_ATTEMPTS - 1; i++) {
+					await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
+				}
 
-				await waitFor(() => {
-					expect(errorSignOut).toHaveBeenCalledWith(
-						en.init.error.waiting_for_allowed_cycles_aborted
-					);
-					expect(handleInsufficientCycles).toHaveBeenCalledTimes(MAX_CHECK_ATTEMPTS + 1); // Initial + MAX_CHECK_ATTEMPTS polls
-				});
+				// Should have reached max attempts and signed out
+				expect(errorSignOut).toHaveBeenCalledWith(en.init.error.waiting_for_allowed_cycles_aborted);
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(POW_MAX_CHECK_ATTEMPTS);
 			});
 		});
 
 		describe('progress steps', () => {
 			beforeEach(() => {
-				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
+				// Cycles allowance IS spent (user lacks sufficient cycles)
+				vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(true);
 			});
 
 			it('should update the progress step based on store', async () => {
@@ -315,25 +329,34 @@ describe('PowProtector', () => {
 		});
 
 		describe('lifecycle management', () => {
-			// TODO: This test causes infinite loops with IntervalLoader and fake timers
-			// IntervalLoader cleanup behavior is tested in IntervalLoader.spec.ts
-			// Worker cleanup can be tested at integration level
-			it.skip('should clean up interval and worker on destroy', async () => {
-				vi.mocked(handleInsufficientCycles).mockResolvedValue(false);
+			it('should clean up interval and worker on destroy', async () => {
+				// Cycles allowance IS spent so polling starts
+				vi.mocked(isCyclesAllowanceSpent).mockResolvedValue(true);
 
 				const { unmount } = render(PowProtector, { children: mockSnippet });
 
-				// Wait for worker to be fully initialized
-				await waitFor(() => {
-					expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-					expect(mockWorker.start).toHaveBeenCalledOnce();
-				});
+				await flushMicrotasks();
+
+				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(mockWorker.start).toHaveBeenCalledOnce();
+
+				// Verify polling started
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
+
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(2);
 
 				// Unmount the component
 				unmount();
+				await flushMicrotasks();
 
 				// Worker should be destroyed
 				expect(mockWorker.destroy).toHaveBeenCalledOnce();
+
+				// Polling should stop
+				const callCount = vi.mocked(isCyclesAllowanceSpent).mock.calls.length;
+				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS * 2);
+
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(callCount);
 			});
 
 			it('should handle worker initialization failure gracefully', async () => {
@@ -342,54 +365,53 @@ describe('PowProtector', () => {
 
 				render(PowProtector, { children: mockSnippet });
 
-				// Should still render the component even if worker fails
-				await waitFor(() => {
-					expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-					expect(consoleErrorSpy).toHaveBeenCalledWith(
-						'Failed to initialize POW worker:',
-						expect.any(Error)
-					);
-				});
+				await flushMicrotasks();
 
-				// Spy will be automatically cleaned up by vi.clearAllMocks() in beforeEach
+				// Should still render the component even if worker fails
+				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(consoleErrorSpy).toHaveBeenCalledWith(
+					'Failed to initialize POW worker:',
+					expect.any(Error)
+				);
+
+				consoleErrorSpy.mockRestore();
 			});
 		});
 
 		describe('edge cases', () => {
 			it('should handle a cycles check failure gracefully', async () => {
 				const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-				vi.mocked(handleInsufficientCycles).mockRejectedValue(new Error('Cycles check failed'));
+				vi.mocked(isCyclesAllowanceSpent).mockRejectedValue(new Error('Cycles check failed'));
 
 				render(PowProtector, { children: mockSnippet });
 
-				// Wait for async operations to complete
-				await waitFor(() => {
-					// Should log the error
-					expect(consoleErrorSpy).toHaveBeenCalledWith(
-						'Error checking initial cycles:',
-						expect.any(Error)
-					);
-					// Should still initialize the worker even if cycle check fails
-					expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				});
+				await flushMicrotasks();
 
-				// Spy will be automatically cleaned up by vi.clearAllMocks() in beforeEach
+				// Should log the error
+				expect(consoleErrorSpy).toHaveBeenCalledWith(
+					'Error checking initial cycles:',
+					expect.any(Error)
+				);
+				// Should still initialize the worker even if cycle check fails
+				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+
+				consoleErrorSpy.mockRestore();
 			});
 
 			it('should not initialize the worker multiple times', async () => {
 				const { rerender } = render(PowProtector, { children: mockSnippet });
 
-				await waitFor(() => {
-					expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				});
+				await flushMicrotasks();
+
+				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
 
 				// Trigger a re-render
 				rerender({ children: mockSnippet });
 
-				await waitFor(() => {
-					// Should still only be called once
-					expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				});
+				await flushMicrotasks();
+
+				// Should still only be called once
+				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
 			});
 		});
 	});
