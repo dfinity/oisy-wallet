@@ -1267,7 +1267,9 @@
 			"block": "区块",
 			"interacted_with": "交互对象（接收方）",
 			"status": "状态",
-			"confirmations": "确认数"
+			"confirmations": "确认数",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "已确认",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
 			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
-			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "无法获取区块号。",

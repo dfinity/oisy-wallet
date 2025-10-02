@@ -1267,7 +1267,9 @@
 			"block": "Block",
 			"interacted_with": "Interagierte mit (Ziel)",
 			"status": "Status",
-			"confirmations": "Bestätigungen"
+			"confirmations": "Bestätigungen",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Bestätigt",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Diese Transaktion in einem Block-Explorer öffnen",
 			"open_from_block_explorer": "Die Absenderadresse in einem Block-Explorer öffnen",
-			"open_to_block_explorer": "Die Empfängeradresse in einem Block-Explorer öffnen"
+			"open_to_block_explorer": "Die Empfängeradresse in einem Block-Explorer öffnen",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Kann Blocknummer nicht abrufen.",
