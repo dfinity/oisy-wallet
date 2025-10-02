@@ -29,7 +29,7 @@
 		icCloseTokensList: void;
 	}>();
 
-	let tokens: TokenUi<Token>[] = $derived(
+	let tokens: TokenUi[] = $derived(
 		pinTokensWithBalanceAtTop({
 			$tokens: [
 				{ ...ICP_TOKEN, enabled: true },
@@ -47,7 +47,7 @@
 		setTokens(tokens);
 	});
 
-	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi<Token>>) => {
+	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<TokenUi>) => {
 		dispatch('icSelectToken', token);
 	};
 </script>

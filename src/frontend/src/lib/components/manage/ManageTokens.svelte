@@ -23,11 +23,13 @@
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let {
-		initialSearch,
-		infoElement,
-		isNftsPage
-	}: { initialSearch?: string; infoElement?: Snippet; isNftsPage?: boolean } = $props();
+	interface Props {
+		initialSearch?: string;
+		infoElement?: Snippet;
+		isNftsPage?: boolean;
+	}
+
+	let { initialSearch, infoElement, isNftsPage }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
