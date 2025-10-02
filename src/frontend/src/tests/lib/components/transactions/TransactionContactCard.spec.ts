@@ -50,6 +50,7 @@ describe('TransactionContactCard', () => {
 		const { getByTestId } = render(TransactionContactCard, {
 			props: { type: 'send' }
 		});
+
 		expect(getByTestId(TOKEN_SKELETON_TEXT)).toBeInTheDocument();
 	});
 
@@ -91,9 +92,11 @@ describe('TransactionContactCard', () => {
 		});
 
 		const btn = getByRole('button', { name: get(i18n).address.save.title });
+
 		expect(btn).toBeTruthy();
 
 		await fireEvent.click(btn);
+
 		expect(modalStore.openAddressBook).toHaveBeenCalled();
 	});
 
@@ -139,6 +142,7 @@ describe('TransactionContactCard', () => {
 		});
 
 		const btn = getByLabelText(get(i18n).transaction.alt.open_to_block_explorer);
+
 		expect(btn).toBeTruthy();
 	});
 
@@ -148,6 +152,7 @@ describe('TransactionContactCard', () => {
 		});
 
 		const btn = getByLabelText(get(i18n).transaction.alt.open_from_block_explorer);
+
 		expect(btn).toBeTruthy();
 	});
 
@@ -161,6 +166,7 @@ describe('TransactionContactCard', () => {
 		});
 
 		const btn = getByLabelText(get(i18n).transaction.alt.open_for_block_explorer);
+
 		expect(btn).toBeTruthy();
 	});
 });
