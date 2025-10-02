@@ -26,7 +26,6 @@
 
 	// Use let with $state() for variables that need to be reassigned
 	let hasNoCycles = $state(false);
-	let checkInterval: ReturnType<typeof setInterval> | undefined;
 	let checkAttempts = $state(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
@@ -71,19 +70,11 @@
 			checkAttempts++;
 
 			if (hasNoCycles) {
-				// Success: User now has sufficient cycles, stop polling
-				if (checkInterval) {
-					clearInterval(checkInterval);
-					checkInterval = undefined;
+				if (checkAttempts >= POW_MAX_CHECK_ATTEMPTS) {
+					checkAttempts = 0;
+					// Sign out with appropriate error message about cycle waiting timeout
+					await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 				}
-			} else if (checkAttempts >= POW_MAX_CHECK_ATTEMPTS) {
-				// Failure: Too many failed attempts, clean up and sign out user
-				if (checkInterval) {
-					clearInterval(checkInterval);
-					checkInterval = undefined;
-				}
-				// Sign out with appropriate error message about cycle waiting timeout
-				await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
 			}
 		} catch (error) {
 			// Log error but continue polling (network issues shouldn't stop the process)
@@ -124,12 +115,8 @@
 
 	onDestroy(() => {
 		if (POW_FEATURE_ENABLED) {
-			// Clear interval if component is destroyed
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
-
+			// Clear check attempts when component is destroyed
+			checkAttempts = 0;
 			// Stop the worker if it was started
 			if (powWorker) {
 				powWorker.destroy();
@@ -143,7 +130,7 @@
 	<IntervalLoader interval={POW_CHECK_INTERVAL_MS} onLoad={checkCycles} skipInitialLoad={true} />
 {/if}
 
-{#if !POW_FEATURE_ENABLED && hasNoCycles}
+{#if POW_FEATURE_ENABLED && hasNoCycles}
 	<!--
 	User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
 	This modal will be displayed until either:
