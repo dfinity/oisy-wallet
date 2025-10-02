@@ -1267,7 +1267,9 @@
 			"block": "Blok",
 			"interacted_with": "Interakce s (do)",
 			"status": "Stav",
-			"confirmations": "Potvrzení"
+			"confirmations": "Potvrzení",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Potvrzeno",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Otevřít tuto transakci v blockchainovém průzkumníku",
 			"open_from_block_explorer": "Otevřít adresu „Od“ v blockchainovém průzkumníku",
-			"open_to_block_explorer": "Otevřít adresu „Do“ v blockchainovém průzkumníku"
+			"open_to_block_explorer": "Otevřít adresu „Do“ v blockchainovém průzkumníku",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Nelze získat číslo bloku.",

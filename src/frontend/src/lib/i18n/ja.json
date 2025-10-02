@@ -1267,7 +1267,9 @@
 			"block": "ブロック",
 			"interacted_with": "相互作用した相手（宛先）",
 			"status": "ステータス",
-			"confirmations": "確認数"
+			"confirmations": "確認数",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "確認済み",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "ブロックエクスプローラーでこの取引を開く",
 			"open_from_block_explorer": "ブロックエクスプローラーで「送信元」アドレスを開く",
-			"open_to_block_explorer": "ブロックエクスプローラーで「宛先」アドレスを開く"
+			"open_to_block_explorer": "ブロックエクスプローラーで「宛先」アドレスを開く",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "ブロック番号を取得できません。",
