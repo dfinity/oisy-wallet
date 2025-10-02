@@ -36,7 +36,7 @@ describe('IcTransaction', () => {
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, fee: 0n, type: 'receive' },
+				transaction: { ...mockTrx, value: 12345n, fee: 0n, type: 'receive', incoming: true },
 				token: ICP_TOKEN
 			}
 		});
