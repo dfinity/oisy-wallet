@@ -37,8 +37,7 @@
 		toExplorerUrl,
 		fee,
 		incoming,
-		approveSpender,
-		approveExpiresAt
+		approveSpender
 	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
