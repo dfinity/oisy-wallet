@@ -1267,7 +1267,9 @@
 			"block": "Блок",
 			"interacted_with": "Взаимодействовали с (Получатель)",
 			"status": "Статус",
-			"confirmations": "Подтверждения"
+			"confirmations": "Подтверждения",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Открыть эту транзакцию в обозревателе блоков",
 			"open_from_block_explorer": "Открыть адрес отправителя в обозревателе блоков",
-			"open_to_block_explorer": "Открыть адрес получателя в обозревателе блоков"
+			"open_to_block_explorer": "Открыть адрес получателя в обозревателе блоков",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Не удается получить номер блока.",

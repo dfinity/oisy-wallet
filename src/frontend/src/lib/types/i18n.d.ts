@@ -1074,6 +1074,8 @@ interface I18nTransaction {
 		interacted_with: string;
 		status: string;
 		confirmations: string;
+		for: string;
+		for_copied: string;
 	};
 	status: {
 		confirmed: string;
@@ -1112,6 +1114,7 @@ interface I18nTransaction {
 		open_block_explorer: string;
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
+		open_for_block_explorer: string;
 	};
 	error: { get_block_number: string; failed_get_transaction: string };
 }
