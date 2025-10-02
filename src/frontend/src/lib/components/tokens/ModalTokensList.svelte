@@ -22,12 +22,7 @@
 		noResults?: Snippet;
 	}
 
-	let {
-		networkSelectorViewOnly = false,
-		tokenListItem,
-		toolbar,
-		noResults
-	}: Props = $props();
+	let { networkSelectorViewOnly = false, tokenListItem, toolbar, noResults }: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
