@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
+			"title_part_1": "Seus Ativos Digitais",
+			"title_part_2": "Privados e Seguros",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"asset_types": "",
-			"instant_and_private": "",
-			"advanced_cryptography": ""
+			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
+			"instant_and_private": "Assistente de IA integrado — Privacidade como padrão",
+			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
