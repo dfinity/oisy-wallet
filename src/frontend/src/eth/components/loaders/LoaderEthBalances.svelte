@@ -20,14 +20,14 @@
 	let loading = $state(false);
 
 	const onLoad = async () => {
+		if (isNullish($ethAddress)) {
+			return;
+		}
+
 		if (loading) {
 			return;
 		}
 		loading = true;
-
-		if (isNullish($ethAddress)) {
-			return;
-		}
 
 		await Promise.allSettled([
 			// We might require Ethereum balance on IC network as well given that one can convert ckETH to ETH.
@@ -46,6 +46,7 @@
 	$effect(() => {
 		// To trigger the load function when any of the dependencies change.
 		[$ethAddress, $enabledEthereumTokens, $enabledEvmTokens, $enabledErc20Tokens];
+		console.log('debounceLoad');
 		debounceLoad();
 	});
 
