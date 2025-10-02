@@ -144,7 +144,7 @@
 		selectTokenType = undefined;
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<Token>) => {
+	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 			setFilterNetwork(token.network);
@@ -216,9 +216,9 @@
 
 	{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
 		<SwapTokensList
-			on:icSelectToken={selectToken}
-			on:icCloseTokensList={closeTokenList}
-			on:icSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+			onCloseTokensList={closeTokenList}
+			onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+			onSelectToken={selectToken}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
 		<ModalNetworksFilter

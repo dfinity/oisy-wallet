@@ -1,6 +1,7 @@
 import { agreementsData } from '$env/agreements.env';
+import type { EnvAgreements } from '$env/types/env-agreements';
 import { userAgreementsData } from '$lib/derived/user-profile.derived';
-import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
+import type { AgreementData, AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 import { mapUserAgreement } from '$lib/utils/agreements.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -71,6 +72,18 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 
 				return outdatedAcc;
 			},
+			{}
+		)
+);
+
+export const agreementsToAccept: Readable<AgreementsToAccept> = derived(
+	[outdatedAgreements],
+	([$outdatedAgreements]) =>
+		Object.keys($outdatedAgreements).reduce<AgreementsToAccept>(
+			(acc, agreementType) => ({
+				...acc,
+				[agreementType as keyof EnvAgreements]: true
+			}),
 			{}
 		)
 );

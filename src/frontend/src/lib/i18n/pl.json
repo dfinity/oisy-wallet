@@ -1267,7 +1267,9 @@
 			"block": "Blok",
 			"interacted_with": "Interakcja z (Do)",
 			"status": "Status",
-			"confirmations": "Potwierdzenia"
+			"confirmations": "Potwierdzenia",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Potwierdzono",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Otwórz tę transakcję w eksploratorze bloków",
 			"open_from_block_explorer": "Otwórz adres „Od” w eksploratorze bloków",
-			"open_to_block_explorer": "Otwórz adres „Do” w eksploratorze bloków"
+			"open_to_block_explorer": "Otwórz adres „Do” w eksploratorze bloków",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Nie można uzyskać numeru bloku.",
