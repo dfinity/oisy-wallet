@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
-	import SwapModal from './SwapModal.svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import {
 		loadDisabledIcrcTokensBalances,
@@ -13,6 +12,7 @@
 		icTokenFeeStore
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
+	import SwapModal from '$lib/components/swap/SwapModal.svelte';
 	import {
 		allDisabledKongSwapCompatibleIcrcTokens,
 		allIcrcTokens

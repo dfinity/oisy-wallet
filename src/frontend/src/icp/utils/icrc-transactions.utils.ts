@@ -4,7 +4,6 @@ import type {
 	IcrcTransaction
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import { ZERO } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
 import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import {
@@ -91,7 +90,6 @@ export const mapIcrcTransaction = ({
 	});
 
 	const isApprove = nonNullish(fromNullable(approve));
-	const isTransfer = nonNullish(fromNullable(transfer));
 	const isMint = nonNullish(fromNullable(mint));
 
 	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
@@ -121,11 +119,7 @@ export const mapIcrcTransaction = ({
 	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
 
 	// for approve we shows the fee value
-	const value = isApprove
-		? approveFee
-		: nonNullish(data?.amount)
-			? data.amount + (isTransfer && source.incoming === false ? (transferFee ?? ZERO) : ZERO)
-			: undefined;
+	const value = isApprove ? approveFee : data?.amount;
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
@@ -149,6 +143,7 @@ export const mapIcrcTransaction = ({
 					})
 				: undefined,
 		...(nonNullish(value) && { value }),
+		...(nonNullish(transferFee) && { fee: transferFee }),
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),
