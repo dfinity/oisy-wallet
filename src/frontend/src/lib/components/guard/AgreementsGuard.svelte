@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { queryAndUpdate } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
@@ -30,25 +31,36 @@
 				return;
 			}
 
-			accepting = true;
+			// As additional safe measure we do not start accepting agreements if there are no agreements to accept.
+			// This allows the `$effect` rune to be re-triggered again if `agreementsToAccept` changes,
+			// since the `accepting` variable is still set to `false`.
+			if (Object.keys($agreementsToAccept).length === 0) {
+				return;
+			}
 
-			console.log(
-				'Accepting agreements',
-				$noAgreementVisionedYet,
-				$hasOutdatedAgreements,
-				$agreementsToAccept
-			);
-			acceptAgreements({
+			queryAndUpdate({
+				request: async ({ identity }) => {
+					accepting = true;
+
+					await acceptAgreements({
+						identity,
+						agreementsToAccept: $agreementsToAccept,
+						currentUserVersion: $userProfileVersion
+					});
+				},
+				onLoad: ({ certified }) => {
+					if (certified) {
+						accepting = false;
+					}
+				},
+				onUpdateError: () => {
+					accepting = false;
+				},
 				identity: $authIdentity,
-				agreementsToAccept: $agreementsToAccept,
-				currentUserVersion: $userProfileVersion
+				resolution: 'all_settled',
+				strategy: 'update'
 			});
 		}
-
-		// FIXME: it stills loads twice...
-		return () => {
-			accepting = false;
-		};
 	});
 </script>
 
