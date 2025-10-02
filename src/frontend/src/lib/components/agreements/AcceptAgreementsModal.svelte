@@ -4,7 +4,7 @@
 	import agreementsBanner from '$lib/assets/banner-agreements.svg';
 	import AcceptAgreementsCheckbox from '$lib/components/agreements/AcceptAgreementsCheckbox.svelte';
 	import IconExternalLink from '$lib/components/icons/IconExternalLink.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -138,11 +138,11 @@
 					testId={AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT}
 				>
 					{#snippet agreementLink()}
-						<LicenseLink noUnderline>
+						<LicenseAgreementLink noUnderline>
 							{#snippet icon()}
 								<IconExternalLink size="18" />
 							{/snippet}
-						</LicenseLink>
+						</LicenseAgreementLink>
 					{/snippet}
 				</AcceptAgreementsCheckbox>
 			{/if}
