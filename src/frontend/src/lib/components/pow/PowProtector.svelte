@@ -15,6 +15,7 @@
 	import { errorSignOut } from '$lib/services/auth.services';
 	import { hasZeroCycles } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
@@ -98,6 +99,8 @@
 	};
 
 	onMount(async () => {
+		modalStore.openAboutWhyOisy(Symbol('test'));
+
 		if (POW_FEATURE_ENABLED) {
 			try {
 				// Initial check
@@ -138,7 +141,7 @@
 <!-- Always render children to preserve component state (e.g., form inputs) -->
 {@render children?.()}
 
-{#if POW_FEATURE_ENABLED && !hasNoCycles}
+{#if POW_FEATURE_ENABLED && hasNoCycles}
 	<!--
 	User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
 	This modal overlays on top of the existing content without destroying it, preserving form state.
@@ -184,9 +187,5 @@
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
-
-	.banner-container {
-		width: 100%;
 	}
 </style>
