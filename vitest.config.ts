@@ -83,7 +83,7 @@ export default defineConfig(
 					autoUpdate: true,
 					statements: 80.06,
 					branches: 85.44,
-					functions: 73.87,
+					functions: 73.9,
 					lines: 80.06
 				}
 			}
