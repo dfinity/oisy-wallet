@@ -83,13 +83,14 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 
 export const agreementsToAccept: Readable<AgreementsToAccept> = derived(
 	[outdatedAgreements],
-	([$outdatedAgreements]) => {
-		const result: AgreementsToAccept = {};
-		Object.keys($outdatedAgreements).forEach((agreementType) => {
-			result[agreementType as keyof EnvAgreements] = true;
-		});
-		return result;
-	}
+	([$outdatedAgreements]) =>
+		Object.keys($outdatedAgreements).reduce<AgreementsToAccept>(
+			(acc, agreementType) => ({
+				...acc,
+				[agreementType as keyof EnvAgreements]: true
+			}),
+			{}
+		)
 );
 
 export const hasOutdatedAgreements: Readable<boolean> = derived(
