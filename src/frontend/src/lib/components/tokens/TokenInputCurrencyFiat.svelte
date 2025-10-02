@@ -72,11 +72,11 @@
 	{disabled}
 	{error}
 	{loading}
+	onInput={handleInput}
 	{placeholder}
 	styleClass="no-padding"
 	testId={TOKEN_INPUT_CURRENCY_FIAT}
 	bind:value={displayValue}
-	on:nnsInput={handleInput}
 	on:focus
 	on:blur
 >
