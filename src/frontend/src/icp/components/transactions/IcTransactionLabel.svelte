@@ -2,10 +2,10 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { IcTransactionType } from '$icp/types/ic-transaction';
+	import Amount from '$lib/components/ui/Amount.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken, Token } from '$lib/types/token';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
-	import Amount from '$lib/components/ui/Amount.svelte';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
