@@ -103,8 +103,8 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "",
-			"title_part_2": "",
+			"title_part_1": "I Tuoi Asset Digitali",
+			"title_part_2": "Privato e Sicuro",
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
