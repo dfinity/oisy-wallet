@@ -15,17 +15,19 @@
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 
+	interface Props {
+		networkSelectorViewOnly: boolean;
+		tokenListItem: Snippet<[Token, () => void]>;
+		toolbar: Snippet;
+		noResults?: Snippet;
+	}
+
 	let {
 		networkSelectorViewOnly = false,
 		tokenListItem,
 		toolbar,
 		noResults
-	}: {
-		networkSelectorViewOnly: boolean;
-		tokenListItem: Snippet<[Token, () => void]>;
-		toolbar: Snippet;
-		noResults?: Snippet;
-	} = $props();
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 

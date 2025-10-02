@@ -2,15 +2,13 @@
 	import InputContactName from '$lib/components/address-book/InputContactName.svelte';
 	import type { ContactUi } from '$lib/types/contact';
 
-	let {
-		contact = $bindable(),
-		disabled,
-		isValid = $bindable()
-	}: {
+	interface Props {
 		contact: Partial<ContactUi>;
 		disabled?: boolean;
 		isValid: boolean;
-	} = $props();
+	}
+
+	let { contact = $bindable(), disabled, isValid = $bindable() }: Props = $props();
 
 	// Expose the isValid value for testing
 	export const getIsValid = () => isValid;
