@@ -12,7 +12,6 @@ export const NetworkExchangeSchema = z.object({
 	coingeckoId: z.custom<CoingeckoPlatformId>().optional()
 });
 
-// TODO: use Zod to validate the OnramperNetworkId
 const NetworkBuySchema = z.object({
 	onramperId: OnramperNetworkIdSchema
 });
