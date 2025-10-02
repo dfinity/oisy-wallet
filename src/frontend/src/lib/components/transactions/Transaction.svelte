@@ -67,11 +67,11 @@
 
 	const displayAmount = $derived(
 		nonNullish(cardAmount)
-			? type === 'approve' && nonNullish(fee)
-				? fee * -1n
-				: !incoming && nonNullish(fee)
-					? cardAmount + fee * -1n
-					: cardAmount
+			? !incoming && nonNullish(fee)
+				? type === 'approve'
+					? fee * -1n
+					: cardAmount + fee * -1n
+				: cardAmount
 			: undefined
 	);
 
