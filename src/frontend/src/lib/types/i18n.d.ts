@@ -1302,7 +1302,12 @@ interface I18nAgreements {
 }
 
 interface I18nLicense_agreement {
-	text: { license_agreement: string; title: string; body: string };
+	text: {
+		license_agreement: string;
+		det: { article: string; possessive: string };
+		title: string;
+		body: string;
+	};
 	alt: { license_agreement: string };
 }
 
