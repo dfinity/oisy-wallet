@@ -34,7 +34,7 @@
 		destination,
 		data,
 		erc20Approve,
-		sourceNetwork,
+		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
 		onApprove,
 		onReject
@@ -55,15 +55,13 @@
 		source={$ethAddress ?? ''}
 		token={$sendToken}
 	>
-		<WalletConnectModalValue
-			slot="sourceNetwork"
-			label={$i18n.send.text.source_network}
-			ref="source-network"
-		>
-			<NetworkWithLogo network={sourceNetwork} />
-		</WalletConnectModalValue>
+		{#snippet sourceNetwork()}
+			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+				<NetworkWithLogo network={sourceNetworkProp} />
+			</WalletConnectModalValue>
+		{/snippet}
 
-		<div slot="destinationNetwork">
+		{#snippet destinationNetwork()}
 			{#if nonNullish(targetNetwork)}
 				<WalletConnectModalValue
 					label={$i18n.send.text.destination_network}
@@ -72,13 +70,15 @@
 					<NetworkWithLogo network={targetNetwork} />
 				</WalletConnectModalValue>
 			{/if}
-		</div>
+		{/snippet}
 
-		<EthFeeDisplay slot="fee">
-			{#snippet label()}
-				<Html text={$i18n.fee.text.max_fee_eth} />
-			{/snippet}
-		</EthFeeDisplay>
+		{#snippet fee()}
+			<EthFeeDisplay>
+				{#snippet label()}
+					<Html text={$i18n.fee.text.max_fee_eth} />
+				{/snippet}
+			</EthFeeDisplay>
+		{/snippet}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>
