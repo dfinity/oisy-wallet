@@ -2,7 +2,10 @@
 	import { Html, IconClose } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
-	import { AGREEMENTS_WARNING_BANNER } from '$lib/constants/test-ids.constants';
+	import {
+		AGREEMENTS_WARNING_BANNER,
+		AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON
+	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements-formatter.utils';
@@ -40,7 +43,11 @@
 {#if visible && notEmptyString(warning)}
 	<WarningBanner testId={AGREEMENTS_WARNING_BANNER}>
 		<span class="w-full px-2"><Html text={warning} /></span>
-		<button aria-label={$i18n.core.text.close} onclick={close}>
+		<button
+			aria-label={$i18n.core.text.close}
+			data-tid={AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON}
+			onclick={close}
+		>
 			<IconClose />
 		</button>
 	</WarningBanner>
