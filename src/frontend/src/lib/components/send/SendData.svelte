@@ -16,16 +16,16 @@
 	export let showNullishAmountLabel = false;
 </script>
 
-{#if nonNullish(destination)}
-	<SendDataDestination {destination} />
-{/if}
-
 <slot name="sourceNetwork" />
 
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
-<slot />
-
 <SendSource {balance} {exchangeRate} {source} {token} />
 
+{#if nonNullish(destination)}
+	<SendDataDestination {destination} />
+{/if}
+
 <slot name="fee" />
+
+<slot />
