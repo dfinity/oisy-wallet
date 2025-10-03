@@ -13,6 +13,6 @@
 
 <label class="font-bold" for={ref}>{@render label()}</label>
 
-<svelte:element this={element} id={ref} class="mb-4 gap-1 break-all font-normal">
+<svelte:element this={element} id={ref} class="mb-4 break-all font-normal">
 	{@render content?.()}
 </svelte:element>
