@@ -8,6 +8,16 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
 
+	interface Props {
+		destination: string;
+		activeSendDestinationTab: SendDestinationTab;
+		selectedContact: Writable<ContactUi>;
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
+	}
+
 	let {
 		destination,
 		activeSendDestinationTab,
@@ -16,15 +26,7 @@
 		onNext,
 		onClose,
 		onQRCodeScan
-	}: {
-		destination: string;
-		activeSendDestinationTab: SendDestinationTab;
-		selectedContact: Writable<ContactUi>;
-		onBack: () => void;
-		onNext: () => void;
-		onClose: () => void;
-		onQRCodeScan: () => void;
-	} = $props();
+	}: Props = $props();
 
 	const steps = allSendWizardSteps({ i18n: $i18n });
 

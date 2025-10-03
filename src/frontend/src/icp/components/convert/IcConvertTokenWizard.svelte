@@ -64,8 +64,8 @@
 		onNext: () => void;
 		onDestination: () => void;
 		onDestinationBack: () => void;
-		onIcQrCodeBack: () => void;
-		onIcQrCodeScan: () => void;
+		onQRCodeBack: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
@@ -80,8 +80,8 @@
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onIcQrCodeBack,
-		onIcQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	}: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -238,19 +238,18 @@
 		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
 			<DestinationWizardStep
 				{networkId}
+				{onDestinationBack}
+				{onQRCodeScan}
 				tokenStandard={$destinationToken.standard}
-				on:icBack={back}
 				bind:customDestination
-				on:icQRCodeScan={onIcQrCodeScan}
-				on:icDestinationBack={onDestinationBack}
 			>
-				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
+				{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
 			</DestinationWizardStep>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$destinationToken}
 				onDecodeQrCode={decodeQrCode}
-				{onIcQrCodeBack}
+				{onQRCodeBack}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
 			/>

@@ -2,7 +2,6 @@ import { SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import {
 	TokenAppearanceSchema,
 	TokenBuyableSchema,
-	TokenBuySchema,
 	TokenCategorySchema,
 	TokenIdSchema,
 	TokenMetadataSchema,
@@ -179,20 +178,6 @@ describe('token.schema', () => {
 			};
 
 			expect(() => TokenAppearanceSchema.parse(invalidAppearance)).toThrow();
-		});
-	});
-
-	describe('TokenBuySchema', () => {
-		it('should validate with an optional onramperId', () => {
-			const validBuy = { onramperId: 'valid-id' };
-
-			expect(TokenBuySchema.parse(validBuy)).toEqual(validBuy);
-		});
-
-		it('should validate with an empty object (onramperId optional)', () => {
-			const validBuy = {};
-
-			expect(TokenBuySchema.parse(validBuy)).toEqual(validBuy);
 		});
 	});
 
