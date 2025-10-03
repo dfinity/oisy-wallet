@@ -20,7 +20,7 @@
 	<SendDataDestination {destination} />
 {/if}
 
-<slot name="sourceNtwork" />
+<slot name="sourceNetwork" />
 
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
