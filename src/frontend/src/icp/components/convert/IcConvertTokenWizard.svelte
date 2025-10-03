@@ -238,13 +238,12 @@
 		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
 			<DestinationWizardStep
 				{networkId}
+				{onDestinationBack}
+				{onQRCodeScan}
 				tokenStandard={$destinationToken.standard}
-				on:icBack={back}
 				bind:customDestination
-				on:icQRCodeScan={onQRCodeScan}
-				on:icDestinationBack={onDestinationBack}
 			>
-				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
+				{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
 			</DestinationWizardStep>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan

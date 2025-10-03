@@ -1588,7 +1588,8 @@
 			"reject_warning": "",
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"accept_and_continue": "",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": ""
@@ -1597,6 +1598,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "اتفاقية ترخيص $oisy_name (\"اتفاقية الترخيص\")",
 			"paragraph_1": "شكرًا لاهتمامك بـ $oisy_name، وهو تطبيق لامركزي للمحفظة متعددة السلاسل ذاتية الحفظ تعتمد على المتصفح ومستضافة على شبكة البلوكتشين العامة Internet Computer (\"$oisy_short\"). لمزيد من المعلومات حول $oisy_short، ورمزه المفتوح المصدر والتراخيص ذات الصلة، يرجى الرجوع إلى مستودع GitHub الخاص بـ $oisy_short هنا: $oisy_repo_url.",
 			"paragraph_2": "تتحكم اتفاقية الترخيص هذه في استخدامك لـ $oisy_short (\"أنت\"). باستخدام $oisy_short، فإنك توافق على أنك قد قرأت وفهمت ووافقت على الالتزام باتفاقية الترخيص هذه. إذا لم توافق، فلا يجوز لك استخدام $oisy_short.",
@@ -1623,6 +1628,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "",
 			"body": ""
@@ -1634,6 +1643,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},

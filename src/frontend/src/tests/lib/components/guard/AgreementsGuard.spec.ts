@@ -440,4 +440,41 @@ describe('AgreementsGuard', () => {
 			currentUserVersion: fromNullable(mockUserProfile.version)
 		});
 	});
+
+	it('should accept the agreements only once at the same time', async () => {
+		vi.useFakeTimers();
+
+		userProfileStore.reset();
+
+		render(AgreementsGuard, mockParams);
+
+		// We mock quick changes of the user profile to test that the agreements are accepted only once
+		userProfileStore.set({
+			certified,
+			profile: mockUserProfile
+		});
+		userProfileStore.reset();
+
+		expect(acceptAgreements).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			agreementsToAccept: {
+				licenseAgreement: true,
+				privacyPolicy: true,
+				termsOfUse: true
+			}
+		});
+
+		await vi.advanceTimersByTimeAsync(10_000);
+
+		expect(acceptAgreements).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			agreementsToAccept: {
+				licenseAgreement: true,
+				privacyPolicy: true,
+				termsOfUse: true
+			}
+		});
+
+		vi.useRealTimers();
+	});
 });
