@@ -13,10 +13,6 @@
 	export let exchangeRate: number | undefined = undefined;
 </script>
 
-<WalletConnectModalValue label={$i18n.send.text.source} ref="source">
-	{source}
-</WalletConnectModalValue>
-
 <WalletConnectModalValue label={$i18n.send.text.balance} ref="balance">
 	{#if nonNullish(token)}
 		<ExchangeAmountDisplay
@@ -28,4 +24,8 @@
 	{:else}
 		&ZeroWidthSpace;
 	{/if}
+</WalletConnectModalValue>
+
+<WalletConnectModalValue label={$i18n.send.text.source} ref="source">
+	{source}
 </WalletConnectModalValue>
