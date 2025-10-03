@@ -71,8 +71,8 @@
 	--alert-max-width: 100vw;
 	--alert-max-height: 100dvh;
 	--alert-border-radius: var(--border-radius-xs);
-	--alert-padding-y: 0;
-	--alert-padding-x: 0;
+	--alert-padding-y: var(--padding-2x);
+	--alert-padding-x: var(--padding-3x);
 
 	--dialog-width: 100vw;
 	--dialog-max-width: var(--alert-max-width);
@@ -95,6 +95,7 @@
 		--dialog-width: 560px;
 		--alert-max-width: calc(100vw - var(--padding-4x));
 		--alert-max-height: initial;
+        --alert-border-radius: calc(var(--border-radius-sm) * 3);
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
 	}
 
