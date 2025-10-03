@@ -1074,6 +1074,10 @@ interface I18nTransaction {
 		interacted_with: string;
 		status: string;
 		confirmations: string;
+		for: string;
+		for_copied: string;
+		expiration: string;
+		approve_label: string;
 	};
 	status: {
 		confirmed: string;
@@ -1112,6 +1116,7 @@ interface I18nTransaction {
 		open_block_explorer: string;
 		open_from_block_explorer: string;
 		open_to_block_explorer: string;
+		open_for_block_explorer: string;
 	};
 	error: { get_block_number: string; failed_get_transaction: string };
 }
@@ -1246,6 +1251,16 @@ interface I18nAddress {
 	qr: { title: string };
 }
 
+interface I18nPow_protector {
+	text: {
+		title: string;
+		description: string;
+		request_challenge: string;
+		solve_challenge: string;
+		grant_cycles: string;
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -1291,6 +1306,7 @@ interface I18nAgreements {
 		i_have_accepted: string;
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
+		updated_agreements_warning: string;
 	};
 	error: { cannot_update_user_agreements: string };
 }
@@ -1298,35 +1314,31 @@ interface I18nAgreements {
 interface I18nLicense_agreement {
 	text: {
 		license_agreement: string;
+		det: { article: string; possessive: string };
 		title: string;
-		paragraph_1: string;
-		paragraph_2: string;
-		paragraph_3: string;
-		limited_license: string;
-		restrictions: string;
-		applicable_laws: string;
-		reservation_rights: string;
-		feedback: string;
-		termination: string;
-		warranty_liability: string;
-		indemnity: string;
-		governing_law: string;
-		entire_agreement: string;
-		assignment: string;
-		no_waiver: string;
-		english_version: string;
 		body: string;
 	};
 	alt: { license_agreement: string };
 }
 
 interface I18nTerms_of_use {
-	text: { terms_of_use: string; title: string; body: string };
+	text: {
+		terms_of_use: string;
+		det: { article: string; possessive: string };
+		title: string;
+		instruction: string;
+		body: string;
+	};
 	alt: { terms_of_use: string };
 }
 
 interface I18nPrivacy_policy {
-	text: { privacy_policy: string; title: string; body: string };
+	text: {
+		privacy_policy: string;
+		det: { article: string; possessive: string };
+		title: string;
+		body: string;
+	};
 	alt: { privacy_policy: string };
 }
 
@@ -1434,6 +1446,7 @@ interface I18n {
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;
+	pow_protector: I18nPow_protector;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	agreements: I18nAgreements;

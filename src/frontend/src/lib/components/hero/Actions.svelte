@@ -57,7 +57,10 @@
 	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
 	// TODO: Remove once Swap/Convert are refactored and merged.
 	let tooManyButtons = $derived(
-		sendAction && swapAction && (convertErc20 || convertEth || convertCkBtc || convertBtc)
+		sendAction &&
+			swapAction &&
+			(convertErc20 || convertEth || convertCkBtc || convertBtc) &&
+			buyAction
 	);
 </script>
 

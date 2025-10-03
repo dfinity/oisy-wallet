@@ -71,8 +71,8 @@ describe('IcConvertTokenWizard', () => {
 	const onNext = vi.fn();
 	const onDestination = vi.fn();
 	const onDestinationBack = vi.fn();
-	const onIcQrCodeScan = vi.fn();
-	const onIcQrCodeBack = vi.fn();
+	const onQRCodeScan = vi.fn();
+	const onQRCodeBack = vi.fn();
 
 	const props = {
 		currentStep: {
@@ -87,8 +87,8 @@ describe('IcConvertTokenWizard', () => {
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onIcQrCodeBack,
-		onIcQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	};
 	let sendSpy: MockInstance;
 

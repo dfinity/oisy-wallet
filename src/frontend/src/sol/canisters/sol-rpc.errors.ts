@@ -1,6 +1,6 @@
 import type { RpcError, RpcSource } from '$declarations/sol_rpc/sol_rpc.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
-import { fromNullable, jsonReplacer } from '@dfinity/utils';
+import { assertNever, fromNullable, jsonReplacer } from '@dfinity/utils';
 
 export const assertConsistentResponse: <T>(
 	response: { Consistent: T } | { Inconsistent: Array<[RpcSource, T]> }
@@ -54,9 +54,6 @@ export class SolRpcCanisterError extends CanisterInternalError {
 			return;
 		}
 
-		// Force compiler error on unhandled cases based on leftover types
-		const _: never = err;
-
-		super('Unknown SOL RPC Error');
+		assertNever(err, 'Unknown SOL RPC Error');
 	}
 }

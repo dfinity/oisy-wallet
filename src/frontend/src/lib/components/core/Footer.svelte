@@ -6,7 +6,7 @@
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -58,7 +58,7 @@
 				<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
 					<TermsOfUseLink />
 					<PrivacyPolicyLink />
-					<LicenseLink />
+					<LicenseAgreementLink />
 				</div>
 			{/if}
 		</div>
