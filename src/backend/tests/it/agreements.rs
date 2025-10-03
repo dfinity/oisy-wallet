@@ -385,7 +385,7 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         agreements: UserAgreements {
             license_agreement: UserAgreement {
                 accepted: Some(true),
-                text_sha256: Some(invalid_sha256),
+                text_sha256: Some(invalid_sha256.clone()),
                 ..Default::default()
             },
             ..Default::default()
@@ -398,7 +398,14 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         arg,
     );
 
-    assert!(matches!(resp, Ok(Err(_))));
+    assert!(resp.is_err());
+    assert!(resp
+        .unwrap_err()
+        .contains(format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        ).as_str()));
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
@@ -415,7 +422,7 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         agreements: UserAgreements {
             license_agreement: UserAgreement {
                 accepted: Some(true),
-                text_sha256: Some(invalid_sha256),
+                text_sha256: Some(invalid_sha256.clone()),
                 ..Default::default()
             },
             ..Default::default()
@@ -428,7 +435,14 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         arg,
     );
 
-    assert!(matches!(resp, Ok(Err(_))));
+    assert!(resp.is_err());
+    assert!(resp
+        .unwrap_err()
+        .contains(format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        ).as_str()));
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
@@ -458,7 +472,14 @@ fn test_update_user_agreements_rejects_invalid_sha256_length() {
         arg,
     );
 
-    assert!(matches!(resp, Ok(Err(_))));
+    assert!(resp.is_err());
+    assert!(resp
+        .unwrap_err()
+        .contains(format!(
+            "Invalid SHA256 hex length: {}, expected {}",
+            invalid_sha256.len(),
+            SHA256_HEX_LENGTH
+        ).as_str()));
 
     let user_profile = pic_setup
         .update::<Result<UserProfile, GetUserProfileError>>(caller, "get_user_profile", ())
