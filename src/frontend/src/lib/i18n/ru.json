@@ -1269,7 +1269,9 @@
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",
@@ -1588,7 +1590,8 @@
 			"reject_warning": "",
 			"i_have_accepted": "",
 			"i_have_accepted_updated": "",
-			"accept_and_continue": ""
+			"accept_and_continue": "",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": ""
@@ -1597,6 +1600,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Лицензионное Соглашение $oisy_name («Лицензионное Соглашение»)",
 			"body": ""
 		},
@@ -1607,6 +1614,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "",
 			"body": ""
@@ -1618,6 +1629,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},

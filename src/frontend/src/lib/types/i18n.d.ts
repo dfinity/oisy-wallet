@@ -1076,6 +1076,8 @@ interface I18nTransaction {
 		confirmations: string;
 		for: string;
 		for_copied: string;
+		expiration: string;
+		approve_label: string;
 	};
 	status: {
 		confirmed: string;
@@ -1294,6 +1296,7 @@ interface I18nAgreements {
 		i_have_accepted: string;
 		i_have_accepted_updated: string;
 		accept_and_continue: string;
+		updated_agreements_warning: string;
 	};
 	error: { cannot_update_user_agreements: string };
 }
@@ -1304,12 +1307,23 @@ interface I18nLicense_agreement {
 }
 
 interface I18nTerms_of_use {
-	text: { terms_of_use: string; title: string; instruction: string; body: string };
+	text: {
+		terms_of_use: string;
+		det: { article: string; possessive: string };
+		title: string;
+		instruction: string;
+		body: string;
+	};
 	alt: { terms_of_use: string };
 }
 
 interface I18nPrivacy_policy {
-	text: { privacy_policy: string; title: string; body: string };
+	text: {
+		privacy_policy: string;
+		det: { article: string; possessive: string };
+		title: string;
+		body: string;
+	};
 	alt: { privacy_policy: string };
 }
 

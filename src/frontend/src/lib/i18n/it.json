@@ -1269,7 +1269,9 @@
 			"status": "Stato",
 			"confirmations": "Conferme",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Confermato",
@@ -1588,7 +1590,8 @@
 			"reject_warning": "Devi accettare i Termini e Condizioni per procedere. Riprova in qualsiasi momento.",
 			"i_have_accepted": "Ho letto e accetto i",
 			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
-			"accept_and_continue": "Accetta e continua"
+			"accept_and_continue": "Accetta e continua",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
@@ -1597,6 +1600,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Accordo di Licenza",
+			"det": {
+				"article": "l'",
+				"possessive": "il nostro "
+			},
 			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
 			"body": ""
 		},
@@ -1607,6 +1614,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Termini di utilizzo",
+			"det": {
+				"article": "i ",
+				"possessive": "i nostri "
+			},
 			"title": "",
 			"instruction": "Cliccando su questo pulsante, accetti i $link",
 			"body": ""
@@ -1618,6 +1629,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Politica sulla riservatezza",
+			"det": {
+				"article": "la ",
+				"possessive": "la nostra "
+			},
 			"title": "",
 			"body": ""
 		},

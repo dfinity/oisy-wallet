@@ -1269,7 +1269,9 @@
 			"status": "Status",
 			"confirmations": "Potwierdzenia",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Potwierdzono",
@@ -1588,7 +1590,8 @@
 			"reject_warning": "Aby kontynuować, musisz zaakceptować Regulamin. Możesz spróbować ponownie w dowolnym momencie.",
 			"i_have_accepted": "Przeczytałem i akceptuję",
 			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
-			"accept_and_continue": "Zaakceptuj i kontynuuj"
+			"accept_and_continue": "Zaakceptuj i kontynuuj",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Wystąpił błąd podczas aktualizacji umów."
@@ -1597,6 +1600,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Umowa licencyjna",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
 			"body": ""
 		},
@@ -1607,6 +1614,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Warunki użytkowania",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
 			"body": ""
@@ -1618,6 +1629,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Polityka prywatności",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
