@@ -3,6 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		title: Snippet;
@@ -36,7 +37,9 @@
 	{#snippet footer()}
 		<div class="my-3 flex w-full justify-between gap-3">
 			<ButtonCancel onclick={onCancelHandler} testId={`${testId}-cancel`} />
-			<Button onclick={onConfirmHandler} testId={`${testId}-confirm`}>Confirm</Button>
+			<Button onclick={onConfirmHandler} testId={`${testId}-confirm`}
+				>{$i18n.core.text.confirm}</Button
+			>
 		</div>
 	{/snippet}
 </Modal>
