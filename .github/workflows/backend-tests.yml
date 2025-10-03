@@ -96,7 +96,6 @@ jobs:
 
   breaking-interface:
     runs-on: ubuntu-24.04
-    if: ${{ github.event_name != 'merge_group' }}
     needs:
       - docker-build
     permissions:
@@ -109,9 +108,11 @@ jobs:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
           persist-credentials: false
+
       - name: Check if backend files changed
         id: changes
         uses: ./.github/actions/check-backend-changes
+
       - name: 'Run when backend candid interface changes'
         if: steps.changes.outputs.backend == 'true'
         # Goal: Run only when the backend candid interface changes, otherwise
@@ -125,6 +126,7 @@ jobs:
           filters: |
             api:
               - 'src/backend/backend.did'
+
       - name: 'Check whether the PR description & title mention "breaking interface"'
         if: steps.changes.outputs.backend == 'true'
         id: conventional-commit
@@ -140,6 +142,7 @@ jobs:
           if grep -qE '^BREAKING CHANGE: ' <<<"$DESCRIPTION"; then
             echo "BREAKING_DESCRIPTION=true" | tee -a "$GITHUB_OUTPUT" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
+
       - name: Need to check for breaking changes
         id: check-for-breaking-changes
         # Run if the interface has changed, but the PR is NOT marked as a breaking change.
@@ -167,7 +170,7 @@ jobs:
           path: .
 
       - name: 'Run backend tests'
-        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true')
+        if: (steps.changes.outputs.backend == 'true') && (steps.check-for-breaking-changes.outputs.EXPECT_NO_BREAKING_CHANGES == 'true') && (github.event_name != 'merge_group')
         working-directory: .
         run: |
           set -euxo pipefail # Ensure that the `exit 1` causes this step to fail.
