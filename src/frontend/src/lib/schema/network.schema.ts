@@ -7,7 +7,6 @@ export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 
 export const NetworkEnvironmentSchema = z.enum(['mainnet', 'testnet']);
 
-// TODO: use Zod to validate the CoingeckoPlatformId
 export const NetworkExchangeSchema = z.object({
 	coingeckoId: CoingeckoPlatformIdSchema.optional()
 });
