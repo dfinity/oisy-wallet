@@ -1,6 +1,5 @@
 <script lang="ts">
 	import TokensDisplayHandler from '$lib/components/tokens/TokensDisplayHandler.svelte';
-
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 	interface Props {
