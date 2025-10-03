@@ -76,7 +76,6 @@ pub struct UpdateUserAgreementsRequest {
     pub agreements: UserAgreements,
 }
 
-
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
 pub struct NewTypeForCI {
     pub a: u32,
