@@ -22,7 +22,7 @@ pub struct UserAgreement {
 }
 
 impl Validate for UserAgreement {
-    /// Verifies that agreement text SHA256 is valid hex of expected length, if provided.
+    /// Verifies that agreement text SHA256 is a valid hex of expected length, if provided.
     fn validate(&self) -> Result<(), candid::Error> {
         if let Some(ref hash) = self.text_sha256 {
             if hash.len() != SHA256_HEX_LENGTH {
