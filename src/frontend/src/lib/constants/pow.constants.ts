@@ -2,7 +2,7 @@
 export const POW_CHALLENGE_INTERVAL_MILLIS = 60_000;
 
 // Minimum cycles allowance required for signer operations before triggering a PoW challenge.
-export const POW_MIN_CYCLES_THRESHOLD = 595_000_000_000n;
+export const POW_MIN_CYCLES_THRESHOLD = 598_000_000_000n;
 
 // Threshold below which cycles are considered effectively zero due to fragmented costs, triggering the PoW protector modal.
 // This is set lower than POW_MIN_CYCLES_THRESHOLD to provide a critical warning before cycles are completely depleted.
