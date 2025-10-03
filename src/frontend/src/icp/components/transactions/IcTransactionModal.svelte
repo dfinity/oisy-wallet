@@ -36,7 +36,8 @@
 		fromExplorerUrl,
 		toExplorerUrl,
 		fee,
-		incoming
+		incoming,
+		approveSpender
 	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -77,14 +78,15 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
+				{approveSpender}
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}
-				type={type === 'receive' ? 'receive' : 'send'}
+				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
 			/>
 		{/if}
 

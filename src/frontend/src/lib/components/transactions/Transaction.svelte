@@ -100,11 +100,7 @@
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
-				{#if nonNullish(contact)}
-					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
-				{:else}
-					{@render children?.()}
-				{/if}
+				{@render children?.()}
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo {network} testId="transaction-network" transparent />

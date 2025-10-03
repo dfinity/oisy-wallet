@@ -1269,7 +1269,9 @@
 			"status": "स्थिति",
 			"confirmations": "पुष्टियां",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "पुष्टि",

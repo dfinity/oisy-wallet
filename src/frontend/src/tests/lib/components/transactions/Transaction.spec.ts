@@ -46,7 +46,8 @@ let testAliasLabel: string | undefined = 'Work';
 vi.mock('$lib/utils/contact.utils', () => ({
 	getContactForAddress: ({ addressString }: { addressString: string }) =>
 		testContact?.address === addressString ? testContact : undefined,
-	filterAddressFromContact: () => (testAliasLabel ? { label: testAliasLabel } : undefined)
+	filterAddressFromContact: () => (testAliasLabel ? { label: testAliasLabel } : undefined),
+	selectColorForName: () => '#000000'
 }));
 
 // Minimal NFT token for tests (will be cast to AppToken at call sites)
@@ -95,6 +96,22 @@ describe('Transaction (single)', () => {
 
 		expect(screen.getByText(/^to$/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
+	});
+
+	it('when a contact is found, shows "To" and the contacts name', () => {
+		const toAddress = '0xJOHNNY';
+		testContact = { name: 'Johnny', address: toAddress };
+
+		const { getByText } = render(Transaction, {
+			type: 'send',
+			status: 'confirmed',
+			token: ICP_TOKEN,
+			iconType: 'transaction',
+			to: toAddress
+		});
+
+		expect(getByText(/^to$/i)).toBeInTheDocument();
+		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
 	});
 
 	it('hides amount in privacy mode (shows dots instead of amount)', () => {
