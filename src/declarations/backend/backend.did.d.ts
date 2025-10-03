@@ -395,6 +395,7 @@ export interface UpdateUserAgreementsRequest {
 }
 export interface UserAgreement {
 	last_accepted_at_ns: [] | [bigint];
+	text_sha256: [] | [string];
 	accepted: [] | [boolean];
 	last_updated_at_ms: [] | [bigint];
 }

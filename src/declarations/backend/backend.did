@@ -371,6 +371,7 @@ type UpdateUserAgreementsRequest = record {
 };
 type UserAgreement = record {
 	last_accepted_at_ns : opt nat64;
+	text_sha256 : opt text;
 	accepted : opt bool;
 	last_updated_at_ms : opt nat64
 };
