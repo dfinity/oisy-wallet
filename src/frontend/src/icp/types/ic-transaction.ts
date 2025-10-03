@@ -55,5 +55,6 @@ export interface IcTransactionUi {
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
 	approveSpender?: string;
+	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;
 }

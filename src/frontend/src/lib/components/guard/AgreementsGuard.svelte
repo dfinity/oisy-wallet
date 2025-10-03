@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { queryAndUpdate } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
-	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
+	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		agreementsToAccept,
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
-		noAgreementVisionedYet
+		noAgreementVisionedYet,
+		atLeastOneAgreementVisioned
 	} from '$lib/derived/user-agreements.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { acceptAgreements } from '$lib/services/user-agreements.services';
+	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 
 	interface Props {
 		children: Snippet;
@@ -21,12 +22,14 @@
 
 	let accepting = false;
 
+	let initialAgreementsToAccept = $state<AgreementsToAccept>({});
+
 	$effect(() => {
 		if ($hasAcceptedAllLatestAgreements) {
 			return;
 		}
 
-		if ($noAgreementVisionedYet) {
+		if ($noAgreementVisionedYet || $hasOutdatedAgreements) {
 			if (accepting) {
 				return;
 			}
@@ -44,6 +47,10 @@
 			// which handles the state of the request internally and has callbacks in case of awaited success or failure.
 			queryAndUpdate({
 				request: async ({ identity }) => {
+					if ($atLeastOneAgreementVisioned && $hasOutdatedAgreements) {
+						initialAgreementsToAccept = { ...$agreementsToAccept };
+					}
+
 					accepting = true;
 
 					await acceptAgreements({
@@ -67,10 +74,12 @@
 	});
 </script>
 
-{#if $hasAcceptedAllLatestAgreements || $noAgreementVisionedYet}
-	{@render children()}
-{:else if $hasOutdatedAgreements}
-	<div in:fade={{ delay: 0, duration: 250 }}>
-		<AcceptAgreementsModal />
+{@render children()}
+
+{#if Object.keys(initialAgreementsToAccept).length > 0}
+	<div
+		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+	>
+		<AgreementsBanner agreementsToAccept={initialAgreementsToAccept} />
 	</div>
 {/if}

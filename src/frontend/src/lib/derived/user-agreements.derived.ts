@@ -42,6 +42,11 @@ export const noAgreementVisionedYet: Readable<boolean> = derived(
 		isNullish($userAgreements.termsOfUse.accepted)
 );
 
+export const atLeastOneAgreementVisioned: Readable<boolean> = derived(
+	[noAgreementVisionedYet],
+	([$noAgreementVisionedYet]) => !$noAgreementVisionedYet
+);
+
 export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 	[userAgreements],
 	([$userAgreements]) =>

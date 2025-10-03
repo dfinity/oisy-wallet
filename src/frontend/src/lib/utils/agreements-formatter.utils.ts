@@ -12,6 +12,7 @@ import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.
 import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 import type { AgreementsToAccept } from '$lib/types/user-agreements';
 import { componentToHtml } from '$lib/utils/component.utils';
+import { assertNever } from '@dfinity/utils';
 import type { Component, ComponentProps } from 'svelte';
 
 const renderAgreementItemHtml = <T extends Component>({
@@ -50,10 +51,7 @@ const mapAgreementToComponent = (
 		return PrivacyPolicyLink;
 	}
 
-	// Force compiler error on unhandled cases based on leftover types
-	const _: never = agreementType;
-
-	throw new Error(`Unmapped agreement type: ${agreementType}`);
+	assertNever(agreementType, `Unmapped agreement type: ${agreementType}`);
 };
 
 export const formatUpdatedAgreementsHtml = ({

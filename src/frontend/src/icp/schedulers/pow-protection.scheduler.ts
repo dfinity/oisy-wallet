@@ -1,7 +1,10 @@
 import { hasRequiredCycles, solvePowChallenge } from '$icp/services/pow-protector.services';
 import { allowSigning, createPowChallenge } from '$lib/api/backend.api';
 import { CreateChallengeEnum, PowCreateChallengeError } from '$lib/canisters/backend.errors';
-import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
+import {
+	POW_CHALLENGE_INTERVAL_MILLIS,
+	POW_MIN_CYCLES_THRESHOLD
+} from '$lib/constants/pow.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
 	PostMessageDataRequest,
@@ -44,7 +47,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 	 * @throws Errors if any step with no specific error handling in the sequence fails.
 	 */
 	private requestSignerCycles = async ({ identity }: SchedulerJobData<PostMessageDataRequest>) => {
-		if (await hasRequiredCycles({ identity })) {
+		if (await hasRequiredCycles({ identity, requiredCycles: POW_MIN_CYCLES_THRESHOLD })) {
 			// We can skip the PoW process if the user has enough cycles
 			return;
 		}

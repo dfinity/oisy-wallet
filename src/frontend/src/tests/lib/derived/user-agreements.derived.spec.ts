@@ -2,6 +2,7 @@ import * as agreementsEnv from '$env/agreements.env';
 import { agreementsData } from '$env/agreements.env';
 import {
 	agreementsToAccept,
+	atLeastOneAgreementVisioned,
 	hasAcceptedAllLatestAgreements,
 	hasOutdatedAgreements,
 	noAgreementVisionedYet,
@@ -291,6 +292,172 @@ describe('user-agreements.derived', () => {
 			});
 
 			expect(get(noAgreementVisionedYet)).toBeFalsy();
+		});
+	});
+
+	describe('atLeastOneAgreementVisioned', () => {
+		it('should return false when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(atLeastOneAgreementVisioned)).toBeFalsy();
+		});
+
+		it('should return false when user agreements data are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable()
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeFalsy();
+		});
+
+		it('should return false if all agreements are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: mockUserProfile
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeFalsy();
+		});
+
+		it('should return true if there is at least one agreement accepted', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(1677542400n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeTruthy();
+		});
+
+		it('should return true if there is at least one agreement rejected', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							privacy_policy: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(1677542400n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeTruthy();
+		});
+
+		it('should return true if all agreements are accepted', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(1677542402n)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(1677542400n)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(1677542401n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeTruthy();
+		});
+
+		it('should return true if all agreements are rejected', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(1677542402n)
+							},
+							privacy_policy: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(1677542400n)
+							},
+							terms_of_use: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(1677542401n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeTruthy();
+		});
+
+		it('should return true if some agreements are nullish, some accepted and some rejected', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(1677542402n)
+							},
+							privacy_policy: {
+								accepted: toNullable(),
+								last_accepted_at_ns: toNullable(),
+								last_updated_at_ms: toNullable()
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(1677542401n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(atLeastOneAgreementVisioned)).toBeTruthy();
 		});
 	});
 
