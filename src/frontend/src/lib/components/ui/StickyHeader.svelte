@@ -24,7 +24,7 @@
 			return;
 		}
 		const rect = rootElement.getBoundingClientRect();
-		scrolledSoon = rect.top <= SPACING_TOP * 4;
+		scrolledSoon = rect.top <= SPACING_TOP * 6;
 		scrolledPast = rect.top <= SPACING_TOP;
 	};
 
