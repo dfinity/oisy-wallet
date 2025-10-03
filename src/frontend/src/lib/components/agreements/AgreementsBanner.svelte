@@ -1,13 +1,18 @@
 <script lang="ts">
-	import { IconClose } from '@dfinity/gix-components';
+	import {Html, IconClose} from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { AGREEMENTS_WARNING_BANNER } from '$lib/constants/test-ids.constants';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { agreementsToAccept } from '$lib/derived/user-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements-formatter.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		agreementsToAccept: AgreementsToAccept;
+	}
+
+	let { agreementsToAccept }: Props = $props();
 
 	let visible = $state(true);
 
@@ -15,9 +20,8 @@
 
 	let formattedAgreements = $derived(
 		formatUpdatedAgreementsHtml({
-			agreements: $agreementsToAccept,
-			i18n: $i18n,
-			language: $currentLanguage
+			agreements: agreementsToAccept,
+			i18n: $i18n
 		})
 	);
 
@@ -35,7 +39,7 @@
 
 {#if visible && notEmptyString(warning)}
 	<WarningBanner testId={AGREEMENTS_WARNING_BANNER}>
-		<span class="w-full px-2">{warning}</span>
+		<span class="w-full px-2"><Html text={warning} /></span>
 		<button aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose />
 		</button>

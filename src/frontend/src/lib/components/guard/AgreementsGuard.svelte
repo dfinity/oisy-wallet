@@ -1,15 +1,18 @@
 <script lang="ts">
 	import { queryAndUpdate } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		agreementsToAccept,
 		hasAcceptedAllLatestAgreements,
 		hasOutdatedAgreements,
-		noAgreementVisionedYet
+		noAgreementVisionedYet,
+		atLeastOneAgreementVisioned
 	} from '$lib/derived/user-agreements.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { acceptAgreements } from '$lib/services/user-agreements.services';
+	import type { AgreementsToAccept } from '$lib/types/user-agreements';
 
 	interface Props {
 		children: Snippet;
@@ -18,6 +21,8 @@
 	let { children }: Props = $props();
 
 	let accepting = false;
+
+	let initialAgreementsToAccept = $state<AgreementsToAccept>({});
 
 	$effect(() => {
 		if ($hasAcceptedAllLatestAgreements) {
@@ -42,6 +47,10 @@
 			// which handles the state of the request internally and has callbacks in case of awaited success or failure.
 			queryAndUpdate({
 				request: async ({ identity }) => {
+					if ($atLeastOneAgreementVisioned && $hasOutdatedAgreements) {
+						initialAgreementsToAccept = { ...$agreementsToAccept };
+					}
+
 					accepting = true;
 
 					await acceptAgreements({
@@ -66,3 +75,11 @@
 </script>
 
 {@render children()}
+
+{#if Object.keys(initialAgreementsToAccept).length > 0}
+	<div
+		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+	>
+		<AgreementsBanner agreementsToAccept={initialAgreementsToAccept} />
+	</div>
+{/if}

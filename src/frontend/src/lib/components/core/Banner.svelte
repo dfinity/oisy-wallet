@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { IconClose, IconWarning } from '@dfinity/gix-components';
-	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
-	import {
-		atLeastOneAgreementVisioned,
-		hasOutdatedAgreements
-	} from '$lib/derived/user-agreements.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isPWAStandalone } from '$lib/utils/device.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
@@ -53,10 +48,6 @@
 			</button>
 		</WarningBanner>
 	</div>
-{/if}
-
-{#if $atLeastOneAgreementVisioned && $hasOutdatedAgreements}
-	<AgreementsBanner />
 {/if}
 
 <style lang="scss">
