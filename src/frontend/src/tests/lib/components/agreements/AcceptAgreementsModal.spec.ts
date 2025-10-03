@@ -38,7 +38,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Start with *all three* being outdated (so all render) unless a test overrides
@@ -74,7 +75,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Only termsOfUse is outdated; others omitted from the store
@@ -107,7 +109,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Only termsOfUse and privacyPolicy outdated
