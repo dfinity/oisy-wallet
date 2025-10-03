@@ -16,7 +16,7 @@ import {
 } from '$lib/derived/balances.derived';
 import { isBusy } from '$lib/derived/busy.derived';
 import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
-import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import {
 	combinedDerivedSortedFungibleNetworkTokens,

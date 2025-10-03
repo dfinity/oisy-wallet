@@ -30,7 +30,7 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
-		amount?: bigint;
+		displayAmount?: bigint;
 		type: TransactionType;
 		status: TransactionStatus;
 		timestamp?: number;
@@ -42,12 +42,11 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
-		fee?: bigint;
 		approveSpender?: string;
 	}
 
 	const {
-		amount: cardAmount,
+		displayAmount,
 		type,
 		status,
 		timestamp,
@@ -59,21 +58,8 @@
 		tokenId,
 		children,
 		onClick,
-		fee,
 		approveSpender
 	}: Props = $props();
-
-	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
-
-	const displayAmount = $derived(
-		nonNullish(cardAmount)
-			? type === 'approve' && nonNullish(fee)
-				? fee * -1n
-				: !incoming && nonNullish(fee)
-					? cardAmount + fee * -1n
-					: cardAmount
-			: undefined
-	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
@@ -114,26 +100,7 @@
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
-				{#if nonNullish(contact)}
-					{type === 'send'
-						? $i18n.transaction.type.send
-						: type === 'approve'
-							? $i18n.transaction.type.approve
-							: $i18n.transaction.type.receive}
-				{:else}
-					{@render children?.()}
-				{/if}
-				{#if type === 'approve' && nonNullish(cardAmount)}
-					{#if $isPrivacyMode}
-						<IconDots />
-					{:else}
-						<Amount
-							amount={cardAmount * -1n}
-							decimals={token.decimals}
-							symbol={getTokenDisplaySymbol(token)}
-						/>
-					{/if}
-				{/if}
+				{@render children?.()}
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo {network} testId="transaction-network" transparent />
