@@ -96,11 +96,9 @@ describe('sol-instructions-ata.utils', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifyAssociatedTokenInstruction).mockReturnValue('unknown-instruction');
 
-			expect(parseSolAtaInstruction(mockInstruction)).toStrictEqual(mockInstruction);
-
-			expect(parseCreateAssociatedTokenInstruction).not.toHaveBeenCalled();
-			expect(parseCreateAssociatedTokenIdempotentInstruction).not.toHaveBeenCalled();
-			expect(parseRecoverNestedAssociatedTokenInstruction).not.toHaveBeenCalled();
+			expect(() => parseSolAtaInstruction(mockInstruction)).toThrow(
+				'Unknown Solana ATA instruction: unknown-instruction'
+			);
 		});
 	});
 });
