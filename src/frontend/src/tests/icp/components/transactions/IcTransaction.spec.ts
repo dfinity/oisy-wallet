@@ -93,7 +93,7 @@ describe('IcTransaction', () => {
 		assertNonNullish(labelElement);
 
 		expect(labelElement.textContent).toBe(
-			`${replacePlaceholders(get(i18n).transaction.text.approve_amount, {
+			`${replacePlaceholders(get(i18n).transaction.text.approve_label, {
 				$approveAmount: formatToken({
 					value: 12345n,
 					displayDecimals: EIGHT_DECIMALS,
