@@ -64,5 +64,5 @@
 	{token}
 	{type}
 >
-	<IcTransactionLabel {type} label={transactionTypeLabel} {token} amount={value} />
+	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
 </Transaction>

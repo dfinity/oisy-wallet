@@ -1270,7 +1270,8 @@
 			"confirmations": "Подтверждения",
 			"for": "",
 			"for_copied": "",
-			"expiration": ""
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",

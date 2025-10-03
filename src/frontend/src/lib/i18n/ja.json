@@ -1270,7 +1270,8 @@
 			"confirmations": "確認数",
 			"for": "",
 			"for_copied": "",
-			"expiration": ""
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "確認済み",

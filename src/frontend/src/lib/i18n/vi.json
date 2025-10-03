@@ -1270,7 +1270,8 @@
 			"confirmations": "Xác nhận",
 			"for": "",
 			"for_copied": "",
-			"expiration": ""
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",

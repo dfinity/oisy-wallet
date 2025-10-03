@@ -1077,6 +1077,7 @@ interface I18nTransaction {
 		for: string;
 		for_copied: string;
 		expiration: string;
+		approve_label: string;
 	};
 	status: {
 		confirmed: string;
