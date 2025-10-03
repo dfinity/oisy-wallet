@@ -18,8 +18,6 @@
 
 <slot name="sourceNetwork" />
 
-<slot name="destinationNetwork" />
-
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
 <SendSource {balance} {exchangeRate} {source} {token} />
