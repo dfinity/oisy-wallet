@@ -25,7 +25,7 @@
 
 	// Use let with $state() for variables that need to be reassigned
 	let cyclesAllowanceSpent = $state<boolean>(false);
-	let checkInterval: ReturnType<typeof setInterval> | undefined;
+	let checkInterval = $state<NodeJS.Timeout | undefined>();
 	let checkAttempts = $state<number>(0);
 	let powWorker: PowProtectorWorkerInitResult | undefined;
 
