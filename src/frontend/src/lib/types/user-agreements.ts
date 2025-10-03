@@ -4,6 +4,7 @@ export interface AgreementData {
 	accepted: boolean | undefined;
 	lastAcceptedTimestamp: bigint | undefined;
 	lastUpdatedTimestamp: bigint | undefined;
+	textSha256: string | undefined;
 }
 
 export interface UserAgreements {

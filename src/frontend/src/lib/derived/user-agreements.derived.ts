@@ -22,7 +22,8 @@ export const userAgreements: Readable<UserAgreements> = derived(
 		const nullishAgreement: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		return {
@@ -60,7 +61,8 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 						[key]: {
 							accepted: undefined,
 							lastAcceptedTimestamp: undefined,
-							lastUpdatedTimestamp: undefined
+							lastUpdatedTimestamp: undefined,
+							textSha256: undefined
 						}
 					};
 				}
