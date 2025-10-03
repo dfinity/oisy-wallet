@@ -15,6 +15,6 @@ describe('SendDataDestination', () => {
 
 		expect(container).toHaveTextContent(en.send.text.destination);
 
-		expect(container).toHaveTextContent(props.destination );
+		expect(container).toHaveTextContent(props.destination);
 	});
 });
