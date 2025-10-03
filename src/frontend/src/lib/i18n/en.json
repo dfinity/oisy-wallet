@@ -1270,7 +1270,8 @@
 			"confirmations": "Confirmations",
 			"for": "For",
 			"for_copied": "Spender address copied to clipboard.",
-			"expiration": "Expiration"
+			"expiration": "Expiration",
+            "approve_label": "Approve $approveAmount"
 		},
 		"status": {
 			"confirmed": "Confirmed",
