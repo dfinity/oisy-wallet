@@ -35,7 +35,8 @@
 			"more_items": "さらに$items件",
 			"select": "選択",
 			"language": "言語",
-			"currency": "通貨"
+			"currency": "通貨",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",

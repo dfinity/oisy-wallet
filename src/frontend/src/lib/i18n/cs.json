@@ -35,7 +35,8 @@
 			"more_items": "+$items další",
 			"select": "Vybrat",
 			"language": "Jazyk",
-			"currency": "Měna"
+			"currency": "Měna",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",

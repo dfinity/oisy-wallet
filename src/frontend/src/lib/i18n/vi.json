@@ -35,7 +35,8 @@
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
-			"currency": "Tiền tệ"
+			"currency": "Tiền tệ",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
