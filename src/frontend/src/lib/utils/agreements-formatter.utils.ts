@@ -10,7 +10,6 @@ import type { EnvAgreements } from '$env/types/env-agreements';
 import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
-import type { Languages } from '$lib/enums/languages';
 import type { AgreementsToAccept } from '$lib/types/user-agreements';
 import { componentToHtml } from '$lib/utils/component.utils';
 import type { Component, ComponentProps } from 'svelte';
