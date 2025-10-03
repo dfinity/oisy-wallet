@@ -37,7 +37,8 @@
 		toExplorerUrl,
 		fee,
 		incoming,
-		approveSpender
+		approveSpender,
+		approveExpiresAt
 	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
@@ -138,6 +139,17 @@
 							displayDecimals: token.decimals
 						})}
 						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+			{#if nonNullish(approveExpiresAt)}
+				<ListItem>
+					<span>{$i18n.transaction?.text?.expiration}</span>
+					<output>
+						{formatNanosecondsToDate({
+							nanoseconds: approveExpiresAt,
+							language: $currentLanguage
+						})}
 					</output>
 				</ListItem>
 			{/if}

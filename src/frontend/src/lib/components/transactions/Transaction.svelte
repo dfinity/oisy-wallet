@@ -170,6 +170,8 @@
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
 						{:else if type === 'receive'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{:else if type === 'approve'}
+							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
 						{#if nonNullish(contact)}
