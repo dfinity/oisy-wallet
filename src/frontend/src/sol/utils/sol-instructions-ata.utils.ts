@@ -11,7 +11,7 @@ import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@s
 
 export const parseSolAtaInstruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedAtaInstruction => {
+): SolParsedAtaInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 

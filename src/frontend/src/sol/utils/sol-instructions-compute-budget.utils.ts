@@ -16,7 +16,7 @@ import { assertIsInstructionWithData } from '@solana/kit';
 
 export const parseSolComputeBudgetInstruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedComputeBudgetInstruction => {
+):  SolParsedComputeBudgetInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 
 	const decodedInstruction = identifyComputeBudgetInstruction(instruction);
