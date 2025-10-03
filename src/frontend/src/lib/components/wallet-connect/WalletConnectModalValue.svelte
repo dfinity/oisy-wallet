@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import Value from '$lib/components/ui/Value.svelte';
 
 	interface Props {
 		label: string;
@@ -7,11 +8,15 @@
 		children: Snippet;
 	}
 
-	let { label, ref, children }: Props = $props();
+	let { label: labelStr, ref, children }: Props = $props();
 </script>
 
-<label class="font-bold" for={ref}>{label}</label>
+<Value element="div" {ref}>
+	{#snippet label()}
+		{labelStr}
+	{/snippet}
 
-<div id={ref} class="mb-4 flex items-center gap-1 font-normal">
-	{@render children()}
-</div>
+	{#snippet content()}
+		{@render children()}
+	{/snippet}
+</Value>
