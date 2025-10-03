@@ -1269,7 +1269,9 @@
 			"status": "Stav",
 			"confirmations": "Potvrzení",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Potvrzeno",

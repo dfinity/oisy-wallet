@@ -1269,7 +1269,9 @@
 			"status": "状态",
 			"confirmations": "确认数",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "已确认",

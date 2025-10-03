@@ -1269,7 +1269,9 @@
 			"status": "Статус",
 			"confirmations": "Подтверждения",
 			"for": "",
-			"for_copied": ""
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Подтверждено",
