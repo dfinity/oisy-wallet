@@ -4,7 +4,7 @@ import TransactionsDateGroup from '$lib/components/transactions/TransactionsDate
 import type {
 	AllTransactionUiWithCmp,
 	AllTransactionUiWithCmpNonEmptyList
-} from '$lib/types/transaction';
+} from '$lib/types/transaction-ui';
 import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { render } from '@testing-library/svelte';

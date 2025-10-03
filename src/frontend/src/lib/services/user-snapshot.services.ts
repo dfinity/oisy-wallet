@@ -36,7 +36,8 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { Address } from '$lib/types/address';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
-import type { AnyTransactionUi, TransactionType } from '$lib/types/transaction';
+import type { TransactionType } from '$lib/types/transaction';
+import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
 import {
 	isNetworkIdBTCMainnet,

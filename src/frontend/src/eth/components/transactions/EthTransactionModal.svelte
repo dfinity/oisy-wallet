@@ -26,7 +26,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import {
 		formatSecondsToDate,
 		formatToken,

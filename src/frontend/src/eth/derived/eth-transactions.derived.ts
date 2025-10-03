@@ -7,7 +7,7 @@ import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
-import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
+import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
