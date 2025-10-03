@@ -14,6 +14,7 @@
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
+	import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
 	import LoaderUserProfile from '$lib/components/loaders/LoaderUserProfile.svelte';
 	import LoaderWallets from '$lib/components/loaders/LoaderWallets.svelte';
 	import PowProtector from '$lib/components/pow/PowProtector.svelte';
@@ -33,6 +34,7 @@
 		<AgreementsGuard>
 			<AddressGuard>
 				<Loader>
+					<LoaderTokens>
 					<UrlGuard>
 						<ShortcutGuard>
 							<RewardGuard>
@@ -60,6 +62,7 @@
 							</RewardGuard>
 						</ShortcutGuard>
 					</UrlGuard>
+					</LoaderTokens>
 				</Loader>
 			</AddressGuard>
 		</AgreementsGuard>

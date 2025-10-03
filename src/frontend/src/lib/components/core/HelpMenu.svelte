@@ -3,7 +3,7 @@
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconHelpCircle from '$lib/components/icons/IconHelpCircle.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import ChangelogLink from '$lib/components/navigation/ChangelogLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
@@ -90,6 +90,6 @@
 	<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
-		<LicenseLink />
+		<LicenseAgreementLink />
 	</div>
 </Popover>

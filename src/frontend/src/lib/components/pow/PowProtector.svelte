@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Modal, type ProgressStep, themeStore } from '@dfinity/gix-components';
+	import { Modal, themeStore } from '@dfinity/gix-components';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
@@ -7,13 +7,14 @@
 	import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
+	import { powProtectorSteps } from '$lib/config/pow.config';
+	import { POW_CHECK_INTERVAL_MS, POW_MAX_CHECK_ATTEMPTS } from '$lib/constants/pow.constants';
+	import { POW_PROTECTOR_MODAL } from '$lib/constants/test-ids.constants';
 	import { ProgressStepsPowProtectorLoader } from '$lib/enums/progress-steps';
 	import { errorSignOut } from '$lib/services/auth.services';
-	import { hasEnoughCycles } from '$lib/services/loader.services';
+	import { isCyclesAllowanceSpent } from '$lib/services/loader.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { powProtectoreProgressStore } from '$lib/stores/pow-protection.store';
-	import type { StaticStep } from '$lib/types/steps';
-	import type { NonEmptyArray } from '$lib/types/utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -23,14 +24,10 @@
 	let { children }: Props = $props();
 
 	// Use let with $state() for variables that need to be reassigned
-	let hasCycles = $state(false);
-	let loading = $state(false);
-	let checkInterval: ReturnType<typeof setInterval> | undefined;
-	let checkAttempts = $state(0);
-	let powWorker: PowProtectorWorkerInitResult | undefined;
-
-	const MAX_CHECK_ATTEMPTS = 100;
-	const CHECK_INTERVAL_MS = 7000;
+	let cyclesAllowanceSpent = $state<boolean>(false);
+	let checkInterval = $state<NodeJS.Timeout | undefined>();
+	let checkAttempts = $state<number>(0);
+	let powWorker = $state<PowProtectorWorkerInitResult | undefined>();
 
 	// Initialize with default value, but it will be reactively updated from the store
 	let progressStep = $state(ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE);
@@ -56,24 +53,26 @@
 		}
 	});
 
-	// Using $derived for reactive steps array
-	let steps = $derived([
-		{
-			step: ProgressStepsPowProtectorLoader.REQUEST_CHALLENGE,
-			text: $i18n.pow_protector.text.request_challenge,
-			state: 'completed'
-		} as ProgressStep,
-		{
-			step: ProgressStepsPowProtectorLoader.SOLVE_CHALLENGE,
-			text: $i18n.pow_protector.text.solve_challenge,
-			state: 'completed'
-		} as ProgressStep,
-		{
-			step: ProgressStepsPowProtectorLoader.GRANT_CYCLES,
-			text: $i18n.pow_protector.text.grant_cycles,
-			state: 'completed'
-		} as ProgressStep
-	] as NonEmptyArray<ProgressStep | StaticStep>);
+	// Using $derived for reactive steps array from config
+	let steps = $derived(powProtectorSteps({ i18n: $i18n }));
+
+	/**
+	 * Clears the check interval and resets the attempt counter
+	 */
+	const stopPolling = (): void => {
+		if (checkInterval) {
+			clearInterval(checkInterval);
+			checkInterval = undefined;
+		}
+		checkAttempts = 0;
+	};
+
+	/**
+	 * Starts polling to check if the user has sufficient cycles
+	 */
+	const startPolling = (): void => {
+		checkInterval = setInterval(checkCycles, POW_CHECK_INTERVAL_MS);
+	};
 
 	/**
 	 * Is periodically checks if the user has sufficient cycles for POW protection.
@@ -81,50 +80,59 @@
 	 * if maximum retry attempts are exceeded.
 	 */
 	const checkCycles = async (): Promise<void> => {
-		// Check current cycles status and update the reactive state
-		hasCycles = await hasEnoughCycles();
-
 		// Increment attempt counter to track how many times we've checked
 		checkAttempts++;
 
-		if (hasCycles) {
+		// Check current cycles status and update the reactive state
+		cyclesAllowanceSpent = await isCyclesAllowanceSpent();
+
+		if (cyclesAllowanceSpent) {
+			if (checkAttempts >= POW_MAX_CHECK_ATTEMPTS) {
+				// Failure: Too many failed attempts, clean up and sign out user
+				stopPolling();
+				// Sign out with appropriate error message about cycle waiting timeout
+				await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+			}
+		} else {
 			// Success: User now has sufficient cycles, stop polling
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
-		} else if (checkAttempts >= MAX_CHECK_ATTEMPTS) {
-			// Failure: Too many failed attempts, clean up and sign out user
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
-			// Sign out with appropriate error message about cycle waiting timeout
-			await errorSignOut(get(i18n).init.error.waiting_for_allowed_cycles_aborted);
+			stopPolling();
 		}
 	};
 
 	const initWorker = async (): Promise<void> => {
 		if (!powWorker) {
-			// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
-			// a challenge to grant cycles when needed
-			powWorker = await initPowProtectorWorker();
-			powWorker.start();
+			try {
+				// Run the worker in the background that continuously checks if the user has sufficient cycles and requests/solves
+				// a challenge to grant cycles when needed
+				powWorker = await initPowProtectorWorker();
+				powWorker.start();
+			} catch (error) {
+				// Log error but don't crash
+				console.error('Failed to initialize POW worker:', error);
+			}
 		}
 	};
 
 	onMount(async () => {
 		if (POW_FEATURE_ENABLED) {
-			// Initial check
-			hasCycles = await hasEnoughCycles();
-			loading = true;
-
 			// Always initialize the worker regardless of cycles status
+			console.warn('Initializing POW worker');
 			await initWorker();
 
-			if (!hasCycles) {
-				// If the user does not have the required cycles amount granted, we need to poll until he has
-				checkInterval = setInterval(checkCycles, CHECK_INTERVAL_MS);
+			try {
+				// Initial check
+				cyclesAllowanceSpent = await isCyclesAllowanceSpent();
+
+				if (cyclesAllowanceSpent) {
+					// Count this as the first attempt
+					checkAttempts = 1;
+					// If the user does not have any cycles amount granted, we need to poll until he has
+					startPolling();
+				}
+			} catch (error) {
+				// Log error but continue (assume no cycles on error)
+				console.error('Error checking initial cycles:', error);
+				cyclesAllowanceSpent = false;
 			}
 		}
 	});
@@ -132,36 +140,26 @@
 	onDestroy(() => {
 		if (POW_FEATURE_ENABLED) {
 			// Clear interval if component is destroyed
-			if (checkInterval) {
-				clearInterval(checkInterval);
-				checkInterval = undefined;
-			}
+			stopPolling();
 
 			// Stop the worker if it was started
 			if (powWorker) {
-				onDestroy(() => powWorker?.destroy());
+				powWorker.destroy();
 			}
 		}
 	});
 </script>
 
-{#if !POW_FEATURE_ENABLED}
-	<!-- POW feature is globally disabled. So we bypass all protection logic and render the app content directly -->
-	{@render children?.()}
-{:else if loading}
-	<!-- POW feature is enabled and component has started loading -->
-	{#if hasCycles}
-		<!-- User has sufficient cycles so, user can proceed normally -->
-		{@render children?.()}
-	{:else}
-		<!-- 
-			User lacks sufficient cycles for POW, so we display modal with progress indicator while cycles are being obtained
-			This modal will be displayed until either:
-			- User obtains sufficient cycles (checkCycles polling succeeds)
-			- Maximum retry attempts reached (user gets signed out)
-		-->
+{#if POW_FEATURE_ENABLED}
+	{#if cyclesAllowanceSpent}
+		<!--
+		User has no more cycles, so we display modal with progress indicator while cycles are being obtained
+		This modal will be displayed until either:
+		- User obtains sufficient cycles (checkCycles polling succeeds)
+		- Maximum retry attempts reached (user gets signed out)
+	-->
 		<div class="insufficient-cycles-modal">
-			<Modal>
+			<Modal testId={POW_PROTECTOR_MODAL}>
 				<div class="stretch">
 					<div class="banner-container mb-8 block">
 						{#await import(`$lib/assets/banner-${$themeStore ?? 'light'}.svg`) then { default: src }}
@@ -182,7 +180,13 @@
 				</div>
 			</Modal>
 		</div>
+	{:else}
+		<!-- User has sufficient cycles, render the app content directly -->
+		{@render children?.()}
 	{/if}
+{:else}
+	<!-- POW feature is globally disabled, bypass all protection logic and render the app content directly -->
+	{@render children?.()}
 {/if}
 
 <style lang="scss">
@@ -190,9 +194,5 @@
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
-
-	.banner-container {
-		width: 100%;
 	}
 </style>
