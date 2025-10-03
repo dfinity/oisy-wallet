@@ -1,6 +1,7 @@
 import * as agreementsEnv from '$env/agreements.env';
 import { agreementsData } from '$env/agreements.env';
 import {
+	agreementsToAccept,
 	hasAcceptedAllLatestAgreements,
 	hasOutdatedAgreements,
 	noAgreementVisionedYet,
@@ -8,7 +9,7 @@ import {
 	userAgreements
 } from '$lib/derived/user-agreements.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
+import type { AgreementData, AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 import { mockUserAgreements, mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
@@ -519,6 +520,258 @@ describe('user-agreements.derived', () => {
 
 			expect(get(outdatedAgreements)).toEqual({
 				newAgreement: nullishAgreement
+			});
+		});
+	});
+
+	describe('agreementsToAccept', () => {
+		const expectedTrueAgreements: AgreementsToAccept = {
+			licenseAgreement: true,
+			privacyPolicy: true,
+			termsOfUse: true
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.resetAllMocks();
+		});
+
+		it('should return all agreements when user profile is not set', () => {
+			userProfileStore.reset();
+
+			expect(get(agreementsToAccept)).toStrictEqual(expectedTrueAgreements);
+		});
+
+		it('should return all agreements when user agreements data are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable()
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual(expectedTrueAgreements);
+		});
+
+		it('should return all agreements when all agreements are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: mockUserProfile
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual(expectedTrueAgreements);
+		});
+
+		it('should return the agreements that are not accepted yet', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({
+				licenseAgreement: true,
+				privacyPolicy: true
+			});
+		});
+
+		it('should return agreements that were rejected', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							license_agreement: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp)
+							},
+							privacy_policy: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({
+				licenseAgreement: true,
+				privacyPolicy: true
+			});
+		});
+
+		it('should return agreements that are outdated', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(
+									agreementsData.licenseAgreement.lastUpdatedTimestamp - 1n
+								)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(
+									agreementsData.privacyPolicy.lastUpdatedTimestamp + 2n
+								)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({
+				licenseAgreement: true,
+				privacyPolicy: true
+			});
+		});
+
+		it('should return an empty object if all agreements are accepted and up-to-date', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({});
+		});
+
+		it('should return the agreements that are either rejected, or outdated, or both', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(false),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(
+									agreementsData.licenseAgreement.lastUpdatedTimestamp - 1n
+								)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp + 5n)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({
+				licenseAgreement: true,
+				termsOfUse: true
+			});
+		});
+
+		it('should handle a new agreement that is not in the user profile', () => {
+			const oldAgreementsData = { ...agreementsData };
+
+			vi.spyOn(agreementsEnv, 'agreementsData', 'get').mockImplementation(() => ({
+				...oldAgreementsData,
+				newAgreement: {
+					lastUpdatedDate: '2025-08-27T06:15Z',
+					lastUpdatedTimestamp: {
+						__bigint__: '1756245600000'
+					}
+				}
+			}));
+
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							...mockUserAgreements.agreements,
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			expect(get(agreementsToAccept)).toStrictEqual({
+				newAgreement: true
 			});
 		});
 	});

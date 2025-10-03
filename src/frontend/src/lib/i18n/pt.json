@@ -1267,7 +1267,9 @@
 			"block": "Bloco",
 			"interacted_with": "Interagido com (Para)",
 			"status": "Status",
-			"confirmations": "Confirmações"
+			"confirmations": "Confirmações",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Confirmado",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Abrir esta transação no explorador de blocos",
 			"open_from_block_explorer": "Abrir o endereço 'De' no explorador de blocos",
-			"open_to_block_explorer": "Abrir o endereço 'Para' no explorador de blocos"
+			"open_to_block_explorer": "Abrir o endereço 'Para' no explorador de blocos",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Não é possível obter o número do bloco.",
@@ -1594,7 +1597,8 @@
 			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
 			"i_have_accepted": "Li e concordo com os",
 			"i_have_accepted_updated": "Li e concordo com os atualizados",
-			"accept_and_continue": "Aceite e continue"
+			"accept_and_continue": "Aceite e continue",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
@@ -1603,6 +1607,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Contrato de Licença",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
 			"paragraph_1": "Obrigado pelo seu interesse em $oisy_name, um aplicativo descentralizado de carteira multi-cadeia e auto-custódia baseado em navegador, hospedado na rede pública de blockchain Internet Computer (“$oisy_short”). Para obter mais informações sobre $oisy_short, seu código-fonte aberto e licenças relacionadas, consulte o repositório GitHub de $oisy_short aqui: $oisy_repo_url.",
 			"paragraph_2": "Este Contrato de Licença rege o uso de $oisy_short por você (“Você”). AO USAR $oisy_short, VOCÊ CONCORDA QUE LEU, COMPREENDEU E CONCORDA EM ESTAR VINCULADO POR ESTE CONTRATO DE LICENÇA. SE VOCÊ NÃO CONCORDA, VOCÊ NÃO PODE USAR $oisy_short.",
@@ -1629,6 +1637,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Termos de Uso",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
 			"body": ""
@@ -1640,6 +1652,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Política de Privacidade",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
