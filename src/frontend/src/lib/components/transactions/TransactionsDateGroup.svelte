@@ -6,6 +6,7 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 
 	interface Props {
 		formattedDate: string;
@@ -18,7 +19,11 @@
 
 {#if transactions.length > 0}
 	<div class="mb-5 flex flex-col gap-3" data-tid={testId}>
-		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{formattedDate}</span>
+		<StickyHeader>
+			<span class="mb-3 flex text-lg font-medium text-tertiary first-letter:capitalize"
+				>{formattedDate}</span
+			>
+		</StickyHeader>
 
 		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
 			{@const { component, token, transaction } = transactionUi}
