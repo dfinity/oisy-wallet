@@ -1,7 +1,7 @@
+import { CoingeckoPlatformIdSchema } from '$lib/schema/coingecko.schema';
 import { OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
-import { CoingeckoPlatformIdSchema } from '$lib/schema/coingecko.schema';
 
 export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 

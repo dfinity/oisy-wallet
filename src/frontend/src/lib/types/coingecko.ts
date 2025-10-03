@@ -4,8 +4,8 @@ import type { Erc20ContractAddress } from '$eth/types/erc20';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { Currency } from '$lib/enums/currency';
 import type {
-	CoingeckoPlatformIdSchema,
-	CoingeckoCoinsIdSchema
+	CoingeckoCoinsIdSchema,
+	CoingeckoPlatformIdSchema
 } from '$lib/schema/coingecko.schema';
 import type { EthAddress } from '$lib/types/address';
 import type * as z from 'zod';
