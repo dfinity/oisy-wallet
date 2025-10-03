@@ -70,6 +70,7 @@ pub enum UpdateAgreementsError {
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]
+#[serde(remote = "Self")]
 pub struct UpdateUserAgreementsRequest {
     pub current_user_version: Option<Version>,
     pub agreements: UserAgreements,

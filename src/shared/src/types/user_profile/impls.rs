@@ -3,7 +3,7 @@
 use candid::Deserialize;
 use ic_verifiable_credentials::issuer_api::ArgumentValue;
 use serde::{de, Deserializer};
-
+use crate::types::agreement::UpdateUserAgreementsRequest;
 use super::{AddUserCredentialRequest, UserCredential, UserProfile, MAX_ISSUER_LENGTH};
 use crate::validate::{validate_on_deserialize, Validate};
 
@@ -81,6 +81,16 @@ impl Validate for AddUserCredentialRequest {
                     }
                 }
             }
+        }
+        Ok(())
+    }
+}
+
+validate_on_deserialize!(UpdateUserAgreementsRequest);
+impl Validate for UpdateUserAgreementsRequest {
+    fn validate(&self) -> Result<(), candid::Error> {
+        if let Some(agreements) = self.agreements.clone().into() {
+            agreements.validate()?;
         }
         Ok(())
     }
