@@ -5,6 +5,8 @@ import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/a
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
+const formatBigIntWithApostrophes = (value: bigint): string =>
+	value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 
 export const hasRequiredCycles = async ({
 	identity,
@@ -26,6 +28,14 @@ export const hasRequiredCycles = async ({
 			subaccount: getIcrcSubaccount(identity.getPrincipal())
 		}
 	});
+	console.warn(
+		'available cycles: ',
+		formatBigIntWithApostrophes(allowanceResult.allowance),
+		'required cycles (threshold): ',
+		formatBigIntWithApostrophes(requiredCycles),
+		', difference to required: ',
+		formatBigIntWithApostrophes(allowanceResult.allowance - requiredCycles)
+	);
 	return allowanceResult.allowance >= requiredCycles;
 };
 
