@@ -14,9 +14,9 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
-	import type { TokenUi } from '$lib/types/token';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { TokenUi } from '$lib/types/token-ui';
 
 	interface Props {
 		totalUsdBalance: number;

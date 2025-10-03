@@ -3,8 +3,8 @@
 	import { onDestroy, type Snippet } from 'svelte';
 	import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 	import { showZeroBalances } from '$lib/derived/settings.derived';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
+	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 	interface Props {
 		tokens: TokenUiOrGroupUi[] | undefined;

@@ -4,9 +4,9 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import type { Token } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
-import type { TokenUiGroup } from '$lib/types/token-group';
 import { isCardDataTogglableToken, mapHeaderData } from '$lib/utils/token-card.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
+import type { TokenUiGroup } from '$lib/types/token-ui-group';
 
 describe('mapHeaderData', () => {
 	const mockGroup = ETH_TOKEN_GROUP;

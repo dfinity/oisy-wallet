@@ -11,8 +11,7 @@ import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Token, TokenUi } from '$lib/types/token';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-group';
+import type { Token } from '$lib/types/token';
 import { last } from '$lib/utils/array.utils';
 import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import {
@@ -26,6 +25,8 @@ import {
 import { bn1Bi, bn2Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 const tokens: TokenUi[] = [
 	{

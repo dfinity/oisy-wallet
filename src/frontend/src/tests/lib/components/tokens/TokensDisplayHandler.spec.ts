@@ -1,7 +1,6 @@
 import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 import { showZeroBalances } from '$lib/derived/settings.derived';
 import { userProfileStore } from '$lib/stores/user-profile.store';
-import type { TokenUiOrGroupUi } from '$lib/types/token-group';
 import { randomWait } from '$lib/utils/time.utils';
 import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 import TokensDisplayHandlerTest from '$tests/lib/components/tokens/TokensDisplayHandlerTest.svelte';
@@ -15,6 +14,7 @@ import { toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 import { get } from 'svelte/store';
+import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 vi.mock(import('$lib/utils/token-group.utils'), async (importOriginal) => {
 	const actual = await importOriginal();

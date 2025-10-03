@@ -10,9 +10,9 @@
 	import { enabledFungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { TokenUi } from '$lib/types/token';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import type { TokenUi } from '$lib/types/token-ui';
 
 	let enabledTokensWithoutTransaction = $derived(
 		$enabledFungibleNetworkTokens

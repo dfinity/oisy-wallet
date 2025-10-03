@@ -2,7 +2,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token, TokenUi } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
 import {
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks
@@ -14,6 +14,7 @@ import {
 } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
+import type { TokenUi } from '$lib/types/token-ui';
 
 export interface ModalTokensListData {
 	tokens: Token[];
