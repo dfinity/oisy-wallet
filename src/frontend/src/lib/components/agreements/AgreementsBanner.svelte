@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {Html, IconClose} from '@dfinity/gix-components';
+	import { Html, IconClose } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { AGREEMENTS_WARNING_BANNER } from '$lib/constants/test-ids.constants';
