@@ -22,7 +22,8 @@ export const userAgreements: Readable<UserAgreements> = derived(
 		const nullishAgreement: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		return {
@@ -41,6 +42,11 @@ export const noAgreementVisionedYet: Readable<boolean> = derived(
 		isNullish($userAgreements.termsOfUse.accepted)
 );
 
+export const atLeastOneAgreementVisioned: Readable<boolean> = derived(
+	[noAgreementVisionedYet],
+	([$noAgreementVisionedYet]) => !$noAgreementVisionedYet
+);
+
 export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 	[userAgreements],
 	([$userAgreements]) =>
@@ -55,7 +61,8 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 						[key]: {
 							accepted: undefined,
 							lastAcceptedTimestamp: undefined,
-							lastUpdatedTimestamp: undefined
+							lastUpdatedTimestamp: undefined,
+							textSha256: undefined
 						}
 					};
 				}

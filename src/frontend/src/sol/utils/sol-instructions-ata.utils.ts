@@ -1,4 +1,5 @@
 import type { SolInstruction, SolParsedAtaInstruction } from '$sol/types/sol-instructions';
+import { assertNever } from '@dfinity/utils';
 import {
 	AssociatedTokenInstruction,
 	identifyAssociatedTokenInstruction,
@@ -8,9 +9,7 @@ import {
 } from '@solana-program/token';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
-export const parseSolAtaInstruction = (
-	instruction: SolInstruction
-): SolInstruction | SolParsedAtaInstruction => {
+export const parseSolAtaInstruction = (instruction: SolInstruction): SolParsedAtaInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
@@ -32,10 +31,7 @@ export const parseSolAtaInstruction = (
 				instructionType: AssociatedTokenInstruction.RecoverNestedAssociatedToken
 			};
 		default: {
-			// Force compiler error on unhandled cases based on leftover types
-			const _: never = decodedInstruction;
-
-			return instruction;
+			assertNever(decodedInstruction, `Unknown Solana ATA instruction: ${decodedInstruction}`);
 		}
 	}
 };
