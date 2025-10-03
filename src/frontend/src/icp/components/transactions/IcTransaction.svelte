@@ -32,7 +32,7 @@
 
 	let status: TransactionStatus = $derived(pending ? 'pending' : 'confirmed');
 
-	let amount = $derived(
+	let displayAmount = $derived(
 		type === 'approve'
 			? (fee ?? ZERO) * -1n
 			: nonNullish(value)
@@ -52,8 +52,8 @@
 </script>
 
 <Transaction
-	{amount}
 	{approveSpender}
+	{displayAmount}
 	{from}
 	{iconType}
 	onClick={() => modalStore.openIcTransaction({ id: modalId, data: { transaction, token } })}
