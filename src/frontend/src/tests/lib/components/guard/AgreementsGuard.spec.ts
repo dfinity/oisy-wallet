@@ -148,7 +148,9 @@ describe('AgreementsGuard', () => {
 							accepted: toNullable(false),
 							last_accepted_at_ns: toNullable(1677628800n),
 							last_updated_at_ms: toNullable(1677542400n),
-							text_sha256: toNullable('3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424')
+							text_sha256: toNullable(
+								'3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424'
+							)
 						}
 					}
 				})
@@ -182,19 +184,25 @@ describe('AgreementsGuard', () => {
 							accepted: toNullable(false),
 							last_accepted_at_ns: toNullable(1677628802n),
 							last_updated_at_ms: toNullable(1677542402n),
-							text_sha256: toNullable('248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'),
+							text_sha256: toNullable(
+								'248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'
+							)
 						},
 						privacy_policy: {
 							accepted: toNullable(false),
 							last_accepted_at_ns: toNullable(1677628800n),
 							last_updated_at_ms: toNullable(1677542400n),
-							text_sha256: toNullable('3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424')
+							text_sha256: toNullable(
+								'3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424'
+							)
 						},
 						terms_of_use: {
 							accepted: toNullable(false),
 							last_accepted_at_ns: toNullable(1677628801n),
 							last_updated_at_ms: toNullable(1677542401n),
-							text_sha256: toNullable('52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930')
+							text_sha256: toNullable(
+								'52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930'
+							)
 						}
 					}
 				})
@@ -228,7 +236,9 @@ describe('AgreementsGuard', () => {
 							accepted: toNullable(false),
 							last_accepted_at_ns: toNullable(1677628802n),
 							last_updated_at_ms: toNullable(1677542402n),
-							text_sha256: toNullable('248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'),
+							text_sha256: toNullable(
+								'248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'
+							)
 						},
 						privacy_policy: {
 							accepted: toNullable(),
@@ -240,7 +250,9 @@ describe('AgreementsGuard', () => {
 							accepted: toNullable(true),
 							last_accepted_at_ns: toNullable(1677628801n),
 							last_updated_at_ms: toNullable(1677542401n),
-							text_sha256: toNullable('52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930')
+							text_sha256: toNullable(
+								'52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930'
+							)
 						}
 					}
 				})
@@ -373,7 +385,7 @@ describe('AgreementsGuard', () => {
 							accepted: toNullable(true),
 							last_accepted_at_ns: toNullable(1677628801n),
 							last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp),
-							text_sha256: toNullable(agreementsData.termsOfUse.textSha256),
+							text_sha256: toNullable(agreementsData.termsOfUse.textSha256)
 						}
 					}
 				})
@@ -450,7 +462,9 @@ describe('AgreementsGuard', () => {
 							license_agreement: {
 								accepted: toNullable(true),
 								last_accepted_at_ns: toNullable(1677628802n),
-								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp),
+								last_updated_at_ms: toNullable(
+									agreementsData.licenseAgreement.lastUpdatedTimestamp
+								),
 								text_sha256: toNullable(agreementsData.licenseAgreement.textSha256)
 							},
 							privacy_policy: {
@@ -521,7 +535,9 @@ describe('AgreementsGuard', () => {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628800n),
 								last_updated_at_ms: toNullable(1677542400n),
-								text_sha256: toNullable('3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424')
+								text_sha256: toNullable(
+									'3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424'
+								)
 							}
 						}
 					})
@@ -545,19 +561,25 @@ describe('AgreementsGuard', () => {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628802n),
 								last_updated_at_ms: toNullable(1677542402n),
-								text_sha256: toNullable('248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979')
+								text_sha256: toNullable(
+									'248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'
+								)
 							},
 							privacy_policy: {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628800n),
 								last_updated_at_ms: toNullable(1677542400n),
-								text_sha256: toNullable('3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424')
+								text_sha256: toNullable(
+									'3c1f186b9348d5cdf17d438f98eb29909bb6bcb74f6f3b554b4abd4942064424'
+								)
 							},
 							terms_of_use: {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628801n),
 								last_updated_at_ms: toNullable(1677542401n),
-								text_sha256: toNullable('52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930')
+								text_sha256: toNullable(
+									'52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930'
+								)
 							}
 						}
 					})
@@ -581,7 +603,9 @@ describe('AgreementsGuard', () => {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628802n),
 								last_updated_at_ms: toNullable(1677542402n),
-								text_sha256: toNullable('248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979')
+								text_sha256: toNullable(
+									'248fd163ca7c0138714d824ba9f2b4378f1b122ad708f7e4d2225b3005d72979'
+								)
 							},
 							privacy_policy: {
 								accepted: toNullable(),
@@ -593,7 +617,9 @@ describe('AgreementsGuard', () => {
 								accepted: toNullable(true),
 								last_accepted_at_ns: toNullable(1677628801n),
 								last_updated_at_ms: toNullable(1677542401n),
-								text_sha256: toNullable('52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930')
+								text_sha256: toNullable(
+									'52bab7b1b296314cec46c12fce499d77823acb27f85ff9ac2f8e4ec541878930'
+								)
 							}
 						}
 					})
@@ -648,7 +674,9 @@ describe('AgreementsGuard', () => {
 							license_agreement: {
 								accepted: toNullable(false),
 								last_accepted_at_ns: toNullable(1677628802n),
-								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp),
+								last_updated_at_ms: toNullable(
+									agreementsData.licenseAgreement.lastUpdatedTimestamp
+								),
 								text_sha256: toNullable(agreementsData.licenseAgreement.textSha256)
 							},
 							privacy_policy: {
