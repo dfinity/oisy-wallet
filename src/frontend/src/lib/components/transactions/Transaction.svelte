@@ -4,6 +4,7 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Avatar from '$lib/components/contact/Avatar.svelte';
+	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
@@ -65,7 +66,7 @@
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	const contactAddress: string | undefined = $derived(
+	const address: string | undefined = $derived(
 		type === 'send'
 			? to
 			: type === 'receive'
@@ -75,15 +76,13 @@
 					: undefined
 	);
 
-	const contact: ContactUi | undefined = $derived(
-		nonNullish(contactAddress)
-			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
+	const contact = $derived(
+		nonNullish(address)
+			? getContactForAddress({ addressString: address, contactList: $contacts })
 			: undefined
 	);
 
-	const addressAlias: string | undefined = $derived(
-		filterAddressFromContact({ contact, address: contactAddress })?.label
-	);
+	const contactAddress = $derived(filterAddressFromContact({ contact, address }));
 
 	const network: Network | undefined = $derived(token.network);
 
@@ -175,28 +174,12 @@
 						{/if}
 
 						{#if nonNullish(contact)}
-							<span class="shrink-0">
-								<Avatar name={contact.name} image={contact.image} variant="xxs" />
+							<ContactWithAvatar {contact} {contactAddress} />
+						{:else if nonNullish(address)}
+							<span class="max-w-38 inline-block flex min-w-0 flex-wrap items-center truncate">
+								{shortenWithMiddleEllipsis({ text: address })}
 							</span>
 						{/if}
-
-						<span class="flex min-w-0 flex-wrap items-center">
-							<span class="max-w-38 inline-block truncate">
-								{#if nonNullish(contact)}
-									{contact.name}
-								{:else if nonNullish(contactAddress)}
-									{shortenWithMiddleEllipsis({ text: contactAddress })}
-								{/if}
-							</span>
-							{#if notEmptyString(addressAlias)}
-								<span class="inline-flex items-center text-tertiary">
-									<Divider />
-									<span class="sm:max-w-29 lg:max-w-34 inline-block max-w-20 truncate">
-										{addressAlias}
-									</span>
-								</span>
-							{/if}
-						</span>
 					</span>
 					<span class="truncate text-tertiary">
 						<TransactionStatusComponent {status} />
