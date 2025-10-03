@@ -98,7 +98,6 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
     }
 
     // Retrieve or initialize new challenge
-    // Retrieve or initialize new challenge
     let difficulty: u32;
     if let Some(stored_challenge) = get_pow_challenge() {
         debug_println!(
