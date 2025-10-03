@@ -2,11 +2,11 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
 	import type { IcTransactionType } from '$icp/types/ic-transaction';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionToken, Token } from '$lib/types/token';
-	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { formatToken } from '$lib/utils/format.utils';
-	import { ZERO } from '$lib/constants/app.constants';
+	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
 	interface Props {
