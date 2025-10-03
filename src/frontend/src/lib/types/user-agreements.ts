@@ -8,9 +8,9 @@ export interface AgreementData {
 }
 
 export interface UserAgreements {
-	licenseAgreement: AgreementData;
-	privacyPolicy: AgreementData;
 	termsOfUse: AgreementData;
+	privacyPolicy: AgreementData;
+	licenseAgreement: AgreementData;
 }
 
 export type AgreementsToAccept = {

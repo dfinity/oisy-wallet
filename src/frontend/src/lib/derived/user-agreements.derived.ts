@@ -13,9 +13,9 @@ export const userAgreements: Readable<UserAgreements> = derived(
 
 		if (nonNullish(agreements)) {
 			return {
-				licenseAgreement: mapUserAgreement(agreements.license_agreement),
+				termsOfUse: mapUserAgreement(agreements.terms_of_use),
 				privacyPolicy: mapUserAgreement(agreements.privacy_policy),
-				termsOfUse: mapUserAgreement(agreements.terms_of_use)
+				licenseAgreement: mapUserAgreement(agreements.license_agreement)
 			};
 		}
 
@@ -27,9 +27,9 @@ export const userAgreements: Readable<UserAgreements> = derived(
 		};
 
 		return {
-			licenseAgreement: nullishAgreement,
+			termsOfUse: nullishAgreement,
 			privacyPolicy: nullishAgreement,
-			termsOfUse: nullishAgreement
+			licenseAgreement: nullishAgreement
 		};
 	}
 );
