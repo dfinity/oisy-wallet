@@ -20,7 +20,6 @@ pub struct UserAgreement {
     /// SHA256 hash of the agreement text, to detect changes.
     pub text_sha256: Option<String>,
 }
-
 impl Validate for UserAgreement {
     /// Verifies that agreement text SHA256 is a valid hex of expected length, if provided.
     fn validate(&self) -> Result<(), candid::Error> {
@@ -44,10 +43,24 @@ pub struct UserAgreements {
     pub terms_of_use: UserAgreement,
     pub privacy_policy: UserAgreement,
 }
+impl Validate for UserAgreements {
+    fn validate(&self) -> Result<(), candid::Error> {
+        self.license_agreement.validate()?;
+        self.terms_of_use.validate()?;
+        self.privacy_policy.validate()?;
+        Ok(())
+    }
+}
 
 #[derive(CandidType, Deserialize, Clone, Debug, Eq, PartialEq, Default)]
 pub struct Agreements {
     pub agreements: UserAgreements,
+}
+impl Validate for Agreements {
+    fn validate(&self) -> Result<(), candid::Error> {
+        self.agreements.validate()?;
+        Ok(())
+    }
 }
 
 #[derive(CandidType, Deserialize, Clone, Eq, PartialEq, Debug)]

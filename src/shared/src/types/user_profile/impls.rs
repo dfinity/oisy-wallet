@@ -34,6 +34,9 @@ impl Validate for UserProfile {
                 UserProfile::MAX_CREDENTIALS
             )));
         }
+        if let Some(agreements) = &self.agreements {
+            agreements.validate()?;
+        }
         Ok(())
     }
 }
