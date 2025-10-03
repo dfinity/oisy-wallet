@@ -1,3 +1,10 @@
+/**
+ * The functions in this file should have gone in the `agreements.utils.ts` module.
+ * However, in their usage there is a circular reference somewhere in the build that makes it fail.
+ * I was still unable to find the source of the issue, so I decided to keep them here for now.
+ * TODO: investigate the circular reference issue and move these functions to `agreements.utils.ts`
+ **/
+
 import type { UserAgreements as BackendUserAgreements } from '$declarations/backend/backend.did';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
@@ -52,12 +59,10 @@ const mapAgreementToComponent = (
 
 export const formatUpdatedAgreementsHtml = ({
 	agreements,
-	i18n,
-	language
+	i18n
 }: {
 	agreements: AgreementsToAccept;
 	i18n: I18n;
-	language: Languages;
 }): string => {
 	if (Object.keys(agreements).length === 0) {
 		return '';
@@ -71,5 +76,5 @@ export const formatUpdatedAgreementsHtml = ({
 		})
 	);
 
-	return new Intl.ListFormat(language, { type: 'conjunction', style: 'long' }).format(parts);
+	return new Intl.ListFormat(i18n.lang, { type: 'conjunction', style: 'long' }).format(parts);
 };
