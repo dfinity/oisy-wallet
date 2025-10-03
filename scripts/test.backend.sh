@@ -56,7 +56,7 @@ fi
 scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-x86_64-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
-export POCKET_IC_MUTE_SERVER=""
+export POCKET_IC_MUTE_SERVER=1
 
 ./scripts/download-canister-api --network ic --canister backend
 
