@@ -1076,6 +1076,8 @@ interface I18nTransaction {
 		confirmations: string;
 		for: string;
 		for_copied: string;
+		expiration: string;
+		approve_label: string;
 	};
 	status: {
 		confirmed: string;
@@ -1314,22 +1316,6 @@ interface I18nLicense_agreement {
 		license_agreement: string;
 		det: { article: string; possessive: string };
 		title: string;
-		paragraph_1: string;
-		paragraph_2: string;
-		paragraph_3: string;
-		limited_license: string;
-		restrictions: string;
-		applicable_laws: string;
-		reservation_rights: string;
-		feedback: string;
-		termination: string;
-		warranty_liability: string;
-		indemnity: string;
-		governing_law: string;
-		entire_agreement: string;
-		assignment: string;
-		no_waiver: string;
-		english_version: string;
 		body: string;
 	};
 	alt: { license_agreement: string };
