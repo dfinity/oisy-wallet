@@ -26,6 +26,7 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionToken } from '$lib/types/token';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import {
 		formatSecondsToDate,
 		formatToken,
@@ -36,7 +37,6 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
-	import type {AnyTransactionUi} from "$lib/types/transaction-ui";
 
 	interface Props {
 		transaction: EthTransactionUi;

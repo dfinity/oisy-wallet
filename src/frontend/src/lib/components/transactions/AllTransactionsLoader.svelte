@@ -10,11 +10,11 @@
 	import { transactionsStoreWithTokens } from '$lib/derived/transactions.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { Token, TokenId } from '$lib/types/token';
+	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { isNetworkIdICP, isNetworkIdSolana } from '$lib/utils/network.utils';
 	import { areTransactionsStoresLoaded } from '$lib/utils/transactions.utils';
 	import { loadNextSolTransactionsByOldest } from '$sol/services/sol-transactions.services.js';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-	import type {AllTransactionUiWithCmp} from "$lib/types/transaction-ui";
 
 	interface Props {
 		transactions: AllTransactionUiWithCmp[];
