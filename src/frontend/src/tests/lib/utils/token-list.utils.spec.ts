@@ -6,6 +6,8 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import type { Network } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import {
@@ -13,8 +15,6 @@ import {
 	getFilteredTokenGroup,
 	getFilteredTokenList
 } from '$lib/utils/token-list.utils';
-import type { TokenUi } from '$lib/types/token-ui';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 // Mock data for tokens
 const token1: TokenUi = BTC_MAINNET_TOKEN;

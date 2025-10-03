@@ -28,6 +28,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
@@ -37,7 +38,6 @@ import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 import { isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-import type { TokenUi } from '$lib/types/token-ui';
 
 /**
  * Sorts tokens by market cap, name and network name, pinning the specified ones at the top of the list in the order they are provided.

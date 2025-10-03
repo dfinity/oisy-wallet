@@ -11,12 +11,12 @@
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { CardData } from '$lib/types/token-card';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import type { TokenUiGroup } from '$lib/types/token-ui-group';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
-	import type { TokenUi } from '$lib/types/token-ui';
-	import type { TokenUiGroup } from '$lib/types/token-ui-group';
 
 	interface Props {
 		tokenGroup: TokenUiGroup;

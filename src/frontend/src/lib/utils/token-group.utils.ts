@@ -1,11 +1,11 @@
 import { ZERO } from '$lib/constants/app.constants';
 import type { TokenId } from '$lib/types/token';
 import type { TokenGroupId } from '$lib/types/token-group';
+import type { TokenUi, TokenUiGroupable } from '$lib/types/token-ui';
+import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 import { sumBalances, sumUsdBalances } from '$lib/utils/token.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { TokenUi, TokenUiGroupable } from '$lib/types/token-ui';
-import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 
 /**
  * Type guard to check if an object is of type TokenUiGroup.
