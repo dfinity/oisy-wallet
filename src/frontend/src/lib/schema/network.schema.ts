@@ -1,5 +1,5 @@
+import { CoingeckoPlatformIdSchema } from '$lib/schema/coingecko.schema';
 import { OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
-import type { CoingeckoPlatformId } from '$lib/types/coingecko';
 import { UrlSchema } from '$lib/validation/url.validation';
 import * as z from 'zod';
 
@@ -7,9 +7,8 @@ export const NetworkIdSchema = z.symbol().brand<'NetworkId'>();
 
 export const NetworkEnvironmentSchema = z.enum(['mainnet', 'testnet']);
 
-// TODO: use Zod to validate the CoingeckoPlatformId
 export const NetworkExchangeSchema = z.object({
-	coingeckoId: z.custom<CoingeckoPlatformId>().optional()
+	coingeckoId: CoingeckoPlatformIdSchema.optional()
 });
 
 const NetworkBuySchema = z.object({
