@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { Modal } from '@dfinity/gix-components';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
+	import type { Snippet } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 
 	interface Props {
 		title: Snippet;
@@ -26,7 +26,7 @@
 
 {@render button(() => (open = true))}
 
-<Modal visible={open} onClose={onCancelHandler} role="alert" {testId}>
+<Modal onClose={onCancelHandler} role="alert" {testId} visible={open}>
 	{#snippet title()}
 		<div class="p-3">{@render innerTitle()}</div>
 	{/snippet}

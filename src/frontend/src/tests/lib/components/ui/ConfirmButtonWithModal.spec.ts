@@ -60,7 +60,7 @@ describe('ConfirmButtonWithModal', () => {
 
 		await fireEvent.click(screen.getByTestId(testId)); // open modal
 
-		const cancelBtn = getByTestId(CONFIRMATION_MODAL + '-cancel');
+		const cancelBtn = getByTestId(`${CONFIRMATION_MODAL  }-cancel`);
 
 		await fireEvent.click(cancelBtn);
 
@@ -82,7 +82,7 @@ describe('ConfirmButtonWithModal', () => {
 		});
 
 		await fireEvent.click(screen.getByTestId(testId)); // open modal
-		const confirmBtn = getByTestId(CONFIRMATION_MODAL + '-confirm');
+		const confirmBtn = getByTestId(`${CONFIRMATION_MODAL  }-confirm`);
 		await fireEvent.click(confirmBtn);
 
 		expect(onConfirm).toHaveBeenCalledOnce();
