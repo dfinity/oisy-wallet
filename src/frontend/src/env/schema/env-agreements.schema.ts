@@ -6,7 +6,7 @@ const policyBlockSchema = z.object({
 });
 
 export const EnvAgreementsSchema = z.object({
-	licenseAgreement: policyBlockSchema,
 	termsOfUse: policyBlockSchema,
-	privacyPolicy: policyBlockSchema
+	privacyPolicy: policyBlockSchema,
+	licenseAgreement: policyBlockSchema
 });
