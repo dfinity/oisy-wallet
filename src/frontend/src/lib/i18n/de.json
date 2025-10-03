@@ -35,7 +35,8 @@
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
 			"language": "Sprache",
-			"currency": "Währung"
+			"currency": "Währung",
+            "confirm": "Bestätigen"
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
