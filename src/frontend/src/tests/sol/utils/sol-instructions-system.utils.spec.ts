@@ -208,25 +208,13 @@ describe('sol-instructions-system.utils', () => {
 			expect(parseUpgradeNonceAccountInstruction).toHaveBeenCalledExactlyOnceWith(mockInstruction);
 		});
 
-		it('should return the original instruction if it is not a recognised System instruction', () => {
+		it('should raise an error if it is not a recognised System instruction', () => {
 			// @ts-expect-error intentional for testing unknown discriminant
 			vi.mocked(identifySystemInstruction).mockReturnValue('unknown-instruction');
 
-			expect(parseSolSystemInstruction(mockInstruction)).toStrictEqual(mockInstruction);
-
-			expect(parseCreateAccountInstruction).not.toHaveBeenCalled();
-			expect(parseAssignInstruction).not.toHaveBeenCalled();
-			expect(parseTransferSolInstruction).not.toHaveBeenCalled();
-			expect(parseCreateAccountWithSeedInstruction).not.toHaveBeenCalled();
-			expect(parseAdvanceNonceAccountInstruction).not.toHaveBeenCalled();
-			expect(parseWithdrawNonceAccountInstruction).not.toHaveBeenCalled();
-			expect(parseInitializeNonceAccountInstruction).not.toHaveBeenCalled();
-			expect(parseAuthorizeNonceAccountInstruction).not.toHaveBeenCalled();
-			expect(parseAllocateInstruction).not.toHaveBeenCalled();
-			expect(parseAllocateWithSeedInstruction).not.toHaveBeenCalled();
-			expect(parseAssignWithSeedInstruction).not.toHaveBeenCalled();
-			expect(parseTransferSolWithSeedInstruction).not.toHaveBeenCalled();
-			expect(parseUpgradeNonceAccountInstruction).not.toHaveBeenCalled();
+			expect(() => parseSolSystemInstruction(mockInstruction)).toThrow(
+				'Unknown Solana System instruction: unknown-instruction'
+			);
 		});
 	});
 });
