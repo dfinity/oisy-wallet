@@ -140,7 +140,7 @@
 	 * Send and approve
 	 */
 
-	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
+	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
 	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
 
