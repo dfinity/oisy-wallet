@@ -11,7 +11,7 @@
 	import { formatUpdatedAgreementsHtml } from '$lib/utils/agreements-formatter.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export interface Props {
+	interface Props {
 		agreementsToAccept: AgreementsToAccept;
 	}
 

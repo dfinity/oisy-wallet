@@ -1,4 +1,4 @@
-import AgreementsBanner, { type Props } from '$lib/components/agreements/AgreementsBanner.svelte';
+import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 import {
 	AGREEMENTS_WARNING_BANNER,
 	AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON
@@ -15,7 +15,7 @@ import type { MockInstance } from 'vitest';
 describe('AgreementsBanner', () => {
 	let formatterSpy: MockInstance<typeof formatUpdatedAgreementsHtml>;
 
-	const props: Props = {
+	const props = {
 		agreementsToAccept: {}
 	};
 
