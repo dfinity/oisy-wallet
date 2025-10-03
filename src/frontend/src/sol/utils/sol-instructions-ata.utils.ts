@@ -9,9 +9,7 @@ import {
 } from '@solana-program/token';
 import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@solana/kit';
 
-export const parseSolAtaInstruction = (
-	instruction: SolInstruction
-): SolParsedAtaInstruction => {
+export const parseSolAtaInstruction = (instruction: SolInstruction): SolParsedAtaInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
