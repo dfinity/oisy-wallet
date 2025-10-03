@@ -17,7 +17,8 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { Token, TokenUi } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 
 	interface Props {

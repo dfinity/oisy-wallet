@@ -20,8 +20,9 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {

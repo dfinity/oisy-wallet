@@ -10,7 +10,8 @@ import type {
 } from '$lib/types/ai-assistant';
 import type { ExtendedAddressContactUiMap } from '$lib/types/contact';
 import type { Network } from '$lib/types/network';
-import type { RequiredTokenWithLinkedData, Token, TokenUi } from '$lib/types/token';
+import type { RequiredTokenWithLinkedData, Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 import { jsonReplacer, nonNullish, notEmptyString } from '@dfinity/utils';
