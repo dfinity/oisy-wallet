@@ -1267,7 +1267,9 @@
 			"block": "Blok",
 			"interacted_with": "Interakcja z (Do)",
 			"status": "Status",
-			"confirmations": "Potwierdzenia"
+			"confirmations": "Potwierdzenia",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "Potwierdzono",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "Otwórz tę transakcję w eksploratorze bloków",
 			"open_from_block_explorer": "Otwórz adres „Od” w eksploratorze bloków",
-			"open_to_block_explorer": "Otwórz adres „Do” w eksploratorze bloków"
+			"open_to_block_explorer": "Otwórz adres „Do” w eksploratorze bloków",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Nie można uzyskać numeru bloku.",
@@ -1594,7 +1597,8 @@
 			"reject_warning": "Aby kontynuować, musisz zaakceptować Regulamin. Możesz spróbować ponownie w dowolnym momencie.",
 			"i_have_accepted": "Przeczytałem i akceptuję",
 			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
-			"accept_and_continue": "Zaakceptuj i kontynuuj"
+			"accept_and_continue": "Zaakceptuj i kontynuuj",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Wystąpił błąd podczas aktualizacji umów."
@@ -1603,6 +1607,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Umowa licencyjna",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
 			"paragraph_1": "Dziękujemy za zainteresowanie $oisy_name, przeglądarkową, samodzielną i wielołańcuchową zdecentralizowaną aplikacją portfela hostowaną w publicznej sieci blockchain Internet Computer („$oisy_short”). Więcej informacji na temat $oisy_short, jego otwartego kodu źródłowego i powiązanych licencji można znaleźć w repozytorium GitHub $oisy_short pod adresem: $oisy_repo_url.",
 			"paragraph_2": "Niniejsza Umowa Licencyjna reguluje korzystanie z $oisy_short przez Ciebie („Ty”). KORZYSTAJĄC Z $oisy_short, ZGADZASZ SIĘ, ŻE PRZECZYTAŁEŚ, ZROZUMIAŁEŚ I ZGADZASZ SIĘ NA ZWIĄZANIE NINIEJSZĄ UMOWĄ LICENCYJNĄ. JEŚLI SIĘ NIE ZGADZASZ, NIE MOŻESZ KORZYSTAĆ Z $oisy_short.",
@@ -1629,6 +1637,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Warunki użytkowania",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
 			"body": ""
@@ -1640,6 +1652,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Polityka prywatności",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},

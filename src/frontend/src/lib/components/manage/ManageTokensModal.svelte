@@ -56,11 +56,13 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
-	let {
-		initialSearch,
-		onClose = () => {},
-		infoElement
-	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
+	interface Props {
+		initialSearch?: string;
+		onClose?: () => void;
+		infoElement?: Snippet;
+	}
+
+	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
 
 	const isNftsPage = $derived(isRouteNfts(page));
 
@@ -88,7 +90,7 @@
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+	const saveTokens = async (tokens: Record<string, Token>) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
@@ -352,9 +354,8 @@
 			{infoElement}
 			{initialSearch}
 			{isNftsPage}
-			on:icClose={close}
-			on:icAddToken={modal.next}
-			on:icSave={saveTokens}
+			onAddToken={modal.next}
+			onSave={saveTokens}
 		/>
 	{/if}
 </WizardModal>

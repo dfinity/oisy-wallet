@@ -8,7 +8,11 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import { isTokensPath, isTransactionsPath } from '$lib/utils/nav.utils';
 
-	let { overflowableContent }: { overflowableContent?: Snippet } = $props();
+	interface Props {
+		overflowableContent?: Snippet;
+	}
+
+	let { overflowableContent }: Props = $props();
 
 	let inputValue = $derived($tokenListStore.filter);
 

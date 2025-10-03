@@ -1267,7 +1267,9 @@
 			"block": "区块",
 			"interacted_with": "交互对象（接收方）",
 			"status": "状态",
-			"confirmations": "确认数"
+			"confirmations": "确认数",
+			"for": "",
+			"for_copied": ""
 		},
 		"status": {
 			"confirmed": "已确认",
@@ -1305,7 +1307,8 @@
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
 			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
-			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "无法获取区块号。",
@@ -1594,7 +1597,8 @@
 			"reject_warning": "你必须接受条款与条件才能继续。你可以随时再次尝试。",
 			"i_have_accepted": "我已阅读并同意",
 			"i_have_accepted_updated": "我已阅读并同意更新后的",
-			"accept_and_continue": "接受并继续"
+			"accept_and_continue": "接受并继续",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "更新你的协议时发生错误。"
@@ -1603,6 +1607,10 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "许可协议",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "$oisy_name 许可协议（“许可协议”）",
 			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
 			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",
@@ -1629,6 +1637,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "使用条款",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意$link",
 			"body": ""
@@ -1640,6 +1652,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "隐私政策",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
