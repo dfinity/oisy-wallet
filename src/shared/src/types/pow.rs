@@ -53,7 +53,7 @@ pub const DIFFICULTY_AUTO_ADJUSTMENT: bool = false;
 // time approaches this target. A well-chosen TARGET_DURATION_MS ensures that challenges are neither
 // too easy nor too difficult to solve, trying to find the balance between system security and
 // usability.
-pub const TARGET_DURATION_MS: u64 = 10_000;
+pub const TARGET_DURATION_MS: u64 = 2_000;
 
 // Every PoW (Proof-of-Work) challenge expires after this duration (in milliseconds).
 // This constant defines the exact time period in which a challenge must be solved.
@@ -62,7 +62,7 @@ pub const TARGET_DURATION_MS: u64 = 10_000;
 // TARGET_DURATION_MS, ensuring that challenges have enough time to be solved before expiration.
 // By default, EXPIRY_DURATION_MS is set to twice the TARGET_DURATION_MS to provide a reasonable
 // time limit for solving challenges.
-pub const EXPIRY_DURATION_MS: u64 = 180_000;
+pub const EXPIRY_DURATION_MS: u64 = 120_000;
 
 // The default starting difficulty for the first PoW challenge.
 // Must lie between `MIN_DIFFICULTY` and `MAX_DIFFICULTY`.
