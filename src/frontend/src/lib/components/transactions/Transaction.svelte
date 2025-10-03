@@ -30,7 +30,7 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
-		amount?: bigint;
+		displayAmount?: bigint;
 		type: TransactionType;
 		status: TransactionStatus;
 		timestamp?: number;
@@ -42,12 +42,11 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
-		fee?: bigint;
 		approveSpender?: string;
 	}
 
 	const {
-		amount: cardAmount,
+		displayAmount,
 		type,
 		status,
 		timestamp,
@@ -59,15 +58,8 @@
 		tokenId,
 		children,
 		onClick,
-		fee,
 		approveSpender
 	}: Props = $props();
-
-	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
-
-	const amountWithFee = $derived(
-		nonNullish(cardAmount) && nonNullish(fee) && !incoming ? cardAmount + fee : cardAmount
-	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
@@ -108,11 +100,7 @@
 			<span
 				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
 			>
-				{#if nonNullish(contact)}
-					{type === 'send' ? $i18n.transaction.type.send : $i18n.transaction.type.receive}
-				{:else}
-					{@render children?.()}
-				{/if}
+				{@render children?.()}
 				{#if nonNullish(network)}
 					<div class="flex">
 						<NetworkLogo {network} testId="transaction-network" transparent />
@@ -143,12 +131,12 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(amountWithFee) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={amountWithFee}
+							amount={displayAmount}
 							decimals={token.decimals}
 							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}
@@ -182,6 +170,8 @@
 							<span class="shrink-0">{$i18n.transaction.text.to}</span>
 						{:else if type === 'receive'}
 							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{:else if type === 'approve'}
+							<span class="shrink-0">{$i18n.transaction.text.for}</span>
 						{/if}
 
 						{#if nonNullish(contact)}

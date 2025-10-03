@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { type Snippet, createEventDispatcher } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import type { Snippet } from 'svelte';
 	import IcSendDestination from '$icp/components/send/IcSendDestination.svelte';
 	import DestinationWizardStepSection from '$lib/components/address/DestinationWizardStepSection.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -16,41 +15,39 @@
 		tokenStandard: TokenStandard;
 		customDestination?: string;
 		networkId?: NetworkId;
-		title?: Snippet;
+		title: Snippet;
+		onDestinationBack: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
 		tokenStandard,
 		customDestination = $bindable(''),
-		networkId = undefined,
-		title
+		networkId,
+		title,
+		onDestinationBack,
+		onQRCodeScan
 	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
-	let activeAddressType: 'default' | 'custom' = $state(
-		isNullishOrEmpty(customDestination) ? 'default' : 'custom'
-	);
+	let activeAddressType = $state(isNullishOrEmpty(customDestination) ? 'default' : 'custom');
 
 	let destination = $state(customDestination);
-	let invalidDestination: boolean = $state();
+	let invalidDestination = $state(false);
 
-	const back = () => dispatch('icDestinationBack');
+	const back = () => onDestinationBack();
 	const apply = () => {
 		customDestination = activeAddressType === 'default' ? '' : destination;
 
-		dispatch('icDestinationBack');
+		onDestinationBack();
 	};
 
-	let disabled = $state(true);
-	run(() => {
-		disabled =
-			activeAddressType !== 'default' && (isNullishOrEmpty(destination) || invalidDestination);
-	});
+	let disabled = $derived(
+		activeAddressType !== 'default' && (isNullishOrEmpty(destination) || invalidDestination)
+	);
 </script>
 
 <ContentWithToolbar>
-	<div class="mb-4 font-bold">{@render title?.()}</div>
+	<div class="mb-4 font-bold">{@render title()}</div>
 
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'default'}
@@ -63,15 +60,14 @@
 		label={$i18n.convert.text.custom_destination}
 		on:click={() => (activeAddressType = 'custom')}
 	>
-		{#snippet content()}
-			<IcSendDestination
-				{networkId}
-				onQRCodeScan={() => dispatch('icQRCodeScan')}
-				{tokenStandard}
-				bind:destination
-				bind:invalidDestination
-			/>
-		{/snippet}
+		<IcSendDestination
+			slot="content"
+			{networkId}
+			{onQRCodeScan}
+			{tokenStandard}
+			bind:destination
+			bind:invalidDestination
+		/>
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}
