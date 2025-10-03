@@ -194,12 +194,14 @@ describe('AcceptAgreementsModal', () => {
 				termsOfUse: {
 					accepted: true,
 					lastAcceptedTimestamp: expect.any(BigInt),
-					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
+					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp,
+					textSha256: agreementsData.termsOfUse.textSha256
 				},
 				privacyPolicy: {
 					accepted: true,
 					lastAcceptedTimestamp: expect.any(BigInt),
-					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp
+					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp,
+					textSha256: agreementsData.privacyPolicy.textSha256
 				}
 			}
 		});
