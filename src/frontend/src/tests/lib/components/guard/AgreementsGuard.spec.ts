@@ -421,6 +421,72 @@ describe('AgreementsGuard', () => {
 			userProfileStore.reset();
 		});
 
+		it('should not render if all agreements are accepted', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable({
+						...mockUserAgreements,
+						agreements: {
+							license_agreement: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628802n),
+								last_updated_at_ms: toNullable(agreementsData.licenseAgreement.lastUpdatedTimestamp)
+							},
+							privacy_policy: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628800n),
+								last_updated_at_ms: toNullable(agreementsData.privacyPolicy.lastUpdatedTimestamp)
+							},
+							terms_of_use: {
+								accepted: toNullable(true),
+								last_accepted_at_ns: toNullable(1677628801n),
+								last_updated_at_ms: toNullable(agreementsData.termsOfUse.lastUpdatedTimestamp)
+							}
+						}
+					})
+				}
+			});
+
+			const { queryByTestId } = render(AgreementsGuard, mockParams);
+
+			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
+		});
+
+		it('should not render when user profile is not set', () => {
+			userProfileStore.reset();
+
+			const { queryByTestId } = render(AgreementsGuard, mockParams);
+
+			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
+		});
+
+		it('should not render when user agreements data are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: {
+					...mockUserProfile,
+					agreements: toNullable()
+				}
+			});
+
+			const { queryByTestId } = render(AgreementsGuard, mockParams);
+
+			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
+		});
+
+		it('should not render when all agreements are nullish', () => {
+			userProfileStore.set({
+				certified,
+				profile: mockUserProfile
+			});
+
+			const { queryByTestId } = render(AgreementsGuard, mockParams);
+
+			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
+		});
+
 		it('should render if there is at least one agreement rejected', () => {
 			userProfileStore.set({
 				certified,
