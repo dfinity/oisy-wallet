@@ -1270,7 +1270,8 @@
 			"confirmations": "पुष्टियां",
 			"for": "",
 			"for_copied": "",
-			"expiration": ""
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "पुष्टि",
