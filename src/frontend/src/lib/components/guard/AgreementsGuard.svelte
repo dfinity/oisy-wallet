@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { queryAndUpdate } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
-	import AcceptAgreementsModal from '$lib/components/agreements/AcceptAgreementsModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		agreementsToAccept,
