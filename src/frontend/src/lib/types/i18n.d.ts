@@ -1251,6 +1251,16 @@ interface I18nAddress {
 	qr: { title: string };
 }
 
+interface I18nPow_protector {
+	text: {
+		title: string;
+		description: string;
+		request_challenge: string;
+		solve_challenge: string;
+		grant_cycles: string;
+	};
+}
+
 interface I18nSigner {
 	sign_in: { text: { access_your_wallet: string; open_or_create: string } };
 	idle: { text: { waiting: string }; alt: { img_placeholder: string } };
@@ -1436,6 +1446,7 @@ interface I18n {
 	address_book: I18nAddress_book;
 	contact: I18nContact;
 	address: I18nAddress;
+	pow_protector: I18nPow_protector;
 	signer: I18nSigner;
 	carousel: I18nCarousel;
 	agreements: I18nAgreements;
