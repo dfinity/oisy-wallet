@@ -9,13 +9,12 @@ import { Languages } from '$lib/enums/languages';
 import { i18n } from '$lib/stores/i18n.store';
 import type { ModalData } from '$lib/stores/modal.store';
 import type { OptionToken } from '$lib/types/token';
+import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 import type {
 	AnyTransactionUi,
 	AnyTransactionUiWithCmp,
-	TransactionStatus,
-	TransactionsUiDateGroup,
-	TransactionType
-} from '$lib/types/transaction';
+	TransactionsUiDateGroup
+} from '$lib/types/transaction-ui';
 import { formatSecondsToNormalizedDate } from '$lib/utils/format.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { Component } from 'svelte';

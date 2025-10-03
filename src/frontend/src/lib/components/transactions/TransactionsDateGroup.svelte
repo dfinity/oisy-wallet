@@ -4,8 +4,8 @@
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
+	import type {AllTransactionUiWithCmpNonEmptyList} from "$lib/types/transaction-ui";
 
 	interface Props {
 		formattedDate: string;
