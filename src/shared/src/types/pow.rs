@@ -3,8 +3,8 @@ use super::{CandidType, Debug, Deserialize};
 //
 // CYCLES_PER_DIFFICULTY:
 // - If the value is too high, more CYCLES can be burned after each solved challenge
-// - If the value is too low, more resources will be consumed by the backend and client due to increased overhead
-//   from frequent backend and client calls to obtain new CYCLES
+// - If the value is too low, more resources will be consumed by the backend and client due to
+//   increased overhead from frequent backend and client calls to obtain new CYCLES
 //
 // START_DIFFICULTY:
 // - The higher the value, the more computational effort someone has to expend to abuse the system
