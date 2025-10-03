@@ -35,7 +35,8 @@
 			"more_items": "+$items więcej",
 			"select": "Wybierz",
 			"language": "Język",
-			"currency": "Waluta"
+			"currency": "Waluta",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",

@@ -35,7 +35,8 @@
 			"more_items": "+$items المزيد",
 			"select": "تحديد",
 			"language": "اللغة",
-			"currency": "العملة"
+			"currency": "العملة",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
