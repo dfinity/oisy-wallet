@@ -69,7 +69,7 @@ describe('Transaction (single)', () => {
 		testContact = undefined;
 
 		const { container } = render(Transaction, {
-			amount: 42n,
+			displayAmount: 42n,
 			type: 'receive',
 			status: 'confirmed',
 			timestamp: 1_690_000_000,
@@ -118,7 +118,7 @@ describe('Transaction (single)', () => {
 		setPrivacyMode({ enabled: true });
 
 		const { container } = render(Transaction, {
-			amount: 10n,
+			displayAmount: 10n,
 			type: 'send',
 			status: 'pending',
 			token: ICP_TOKEN,
@@ -134,7 +134,7 @@ describe('Transaction (single)', () => {
 		mockIsErc721 = true;
 
 		render(Transaction, {
-			amount: 999n,
+			displayAmount: 999n,
 			type: 'send',
 			status: 'confirmed',
 			token: NFT_TEST_TOKEN as unknown as AppToken,
@@ -172,7 +172,7 @@ describe('Transaction (single)', () => {
 			token: ICP_TOKEN,
 			iconType: 'token',
 			from: '0xaddr',
-			amount: 1n
+			displayAmount: 1n
 		});
 
 		await expect(screen.findByText(/ICP/)).resolves.toBeInTheDocument();

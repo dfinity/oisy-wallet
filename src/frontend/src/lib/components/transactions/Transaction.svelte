@@ -30,7 +30,7 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
-		amount?: bigint;
+		displayAmount?: bigint;
 		type: TransactionType;
 		status: TransactionStatus;
 		timestamp?: number;
@@ -42,12 +42,11 @@
 		tokenId?: number;
 		children?: Snippet;
 		onClick?: () => void;
-		fee?: bigint;
 		approveSpender?: string;
 	}
 
 	const {
-		amount: cardAmount,
+		displayAmount,
 		type,
 		status,
 		timestamp,
@@ -59,21 +58,8 @@
 		tokenId,
 		children,
 		onClick,
-		fee,
 		approveSpender
 	}: Props = $props();
-
-	const incoming = $derived(type === 'receive' || type === 'withdraw' || type === 'mint');
-
-	const displayAmount = $derived(
-		nonNullish(cardAmount)
-			? !incoming && nonNullish(fee)
-				? type === 'approve'
-					? fee * -1n
-					: cardAmount + fee * -1n
-				: cardAmount
-			: undefined
-	);
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
