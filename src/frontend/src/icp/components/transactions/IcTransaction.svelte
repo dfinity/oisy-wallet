@@ -64,5 +64,5 @@
 	{token}
 	{type}
 >
-	<IcTransactionLabel fallback={type} label={transactionTypeLabel} {token} />
+	<IcTransactionLabel amount={value} label={transactionTypeLabel} {token} {type} />
 </Transaction>

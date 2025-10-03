@@ -2,12 +2,17 @@ import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import { POW_MIN_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
 
-export const hasRequiredCycles = async ({ identity }: { identity: Identity }): Promise<boolean> => {
+export const hasRequiredCycles = async ({
+	identity,
+	requiredCycles
+}: {
+	identity: Identity;
+	requiredCycles: bigint;
+}): Promise<boolean> => {
 	const allowanceResult = await allowance({
 		identity,
 		certified: false,
@@ -21,8 +26,7 @@ export const hasRequiredCycles = async ({ identity }: { identity: Identity }): P
 			subaccount: getIcrcSubaccount(identity.getPrincipal())
 		}
 	});
-
-	return allowanceResult.allowance >= POW_MIN_CYCLES_THRESHOLD;
+	return allowanceResult.allowance >= requiredCycles;
 };
 
 /**
