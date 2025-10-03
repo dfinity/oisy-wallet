@@ -21,23 +21,26 @@ use super::{CandidType, Debug, Deserialize};
 //   EXPIRY_DURATION_MS = 120_000 (2 minutes)
 //   START_DIFFICULTY = 500_000
 //   CYCLES_PER_DIFFICULTY = 1_200_000
-//   → Challenges should average ~20 seconds to solve, must be solved within 3 minutes, and 600B Cycles, and the next
-//     challenge can be requested after this period. This provides basic protection while being
-//     reliably solvable even on slower devices or under varying network conditions.
+//   → Challenges should average ~20 seconds to solve, must be solved within 3 minutes, and 600B
+// Cycles, and the next     challenge can be requested after this period. This provides basic
+// protection while being     reliably solvable even on slower devices or under varying network
+// conditions.
 //
 // Medium Protection:
 //   EXPIRY_DURATION_MS = 180_000 (3 minutes)
 //   START_DIFFICULTY = 1_000_000
 //   CYCLES_PER_DIFFICULTY = 600_000
-//   → Challenges should average 40 seconds to solve, must be solved within 3 minutes, and 600B Cycles and the next
-//     challenge can be requested after this period. This offers balanced security and usability.
+//   → Challenges should average 40 seconds to solve, must be solved within 3 minutes, and 600B
+// Cycles and the next     challenge can be requested after this period. This offers balanced
+// security and usability.
 //
 // High Protection:
 //   EXPIRY_DURATION_MS = 220_000 (3.6 minutes)
 //   START_DIFFICULTY = 3_000_000
 //   CYCLES_PER_DIFFICULTY = 200_000
-//   → Challenges should average ~2 minutes to solve, must be solved within 3.6 minutes, and 600B Cycles, and the next
-//     challenge can be requested after this period. This offers strong protection against abuse.
+//   → Challenges should average ~2 minutes to solve, must be solved within 3.6 minutes, and 600B
+// Cycles, and the next     challenge can be requested after this period. This offers strong
+// protection against abuse.
 
 // If `POW_ENABLED` is false, PoW protection remains disabled, preserving the original behavior
 // of the `allow_signing` function.
