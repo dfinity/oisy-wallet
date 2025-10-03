@@ -6,7 +6,7 @@ export const POW_MIN_CYCLES_THRESHOLD = 598_000_000_000n;
 
 // Threshold below which cycles are considered effectively zero due to fragmented costs, triggering the PoW protector modal.
 // This is set lower than POW_MIN_CYCLES_THRESHOLD to provide a critical warning before cycles are completely depleted.
-export const POW_ZERO_CYCLES_THRESHOLD = 595_000_000_000n; // 26_153_846_153n
+export const POW_ZERO_CYCLES_THRESHOLD = 598_000_000_000n; // 26_153_846_153n
 
 // Maximum number of attempts to check for sufficient cycles before signing out the user
 export const POW_MAX_CHECK_ATTEMPTS = 100;
