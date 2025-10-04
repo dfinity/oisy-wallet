@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "究極の分散型ウォレット",
+			"title_part_1": "あなたのデジタル資産を",
+			"title_part_2": "プライベートで、安全に。",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "開く／作成",
-			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
-			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
-			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
+			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
+			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
+			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
