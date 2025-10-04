@@ -58,6 +58,7 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 			const createChallengeResponse = await createPowChallenge({
 				identity
 			});
+			console.warn('PoW challenge requested...');
 
 			// Make sure we have a valid response before continuing
 			if (isNullish(createChallengeResponse)) {
@@ -66,10 +67,14 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 
 			// Step 2: Solve the PoW challenge.
 			this.postMessagePowProgress({ progress: 'SOLVE_CHALLENGE' });
+
+			const solveStartTime = performance.now();
 			const nonce = await solvePowChallenge({
 				timestamp: createChallengeResponse.start_timestamp_ms,
 				difficulty: createChallengeResponse.difficulty
 			});
+			const solveDuration = performance.now() - solveStartTime;
+			console.warn(`PoW challenge solved (Duration=${solveDuration.toFixed(2)}ms)`);
 
 			// Step 3: Request allowance for signing operations with solved nonce.
 			this.postMessagePowProgress({
@@ -79,6 +84,8 @@ export class PowProtectionScheduler implements Scheduler<PostMessageDataRequest>
 				identity,
 				request: { nonce }
 			});
+
+			console.warn(`Cycled allowance completed for nonce ${nonce}`);
 
 			if (allowSigningResponse?.challenge_completion[0]?.next_allowance_ms !== undefined) {
 				this.postMessagePowNextAllowance({
