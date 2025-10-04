@@ -23,7 +23,7 @@
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
-		onToggle?: (t: CustomEvent<Token>) => void;
+		onToggle?: (t: Token) => void;
 	}
 
 	let {

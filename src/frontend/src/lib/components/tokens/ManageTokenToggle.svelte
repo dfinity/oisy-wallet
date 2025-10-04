@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
@@ -9,20 +8,27 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
-	export let token:
+	type TokenToggleable =
 		| EthereumUserToken
 		| SplTokenToggleable
 		| Erc721TokenToggleable
 		| Erc1155TokenToggleable;
-	export let testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE;
 
-	let disabled = false;
-	$: disabled = isDefaultEthereumToken(token);
+	interface Props {
+		token: TokenToggleable;
+		testIdPrefix?: string;
+		onShowOrHideToken: (token: TokenToggleable) => void;
+	}
 
-	let checked: boolean;
-	$: checked = token.enabled ?? false;
+	let {
+		token,
+		testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
+		onShowOrHideToken
+	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
+	let disabled = $derived(isDefaultEthereumToken(token));
+
+	let checked = $derived(token.enabled ?? false);
 
 	const toggle = () => {
 		if (disabled) {
@@ -31,7 +37,7 @@
 
 		checked = !checked;
 
-		dispatch('icShowOrHideToken', {
+		onShowOrHideToken({
 			...token,
 			enabled: checked
 		});
@@ -40,9 +46,9 @@
 	const onClick = () => {};
 </script>
 
-<!-- svelte-ignore a11y-interactive-supports-focus -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div role="button" on:click={onClick}>
+<!-- svelte-ignore a11y_interactive_supports_focus -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div onclick={onClick} role="button">
 	<Toggle
 		ariaLabel={checked ? $i18n.tokens.text.hide_token : $i18n.tokens.text.show_token}
 		{disabled}
