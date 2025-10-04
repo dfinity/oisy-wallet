@@ -34,7 +34,7 @@ import {
 	parseSolBase64TransactionMessage,
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	addSignersToTransactionMessage,
 	getBase64Decoder,
