@@ -33,16 +33,8 @@ import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { addSignersToTransactionMessage, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import type { Rpc, SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
-
-vi.mock(import('@solana/kit'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		addSignersToTransactionMessage: vi.fn()
-	};
-});
 
 vi.mock(import('$sol/utils/sol-transactions.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -67,7 +59,6 @@ describe('wallet-connect.services', () => {
 		amount: 123n,
 		destination: mockAtaAddress
 	};
-	const mockAllSignersTransaction = { mock: 'mockAllSignersTransaction' };
 	const mockTransactionMessage = { mock: 'mockTransactionMessage' };
 
 	const mockSignature = mockSolSignature();
@@ -96,10 +87,6 @@ describe('wallet-connect.services', () => {
 			() => mockSolSignedTransaction
 		);
 		vi.spyOn(solTransactionsUtils, 'transactionMessageHasBlockhashLifetime').mockReturnValue(true);
-
-		vi.mocked(addSignersToTransactionMessage).mockReturnValue(
-			mockAllSignersTransaction as unknown as ReturnType<typeof addSignersToTransactionMessage>
-		);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
 			mockTransactionMessage as unknown as SolTransactionMessage

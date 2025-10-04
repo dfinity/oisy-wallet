@@ -36,7 +36,6 @@ import {
 } from '$sol/utils/sol-transactions.utils';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
-	addSignersToTransactionMessage,
 	getBase64Decoder,
 	getTransactionEncoder,
 	type Base64EncodedWireTransaction
@@ -149,22 +148,18 @@ export const sign = ({
 				}
 
 				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
-				const additionalSigners = Object.keys(signatures)
-					.filter((a) => a !== address)
-					.map((signer) =>
-						createSigner({
-							identity,
-							address: signer,
-							network: solNetwork
-						})
-					);
-				const transactionMessageWithAllSigners = addSignersToTransactionMessage(
-					additionalSigners,
-					transactionMessageRaw
+
+				const requireAdditionalSigners = Object.entries(signatures).some(
+					([a, signature]) => a !== address && isNullish(signature)
 				);
 
+				// We cannot send transaction with additional signers that have not signed yet and that we are unable to sign for.
+				if (requireAdditionalSigners) {
+					return { success: false };
+				}
+
 				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
-					transactionMessage: transactionMessageWithAllSigners,
+					transactionMessage: transactionMessageRaw,
 					rpc,
 					feePayer: signer
 				});
