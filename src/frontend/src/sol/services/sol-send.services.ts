@@ -76,15 +76,10 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	const { getLatestBlockhash } = rpc;
 	const { value: latestBlockhash } = await getLatestBlockhash({ commitment: 'confirmed' }).send();
 
-	const correctedLatestBlockhash = {
-		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-	};
-
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(correctedLatestBlockhash, tx)
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
 	);
 };
 
