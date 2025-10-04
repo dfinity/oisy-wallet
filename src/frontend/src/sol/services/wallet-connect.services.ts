@@ -128,8 +128,6 @@ export const sign = ({
 			try {
 				progress(ProgressStepsSign.SIGN);
 
-				assertNonNullish(address);
-
 				const rpc = solanaHttpRpc(solNetwork);
 
 				const signer = createSigner({
