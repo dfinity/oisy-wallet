@@ -36,7 +36,8 @@ export const acceptAgreements = async ({
 						accepted,
 						lastAcceptedTimestamp: nowInBigIntNanoSeconds(),
 						lastUpdatedTimestamp:
-							agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp
+							agreementsData[agreement as keyof EnvAgreements].lastUpdatedTimestamp,
+						textSha256: agreementsData[agreement as keyof EnvAgreements].textSha256
 					}
 				};
 			}

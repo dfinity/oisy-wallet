@@ -7,7 +7,6 @@
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SendTokenContext from '$lib/components/send/SendTokenContext.svelte';
-	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
 	interface Props {
@@ -17,9 +16,9 @@
 		listener: OptionWalletConnectListener;
 	}
 
-	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
+	let { request, firstTransaction, sourceNetwork, listener = $bindable() }: Props = $props();
 
-	let token: Token | undefined = $derived(
+	let token = $derived(
 		[...$enabledEthereumTokens, ...$enabledEvmTokens].find(
 			({ network: { id: networkId } }) => networkId === sourceNetwork.id
 		)

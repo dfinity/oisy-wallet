@@ -35,9 +35,7 @@
 	}: Props = $props();
 </script>
 
-{#if nonNullish(destination)}
-	<SendDataDestination {destination} />
-{/if}
+<slot name="sourceNetwork" />
 
 {@render network?.()}
 
