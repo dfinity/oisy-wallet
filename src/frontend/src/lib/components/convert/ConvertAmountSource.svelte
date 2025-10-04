@@ -35,7 +35,7 @@
 
 	$: (errorType, setErrorType(errorType));
 
-	const customValidate = (userAmount: bigint): TokenActionErrorType =>
+	const onCustomValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
 			userAmount,
 			token: $sourceToken,
@@ -84,37 +84,40 @@
 </script>
 
 <TokenInput
-	{customValidate}
 	displayUnit={inputUnit}
 	exchangeRate={$sourceTokenExchangeRate}
 	isSelectable={false}
+	{onCustomValidate}
 	token={$sourceToken}
 	bind:amount={sendAmount}
 	bind:errorType
 	bind:amountSetToMax
 >
-	<div slot="amount-info" class="text-tertiary">
-		<TokenInputAmountExchange
-			amount={sendAmount}
-			exchangeRate={$sourceTokenExchangeRate}
-			token={$sourceToken}
-			bind:displayUnit={exchangeValueUnit}
-		/>
-	</div>
+	{#snippet amountInfo()}
+		<div class="text-tertiary">
+			<TokenInputAmountExchange
+				amount={sendAmount}
+				exchangeRate={$sourceTokenExchangeRate}
+				token={$sourceToken}
+				bind:displayUnit={exchangeValueUnit}
+			/>
+		</div>
+	{/snippet}
 
-	<button
-		slot="balance"
-		class="font-semibold transition-all"
-		class:animate-pulse={isNullish(maxAmount)}
-		class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
-		class:text-error-primary={isZeroBalance || nonNullish(errorType)}
-		class:text-tertiary={isNullish(maxAmount)}
-		data-tid="convert-amount-source-balance"
-		on:click|preventDefault={setMax}
-	>
-		{$i18n.convert.text.max_balance}:
-		{nonNullish(maxAmount)
-			? `${maxAmount} ${$sourceToken.symbol}`
-			: $i18n.convert.text.calculating_max_amount}
-	</button>
+	{#snippet balance()}
+		<button
+			class="font-semibold transition-all"
+			class:animate-pulse={isNullish(maxAmount)}
+			class:text-brand-primary={!isZeroBalance && isNullish(errorType) && nonNullish(maxAmount)}
+			class:text-error-primary={isZeroBalance || nonNullish(errorType)}
+			class:text-tertiary={isNullish(maxAmount)}
+			data-tid="convert-amount-source-balance"
+			on:click|preventDefault={setMax}
+		>
+			{$i18n.convert.text.max_balance}:
+			{nonNullish(maxAmount)
+				? `${maxAmount} ${$sourceToken.symbol}`
+				: $i18n.convert.text.calculating_max_amount}
+		</button>
+	{/snippet}
 </TokenInput>
