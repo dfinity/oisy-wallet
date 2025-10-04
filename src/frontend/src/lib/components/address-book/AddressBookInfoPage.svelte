@@ -28,7 +28,7 @@
 
 		<AddressInfoCard {address} />
 	{:else}
-		<!-- Display a fallback message if no address is available. 
+		<!-- Display a fallback message if no address is available.
 		   TODO: Styling is minimal and could be enhanced. -->
 		<div class="flex items-center justify-center py-4" data-testid={ADDRESS_BOOK_FALLBACK_MESSAGE}>
 			<p class="text-center text-sm font-medium text-brand-primary"

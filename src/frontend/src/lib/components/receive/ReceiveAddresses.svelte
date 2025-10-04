@@ -99,8 +99,7 @@
 		};
 	}
 
-	let receiveAddressCoreList: Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[];
-	$: receiveAddressCoreList = [
+	let receiveAddressCoreList: Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[] = $derived([
 		{
 			labelRef: 'btcAddressMainnet',
 			address: $btcAddressMainnet,
@@ -213,47 +212,49 @@
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
 		}
-	];
+	]);
 
-	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
-	$: receiveAddressList = receiveAddressCoreList.map(
-		({
-			address,
-			token: addressToken,
-			qrCodeAriaLabel,
-			label: addressLabel,
-			copyAriaLabel,
-			labelRef,
-			network,
-			testId,
-			title,
-			text,
-			condition
-		}) => ({
-			labelRef,
-			address,
-			network,
-			testId,
-			copyAriaLabel,
-			title,
-			text,
-			condition,
-			qrCodeAction: {
-				enabled: true,
-				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: qrCodeAriaLabel
-			},
-			on: {
-				click: () =>
-					displayQRCode({
-						address: address ?? '',
-						addressLabel,
-						addressToken,
-						copyAriaLabel
-					})
-			}
-		})
-	);
+	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[] =
+		$derived(
+			receiveAddressCoreList.map(
+				({
+					address,
+					token: addressToken,
+					qrCodeAriaLabel,
+					label: addressLabel,
+					copyAriaLabel,
+					labelRef,
+					network,
+					testId,
+					title,
+					text,
+					condition
+				}) => ({
+					labelRef,
+					address,
+					network,
+					testId,
+					copyAriaLabel,
+					title,
+					text,
+					condition,
+					qrCodeAction: {
+						enabled: true,
+						testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+						ariaLabel: qrCodeAriaLabel
+					},
+					on: {
+						click: () =>
+							displayQRCode({
+								address: address ?? '',
+								addressLabel,
+								addressToken,
+								copyAriaLabel
+							})
+					}
+				})
+			)
+		);
 </script>
 
 <ContentWithToolbar>

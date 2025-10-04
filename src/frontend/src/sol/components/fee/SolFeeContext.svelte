@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy } from 'svelte';
+	import { type Snippet, getContext, onDestroy } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -18,8 +19,13 @@
 	import { isAtaAddress } from '$sol/utils/sol-address.utils';
 	import { isTokenSpl } from '$sol/utils/spl.utils';
 
-	export let observe: boolean;
-	export let destination = '';
+	interface Props {
+		observe: boolean;
+		destination?: string;
+		children?: Snippet;
+	}
+
+	let { observe, destination = '', children }: Props = $props();
 
 	const { feeStore, prioritizationFeeStore, ataFeeStore }: FeeContext =
 		getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
@@ -49,7 +55,9 @@
 		timer = setInterval(estimateFee, 5000);
 	};
 
-	$: ($sendTokenNetworkId, (async () => await updateFee())());
+	run(() => {
+		($sendTokenNetworkId, (async () => await updateFee())());
+	});
 
 	let timer: NodeJS.Timeout | undefined;
 
@@ -90,7 +98,9 @@
 		ataFeeStore.setFee(ataFee);
 	};
 
-	$: (destination, $sendToken, updateAtaFee());
+	run(() => {
+		(destination, $sendToken, updateAtaFee());
+	});
 </script>
 
-<slot />
+{@render children?.()}

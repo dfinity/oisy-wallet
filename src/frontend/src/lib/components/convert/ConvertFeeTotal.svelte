@@ -5,18 +5,23 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
-	export let feeAmount: bigint | undefined = undefined;
-	export let decimals: number;
-	export let exchangeRate: number | undefined = undefined;
+	interface Props {
+		feeAmount?: bigint;
+		decimals: number;
+		exchangeRate?: number;
+	}
 
-	let formattedAmount: number | undefined;
-	$: formattedAmount = nonNullish(feeAmount)
-		? formatTokenBigintToNumber({
-				value: feeAmount,
-				unitName: decimals,
-				displayDecimals: decimals
-			})
-		: undefined;
+	let { feeAmount = undefined, decimals, exchangeRate = undefined }: Props = $props();
+
+	let formattedAmount: number | undefined = $derived(
+		nonNullish(feeAmount)
+			? formatTokenBigintToNumber({
+					value: feeAmount,
+					unitName: decimals,
+					displayDecimals: decimals
+				})
+			: undefined
+	);
 </script>
 
 <ModalValue>

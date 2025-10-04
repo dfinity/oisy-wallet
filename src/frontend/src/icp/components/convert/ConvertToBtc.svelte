@@ -32,8 +32,7 @@
 		modalStore.openConvertCkBTCToBTC(modalId);
 	};
 
-	let ckBtcToken: OptionIcCkToken;
-	$: ckBtcToken = $pageToken as OptionIcCkToken;
+	let ckBtcToken: OptionIcCkToken = $derived($pageToken as OptionIcCkToken);
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>

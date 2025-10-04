@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -8,7 +9,6 @@
 	import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
-	import type { Erc1155Metadata } from '$eth/types/erc1155';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -25,9 +25,13 @@
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let contractAddress: string | undefined;
-	export let metadata: Erc20Metadata | Erc721Metadata | Erc1155Metadata | undefined;
-	export let network: Network;
+	interface Props {
+		contractAddress: string | undefined;
+		metadata: Erc20Metadata | Erc721Metadata | undefined;
+		network: Network;
+	}
+
+	let { contractAddress, metadata = $bindable(), network }: Props = $props();
 
 	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
@@ -116,8 +120,10 @@
 		}
 	});
 
-	let invalid = true;
-	$: invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
+	let invalid = $state(true);
+	run(() => {
+		invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
+	});
 
 	const dispatch = createEventDispatcher();
 </script>

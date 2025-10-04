@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { run } from 'svelte/legacy';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import { rewardCampaigns, FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
@@ -23,36 +24,43 @@
 	import { emit } from '$lib/utils/events.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let styleClass: string | undefined = undefined;
-	export let wrapperStyleClass: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+		wrapperStyleClass?: string;
+	}
+
+	let { styleClass, wrapperStyleClass }: Props = $props();
 
 	// It may happen that the user's settings are refreshed before having been updated.
 	// But for that small instant of time, we could still show the dApp.
 	// To avoid this glitch we store the dApp id in a temporary array, and we add it to the hidden dApps ids.
-	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = [];
+	let temporaryHiddenDappsIds: OisyDappDescription['id'][] = $state([]);
 
-	let hiddenDappsIds: OisyDappDescription['id'][];
-	$: hiddenDappsIds = [
-		...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),
-		...temporaryHiddenDappsIds
-	];
+	let hiddenDappsIds: OisyDappDescription['id'][] = $state();
+	run(() => {
+		hiddenDappsIds = [
+			...($userSettings?.dapp.dapp_carousel.hidden_dapp_ids ?? []),
+			...temporaryHiddenDappsIds
+		];
+	});
 
 	const featuredAirdrop: RewardCampaignDescription | undefined = rewardCampaigns.find(
 		({ id }) => id === FEATURED_REWARD_CAROUSEL_SLIDE_ID
 	);
 
-	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined;
-	$: featureAirdropSlide = nonNullish(featuredAirdrop)
-		? ({
-				id: featuredAirdrop.id,
-				carousel: {
-					text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
-					callToAction: $i18n.rewards.text.carousel_slide_cta
-				},
-				logo: featuredAirdrop.logo,
-				name: featuredAirdrop.title
-			} as CarouselSlideOisyDappDescription)
-		: undefined;
+	let featureAirdropSlide: CarouselSlideOisyDappDescription | undefined = $derived(
+		nonNullish(featuredAirdrop)
+			? ({
+					id: featuredAirdrop.id,
+					carousel: {
+						text: replaceOisyPlaceholders($i18n.rewards.text.carousel_slide_title),
+						callToAction: $i18n.rewards.text.carousel_slide_cta
+					},
+					logo: featuredAirdrop.logo,
+					name: featuredAirdrop.title
+				} as CarouselSlideOisyDappDescription)
+			: undefined
+	);
 
 	/*
 	 TODO: rename and adjust DappsCarousel for different data sources (not only dApps descriptions).
@@ -61,16 +69,18 @@
 	 3. Create a single slide data type that can be used for airdrop, dApps, and all further cases.
 	 4. Adjust DappsCarouselSlide accordingly.
 	 */
-	let dappsCarouselSlides: CarouselSlideOisyDappDescription[];
-	$: dappsCarouselSlides = filterCarouselDapps({
-		dAppDescriptions: [
-			...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
-			...dAppDescriptions
-		],
-		hiddenDappsIds
+	let dappsCarouselSlides: CarouselSlideOisyDappDescription[] = $state();
+	run(() => {
+		dappsCarouselSlides = filterCarouselDapps({
+			dAppDescriptions: [
+				...(nonNullish(featureAirdropSlide) ? [featureAirdropSlide] : []),
+				...dAppDescriptions
+			],
+			hiddenDappsIds
+		});
 	});
 
-	let carousel: Carousel;
+	let carousel: Carousel = $state();
 
 	const closeSlide = async ({
 		detail: dappId

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import { blur, fade } from 'svelte/transition';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
@@ -45,6 +46,9 @@
 		}
 
 		metadata = data;
+	});
+	run(() => {
+		invalid = isNullish(token);
 	});
 </script>
 

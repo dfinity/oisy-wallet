@@ -12,23 +12,28 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { formatCurrency } from '$lib/utils/format.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let exchangeRate: number | undefined = undefined;
+	interface Props {
+		amount?: OptionAmount;
+		exchangeRate?: number;
+	}
 
-	let usdValue: number | undefined;
-	$: usdValue =
-		nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : undefined;
+	let { amount = undefined, exchangeRate = undefined }: Props = $props();
 
-	let displayValue: string | undefined;
-	$: displayValue = nonNullish(usdValue)
-		? formatCurrency({
-				value: usdValue,
-				currency: $currentCurrency,
-				exchangeRate: $currencyExchangeStore,
-				language: $currentLanguage,
-				notBelowThreshold: usdValue !== 0
-			})
-		: undefined;
+	let usdValue: number | undefined = $derived(
+		nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : undefined
+	);
+
+	let displayValue: string | undefined = $derived(
+		nonNullish(usdValue)
+			? formatCurrency({
+					value: usdValue,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage,
+					notBelowThreshold: usdValue !== 0
+				})
+			: undefined
+	);
 </script>
 
 {#if nonNullish(usdValue)}

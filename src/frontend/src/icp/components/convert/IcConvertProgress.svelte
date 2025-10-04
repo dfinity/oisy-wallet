@@ -7,7 +7,11 @@
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let convertProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	interface Props {
+		convertProgressStep?: string;
+	}
+
+	let { convertProgressStep = ProgressStepsSend.INITIALIZATION }: Props = $props();
 
 	const { destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>

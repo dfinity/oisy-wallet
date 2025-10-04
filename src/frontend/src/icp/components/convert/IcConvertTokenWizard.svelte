@@ -214,13 +214,13 @@
 				bind:sendAmount
 				bind:receiveAmount
 			>
-				<svelte:fragment slot="cancel">
+				{#snippet cancel()}
 					{#if formCancelAction === 'back'}
 						<ButtonBack onclick={back} />
 					{:else}
 						<ButtonCancel onclick={close} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</IcConvertForm>
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<IcConvertReview
@@ -231,7 +231,9 @@
 				on:icConvert={convert}
 				on:icBack={onBack}
 			>
-				<ButtonBack slot="cancel" onclick={back} />
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />

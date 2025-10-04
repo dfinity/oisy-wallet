@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
+	import { type Snippet, createEventDispatcher } from 'svelte';
 	import ConvertAmount from '$lib/components/convert/ConvertAmount.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -8,18 +8,39 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let totalFee: bigint | undefined;
-	export let destinationTokenFee: bigint | undefined = undefined;
-	export let minFee: bigint | undefined = undefined;
-	export let ethereumEstimateFee: bigint | undefined = undefined;
-	export let disabled: boolean;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount: number | undefined;
+		totalFee: bigint | undefined;
+		destinationTokenFee?: bigint;
+		minFee?: bigint;
+		ethereumEstimateFee?: bigint;
+		disabled: boolean;
+		testId?: string;
+		message?: Snippet;
+		destination?: Snippet;
+		fee?: Snippet;
+		cancel?: Snippet;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		totalFee,
+		destinationTokenFee = undefined,
+		minFee = undefined,
+		ethereumEstimateFee = undefined,
+		disabled,
+		testId = undefined,
+		message,
+		destination,
+		fee,
+		cancel
+	}: Props = $props();
 
 	const dispatch = createEventDispatcher();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
+	let exchangeValueUnit: DisplayUnit = $state('usd');
 </script>
 
 <ContentWithToolbar {testId}>
@@ -34,16 +55,16 @@
 	/>
 
 	<div class="mt-6">
-		<slot name="message" />
+		{@render message?.()}
 
-		<slot name="destination" />
+		{@render destination?.()}
 
-		<slot name="fee" />
+		{@render fee?.()}
 	</div>
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<slot name="cancel" />
+			{@render cancel?.()}
 
 			<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
 				{$i18n.convert.text.review_button}

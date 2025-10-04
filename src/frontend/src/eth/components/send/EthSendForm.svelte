@@ -44,6 +44,8 @@
 
 	const { feeSymbolStore, feeDecimalsStore, feeTokenIdStore }: EthFeeContext =
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+
+	const cancel_render = $derived(cancel);
 </script>
 
 <SendForm
