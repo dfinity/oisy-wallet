@@ -151,19 +151,19 @@
 				>
 					{#snippet tokenInput()}
 						<TokenInput
-							customValidate={onCustomValidate}
 							displayUnit={inputUnit}
 							exchangeRate={$sourceTokenExchangeRate}
+							onClick={() => onShowTokensList('source')}
+							{onCustomValidate}
 							showTokenNetwork
 							token={$sourceToken}
 							bind:amount={swapAmount}
 							bind:errorType
 							bind:amountSetToMax
-							on:click={() => onShowTokensList('source')}
 						>
-							<span slot="title">{$i18n.tokens.text.source_token_title}</span>
+							{#snippet title()}{$i18n.tokens.text.source_token_title}{/snippet}
 
-							<svelte:fragment slot="amount-info">
+							{#snippet amountInfo()}
 								{#if nonNullish($sourceToken)}
 									<div class="text-tertiary">
 										<TokenInputAmountExchange
@@ -174,9 +174,9 @@
 										/>
 									</div>
 								{/if}
-							</svelte:fragment>
+							{/snippet}
 
-							<svelte:fragment slot="balance">
+							{#snippet balance()}
 								{#if nonNullish($sourceToken)}
 									{#if nonNullish(fee)}
 										<MaxBalanceButton
@@ -193,7 +193,7 @@
 										</div>
 									{/if}
 								{/if}
-							</svelte:fragment>
+							{/snippet}
 						</TokenInput>
 					{/snippet}
 				</TokenInputNetworkWrapper>
@@ -215,13 +215,13 @@
 						displayUnit={inputUnit}
 						exchangeRate={$destinationTokenExchangeRate}
 						loading={swapAmountsLoading}
+						onClick={() => onShowTokensList('destination')}
 						showTokenNetwork
 						token={$destinationToken}
-						on:click={() => onShowTokensList('destination')}
 					>
-						<span slot="title">{$i18n.tokens.text.destination_token_title}</span>
+						{#snippet title()}{$i18n.tokens.text.destination_token_title}{/snippet}
 
-						<svelte:fragment slot="amount-info">
+						{#snippet amountInfo()}
 							{#if nonNullish($destinationToken)}
 								{#if showSwapNotOfferedError}
 									<div class="text-error-primary" transition:slide={SLIDE_DURATION}
@@ -246,13 +246,13 @@
 									</div>
 								{/if}
 							{/if}
-						</svelte:fragment>
+						{/snippet}
 
-						<svelte:fragment slot="balance">
+						{#snippet balance()}
 							{#if nonNullish($destinationToken)}
 								<TokenInputBalance balance={$destinationTokenBalance} token={$destinationToken} />
 							{/if}
-						</svelte:fragment>
+						{/snippet}
 					</TokenInput>
 				{/snippet}
 			</TokenInputNetworkWrapper>
