@@ -14,13 +14,13 @@ import {
 	type TransactionWithLifetime
 } from '@solana/kit';
 
-interface CreateSignerParams {
+export interface CreateSignerParams {
 	identity: OptionIdentity;
 	address: SolAddress;
 	network: SolanaNetworkType;
 }
 
-const signTransaction = async ({
+export const signTransaction = async ({
 	identity,
 	transaction,
 	address,
