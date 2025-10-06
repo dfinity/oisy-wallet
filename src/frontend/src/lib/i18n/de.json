@@ -52,7 +52,7 @@
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": "Deine $oisy_short Wallet is momentan as "standalone app" auf deinem Mobiltelefon installiert. Dies verhindert, dass andere ICP Applikationen auf OISY zugreifen können. Du kannst $oisy_short von deinem Homescreen löschen, und es dann erneut installieren. $oisy_short wird dann so instaklliert, dass du in anderen apps auf $oisy_short zugreifen und Transacktionen signieren kannst."
+			"standalone_mode": "Deine $oisy_short Wallet is momentan als Standalone App auf deinem Mobiltelefon installiert. Dies verhindert, dass andere ICP Applikationen auf $oisy_short zugreifen können. Du kannst $oisy_short von deinem Homescreen löschen, und es dann erneut installieren. $oisy_short wird dann so instaklliert, dass du in anderen apps auf $oisy_short zugreifen und Transacktionen signieren kannst."
 		}
 	},
 	"navigation": {
