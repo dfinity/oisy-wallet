@@ -257,7 +257,6 @@ export const sign = ({
 							: undefined;
 
 				if (isNullish(signature)) {
-
 					return { success: false };
 				}
 
