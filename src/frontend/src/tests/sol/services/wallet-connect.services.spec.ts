@@ -214,7 +214,7 @@ describe('wallet-connect.services', () => {
 
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 					msg: { text: en.wallet_connect.error.wallet_not_initialized }
 				});
 			});
@@ -239,7 +239,7 @@ describe('wallet-connect.services', () => {
 
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 
-				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+				expect(mockParams.modalNext).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockParams.progress).toHaveBeenCalledTimes(3);
 				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
@@ -285,7 +285,7 @@ describe('wallet-connect.services', () => {
 
 				expect(signTransaction).toHaveBeenCalledExactlyOnceWith(expected);
 
-				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+				expect(mockParams.modalNext).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSendSol.SIGN);
 
@@ -341,7 +341,7 @@ describe('wallet-connect.services', () => {
 
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 
-				expect(spyToastsError).toHaveBeenCalledWith({
+				expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 					msg: { text: en.wallet_connect.error.wallet_not_initialized }
 				});
 			});
@@ -372,7 +372,7 @@ describe('wallet-connect.services', () => {
 					rpc: expect.any(Object)
 				});
 
-				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+				expect(mockParams.modalNext).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockParams.progress).toHaveBeenCalledTimes(4);
 				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
@@ -421,7 +421,7 @@ describe('wallet-connect.services', () => {
 
 				expect(sendSignedTransaction).not.toHaveBeenCalled();
 
-				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+				expect(mockParams.modalNext).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSendSol.SIGN);
 
@@ -467,7 +467,7 @@ describe('wallet-connect.services', () => {
 					rpc: expect.any(Object)
 				});
 
-				expect(mockParams.modalNext).toHaveBeenCalledOnce();
+				expect(mockParams.modalNext).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockParams.progress).toHaveBeenCalledTimes(4);
 				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
