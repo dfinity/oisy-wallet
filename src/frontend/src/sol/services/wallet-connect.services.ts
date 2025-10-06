@@ -111,12 +111,17 @@ const getSignatureWithSending = async ({
 }): Promise<string | undefined> => {
 	const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 
-	const requireAdditionalSigners = Object.entries(signatures).some(
-		([a, signature]) => a !== address && isNullish(signature)
+	const additionalSigners = Object.entries(signatures).reduce<string[]>(
+		(acc, [a, signature]) => [...acc, ...(a !== address && isNullish(signature) ? [a] : [])],
+		[]
 	);
 
 	// We cannot send transaction with additional signers that have not signed yet
-	if (requireAdditionalSigners) {
+	if (additionalSigners.length > 0) {
+		console.warn(
+			`WalletConnect Solana transaction has additional signers that have not signed yet: ${additionalSigners}`
+		);
+
 		return;
 	}
 
@@ -127,8 +132,13 @@ const getSignatureWithSending = async ({
 		rpc
 	});
 
-	// It should not happen, since we receive transaction with blockhash lifetime, but just to guarantee the correct type casting
+	// It should not happen, since we receive transaction with blockhash lifetime,
+	// but just to guarantee the correct type casting
 	if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
+		console.warn(
+			'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
+		);
+
 		return;
 	}
 
@@ -247,7 +257,6 @@ export const sign = ({
 							: undefined;
 
 				if (isNullish(signature)) {
-					console.warn(`WalletConnect Solana unsupported method ${method}`);
 
 					return { success: false };
 				}
