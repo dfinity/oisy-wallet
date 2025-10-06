@@ -1,6 +1,5 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendSource from '$lib/components/send/SendSource.svelte';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { contactsStore } from '$lib/stores/contacts.store';
 import type { ContactUi } from '$lib/types/contact';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
