@@ -109,7 +109,7 @@
 		bind:amountSetToMax
 		bind:error={insufficientFundsError}
 	>
-		{#snippet title()}$i18n.core.text.amount}{/snippet}
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
 		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
