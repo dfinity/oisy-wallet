@@ -60,8 +60,8 @@
 		const onGoingCampaigns = rewardCampaigns
 			.filter(({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate }))
 			.sort(
-				({ startDate: aStartDate }, { startDate: bStartDate }) =>
-					bStartDate.getTime() - aStartDate.getTime()
+				({ id: aId, startDate: aStartDate }, { id: bId, startDate: bStartDate }) =>
+					bStartDate.getTime() - aStartDate.getTime() || bId.localeCompare(aId)
 			);
 
 		const campaignToDisplay = onGoingCampaigns.length > 0 ? onGoingCampaigns[0] : undefined;

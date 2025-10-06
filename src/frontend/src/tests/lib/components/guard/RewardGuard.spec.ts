@@ -36,14 +36,14 @@ describe('RewardGuard', () => {
 				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
 					return {
 						...campaign,
-						startDate: mockStartDateEarlier,
+						startDate: mockStartDate,
 						endDate: mockEndDate
 					};
 				}
 				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
 					return {
 						...campaign,
-						startDate: mockStartDate,
+						startDate: mockStartDateEarlier,
 						endDate: mockEndDate
 					};
 				}
@@ -260,6 +260,61 @@ describe('RewardGuard', () => {
 	});
 
 	it('should open welcome modal with the most recent ongoing campaign', async () => {
+		const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [],
+			last_snapshot_timestamp: [0n],
+			sprinkles: []
+		};
+		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).toEqual({
+				id: get(modalStore)?.id,
+				data: {
+					reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
+				},
+				type: 'welcome'
+			});
+
+			expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				name: TRACK_WELCOME_OPEN,
+				metadata: {
+					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
+				}
+			});
+		});
+	});
+
+	it('should open welcome modal with the alphabetically-first ongoing campaign', async () => {
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
+			originalRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate
+					};
+				}
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate
+					};
+				}
+				return campaign;
+			})
+		);
+
 		const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID
 		);
