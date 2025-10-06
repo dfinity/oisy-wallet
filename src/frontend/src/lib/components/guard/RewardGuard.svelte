@@ -80,6 +80,10 @@
 			return;
 		}
 
+		if (isNullish(season1Episode4Campaign)) {
+			return;
+		}
+
 		if (
 			isNullish(campaignToDisplay.welcome?.title) &&
 			isNullish(campaignToDisplay.welcome?.title) &&
