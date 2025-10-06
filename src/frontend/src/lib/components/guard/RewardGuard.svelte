@@ -8,7 +8,12 @@
 	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import {modalRewardState, modalRewardStateData, modalWelcome, modalWelcomeData} from '$lib/derived/modal.derived';
+	import {
+		modalRewardState,
+		modalRewardStateData,
+		modalWelcome,
+		modalWelcomeData
+	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
@@ -98,5 +103,5 @@
 		rewardType={$modalRewardStateData.rewardType}
 	/>
 {:else if $modalWelcome && nonNullish($modalWelcomeData)}
-	<WelcomeModal reward={$modalWelcomeData.reward}/>
+	<WelcomeModal reward={$modalWelcomeData.reward} />
 {/if}
