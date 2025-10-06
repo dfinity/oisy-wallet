@@ -317,6 +317,7 @@ interface I18nRewards {
 			participate_title: string;
 			description: string;
 			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
 			win: {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
@@ -332,6 +333,7 @@ interface I18nRewards {
 			participate_title: string;
 			description: string;
 			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
 			win: {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
@@ -1360,12 +1362,6 @@ interface I18nEarning {
 	};
 }
 
-interface I18nWelcome {
-	title: string;
-	subtitle: string;
-	description: string;
-}
-
 interface I18nTemporal {
 	seconds_to_duration: {
 		year: string;
@@ -1455,7 +1451,6 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
-	welcome: I18nWelcome;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }
