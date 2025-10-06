@@ -19,7 +19,7 @@
 
 	interface Props {
 		amount: OptionAmount;
-		exchangeRate: number | undefined;
+		exchangeRate?: number;
 		token?: Token;
 		displayUnit?: DisplayUnit;
 		disabled?: boolean;
