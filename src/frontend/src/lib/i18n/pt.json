@@ -422,6 +422,11 @@
 				"participate_title": "Ganhe BTC mantendo-se ativo - e agora também por convidar outras pessoas.",
 				"description": "Cumpra requisitos semanais simples: inicie sessão, faça duas transações e tenha pelo menos 20 dólares em tokens para continuar elegível para ganhar até 50 dólares em BTC por dia. <br>Agora com recompensas por referência: convide um amigo para criar uma carteira e ambos ganharão Sprinkles garantidos. Esteja entre os 4 melhores nomeados e ganhe um jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+				},
 				"win": {
 					"default": {
 						"title": "Você foi recompensado",
@@ -457,6 +462,11 @@
 				"participate_title": "Ganhe tokens por atividades e indicações. Mais cadeias significam mais chances.",
 				"description": "Permaneça ativo por mais de 10 dias para se qualificar: faça login com frequência, conclua ações da carteira e mantenha pelo menos US$ 20.<br/>Cada cadeia ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% de amigos que se qualificarem e fique entre os 3 primeiros para ganhar um Super Sprinkle de US$ 200.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
+				},
 				"win": {
 					"default": {
 						"title": "Você foi recompensado",
@@ -1673,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Recompensas OISY"
 		}
-	},
-	"welcome": {
-		"title": "Bem vindo ao $oisy_curtas!",
-		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
 	},
 	"temporal": {
 		"seconds_to_duration": {

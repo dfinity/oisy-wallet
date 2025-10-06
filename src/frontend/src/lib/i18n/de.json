@@ -422,6 +422,11 @@
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
 				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -457,6 +462,11 @@
 				"participate_title": "Verdiene Tokens für Aktivitäten und Empfehlungen. Mehr Netzwerke bedeuten mehr Chancen.",
 				"description": "Bleibe 10 Tage lang aktiv, um dich zu qualifizieren: Melden dich häufig an, führe Wallet-Aktionen durch und halte mindestens $20.<br/>Jedes aktive Netzwerk erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10% von Freunden, die sich qualifizieren, und lande unter den ersten drei, um einen Super Sprinkle im Wert von $200 zu gewinnen.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -1673,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
-	},
-	"welcome": {
-		"title": "Wilkommen bei $oisy_short!",
-		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {

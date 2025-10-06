@@ -41,6 +41,10 @@ export interface RewardStateData {
 	rewardType?: RewardType;
 }
 
+export interface WelcomeData {
+	reward: RewardCampaignDescription;
+}
+
 export interface UserRoleResult {
 	isVip: boolean;
 	isGold: boolean;
