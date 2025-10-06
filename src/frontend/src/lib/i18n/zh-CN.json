@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% 去中心化",
+			"title_part_1": "您的数字资产",
+			"title_part_2": "私密且安全",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"asset_types": "比特币、Solana、以太坊、ICP 等",
-			"instant_and_private": "随时随地实现即时且私密的访问",
-			"advanced_cryptography": "100% 上链：通过先进加密技术确保安心使用"
+			"asset_types": "管理 BTC、SOL、ETH、ICP 等多种资产",
+			"instant_and_private": "内置 AI 助手 — 隐私保护为标准配置",
+			"advanced_cryptography": "先进加密技术保护 — 100% 链上"
 		},
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
@@ -422,6 +422,11 @@
 				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC。",
 				"description": "满足简单的每周要求：登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得高达 50 美元的 BTC 空投。<br>现在还有推荐奖励：邀请朋友设置钱包，你们都将获得保证的 Sprinkles。进入前 4 名推荐人，即可赢得大奖。",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "欢迎来到 $oisy_short！",
+					"subtitle": "准备好赚取收益了吗？",
+					"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐 4 位朋友即可获得保证奖金。"
+				},
 				"win": {
 					"default": {
 						"title": "您已获得奖励",
@@ -457,6 +462,11 @@
 				"participate_title": "通过活跃度和推荐赚取代币。更多连锁意味着更多机会。",
 				"description": "保持活跃超过 10 天即可获得资格：经常登录、完成钱包操作并持有至少 20 美元。<br/>每个活跃链都会通过多链乘数提高您的几率。<br/>从符合资格的朋友那里赚取 10%，并排名前 3 位即可赢得 200 美元的超级洒水。",
 				"campaign_href": "",
+				"welcome": {
+					"title": "欢迎来到 $oisy_short！",
+					"subtitle": "准备好赚取收益了吗？",
+					"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
+				},
 				"win": {
 					"default": {
 						"title": "您已获得奖励",
@@ -1673,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 奖励"
 		}
-	},
-	"welcome": {
-		"title": "欢迎来到 $oisy_short！",
-		"subtitle": "准备好赚取收益了吗？",
-		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
 	},
 	"temporal": {
 		"seconds_to_duration": {

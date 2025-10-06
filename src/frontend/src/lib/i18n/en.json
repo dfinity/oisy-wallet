@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Decentralized",
+			"title_part_1": "Your Digital Assets",
+			"title_part_2": "Private and Secure",
 			"logout": "Log out",
 			"lock": "Lock",
 			"authenticate": "Open or Create",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP, and more",
-			"instant_and_private": "Instant and private access anywhere",
-			"advanced_cryptography": "100% onchain: peace of mind through advanced cryptography"
+			"asset_types": "Manage assets across Bitcoin, Solana, Ethereum, ICP, and more",
+			"instant_and_private": "Built-in AI Assistant with privacy as standard",
+			"advanced_cryptography": "Secured by advanced cryptography - 100% onchain"
 		},
 		"alt": {
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
@@ -422,6 +422,11 @@
 				"participate_title": "Earn BTC by staying active - and now by inviting others.",
 				"description": "Meet simple weekly requirements: log in, make two transactions, and hold at least $20 in tokens to stay eligible for up to $50 in BTC drops each day.<br>Now with referral rewards: invite a friend to set up a wallet and you’ll both earn guaranteed Sprinkles. Land in the top 4 referrers and win a jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Welcome to $oisy_short!",
+					"subtitle": "Ready to Earn?",
+					"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer 4 friends and get a guaranteed bonus."
+				},
 				"win": {
 					"default": {
 						"title": "You got rewarded",
@@ -457,6 +462,11 @@
 				"participate_title": "Earn tokens for activity and referrals. More chains mean more chances.",
 				"description": "Stay active over 10 days to qualify: log in often, complete wallet actions, and hold at least $20.<br/>Each active chain boosts your odds with a Multichain Multiplier.<br/>Earn 10% from friends who qualify, and rank top 3 to win a $200 Super Sprinkle.",
 				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Welcome to $oisy_short!",
+					"subtitle": "Ready to Earn?",
+					"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
+				},
 				"win": {
 					"default": {
 						"title": "You got rewarded",
@@ -1673,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
-	},
-	"welcome": {
-		"title": "Welcome to $oisy_short!",
-		"subtitle": "Ready to Earn?",
-		"description": "You're 2 steps away from your first reward: Log in, hold $20+, and complete 2 actions. That's all it takes to start earning Sprinkles.<br><br>Want more? Refer your friends and get a bonus every time one of them earns sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {

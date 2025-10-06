@@ -14,7 +14,9 @@ describe('SolSendReview', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		network: SOLANA_MAINNET_NETWORK
+		network: SOLANA_MAINNET_NETWORK,
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 	const mockFeeStore = initFeeStore();
@@ -43,7 +45,8 @@ describe('SolSendReview', () => {
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
-				feeTokenIdStore: writable(SOLANA_TOKEN.id)
+				feeTokenIdStore: writable(SOLANA_TOKEN.id),
+				feeExchangeRateStore: writable(9.87)
 			})
 		);
 	});
