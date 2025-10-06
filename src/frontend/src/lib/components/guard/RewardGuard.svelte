@@ -58,7 +58,6 @@
 
 	const handleWelcomeModal = (timestamp: bigint) => {
 		if (
-			isNullish(timestamp) ||
 			timestamp !== ZERO ||
 			nonNullish($modalStore?.type) ||
 			hasDisplayedWelcome ||
