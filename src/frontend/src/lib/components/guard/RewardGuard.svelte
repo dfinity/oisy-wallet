@@ -57,27 +57,31 @@
 	});
 
 	const handleWelcomeModal = (timestamp: bigint) => {
+		if (timestamp !== ZERO || nonNullish($modalStore?.type) || hasDisplayedWelcome || $hasUrlCode) {
+			return;
+		}
+
 		const season1Episode4Campaign = rewardCampaigns.find(
 			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
 		);
 
+		if (isNullish(season1Episode4Campaign)) {
+			return;
+		}
+
 		if (
-			nonNullish(timestamp) &&
-			timestamp === ZERO &&
-			nonNullish(season1Episode4Campaign) &&
 			isOngoingCampaign({
 				startDate: season1Episode4Campaign.startDate,
 				endDate: season1Episode4Campaign.endDate
-			}) &&
-			isNullish($modalStore?.type) &&
-			!hasDisplayedWelcome &&
-			!$hasUrlCode
+			})
 		) {
 			hasDisplayedWelcome = true;
+
 			trackEvent({
 				name: TRACK_WELCOME_OPEN,
 				metadata: { campaignId: `${season1Episode4Campaign.id}` }
 			});
+
 			modalStore.openWelcome({
 				id: welcomeModalId,
 				data: { reward: season1Episode4Campaign }
