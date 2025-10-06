@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { Toggle } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import type { Erc1155TokenToggleable } from '$eth/types/erc1155-token-toggleable';
 	import type { EthereumUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
@@ -10,24 +8,27 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
 
+	type TokenToggleable =
+		| EthereumUserToken
+		| SplTokenToggleable
+		| Erc721TokenToggleable
+		| Erc1155TokenToggleable;
+
 	interface Props {
-		token: EthereumUserToken | SplTokenToggleable | Erc721TokenToggleable | Erc1155TokenToggleable;
+		token: TokenToggleable;
 		testIdPrefix?: string;
+		onShowOrHideToken: (token: TokenToggleable) => void;
 	}
 
-	let { token, testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE }: Props = $props();
+	let {
+		token,
+		testIdPrefix = MANAGE_TOKENS_MODAL_TOKEN_TOGGLE,
+		onShowOrHideToken
+	}: Props = $props();
 
-	let disabled = $state(false);
-	run(() => {
-		disabled = isDefaultEthereumToken(token);
-	});
+	let disabled = $derived(isDefaultEthereumToken(token));
 
-	let checked: boolean = $state();
-	run(() => {
-		checked = token.enabled ?? false;
-	});
-
-	const dispatch = createEventDispatcher();
+	let checked = $derived(token.enabled ?? false);
 
 	const toggle = () => {
 		if (disabled) {
@@ -36,7 +37,7 @@
 
 		checked = !checked;
 
-		dispatch('icShowOrHideToken', {
+		onShowOrHideToken({
 			...token,
 			enabled: checked
 		});

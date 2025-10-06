@@ -33,16 +33,8 @@ import { mockSolSignature } from '$tests/mocks/sol-signatures.mock';
 import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
-import { addSignersToTransactionMessage, type Rpc, type SolanaRpcApi } from '@solana/kit';
+import type { Rpc, SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
-
-vi.mock(import('@solana/kit'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		addSignersToTransactionMessage: vi.fn()
-	};
-});
 
 vi.mock(import('$sol/utils/sol-transactions.utils'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -67,7 +59,6 @@ describe('wallet-connect.services', () => {
 		amount: 123n,
 		destination: mockAtaAddress
 	};
-	const mockAllSignersTransaction = { mock: 'mockAllSignersTransaction' };
 	const mockTransactionMessage = { mock: 'mockTransactionMessage' };
 
 	const mockSignature = mockSolSignature();
@@ -96,10 +87,6 @@ describe('wallet-connect.services', () => {
 			() => mockSolSignedTransaction
 		);
 		vi.spyOn(solTransactionsUtils, 'transactionMessageHasBlockhashLifetime').mockReturnValue(true);
-
-		vi.mocked(addSignersToTransactionMessage).mockReturnValue(
-			mockAllSignersTransaction as unknown as ReturnType<typeof addSignersToTransactionMessage>
-		);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
 			mockTransactionMessage as unknown as SolTransactionMessage
@@ -440,7 +427,10 @@ describe('wallet-connect.services', () => {
 				message: { signature: mockSignature }
 			});
 
-			expect(console.warn).not.toHaveBeenCalled();
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				'WalletConnect Solana transaction send error',
+				mockError
+			);
 		});
 
 		describe('with other WalletConnect methods', () => {
@@ -458,63 +448,27 @@ describe('wallet-connect.services', () => {
 				}
 			};
 
-			it('should return success when signing is successful', async () => {
+			it('should not sign the transactions', async () => {
 				const result = await sign(mockParamsOther);
 
-				expect(result).toStrictEqual({ success: true });
+				expect(result).toEqual({ success: false });
 
-				expect(signTransaction).toHaveBeenCalledExactlyOnceWith(mockTransactionMessage);
+				expect(signTransaction).not.toHaveBeenCalled();
 
-				expect(sendSignedTransaction).toHaveBeenCalledExactlyOnceWith({
-					signedTransaction: mockSolSignedTransaction,
-					rpc: expect.any(Object)
-				});
+				expect(sendSignedTransaction).not.toHaveBeenCalled();
 
-				expect(mockParams.progress).toHaveBeenCalledTimes(3);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(
-					2,
-					ProgressStepsSign.APPROVE_WALLET_CONNECT
-				);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(3, ProgressStepsSendSol.DONE);
-			});
+				expect(mockParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSendSol.SIGN);
 
-			it('should not wait for errors when sending', async () => {
-				const mockError = new Error('mock-send-error');
+				expect(mockListener.approveRequest).not.toHaveBeenCalled();
 
-				vi.spyOn(solSendServices, 'sendSignedTransaction').mockImplementationOnce(() => {
-					throw mockError;
-				});
+				expect(mockListener.rejectRequest).not.toHaveBeenCalled();
 
-				const result = await sign(mockParamsOther);
+				expect(spyToastsShow).not.toHaveBeenCalled();
+				expect(spyToastsError).not.toHaveBeenCalled();
 
-				expect(result).toStrictEqual({ success: true });
+				expect(trackEvent).not.toHaveBeenCalled();
 
-				expect(signTransaction).toHaveBeenCalledExactlyOnceWith(mockTransactionMessage);
-
-				expect(sendSignedTransaction).toHaveBeenCalledExactlyOnceWith({
-					signedTransaction: mockSolSignedTransaction,
-					rpc: expect.any(Object)
-				});
-
-				expect(mockParams.progress).toHaveBeenCalledTimes(3);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(1, ProgressStepsSendSol.SIGN);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(
-					2,
-					ProgressStepsSign.APPROVE_WALLET_CONNECT
-				);
-				expect(mockParams.progress).toHaveBeenNthCalledWith(3, ProgressStepsSendSol.DONE);
-
-				expect(mockListener.approveRequest).toHaveBeenCalledExactlyOnceWith({
-					topic: mockRequest.topic,
-					id: mockRequest.id,
-					message: { signature: mockSignature }
-				});
-
-				expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-					'WalletConnect Solana transaction send error',
-					mockError
-				);
+				expect(console.warn).not.toHaveBeenCalled();
 			});
 		});
 	});

@@ -19,7 +19,7 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -101,7 +101,7 @@
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+	const onToggle = ({ id, network, ...rest }: Token) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 

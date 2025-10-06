@@ -51,22 +51,17 @@
 <div class="mb-4">
 	<TokenInput
 		autofocus={nonNullish($sendToken)}
-		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={onTokensList}
 	>
-		{#snippet title()}
-			<span>{$i18n.core.text.amount}</span>
-		{/snippet}
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-		<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -77,7 +72,7 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
 		{#snippet balance()}
 			{#if nonNullish($sendToken)}

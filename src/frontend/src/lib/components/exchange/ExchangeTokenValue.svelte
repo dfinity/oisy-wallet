@@ -2,8 +2,8 @@
 	import { run } from 'svelte/legacy';
 	import TokenExchangeBalance from '$lib/components/tokens/TokenExchangeBalance.svelte';
 	import TokenExchangeValueSkeleton from '$lib/components/tokens/TokenExchangeValueSkeleton.svelte';
-	import type { TokenUi } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
+	import type { TokenUi } from '$lib/types/token-ui';
 
 	interface Props {
 		data: CardData;

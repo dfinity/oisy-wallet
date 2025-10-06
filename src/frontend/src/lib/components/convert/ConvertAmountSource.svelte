@@ -49,7 +49,7 @@
 		(errorType, setErrorType(errorType));
 	});
 
-	const customValidate = (userAmount: bigint): TokenActionErrorType =>
+	const onCustomValidate = (userAmount: bigint): TokenActionErrorType =>
 		validateUserAmount({
 			userAmount,
 			token: $sourceToken,
@@ -103,26 +103,25 @@
 </script>
 
 <TokenInput
-	{customValidate}
 	displayUnit={inputUnit}
 	exchangeRate={$sourceTokenExchangeRate}
 	isSelectable={false}
+	{onCustomValidate}
 	token={$sourceToken}
 	bind:amount={sendAmount}
 	bind:errorType
 	bind:amountSetToMax
 >
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<div slot="amount-info" class="text-tertiary">
-		<TokenInputAmountExchange
-			amount={sendAmount}
-			exchangeRate={$sourceTokenExchangeRate}
-			token={$sourceToken}
-			bind:displayUnit={exchangeValueUnit}
-		/>
-	</div>
+	{#snippet amountInfo()}
+		<div class="text-tertiary">
+			<TokenInputAmountExchange
+				amount={sendAmount}
+				exchangeRate={$sourceTokenExchangeRate}
+				token={$sourceToken}
+				bind:displayUnit={exchangeValueUnit}
+			/>
+		</div>
+	{/snippet}
 
 	{#snippet balance()}
 		<button

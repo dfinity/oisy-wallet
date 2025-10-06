@@ -10,7 +10,7 @@ import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
-import type { AnyTransactionUi } from '$lib/types/transaction';
+import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';

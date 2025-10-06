@@ -54,17 +54,16 @@
 	isSelectable={false}
 	token={$destinationToken}
 >
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<!-- @migration-task: migrate this slot by hand, `amount-info` is an invalid identifier -->
-	<div slot="amount-info" class="text-tertiary">
-		<TokenInputAmountExchange
-			amount={receiveAmount}
-			exchangeRate={$destinationTokenExchangeRate}
-			token={$destinationToken}
-			bind:displayUnit={exchangeValueUnit}
-		/>
-	</div>
+	{#snippet amountInfo()}
+		<div class="text-tertiary">
+			<TokenInputAmountExchange
+				amount={receiveAmount}
+				exchangeRate={$destinationTokenExchangeRate}
+				token={$destinationToken}
+				bind:displayUnit={exchangeValueUnit}
+			/>
+		</div>
+	{/snippet}
 
 	{#snippet balance()}
 		<TokenInputBalance

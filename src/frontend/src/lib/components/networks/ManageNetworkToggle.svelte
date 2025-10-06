@@ -6,9 +6,10 @@
 		checked?: boolean;
 		disabled?: boolean;
 		testId?: string;
+		onToggle: () => void;
 	}
 
-	let { checked = false, disabled = false, testId = undefined }: Props = $props();
+	let { checked = false, disabled = false, testId, onToggle }: Props = $props();
 </script>
 
 <Toggle
@@ -16,5 +17,5 @@
 	{checked}
 	{disabled}
 	{testId}
-	on:nnsToggle
+	on:nnsToggle={onToggle}
 />

@@ -3,7 +3,7 @@
 <!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (icon to icon_1) making the component unusable -->
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 	import { erc20UserTokens } from '$eth/derived/erc20.derived';
 	import { isNotSupportedEthTokenId } from '$eth/utils/eth.utils';
@@ -25,18 +25,24 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { TokenId } from '$lib/types/token';
 
-	export let nativeTokenId: TokenId;
-	export let ariaLabel: string;
+	interface Props {
+		nativeTokenId: TokenId;
+		ariaLabel: string;
+		icon: Snippet;
+		label: Snippet;
+	}
+
+	let { nativeTokenId, ariaLabel, icon, label }: Props = $props();
 
 	const ethModalId = Symbol();
 	const ckEthModalId = Symbol();
 
 	const { outflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 
-	let isNetworkDisabled = false;
-	$: isNetworkDisabled =
+	let isNetworkDisabled = $derived(
 		(nativeTokenId === ETHEREUM_TOKEN_ID && $networkEthereumDisabled) ||
-		(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled);
+			(nativeTokenId === SEPOLIA_TOKEN_ID && $networkSepoliaDisabled)
+	);
 
 	const isDisabled = (): boolean =>
 		isNetworkDisabled ||
@@ -88,13 +94,8 @@
 	<ButtonHero
 		{ariaLabel}
 		disabled={isNetworkDisabled || $isBusy || $outflowActionsDisabled}
+		{icon}
+		{label}
 		onclick={async () => await openConvert()}
-	>
-		{#snippet icon()}
-			<slot name="icon" />
-		{/snippet}
-		{#snippet label()}
-			<slot />
-		{/snippet}
-	</ButtonHero>
+	/>
 </CkEthLoader>
