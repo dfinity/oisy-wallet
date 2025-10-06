@@ -240,68 +240,6 @@ export const sign = ({
 					return { success: false };
 				}
 
-				const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
-
-				const requireAdditionalSigners = Object.entries(signatures).some(
-					([a, signature]) => a !== address && isNullish(signature)
-				);
-
-				// We cannot send transaction with additional signers that have not signed yet and that we are unable to sign for.
-				if (requireAdditionalSigners) {
-					console.warn(
-						`WalletConnect Solana transaction requires additional signers: ${Object.entries(
-							signatures
-						)
-							.filter(([a, signature]) => a !== address && isNullish(signature))
-							.map(([a]) => a)
-							.join(', ')}`
-					);
-
-					return { success: false };
-				}
-
-				const transactionMessage = await setLifetimeAndFeePayerToTransaction({
-					transactionMessage: transactionMessageRaw,
-					rpc,
-					feePayer: signer
-				});
-
-				const { signedTransaction, signature } = await signTransaction(transactionMessage);
-
-				const transactionBytes = getBase64Decoder().decode(
-					getTransactionEncoder().encode(signedTransaction)
-				);
-
-				const { simulateTransaction } = rpc;
-
-				const simulationResult = await simulateTransaction(
-					transactionBytes as Base64EncodedWireTransaction,
-					{
-						encoding: 'base64'
-					}
-				).send();
-
-				if (nonNullish(simulationResult.value.err)) {
-					// In case of simulation error, it is useful to log the error to the console for development purposes
-					console.warn('WalletConnect Solana transaction simulation error', simulationResult);
-				}
-
-				if (method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
-					progress(ProgressStepsSendSol.SEND);
-				}
-
-				try {
-					// Even if some DEXs send an only-sign transaction, they do not send it when we return it.
-					// So, for good measure, we will send it anyway. It is not an issue if it is sent twice, since only one will pass.
-					// Plus, if it requires more signatures on the DEX's side, it will be sent again by them and it will fail with us.
-					sendSignedTransaction({ rpc, signedTransaction });
-				} catch (err: unknown) {
-					// If the transaction requires that we send it, and it fails, we reject the request, otherwise we just log the error
-					if (method !== SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION) {
-						console.warn('WalletConnect Solana transaction send error', err);
-					}
-				}
-
 				progress(ProgressStepsSign.APPROVE_WALLET_CONNECT);
 
 				await listener.approveRequest({
