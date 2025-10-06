@@ -39,13 +39,7 @@ import { mockSolSignedTransaction } from '$tests/mocks/sol-transactions.mock';
 import { mockAtaAddress, mockSolAddress } from '$tests/mocks/sol.mock';
 import type { WalletKitTypes } from '@reown/walletkit';
 import type { SignatureBytes } from '@solana/keys';
-import {
-	addSignersToTransactionMessage,
-	getBase58Encoder,
-	type Rpc,
-	type SolanaRpcApi
-} from '@solana/kit';
-import type { Rpc, SolanaRpcApi } from '@solana/kit';
+import { getBase58Encoder, type Rpc, type SolanaRpcApi } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock(import('$sol/utils/sol-transactions.utils'), async (importOriginal) => {
