@@ -76,8 +76,8 @@
 
 		if (
 			isNullish(campaignToDisplay.welcome?.title) &&
-			isNullish(campaignToDisplay.welcome?.title) &&
-			isNullish(campaignToDisplay.welcome?.title)
+			isNullish(campaignToDisplay.welcome?.subtitle) &&
+			isNullish(campaignToDisplay.welcome?.description)
 		) {
 			return;
 		}
