@@ -7,6 +7,7 @@
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
+	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import type { OptionToken } from '$lib/types/token';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 
