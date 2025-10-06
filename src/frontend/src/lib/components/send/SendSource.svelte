@@ -7,20 +7,21 @@
 	import { contacts } from '$lib/derived/contacts.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionBalance } from '$lib/types/balance';
-	import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 	import type { OptionToken } from '$lib/types/token';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
 
-	export let token: OptionToken;
-	export let balance: OptionBalance;
-	export let source: string;
-	export let exchangeRate: number | undefined = undefined;
+	interface Props {
+		token: OptionToken;
+		balance: OptionBalance;
+		source: string;
+		exchangeRate?: number;
+	}
 
-	let contact: ContactUi | undefined;
-	$: contact = getContactForAddress({ addressString: source, contactList: $contacts });
+	let { token, balance, source, exchangeRate }: Props = $props();
 
-	let contactAddress: ContactAddressUi | undefined;
-	$: contactAddress = filterAddressFromContact({ contact, address: source });
+	let contact = $derived(getContactForAddress({ addressString: source, contactList: $contacts }));
+
+	let contactAddress = $derived(filterAddressFromContact({ contact, address: source }));
 </script>
 
 <WalletConnectModalValue label={$i18n.send.text.balance} ref="balance">
