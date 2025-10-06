@@ -43,7 +43,7 @@
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
 		{#if notEmptyString(titleStr)}
-			<span class="text-xl">{replaceOisyPlaceholders(titleStr)}</span>4
+			<span class="text-xl">{replaceOisyPlaceholders(titleStr)}</span>
 		{/if}
 	{/snippet}
 
