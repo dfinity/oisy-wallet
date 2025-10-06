@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import WalletConnectSendTokenModal from '$eth/components/wallet-connect/WalletConnectSendTokenModal.svelte';
+	import EthWalletConnectSendTokenModal from '$eth/components/wallet-connect/EthWalletConnectSendTokenModal.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { WalletConnectEthSendTransactionParams } from '$eth/types/wallet-connect';
@@ -27,6 +27,6 @@
 
 {#if nonNullish(token)}
 	<SendTokenContext {token}>
-		<WalletConnectSendTokenModal {firstTransaction} {listener} {request} {sourceNetwork} />
+		<EthWalletConnectSendTokenModal {firstTransaction} {listener} {request} {sourceNetwork} />
 	</SendTokenContext>
 {/if}
