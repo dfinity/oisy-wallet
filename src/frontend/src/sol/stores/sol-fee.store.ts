@@ -25,6 +25,7 @@ export interface FeeContext {
 	feeSymbolStore: Writable<string | undefined>;
 	feeDecimalsStore: Writable<number | undefined>;
 	feeTokenIdStore: Writable<TokenId | undefined>;
+	feeExchangeRateStore: Writable<number | undefined>;
 }
 
 export const initFeeContext = (params: FeeContext): FeeContext => params;

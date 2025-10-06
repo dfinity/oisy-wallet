@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Decentralizované",
+			"title_part_1": "Vaše Digitální Aktiva",
+			"title_part_2": "Soukromá a Bezpečná",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP a další",
-			"instant_and_private": "Okamžitý a soukromý přístup kdekoli",
-			"advanced_cryptography": "100% onchain: klidné spaní díky pokročilé kryptografii"
+			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
+			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
+			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"

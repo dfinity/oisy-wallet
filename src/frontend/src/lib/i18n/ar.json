@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "لامركزي 100%",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"asset_types": "بيتكوين، سولانا، إيثريوم، الانترنت كمبيوتر، والمزيد",
-			"instant_and_private": "وصول فوري وخاص في أي مكان",
-			"advanced_cryptography": "100% على السلسلة: راحة البال من خلال التشفير المتقدم"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"

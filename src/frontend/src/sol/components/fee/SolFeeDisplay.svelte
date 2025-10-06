@@ -10,20 +10,16 @@
 		feeStore: fee,
 		ataFeeStore: ataFee,
 		feeDecimalsStore: decimals,
-		feeSymbolStore: symbol
+		feeSymbolStore: symbol,
+		feeExchangeRateStore: exchangeRate
 	}: FeeContext = getContext<FeeContext>(SOL_FEE_CONTEXT_KEY);
 
-	const { sendTokenId, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
 {#if nonNullish($symbol) && nonNullish($sendTokenId) && nonNullish($decimals)}
 	{#if nonNullish($fee)}
-		<FeeDisplay
-			decimals={$decimals}
-			exchangeRate={$sendTokenExchangeRate}
-			feeAmount={$fee}
-			symbol={$symbol}
-		>
+		<FeeDisplay decimals={$decimals} exchangeRate={$exchangeRate} feeAmount={$fee} symbol={$symbol}>
 			{#snippet label()}
 				<span>{$i18n.fee.text.fee}</span>
 			{/snippet}
@@ -33,7 +29,7 @@
 	{#if nonNullish($ataFee)}
 		<FeeDisplay
 			decimals={$decimals}
-			exchangeRate={$sendTokenExchangeRate}
+			exchangeRate={$exchangeRate}
 			feeAmount={$ataFee}
 			symbol={$symbol}
 		>
