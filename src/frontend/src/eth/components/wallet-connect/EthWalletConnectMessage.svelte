@@ -20,6 +20,8 @@
 
 	let { request }: Props = $props();
 
+	let method = $derived(request.params.request.method);
+
 	let json = $derived.by(() => {
 		try {
 			return getSignParamsMessageTypedDataV4(request.params.request.params);
@@ -97,6 +99,9 @@
 		}
 	});
 </script>
+
+<p class="mb-0 font-bold">{$i18n.wallet_connect.text.method}:</p>
+<p class="mb-4 font-normal">{method}</p>
 
 {#if nonNullish(token)}
 	<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.token}:</p>
