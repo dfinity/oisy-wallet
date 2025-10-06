@@ -525,6 +525,8 @@ describe('wallet-connect.services', () => {
 			});
 
 			it('should wait sending to be confirmed', async () => {
+				const spy = vi.spyOn(solSendServices, 'sendSignedTransaction');
+
 				const result = await sign(mockParams);
 
 				expect(result).toStrictEqual({ success: true });
@@ -551,7 +553,7 @@ describe('wallet-connect.services', () => {
 					message: { signature: mockSignature }
 				});
 
-				expect(mockListener.approveRequest).toHaveBeenCalledAfter(sendSignedTransaction);
+				expect(mockListener.approveRequest).toHaveBeenCalledAfter(spy);
 
 				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 					text: replacePlaceholders(en.wallet_connect.info.transaction_executed, {
