@@ -80,7 +80,7 @@
 
 	let modifiedTokens: Record<string, Token> = $state({});
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+	const onToggle = ({ id, network, ...rest }: Token) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 

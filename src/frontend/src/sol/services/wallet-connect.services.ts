@@ -34,7 +34,7 @@ import {
 	parseSolBase64TransactionMessage,
 	transactionMessageHasBlockhashLifetime
 } from '$sol/utils/sol-transactions.utils';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	getBase64Decoder,
 	getTransactionEncoder,
@@ -126,8 +126,6 @@ export const sign = ({
 
 			try {
 				progress(ProgressStepsSign.SIGN);
-
-				assertNonNullish(address);
 
 				const rpc = solanaHttpRpc(solNetwork);
 
