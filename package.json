@@ -89,7 +89,7 @@
 		"@solana/kit": "^3.0.3",
 		"@velora-dex/sdk": "^9.0.0",
 		"@walletconnect/auth-client": "^2.1.2",
-		"alchemy-sdk": "^3.6.4",
+		"alchemy-sdk": "^3.6.5",
 		"bitcoinjs-lib": "^6.1.7",
 		"browser-image-compression": "^2.0.2",
 		"buffer": "^6.0.3",
