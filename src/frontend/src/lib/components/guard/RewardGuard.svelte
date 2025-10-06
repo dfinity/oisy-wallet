@@ -57,6 +57,16 @@
 	});
 
 	const handleWelcomeModal = (timestamp: bigint) => {
+		if (
+			isNullish(timestamp) ||
+			timestamp !== ZERO ||
+			nonNullish($modalStore?.type) ||
+			hasDisplayedWelcome ||
+			$hasUrlCode
+		) {
+			return;
+		}
+
 		const onGoingCampaigns = rewardCampaigns
 			.filter(({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate }))
 			.sort(
@@ -66,24 +76,29 @@
 
 		const campaignToDisplay = onGoingCampaigns.length > 0 ? onGoingCampaigns[0] : undefined;
 
-		if (
-			nonNullish(timestamp) &&
-			timestamp === ZERO &&
-			nonNullish(campaignToDisplay) &&
-			isNullish($modalStore?.type) &&
-			!hasDisplayedWelcome &&
-			!$hasUrlCode
-		) {
-			hasDisplayedWelcome = true;
-			trackEvent({
-				name: TRACK_WELCOME_OPEN,
-				metadata: { campaignId: `${campaignToDisplay.id}` }
-			});
-			modalStore.openWelcome({
-				id: welcomeModalId,
-				data: { reward: campaignToDisplay }
-			});
+		if (isNullish(campaignToDisplay)) {
+			return;
 		}
+
+		if (
+			isNullish(campaignToDisplay.welcome?.title) &&
+			isNullish(campaignToDisplay.welcome?.title) &&
+			isNullish(campaignToDisplay.welcome?.title)
+		) {
+			return;
+		}
+
+		hasDisplayedWelcome = true;
+
+		trackEvent({
+			name: TRACK_WELCOME_OPEN,
+			metadata: { campaignId: `${campaignToDisplay.id}` }
+		});
+
+		modalStore.openWelcome({
+			id: welcomeModalId,
+			data: { reward: campaignToDisplay }
+		});
 	};
 
 	$effect(() => {

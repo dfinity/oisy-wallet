@@ -74,298 +74,337 @@ describe('RewardGuard', () => {
 		trackEvent: vi.fn()
 	}));
 
-	it('should open reward state modal for leaderboard', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.LEADERBOARD] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+	describe('reward state modal', () => {
+		it('should open for leaderboard', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.LEADERBOARD] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		render(RewardGuard);
+			render(RewardGuard);
 
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.LEADERBOARD },
-				type: 'reward-state'
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.LEADERBOARD },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.LEADERBOARD
+					}
+				});
 			});
+		});
 
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.LEADERBOARD
-				}
+		it('should open for jackpot', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.JACKPOT },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.JACKPOT
+					}
+				});
+			});
+		});
+
+		it('should open for referrer', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRER] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.REFERRER },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.REFERRER
+					}
+				});
+			});
+		});
+
+		it('should open for referee', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.REFEREE },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.REFEREE
+					}
+				});
+			});
+		});
+
+		it('should open for referral', async () => {
+			const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward, customMockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.REFERRAL },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.REFERRAL
+					}
+				});
+			});
+		});
+
+		it('should open for normal airdrop', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [lastTimestamp],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: mockRewardCampaign, rewardType: RewardType.AIRDROP },
+					type: 'reward-state'
+				});
+
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_REWARD_CAMPAIGN_WIN,
+					metadata: {
+						campaignId: mockRewardCampaign.id,
+						type: RewardType.AIRDROP
+					}
+				});
 			});
 		});
 	});
 
-	it('should open reward state modal for jackpot', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.JACKPOT] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+	describe('welcome modal', () => {
+		it('should open with the most recent ongoing campaign', async () => {
+			const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+				({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+			);
 
-		render(RewardGuard);
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.JACKPOT },
-				type: 'reward-state'
-			});
+			render(RewardGuard);
 
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.JACKPOT
-				}
-			});
-		});
-	});
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: {
+						reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
+					},
+					type: 'welcome'
+				});
 
-	it('should open reward state modal for referrer', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRER] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.REFERRER },
-				type: 'reward-state'
-			});
-
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.REFERRER
-				}
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_WELCOME_OPEN,
+					metadata: {
+						campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
+					}
+				});
 			});
 		});
-	});
 
-	it('should open reward state modal for referee', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFEREE] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		it('should open with the alphabetically-first ongoing campaign', async () => {
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
+				originalRewardCampaigns.map((campaign) => {
+					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+						return {
+							...campaign,
+							startDate: mockStartDate,
+							endDate: mockEndDate
+						};
+					}
+					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+						return {
+							...campaign,
+							startDate: mockStartDate,
+							endDate: mockEndDate
+						};
+					}
+					return campaign;
+				})
+			);
 
-		render(RewardGuard);
+			const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+				({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID
+			);
 
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.REFEREE },
-				type: 'reward-state'
-			});
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.REFEREE
-				}
-			});
-		});
-	});
+			render(RewardGuard);
 
-	it('should open reward state modal for referral', async () => {
-		const customMockedReward: RewardInfo = { ...mockedReward, name: [RewardType.REFERRAL] };
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward, customMockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: {
+						reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
+					},
+					type: 'welcome'
+				});
 
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.REFERRAL },
-				type: 'reward-state'
-			});
-
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.REFERRAL
-				}
+				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+					name: TRACK_WELCOME_OPEN,
+					metadata: {
+						campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
+					}
+				});
 			});
 		});
-	});
 
-	it('should open reward state modal for normal airdrop', async () => {
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward]],
-			last_snapshot_timestamp: [lastTimestamp],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		it('should not open if there are no modal text', async () => {
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
+				originalRewardCampaigns.map((campaign) => {
+					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+						return {
+							...campaign,
+							startDate: mockStartDate,
+							endDate: mockEndDate,
+							welcome: undefined
+						};
+					}
+					return campaign;
+				})
+			);
 
-		render(RewardGuard);
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: { reward: mockRewardCampaign, rewardType: RewardType.AIRDROP },
-				type: 'reward-state'
-			});
+			render(RewardGuard);
 
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_REWARD_CAMPAIGN_WIN,
-				metadata: {
-					campaignId: mockRewardCampaign.id,
-					type: RewardType.AIRDROP
-				}
-			});
-		});
-	});
-
-	it('should open welcome modal with the most recent ongoing campaign', async () => {
-		const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
-			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
-		);
-
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [],
-			last_snapshot_timestamp: [0n],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: {
-					reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
-				},
-				type: 'welcome'
-			});
-
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_WELCOME_OPEN,
-				metadata: {
-					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
-				}
+			await waitFor(() => {
+				expect(get(modalStore)).not.toEqual({
+					id: get(modalStore)?.id,
+					type: 'welcome'
+				});
 			});
 		});
-	});
 
-	it('should open welcome modal with the alphabetically-first ongoing campaign', async () => {
-		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
-			originalRewardCampaigns.map((campaign) => {
-				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
-					return {
-						...campaign,
-						startDate: mockStartDate,
-						endDate: mockEndDate
-					};
-				}
-				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
-					return {
-						...campaign,
-						startDate: mockStartDate,
-						endDate: mockEndDate
-					};
-				}
-				return campaign;
-			})
-		);
+		it('should not open if another modal is already opened', async () => {
+			const mockedUserData: UserData = {
+				is_vip: [false],
+				superpowers: [],
+				airdrops: [],
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [0n],
+				sprinkles: []
+			};
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
 
-		const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
-			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID
-		);
+			render(RewardGuard);
 
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [],
-			last_snapshot_timestamp: [0n],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).toEqual({
-				id: get(modalStore)?.id,
-				data: {
-					reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
-				},
-				type: 'welcome'
-			});
-
-			expect(trackEvent).toHaveBeenNthCalledWith(1, {
-				name: TRACK_WELCOME_OPEN,
-				metadata: {
-					campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
-				}
-			});
-		});
-	});
-
-	it('should not open welcome modal if another modal is already opened', async () => {
-		const mockedUserData: UserData = {
-			is_vip: [false],
-			superpowers: [],
-			airdrops: [],
-			usage_awards: [[mockedReward]],
-			last_snapshot_timestamp: [0n],
-			sprinkles: []
-		};
-		vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
-
-		render(RewardGuard);
-
-		await waitFor(() => {
-			expect(get(modalStore)).not.toEqual({
-				id: get(modalStore)?.id,
-				type: 'welcome'
+			await waitFor(() => {
+				expect(get(modalStore)).not.toEqual({
+					id: get(modalStore)?.id,
+					type: 'welcome'
+				});
 			});
 		});
 	});
