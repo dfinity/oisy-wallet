@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import SendDataApplication from '$lib/components/send/SendDataApplication.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
@@ -13,8 +14,11 @@
 	export let exchangeRate: number | undefined = undefined;
 	export let balance: OptionBalance;
 	export let source: string;
+	export let application: string;
 	export let showNullishAmountLabel = false;
 </script>
+
+<SendDataApplication {application} />
 
 <slot name="sourceNetwork" />
 

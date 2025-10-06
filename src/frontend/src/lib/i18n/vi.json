@@ -1200,6 +1200,7 @@
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
 			"spender": "",
+			"application": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
 			"methods": "Hàm",
