@@ -57,12 +57,7 @@
 	});
 
 	const handleWelcomeModal = (timestamp: bigint) => {
-		if (
-			timestamp !== ZERO ||
-			nonNullish($modalStore?.type) ||
-			hasDisplayedWelcome ||
-			$hasUrlCode
-		) {
+		if (timestamp !== ZERO || nonNullish($modalStore?.type) || hasDisplayedWelcome || $hasUrlCode) {
 			return;
 		}
 
@@ -78,7 +73,6 @@
 		if (isNullish(campaignToDisplay)) {
 			return;
 		}
-
 
 		if (
 			isNullish(campaignToDisplay.welcome?.title) &&
