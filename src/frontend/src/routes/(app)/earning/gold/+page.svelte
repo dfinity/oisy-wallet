@@ -1,5 +1,5 @@
 <script lang="ts">
-	import GldtStaking from '$lib/components/staking/GldtStaking.svelte';
+	import GldtStaking from '$icp/components/gldt-staking/GldtStaking.svelte';
 </script>
 
 <GldtStaking />
