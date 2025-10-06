@@ -45,7 +45,7 @@ describe('RewardGuard', () => {
 		amount: 1000000n,
 		ledger: mockIdentity.getPrincipal(),
 		name: ['airdrop'],
-		campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superceded by campaign_id.
+		campaign_name: ['deuteronomy'], // Note: This is no longer optional and will be superseded by campaign_id.
 		campaign_id: SPRINKLES_SEASON_1_EPISODE_3_ID
 	};
 
@@ -244,6 +244,10 @@ describe('RewardGuard', () => {
 	});
 
 	it('should open welcome modal', async () => {
+		const expectedRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
+
 		const mockedUserData: UserData = {
 			is_vip: [false],
 			superpowers: [],
@@ -259,6 +263,9 @@ describe('RewardGuard', () => {
 		await waitFor(() => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
+				data: {
+					reward: { ...expectedRewardCampaign, startDate: new Date('2025-02-05T14:28:02.288Z') }
+				},
 				type: 'welcome'
 			});
 
