@@ -23,9 +23,9 @@
 
 	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let balanceForFee = $derived(nonNullish(feeTokenId)
-		? ($balancesStore?.[feeTokenId]?.data ?? ZERO)
-		: ZERO);
+	let balanceForFee = $derived(
+		nonNullish(feeTokenId) ? ($balancesStore?.[feeTokenId]?.data ?? ZERO) : ZERO
+	);
 </script>
 
 {#if nonNullish(feeSymbol) && $sendTokenSymbol !== feeSymbol}
