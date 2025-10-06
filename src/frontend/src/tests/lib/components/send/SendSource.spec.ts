@@ -1,12 +1,13 @@
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import SendSource from '$lib/components/send/SendSource.svelte';
+import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { render } from '@testing-library/svelte';
 
 describe('SendSource', () => {
 	const props = {
 		token: BTC_MAINNET_TOKEN,
 		balance: 22000000n,
-		source: '0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9'
+		source: mockEthAddress
 	};
 
 	const sourceSelector = 'div[id="source"]';
@@ -18,7 +19,7 @@ describe('SendSource', () => {
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
-		expect(source?.textContent).toBe('0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9');
+		expect(source).toHaveTextContent(mockEthAddress);
 		expect(balance?.textContent).toContain('0.22');
 		expect(balance?.textContent).toContain('BTC');
 	});
@@ -29,7 +30,7 @@ describe('SendSource', () => {
 		const source: HTMLDivElement | null = container.querySelector(sourceSelector);
 		const balance: HTMLDivElement | null = container.querySelector(balanceSelector);
 
-		expect(source?.textContent).toBe('0xF2777205439a8c7be0425cbb21D8DB7426Df5DE9');
+		expect(source).toHaveTextContent(mockEthAddress);
 		expect(balance?.textContent).toBe('\u200B');
 	});
 });
