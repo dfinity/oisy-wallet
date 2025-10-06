@@ -156,7 +156,10 @@ export const sign = ({
 				// We cannot send transaction with additional signers that have not signed yet and that we are unable to sign for.
 				if (requireAdditionalSigners) {
 					console.warn(
-						`WalletConnect Solana transaction requires additional signers: ${Object.keys(signatures)}`
+						`WalletConnect Solana transaction requires additional signers: ${Object.entries(signatures)
+							.filter(([a, signature]) => a !== address && isNullish(signature))
+							.map(([a]) => a)
+							.join(', ')}`
 					);
 
 					return { success: false };
