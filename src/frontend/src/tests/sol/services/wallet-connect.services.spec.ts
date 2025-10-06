@@ -512,7 +512,7 @@ describe('wallet-connect.services', () => {
 				);
 			});
 
-			it('should wait sending to be confirmed', async () => {
+			it('should wait for sending to be confirmed', async () => {
 				const spy = vi.spyOn(solSendServices, 'sendSignedTransaction');
 
 				const result = await sign(mockParams);
