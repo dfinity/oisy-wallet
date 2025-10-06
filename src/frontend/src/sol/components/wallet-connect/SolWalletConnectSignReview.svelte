@@ -35,7 +35,7 @@
 
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<ReviewNetwork slot="network" sourceNetwork={token.network} />
+		<ReviewNetwork slot="sourceNetwork" sourceNetwork={token.network} />
 	</SendData>
 
 	{#snippet toolbar()}

@@ -1,3 +1,4 @@
+import { ICP_EXPLORER_URL } from '$env/explorers.env';
 import type {
 	IcTransactionType,
 	IcTransactionUi,
@@ -118,8 +119,8 @@ export const mapIcrcTransaction = ({
 	const approveFee = fromNullishNullable(fromNullable(approve)?.fee);
 	const transferFee = fromNullishNullable(fromNullable(transfer)?.fee);
 
-	// for approve we shows the fee value
-	const value = isApprove ? approveFee : data?.amount;
+	const value = data?.amount;
+	const fee = isApprove ? approveFee : transferFee;
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
@@ -143,10 +144,13 @@ export const mapIcrcTransaction = ({
 					})
 				: undefined,
 		...(nonNullish(value) && { value }),
-		...(nonNullish(transferFee) && { fee: transferFee }),
+		...(nonNullish(fee) && { fee }),
 		timestamp,
 		status: 'executed',
 		...(nonNullish(approveSpender) && { approveSpender }),
+		...(nonNullish(approveSpender) && {
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approveSpender}`
+		}),
 		...(nonNullish(approveExpiresAt) && { approveExpiresAt })
 	};
 };

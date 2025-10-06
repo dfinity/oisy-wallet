@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, setContext, type Snippet } from 'svelte';
+	import { getContext, onMount, setContext, type Snippet } from 'svelte';
 	import IconPlus from '$lib/components/icons/lucide/IconPlus.svelte';
 	import EnableTokenToggle from '$lib/components/tokens/EnableTokenToggle.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
@@ -23,13 +23,15 @@
 	import type { Token } from '$lib/types/token';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
-	let {
-		initialSearch,
-		infoElement,
-		isNftsPage
-	}: { initialSearch?: string; infoElement?: Snippet; isNftsPage?: boolean } = $props();
+	interface Props {
+		initialSearch?: string;
+		infoElement?: Snippet;
+		isNftsPage?: boolean;
+		onSave: (tokens: Record<string, Token>) => void;
+		onAddToken: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { initialSearch, infoElement, isNftsPage, onSave, onAddToken }: Props = $props();
 
 	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
@@ -78,7 +80,7 @@
 
 	let modifiedTokens: Record<string, Token> = $state({});
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
+	const onToggle = ({ id, network, ...rest }: Token) => {
 		const { id: networkId } = network;
 		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
 
@@ -106,7 +108,7 @@
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => dispatch('icSave', modifiedTokens);
+	const save = () => onSave(modifiedTokens);
 </script>
 
 {#if nonNullish(infoElement)}
@@ -117,9 +119,8 @@
 	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
-		loading={false}
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
-		on:icSelectNetworkFilter={onSelectNetwork}
+		onSelectNetworkFilter={onSelectNetwork}
 	>
 		{#snippet tokenListItem(token)}
 			<LogoButton dividers hover={false}>
@@ -149,10 +150,7 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button
-				colorStyle="secondary-light"
-				disabled={$pseudoNetworkICPTestnet}
-				onclick={() => dispatch('icAddToken')}
+			<Button colorStyle="secondary-light" disabled={$pseudoNetworkICPTestnet} onclick={onAddToken}
 				><IconPlus />
 				{isNftsPage
 					? $i18n.tokens.manage.text.import_nft

@@ -1,14 +1,20 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
-	import ReviewNetwork from '$lib/components/send/ReviewNetwork.svelte';
-	import SendReview from '$lib/components/send/SendReview.svelte';
+	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import SendData from '$lib/components/send/SendData.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import WalletConnectActions from '$lib/components/wallet-connect/WalletConnectActions.svelte';
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
+	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { balance } from '$lib/derived/balances.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
 	import { formatToken } from '$lib/utils/format.utils';
 
@@ -37,26 +43,47 @@
 	let amountDisplay = $derived(
 		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
 	);
+
+	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
 
-<SendReview amount={formatToken({ value: amountDisplay })} {destination}>
-	{#snippet info()}
-		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
-	{/snippet}
+<ContentWithToolbar>
+	<SendData
+		amount={formatToken({ value: amountDisplay })}
+		balance={$balance}
+		{destination}
+		source={$ethAddress ?? ''}
+		token={$sendToken}
+	>
+		<WalletConnectModalValue
+			slot="sourceNetwork"
+			label={$i18n.send.text.source_network}
+			ref="source-network"
+		>
+			<NetworkWithLogo network={sourceNetwork} />
+		</WalletConnectModalValue>
 
-	{#snippet fee()}
-		<EthFeeDisplay>
+		<div slot="destinationNetwork">
+			{#if nonNullish(targetNetwork)}
+				<WalletConnectModalValue
+					label={$i18n.send.text.destination_network}
+					ref="destination-network"
+				>
+					<NetworkWithLogo network={targetNetwork} />
+				</WalletConnectModalValue>
+			{/if}
+		</div>
+
+		<EthFeeDisplay slot="fee">
 			{#snippet label()}
 				<Html text={$i18n.fee.text.max_fee_eth} />
 			{/snippet}
 		</EthFeeDisplay>
-	{/snippet}
 
-	{#snippet network()}
-		<ReviewNetwork destinationNetworkId={targetNetwork?.id} {sourceNetwork} />
-	{/snippet}
+		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
+	</SendData>
 
-	{#snippet replaceToolbar()}
+	{#snippet toolbar()}
 		<WalletConnectActions {onApprove} {onReject} />
 	{/snippet}
-</SendReview>
+</ContentWithToolbar>

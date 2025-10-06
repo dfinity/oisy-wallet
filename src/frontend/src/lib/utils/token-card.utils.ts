@@ -1,8 +1,8 @@
 import { TokenSchema } from '$lib/schema/token.schema';
 import type { Token } from '$lib/types/token';
 import type { CardData } from '$lib/types/token-card';
-import type { TokenUiGroup } from '$lib/types/token-group';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUiGroup } from '$lib/types/token-ui-group';
 
 /** Maps the token group to the card data of the card that will be used as "summary" for the group.
  *

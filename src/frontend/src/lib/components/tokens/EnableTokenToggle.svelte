@@ -14,16 +14,16 @@
 
 	interface Props {
 		token: Token;
-		onToggle: (t: CustomEvent<Token>) => void;
+		onToggle: (t: Token) => void;
 	}
 
 	const { token, onToggle }: Props = $props();
 </script>
 
 {#if icTokenIcrcCustomToken(token)}
-	<IcManageTokenToggle {token} on:icToken={(t) => onToggle(t)} />
+	<IcManageTokenToggle onIcToken={(t) => onToggle(t)} {token} />
 {:else if isTokenEthereumUserToken(token) || isTokenSplToggleable(token) || isTokenErc721CustomToken(token) || isTokenErc1155CustomToken(token)}
-	<ManageTokenToggle {token} on:icShowOrHideToken={(t) => onToggle(t)} />
+	<ManageTokenToggle onShowOrHideToken={(t) => onToggle(t)} {token} />
 {:else if isBitcoinToken(token)}
 	<BtcManageTokenToggle />
 {:else if isSolanaToken(token)}

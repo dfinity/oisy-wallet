@@ -2,9 +2,14 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let checked = false;
-	export let disabled = false;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		checked?: boolean;
+		disabled?: boolean;
+		testId?: string;
+		onToggle: () => void;
+	}
+
+	let { checked = false, disabled = false, testId, onToggle }: Props = $props();
 </script>
 
 <Toggle
@@ -12,5 +17,5 @@
 	{checked}
 	{disabled}
 	{testId}
-	on:nnsToggle
+	on:nnsToggle={onToggle}
 />

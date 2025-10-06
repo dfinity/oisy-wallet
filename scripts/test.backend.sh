@@ -3,7 +3,7 @@
 POCKET_IC_SERVER_VERSION=8.0.0
 OISY_UPGRADE_VERSIONS="v0.0.13,v0.0.19"
 BITCOIN_CANISTER_RELEASE="2024-08-30"
-BITCON_CANISTER_WASM="ic-btc-canister.wasm.gz"
+BITCOIN_CANISTER_WASM="ic-btc-canister.wasm.gz"
 CYCLES_LEDGER_CANISTER_URL="$(jq -re .canisters.cycles_ledger.wasm dfx.json)"
 CYCLES_LEDGER_CANISTER_WASM="cycles-ledger.wasm.gz"
 # If a backend wasm file exists at the root, it will be used for the tests.
@@ -18,9 +18,9 @@ else
   cargo build --locked --target wasm32-unknown-unknown --release -p backend
 fi
 
-scripts/download-immutable.sh "https://github.com/dfinity/bitcoin-canister/releases/download/release%2F$BITCOIN_CANISTER_RELEASE/ic-btc-canister.wasm.gz" "$BITCON_CANISTER_WASM"
+scripts/download-immutable.sh "https://github.com/dfinity/bitcoin-canister/releases/download/release%2F$BITCOIN_CANISTER_RELEASE/ic-btc-canister.wasm.gz" "$BITCOIN_CANISTER_WASM"
 # Setting the environment variable that will be used in the test to load that particular file relative to the cargo workspace.
-export BITCOIN_CANISTER_WASM_FILE="../../$BITCON_CANISTER_WASM"
+export BITCOIN_CANISTER_WASM_FILE="../../$BITCOIN_CANISTER_WASM"
 
 scripts/download-immutable.sh "${CYCLES_LEDGER_CANISTER_URL}" "${CYCLES_LEDGER_CANISTER_WASM}"
 
@@ -56,7 +56,7 @@ fi
 scripts/download-immutable.sh "https://github.com/dfinity/pocketic/releases/download/${POCKET_IC_SERVER_VERSION}/pocket-ic-x86_64-${PLATFORM}.gz" "${POCKET_IC_SERVER_PATH}.gz"
 
 export POCKET_IC_BIN="../../${POCKET_IC_SERVER_PATH}"
-export POCKET_IC_MUTE_SERVER=""
+export POCKET_IC_MUTE_SERVER=1
 
 ./scripts/download-canister-api --network ic --canister backend
 

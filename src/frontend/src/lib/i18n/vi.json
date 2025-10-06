@@ -422,6 +422,11 @@
 				"participate_title": "Kiếm BTC bằng cách duy trì hoạt động - và bây giờ bằng cách mời người khác.",
 				"description": "Đáp ứng các yêu cầu hàng tuần đơn giản: đăng nhập, thực hiện hai giao dịch và giữ ít nhất 20$ token để đủ điều kiện nhận các đợt phát BTC lên đến 50$ mỗi ngày.<br>Giờ đây với phần thưởng giới thiệu: mời một người bạn thiết lập ví và cả hai bạn sẽ kiếm được Sprinkles được đảm bảo. Lọt vào top 4 người giới thiệu hàng đầu và giành được giải độc đắc.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+				},
 				"win": {
 					"default": {
 						"title": "Bạn đã được thưởng",
@@ -457,6 +462,11 @@
 				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
 				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
 				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
+				},
 				"win": {
 					"default": {
 						"title": "Bạn đã được thưởng",
@@ -1267,7 +1277,11 @@
 			"block": "Khối",
 			"interacted_with": "Đã tương tác với (Đến)",
 			"status": "Trạng thái",
-			"confirmations": "Xác nhận"
+			"confirmations": "Xác nhận",
+			"for": "",
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Đã xác nhận",
@@ -1305,7 +1319,8 @@
 		"alt": {
 			"open_block_explorer": "Mở giao dịch này trên trình khám phá khối",
 			"open_from_block_explorer": "Mở địa chỉ 'Từ' trên trình khám phá khối",
-			"open_to_block_explorer": "Mở địa chỉ 'Đến' trên trình khám phá khối"
+			"open_to_block_explorer": "Mở địa chỉ 'Đến' trên trình khám phá khối",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Không thể lấy số khối.",
@@ -1507,6 +1522,15 @@
 			"title": "Quét mã QR"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1585,7 +1609,8 @@
 			"reject_warning": "Bạn phải chấp nhận Điều khoản và Điều kiện để tiếp tục. Bạn có thể thử lại bất cứ lúc nào.",
 			"i_have_accepted": "Tôi đã đọc và đồng ý với",
 			"i_have_accepted_updated": "Tôi đã đọc và đồng ý với phiên bản cập nhật của",
-			"accept_and_continue": "Chấp nhận và tiếp tục"
+			"accept_and_continue": "Chấp nhận và tiếp tục",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "Đã xảy ra lỗi khi cập nhật các thỏa thuận của bạn."
@@ -1594,23 +1619,11 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Thỏa thuận cấp phép",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "Thỏa thuận cấp phép $oisy_name (“Thỏa thuận cấp phép”)",
-			"paragraph_1": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung ví đa chuỗi, tự quản lý dựa trên trình duyệt được lưu trữ trên mạng blockchain công khai Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ GitHub của $oisy_short tại đây: $oisy_repo_url.",
-			"paragraph_2": "Thỏa thuận cấp phép này điều chỉnh việc bạn (“Bạn”) sử dụng $oisy_short. BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.",
-			"paragraph_3": "Nếu bạn chọn sử dụng $oisy_short, bạn và DFINITY Foundation, bao gồm các chi nhánh và công ty con của nó (gọi chung là “DFINITY”), thừa nhận và đồng ý như sau:",
-			"limited_license": "<strong>1. GIẤY PHÉP CÓ GIỚI HẠN.</strong> Theo các điều khoản và điều kiện có trong Thỏa thuận cấp phép này, DFINITY cấp cho Bạn giấy phép có giới hạn, không độc quyền, không thể chuyển nhượng, không thể cấp phép lại, có thể hủy bỏ để sử dụng $oisy_short chỉ với mục đích nhận, giữ và gửi các token như ICP gốc, ICRC-1, ETH và các token ERC20, cũng như các token khác có thể được cung cấp theo thời gian. Bạn có thể tạo các tác phẩm phái sinh trong phạm vi được phép theo các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần mã nguồn mở nào có trong $oisy_short.",
-			"restrictions": "<strong>2. HẠN CHẾ.</strong> Bạn chịu trách nhiệm về tất cả các hoạt động liên quan đến việc sử dụng $oisy_short của mình, bất kể hoạt động đó có được bạn ủy quyền hay do bạn, nhân viên của bạn hoặc bên thứ ba thực hiện thay mặt bạn. BẠN HIỂU RẰNG DFINITY KHÔNG CHỊU TRÁCH NHIỆM VỀ BẤT KỲ HOẠT ĐỘNG HOẶC GIAO DỊCH NÀO (ĐÃ HOÀN TẤT HOẶC CÁCH KHÁC) LIÊN QUAN ĐẾN $oisy_name CỦA BẠN. Bạn sẽ không trình bày sai hoặc tô vẽ mối quan hệ giữa bạn và DFINITY, bao gồm việc thể hiện hoặc ngụ ý rằng DFINITY hỗ trợ, tài trợ, xác nhận hoặc đóng góp cho bạn hoặc các nỗ lực kinh doanh của bạn thông qua việc sử dụng $oisy_short. Bạn sẽ không ngụ ý bất kỳ mối quan hệ hoặc liên kết nào với DFINITY ngoại trừ những gì được cho phép rõ ràng bởi Thỏa thuận cấp phép này. Bạn bị cấm sử dụng tên $oisy_short, logo hoặc bất kỳ nhãn hiệu nào khác liên quan đến $oisy_short theo bất kỳ cách nào có thể ngụ ý sự xác nhận hoặc liên kết, trình bày sai mối quan hệ của bạn với $oisy_short hoặc gây nhầm lẫn về nguồn gốc của $oisy_short.",
-			"applicable_laws": "<strong>3. LUẬT ÁP DỤNG.</strong> Bạn sẽ tuân thủ tất cả các luật và quy định hiện hành (bao gồm nhưng không giới hạn ở các luật và quy định liên quan đến kiểm soát xuất khẩu, rửa tiền hoặc lệnh trừng phạt kinh tế) liên quan đến việc sử dụng $oisy_short và bất kỳ giao dịch nào liên quan đến $oisy_name của bạn.",
-			"reservation_rights": "<strong>4. BẢO LƯU QUYỀN CỦA DFINITY.</strong> $oisy_short thuộc sở hữu của DFINITY và được cấp phép, không bán, cho Bạn. Nội dung, giao diện người dùng trực quan, tính năng tương tác, thông tin, đồ họa, thiết kế, biên dịch, mã máy tính, sản phẩm, dịch vụ và tất cả các yếu tố khác của $oisy_short và tài liệu liên quan đều được bảo vệ bởi luật sở hữu trí tuệ hiện hành. Giữa Bạn và DFINITY, tất cả các tài liệu của DFINITY và $oisy_short, bao gồm các quyền sở hữu trí tuệ trong đó, là tài sản duy nhất và độc quyền của DFINITY hoặc các công ty con hoặc các công ty liên kết của nó và/hoặc các nhà cấp phép bên thứ ba, tùy thuộc vào bất kỳ giấy phép phần mềm nguồn mở nào. DFINITY bảo lưu tất cả các quyền không được cấp rõ ràng trong Thỏa thuận cấp phép này. Bạn không có được bất kỳ quyền, quyền sở hữu hoặc lợi ích nào đối với các tài liệu của DFINITY hoặc $oisy_short, cho dù ngụ ý, cấm đoán hay cách khác, ngoại trừ các quyền giới hạn được quy định trong Thỏa thuận cấp phép này và các quyền được cấp bởi các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần nguồn mở nào có trong $oisy_short. Thỏa thuận cấp phép này không cấp cho bạn bất kỳ quyền nào để sử dụng tên $oisy_short, logo hoặc các nhãn hiệu khác liên quan đến $oisy_short hoặc DFINITY.",
-			"feedback": "<strong>5. PHẢN HỒI.</strong> Nếu Bạn cung cấp cho DFINITY bất kỳ nhận xét, ý tưởng, báo cáo lỗi, phản hồi, cải tiến, khuyến nghị hoặc sửa đổi nào liên quan đến $oisy_short (“Phản hồi”), thì Phản hồi đó được cung cấp trên cơ sở không bảo mật, và DFINITY có quyền sử dụng Phản hồi đó theo quyết định của mình, bao gồm nhưng không giới hạn ở việc kết hợp các thay đổi được đề xuất đó vào các tài liệu của DFINITY, $oisy_short hoặc các dịch vụ khác. Bạn theo đây cấp cho DFINITY giấy phép vĩnh viễn, không thể hủy ngang, có thể chuyển nhượng, có thể cấp phép lại, không độc quyền, miễn phí bản quyền theo tất cả các quyền cần thiết để kết hợp và sử dụng Phản hồi của bạn cho bất kỳ mục đích nào, bao gồm sản xuất và bán sản phẩm và dịch vụ, và đồng ý cung cấp cho DFINITY bất kỳ sự hỗ trợ nào cần thiết để lập tài liệu, hoàn thiện và duy trì các quyền của DFINITY đối với Phản hồi. Bạn đồng ý cho phép DFINITY liên hệ với Bạn để lấy Phản hồi theo thời gian, nhưng có thể từ chối bằng cách gửi thông báo bằng văn bản đến legalnotice@dfinity.org.",
-			"termination": "<strong>6. ĐIỀU KHOẢN VÀ CHẤM DỨT.</strong> Thỏa thuận cấp phép này sẽ vẫn có hiệu lực cho đến khi bị chấm dứt. Thỏa thuận cấp phép, cùng với các quyền và giấy phép của bạn theo đây, sẽ chấm dứt ngay lập tức khi bạn vi phạm Thỏa thuận cấp phép. Bạn có thể chấm dứt Thỏa thuận cấp phép bất kỳ lúc nào bằng cách xóa hết token khỏi $oisy_name của mình và ngừng mọi việc sử dụng $oisy_short. DFINITY có thể chấm dứt Thỏa thuận cấp phép này bất kỳ lúc nào vì bất kỳ lý do nào, bao gồm nhưng không giới hạn ở bất kỳ hành vi lạm dụng hoặc sử dụng sai mục đích thực tế hoặc bị nghi ngờ của $oisy_short bởi bạn hoặc bất kỳ vi phạm nào của Thỏa thuận cấp phép này. Các Mục từ 3 đến 13 sẽ vẫn có hiệu lực sau bất kỳ việc chấm dứt nào của Thỏa thuận cấp phép này.",
-			"warranty_liability": "<strong>7. TUYÊN BỐ MIỄN TRỪ BẢO HÀNH VÀ GIỚI HẠN TRÁCH NHIỆM.</strong> TRONG PHẠM VI TỐI ĐA ĐƯỢC PHÉP THEO LUẬT ÁP DỤNG, $oisy_short ĐƯỢC CUNG CẤP “NGUYÊN TRẠNG”, KHÔNG CÓ BẤT KỲ BẢO HÀNH NÀO. TRONG PHẠM VI TỐI ĐA ĐƯỢC PHÉP THEO LUẬT ÁP DỤNG, DFINITY TỪ CHỐI TẤT CẢ CÁC BẢO HÀNH VÀ ĐIỀU KIỆN, DÙ RÕ RÀNG, NGỤ Ý, THEO LUẬT ĐỊNH HAY CÁCH KHÁC, BAO GỒM NHƯNG KHÔNG GIỚI HẠN Ở CÁC BẢO HÀNH HOẶC ĐIỀU KIỆN NGỤ Ý VỀ TÍNH PHÙ HỢP VỚI MỤC ĐÍCH CỤ THỂ, KHẢ NĂNG TIÊU THỤ, QUYỀN SỞ HỮU, CHẤT LƯỢNG, KẾT QUẢ VÀ KHÔNG VI PHẠM. DFINITY KHÔNG ĐẢM BẢO RẰNG $oisy_short SẼ LUÔN KHẢ DỤNG, AN TOÀN HOẶC BẢO MẬT (HIỆN TẠI VÀ TRONG TƯƠNG LAI). DFINITY TUYÊN BỐ MIỄN TRỪ RÕ RÀNG BẤT KỲ BẢO HÀNH NÀO VỀ ĐỘ CHÍNH XÁC HOẶC CHỨC NĂNG CỦA $oisy_short, VÀ VỀ ĐỘ CHÍNH XÁC, TÍNH HỢP LỆ HOẶC TÍNH TOÀN VẸN CỦA BẤT KỲ THÔNG TIN HOẶC TÍNH NĂNG NÀO (HIỆN TẠI VÀ TRONG TƯƠNG LAI) ĐƯỢC CUNG CẤP THÔNG QUA VIỆC BẠN SỬ DỤNG $oisy_short, HOẶC CHẤT LƯỢNG HOẶC TÍNH NHẤT QUÁN CỦA $oisy_short HOẶC CÁC KẾT QUẢ ĐẠT ĐƯỢC THÔNG QUA VIỆC SỬ DỤNG NÓ. TRONG PHẠM VI TỐI ĐA ĐƯỢC PHÉP THEO LUẬT ÁP DỤNG, TRONG MỌI TRƯỜNG HỢP, DFINITY SẼ KHÔNG CHỊU TRÁCH NHIỆM PHÁP LÝ ĐỐI VỚI BẤT KỲ THIỆT HẠI HẬU QUẢ, ĐẶC BIỆT, GIÁN TIẾP, NGẪU NHIÊN HOẶC TRỪNG PHẠT NÀO PHÁT SINH TỪ VIỆC SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG VÀ TRUY CẬP $oisy_short HOẶC CÁC TÀI LIỆU CỦA DFINITY, NGAY CẢ KHI DFINITY ĐÃ ĐƯỢC THÔNG BÁO VỀ KHẢ NĂNG XẢY RA CÁC THIỆT HẠI ĐÓ, VÀ BẤT KỂ BẤT KỲ SỰ THẤT BẠI CỦA MỤC ĐÍCH THIẾT YẾU CỦA BẤT KỲ BIỆN PHÁP KHẮC PHỤC HẠN CHẾ NÀO. TRONG PHẠM VI TỐI ĐA ĐƯỢC PHÉP THEO LUẬT ÁP DỤNG, TRONG MỌI TRƯỜNG HỢP, TỔNG TRÁCH NHIỆM PHÁP LÝ CỦA DFINITY ĐỐI VỚI CÁC THIỆT HẠI PHÁT SINH TỪ THỎA THUẬN CẤP PHÉP NÀY HOẶC VIỆC BẠN SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG $oisy_short SẼ KHÔNG VƯỢT QUÁ 100 CHF.",
-			"indemnity": "<strong>8. BỒI THƯỜNG.</strong> Bạn đồng ý bồi thường, bảo vệ và giữ cho DFINITY và các chi nhánh, cán bộ, giám đốc, nhà cung cấp, người cấp phép và các khách hàng khác không bị tổn hại trước và chống lại bất kỳ và tất cả trách nhiệm pháp lý và chi phí, bao gồm phí luật sư hợp lý phát sinh bởi các bên đó, liên quan đến việc bạn sử dụng hoặc lạm dụng $oisy_short hoặc vi phạm Thỏa thuận cấp phép này hoặc bất kỳ luật hoặc quy định hiện hành nào.",
-			"governing_law": "<strong>9. LUẬT ĐIỀU CHỈNH; ĐỊA ĐIỂM.</strong> Mọi khiếu nại liên quan đến $oisy_short sẽ được điều chỉnh bởi luật pháp Thụy Sĩ, loại trừ các quy tắc về xung đột luật. Mọi khiếu nại hoặc tranh chấp liên quan đến Thỏa thuận cấp phép này hoặc liên quan đến nó (bao gồm các tranh chấp hoặc khiếu nại ngoài hợp đồng và việc giải thích chúng) sẽ thuộc thẩm quyền độc quyền của Tòa án Zurich, Thụy Sĩ, tùy thuộc vào việc kháng cáo lên Tòa án Liên bang Thụy Sĩ.",
-			"entire_agreement": "<strong>10. TOÀN BỘ THỎA THUẬN VÀ TÍNH KHẢ PHÂN.</strong> Thỏa thuận cấp phép này là toàn bộ thỏa thuận giữa Bạn và DFINITY và thay thế bất kỳ và tất cả các thỏa thuận, đàm phán hoặc thông tin liên lạc trước đó giữa Bạn và DFINITY, dù bằng lời nói hay văn bản, liên quan đến vấn đề này. DFINITY có thể thực hiện các thay đổi đối với Thỏa thuận cấp phép này khi các phiên bản mới của $oisy_short được cung cấp. Trong trường hợp bất kỳ điều khoản nào của Thỏa thuận cấp phép này được coi là không hợp lệ hoặc không thể thực thi, thì: (a) điều khoản đó sẽ được coi là đã được sửa đổi trong phạm vi cần thiết để làm cho điều khoản đó hợp lệ và có thể thực thi, hoặc nếu không thể sửa đổi, sẽ được coi là tách rời khỏi Thỏa thuận cấp phép này; và (b) tính hợp lệ và khả năng thực thi của tất cả các điều khoản khác của tài liệu này sẽ không bị ảnh hưởng hoặc suy giảm dưới bất kỳ hình thức nào.",
-			"assignment": "<strong>11. CHUYỂN NHƯỢNG.</strong> Bạn không được chuyển nhượng Thỏa thuận cấp phép này mà không có sự đồng ý trước bằng văn bản của DFINITY, dù rõ ràng hay theo quy định của pháp luật, bao gồm cả việc sáp nhập hoặc thay đổi quyền kiểm soát, và bất kỳ nỗ lực chuyển nhượng nào như vậy sẽ vô hiệu. DFINITY có thể chuyển nhượng Thỏa thuận cấp phép này mà không bị hạn chế và không cần thông báo cho bạn. Theo đó, Thỏa thuận cấp phép này sẽ ràng buộc các bên và những người kế nhiệm và người được chỉ định hợp pháp của họ.",
-			"no_waiver": "<strong>12. KHÔNG TỪ BỎ.</strong> Việc không thực hiện hoặc trì hoãn thực hiện một quyền, quyền hạn hoặc biện pháp khắc phục được quy định trong Thỏa thuận cấp phép này hoặc theo luật sẽ không cấu thành việc từ bỏ quyền, quyền hạn hoặc biện pháp khắc phục đó. Việc DFINITY từ bỏ bất kỳ nghĩa vụ hoặc vi phạm nào của Thỏa thuận cấp phép này sẽ không được coi là từ bỏ bất kỳ nghĩa vụ nào khác hoặc vi phạm tiếp theo của Thỏa thuận cấp phép.",
-			"english_version": "<strong>13. PHIÊN BẢN TIẾNG ANH.</strong> Phiên bản tiếng Anh của Thỏa thuận cấp phép này sẽ là phiên bản chính thức và có giá trị chi phối của thỏa thuận nếu có bất kỳ xung đột nào phát sinh. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận cấp phép này phải bằng tiếng Anh.",
 			"body": "Cảm ơn bạn đã quan tâm đến $oisy_name, một ứng dụng phi tập trung dạng ví tự quản lý, chạy trên trình duyệt và đa chuỗi, được lưu trữ trên mạng lưới blockchain công cộng Internet Computer (“$oisy_short”). Để biết thêm thông tin về $oisy_short, mã nguồn mở và các giấy phép liên quan, vui lòng tham khảo kho lưu trữ github của $oisy_short tại đây: $oisy_repo_url.\n\nThỏa thuận Cấp phép này điều chỉnh việc bạn sử dụng $oisy_short (\\\"Bạn\\\"). BẰNG CÁCH SỬ DỤNG $oisy_short, BẠN ĐỒNG Ý RẰNG BẠN ĐÃ ĐỌC, HIỂU VÀ ĐỒNG Ý RÀNG BUỘC BỞI THỎA THUẬN CẤP PHÉP NÀY. NẾU BẠN KHÔNG ĐỒNG Ý, BẠN KHÔNG ĐƯỢC PHÉP SỬ DỤNG $oisy_short.\n\nNếu Bạn chọn sử dụng $oisy_short, Bạn và Quỹ DFINITY, bao gồm các chi nhánh và công ty con của nó (gọi chung là “DFINITY”), thừa nhận và đồng ý với các điều sau:\n\n### 1. GIẤY PHÉP CÓ GIỚI HẠN.\n\nTheo các điều khoản và điều kiện trong Thỏa thuận Cấp phép này, DFINITY cấp cho Bạn một giấy phép có giới hạn, không độc quyền, không thể chuyển nhượng, không thể cấp phép lại và có thể hủy bỏ để sử dụng $oisy_short chỉ với mục đích nhận, giữ và gửi các token như ICP gốc, ICRC-1, ETH và các token ERC20, cũng như các token khác có thể được cung cấp theo thời gian. Bạn có thể tạo các tác phẩm phái sinh trong phạm vi được cho phép bởi các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần mã nguồn mở nào có trong $oisy_short.\n\n### 2. CÁC HẠN CHẾ.\n\nBạn chịu trách nhiệm cho tất cả các hoạt động liên quan đến việc sử dụng $oisy_short, bất kể các hoạt động đó có được Bạn cho phép hay do Bạn, nhân viên của Bạn hoặc một bên thứ ba thay mặt Bạn thực hiện. BẠN HIỂU RẰNG DFINITY KHÔNG CHỊU TRÁCH NHIỆM VỚI BẤT KỲ HOẠT ĐỘNG HOẶC GIAO DỊCH NÀO (DÙ ĐÃ HOÀN TẤT HAY CHƯA) LIÊN QUAN ĐẾN $oisy_name CỦA BẠN. Bạn sẽ không trình bày sai hoặc phóng đại mối quan hệ giữa Bạn và DFINITY, bao gồm việc thể hiện hoặc ngụ ý rằng DFINITY hỗ trợ, tài trợ, xác nhận hoặc đóng góp cho Bạn hoặc các hoạt động kinh doanh của Bạn thông qua việc sử dụng $oisy_short. Bạn sẽ không ngụ ý bất kỳ mối quan hệ hoặc liên kết nào với DFINITY ngoại trừ những gì được Thỏa thuận Cấp phép này cho phép một cách rõ ràng. Bạn bị cấm sử dụng tên, logo $oisy_short hoặc bất kỳ nhãn hiệu nào khác liên quan đến $oisy_short theo bất kỳ cách nào có thể ngụ ý sự xác nhận hoặc liên kết, trình bày sai mối quan hệ của bạn với $oisy_short hoặc tạo ra sự nhầm lẫn về nguồn gốc của $oisy_short.\n\n### 3. CÁC LUẬT ÁP DỤNG.\n\nBạn sẽ tuân thủ tất cả các luật và quy định hiện hành (bao gồm nhưng không giới hạn các luật và quy định liên quan đến kiểm soát xuất khẩu, rửa tiền hoặc trừng phạt kinh tế) liên quan đến việc sử dụng $oisy_short và bất kỳ giao dịch nào liên quan đến $oisy_name của bạn.\n\n### 4. BẢO LƯU QUYỀN CỦA DFINITY.\n\n$oisy_short thuộc sở hữu của DFINITY và được cấp phép, không phải bán, cho Bạn. Nội dung, giao diện trực quan, tính năng tương tác, thông tin, đồ họa, thiết kế, bản biên soạn, mã máy tính, sản phẩm, dịch vụ và tất cả các yếu tố khác của $oisy_short và các tài liệu liên quan đều được bảo vệ bởi các luật sở hữu trí tuệ hiện hành. Giữa Bạn và DFINITY, tất cả các tài liệu của DFINITY và $oisy_short, bao gồm các quyền sở hữu trí tuệ trong và đối với chúng, là tài sản duy nhất và độc quyền của DFINITY hoặc các công ty con hoặc công ty liên kết và/hoặc các bên cấp phép bên thứ ba của nó, tuân theo bất kỳ giấy phép phần mềm mã nguồn mở nào. DFINITY bảo lưu tất cả các quyền không được cấp rõ ràng trong Thỏa thuận Cấp phép này. Bạn không có được bất kỳ quyền, quyền sở hữu hoặc lợi ích nào đối với các tài liệu của DFINITY hoặc $oisy_short, dù là do ngụ ý, cấm đoán hay cách khác, ngoại trừ các quyền giới hạn được nêu trong Thỏa thuận Cấp phép này và các quyền được trao bởi các điều khoản cấp phép điều chỉnh việc sử dụng bất kỳ thành phần mã nguồn mở nào có trong $oisy_short. Thỏa thuận Cấp phép này không cấp cho bạn bất kỳ quyền nào để sử dụng tên, logo $oisy_short hoặc các nhãn hiệu khác liên quan đến $oisy_short hoặc DFINITY.\n\n### 5. PHẢN HỒI.\n\nNếu Bạn cung cấp cho DFINITY bất kỳ nhận xét, ý tưởng, báo cáo lỗi, phản hồi, cải tiến, đề xuất hoặc sửa đổi nào liên quan đến $oisy_short (\\\"Phản hồi\\\"), Phản hồi đó được cung cấp trên cơ sở không bảo mật và DFINITY sẽ có quyền sử dụng Phản hồi đó theo ý mình, bao gồm nhưng không giới hạn việc kết hợp các thay đổi được đề xuất đó vào các tài liệu của DFINITY, $oisy_short hoặc các dịch vụ khác. Bạn theo đây cấp cho DFINITY một giấy phép vĩnh viễn, không thể hủy ngang, có thể chuyển nhượng, có thể cấp phép lại, không độc quyền, miễn phí bản quyền theo tất cả các quyền cần thiết để kết hợp và sử dụng Phản hồi của bạn cho bất kỳ mục đích nào, bao gồm cả việc tạo và bán các sản phẩm và dịch vụ, và đồng ý cung cấp cho DFINITY bất kỳ sự hỗ trợ nào cần thiết để ghi chép, hoàn thiện và duy trì các quyền của DFINITY đối với Phản hồi. Bạn đồng ý cho phép DFINITY liên hệ với Bạn để lấy Phản hồi theo thời gian, nhưng có thể từ chối bằng cách gửi thông báo bằng văn bản đến legalnotice@dfinity.org.\n\n### 6. ĐIỀU KHOẢN VÀ CHẤM DỨT.\n\nThỏa thuận Cấp phép này sẽ có hiệu lực cho đến khi bị chấm dứt. Thỏa thuận Cấp phép và các quyền và giấy phép của bạn theo đây sẽ chấm dứt ngay lập tức khi bạn vi phạm Thỏa thuận Cấp phép. Bạn có thể chấm dứt Thỏa thuận Cấp phép bất cứ lúc nào bằng cách xóa hết token khỏi $oisy_name của bạn và ngừng mọi hoạt động sử dụng $oisy_short. DFINITY có thể chấm dứt Thỏa thuận Cấp phép này bất cứ lúc nào vì bất kỳ lý do gì, bao gồm nhưng không giới hạn bất kỳ hành vi lạm dụng hoặc sử dụng sai mục đích nào của Bạn đối với $oisy_short hoặc bất kỳ vi phạm nào của Thỏa thuận Cấp phép này. Các mục từ 3 đến 13 sẽ vẫn có hiệu lực sau khi Thỏa thuận Cấp phép này chấm dứt.\n\n### 7. TUYÊN BỐ MIỄN TRỪ BẢO HÀNH VÀ GIỚI HẠN TRÁCH NHIỆM.\n\nĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, $oisy_short ĐƯỢC CUNG CẤP TRÊN CƠ SỞ \\\"NGUYÊN TRẠNG\\\", KHÔNG CÓ BẤT KỲ BẢO HÀNH NÀO. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, DFINITY TỪ CHỐI TẤT CẢ CÁC BẢO HÀNH VÀ ĐIỀU KIỆN, DÙ RÕ RÀNG, NGỤ Ý, THEO LUẬT ĐỊNH HAY CÁCH KHÁC, BAO GỒM NHƯNG KHÔNG GIỚI HẠN CÁC BẢO HÀNH HOẶC ĐIỀU KIỆN NGỤ Ý VỀ SỰ PHÙ HỢP CHO MỘT MỤC ĐÍCH CỤ THỂ, KHẢ NĂNG TIÊU THỤ, QUYỀN SỞ HỮU, CHẤT LƯỢNG, KẾT QUẢ VÀ KHÔNG VI PHẠM. DFINITY KHÔNG ĐẢM BẢO RẰNG $oisy_short SẼ LUÔN LUÔN CÓ SẴN, AN TOÀN HOẶC BẢO MẬT (HIỆN TẠI VÀ TRONG TƯƠNG LAI). DFINITY TUYÊN BỐ MIỄN TRỪ BẤT KỲ BẢO HÀNH NÀO DƯỚI BẤT KỲ HÌNH THỨC NÀO ĐỐI VỚI TÍNH CHÍNH XÁC HOẶC CHỨC NĂNG CỦA $oisy_short, VÀ ĐỐI VỚI TÍNH CHÍNH XÁC, TÍNH HỢP LỆ HOẶC TÍNH ĐẦY ĐỦ CỦA BẤT KỲ THÔNG TIN HOẶC TÍNH NĂNG NÀO (HIỆN TẠI VÀ TRONG TƯƠNG LAI) ĐƯỢC CUNG CẤP THÔNG QUA VIỆC SỬ DỤNG $oisy_short CỦA BẠN, HOẶC CHẤT LƯỢNG HOẶC TÍNH NHẤT QUÁN CỦA $oisy_short HOẶC CÁC KẾT QUẢ CÓ ĐƯỢC TỪ VIỆC SỬ DỤNG NÓ. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, TRONG MỌI TRƯỜNG HỢP DFINITY SẼ KHÔNG CHỊU TRÁCH NHIỆM VỚI BẤT KỲ THIỆT HẠI NÀO DO HẬU QUẢ, ĐẶC BIỆT, GIÁN TIẾP, NGẪU NHIÊN HOẶC TRỪNG PHẠT PHÁT SINH TỪ VIỆC SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG VÀ TRUY CẬP $oisy_short HOẶC TÀI LIỆU CỦA DFINITY, NGAY CẢ KHI DFINITY ĐÃ ĐƯỢC TƯ VẤN VỀ KHẢ NĂNG XẢY RA THIỆT HẠI NHƯ VẬY, VÀ BẤT KỂ VIỆC KHÔNG ĐẠT ĐƯỢC MỤC ĐÍCH CỐT LÕI CỦA BẤT KỲ BIỆN PHÁP KHẮC PHỤC HẠN CHẾ NÀO. ĐẾN MỨC TỐI ĐA ĐƯỢC PHÁP LUẬT HIỆN HÀNH CHO PHÉP, TRONG MỌI TRƯỜNG HỢP, TỔNG TRÁCH NHIỆM PHÁP LÝ CỦA DFINITY ĐỐI VỚI THIỆT HẠI PHÁT SINH TỪ THỎA THUẬN CẤP PHÉP NÀY HOẶC VIỆC BẠN SỬ DỤNG HOẶC KHÔNG THỂ SỬ DỤNG $oisy_short SẼ KHÔNG VƯỢT QUÁ 100 CHF.\n\n### 8. BỒI THƯỜNG.\n\nBạn đồng ý bồi thường, bảo vệ và giữ cho DFINITY và các chi nhánh, cán bộ, giám đốc, nhà cung cấp, bên cấp phép và các khách hàng khác của họ không bị tổn hại trước và chống lại bất kỳ và tất cả trách nhiệm pháp lý và chi phí nào, bao gồm cả phí luật sư hợp lý mà các bên đó phải chịu, liên quan đến việc bạn sử dụng hoặc lạm dụng $oisy_short hoặc việc bạn vi phạm Thỏa thuận Cấp phép này hoặc bất kỳ luật hoặc quy định hiện hành nào.\n\n### 9. LUẬT ĐIỀU CHỈNH; ĐỊA ĐIỂM.\n\nBất kỳ khiếu nại nào liên quan đến $oisy_short sẽ được điều chỉnh bởi luật pháp của Thụy Sĩ, không bao gồm các quy tắc về xung đột pháp luật. Bất kỳ khiếu nại hoặc tranh chấp nào liên quan đến Thỏa thuận Cấp phép này hoặc liên quan đến nó (bao gồm cả các tranh chấp hoặc khiếu nại ngoài hợp đồng và việc giải thích chúng) sẽ thuộc thẩm quyền độc quyền của Tòa án Zurich, Thụy Sĩ, có thể kháng cáo tại Tòa án Liên bang Thụy Sĩ.\n\n### 10. TOÀN BỘ THỎA THUẬN VÀ TÍNH KHẢ PHÂN TÁCH.\n\nThỏa thuận Cấp phép này là toàn bộ thỏa thuận giữa Bạn và DFINITY, và thay thế bất kỳ và tất cả các thỏa thuận, đàm phán hoặc thông tin liên lạc khác trước đó giữa Bạn và DFINITY, dù bằng lời nói hay bằng văn bản, liên quan đến chủ đề của tài liệu này. DFINITY có thể thực hiện các thay đổi đối với Thỏa thuận Cấp phép này khi các phiên bản mới của $oisy_short được cung cấp. Trong trường hợp bất kỳ điều khoản nào của Thỏa thuận Cấp phép này bị coi là không hợp lệ hoặc không thể thực thi, thì: (a) điều khoản đó sẽ được coi là đã được sửa đổi trong phạm vi cần thiết để làm cho điều khoản đó hợp lệ và có thể thực thi, hoặc nếu không thể sửa đổi như vậy sẽ được coi là bị tách ra khỏi Thỏa thuận Cấp phép này; và (b) tính hợp lệ và khả năng thực thi của tất cả các điều khoản khác của tài liệu này sẽ không bị ảnh hưởng hoặc suy giảm theo bất kỳ cách nào.\n\n### 11. CHUYỂN NHƯỢNG.\n\nBạn không được chuyển nhượng Thỏa thuận Cấp phép này nếu không có sự đồng ý trước bằng văn bản của DFINITY, dù là rõ ràng hay do luật định, bao gồm cả trong trường hợp sáp nhập hoặc thay đổi quyền kiểm soát, và bất kỳ nỗ lực chuyển nhượng nào như vậy sẽ vô hiệu và không có hiệu lực. DFINITY có thể chuyển nhượng Thỏa thuận Cấp phép này mà không bị hạn chế và không cần thông báo cho Bạn. Tuân theo các điều khoản trên, Thỏa thuận Cấp phép này sẽ ràng buộc các bên và những người kế thừa và người được chuyển nhượng hợp pháp của họ.\n\n### 12. KHÔNG TỪ BỎ.\n\nViệc không thực hiện, hoặc trì hoãn việc thực hiện, một quyền, quyền lực hoặc biện pháp khắc phục được quy định trong Thỏa thuận Cấp phép này hoặc theo luật pháp sẽ không cấu thành sự từ bỏ quyền, quyền lực hoặc biện pháp khắc phục đó. Việc DFINITY từ bỏ bất kỳ nghĩa vụ hoặc vi phạm nào của Thỏa thuận Cấp phép này sẽ không có tác dụng như một sự từ bỏ bất kỳ nghĩa vụ nào khác hoặc vi phạm tiếp theo của Thỏa thuận Cấp phép.\n\n### 13. PHIÊN BẢN TIẾNG ANH.\n\nNếu có bất kỳ xung đột nào phát sinh, phiên bản tiếng Anh của Thỏa thuận Cấp phép này sẽ là phiên bản chính thức và kiểm soát của thỏa thuận. Tất cả các thông tin liên lạc và thông báo được thực hiện theo Thỏa thuận Cấp phép này phải bằng tiếng Anh."
 		},
 		"alt": {
@@ -1620,7 +1633,12 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Điều khoản sử dụng",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
+			"instruction": "Bằng cách nhấp vào nút này, bạn đồng ý với $link",
 			"body": ""
 		},
 		"alt": {
@@ -1630,6 +1648,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Chính sách quyền riêng tư",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
@@ -1661,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Phần thưởng OISY"
 		}
-	},
-	"welcome": {
-		"title": "Chào mừng đến với $oisy_short!",
-		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {

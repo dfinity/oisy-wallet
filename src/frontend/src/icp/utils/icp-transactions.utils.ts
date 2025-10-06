@@ -97,7 +97,8 @@ export const mapIcpTransaction = ({
 			value: approveValue,
 			...(nonNullish(approveFee) && { fee: approveFee }),
 			...(nonNullish(approveExpiresAt) && { approveExpiresAt }),
-			approveSpender: approve.spender
+			approveSpender: approve.spender,
+			approveSpenderExplorerUrl: `${ICP_EXPLORER_URL}/account/${approve.spender}`
 		};
 	}
 
