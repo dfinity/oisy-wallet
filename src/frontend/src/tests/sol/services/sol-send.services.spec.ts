@@ -215,7 +215,9 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(DEVNET_USDC_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(
+				DEVNET_USDC_TOKEN.network.id
+			);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
 			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
@@ -241,7 +243,9 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(DEVNET_USDC_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(
+				DEVNET_USDC_TOKEN.network.id
+			);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
 			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
@@ -333,7 +337,9 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(DEVNET_USDC_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(
+				DEVNET_USDC_TOKEN.network.id
+			);
 			expect(spyCalculateAssociatedTokenAddress).toHaveBeenCalledExactlyOnceWith();
 			expect(spyCreateAtaInstruction).toHaveBeenCalledExactlyOnceWith();
 

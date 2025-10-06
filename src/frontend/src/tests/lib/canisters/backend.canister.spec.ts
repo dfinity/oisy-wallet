@@ -390,7 +390,9 @@ describe('backend.canister', () => {
 
 		const res = await addUserCredential(addUserCredentialParams);
 
-		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(addUserCredentialEndpointParams);
+		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(
+			addUserCredentialEndpointParams
+		);
 		expect(res).toEqual(response);
 	});
 
@@ -404,7 +406,9 @@ describe('backend.canister', () => {
 
 		const res = await addUserCredential(addUserCredentialParams);
 
-		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(addUserCredentialEndpointParams);
+		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(
+			addUserCredentialEndpointParams
+		);
 		expect(res).toEqual(response);
 	});
 

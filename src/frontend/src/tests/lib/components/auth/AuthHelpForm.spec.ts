@@ -94,7 +94,9 @@ describe('AuthHelpForm', () => {
 			expect(onLostIdentityMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_LOST_INTERNET_IDENTITY });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({
+			name: TRACK_HELP_LOST_INTERNET_IDENTITY
+		});
 
 		const securityButton: HTMLButtonElement | null =
 			container.querySelector(securityButtonSelector);
@@ -107,7 +109,9 @@ describe('AuthHelpForm', () => {
 			expect(onOtherMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_CONCERNED_ABOUT_SECURITY });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({
+			name: TRACK_HELP_CONCERNED_ABOUT_SECURITY
+		});
 
 		const gotConfusedButton: HTMLButtonElement | null =
 			container.querySelector(gotConfusedButtonSelector);

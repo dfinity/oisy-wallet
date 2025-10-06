@@ -405,9 +405,10 @@ describe('signer.canister', () => {
 			const res = await signTransaction(signTransactionParams);
 
 			expect(res).toEqual(response);
-			expect(service.eth_sign_transaction).toHaveBeenCalledExactlyOnceWith(signTransactionParams.transaction, [
-				SIGNER_PAYMENT_TYPE
-			]);
+			expect(service.eth_sign_transaction).toHaveBeenCalledExactlyOnceWith(
+				signTransactionParams.transaction,
+				[SIGNER_PAYMENT_TYPE]
+			);
 		});
 
 		it('should throw an error if eth_sign_transaction throws', async () => {

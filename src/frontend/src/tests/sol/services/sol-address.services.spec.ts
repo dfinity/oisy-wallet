@@ -138,7 +138,9 @@ describe('sol-address.services', () => {
 				data: mockSolAddress,
 				certified: false
 			});
-			expect(spyUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+			expect(spyUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should handle missing IDB address', async () => {

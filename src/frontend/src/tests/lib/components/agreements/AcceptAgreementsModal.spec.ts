@@ -157,7 +157,9 @@ describe('AcceptAgreementsModal', () => {
 
 		await fireEvent.click(getByRole('button', { name: get(i18n).core.text.reject }));
 
-		expect(authServices.warnSignOut).toHaveBeenCalledExactlyOnceWith(get(i18n).agreements.text.reject_warning);
+		expect(authServices.warnSignOut).toHaveBeenCalledExactlyOnceWith(
+			get(i18n).agreements.text.reject_warning
+		);
 	});
 
 	it('clicking Accept calls nullishSignOut if the identity is nullish', async () => {

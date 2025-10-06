@@ -48,7 +48,10 @@ describe('rest.services', () => {
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				'Max retries reached. Error:',
+				mockError
+			);
 		});
 
 		it('should call onRetry on each retry attempt', async () => {
@@ -107,7 +110,10 @@ describe('rest.services', () => {
 			expect(mockOnRetry).not.toHaveBeenCalled();
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				'Max retries reached. Error:',
+				mockError
+			);
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
@@ -190,7 +196,10 @@ describe('rest.services', () => {
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				'Max retries reached. Error:',
+				mockError
+			);
 		});
 
 		it('should call randomWait after each failed attempt', async () => {
@@ -218,7 +227,10 @@ describe('rest.services', () => {
 			expect(mockFailedRequest).toHaveBeenCalledExactlyOnceWith();
 			expect(randomWait).not.toHaveBeenCalled();
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				'Max retries reached. Error:',
+				mockError
+			);
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 	});

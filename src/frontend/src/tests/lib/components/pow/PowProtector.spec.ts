@@ -275,7 +275,9 @@ describe('PowProtector', () => {
 				}
 
 				// Should have reached max attempts and signed out
-				expect(errorSignOut).toHaveBeenCalledExactlyOnceWith(en.init.error.waiting_for_allowed_cycles_aborted);
+				expect(errorSignOut).toHaveBeenCalledExactlyOnceWith(
+					en.init.error.waiting_for_allowed_cycles_aborted
+				);
 				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(POW_MAX_CHECK_ATTEMPTS);
 			});
 		});

@@ -520,7 +520,9 @@ describe('solana.api', () => {
 			});
 
 			expect(info).toEqual(mockAccountInfo);
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress1, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress1, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should cache account info by address and network', async () => {
@@ -603,7 +605,9 @@ describe('solana.api', () => {
 				mintAuthority: mockSolAddress3,
 				freezeAuthority: mockSolAddress4
 			});
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSplAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSplAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -691,7 +695,9 @@ describe('solana.api', () => {
 			});
 
 			expect(owner).toEqual(mockSolAddress);
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -733,7 +739,9 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeTruthy();
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should return true if it is a non-ATA address', async () => {
@@ -745,7 +753,9 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeTruthy();
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSolAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSolAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should return false if the ATA address has no info data', async () => {
@@ -757,7 +767,9 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeFalsy();
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should return false if the ATA address if the info data are nullish', async () => {
@@ -769,7 +781,9 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeFalsy();
-			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, {
+				encoding: 'jsonParsed'
+			});
 		});
 
 		it('should throw error when RPC call fails', async () => {

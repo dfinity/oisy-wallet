@@ -59,7 +59,10 @@ describe('address.services', () => {
 			expect(result).toEqual({ success: true });
 			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockGetAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity);
-			expect(mockAddressStore.set).toHaveBeenCalledExactlyOnceWith({ data: 'mock-address', certified: true });
+			expect(mockAddressStore.set).toHaveBeenCalledExactlyOnceWith({
+				data: 'mock-address',
+				certified: true
+			});
 		});
 
 		it('should save the address for future sign-in if setIdbAddress is provided', async () => {
@@ -127,9 +130,14 @@ describe('address.services', () => {
 			expect(result).toEqual({ success: true });
 			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
-			expect(mockAddressStore.set).toHaveBeenCalledExactlyOnceWith({ data: mockAddress, certified: false });
+			expect(mockAddressStore.set).toHaveBeenCalledExactlyOnceWith({
+				data: mockAddress,
+				certified: false
+			});
 			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith();
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should handle errors gracefully and return a failure result', async () => {
@@ -174,7 +182,9 @@ describe('address.services', () => {
 				certified: true
 			});
 			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith();
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should return error when address does not match certified address', async () => {

@@ -53,13 +53,19 @@ describe('idb-addresses.api', () => {
 			const result = await getIdbBtcAddressMainnet(mockPrincipal);
 
 			expect(result).toEqual(mockAddress);
-			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should delete BTC address', async () => {
 			await deleteIdbBtcAddressMainnet(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should update BTC address last usage', async () => {
@@ -98,13 +104,19 @@ describe('idb-addresses.api', () => {
 			const result = await getIdbEthAddress(mockPrincipal);
 
 			expect(result).toEqual(mockAddress);
-			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should delete ETH address', async () => {
 			await deleteIdbEthAddress(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should update ETH address last usage', async () => {
@@ -143,13 +155,19 @@ describe('idb-addresses.api', () => {
 			const result = await getIdbSolAddressMainnet(mockPrincipal);
 
 			expect(result).toEqual(mockAddress);
-			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should delete SOL address', async () => {
 			await deleteIdbSolAddressMainnet(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 
 		it('should update SOL address last usage', async () => {

@@ -153,7 +153,10 @@ describe('idb-tokens.api', () => {
 			const result = await getIdbAllCustomTokens(mockPrincipal);
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 	});
 
@@ -164,7 +167,10 @@ describe('idb-tokens.api', () => {
 			const result = await getIdbEthTokensDeprecated(mockPrincipal);
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
+				mockPrincipal.toText(),
+				expect.any(Object)
+			);
 		});
 	});
 

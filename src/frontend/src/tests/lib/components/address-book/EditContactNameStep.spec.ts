@@ -78,7 +78,9 @@ describe('EditContactNameStep', () => {
 
 		// Check that addContact was called with the correct contact
 		expect(onAddContact).toHaveBeenCalledExactlyOnceWith();
-		expect(onAddContact).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ name: 'Test Contact' }));
+		expect(onAddContact).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({ name: 'Test Contact' })
+		);
 	});
 
 	it('should call addContact with full contact when save button is clicked with isNewContact=false', async () => {

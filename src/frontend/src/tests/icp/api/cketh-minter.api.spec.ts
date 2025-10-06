@@ -138,7 +138,9 @@ describe('cketh-minter.api', () => {
 			expect(result).toEqual(expected);
 
 			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({ certified: true });
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('successfully calls getMinterInfo endpoint as query', async () => {
