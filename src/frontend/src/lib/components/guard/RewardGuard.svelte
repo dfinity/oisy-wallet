@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount, type Snippet, untrack } from 'svelte';
-	import { rewardCampaigns, SPRINKLES_SEASON_1_EPISODE_4_ID } from '$env/reward-campaigns.env';
+	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
@@ -57,18 +57,19 @@
 	});
 
 	const handleWelcomeModal = (timestamp: bigint) => {
-		const season1Episode4Campaign = rewardCampaigns.find(
-			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
-		);
+		const onGoingCampaigns = rewardCampaigns
+			.filter(({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate }))
+			.sort(
+				({ startDate: aStartDate }, { startDate: bStartDate }) =>
+					bStartDate.getTime() - aStartDate.getTime()
+			);
+
+		const campaignToDisplay = onGoingCampaigns.length > 0 ? onGoingCampaigns[0] : undefined;
 
 		if (
 			nonNullish(timestamp) &&
 			timestamp === ZERO &&
-			nonNullish(season1Episode4Campaign) &&
-			isOngoingCampaign({
-				startDate: season1Episode4Campaign.startDate,
-				endDate: season1Episode4Campaign.endDate
-			}) &&
+			nonNullish(campaignToDisplay) &&
 			isNullish($modalStore?.type) &&
 			!hasDisplayedWelcome &&
 			!$hasUrlCode
@@ -76,11 +77,11 @@
 			hasDisplayedWelcome = true;
 			trackEvent({
 				name: TRACK_WELCOME_OPEN,
-				metadata: { campaignId: `${season1Episode4Campaign.id}` }
+				metadata: { campaignId: `${campaignToDisplay.id}` }
 			});
 			modalStore.openWelcome({
 				id: welcomeModalId,
-				data: { reward: season1Episode4Campaign }
+				data: { reward: campaignToDisplay }
 			});
 		}
 	};

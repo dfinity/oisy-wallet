@@ -1,8 +1,10 @@
 import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
-import * as rewardCampaigns from '$env/reward-campaigns.env';
+import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import {
 	SPRINKLES_SEASON_1_EPISODE_3_ID,
-	SPRINKLES_SEASON_1_EPISODE_4_ID
+	SPRINKLES_SEASON_1_EPISODE_4_ID,
+	SPRINKLES_SEASON_1_EPISODE_5_ID,
+	rewardCampaigns
 } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
@@ -13,22 +15,36 @@ import { trackEvent } from '$lib/services/analytics.services';
 import { modalStore } from '$lib/stores/modal.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('RewardGuard', () => {
+	const now = new Date();
+	const mockStartDateEarlier = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
+	const mockStartDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+	const mockEndDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
+
+	const originalRewardCampaigns = rewardCampaignsEnv.rewardCampaigns;
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 		modalStore.close();
 
-		vi.spyOn(rewardCampaigns, 'rewardCampaigns', 'get').mockImplementation(() =>
-			mockRewardCampaigns.map((campaign) => {
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
+			originalRewardCampaigns.map((campaign) => {
 				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
 					return {
 						...campaign,
-						startDate: new Date('2025-02-05T14:28:02.288Z')
+						startDate: mockStartDateEarlier,
+						endDate: mockEndDate
+					};
+				}
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate
 					};
 				}
 				return campaign;
@@ -49,7 +65,7 @@ describe('RewardGuard', () => {
 		campaign_id: SPRINKLES_SEASON_1_EPISODE_3_ID
 	};
 
-	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+	const mockRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
 		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
@@ -243,9 +259,9 @@ describe('RewardGuard', () => {
 		});
 	});
 
-	it('should open welcome modal', async () => {
-		const expectedRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
-			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+	it('should open welcome modal with the most recent ongoing campaign', async () => {
+		const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID
 		);
 
 		const mockedUserData: UserData = {
@@ -264,7 +280,7 @@ describe('RewardGuard', () => {
 			expect(get(modalStore)).toEqual({
 				id: get(modalStore)?.id,
 				data: {
-					reward: { ...expectedRewardCampaign, startDate: new Date('2025-02-05T14:28:02.288Z') }
+					reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
 				},
 				type: 'welcome'
 			});
@@ -272,7 +288,7 @@ describe('RewardGuard', () => {
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_WELCOME_OPEN,
 				metadata: {
-					campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
+					campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
 				}
 			});
 		});
