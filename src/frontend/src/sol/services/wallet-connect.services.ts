@@ -90,7 +90,7 @@ const getSignatureWithSending = async ({
 	const { signatures } = decodeTransactionMessage(base64EncodedTransactionMessage);
 
 	const additionalSigners = Object.entries(signatures).reduce<string[]>(
-		(acc, [a, signature]) => [...acc, ...(a !== address && isNullish(signature) ? [address] : [])],
+		(acc, [a, signature]) => [...acc, ...(a !== address && isNullish(signature) ? [a] : [])],
 		[]
 	);
 
