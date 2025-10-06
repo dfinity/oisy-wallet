@@ -134,7 +134,7 @@
 				<ManageNetworkToggle
 					checked={enabledNetworks[network.id]?.enabled ?? false}
 					disabled={isNetworkIdICP(network.id)}
-					on:nnsToggle={() => toggleNetwork(network)}
+					onToggle={() => toggleNetwork(network)}
 				/>
 			</ListItem>
 		{/each}
@@ -155,8 +155,8 @@
 					<ManageNetworkToggle
 						checked={enabledNetworks[network.id]?.enabled ?? false}
 						disabled={isNetworkIdICP(network.id)}
+						onToggle={() => toggleNetwork(network)}
 						testId={`${SETTINGS_NETWORKS_MODAL_TESTNET_TOGGLE}-${network.id.description}`}
-						on:nnsToggle={() => toggleNetwork(network)}
 					/>
 				</ListItem>
 			{/each}
