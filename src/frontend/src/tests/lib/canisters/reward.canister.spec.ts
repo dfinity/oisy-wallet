@@ -43,7 +43,7 @@ describe('reward.canister', () => {
 
 			const eligibilityReport = await isEligible(queryParams);
 
-			expect(service.eligible).toHaveBeenCalledWith([]);
+			expect(service.eligible).toHaveBeenCalledExactlyOnceWith([]);
 			expect(eligibilityReport).toEqual(mockEligibilityResponse.Ok);
 		});
 
@@ -82,7 +82,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(service.user_info).toHaveBeenCalledWith();
+				expect(service.user_info).toHaveBeenCalledExactlyOnceWith();
 				expect(userData.superpowers[0]?.length).toBe(1);
 				expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
 			});
@@ -127,7 +127,7 @@ describe('reward.canister', () => {
 
 				const userData = await getUserInfo(queryParams);
 
-				expect(service.user_info).toHaveBeenCalledWith();
+				expect(service.user_info).toHaveBeenCalledExactlyOnceWith();
 				expect(userData.superpowers[0]?.length).toBe(1);
 				expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
 			});
@@ -171,7 +171,7 @@ describe('reward.canister', () => {
 
 			const userData = await getUserInfo(queryParams);
 
-			expect(service.user_info).toHaveBeenCalledWith();
+			expect(service.user_info).toHaveBeenCalledExactlyOnceWith();
 			expect(userData.superpowers[0]?.length).toBe(2);
 			expect(fromNullable(userData.superpowers)?.includes('vip') === true).toBeTruthy();
 			expect(fromNullable(userData.superpowers)?.includes('gold') === true).toBeTruthy();
@@ -209,7 +209,7 @@ describe('reward.canister', () => {
 			const rewardType: ClaimedVipReward = { campaign_id: 'vip' };
 			const vipRewardResponse = await getNewVipReward(rewardType);
 
-			expect(service.new_vip_reward).toHaveBeenCalledWith(toNullable(rewardType));
+			expect(service.new_vip_reward).toHaveBeenCalledExactlyOnceWith(toNullable(rewardType));
 			expect(vipRewardResponse).toEqual(mockedRewardResponse);
 		});
 
@@ -244,7 +244,7 @@ describe('reward.canister', () => {
 			const vipReward = { code: '1234567890' };
 			const claimResponse = await claimVipReward(vipReward);
 
-			expect(service.claim_vip_reward).toHaveBeenCalledWith(vipReward);
+			expect(service.claim_vip_reward).toHaveBeenCalledExactlyOnceWith(vipReward);
 			expect(claimResponse).toEqual({
 				claimRewardResponse: { Success: null },
 				claimedVipReward: { campaign_id: 'vip' }
@@ -282,7 +282,7 @@ describe('reward.canister', () => {
 
 			const referrerInfo = await getReferrerInfo(queryParams);
 
-			expect(service.referrer_info).toHaveBeenCalledWith();
+			expect(service.referrer_info).toHaveBeenCalledExactlyOnceWith();
 			expect(referrerInfo).toEqual(mockedReferrerInfo);
 		});
 
@@ -312,7 +312,7 @@ describe('reward.canister', () => {
 
 			await setReferrer(mockedReferrerCode);
 
-			expect(service.set_referrer).toHaveBeenCalledWith(mockedReferrerCode);
+			expect(service.set_referrer).toHaveBeenCalledExactlyOnceWith(mockedReferrerCode);
 		});
 
 		it('should throw an error if set_referrer throws', async () => {
@@ -344,7 +344,7 @@ describe('reward.canister', () => {
 
 			await registerAirdropRecipient(mockUserSnapshot);
 
-			expect(service.register_airdrop_recipient).toHaveBeenCalledWith(mockUserSnapshot);
+			expect(service.register_airdrop_recipient).toHaveBeenCalledExactlyOnceWith(mockUserSnapshot);
 		});
 
 		it('should throw an error if register_airdrop_recipient throws', async () => {

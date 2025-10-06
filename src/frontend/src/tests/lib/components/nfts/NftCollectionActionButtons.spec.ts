@@ -94,7 +94,7 @@ describe('NftCollectionActionButtons', () => {
 
 			hideButton?.click();
 
-			expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+			expect(erc721CustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 				tokens: [
 					{
 						...mockToken,
@@ -119,7 +119,7 @@ describe('NftCollectionActionButtons', () => {
 
 			spamButton?.click();
 
-			expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+			expect(erc721CustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 				tokens: [
 					{
 						...mockToken,

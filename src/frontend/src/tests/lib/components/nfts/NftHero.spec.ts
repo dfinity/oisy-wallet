@@ -107,7 +107,7 @@ describe('NftHero', () => {
 
 		fireEvent.click(nftImageButton);
 
-		expect(openFullscreenSpy).toHaveBeenCalledWith(
+		expect(openFullscreenSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				data: mockValidErc1155Nft,
 				id: expect.any(Symbol)
@@ -142,6 +142,6 @@ describe('NftHero', () => {
 			expect(modalTitle).toHaveTextContent(get(i18n).send.text.select_nft);
 		});
 
-		expect(openSendSpy).toHaveBeenCalledOnce();
+		expect(openSendSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 });

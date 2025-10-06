@@ -29,7 +29,7 @@ describe('LoaderUserProfile', () => {
 
 		render(LoaderUserProfile, { children: mockSnippet });
 
-		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
 
 		expect(get(userProfileStore)).toEqual({ certified: true, profile: mockUserProfile });
 	});
@@ -39,7 +39,7 @@ describe('LoaderUserProfile', () => {
 
 		render(LoaderUserProfile, { children: mockSnippet });
 
-		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
 
 		userProfileStore.set({ certified: true, profile: mockUserProfile });
 

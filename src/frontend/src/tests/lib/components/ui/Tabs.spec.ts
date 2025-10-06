@@ -51,10 +51,10 @@ describe('Tabs', () => {
 
 		await fireEvent.click(tab0);
 
-		expect(goto).toHaveBeenCalledWith('test1');
+		expect(goto).toHaveBeenCalledExactlyOnceWith('test1');
 
 		await fireEvent.click(tab1);
 
-		expect(goto).toHaveBeenCalledWith('test2');
+		expect(goto).toHaveBeenCalledExactlyOnceWith('test2');
 	});
 });

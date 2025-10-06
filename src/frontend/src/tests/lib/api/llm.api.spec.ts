@@ -40,7 +40,7 @@ describe('llm.api', () => {
 				request
 			});
 
-			expect(llmCanisterMock.chat).toHaveBeenCalledOnce();
+			expect(llmCanisterMock.chat).toHaveBeenCalledExactlyOnceWith();
 			expect(result).toBe(response);
 		});
 

@@ -171,8 +171,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledOnce();
-					expect(spyLoadTransactions).toHaveBeenCalledOnce();
+					expect(spyLoadBalance).toHaveBeenCalledExactlyOnceWith();
+					expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should stop the scheduler', () => {
@@ -184,8 +184,8 @@ describe('sol-wallet.scheduler', () => {
 				it('should trigger syncWallet periodically', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledOnce();
-					expect(spyLoadTransactions).toHaveBeenCalledOnce();
+					expect(spyLoadBalance).toHaveBeenCalledExactlyOnceWith();
+					expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith();
 
 					await vi.advanceTimersByTimeAsync(SOL_WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -203,8 +203,8 @@ describe('sol-wallet.scheduler', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 				});
 
 				it('should trigger postMessage with error after retrying', async () => {
@@ -223,7 +223,7 @@ describe('sol-wallet.scheduler', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncSolWalletError',
 						data: {
 							error: err
@@ -247,8 +247,8 @@ describe('sol-wallet.scheduler', () => {
 
 					// Only status messages should be sent
 					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 				});
 
 				it('should update store with new transactions', async () => {
@@ -270,7 +270,7 @@ describe('sol-wallet.scheduler', () => {
 				it('should load balance with the correct parameters', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadBalance).toHaveBeenCalledWith({
+					expect(spyLoadBalance).toHaveBeenCalledExactlyOnceWith({
 						address: mockSolAddress,
 						network: startData?.solanaNetwork,
 						tokenAddress: startData?.tokenAddress,
@@ -281,7 +281,7 @@ describe('sol-wallet.scheduler', () => {
 				it('should load transactions with the correct parameters', async () => {
 					await scheduler.start(startData);
 
-					expect(spyLoadTransactions).toHaveBeenCalledWith({
+					expect(spyLoadTransactions).toHaveBeenCalledExactlyOnceWith({
 						identity: mockIdentity,
 						address: mockSolAddress,
 						network: startData?.solanaNetwork,

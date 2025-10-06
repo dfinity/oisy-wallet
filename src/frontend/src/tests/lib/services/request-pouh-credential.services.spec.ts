@@ -65,8 +65,8 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith();
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -77,7 +77,7 @@ describe('request-pouh-credential.services', () => {
 				currentUserVersion: mockUserProfileVersion,
 				nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 			});
-			expect(getUserProfileMock).toHaveBeenCalledOnce();
+			expect(getUserProfileMock).toHaveBeenCalledExactlyOnceWith();
 			expect(get(userProfileStore)).toEqual({
 				certified: true,
 				profile: userProfileWithCredential
@@ -90,8 +90,8 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith();
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {

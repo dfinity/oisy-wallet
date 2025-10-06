@@ -72,11 +72,11 @@ describe('wallet.utils', () => {
 			cleanWorkers({ workers: mockWorkers, tokens: [tokenA] });
 
 			// Check that worker.stop() was called for the removed worker
-			expect(stopB).toHaveBeenCalledOnce();
+			expect(stopB).toHaveBeenCalledExactlyOnceWith();
 			expect(stopA).not.toHaveBeenCalled();
 
 			// Check that worker.destroy() was called for the removed worker
-			expect(destroyB).toHaveBeenCalledOnce();
+			expect(destroyB).toHaveBeenCalledExactlyOnceWith();
 			expect(destroyA).not.toHaveBeenCalled();
 
 			// Verify the token entry was removed from the workers map
@@ -87,7 +87,7 @@ describe('wallet.utils', () => {
 		it('should remove workers not in the tokens list', () => {
 			cleanWorkers({ workers: mockWorkers, tokens: [tokenA] });
 
-			expect(stopB).toHaveBeenCalledOnce();
+			expect(stopB).toHaveBeenCalledExactlyOnceWith();
 			expect(stopA).not.toHaveBeenCalled();
 
 			expect(mockWorkers.has(tokenB.id)).toBeFalsy();
@@ -170,8 +170,8 @@ describe('wallet.utils', () => {
 		it('should start worker if not already present', async () => {
 			await loadWorker({ workers, token, initWalletWorker });
 
-			expect(stop).toHaveBeenCalledOnce();
-			expect(start).toHaveBeenCalledOnce();
+			expect(stop).toHaveBeenCalledExactlyOnceWith();
+			expect(start).toHaveBeenCalledExactlyOnceWith();
 			expect(stop).toHaveBeenCalledBefore(start);
 		});
 

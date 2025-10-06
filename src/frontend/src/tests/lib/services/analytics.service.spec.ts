@@ -32,7 +32,7 @@ describe('plausible analytics service', () => {
 
 		initPlausibleAnalytics();
 
-		expect(Plausible).toHaveBeenCalledWith({
+		expect(Plausible).toHaveBeenCalledExactlyOnceWith({
 			domain: PLAUSIBLE_DOMAIN,
 			hashMode: false,
 			trackLocalhost: false
@@ -54,11 +54,11 @@ describe('plausible analytics service', () => {
 
 		trackEvent(params);
 
-		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
+		expect(trackEventMock).toHaveBeenCalledExactlyOnceWith('test_event_name', {
 			props: { eventName: 'eventValue' }
 		});
 
-		expect(console.warn).toHaveBeenCalledWith('Warning message');
+		expect(console.warn).toHaveBeenCalledExactlyOnceWith('Warning message');
 	});
 
 	it('should enable auto pageviews', async () => {
@@ -68,7 +68,7 @@ describe('plausible analytics service', () => {
 
 		initPlausibleAnalytics();
 
-		expect(enableAutoPageviews).toHaveBeenCalledOnce();
+		expect(enableAutoPageviews).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should call trackEvent if tracker is initialized', async () => {
@@ -83,7 +83,7 @@ describe('plausible analytics service', () => {
 
 		trackEvent(params);
 
-		expect(trackEventMock).toHaveBeenCalledWith('test_event_name', {
+		expect(trackEventMock).toHaveBeenCalledExactlyOnceWith('test_event_name', {
 			props: { eventName: 'eventValue' }
 		});
 	});
@@ -126,7 +126,7 @@ describe('plausible analytics service', () => {
 
 		initPlausibleAnalytics();
 
-		expect(consoleWarnSpy).toHaveBeenCalledWith(
+		expect(consoleWarnSpy).toHaveBeenCalledExactlyOnceWith(
 			'An unexpected error occurred during initialization.'
 		);
 

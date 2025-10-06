@@ -101,7 +101,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 			await fireEvent.click(button);
 
-			expect(btcSendApiSpy).toHaveBeenCalledWith({
+			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 				utxosToSpend: mockUtxosFee.utxos,
@@ -113,7 +113,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 					}
 				]
 			});
-			expect(btcSendApiSpy).toHaveBeenCalledOnce();
+			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 

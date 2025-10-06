@@ -39,7 +39,7 @@ describe('FullscreenImgModal', () => {
 		const backdrop = getByTestId('backdrop');
 		await fireEvent.click(backdrop);
 
-		expect(closeSpy).toHaveBeenCalledOnce();
+		expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('applies max size constraints to the fullscreen-modal container', () => {

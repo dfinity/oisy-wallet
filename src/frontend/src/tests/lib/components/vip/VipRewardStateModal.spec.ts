@@ -137,7 +137,7 @@ describe('VipRewardStateModal', () => {
 
 			button?.click();
 
-			expect(autoLoadSingleToken).toHaveBeenCalledOnce();
+			expect(autoLoadSingleToken).toHaveBeenCalledExactlyOnceWith();
 			expect(autoLoadSingleToken).toHaveBeenNthCalledWith(1, {
 				token: expect.objectContaining({
 					...mockIcrcDefaultToken,
@@ -164,7 +164,7 @@ describe('VipRewardStateModal', () => {
 
 			button?.click();
 
-			expect(autoLoadSingleToken).toHaveBeenCalledOnce();
+			expect(autoLoadSingleToken).toHaveBeenCalledExactlyOnceWith();
 			expect(autoLoadSingleToken).toHaveBeenNthCalledWith(1, {
 				token: expect.objectContaining({
 					...mockIcrcDefaultToken,

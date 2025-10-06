@@ -758,7 +758,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(toastsShow).toHaveBeenCalledWith({
+			expect(toastsShow).toHaveBeenCalledExactlyOnceWith({
 				text: i18nMock.tokens.manage.info.no_changes,
 				level: 'info',
 				duration: 5000
@@ -777,7 +777,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveIcrcCustomTokens).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([
 						expect.objectContaining({ ...mockValidIcrcToken, networkKey: 'Icrc' })
@@ -796,7 +796,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveErc20UserTokens).toHaveBeenCalledWith(
+			expect(saveErc20UserTokens).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
@@ -813,7 +813,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveErc20CustomTokens).toHaveBeenCalledWith(
+			expect(saveErc20CustomTokens).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
@@ -830,7 +830,7 @@ describe('tokens.utils', () => {
 				$i18n: i18nMock
 			});
 
-			expect(saveSplCustomTokens).toHaveBeenCalledWith(
+			expect(saveSplCustomTokens).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					tokens: expect.arrayContaining([expect.objectContaining(token)]),
 					identity: mockIdentity
@@ -852,7 +852,7 @@ describe('tokens.utils', () => {
 				modalNext
 			});
 
-			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
+			expect(saveIcrcCustomTokens).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({ progress, onSuccess, modalNext })
 			);
 		});

@@ -14,7 +14,7 @@ describe('SignerContext', () => {
 
 		init({ owner: identity });
 
-		expect(spy).toHaveBeenCalledWith({
+		expect(spy).toHaveBeenCalledExactlyOnceWith({
 			owner: identity,
 			host: REPLICA_HOST
 		});

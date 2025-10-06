@@ -282,7 +282,7 @@ describe('sol-transactions.services', () => {
 					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 				})
 			).resolves.toEqual([expectedResults[expectedResults.length - 1]]);
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should return an empty array if no mapped transactions match token address', async () => {
@@ -298,7 +298,7 @@ describe('sol-transactions.services', () => {
 					tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 				})
 			).resolves.toEqual([]);
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should create a duplicate transaction for self-transfers with opposite type', async () => {
@@ -444,7 +444,7 @@ describe('sol-transactions.services', () => {
 
 			expect(signalEnd).not.toHaveBeenCalled();
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -457,7 +457,7 @@ describe('sol-transactions.services', () => {
 
 			expect(signalEnd).not.toHaveBeenCalled();
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -477,7 +477,7 @@ describe('sol-transactions.services', () => {
 				limit
 			});
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -492,7 +492,7 @@ describe('sol-transactions.services', () => {
 
 			await loadNextSolTransactions(mockParams);
 
-			expect(signalEnd).toHaveBeenCalledOnce();
+			expect(signalEnd).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should append transactions to the store', async () => {
@@ -520,7 +520,7 @@ describe('sol-transactions.services', () => {
 				token: SOLANA_DEVNET_TOKEN
 			});
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress2,
@@ -586,7 +586,7 @@ describe('sol-transactions.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -608,7 +608,7 @@ describe('sol-transactions.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -625,7 +625,7 @@ describe('sol-transactions.services', () => {
 
 			expect(resultWithNano).toEqual({ success: true });
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,
@@ -642,7 +642,7 @@ describe('sol-transactions.services', () => {
 
 			expect(resultWithMillis).toEqual({ success: true });
 
-			expect(spyGetTransactions).toHaveBeenCalledOnce();
+			expect(spyGetTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				address: mockSolAddress,

@@ -244,7 +244,7 @@ describe('EIP - 712 utils methods', () => {
 
 				const result = getCompactSignature(input);
 
-				expect(mockSignature.from).toHaveBeenCalledWith(input);
+				expect(mockSignature.from).toHaveBeenCalledExactlyOnceWith(input);
 				expect(result).toBe(expectedOutput);
 			});
 		});

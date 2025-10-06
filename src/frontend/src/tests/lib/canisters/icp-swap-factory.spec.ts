@@ -63,7 +63,7 @@ describe('icp_swap_factory.canister', () => {
 			});
 
 			expect(result).toEqual(poolData);
-			expect(service.getPool).toHaveBeenCalledWith(args);
+			expect(service.getPool).toHaveBeenCalledExactlyOnceWith(args);
 		});
 
 		it('throws CanisterInternalError if result is error variant', async () => {

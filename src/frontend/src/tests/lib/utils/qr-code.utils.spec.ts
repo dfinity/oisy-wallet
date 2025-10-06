@@ -88,7 +88,7 @@ describe('decodeQrCode', () => {
 
 		expect(response).toEqual({ status: 'success', destination: code });
 
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+		expect(mockDecodePayment).toHaveBeenCalledExactlyOnceWith(code);
 	});
 
 	it('should return { status: "token_incompatible" } when tokens do not match', () => {
@@ -102,7 +102,7 @@ describe('decodeQrCode', () => {
 		const response = decodeQrCode({ status: 'success', code, expectedToken: token });
 
 		expect(response).toEqual({ status: 'token_incompatible' });
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+		expect(mockDecodePayment).toHaveBeenCalledExactlyOnceWith(code);
 	});
 
 	it('should return { status: "success", identifier, token, amount } when everything matches', () => {
@@ -121,6 +121,6 @@ describe('decodeQrCode', () => {
 			symbol: token.symbol,
 			amount
 		});
-		expect(mockDecodePayment).toHaveBeenCalledWith(code);
+		expect(mockDecodePayment).toHaveBeenCalledExactlyOnceWith(code);
 	});
 });

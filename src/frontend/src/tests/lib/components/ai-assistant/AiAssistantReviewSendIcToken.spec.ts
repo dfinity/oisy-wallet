@@ -70,8 +70,8 @@ describe('AiAssistantReviewSendIcToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith(
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith();
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				to: mockPrincipalText,
 				amount: parseToken({

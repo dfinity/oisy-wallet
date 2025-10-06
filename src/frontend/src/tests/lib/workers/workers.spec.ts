@@ -90,7 +90,7 @@ describe('workers', () => {
 			await onmessage(mockEvent);
 
 			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
+				expect(onMessageFn).toHaveBeenCalledExactlyOnceWith();
 				expect(onMessageFn).toHaveBeenNthCalledWith(1, mockEvent);
 			});
 		});
@@ -102,7 +102,7 @@ describe('workers', () => {
 			await onmessage(event);
 
 			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
+				expect(onMessageFn).toHaveBeenCalledExactlyOnceWith();
 				expect(onMessageFn).toHaveBeenNthCalledWith(1, event);
 			});
 		});
@@ -114,7 +114,7 @@ describe('workers', () => {
 			await onmessage(mockEvent);
 
 			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
+				expect(onMessageFn).toHaveBeenCalledExactlyOnceWith();
 				expect(onMessageFn).toHaveBeenNthCalledWith(1, mockEvent);
 			});
 		});

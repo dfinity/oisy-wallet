@@ -82,7 +82,7 @@ describe('SendNftsList.spec', () => {
 
 		await fireEvent.click(btn);
 
-		expect(onSelectNetwork).toHaveBeenCalledOnce();
+		expect(onSelectNetwork).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('calls onSelect when an NFT card is clicked', async () => {

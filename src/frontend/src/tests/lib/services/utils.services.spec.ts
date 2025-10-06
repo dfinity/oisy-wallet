@@ -54,7 +54,7 @@ describe('utils.services', () => {
 			const params = { param1: 'value1' };
 			const result = await wrappedFunction(params);
 
-			expect(mockMethodToCall).toHaveBeenCalledWith({
+			expect(mockMethodToCall).toHaveBeenCalledExactlyOnceWith({
 				...params,
 				identity: mockIdentity
 			});
@@ -78,7 +78,7 @@ describe('utils.services', () => {
 
 			await wrappedFunction({ param1: 'value1' });
 
-			expect(mockTrackEvent).toHaveBeenCalledWith({
+			expect(mockTrackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: successEventName
 			});
 
@@ -120,12 +120,12 @@ describe('utils.services', () => {
 
 			await expect(wrappedFunction({ param1: 'value1' })).resolves.toBeUndefined();
 
-			expect(mockTrackEvent).toHaveBeenCalledWith({
+			expect(mockTrackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: errorEventName,
 				metadata: { error: expect.any(String) }
 			});
 
-			expect(mockToastsError).toHaveBeenCalledWith({
+			expect(mockToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: toastErrorMessage },
 				err: testError
 			});
@@ -151,7 +151,7 @@ describe('utils.services', () => {
 			await expect(wrappedFunction({ param1: 'value1' })).resolves.toBeUndefined();
 
 			expect(mockTrackEvent).not.toHaveBeenCalled();
-			expect(mockToastsError).toHaveBeenCalledWith({
+			expect(mockToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: toastErrorMessage },
 				err: testError
 			});
@@ -172,7 +172,7 @@ describe('utils.services', () => {
 
 			await expect(wrappedFunction({ param1: 'value1' })).rejects.toThrow(testError);
 
-			expect(mockTrackEvent).toHaveBeenCalledWith({
+			expect(mockTrackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: errorEventName,
 				metadata: { error: expect.any(String) }
 			});

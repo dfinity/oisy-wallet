@@ -172,6 +172,6 @@ describe('RewardEarnings', () => {
 			}
 		});
 
-		expect(rewardServiceSpy).toHaveBeenCalledOnce();
+		expect(rewardServiceSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 });

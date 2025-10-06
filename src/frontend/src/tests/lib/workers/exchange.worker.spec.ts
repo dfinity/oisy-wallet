@@ -134,7 +134,7 @@ describe('exchange.worker', () => {
 			it('should post a message with synced prices', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchange',
 					data: {
@@ -158,17 +158,17 @@ describe('exchange.worker', () => {
 			it('should not start the timer more than once', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should sync prices at the correct interval', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
@@ -182,13 +182,13 @@ describe('exchange.worker', () => {
 
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: 'syncExchangeError',
 					data: { err: mockErrorMessage }
 				});
 
-				expect(console.error).toHaveBeenCalledOnce();
+				expect(console.error).toHaveBeenCalledExactlyOnceWith();
 				expect(console.error).toHaveBeenNthCalledWith(
 					1,
 					'Unexpected error while fetching symbol average price:',
@@ -199,7 +199,7 @@ describe('exchange.worker', () => {
 			it('should stop the timer if the sync fails', async () => {
 				await onExchangeMessage(event);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				vi.clearAllMocks();
 
@@ -291,7 +291,7 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith();
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'internet-computer',
 						vs_currencies: Currency.USD,
@@ -319,7 +319,7 @@ describe('exchange.worker', () => {
 
 					await onExchangeMessage(mockEvent);
 
-					expect(simpleTokenPrice).toHaveBeenCalledOnce();
+					expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith();
 					expect(simpleTokenPrice).toHaveBeenNthCalledWith(1, {
 						id: 'solana',
 						vs_currencies: Currency.USD,
@@ -525,25 +525,25 @@ describe('exchange.worker', () => {
 			it('should stop the exchange syncing', async () => {
 				await onExchangeMessage(startEvent);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				await onExchangeMessage(stopEvent);
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should stop the timer and allow restarting it', async () => {
 				await onExchangeMessage(startEvent);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				await onExchangeMessage(stopEvent);
 
 				await vi.advanceTimersByTimeAsync(SYNC_EXCHANGE_TIMER_INTERVAL * 10);
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 
 				await onExchangeMessage(startEvent);
 

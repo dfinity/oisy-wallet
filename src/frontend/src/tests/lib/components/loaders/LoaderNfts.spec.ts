@@ -120,9 +120,9 @@ describe('LoaderNfts', () => {
 			});
 
 			await waitFor(() => {
-				expect(mockGetNftsForOwner).toHaveBeenCalledOnce();
+				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith();
 
-				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith({
 					address: mockEthAddress,
 					tokens: [mockedEnabledAzukiToken, mockedEnabledGodsToken]
 				});
@@ -149,12 +149,12 @@ describe('LoaderNfts', () => {
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
 
-				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith({
 					address: mockEthAddress,
 					tokens: [mockedEnabledNyanToken]
 				});
 
-				expect(mockGetNftsForOwner).toHaveBeenCalledWith({
+				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith({
 					address: mockEthAddress,
 					tokens: [mockedEnabledApeToken]
 				});
@@ -182,7 +182,7 @@ describe('LoaderNfts', () => {
 			});
 
 			await waitFor(() => {
-				expect(mockGetNftsForOwner).toHaveBeenCalledOnce();
+				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith();
 
 				expect(get(nftStore)).toEqual([mockErc721Nft1]);
 			});

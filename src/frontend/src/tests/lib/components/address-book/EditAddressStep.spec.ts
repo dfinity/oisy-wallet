@@ -134,7 +134,7 @@ describe('EditAddressStep', () => {
 
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
-		expect(onAddAddress).toHaveBeenCalledWith(
+		expect(onAddAddress).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
 				addressType: 'Eth',
@@ -166,7 +166,7 @@ describe('EditAddressStep', () => {
 
 		await fireEvent.click(getByTestId(ADDRESS_BOOK_SAVE_BUTTON));
 
-		expect(onSaveAddress).toHaveBeenCalledWith(address);
+		expect(onSaveAddress).toHaveBeenCalledExactlyOnceWith(address);
 	});
 
 	it('should call onClose when cancel is clicked', async () => {

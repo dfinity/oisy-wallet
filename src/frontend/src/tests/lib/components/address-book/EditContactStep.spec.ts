@@ -102,8 +102,8 @@ describe('EditContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDITING_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledOnce();
-		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+		expect(mockEdit).toHaveBeenCalledExactlyOnceWith();
+		expect(mockEdit).toHaveBeenCalledExactlyOnceWith(mockContact);
 	});
 
 	it('should call addAddress function when add address button is clicked', async () => {
@@ -123,7 +123,7 @@ describe('EditContactStep', () => {
 		const addAddressButton = getByTestId(CONTACT_EDIT_ADD_ADDRESS_BUTTON);
 		await fireEvent.click(addAddressButton);
 
-		expect(mockAddAddress).toHaveBeenCalledOnce();
+		expect(mockAddAddress).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should call deleteContact function when delete contact button is clicked', async () => {
@@ -143,8 +143,8 @@ describe('EditContactStep', () => {
 		const deleteContactButton = getByTestId(CONTACT_EDIT_DELETE_CONTACT_BUTTON);
 		await fireEvent.click(deleteContactButton);
 
-		expect(mockDeleteContact).toHaveBeenCalledOnce();
-		expect(mockDeleteContact).toHaveBeenCalledWith(mockContact.id);
+		expect(mockDeleteContact).toHaveBeenCalledExactlyOnceWith();
+		expect(mockDeleteContact).toHaveBeenCalledExactlyOnceWith(mockContact.id);
 	});
 
 	it('should call close function when close button is clicked', async () => {
@@ -164,7 +164,7 @@ describe('EditContactStep', () => {
 		const closeButton = getByTestId(CONTACT_SHOW_CLOSE_BUTTON);
 		await fireEvent.click(closeButton);
 
-		expect(mockClose).toHaveBeenCalledOnce();
+		expect(mockClose).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should call editAddress function when edit address button is clicked', async () => {
@@ -186,8 +186,8 @@ describe('EditContactStep', () => {
 		// Click the first edit address button
 		await fireEvent.click(editAddressButtons[0]);
 
-		expect(mockEditAddress).toHaveBeenCalledOnce();
-		expect(mockEditAddress).toHaveBeenCalledWith(0);
+		expect(mockEditAddress).toHaveBeenCalledExactlyOnceWith();
+		expect(mockEditAddress).toHaveBeenCalledExactlyOnceWith(0);
 	});
 
 	it('should call deleteAddress function when delete address button is clicked', async () => {
@@ -209,8 +209,8 @@ describe('EditContactStep', () => {
 		// Click the first delete address button
 		await fireEvent.click(deleteAddressButtons[0]);
 
-		expect(mockDeleteAddress).toHaveBeenCalledOnce();
-		expect(mockDeleteAddress).toHaveBeenCalledWith(0);
+		expect(mockDeleteAddress).toHaveBeenCalledExactlyOnceWith();
+		expect(mockDeleteAddress).toHaveBeenCalledExactlyOnceWith(0);
 	});
 
 	it('should disable add address button when onAddAddress is not provided', () => {
@@ -256,7 +256,7 @@ describe('EditContactStep', () => {
 			await fireEvent.change(input, { target: { files: [file] } });
 		}
 
-		expect(onAvatarEdit).toHaveBeenCalledOnce();
+		expect(onAvatarEdit).toHaveBeenCalledExactlyOnceWith();
 		expect(onAvatarEdit).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining({

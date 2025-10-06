@@ -66,7 +66,7 @@ describe('AddressGuard', () => {
 
 			emit({ message: 'oisyValidateAddresses' });
 
-			expect(spy).toHaveBeenCalledOnce();
+			expect(spy).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should sign out and ultimately reload the window if signer allowance fails', async () => {
@@ -87,8 +87,8 @@ describe('AddressGuard', () => {
 			emit({ message: 'oisyValidateAddresses' });
 
 			await waitFor(() => {
-				expect(spySignOut).toHaveBeenCalledOnce();
-				expect(spy).toHaveBeenCalledOnce();
+				expect(spySignOut).toHaveBeenCalledExactlyOnceWith();
+				expect(spy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
@@ -215,7 +215,7 @@ describe('AddressGuard', () => {
 				await waitFor(() => {
 					expect(validateBitcoinSpy).not.toHaveBeenCalled();
 					expect(validateEthereumSpy).not.toHaveBeenCalled();
-					expect(validateSolanaSpy).toHaveBeenCalledOnce();
+					expect(validateSolanaSpy).toHaveBeenCalledExactlyOnceWith();
 				});
 			});
 
@@ -305,7 +305,7 @@ describe('AddressGuard', () => {
 					});
 
 					await waitFor(() => {
-						expect(validateSpy).toHaveBeenCalledOnce();
+						expect(validateSpy).toHaveBeenCalledExactlyOnceWith();
 					});
 
 					emit({ message: 'oisyValidateAddresses' });

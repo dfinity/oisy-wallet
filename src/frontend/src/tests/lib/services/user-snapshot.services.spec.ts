@@ -375,7 +375,7 @@ describe('user-snapshot.services', () => {
 		it('should handle multiple tokens and send correct snapshots', async () => {
 			await registerUserSnapshot();
 
-			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+			expect(registerAirdropRecipient).toHaveBeenCalledExactlyOnceWith({
 				userSnapshot,
 				identity: mockIdentity
 			});
@@ -394,7 +394,7 @@ describe('user-snapshot.services', () => {
 
 			await registerUserSnapshot();
 
-			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+			expect(registerAirdropRecipient).toHaveBeenCalledExactlyOnceWith({
 				userSnapshot,
 				identity: mockIdentity
 			});
@@ -412,7 +412,7 @@ describe('user-snapshot.services', () => {
 
 			await registerUserSnapshot();
 
-			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+			expect(registerAirdropRecipient).toHaveBeenCalledExactlyOnceWith({
 				userSnapshot: {
 					...userSnapshot,
 					accounts: [...icpAccount, ...icrcAccounts.slice(0, 1), ...solMainnetAccounts]

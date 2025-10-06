@@ -64,7 +64,7 @@ describe('LoaderCollections', () => {
 			expect(mockGetTokensForOwner).toHaveBeenCalledTimes(networks.length);
 
 			for (const network of networks) {
-				expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+				expect(erc721CustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 					tokens: [
 						{
 							address: mockEthAddress,
@@ -75,7 +75,7 @@ describe('LoaderCollections', () => {
 					identity: mockIdentity
 				});
 
-				expect(erc1155CustomTokensSpy).toHaveBeenCalledWith({
+				expect(erc1155CustomTokensSpy).toHaveBeenCalledExactlyOnceWith({
 					tokens: [
 						{
 							address: mockEthAddress,

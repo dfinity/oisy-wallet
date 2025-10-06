@@ -62,7 +62,7 @@ describe('AiAssistantConsole', () => {
 		await waitFor(async () => {
 			await fireEvent.click(button);
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 

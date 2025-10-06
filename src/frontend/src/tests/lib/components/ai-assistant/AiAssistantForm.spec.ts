@@ -17,7 +17,7 @@ describe('AiAssistantForm', () => {
 
 		await fireEvent.click(button);
 
-		expect(onMessageSubmit).toHaveBeenCalledOnce();
+		expect(onMessageSubmit).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('does not submit the form if button is disabled', async () => {

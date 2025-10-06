@@ -46,8 +46,8 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockBlock);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith();
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: AccountIdentifier.fromHex(mockAccountIdentifierText)
 			});
@@ -95,8 +95,8 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith();
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				createdAt
@@ -110,8 +110,8 @@ describe('icp-ledger.api', () => {
 
 			expect(result).toEqual(mockIndex);
 
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith();
+			expect(ledgerCanisterMock.icrc1Transfer).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				to: toAccount,
 				createdAt: 987_654_321n

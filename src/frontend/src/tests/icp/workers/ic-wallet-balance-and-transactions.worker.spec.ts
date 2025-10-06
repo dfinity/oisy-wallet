@@ -237,7 +237,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					// cleanup
 					expect(postMessageMock).toHaveBeenCalledTimes(5);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: `${msg}CleanUp`,
 						data: {
 							transactionIds: [`${mockRogueId}`]
@@ -257,7 +257,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: `${msg}Error`,
 						data: {
 							error: err
@@ -595,9 +595,9 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 				await awaitJobExecution();
 
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageNotCertified);
 
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageCertified);
 			});
 
 			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {

@@ -48,7 +48,7 @@ describe('MarkdownWithSidebar', () => {
 
 		expect(h1).toBeInTheDocument();
 
-		expect(rp).toHaveBeenCalledWith('Some body $var', { $var: 'VALUE' });
+		expect(rp).toHaveBeenCalledExactlyOnceWith('Some body $var', { $var: 'VALUE' });
 	});
 
 	it('passes { markdown: text, headingDesignator } to getMarkdownBlocks (default ###)', () => {
@@ -63,7 +63,7 @@ describe('MarkdownWithSidebar', () => {
 			}
 		});
 
-		expect(spy).toHaveBeenCalledWith({
+		expect(spy).toHaveBeenCalledExactlyOnceWith({
 			markdown: '### H\nP',
 			headingDesignator: '###'
 		});
@@ -86,7 +86,7 @@ describe('MarkdownWithSidebar', () => {
 			}
 		});
 
-		expect(spy).toHaveBeenCalledWith({
+		expect(spy).toHaveBeenCalledExactlyOnceWith({
 			markdown: '## Custom H2\nBody line',
 			headingDesignator: '##'
 		});

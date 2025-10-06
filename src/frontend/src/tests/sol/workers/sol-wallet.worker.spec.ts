@@ -43,7 +43,7 @@ describe('sol-wallet.worker', () => {
 
 			await onSolWalletMessage(event);
 
-			expect(mockStop).toHaveBeenCalledOnce();
+			expect(mockStop).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockStart).not.toHaveBeenCalled();
 			expect(mockTrigger).not.toHaveBeenCalled();
@@ -54,7 +54,7 @@ describe('sol-wallet.worker', () => {
 
 			await onSolWalletMessage(event);
 
-			expect(mockStart).toHaveBeenCalledOnce();
+			expect(mockStart).toHaveBeenCalledExactlyOnceWith();
 			expect(mockStart).toHaveBeenNthCalledWith(1, event.data.data);
 
 			expect(mockStop).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('sol-wallet.worker', () => {
 
 			await onSolWalletMessage(event);
 
-			expect(mockTrigger).toHaveBeenCalledOnce();
+			expect(mockTrigger).toHaveBeenCalledExactlyOnceWith();
 			expect(mockTrigger).toHaveBeenNthCalledWith(1, event.data.data);
 
 			expect(mockStart).not.toHaveBeenCalled();

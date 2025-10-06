@@ -27,14 +27,14 @@ describe('clipboard.utils', () => {
 		it('should copy text to clipboard', async () => {
 			await copyToClipboard({ value, text });
 
-			expect(mockCopyText).toHaveBeenCalledOnce();
-			expect(mockCopyText).toHaveBeenCalledWith(value);
+			expect(mockCopyText).toHaveBeenCalledExactlyOnceWith();
+			expect(mockCopyText).toHaveBeenCalledExactlyOnceWith(value);
 		});
 
 		it('should show a success toast if copy is successful', async () => {
 			await copyToClipboard({ value, text });
 
-			expect(spyToastsShow).toHaveBeenCalledWith({
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 				text,
 				level: 'success',
 				duration: 2000
@@ -44,7 +44,7 @@ describe('clipboard.utils', () => {
 		it('should handle empty string', async () => {
 			await copyToClipboard({ value: '', text });
 
-			expect(spyToastsShow).toHaveBeenCalledWith({
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 				text,
 				level: 'success',
 				duration: 2000

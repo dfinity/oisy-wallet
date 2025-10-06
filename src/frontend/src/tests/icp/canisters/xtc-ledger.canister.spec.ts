@@ -49,7 +49,7 @@ describe('xtc-ledger.canister', () => {
 			const res = await transfer(params);
 
 			expect(res).toEqual(txReceipt);
-			expect(service.transfer).toHaveBeenCalledOnce();
+			expect(service.transfer).toHaveBeenCalledExactlyOnceWith();
 			expect(service.transfer).toHaveBeenNthCalledWith(1, mockPrincipal, amount);
 		});
 
@@ -241,7 +241,7 @@ describe('xtc-ledger.canister', () => {
 			const res = await balance(mockPrincipal);
 
 			expect(res).toEqual(mockBalance);
-			expect(service.balanceOf).toHaveBeenCalledOnce();
+			expect(service.balanceOf).toHaveBeenCalledExactlyOnceWith();
 			expect(service.balanceOf).toHaveBeenNthCalledWith(1, mockPrincipal);
 		});
 

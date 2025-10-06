@@ -39,8 +39,8 @@ describe('sol-sign.services', () => {
 		it('should return a signed transaction and signature', async () => {
 			const result = await signTransaction(mockTransactionMessage);
 
-			expect(spySignTransactionMessageWithSigners).toHaveBeenCalledWith(mockTransactionMessage);
-			expect(spyGetSignatureFromTransaction).toHaveBeenCalledWith(mockSignedTransaction);
+			expect(spySignTransactionMessageWithSigners).toHaveBeenCalledExactlyOnceWith(mockTransactionMessage);
+			expect(spyGetSignatureFromTransaction).toHaveBeenCalledExactlyOnceWith(mockSignedTransaction);
 			expect(result).toEqual({
 				signedTransaction: mockSignedTransaction,
 				signature: mockSignature

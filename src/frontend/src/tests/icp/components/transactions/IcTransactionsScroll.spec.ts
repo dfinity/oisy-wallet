@@ -65,7 +65,7 @@ describe('IcTransactionsScroll', () => {
 		it('should load next transactions', () => {
 			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+			expect(loadNextIcTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(loadNextIcTransactions).toHaveBeenNthCalledWith(1, {
 				lastId: mockLastId,
 				owner: mockIdentity.getPrincipal(),
@@ -83,7 +83,7 @@ describe('IcTransactionsScroll', () => {
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should not load next transactions if the token is nullish', () => {
@@ -133,7 +133,7 @@ describe('IcTransactionsScroll', () => {
 
 			await vi.advanceTimersByTimeAsync(interval + 1000);
 
-			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+			expect(loadNextIcTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(loadNextIcTransactions).toHaveBeenNthCalledWith(1, {
 				lastId: mockLastId,
 				owner: mockIdentity.getPrincipal(),
@@ -145,7 +145,7 @@ describe('IcTransactionsScroll', () => {
 
 			await vi.advanceTimersByTimeAsync(interval * 2);
 
-			expect(loadNextIcTransactions).toHaveBeenCalledOnce();
+			expect(loadNextIcTransactions).toHaveBeenCalledExactlyOnceWith();
 
 			vi.useRealTimers();
 		});

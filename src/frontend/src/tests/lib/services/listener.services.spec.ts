@@ -53,7 +53,7 @@ describe('listener.services', () => {
 		it('should call getIdbTransactions with correct parameters', async () => {
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -65,7 +65,7 @@ describe('listener.services', () => {
 		it('should call getIdbBalances with correct parameters', async () => {
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(getIdbBalances).toHaveBeenCalledWith({
+			expect(getIdbBalances).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -79,7 +79,7 @@ describe('listener.services', () => {
 
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -87,7 +87,7 @@ describe('listener.services', () => {
 
 			expect(mockAppend).not.toHaveBeenCalled();
 
-			expect(getIdbBalances).toHaveBeenCalledWith({
+			expect(getIdbBalances).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -99,7 +99,7 @@ describe('listener.services', () => {
 
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -107,7 +107,7 @@ describe('listener.services', () => {
 
 			expect(mockTransactionsStore.append).not.toHaveBeenCalled();
 
-			expect(getIdbBalances).toHaveBeenCalledWith({
+			expect(getIdbBalances).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -123,13 +123,13 @@ describe('listener.services', () => {
 
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(mockTransactionsStore.append).toHaveBeenCalledWith({
+			expect(mockTransactionsStore.append).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				transactions: mockTxs.map((tx) => ({
 					data: tx,
@@ -145,13 +145,13 @@ describe('listener.services', () => {
 
 			await syncWalletFromIdbCache(mockParams);
 
-			expect(getIdbBalances).toHaveBeenCalledWith({
+			expect(getIdbBalances).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(balancesStore.set).toHaveBeenCalledWith({
+			expect(balancesStore.set).toHaveBeenCalledExactlyOnceWith({
 				id: mockTokenId,
 				data: {
 					data: mockBalance,
@@ -166,7 +166,7 @@ describe('listener.services', () => {
 
 			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
@@ -183,13 +183,13 @@ describe('listener.services', () => {
 
 			await expect(syncWalletFromIdbCache(mockParams)).rejects.toThrow(mockError);
 
-			expect(mockGetIdbTransactions).toHaveBeenCalledWith({
+			expect(mockGetIdbTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()
 			});
 
-			expect(getIdbBalances).toHaveBeenCalledWith({
+			expect(getIdbBalances).toHaveBeenCalledExactlyOnceWith({
 				tokenId: mockTokenId,
 				networkId: mockNetworkId,
 				principal: mockIdentity.getPrincipal()

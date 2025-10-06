@@ -85,7 +85,7 @@ describe('Transactions', () => {
 
 		button?.click();
 
-		expect(mockGoTo).toHaveBeenCalledWith('/');
+		expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/');
 	});
 
 	it('should not redirect the user if the modal gets closed and pageToken is nonNullish', async () => {
@@ -120,6 +120,6 @@ describe('Transactions', () => {
 
 		expect(get(modalStore)).toBeNull();
 
-		expect(mockGoTo).toHaveBeenCalledWith('/');
+		expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/');
 	});
 });

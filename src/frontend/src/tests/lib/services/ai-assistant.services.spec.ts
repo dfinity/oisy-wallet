@@ -57,7 +57,7 @@ describe('ai-assistant.services', () => {
 				messages: [{ user: { content: 'test' } }]
 			});
 
-			expect(llmChat).toHaveBeenCalledOnce();
+			expect(llmChat).toHaveBeenCalledExactlyOnceWith();
 			expect(result).toStrictEqual({
 				text: fromNullable(response.message.content),
 				tool: {
@@ -82,7 +82,7 @@ describe('ai-assistant.services', () => {
 				messages: [{ user: { content: 'test' } }]
 			});
 
-			expect(llmChat).toHaveBeenCalledOnce();
+			expect(llmChat).toHaveBeenCalledExactlyOnceWith();
 			expect(result).toStrictEqual({
 				text: fromNullable(response.message.content),
 				tool: {

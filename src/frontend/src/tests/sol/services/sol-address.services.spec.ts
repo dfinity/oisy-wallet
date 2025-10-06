@@ -78,7 +78,7 @@ describe('sol-address.services', () => {
 				const result = await getAddress(mockIdentity);
 
 				expect(result).toBe(mockSolAddress);
-				expect(spyGetSchnorrPublicKey).toHaveBeenCalledWith({
+				expect(spyGetSchnorrPublicKey).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					keyId: SOLANA_KEY_ID,
 					derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, networkType]
@@ -116,7 +116,7 @@ describe('sol-address.services', () => {
 			const result = await loadSolAddressMainnet();
 
 			expect(result).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
 						$symbol: SOLANA_TOKEN_ID.description ?? ''
@@ -138,7 +138,7 @@ describe('sol-address.services', () => {
 				data: mockSolAddress,
 				certified: false
 			});
-			expect(spyUpdateIdbAddressLastUsage).toHaveBeenCalledWith(mockIdentity.getPrincipal());
+			expect(spyUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 		});
 
 		it('should handle missing IDB address', async () => {

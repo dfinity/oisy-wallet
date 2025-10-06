@@ -65,8 +65,8 @@ describe('ConvertToCkBtc', () => {
 		});
 
 		expect(getByTestId(buttonId)).toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 
 	it('should keep the button disabled but call the service if isBusy is true', () => {
@@ -79,8 +79,8 @@ describe('ConvertToCkBtc', () => {
 		});
 
 		expect(getByTestId(buttonId)).toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 
 	it('should keep the button enabled and call the service if ckBtcToken is available', () => {
@@ -93,7 +93,7 @@ describe('ConvertToCkBtc', () => {
 		});
 
 		expect(getByTestId(buttonId)).not.toHaveAttribute('disabled');
-		expect(spy).toHaveBeenCalledOnce();
-		expect(spy).toHaveBeenCalledWith(serviceCallParams);
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
+		expect(spy).toHaveBeenCalledExactlyOnceWith(serviceCallParams);
 	});
 });

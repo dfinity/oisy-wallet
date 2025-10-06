@@ -46,7 +46,7 @@ describe('infura-erc721.providers', () => {
 			const provider = new InfuraErc721Provider(infura);
 
 			expect(provider).toBeDefined();
-			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
+			expect(InfuraProviderLib).toHaveBeenCalledExactlyOnceWith(infura, INFURA_API_KEY);
 		});
 
 		describe('metadata', () => {
@@ -87,7 +87,7 @@ describe('infura-erc721.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
@@ -95,8 +95,8 @@ describe('infura-erc721.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mockName).toHaveBeenCalledOnce();
-				expect(mockSymbol).toHaveBeenCalledOnce();
+				expect(mockName).toHaveBeenCalledExactlyOnceWith();
+				expect(mockSymbol).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should handle errors gracefully', async () => {
@@ -169,7 +169,7 @@ describe('infura-erc721.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
@@ -177,7 +177,7 @@ describe('infura-erc721.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mockTokenUri).toHaveBeenCalledOnce();
+				expect(mockTokenUri).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 

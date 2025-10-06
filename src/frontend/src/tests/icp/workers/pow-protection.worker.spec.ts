@@ -147,18 +147,18 @@ describe('pow-protector.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyHasRequiredCycles).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+					expect(spyHasRequiredCycles).toHaveBeenCalledExactlyOnceWith();
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith();
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
-					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith();
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledOnce();
-					expect(spyAllowSigning).toHaveBeenCalledWith({
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith();
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
 					});
@@ -177,17 +177,17 @@ describe('pow-protector.worker', () => {
 					await vi.advanceTimersByTimeAsync(100);
 
 					// After start() - should have run once immediately
-					expect(spyCreatePowChallenge).toHaveBeenCalledOnce();
-					expect(spyCreatePowChallenge).toHaveBeenCalledWith({ identity: mockIdentity });
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith();
+					expect(spyCreatePowChallenge).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-					expect(spySolvePowChallenge).toHaveBeenCalledOnce();
-					expect(spySolvePowChallenge).toHaveBeenCalledWith({
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith();
+					expect(spySolvePowChallenge).toHaveBeenCalledExactlyOnceWith({
 						timestamp: mockCreateChallengeResponse.start_timestamp_ms,
 						difficulty: mockCreateChallengeResponse.difficulty
 					});
 
-					expect(spyAllowSigning).toHaveBeenCalledOnce();
-					expect(spyAllowSigning).toHaveBeenCalledWith({
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith();
+					expect(spyAllowSigning).toHaveBeenCalledExactlyOnceWith({
 						identity: mockIdentity,
 						request: { nonce: 42n }
 					});
@@ -286,8 +286,8 @@ describe('pow-protector.worker', () => {
 
 					// For ChallengeInProgressError, we just start and end normally
 					// because the error is handled internally without propagating
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 
 					// Make sure error status was not set
 					const errorCalls = postMessageMock.mock.calls.filter(
@@ -332,8 +332,8 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// With ExpiredChallengeError, we should see the error status
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusError);
 
 					// Make sure error status was set
 					const errorCalls = postMessageMock.mock.calls.filter(
@@ -374,8 +374,8 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// For unhandled errors, we should see the error status
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusError);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusError);
 				});
 			}
 		};
@@ -406,8 +406,8 @@ describe('pow-protector.worker', () => {
 					await awaitJobExecution();
 
 					// Should only see status messages, no progress messages
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 
 					// Should not call PoW-related functions
 					expect(spyCreatePowChallenge).not.toHaveBeenCalled();

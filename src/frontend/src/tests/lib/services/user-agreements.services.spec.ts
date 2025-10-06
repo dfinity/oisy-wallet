@@ -184,7 +184,7 @@ describe('user-agreements.services', () => {
 				}
 			});
 
-			expect(nowInBigIntNanoSeconds).toHaveBeenCalledOnce();
+			expect(nowInBigIntNanoSeconds).toHaveBeenCalledExactlyOnceWith();
 
 			expect(updateUserAgreements).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,

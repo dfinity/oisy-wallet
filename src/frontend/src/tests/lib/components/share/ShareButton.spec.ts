@@ -58,7 +58,7 @@ describe('ShareButton', () => {
 
 			shareButton?.click();
 
-			expect(mockShare).toHaveBeenCalledWith({
+			expect(mockShare).toHaveBeenCalledExactlyOnceWith({
 				text: shareAriaLabel
 			});
 		});

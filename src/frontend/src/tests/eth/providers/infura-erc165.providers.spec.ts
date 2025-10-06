@@ -36,7 +36,7 @@ describe('infura-erc165.providers', () => {
 			const provider = new InfuraErc165Provider(infura);
 
 			expect(provider).toBeDefined();
-			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
+			expect(InfuraProviderLib).toHaveBeenCalledExactlyOnceWith(infura, INFURA_API_KEY);
 		});
 
 		describe('isSupportedInterface', () => {

@@ -65,7 +65,7 @@ describe('infura.rest', () => {
 
 			const urlString = mockFetch.mock.calls[0][0].toString();
 
-			expect(fetch).toHaveBeenCalledOnce();
+			expect(fetch).toHaveBeenCalledExactlyOnceWith();
 			expect(urlString).toBe(
 				`${INFURA_GAS_REST_URL}/${INFURA_API_KEY}/networks/${chainId}/suggestedGasFees`
 			);

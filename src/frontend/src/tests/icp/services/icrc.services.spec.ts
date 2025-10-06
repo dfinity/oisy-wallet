@@ -215,11 +215,11 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyMetadata).toHaveBeenCalledWith({
+				expect(spyMetadata).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
 
-				expect(spyMetadata).toHaveBeenCalledWith({
+				expect(spyMetadata).toHaveBeenCalledExactlyOnceWith({
 					certified: true
 				});
 			});
@@ -231,11 +231,11 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
+				expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
+				expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({
 					certified: true
 				});
 			});
@@ -245,7 +245,7 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(idbKeyval.set).toHaveBeenCalledOnce();
+				expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 				expect(idbKeyval.set).toHaveBeenNthCalledWith(
 					1,
 					mockIdentity.getPrincipal().toText(),
@@ -257,7 +257,7 @@ describe('icrc.services', () => {
 			it('should fetch the cached custom tokens in IDB on query call', async () => {
 				await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-				expect(idbKeyval.get).toHaveBeenCalledOnce();
+				expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith();
 				expect(idbKeyval.get).toHaveBeenNthCalledWith(
 					1,
 					mockIdentity.getPrincipal().toText(),
@@ -320,7 +320,7 @@ describe('icrc.services', () => {
 
 				await loadCustomTokens({ identity: mockIdentity });
 
-				expect(trackEvent).toHaveBeenCalledOnce();
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith();
 				expect(trackEvent).toHaveBeenNthCalledWith(1, {
 					name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 					metadata: {

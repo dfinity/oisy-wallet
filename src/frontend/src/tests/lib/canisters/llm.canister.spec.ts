@@ -49,7 +49,7 @@ describe('llm.canister', () => {
 			const result = await chat(params);
 
 			expect(result).toEqual(response);
-			expect(service.v1_chat).toHaveBeenCalledWith(params);
+			expect(service.v1_chat).toHaveBeenCalledExactlyOnceWith(params);
 		});
 
 		it('throws an error if v1_chat method fails', async () => {

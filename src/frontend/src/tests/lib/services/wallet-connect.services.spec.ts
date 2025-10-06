@@ -61,7 +61,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 
@@ -71,7 +71,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 		});
@@ -84,7 +84,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 
@@ -95,7 +95,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 		});
@@ -106,11 +106,11 @@ describe('wallet-connect.services', () => {
 			const result = await execute(mockExecuteParams);
 
 			expect(result).toEqual({ success: true });
-			expect(mockCallback).toHaveBeenCalledWith({
+			expect(mockCallback).toHaveBeenCalledExactlyOnceWith({
 				request: mockRequest,
 				listener: mockListener
 			});
-			expect(spyToastsShow).toHaveBeenCalledWith({
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 				text: mockToastMsg,
 				level: 'info',
 				duration: 2000
@@ -124,7 +124,7 @@ describe('wallet-connect.services', () => {
 			const result = await execute(mockExecuteParams);
 
 			expect(result).toEqual({ success: false, err: mockError });
-			expect(mockCallback).toHaveBeenCalledWith({
+			expect(mockCallback).toHaveBeenCalledExactlyOnceWith({
 				request: mockRequest,
 				listener: mockListener
 			});
@@ -138,7 +138,7 @@ describe('wallet-connect.services', () => {
 			const result = await execute(mockExecuteParams);
 
 			expect(result).toEqual({ success: false, err: mockError });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.unexpected_processing_request },
 				err: mockError
 			});
@@ -185,7 +185,7 @@ describe('wallet-connect.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(spyToastsShow).toHaveBeenCalledWith({
+			expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 				text: en.wallet_connect.error.request_rejected,
 				level: 'info',
 				duration: 2000

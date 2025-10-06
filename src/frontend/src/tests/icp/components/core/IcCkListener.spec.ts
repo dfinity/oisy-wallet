@@ -73,7 +73,7 @@ describe('IcCkListener', () => {
 
 		await awaitTimer();
 
-		expect(initFn).toHaveBeenCalledOnce();
+		expect(initFn).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should initialize the worker without minterCanisterId', async () => {
@@ -143,15 +143,15 @@ describe('IcCkListener', () => {
 
 		await awaitTimer();
 
-		expect(stop).toHaveBeenCalledOnce();
-		expect(start).toHaveBeenCalledOnce();
+		expect(stop).toHaveBeenCalledExactlyOnceWith();
+		expect(start).toHaveBeenCalledExactlyOnceWith();
 
 		expect(stop).toHaveBeenCalledBefore(start);
 
 		await awaitTimer();
 
-		expect(stop).toHaveBeenCalledOnce();
-		expect(start).toHaveBeenCalledOnce();
+		expect(stop).toHaveBeenCalledExactlyOnceWith();
+		expect(start).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should destroy the worker on destroy', async () => {
@@ -167,19 +167,19 @@ describe('IcCkListener', () => {
 
 		await awaitTimer();
 
-		expect(initFn).toHaveBeenCalledOnce();
+		expect(initFn).toHaveBeenCalledExactlyOnceWith();
 
-		expect(stop).toHaveBeenCalledOnce();
-		expect(start).toHaveBeenCalledOnce();
+		expect(stop).toHaveBeenCalledExactlyOnceWith();
+		expect(start).toHaveBeenCalledExactlyOnceWith();
 
 		unmount();
 
 		await awaitTimer();
 
-		expect(destroy).toHaveBeenCalledOnce();
+		expect(destroy).toHaveBeenCalledExactlyOnceWith();
 
-		expect(stop).toHaveBeenCalledOnce();
-		expect(start).toHaveBeenCalledOnce();
+		expect(stop).toHaveBeenCalledExactlyOnceWith();
+		expect(start).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should trigger the worker on emitted event', async () => {
@@ -195,12 +195,12 @@ describe('IcCkListener', () => {
 
 		await awaitTimer();
 
-		expect(initFn).toHaveBeenCalledOnce();
+		expect(initFn).toHaveBeenCalledExactlyOnceWith();
 
 		emit({ message: 'oisyTriggerWallet' });
 
 		await awaitTimer();
 
-		expect(trigger).toHaveBeenCalledOnce();
+		expect(trigger).toHaveBeenCalledExactlyOnceWith();
 	});
 });

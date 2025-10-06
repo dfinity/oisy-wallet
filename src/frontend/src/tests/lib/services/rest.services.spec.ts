@@ -23,7 +23,7 @@ describe('rest.services', () => {
 				request: mockSuccessfulRequest
 			});
 
-			expect(mockSuccessfulRequest).toHaveBeenCalledOnce();
+			expect(mockSuccessfulRequest).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should return the result of the request when the request succeeds on the first try', async () => {
@@ -48,7 +48,7 @@ describe('rest.services', () => {
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
 		});
 
 		it('should call onRetry on each retry attempt', async () => {
@@ -67,11 +67,11 @@ describe('rest.services', () => {
 
 			expect(mockRequest).toHaveBeenCalledTimes(3);
 			expect(mockOnRetry).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith({
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith({
 				error: new Error('Second attempt failed'),
 				retryCount: 1
 			});
@@ -103,11 +103,11 @@ describe('rest.services', () => {
 					})
 			).rejects.toThrow(mockError);
 
-			expect(mockFailedRequest).toHaveBeenCalledOnce();
+			expect(mockFailedRequest).toHaveBeenCalledExactlyOnceWith();
 			expect(mockOnRetry).not.toHaveBeenCalled();
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
@@ -126,8 +126,8 @@ describe('rest.services', () => {
 			expect(result).toEqual(mockResult);
 
 			expect(mockRequest).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledOnce();
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith();
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith({
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});
@@ -141,7 +141,7 @@ describe('rest.services', () => {
 
 			expect(result).toEqual(mockResult);
 
-			expect(mockSuccessfulRequest).toHaveBeenCalledOnce();
+			expect(mockSuccessfulRequest).toHaveBeenCalledExactlyOnceWith();
 			expect(mockOnRetry).not.toHaveBeenCalled();
 
 			expect(console.error).not.toHaveBeenCalled();
@@ -165,7 +165,7 @@ describe('rest.services', () => {
 				request: mockSuccessfulRequest
 			});
 
-			expect(mockSuccessfulRequest).toHaveBeenCalledOnce();
+			expect(mockSuccessfulRequest).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should return the result of the request when the request succeeds on the first try', async () => {
@@ -190,7 +190,7 @@ describe('rest.services', () => {
 			expect(mockFailedRequest).toHaveBeenCalledTimes(maxRetries + 1);
 
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
 		});
 
 		it('should call randomWait after each failed attempt', async () => {
@@ -215,10 +215,10 @@ describe('rest.services', () => {
 					})
 			).rejects.toThrow(mockError);
 
-			expect(mockFailedRequest).toHaveBeenCalledOnce();
+			expect(mockFailedRequest).toHaveBeenCalledExactlyOnceWith();
 			expect(randomWait).not.toHaveBeenCalled();
 			expect(console.error).toHaveBeenCalled();
-			expect(console.error).toHaveBeenCalledWith('Max retries reached. Error:', mockError);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith('Max retries reached. Error:', mockError);
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 	});

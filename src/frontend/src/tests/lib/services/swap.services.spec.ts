@@ -351,7 +351,7 @@ describe('fetchSwapAmountsEVM', () => {
 		});
 
 		expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-		expect(mapVeloraSwapResult).toHaveBeenCalledOnce();
+		expect(mapVeloraSwapResult).toHaveBeenCalledExactlyOnceWith();
 		expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
 		expect(result).toHaveLength(1);
 		expect(result[0].provider).toBe(SwapProvider.VELORA);
@@ -367,7 +367,7 @@ describe('fetchSwapAmountsEVM', () => {
 			userEthAddress
 		});
 
-		expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();
+		expect(mapVeloraMarketSwapResult).toHaveBeenCalledExactlyOnceWith();
 		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
 		expect(result).toHaveLength(1);
 		expect(result[0].provider).toBe(SwapProvider.VELORA);
@@ -554,9 +554,9 @@ describe('fetchVeloraDeltaSwap', () => {
 			swapDetails: mockSwapDetails as VeloraSwapDetails
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.UPDATE_UI);
 		expect(mockDeltaContractGetDeltaContract).toHaveBeenCalled();
-		expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledWith({
+		expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledExactlyOnceWith({
 			order: { order: 'mock-order-data' },
 			signature: 'mock-signature'
 		});
@@ -610,7 +610,7 @@ describe('fetchVeloraDeltaSwap', () => {
 			swapDetails: mockSwapDetails as VeloraSwapDetails
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.UPDATE_UI);
 	});
 });
 
@@ -711,8 +711,8 @@ describe('fetchVeloraMarketSwap', () => {
 			destinationNetwork: SEPOLIA_NETWORK
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.UPDATE_UI);
 		expect(mockSwapGetSpender).toHaveBeenCalled();
 	});
 
@@ -736,8 +736,8 @@ describe('fetchVeloraMarketSwap', () => {
 			destinationNetwork: SEPOLIA_NETWORK
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.UPDATE_UI);
 		expect(mockSwapGetSpender).toHaveBeenCalled();
 		expect(mockSwapBuildTx).toHaveBeenCalled();
 	});
@@ -795,7 +795,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 
 		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith();
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
 	});
 
@@ -831,7 +831,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 				fee: sourceToken.fee
 			})
 		);
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
 	});
 
@@ -856,9 +856,9 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 			destinationToken
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
+		expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
+		expect(setFailedProgressStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.WITHDRAW);
 		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
 	});
 });
@@ -894,11 +894,11 @@ describe('performManualWithdraw', () => {
 
 		const result = await performManualWithdraw(baseParams);
 
-		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith();
 
-		expect(trackEvent).toHaveBeenCalledWith({
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
 				token: destinationToken.symbol,
@@ -927,11 +927,11 @@ describe('performManualWithdraw', () => {
 			setFailedProgressStep
 		});
 
-		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
 		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
 
-		expect(trackEvent).toHaveBeenCalledWith({
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
 			metadata: {
 				token: destinationToken.symbol,
@@ -939,7 +939,7 @@ describe('performManualWithdraw', () => {
 				dApp: SwapProvider.ICP_SWAP
 			}
 		});
-		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
+		expect(setFailedProgressStep).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.WITHDRAW);
 		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED);
 		expect(result.variant).toBe('error');
 	});
@@ -960,7 +960,7 @@ describe('performManualWithdraw', () => {
 			withdrawDestinationTokens: false
 		});
 
-		expect(trackEvent).toHaveBeenCalledWith({
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
 			metadata: {
 				token: sourceToken.symbol,
@@ -1001,7 +1001,7 @@ describe('withdrawUserUnusedBalance', () => {
 			destinationToken
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
 		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
 	});
 
@@ -1025,7 +1025,7 @@ describe('withdrawUserUnusedBalance', () => {
 			})
 		).rejects.toThrow('No unused balance to withdraw');
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
 		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
 	});
 
@@ -1047,8 +1047,8 @@ describe('withdrawUserUnusedBalance', () => {
 			destinationToken
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith({
 			identity,
 			canisterId,
 			token: destinationToken.ledgerCanisterId,
@@ -1075,8 +1075,8 @@ describe('withdrawUserUnusedBalance', () => {
 			destinationToken
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledExactlyOnceWith();
+		expect(icpSwapPool.withdraw).toHaveBeenCalledExactlyOnceWith({
 			identity,
 			canisterId,
 			token: sourceToken.ledgerCanisterId,

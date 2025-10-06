@@ -44,7 +44,7 @@ describe('ckbtc-update-balance.worker', () => {
 
 			await onCkBtcUpdateBalanceMessage(event);
 
-			expect(mockStop).toHaveBeenCalledOnce();
+			expect(mockStop).toHaveBeenCalledExactlyOnceWith();
 
 			expect(mockStart).not.toHaveBeenCalled();
 		});
@@ -54,7 +54,7 @@ describe('ckbtc-update-balance.worker', () => {
 
 			await onCkBtcUpdateBalanceMessage(event);
 
-			expect(mockStart).toHaveBeenCalledOnce();
+			expect(mockStart).toHaveBeenCalledExactlyOnceWith();
 			expect(mockStart).toHaveBeenNthCalledWith(1, event.data.data);
 
 			expect(mockStop).not.toHaveBeenCalled();

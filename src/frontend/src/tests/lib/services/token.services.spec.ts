@@ -115,13 +115,13 @@ describe('token.services', () => {
 
 			expect(result).toBe('error');
 
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: mockErrorMessage },
 				err: error
 			});
 
-			expect(spyBusyStart).toHaveBeenCalledOnce();
-			expect(spyBusyStop).toHaveBeenCalledOnce();
+			expect(spyBusyStart).toHaveBeenCalledExactlyOnceWith();
+			expect(spyBusyStop).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should enable token, reload tokens, and return "loaded" on success', async () => {
@@ -132,15 +132,15 @@ describe('token.services', () => {
 
 			expect(result).toBe('loaded');
 
-			expect(mockSetToken).toHaveBeenCalledWith({
+			expect(mockSetToken).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				token: params.token,
 				enabled: true
 			});
-			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
+			expect(mockLoadTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-			expect(spyBusyStart).toHaveBeenCalledOnce();
-			expect(spyBusyStop).toHaveBeenCalledOnce();
+			expect(spyBusyStart).toHaveBeenCalledExactlyOnceWith();
+			expect(spyBusyStop).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -227,13 +227,13 @@ describe('token.services', () => {
 
 			expect(result).toBe('error');
 
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: mockErrorMessage },
 				err: error
 			});
 
-			expect(spyBusyStart).toHaveBeenCalledOnce();
-			expect(spyBusyStop).toHaveBeenCalledOnce();
+			expect(spyBusyStart).toHaveBeenCalledExactlyOnceWith();
+			expect(spyBusyStop).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should enable counterpart token, reload tokens, and return "loaded" on success', async () => {
@@ -248,15 +248,15 @@ describe('token.services', () => {
 
 			expect(result).toBe('loaded');
 
-			expect(mockSetToken).toHaveBeenCalledWith({
+			expect(mockSetToken).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				token: pseudoDisabledToken,
 				enabled: true
 			});
-			expect(mockLoadTokens).toHaveBeenCalledWith({ identity: mockIdentity });
+			expect(mockLoadTokens).toHaveBeenCalledExactlyOnceWith({ identity: mockIdentity });
 
-			expect(spyBusyStart).toHaveBeenCalledOnce();
-			expect(spyBusyStop).toHaveBeenCalledOnce();
+			expect(spyBusyStart).toHaveBeenCalledExactlyOnceWith();
+			expect(spyBusyStop).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 });

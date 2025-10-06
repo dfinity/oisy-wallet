@@ -56,14 +56,14 @@ describe('eth-transactions-batch.services', () => {
 			expect(loadEthereumTransactions).toHaveBeenCalledTimes(mockTokensNotLoaded.length);
 
 			mockTokensNotLoaded.forEach((token) => {
-				expect(loadEthereumTransactions).toHaveBeenCalledWith({
+				expect(loadEthereumTransactions).toHaveBeenCalledExactlyOnceWith({
 					tokenId: token.id,
 					networkId: token.network.id,
 					standard: token.standard
 				});
 			});
 
-			expect(batchSpy).toHaveBeenCalledWith({
+			expect(batchSpy).toHaveBeenCalledExactlyOnceWith({
 				promises: expect.any(Array),
 				batchSize: expect.any(Number)
 			});
@@ -125,7 +125,7 @@ describe('eth-transactions-batch.services', () => {
 				tokensAlreadyLoaded: []
 			});
 
-			expect(batch).toHaveBeenCalledWith({
+			expect(batch).toHaveBeenCalledExactlyOnceWith({
 				promises: expect.any(Array),
 				batchSize: ETHERSCAN_MAX_CALLS_PER_SECOND
 			});

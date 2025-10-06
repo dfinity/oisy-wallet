@@ -104,7 +104,7 @@ describe('signer.canister', () => {
 			const res = await getBtcAddress(btcParams);
 
 			expect(res).toEqual(address);
-			expect(service.btc_caller_address).toHaveBeenCalledWith(
+			expect(service.btc_caller_address).toHaveBeenCalledExactlyOnceWith(
 				{ network: btcParams.network, address_type: P2WPKH },
 				[SIGNER_PAYMENT_TYPE]
 			);
@@ -194,7 +194,7 @@ describe('signer.canister', () => {
 			const res = await getBtcBalance(btcParams);
 
 			expect(res).toEqual(balance);
-			expect(service.btc_caller_balance).toHaveBeenCalledWith(
+			expect(service.btc_caller_balance).toHaveBeenCalledExactlyOnceWith(
 				{ network: btcParams.network, address_type: P2WPKH, min_confirmations: [] },
 				[SIGNER_PAYMENT_TYPE]
 			);
@@ -213,7 +213,7 @@ describe('signer.canister', () => {
 			const res = await getBtcBalance({ ...btcParams, minConfirmations });
 
 			expect(res).toEqual(balance);
-			expect(service.btc_caller_balance).toHaveBeenCalledWith(
+			expect(service.btc_caller_balance).toHaveBeenCalledExactlyOnceWith(
 				{
 					network: btcParams.network,
 					address_type: P2WPKH,
@@ -405,7 +405,7 @@ describe('signer.canister', () => {
 			const res = await signTransaction(signTransactionParams);
 
 			expect(res).toEqual(response);
-			expect(service.eth_sign_transaction).toHaveBeenCalledWith(signTransactionParams.transaction, [
+			expect(service.eth_sign_transaction).toHaveBeenCalledExactlyOnceWith(signTransactionParams.transaction, [
 				SIGNER_PAYMENT_TYPE
 			]);
 		});
@@ -450,7 +450,7 @@ describe('signer.canister', () => {
 			const res = await personalSign(personalSignParams);
 
 			expect(res).toEqual(response);
-			expect(service.eth_personal_sign).toHaveBeenCalledWith(personalSignParams, [
+			expect(service.eth_personal_sign).toHaveBeenCalledExactlyOnceWith(personalSignParams, [
 				SIGNER_PAYMENT_TYPE
 			]);
 		});
@@ -495,7 +495,7 @@ describe('signer.canister', () => {
 			const res = await signPrehash(signPrehashParams);
 
 			expect(res).toEqual(response);
-			expect(service.eth_sign_prehash).toHaveBeenCalledWith(signPrehashParams, [
+			expect(service.eth_sign_prehash).toHaveBeenCalledExactlyOnceWith(signPrehashParams, [
 				SIGNER_PAYMENT_TYPE
 			]);
 		});
@@ -540,7 +540,7 @@ describe('signer.canister', () => {
 			const res = await sendBtc(sendBtcParams);
 
 			expect(res).toEqual(response.Ok);
-			expect(service.btc_caller_send).toHaveBeenCalledWith(
+			expect(service.btc_caller_send).toHaveBeenCalledExactlyOnceWith(
 				{
 					fee_satoshis: sendBtcParams.feeSatoshis,
 					network: sendBtcParams.network,
@@ -659,7 +659,7 @@ describe('signer.canister', () => {
 			const res = await getSchnorrPublicKey({ derivationPath: ['test'], keyId: SOLANA_KEY_ID });
 
 			expect(res).toEqual(publicKey);
-			expect(service.schnorr_public_key).toHaveBeenCalledWith(
+			expect(service.schnorr_public_key).toHaveBeenCalledExactlyOnceWith(
 				{
 					key_id: SOLANA_KEY_ID,
 					canister_id: [],
@@ -702,7 +702,7 @@ describe('signer.canister', () => {
 			});
 
 			expect(res).toEqual(signature);
-			expect(service.schnorr_sign).toHaveBeenCalledWith(
+			expect(service.schnorr_sign).toHaveBeenCalledExactlyOnceWith(
 				{
 					key_id: SOLANA_KEY_ID,
 					derivation_path: mapDerivationPath(['test']),

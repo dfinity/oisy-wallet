@@ -102,7 +102,7 @@ describe('ic-send.services', () => {
 				it('should execute full send flow', async () => {
 					await sendIc(mockParams);
 
-					expect(transferIcrc).toHaveBeenCalledOnce();
+					expect(transferIcrc).toHaveBeenCalledExactlyOnceWith();
 					expect(transferIcrc).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
@@ -114,13 +114,13 @@ describe('ic-send.services', () => {
 				it('should call the auxiliary functions', async () => {
 					await sendIc(mockParams);
 
-					expect(mockSendCompleted).toHaveBeenCalledOnce();
+					expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
 					expect(mockProgress).toHaveBeenCalledTimes(2);
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendIc.RELOAD);
 
-					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+					expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should not call the other services', async () => {
@@ -150,7 +150,7 @@ describe('ic-send.services', () => {
 					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
-					expect(mockProgress).toHaveBeenCalledOnce();
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
 				});
@@ -174,7 +174,7 @@ describe('ic-send.services', () => {
 
 					await sendIc(mockParams);
 
-					expect(icrc1TransferIcp).toHaveBeenCalledOnce();
+					expect(icrc1TransferIcp).toHaveBeenCalledExactlyOnceWith();
 					expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: decodeIcrcAccount(mockPrincipalText2),
@@ -191,7 +191,7 @@ describe('ic-send.services', () => {
 
 					await sendIc(mockParams);
 
-					expect(transferIcp).toHaveBeenCalledOnce();
+					expect(transferIcp).toHaveBeenCalledExactlyOnceWith();
 					expect(transferIcp).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						to: mockPrincipalText2,
@@ -208,13 +208,13 @@ describe('ic-send.services', () => {
 
 					await sendIc(mockParams);
 
-					expect(mockSendCompleted).toHaveBeenCalledOnce();
+					expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
 					expect(mockProgress).toHaveBeenCalledTimes(2);
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendIc.RELOAD);
 
-					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+					expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 
 					vi.clearAllMocks();
 
@@ -223,13 +223,13 @@ describe('ic-send.services', () => {
 
 					await sendIc(mockParams);
 
-					expect(mockSendCompleted).toHaveBeenCalledOnce();
+					expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
 					expect(mockProgress).toHaveBeenCalledTimes(2);
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendIc.RELOAD);
 
-					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+					expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should not call the other services', async () => {
@@ -278,7 +278,7 @@ describe('ic-send.services', () => {
 					await expect(sendIc(mockParams)).rejects.toThrow('Test error 1');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
-					expect(mockProgress).toHaveBeenCalledOnce();
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
 
@@ -292,7 +292,7 @@ describe('ic-send.services', () => {
 					await expect(sendIc(mockParams)).rejects.toThrow('Test error 2');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
-					expect(mockProgress).toHaveBeenCalledOnce();
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
 				});
@@ -315,7 +315,7 @@ describe('ic-send.services', () => {
 				it('should execute full send flow', async () => {
 					await sendIc(mockParams);
 
-					expect(transferDip20).toHaveBeenCalledOnce();
+					expect(transferDip20).toHaveBeenCalledExactlyOnceWith();
 					expect(transferDip20).toHaveBeenNthCalledWith(1, {
 						identity: mockIdentity,
 						canisterId: mockValidDip20Token.ledgerCanisterId,
@@ -327,13 +327,13 @@ describe('ic-send.services', () => {
 				it('should call the auxiliary functions', async () => {
 					await sendIc(mockParams);
 
-					expect(mockSendCompleted).toHaveBeenCalledOnce();
+					expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
 					expect(mockProgress).toHaveBeenCalledTimes(2);
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSendIc.RELOAD);
 
-					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+					expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should not call the other services', async () => {
@@ -363,7 +363,7 @@ describe('ic-send.services', () => {
 					await expect(sendIc(mockParams)).rejects.toThrow('Test error');
 
 					expect(mockSendCompleted).not.toHaveBeenCalled();
-					expect(mockProgress).toHaveBeenCalledOnce();
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 					expect(waitAndTriggerWallet).not.toHaveBeenCalled();
 				});
@@ -392,19 +392,19 @@ describe('ic-send.services', () => {
 
 					const { sendCompleted: _, targetNetworkId: __, ...expected } = mockParams;
 
-					expect(convertCkBTCToBtc).toHaveBeenCalledOnce();
+					expect(convertCkBTCToBtc).toHaveBeenCalledExactlyOnceWith();
 					expect(convertCkBTCToBtc).toHaveBeenNthCalledWith(1, expected);
 				});
 
 				it('should call the auxiliary functions', async () => {
 					await sendIc(mockParams);
 
-					expect(mockSendCompleted).toHaveBeenCalledOnce();
+					expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
-					expect(mockProgress).toHaveBeenCalledOnce();
+					expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 					expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.RELOAD);
 
-					expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+					expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should not call the other services', async () => {
@@ -452,19 +452,19 @@ describe('ic-send.services', () => {
 
 						const { sendCompleted: _, targetNetworkId: __, ...expected } = mockParams;
 
-						expect(convertCkETHToEth).toHaveBeenCalledOnce();
+						expect(convertCkETHToEth).toHaveBeenCalledExactlyOnceWith();
 						expect(convertCkETHToEth).toHaveBeenNthCalledWith(1, expected);
 					});
 
 					it('should call the auxiliary functions', async () => {
 						await sendIc(mockParams);
 
-						expect(mockSendCompleted).toHaveBeenCalledOnce();
+						expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
-						expect(mockProgress).toHaveBeenCalledOnce();
+						expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 						expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.RELOAD);
 
-						expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+						expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 					});
 
 					it('should not call the other services', async () => {
@@ -507,19 +507,19 @@ describe('ic-send.services', () => {
 
 						const { sendCompleted: _, targetNetworkId: __, ...expected } = mockParams;
 
-						expect(convertCkErc20ToErc20).toHaveBeenCalledOnce();
+						expect(convertCkErc20ToErc20).toHaveBeenCalledExactlyOnceWith();
 						expect(convertCkErc20ToErc20).toHaveBeenNthCalledWith(1, expected);
 					});
 
 					it('should call the auxiliary functions', async () => {
 						await sendIc(mockParams);
 
-						expect(mockSendCompleted).toHaveBeenCalledOnce();
+						expect(mockSendCompleted).toHaveBeenCalledExactlyOnceWith();
 
-						expect(mockProgress).toHaveBeenCalledOnce();
+						expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 						expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.RELOAD);
 
-						expect(waitAndTriggerWallet).toHaveBeenCalledOnce();
+						expect(waitAndTriggerWallet).toHaveBeenCalledExactlyOnceWith();
 					});
 
 					it('should not call the other services', async () => {
@@ -566,7 +566,7 @@ describe('ic-send.services', () => {
 		it('should execute full send flow', async () => {
 			await sendIcrc(mockParams);
 
-			expect(transferIcrc).toHaveBeenCalledOnce();
+			expect(transferIcrc).toHaveBeenCalledExactlyOnceWith();
 			expect(transferIcrc).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				ledgerCanisterId: mockValidIcrcToken.ledgerCanisterId,
@@ -578,7 +578,7 @@ describe('ic-send.services', () => {
 		it('should call the auxiliary function', async () => {
 			await sendIcrc(mockParams);
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
@@ -595,7 +595,7 @@ describe('ic-send.services', () => {
 
 			await expect(sendIcrc(mockParams)).rejects.toThrow('Test error');
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 	});
@@ -619,7 +619,7 @@ describe('ic-send.services', () => {
 
 			await sendIcp(mockParams);
 
-			expect(icrc1TransferIcp).toHaveBeenCalledOnce();
+			expect(icrc1TransferIcp).toHaveBeenCalledExactlyOnceWith();
 			expect(icrc1TransferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: decodeIcrcAccount(mockPrincipalText2),
@@ -636,7 +636,7 @@ describe('ic-send.services', () => {
 
 			await sendIcp(mockParams);
 
-			expect(transferIcp).toHaveBeenCalledOnce();
+			expect(transferIcp).toHaveBeenCalledExactlyOnceWith();
 			expect(transferIcp).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				to: mockPrincipalText2,
@@ -653,7 +653,7 @@ describe('ic-send.services', () => {
 
 			await sendIcp(mockParams);
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 
 			vi.clearAllMocks();
@@ -663,7 +663,7 @@ describe('ic-send.services', () => {
 
 			await sendIcp(mockParams);
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
@@ -684,7 +684,7 @@ describe('ic-send.services', () => {
 
 			await expect(sendIcp(mockParams)).rejects.toThrow('Test error 1');
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 
 			vi.clearAllMocks();
@@ -696,7 +696,7 @@ describe('ic-send.services', () => {
 
 			await expect(sendIcp(mockParams)).rejects.toThrow('Test error 2');
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 	});
@@ -719,7 +719,7 @@ describe('ic-send.services', () => {
 		it('should execute full send flow', async () => {
 			await sendDip20(mockParams);
 
-			expect(transferDip20).toHaveBeenCalledOnce();
+			expect(transferDip20).toHaveBeenCalledExactlyOnceWith();
 			expect(transferDip20).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				canisterId: mockValidDip20Token.ledgerCanisterId,
@@ -731,7 +731,7 @@ describe('ic-send.services', () => {
 		it('should call the auxiliary function', async () => {
 			await sendDip20(mockParams);
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 
@@ -748,7 +748,7 @@ describe('ic-send.services', () => {
 
 			await expect(sendDip20(mockParams)).rejects.toThrow('Test error');
 
-			expect(mockProgress).toHaveBeenCalledOnce();
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith();
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSendIc.SEND);
 		});
 	});

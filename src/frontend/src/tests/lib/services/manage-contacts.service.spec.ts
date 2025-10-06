@@ -165,8 +165,8 @@ describe('manage-contacts.service', () => {
 				image: mockContactImage
 			});
 
-			expect(mockUpdateContact).toHaveBeenCalledOnce();
-			expect(updateContactSpy).toHaveBeenCalledWith(
+			expect(mockUpdateContact).toHaveBeenCalledExactlyOnceWith();
+			expect(updateContactSpy).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					image: mockContactImage
 				})
@@ -199,7 +199,7 @@ describe('manage-contacts.service', () => {
 				image: null
 			});
 
-			expect(mockUpdateContact).toHaveBeenCalledWith(
+			expect(mockUpdateContact).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					contact: expect.objectContaining({
 						image: toNullable(null)

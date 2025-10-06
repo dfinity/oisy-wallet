@@ -46,7 +46,7 @@ describe('RadioBox', () => {
 
 		await fireEvent.click(boxElm);
 
-		expect(props.onChange).toHaveBeenCalledOnce();
+		expect(props.onChange).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should render a label and optional description', async () => {

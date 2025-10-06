@@ -123,8 +123,8 @@ describe('exchange.services', () => {
 
 			const result = await exchangeRateICRCToUsd([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
-			expect(simpleTokenPrice).toHaveBeenCalledOnce();
-			expect(findMissingLedgerCanisterIds).toHaveBeenCalledWith({
+			expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith();
+			expect(findMissingLedgerCanisterIds).toHaveBeenCalledExactlyOnceWith({
 				allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
 				coingeckoResponse
 			});
@@ -147,12 +147,12 @@ describe('exchange.services', () => {
 
 			const result = await exchangeRateICRCToUsd([MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2]);
 
-			expect(simpleTokenPrice).toHaveBeenCalledOnce();
-			expect(findMissingLedgerCanisterIds).toHaveBeenCalledWith({
+			expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith();
+			expect(findMissingLedgerCanisterIds).toHaveBeenCalledExactlyOnceWith({
 				allLedgerCanisterIds: [MOCK_CANISTER_ID_1, MOCK_CANISTER_ID_2],
 				coingeckoResponse: partialCoingecko
 			});
-			expect(fetchBatchKongSwapPrices).toHaveBeenCalledWith([MOCK_CANISTER_ID_2]);
+			expect(fetchBatchKongSwapPrices).toHaveBeenCalledExactlyOnceWith([MOCK_CANISTER_ID_2]);
 			expect(formatKongSwapToCoingeckoPrices).toHaveBeenCalled();
 			expect(result).toEqual({
 				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1,
@@ -170,7 +170,7 @@ describe('exchange.services', () => {
 
 			const result = await exchangeRateICRCToUsd([MOCK_CANISTER_ID_1]);
 
-			expect(simpleTokenPrice).toHaveBeenCalledOnce();
+			expect(simpleTokenPrice).toHaveBeenCalledExactlyOnceWith();
 			expect(fetchBatchKongSwapPrices).toHaveBeenCalled();
 			expect(result).toEqual({
 				[MOCK_CANISTER_ID_1.toLowerCase()]: mockPrice1

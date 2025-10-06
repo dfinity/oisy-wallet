@@ -66,14 +66,14 @@ describe('manage-tokens.services', () => {
 		it('should call nullishSignOut if identity is nullish', async () => {
 			await saveTokens({ ...params, identity: null });
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 			expect(mockSave).not.toHaveBeenCalled();
 		});
 
 		it('should show an error toast if tokens are empty', async () => {
 			await saveTokens({ ...params, tokens: [] });
 
-			expect(toastsError).toHaveBeenCalledWith({
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.tokens.manage.error.empty }
 			});
 			expect(mockSave).not.toHaveBeenCalled();
@@ -84,17 +84,17 @@ describe('manage-tokens.services', () => {
 
 			await saveTokens(params);
 
-			expect(mockModalNext).toHaveBeenCalledOnce();
-			expect(mockSave).toHaveBeenCalledWith({
+			expect(mockModalNext).toHaveBeenCalledExactlyOnceWith();
+			expect(mockSave).toHaveBeenCalledExactlyOnceWith({
 				progress: mockProgress,
 				identity: mockIdentity,
 				tokens
 			});
-			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsAddToken.DONE);
+			expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsAddToken.DONE);
 
 			await new Promise((resolve) => setTimeout(resolve, 750));
 
-			expect(mockOnSuccess).toHaveBeenCalledOnce();
+			expect(mockOnSuccess).toHaveBeenCalledExactlyOnceWith();
 
 			expect(trackEvent).toHaveBeenCalledTimes(tokens.length);
 
@@ -121,13 +121,13 @@ describe('manage-tokens.services', () => {
 
 			await saveTokens(params);
 
-			expect(mockModalNext).toHaveBeenCalledOnce();
-			expect(mockSave).toHaveBeenCalledOnce();
-			expect(toastsError).toHaveBeenCalledWith({
+			expect(mockModalNext).toHaveBeenCalledExactlyOnceWith();
+			expect(mockSave).toHaveBeenCalledExactlyOnceWith();
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.tokens.error.unexpected },
 				err: new Error('Save failed')
 			});
-			expect(mockOnError).toHaveBeenCalledOnce();
+			expect(mockOnError).toHaveBeenCalledExactlyOnceWith();
 
 			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR,

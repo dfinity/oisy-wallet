@@ -152,6 +152,6 @@ describe('Menu', () => {
 
 		button.click();
 
-		expect(openReceiveSpy).toHaveBeenCalledWith(getSymbol('menu-addresses'));
+		expect(openReceiveSpy).toHaveBeenCalledExactlyOnceWith(getSymbol('menu-addresses'));
 	});
 });

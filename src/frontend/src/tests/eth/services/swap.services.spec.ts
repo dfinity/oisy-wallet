@@ -108,7 +108,7 @@ describe('swap.services', () => {
 			expect(result).toEqual({ hash: mockTransactionHash });
 
 			expect(infuraProviders).toHaveBeenCalled();
-			expect(mockGetTransactionCount).toHaveBeenCalledOnce();
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith();
 
 			expect(infuraProviders).toHaveBeenNthCalledWith(1, ETHEREUM_NETWORK_ID);
 			expect(mockGetTransactionCount).toHaveBeenNthCalledWith(1, mockEthAddress, 'pending');
@@ -117,13 +117,13 @@ describe('swap.services', () => {
 		it('should call progress with correct step', async () => {
 			await swap(mockSwapParams);
 
-			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+			expect(mockSwapParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
 		});
 
 		it('should call signTransaction with correct parameters', async () => {
 			await swap(mockSwapParams);
 
-			expect(signTransaction).toHaveBeenCalledOnce();
+			expect(signTransaction).toHaveBeenCalledExactlyOnceWith();
 			expect(signTransaction).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				transaction: {
@@ -143,14 +143,14 @@ describe('swap.services', () => {
 		it('should call sendTransaction with raw transaction', async () => {
 			await swap(mockSwapParams);
 
-			expect(mockSendTransaction).toHaveBeenCalledOnce();
+			expect(mockSendTransaction).toHaveBeenCalledExactlyOnceWith();
 			expect(mockSendTransaction).toHaveBeenNthCalledWith(1, mockRawTransaction);
 		});
 
 		it('should call processTransactionSent with correct parameters', async () => {
 			await swap(mockSwapParams);
 
-			expect(processTransactionSent).toHaveBeenCalledOnce();
+			expect(processTransactionSent).toHaveBeenCalledExactlyOnceWith();
 			expect(processTransactionSent).toHaveBeenNthCalledWith(1, {
 				token: ETHEREUM_TOKEN,
 				transaction: mockTransactionResponse
@@ -165,7 +165,7 @@ describe('swap.services', () => {
 
 			await swap(paramsWithNullData);
 
-			expect(signTransaction).toHaveBeenCalledWith({
+			expect(signTransaction).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transaction: {
 					to: mockEthAddress2,
@@ -189,7 +189,7 @@ describe('swap.services', () => {
 
 			await swap(paramsWithValue);
 
-			expect(signTransaction).toHaveBeenCalledWith({
+			expect(signTransaction).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				transaction: {
 					to: mockEthAddress2,
@@ -213,9 +213,9 @@ describe('swap.services', () => {
 
 			await expect(swap(paramsWithNullishGas)).rejects.toThrow(en.send.error.erc20_data_undefined);
 
-			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
-			expect(mockGetTransactionCount).toHaveBeenCalledWith(mockEthAddress, 'pending');
+			expect(mockSwapParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+			expect(infuraProviders).toHaveBeenCalledExactlyOnceWith(ETHEREUM_NETWORK_ID);
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'pending');
 		});
 
 		it('should handle error when getting transaction count', async () => {
@@ -223,9 +223,9 @@ describe('swap.services', () => {
 
 			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
-			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
-			expect(mockGetTransactionCount).toHaveBeenCalledWith(mockEthAddress, 'pending');
+			expect(mockSwapParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+			expect(infuraProviders).toHaveBeenCalledExactlyOnceWith(ETHEREUM_NETWORK_ID);
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'pending');
 			expect(signTransaction).not.toHaveBeenCalled();
 		});
 
@@ -234,9 +234,9 @@ describe('swap.services', () => {
 
 			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
-			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
-			expect(mockGetTransactionCount).toHaveBeenCalledWith(mockEthAddress, 'pending');
+			expect(mockSwapParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+			expect(infuraProviders).toHaveBeenCalledExactlyOnceWith(ETHEREUM_NETWORK_ID);
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'pending');
 			expect(signTransaction).toHaveBeenCalled();
 			expect(mockSendTransaction).not.toHaveBeenCalled();
 		});
@@ -246,11 +246,11 @@ describe('swap.services', () => {
 
 			await expect(swap(mockSwapParams)).rejects.toThrow(mockError);
 
-			expect(mockSwapParams.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-			expect(infuraProviders).toHaveBeenCalledWith(ETHEREUM_NETWORK_ID);
-			expect(mockGetTransactionCount).toHaveBeenCalledWith(mockEthAddress, 'pending');
+			expect(mockSwapParams.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+			expect(infuraProviders).toHaveBeenCalledExactlyOnceWith(ETHEREUM_NETWORK_ID);
+			expect(mockGetTransactionCount).toHaveBeenCalledExactlyOnceWith(mockEthAddress, 'pending');
 			expect(signTransaction).toHaveBeenCalled();
-			expect(mockSendTransaction).toHaveBeenCalledWith(mockRawTransaction);
+			expect(mockSendTransaction).toHaveBeenCalledExactlyOnceWith(mockRawTransaction);
 			expect(processTransactionSent).not.toHaveBeenCalled();
 		});
 	});

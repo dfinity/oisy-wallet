@@ -214,7 +214,7 @@ describe('backend.canister', () => {
 
 		const res = await setManyCustomTokens({ tokens: customTokens });
 
-		expect(service.set_many_custom_tokens).toHaveBeenCalledWith(customTokens);
+		expect(service.set_many_custom_tokens).toHaveBeenCalledExactlyOnceWith(customTokens);
 		expect(res).toEqual(undefined);
 	});
 
@@ -240,7 +240,7 @@ describe('backend.canister', () => {
 
 		const res = await setCustomToken({ token: mockedCustomToken });
 
-		expect(service.set_custom_token).toHaveBeenCalledWith(mockedCustomToken);
+		expect(service.set_custom_token).toHaveBeenCalledExactlyOnceWith(mockedCustomToken);
 		expect(res).toEqual(undefined);
 	});
 
@@ -266,7 +266,7 @@ describe('backend.canister', () => {
 
 		const res = await setManyUserTokens({ tokens: userTokens });
 
-		expect(service.set_many_user_tokens).toHaveBeenCalledWith(userTokens);
+		expect(service.set_many_user_tokens).toHaveBeenCalledExactlyOnceWith(userTokens);
 		expect(res).toEqual(undefined);
 	});
 
@@ -292,7 +292,7 @@ describe('backend.canister', () => {
 
 		const res = await setUserToken({ token: mockedUserToken });
 
-		expect(service.set_user_token).toHaveBeenCalledWith(mockedUserToken);
+		expect(service.set_user_token).toHaveBeenCalledExactlyOnceWith(mockedUserToken);
 		expect(res).toEqual(undefined);
 	});
 
@@ -390,7 +390,7 @@ describe('backend.canister', () => {
 
 		const res = await addUserCredential(addUserCredentialParams);
 
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
+		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(addUserCredentialEndpointParams);
 		expect(res).toEqual(response);
 	});
 
@@ -404,7 +404,7 @@ describe('backend.canister', () => {
 
 		const res = await addUserCredential(addUserCredentialParams);
 
-		expect(service.add_user_credential).toHaveBeenCalledWith(addUserCredentialEndpointParams);
+		expect(service.add_user_credential).toHaveBeenCalledExactlyOnceWith(addUserCredentialEndpointParams);
 		expect(res).toEqual(response);
 	});
 
@@ -435,7 +435,7 @@ describe('backend.canister', () => {
 
 			const res = await btcAddPendingTransaction(btcAddPendingTransactionParams);
 
-			expect(service.btc_add_pending_transaction).toHaveBeenCalledWith(
+			expect(service.btc_add_pending_transaction).toHaveBeenCalledExactlyOnceWith(
 				btcAddPendingTransactionEndpointParams
 			);
 			expect(res).toBeTruthy();
@@ -520,7 +520,7 @@ describe('backend.canister', () => {
 
 			const res = await btcGetPendingTransaction(btcGetPendingTransactionParams);
 
-			expect(service.btc_get_pending_transactions).toHaveBeenCalledWith(
+			expect(service.btc_get_pending_transactions).toHaveBeenCalledExactlyOnceWith(
 				btcGetPendingTransactionParams
 			);
 			expect(res).toEqual(response.Ok.transactions);
@@ -586,7 +586,7 @@ describe('backend.canister', () => {
 
 			const res = await btcSelectUserUtxosFee(btcSelectUserUtxosFeeParams);
 
-			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledWith(
+			expect(service.btc_select_user_utxos_fee).toHaveBeenCalledExactlyOnceWith(
 				btcSelectUserUtxosFeeEndpointParams
 			);
 			expect(res).toEqual(response.Ok);
@@ -680,7 +680,7 @@ describe('backend.canister', () => {
 
 			const result = await getAllowedCycles();
 
-			expect(service.get_allowed_cycles).toHaveBeenCalledOnce();
+			expect(service.get_allowed_cycles).toHaveBeenCalledExactlyOnceWith();
 			expect(result).toEqual({ allowed_cycles: mockAllowedCycles });
 		});
 
@@ -770,7 +770,7 @@ describe('backend.canister', () => {
 
 			const res = await allowSigning();
 
-			expect(service.allow_signing).toHaveBeenCalledOnce();
+			expect(service.allow_signing).toHaveBeenCalledExactlyOnceWith();
 			expect(res).toBeDefined();
 		});
 
@@ -991,7 +991,7 @@ describe('backend.canister', () => {
 
 			const res = await addUserHiddenDappId({ dappId: 'test-dapp-id' });
 
-			expect(service.add_user_hidden_dapp_id).toHaveBeenCalledWith({
+			expect(service.add_user_hidden_dapp_id).toHaveBeenCalledExactlyOnceWith({
 				dapp_id: 'test-dapp-id',
 				current_user_version: []
 			});
@@ -1028,7 +1028,7 @@ describe('backend.canister', () => {
 				showTestnets: true
 			});
 
-			expect(service.set_user_show_testnets).toHaveBeenCalledWith({
+			expect(service.set_user_show_testnets).toHaveBeenCalledExactlyOnceWith({
 				show_testnets: true,
 				current_user_version: []
 			});
@@ -1067,7 +1067,7 @@ describe('backend.canister', () => {
 				networks: mockUserNetworks
 			});
 
-			expect(service.update_user_network_settings).toHaveBeenCalledWith({
+			expect(service.update_user_network_settings).toHaveBeenCalledExactlyOnceWith({
 				networks: mockUserNetworksMap,
 				current_user_version: []
 			});
@@ -1106,7 +1106,7 @@ describe('backend.canister', () => {
 				experimentalFeatures: mockUserExperimentalFeatures
 			});
 
-			expect(service.update_user_experimental_feature_settings).toHaveBeenCalledWith({
+			expect(service.update_user_experimental_feature_settings).toHaveBeenCalledExactlyOnceWith({
 				experimental_features: mockUserExperimentalFeaturesMap,
 				current_user_version: []
 			});
@@ -1145,7 +1145,7 @@ describe('backend.canister', () => {
 				agreements: mockUserAgreements
 			});
 
-			expect(service.update_user_agreements).toHaveBeenCalledWith({
+			expect(service.update_user_agreements).toHaveBeenCalledExactlyOnceWith({
 				agreements: mockDefinedUserAgreements.agreements,
 				current_user_version: []
 			});
@@ -1165,7 +1165,7 @@ describe('backend.canister', () => {
 
 			const res = await updateUserAgreements({ agreements });
 
-			expect(service.update_user_agreements).toHaveBeenCalledWith({
+			expect(service.update_user_agreements).toHaveBeenCalledExactlyOnceWith({
 				agreements: {
 					...mockDefinedUserAgreements.agreements,
 					license_agreement: {
@@ -1211,7 +1211,7 @@ describe('backend.canister', () => {
 
 			const res = await getContact(1n);
 
-			expect(service.get_contact).toHaveBeenCalledWith(1n);
+			expect(service.get_contact).toHaveBeenCalledExactlyOnceWith(1n);
 			expect(res).toEqual(mockContact);
 		});
 
@@ -1244,7 +1244,7 @@ describe('backend.canister', () => {
 
 			const res = await getContacts();
 
-			expect(service.get_contacts).toHaveBeenCalledOnce();
+			expect(service.get_contacts).toHaveBeenCalledExactlyOnceWith();
 			expect(res).toEqual(mockContacts);
 		});
 
@@ -1277,7 +1277,7 @@ describe('backend.canister', () => {
 
 			const res = await createContact('John');
 
-			expect(service.create_contact).toHaveBeenCalledWith({ name: 'John', image: [] });
+			expect(service.create_contact).toHaveBeenCalledExactlyOnceWith({ name: 'John', image: [] });
 			expect(res).toEqual(mockContact);
 		});
 
@@ -1309,7 +1309,7 @@ describe('backend.canister', () => {
 
 			const res = await deleteContact(1n);
 
-			expect(service.delete_contact).toHaveBeenCalledWith(1n);
+			expect(service.delete_contact).toHaveBeenCalledExactlyOnceWith(1n);
 			expect(res).toEqual(1n);
 		});
 
@@ -1342,7 +1342,7 @@ describe('backend.canister', () => {
 
 			const res = await updateContact(mockContact);
 
-			expect(service.update_contact).toHaveBeenCalledWith(mockContact);
+			expect(service.update_contact).toHaveBeenCalledExactlyOnceWith(mockContact);
 			expect(res).toEqual(mockContact);
 		});
 
@@ -1379,7 +1379,7 @@ describe('backend.canister', () => {
 
 			const res = await removeUserToken(params);
 
-			expect(service.remove_user_token).toHaveBeenCalledWith(params);
+			expect(service.remove_user_token).toHaveBeenCalledExactlyOnceWith(params);
 			expect(res).toEqual(response);
 		});
 
@@ -1417,7 +1417,7 @@ describe('backend.canister', () => {
 
 			const res = await removeCustomToken(params);
 
-			expect(service.remove_custom_token).toHaveBeenCalledWith(params.token);
+			expect(service.remove_custom_token).toHaveBeenCalledExactlyOnceWith(params.token);
 			expect(res).toEqual(response);
 		});
 
@@ -1459,7 +1459,7 @@ describe('backend.canister', () => {
 
 			const res = await btcGetCurrentFeePercentiles(btcGetFeePercentilesParams);
 
-			expect(service.btc_get_current_fee_percentiles).toHaveBeenCalledWith(
+			expect(service.btc_get_current_fee_percentiles).toHaveBeenCalledExactlyOnceWith(
 				btcGetFeePercentilesParams
 			);
 			expect(res).toEqual(response.Ok);

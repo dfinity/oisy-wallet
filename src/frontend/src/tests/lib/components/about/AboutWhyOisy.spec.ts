@@ -21,7 +21,7 @@ describe('AboutWhyOisy', () => {
 		await fireEvent.click(getByTestId(ABOUT_WHY_OISY_BUTTON));
 
 		expect(openModalSpy).toHaveBeenCalled();
-		expect(trackEventSpy).toHaveBeenCalledWith({
+		expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_COUNT_OPEN_WHY_OISY,
 			metadata: {
 				source: 'test-source'

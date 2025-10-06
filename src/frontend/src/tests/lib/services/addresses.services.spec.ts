@@ -38,9 +38,9 @@ describe('addresses.services', () => {
 			const result = await loadAddresses(networkIds);
 
 			expect(result).toEqual({ success: true });
-			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
-			expect(loadEthAddress).toHaveBeenCalledOnce();
-			expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
+			expect(loadEthAddress).toHaveBeenCalledExactlyOnceWith();
+			expect(loadSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should load addresses only for provided token IDs', async () => {
@@ -49,7 +49,7 @@ describe('addresses.services', () => {
 			const result = await loadAddresses(networkIds);
 
 			expect(result).toEqual({ success: true });
-			expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 			expect(loadEthAddress).not.toHaveBeenCalled();
 			expect(loadSolAddressMainnet).not.toHaveBeenCalled();
 		});
@@ -73,9 +73,9 @@ describe('addresses.services', () => {
 			]);
 
 			expect(result).toEqual({ success: true });
-			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
-			expect(loadIdbEthAddress).toHaveBeenCalledOnce();
-			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
+			expect(loadIdbEthAddress).toHaveBeenCalledExactlyOnceWith();
+			expect(loadIdbSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should handle failure when one network fails during IndexedDB loading', async () => {
@@ -95,18 +95,18 @@ describe('addresses.services', () => {
 				success: false,
 				err: [mockError]
 			});
-			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
-			expect(loadIdbEthAddress).toHaveBeenCalledOnce();
-			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
+			expect(loadIdbEthAddress).toHaveBeenCalledExactlyOnceWith();
+			expect(loadIdbSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should not call load for disabled networks', async () => {
 			const result = await loadIdbAddresses([BTC_MAINNET_NETWORK_ID, SOLANA_MAINNET_NETWORK_ID]);
 
 			expect(result).toEqual({ success: true });
-			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadIdbBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 			expect(loadIdbEthAddress).not.toHaveBeenCalledOnce();
-			expect(loadIdbSolAddressMainnet).toHaveBeenCalledOnce();
+			expect(loadIdbSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should not call any if all networks disabled', async () => {

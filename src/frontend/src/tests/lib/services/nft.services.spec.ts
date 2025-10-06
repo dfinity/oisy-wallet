@@ -172,10 +172,10 @@ describe('nft.services', () => {
 				progress
 			});
 
-			expect(transfer721Spy).toHaveBeenCalledOnce();
+			expect(transfer721Spy).toHaveBeenCalledExactlyOnceWith();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
 
-			expect(transfer721Spy).toHaveBeenCalledWith({
+			expect(transfer721Spy).toHaveBeenCalledExactlyOnceWith({
 				contractAddress: token721.address,
 				tokenId,
 				sourceNetwork: token721.network,
@@ -205,10 +205,10 @@ describe('nft.services', () => {
 				progress
 			});
 
-			expect(transfer1155Spy).toHaveBeenCalledOnce();
+			expect(transfer1155Spy).toHaveBeenCalledExactlyOnceWith();
 			expect(transfer721Spy).not.toHaveBeenCalled();
 
-			expect(transfer1155Spy).toHaveBeenCalledWith(
+			expect(transfer1155Spy).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					contractAddress: token1155.address,
 					id: tokenId,
@@ -237,7 +237,7 @@ describe('nft.services', () => {
 				maxPriorityFeePerGas
 			});
 
-			expect(signOutSpy).toHaveBeenCalledOnce();
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(transfer721Spy).not.toHaveBeenCalled();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
 		});

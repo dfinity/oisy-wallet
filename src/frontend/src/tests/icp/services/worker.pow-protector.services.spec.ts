@@ -48,7 +48,7 @@ describe('worker.pow-protection.services', () => {
 		it('should start the worker and send the correct start message', () => {
 			worker.start();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'startPowProtectionTimer'
 			});
@@ -57,7 +57,7 @@ describe('worker.pow-protection.services', () => {
 		it('should stop the worker and send the correct stop message', () => {
 			worker.stop();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'stopPowProtectionTimer'
 			});
@@ -66,7 +66,7 @@ describe('worker.pow-protection.services', () => {
 		it('should trigger the worker and send the correct trigger message', () => {
 			worker.trigger();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'triggerPowProtectionTimer'
 			});
@@ -75,12 +75,12 @@ describe('worker.pow-protection.services', () => {
 		it('should destroy the worker', () => {
 			worker.destroy();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'stopPowProtectionTimer'
 			});
 
-			expect(workerInstance.terminate).toHaveBeenCalledOnce();
+			expect(workerInstance.terminate).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		describe('onmessage', () => {
@@ -91,8 +91,8 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowProgress).toHaveBeenCalledOnce();
-				expect(syncPowProgress).toHaveBeenCalledWith({
+				expect(syncPowProgress).toHaveBeenCalledExactlyOnceWith();
+				expect(syncPowProgress).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});
@@ -104,8 +104,8 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowNextAllowance).toHaveBeenCalledOnce();
-				expect(syncPowNextAllowance).toHaveBeenCalledWith({
+				expect(syncPowNextAllowance).toHaveBeenCalledExactlyOnceWith();
+				expect(syncPowNextAllowance).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});

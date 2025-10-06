@@ -18,7 +18,7 @@ describe('blockchain.rest', () => {
 
 			expect(result).toEqual(mockBlockchainResponse);
 
-			expect(global.fetch).toHaveBeenCalledWith(
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(
 				expect.stringContaining(`rawaddr/${mockBtcAddress}?cors=true`)
 			);
 		});
@@ -35,7 +35,7 @@ describe('blockchain.rest', () => {
 				'Blockchain API response not ok.'
 			);
 
-			expect(global.fetch).toHaveBeenCalledWith(
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(
 				expect.stringContaining(`rawaddr/${mockBtcAddress}?cors=true`)
 			);
 		});

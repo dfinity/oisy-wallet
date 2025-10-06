@@ -52,7 +52,7 @@ describe('infura-erc20.providers', () => {
 			const provider = new InfuraErc20Provider(infura);
 
 			expect(provider).toBeDefined();
-			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
+			expect(InfuraProviderLib).toHaveBeenCalledExactlyOnceWith(infura, INFURA_API_KEY);
 		});
 
 		describe('metadata method', () => {
@@ -97,16 +97,16 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockName).toHaveBeenCalledOnce();
-				expect(mockSymbol).toHaveBeenCalledOnce();
-				expect(mockDecimals).toHaveBeenCalledOnce();
+				expect(mockName).toHaveBeenCalledExactlyOnceWith();
+				expect(mockSymbol).toHaveBeenCalledExactlyOnceWith();
+				expect(mockDecimals).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should handle errors gracefully', async () => {
@@ -151,14 +151,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockBalanceOf).toHaveBeenCalledOnce();
+				expect(mockBalanceOf).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should handle errors gracefully', async () => {
@@ -217,14 +217,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockApprove.estimateGas).toHaveBeenCalledOnce();
+				expect(mockApprove.estimateGas).toHaveBeenCalledExactlyOnceWith();
 				expect(mockApprove.estimateGas).toHaveBeenNthCalledWith(1, mockEthAddress, mockAmount, {
 					from: mockEthAddress2
 				});
@@ -237,14 +237,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockTransfer.estimateGas).toHaveBeenCalledOnce();
+				expect(mockTransfer.estimateGas).toHaveBeenCalledExactlyOnceWith();
 				expect(mockTransfer.estimateGas).toHaveBeenNthCalledWith(1, mockEthAddress, mockAmount, {
 					from: mockEthAddress2
 				});
@@ -328,14 +328,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockTransfer.populateTransaction).toHaveBeenCalledOnce();
+				expect(mockTransfer.populateTransaction).toHaveBeenCalledExactlyOnceWith();
 				expect(mockTransfer.populateTransaction).toHaveBeenNthCalledWith(
 					1,
 					mockEthAddress,
@@ -396,14 +396,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockApprove.populateTransaction).toHaveBeenCalledOnce();
+				expect(mockApprove.populateTransaction).toHaveBeenCalledExactlyOnceWith();
 				expect(mockApprove.populateTransaction).toHaveBeenNthCalledWith(
 					1,
 					mockEthAddress2,
@@ -454,14 +454,14 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
 					...expectedContractParams,
 					new mockProvider()
 				);
 
-				expect(mockAllowance).toHaveBeenCalledOnce();
+				expect(mockAllowance).toHaveBeenCalledExactlyOnceWith();
 				expect(mockAllowance).toHaveBeenNthCalledWith(1, mockEthAddress, mockEthAddress2);
 			});
 
@@ -517,7 +517,7 @@ describe('infura-erc20.providers', () => {
 
 				expect(provider).toBeDefined();
 
-				expect(mockContract).toHaveBeenCalledOnce();
+				expect(mockContract).toHaveBeenCalledExactlyOnceWith();
 
 				expect(mockContract).toHaveBeenNthCalledWith(
 					1,
@@ -525,7 +525,7 @@ describe('infura-erc20.providers', () => {
 					new mockProvider()
 				);
 
-				expect(mockDecimals).toHaveBeenCalledOnce();
+				expect(mockDecimals).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 	});

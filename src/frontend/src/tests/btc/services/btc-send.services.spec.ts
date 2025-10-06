@@ -51,8 +51,8 @@ describe('btc-send.services', () => {
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
-			expect(sendBtcApiSpy).toHaveBeenCalledOnce();
-			expect(sendBtcApiSpy).toHaveBeenCalledWith({
+			expect(sendBtcApiSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(sendBtcApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				feeSatoshis: toNullable(defaultParams.utxosFee.feeSatoshis),
@@ -67,10 +67,10 @@ describe('btc-send.services', () => {
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
-			expect(txidStringToUint8ArraySpy).toHaveBeenCalledWith(txid);
+			expect(txidStringToUint8ArraySpy).toHaveBeenCalledExactlyOnceWith(txid);
 
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledWith({
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				address: defaultParams.source,
@@ -406,7 +406,7 @@ describe('btc-send.services', () => {
 
 			await validateBtcSend(defaultValidateParams);
 
-			expect(getFeeRateFromPercentilesSpy).toHaveBeenCalledWith({
+			expect(getFeeRateFromPercentilesSpy).toHaveBeenCalledExactlyOnceWith({
 				network: defaultValidateParams.network,
 				identity: defaultValidateParams.identity
 			});

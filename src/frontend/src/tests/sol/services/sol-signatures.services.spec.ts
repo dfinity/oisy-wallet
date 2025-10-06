@@ -127,7 +127,7 @@ describe('sol-signatures.services', () => {
 
 			expect(signatures).toEqual(mockSignaturesSol);
 
-			expect(spyFetchSignatures).toHaveBeenCalledOnce();
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith();
 			expect(spyFetchSignatures).toHaveBeenNthCalledWith(1, {
 				network: mockNetwork,
 				wallet: mockSolAddress,
@@ -143,7 +143,7 @@ describe('sol-signatures.services', () => {
 
 			expect(signatures).toEqual(mockSignaturesSol);
 
-			expect(spyFetchSignatures).toHaveBeenCalledOnce();
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith();
 			expect(spyFetchSignatures).toHaveBeenNthCalledWith(1, {
 				network: mockNetwork,
 				wallet: mockSolAddress,
@@ -184,7 +184,7 @@ describe('sol-signatures.services', () => {
 
 			await getSolSignatures({ ...mockParams, before: signature });
 
-			expect(spyFetchSignatures).toHaveBeenCalledWith(
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					before: signature
 				})
@@ -194,7 +194,7 @@ describe('sol-signatures.services', () => {
 		it('should handle limit parameter', async () => {
 			await getSolSignatures({ ...mockParams, limit: 5 });
 
-			expect(spyFetchSignatures).toHaveBeenCalledWith(
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					limit: 5
 				})
@@ -250,7 +250,7 @@ describe('sol-signatures.services', () => {
 			});
 
 			expect(transactions).toHaveLength(mockSignatures.length * mockSolTransactions.length);
-			expect(spyFetchSignatures).toHaveBeenCalledOnce();
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith();
 			expect(spyFetchTransactionsForSignature).toHaveBeenCalledTimes(mockSignatures.length);
 		});
 
@@ -265,8 +265,8 @@ describe('sol-signatures.services', () => {
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			});
 
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith();
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith({
 				owner: mockSolAddress,
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
 				mint: mockSplAddress
@@ -282,7 +282,7 @@ describe('sol-signatures.services', () => {
 				before: signature
 			});
 
-			expect(spyFetchSignatures).toHaveBeenCalledWith(
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					before: signature
 				})
@@ -297,7 +297,7 @@ describe('sol-signatures.services', () => {
 				limit: 5
 			});
 
-			expect(spyFetchSignatures).toHaveBeenCalledWith(
+			expect(spyFetchSignatures).toHaveBeenCalledExactlyOnceWith(
 				expect.objectContaining({
 					limit: 5
 				})

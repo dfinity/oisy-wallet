@@ -106,21 +106,21 @@ describe('BtcUtxosFee', () => {
 
 			// Wait for initial call during onMount
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			// Advance timer by the interval and verify scheduler calls prepareBtcSend
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			// Advance timer again to verify continuous scheduling
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 
@@ -142,14 +142,14 @@ describe('BtcUtxosFee', () => {
 
 			// Wait for initial call
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			// Advance timer to verify scheduler is working
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			await vi.waitFor(() => {
-				expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+				expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			// The component should be unmounted to trigger onDestroy
@@ -159,7 +159,7 @@ describe('BtcUtxosFee', () => {
 			vi.advanceTimersByTime(BTC_UTXOS_FEE_UPDATE_INTERVAL);
 
 			// Should still be 2 calls (no additional calls after the component is unmounted)
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 });

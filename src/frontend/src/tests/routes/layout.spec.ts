@@ -50,9 +50,9 @@ describe('App Layout', () => {
 
 		render(App, { children: mockSnippet });
 
-		expect(spyAuthSync).toHaveBeenCalledOnce();
-		expect(spyInitPlausibleAnalytics).toHaveBeenCalledOnce();
-		expect(spyI18n).toHaveBeenCalledOnce();
+		expect(spyAuthSync).toHaveBeenCalledExactlyOnceWith();
+		expect(spyInitPlausibleAnalytics).toHaveBeenCalledExactlyOnceWith();
+		expect(spyI18n).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should initialize analytics tracking on mount', () => {
@@ -62,7 +62,7 @@ describe('App Layout', () => {
 
 		render(App, { children: mockSnippet });
 
-		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	describe('when handling AuthBroadcastChannel', () => {

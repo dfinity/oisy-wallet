@@ -23,7 +23,7 @@ describe('DappsExplorerSignedIn', () => {
 		if (nonNullish(button)) {
 			await fireEvent.click(button);
 
-			expect(trackEventSpy).toHaveBeenCalledWith({
+			expect(trackEventSpy).toHaveBeenCalledExactlyOnceWith({
 				name: TRACK_COUNT_DAPP_OPEN_INFO_MODAL,
 				metadata: { dappId: 'kongswap' }
 			});

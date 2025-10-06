@@ -177,7 +177,7 @@ describe('AddressListItem', () => {
 		await fireEvent.click(copyButton);
 
 		// Check that copyToClipboard was called with the correct arguments
-		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledWith({
+		expect(clipboardUtils.copyToClipboard).toHaveBeenCalledExactlyOnceWith({
 			text: en.wallet.text.address_copied,
 			value: icrcAddress.address
 		});

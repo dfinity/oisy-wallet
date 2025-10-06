@@ -100,7 +100,7 @@ describe('custom-token.services', () => {
 					}
 				});
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+				expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({ certified: true });
 			};
 
 			it.each([undefined, IC_CKBTC_INDEX_CANISTER_ID])(
@@ -167,9 +167,9 @@ describe('custom-token.services', () => {
 
 					expect(result).toBe('loaded');
 
-					expect(spyListCustomTokens).toHaveBeenCalledWith({ certified: true });
+					expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({ certified: true });
 
-					expect(spyMetadata).toHaveBeenCalledWith({ certified: true });
+					expect(spyMetadata).toHaveBeenCalledExactlyOnceWith({ certified: true });
 
 					const store = get(icrcCustomTokensStore);
 
@@ -292,7 +292,7 @@ describe('custom-token.services', () => {
 						enabled
 					});
 
-					expect(spySetCustomToken).toHaveBeenCalledWith({
+					expect(spySetCustomToken).toHaveBeenCalledExactlyOnceWith({
 						token: {
 							enabled,
 							version: toNullable(mockIcrcCustomToken.version),

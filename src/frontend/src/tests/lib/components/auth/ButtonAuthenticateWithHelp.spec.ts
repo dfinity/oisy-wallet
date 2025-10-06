@@ -40,7 +40,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 		await waitFor(() => signInButton?.click());
 
-		expect(authSpy).toHaveBeenCalledOnce();
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith();
 
 		expect(get(modalStore)?.type).toBe('auth-help');
 	});
@@ -58,7 +58,7 @@ describe('ButtonAuthenticateWithHelp', () => {
 
 		await waitFor(() => signInButton?.click());
 
-		expect(authSpy).toHaveBeenCalledOnce();
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith();
 
 		expect(get(modalStore)?.type).toBeUndefined();
 

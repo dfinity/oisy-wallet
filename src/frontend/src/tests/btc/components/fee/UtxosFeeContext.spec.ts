@@ -56,15 +56,15 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
-			expect(prepareBtcSendSpy).toHaveBeenCalledWith({
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				network: 'mainnet',
 				identity: mockIdentity,
 				source
 			});
-			expect(setUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(setUtxosFeeSpy).toHaveBeenCalledWith({
+			expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				utxosFee: {
 					feeSatoshis: mockBtcReviewResult.feeSatoshis,
 					utxos: mockBtcReviewResult.utxos
@@ -85,7 +85,7 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(nullishSignOutSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -136,7 +136,7 @@ describe('UtxosFeeContext', () => {
 
 		await waitFor(() => {
 			expect(prepareBtcSendSpy).toHaveBeenCalled();
-			expect(prepareBtcSendSpy).toHaveBeenCalledWith({
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
 				amount: Number(DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE),
 				network: 'mainnet',
 				identity: mockIdentity,
@@ -157,7 +157,7 @@ describe('UtxosFeeContext', () => {
 
 		await waitFor(() => {
 			expect(prepareBtcSendSpy).toHaveBeenCalled();
-			expect(prepareBtcSendSpy).toHaveBeenCalledWith({
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
 				amount: Number(DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE),
 				network: 'mainnet',
 				identity: mockIdentity,
@@ -180,7 +180,7 @@ describe('UtxosFeeContext', () => {
 		await rerender({ ...props, amount: undefined });
 
 		await waitFor(() => {
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -240,8 +240,8 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(resetSpy).toHaveBeenCalledOnce();
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
+			expect(resetSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 

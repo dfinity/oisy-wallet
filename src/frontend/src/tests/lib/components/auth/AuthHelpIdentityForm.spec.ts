@@ -85,7 +85,7 @@ describe('AuthHelpIdentityForm', () => {
 		await waitFor(() => {
 			backButton?.click();
 
-			expect(onBackMock).toHaveBeenCalledOnce();
+			expect(onBackMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
@@ -95,7 +95,7 @@ describe('AuthHelpIdentityForm', () => {
 		await waitFor(() => {
 			doneButton?.click();
 
-			expect(onDoneMock).toHaveBeenCalledOnce();
+			expect(onDoneMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		const signInButton: HTMLButtonElement | null = container.querySelector(signInButtonSelector);
@@ -107,6 +107,6 @@ describe('AuthHelpIdentityForm', () => {
 		});
 
 		expect(onDoneMock).toHaveBeenCalledTimes(2);
-		expect(authSpy).toHaveBeenCalledWith({ domain: 'ic0.app' });
+		expect(authSpy).toHaveBeenCalledExactlyOnceWith({ domain: 'ic0.app' });
 	});
 });

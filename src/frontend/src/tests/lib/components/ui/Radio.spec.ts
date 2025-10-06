@@ -66,6 +66,6 @@ describe('Radio', () => {
 
 		await fireEvent.change(input);
 
-		expect(onChange).toHaveBeenCalledOnce();
+		expect(onChange).toHaveBeenCalledExactlyOnceWith();
 	});
 });

@@ -131,9 +131,9 @@ describe('transferErc721', () => {
 			progress: (s) => steps.push(s)
 		});
 
-		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
-		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
-		expect(signTransactionSpy).toHaveBeenCalledOnce();
+		expect(providersMod.infuraProviders).toHaveBeenCalledExactlyOnceWith(BASE_NETWORK.id);
+		expect(getTransactionCount).toHaveBeenCalledExactlyOnceWith(FROM);
+		expect(signTransactionSpy).toHaveBeenCalledExactlyOnceWith();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;
 
@@ -145,7 +145,7 @@ describe('transferErc721', () => {
 		expect(signedReq.max_priority_fee_per_gas).toBe(maxPriorityFeePerGas);
 		expect(Array.isArray(signedReq.data)).toBeTruthy();
 		expect(signedReq.data).toHaveLength(1);
-		expect(sendTransaction).toHaveBeenCalledWith('0xsigned');
+		expect(sendTransaction).toHaveBeenCalledExactlyOnceWith('0xsigned');
 		expect(steps).toEqual([Steps.SIGN_TRANSFER, Steps.TRANSFER]);
 		expect(result).toBe(fakeTx);
 	});
@@ -192,9 +192,9 @@ describe('transferErc1155', () => {
 			progress: (s) => steps.push(s)
 		});
 
-		expect(providersMod.infuraProviders).toHaveBeenCalledWith(BASE_NETWORK.id);
-		expect(getTransactionCount).toHaveBeenCalledWith(FROM);
-		expect(signTransactionSpy).toHaveBeenCalledOnce();
+		expect(providersMod.infuraProviders).toHaveBeenCalledExactlyOnceWith(BASE_NETWORK.id);
+		expect(getTransactionCount).toHaveBeenCalledExactlyOnceWith(FROM);
+		expect(signTransactionSpy).toHaveBeenCalledExactlyOnceWith();
 
 		const signedReq = signTransactionSpy.mock.calls[0][0].transaction;
 
@@ -207,7 +207,7 @@ describe('transferErc1155', () => {
 		expect(Array.isArray(signedReq.data)).toBeTruthy();
 		expect(signedReq.data).toHaveLength(1);
 		expect((signedReq.data[0] as string).startsWith('0xf242432a')).toBeTruthy();
-		expect(sendTransaction).toHaveBeenCalledWith('0xsigned1155');
+		expect(sendTransaction).toHaveBeenCalledExactlyOnceWith('0xsigned1155');
 		expect(steps).toEqual([Steps.SIGN_TRANSFER, Steps.TRANSFER]);
 		expect(result).toBe(fakeTx);
 	});

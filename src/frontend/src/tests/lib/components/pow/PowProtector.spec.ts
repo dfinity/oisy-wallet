@@ -114,8 +114,8 @@ describe('PowProtector', () => {
 			// Flush microtasks to allow onMount to complete
 			await flushMicrotasks();
 
-			expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-			expect(mockWorker.start).toHaveBeenCalledOnce();
+			expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
+			expect(mockWorker.start).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should check cycles on mount', async () => {
@@ -124,7 +124,7 @@ describe('PowProtector', () => {
 			// Flush microtasks to allow onMount to complete
 			await flushMicrotasks();
 
-			expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
+			expect(isCyclesAllowanceSpent).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		describe('when the user has sufficient cycles', () => {
@@ -148,12 +148,12 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Initial check should have happened
-				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledExactlyOnceWith();
 
 				// Advance time - should not trigger more checks since cycles are available
 				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS * 2);
 
-				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce(); // Only initial call
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledExactlyOnceWith(); // Only initial call
 			});
 		});
 
@@ -202,7 +202,7 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Initial check
-				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledExactlyOnceWith();
 
 				// Advance time by one interval
 				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
@@ -267,7 +267,7 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Initial check should have happened
-				expect(isCyclesAllowanceSpent).toHaveBeenCalledOnce();
+				expect(isCyclesAllowanceSpent).toHaveBeenCalledExactlyOnceWith();
 
 				// Advance time for POW_MAX_CHECK_ATTEMPTS - 1 more attempts
 				for (let i = 0; i < POW_MAX_CHECK_ATTEMPTS - 1; i++) {
@@ -275,7 +275,7 @@ describe('PowProtector', () => {
 				}
 
 				// Should have reached max attempts and signed out
-				expect(errorSignOut).toHaveBeenCalledWith(en.init.error.waiting_for_allowed_cycles_aborted);
+				expect(errorSignOut).toHaveBeenCalledExactlyOnceWith(en.init.error.waiting_for_allowed_cycles_aborted);
 				expect(isCyclesAllowanceSpent).toHaveBeenCalledTimes(POW_MAX_CHECK_ATTEMPTS);
 			});
 		});
@@ -321,7 +321,7 @@ describe('PowProtector', () => {
 				});
 
 				await waitFor(() => {
-					expect(consoleSpy).toHaveBeenCalledWith('Unknown value: ', 'INVALID_PROGRESS');
+					expect(consoleSpy).toHaveBeenCalledExactlyOnceWith('Unknown value: ', 'INVALID_PROGRESS');
 				});
 
 				consoleSpy.mockRestore();
@@ -337,8 +337,8 @@ describe('PowProtector', () => {
 
 				await flushMicrotasks();
 
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				expect(mockWorker.start).toHaveBeenCalledOnce();
+				expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
+				expect(mockWorker.start).toHaveBeenCalledExactlyOnceWith();
 
 				// Verify polling started
 				await vi.advanceTimersByTimeAsync(POW_CHECK_INTERVAL_MS);
@@ -350,7 +350,7 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Worker should be destroyed
-				expect(mockWorker.destroy).toHaveBeenCalledOnce();
+				expect(mockWorker.destroy).toHaveBeenCalledExactlyOnceWith();
 
 				// Polling should stop
 				const callCount = vi.mocked(isCyclesAllowanceSpent).mock.calls.length;
@@ -368,8 +368,8 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Should still render the component even if worker fails
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
+				expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
+				expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(
 					'Failed to initialize POW worker:',
 					expect.any(Error)
 				);
@@ -388,12 +388,12 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Should log the error
-				expect(consoleErrorSpy).toHaveBeenCalledWith(
+				expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(
 					'Error checking initial cycles:',
 					expect.any(Error)
 				);
 				// Should still initialize the worker even if cycle check fails
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
 
 				consoleErrorSpy.mockRestore();
 			});
@@ -403,7 +403,7 @@ describe('PowProtector', () => {
 
 				await flushMicrotasks();
 
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
 
 				// Trigger a re-render
 				rerender({ children: mockSnippet });
@@ -411,7 +411,7 @@ describe('PowProtector', () => {
 				await flushMicrotasks();
 
 				// Should still only be called once
-				expect(initPowProtectorWorker).toHaveBeenCalledOnce();
+				expect(initPowProtectorWorker).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 	});

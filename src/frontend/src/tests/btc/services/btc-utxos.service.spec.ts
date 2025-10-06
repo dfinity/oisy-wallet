@@ -134,11 +134,11 @@ describe('btc-utxos.service', () => {
 			expect(result.utxos.length).toBeGreaterThan(ZERO);
 
 			// Verify API functions were called
-			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: { mainnet: null }
 			});
-			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledWith({
+			expect(bitcoinApi.getUtxosQuery).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				bitcoinCanisterId: 'ghsi2-tqaaa-aaaan-aaaca-cai',
 				address: mockBtcAddress,
@@ -274,7 +274,7 @@ describe('btc-utxos.service', () => {
 
 			await prepareBtcSend(testnetParams);
 
-			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: { testnet: null }
 			});
@@ -288,7 +288,7 @@ describe('btc-utxos.service', () => {
 
 			await prepareBtcSend(regtestParams);
 
-			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: { regtest: null }
 			});
@@ -553,7 +553,7 @@ describe('btc-utxos.service', () => {
 				network: 'testnet'
 			});
 
-			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: { testnet: null }
 			});
@@ -567,7 +567,7 @@ describe('btc-utxos.service', () => {
 				network: 'regtest'
 			});
 
-			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledWith({
+			expect(backendApi.getCurrentBtcFeePercentiles).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: { regtest: null }
 			});

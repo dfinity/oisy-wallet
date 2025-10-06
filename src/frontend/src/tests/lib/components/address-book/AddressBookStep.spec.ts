@@ -113,7 +113,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByText(en.address_book.text.add_new_contact);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledOnce();
+		expect(mockAddContact).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should render contacts list when there are contacts', () => {
@@ -153,7 +153,7 @@ describe('AddressBookStep', () => {
 		const addButton = getByTestId(ADDRESS_BOOK_ADD_CONTACT_BUTTON);
 		await fireEvent.click(addButton);
 
-		expect(mockAddContact).toHaveBeenCalledOnce();
+		expect(mockAddContact).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should call showContact with the correct contact when ContactCard is clicked', async () => {
@@ -171,12 +171,12 @@ describe('AddressBookStep', () => {
 		// Click the first contact's card
 		await fireEvent.click(contactButtons[0]);
 
-		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[0]);
+		expect(mockShowContact).toHaveBeenCalledExactlyOnceWith(baseContacts[0]);
 
 		// Click the second contact's card
 		await fireEvent.click(contactButtons[1]);
 
-		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[1]);
+		expect(mockShowContact).toHaveBeenCalledExactlyOnceWith(baseContacts[1]);
 	});
 
 	it('should call onShowAddress with the correct contact and address index', async () => {
@@ -201,7 +201,7 @@ describe('AddressBookStep', () => {
 		await fireEvent.click(infoButtons[0]);
 
 		// Check that onShowAddress was called with the correct parameters
-		expect(mockShowAddress).toHaveBeenCalledWith({
+		expect(mockShowAddress).toHaveBeenCalledExactlyOnceWith({
 			contact: contactWithAddress,
 			addressIndex: 0
 		});

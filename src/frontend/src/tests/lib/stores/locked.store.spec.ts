@@ -18,7 +18,7 @@ describe('authLocked store', () => {
 
 			authLocked.toggleLock({ source: 'toggle-test' });
 
-			expect(spyStorageSet).toHaveBeenCalledWith({
+			expect(spyStorageSet).toHaveBeenCalledExactlyOnceWith({
 				key: 'authLocked',
 				value: true
 			});
@@ -29,7 +29,7 @@ describe('authLocked store', () => {
 
 			authLocked.toggleLock({ source: 'toggle-test' });
 
-			expect(spyStorageSet).toHaveBeenCalledWith({
+			expect(spyStorageSet).toHaveBeenCalledExactlyOnceWith({
 				key: 'authLocked',
 				value: false
 			});

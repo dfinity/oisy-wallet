@@ -59,7 +59,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'startIcrcWalletTimer',
 					data: {
@@ -73,7 +73,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'stopIcrcWalletTimer'
 				});
@@ -82,7 +82,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'triggerIcrcWalletTimer',
 					data: {
@@ -96,12 +96,12 @@ describe('worker.icrc-wallet.services', () => {
 			it('should destroy the worker', () => {
 				worker.destroy();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'stopIcrcWalletTimer'
 				});
 
-				expect(workerInstance.terminate).toHaveBeenCalledOnce();
+				expect(workerInstance.terminate).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should sync one time from cache', () => {
@@ -119,8 +119,8 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith();
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});
@@ -133,7 +133,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(onLoadTransactionsError).toHaveBeenCalledOnce();
+					expect(onLoadTransactionsError).toHaveBeenCalledExactlyOnceWith();
 					expect(onLoadTransactionsError).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
 						error: payload.data.error
@@ -147,7 +147,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(onTransactionsCleanUp).toHaveBeenCalledOnce();
+					expect(onTransactionsCleanUp).toHaveBeenCalledExactlyOnceWith();
 					expect(onTransactionsCleanUp).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
 						transactionIds: payload.data.transactionIds
@@ -161,7 +161,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 						msg: 'startIcrcWalletTimer',
 						data: {
@@ -181,7 +181,7 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 						msg: 'startIcrcWalletTimer',
 						data: {
@@ -210,7 +210,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'startIcrcWalletTimer',
 					data: {
@@ -223,7 +223,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'stopIcrcWalletTimer'
 				});
@@ -232,7 +232,7 @@ describe('worker.icrc-wallet.services', () => {
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 					msg: 'triggerIcrcWalletTimer',
 					data: {
@@ -250,8 +250,8 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith();
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});
@@ -264,7 +264,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(onLoadTransactionsError).toHaveBeenCalledOnce();
+					expect(onLoadTransactionsError).toHaveBeenCalledExactlyOnceWith();
 					expect(onLoadTransactionsError).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
 						error: payload.data.error
@@ -278,7 +278,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(onTransactionsCleanUp).toHaveBeenCalledOnce();
+					expect(onTransactionsCleanUp).toHaveBeenCalledExactlyOnceWith();
 					expect(onTransactionsCleanUp).toHaveBeenNthCalledWith(1, {
 						tokenId: mockToken.id,
 						transactionIds: payload.data.transactionIds

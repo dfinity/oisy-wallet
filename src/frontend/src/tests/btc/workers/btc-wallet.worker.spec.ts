@@ -187,8 +187,8 @@ describe('btc-wallet.worker', () => {
 				it('should trigger the scheduler manually', async () => {
 					await scheduler.trigger(startData);
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
-					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledExactlyOnceWith();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledExactlyOnceWith();
 				});
 
 				it('should stop the scheduler', () => {
@@ -203,8 +203,8 @@ describe('btc-wallet.worker', () => {
 					// Wait for the first execution to complete
 					await awaitJobExecution();
 
-					expect(spyGetUncertifiedBalance).toHaveBeenCalledOnce();
-					expect(spyGetCertifiedBalance).toHaveBeenCalledOnce();
+					expect(spyGetUncertifiedBalance).toHaveBeenCalledExactlyOnceWith();
+					expect(spyGetCertifiedBalance).toHaveBeenCalledExactlyOnceWith();
 
 					await vi.advanceTimersByTimeAsync(WALLET_TIMER_INTERVAL_MILLIS);
 
@@ -222,8 +222,8 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 				});
 
 				it('should trigger postMessage with error on third try', async () => {
@@ -238,7 +238,7 @@ describe('btc-wallet.worker', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(7);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: 'syncBtcWalletError',
 						data: {
 							error: err

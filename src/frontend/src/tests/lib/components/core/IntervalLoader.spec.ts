@@ -25,7 +25,7 @@ describe('IntervalLoader', () => {
 
 		await tick();
 
-		expect(onLoad).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should call load function repeatedly on interval', async () => {
@@ -40,7 +40,7 @@ describe('IntervalLoader', () => {
 
 		await tick();
 
-		expect(onLoad).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledExactlyOnceWith();
 
 		const n = 5;
 
@@ -61,12 +61,12 @@ describe('IntervalLoader', () => {
 
 		await tick();
 
-		expect(onLoad).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledExactlyOnceWith();
 
 		unmount();
 
 		vi.advanceTimersByTime(interval * 5);
 
-		expect(onLoad).toHaveBeenCalledOnce();
+		expect(onLoad).toHaveBeenCalledExactlyOnceWith();
 	});
 });

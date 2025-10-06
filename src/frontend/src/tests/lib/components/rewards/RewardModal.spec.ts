@@ -165,7 +165,7 @@ describe('RewardModal', () => {
 			context: mockContext
 		});
 
-		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledOnce();
+		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledExactlyOnceWith();
 
 		await vi.waitFor(() => {
 			expect(get(store).campaignEligibilities).toEqual(campaignEligibilities);

@@ -63,7 +63,7 @@ describe('NftImageConsentPreference', () => {
 
 		await fireEvent.click(btn);
 
-		expect(openSpy).toHaveBeenCalledWith(
+		expect(openSpy).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				data: nftAzuki.collection,
 				id: expect.any(Symbol)

@@ -37,12 +37,12 @@ describe('UrlGuard', () => {
 			render(UrlGuard);
 
 			await vi.waitFor(() => {
-				expect(claimRewardSpy).toHaveBeenCalledWith({
+				expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					code
 				});
 
-				expect(removeSearchParamSpy).toHaveBeenCalledWith({
+				expect(removeSearchParamSpy).toHaveBeenCalledExactlyOnceWith({
 					url: rewardUrl,
 					searchParam: 'code'
 				});
@@ -71,12 +71,12 @@ describe('UrlGuard', () => {
 			render(UrlGuard);
 
 			await vi.waitFor(() => {
-				expect(claimRewardSpy).toHaveBeenCalledWith({
+				expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					code
 				});
 
-				expect(removeSearchParamSpy).toHaveBeenCalledWith({
+				expect(removeSearchParamSpy).toHaveBeenCalledExactlyOnceWith({
 					url: rewardUrl,
 					searchParam: 'code'
 				});
@@ -126,12 +126,12 @@ describe('UrlGuard', () => {
 			render(UrlGuard);
 
 			await vi.waitFor(() => {
-				expect(setReferrerSpy).toHaveBeenCalledWith({
+				expect(setReferrerSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					referrerCode
 				});
 
-				expect(removeSearchParamSpy).toHaveBeenCalledWith({
+				expect(removeSearchParamSpy).toHaveBeenCalledExactlyOnceWith({
 					url: referrerUrl,
 					searchParam: 'referrer'
 				});
@@ -154,7 +154,7 @@ describe('UrlGuard', () => {
 			await vi.waitFor(() => {
 				expect(setReferrerSpy).not.toHaveBeenCalled();
 
-				expect(removeSearchParamSpy).toHaveBeenCalledWith({
+				expect(removeSearchParamSpy).toHaveBeenCalledExactlyOnceWith({
 					url: referrerUrl,
 					searchParam: 'referrer'
 				});

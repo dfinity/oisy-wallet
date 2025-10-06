@@ -150,7 +150,7 @@ describe('ic-transactions.services', () => {
 		it('should call toastsError by default', () => {
 			onTransactionsCleanUp(mockData);
 
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: get(i18n).transactions.error.uncertified_transactions_removed }
 			});
 		});
@@ -379,7 +379,7 @@ describe('ic-transactions.services', () => {
 
 			expect(get(icTransactionsStore)?.[mockToken.id]).toBeNull();
 
-			expect(signalEnd).toHaveBeenCalledOnce();
+			expect(signalEnd).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 

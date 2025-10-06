@@ -49,7 +49,7 @@ describe('infura-erc1155.providers', () => {
 			const provider = new InfuraErc1155Provider(infura);
 
 			expect(provider).toBeDefined();
-			expect(InfuraProviderLib).toHaveBeenCalledWith(infura, INFURA_API_KEY);
+			expect(InfuraProviderLib).toHaveBeenCalledExactlyOnceWith(infura, INFURA_API_KEY);
 		});
 
 		describe('getNftMetadata', () => {

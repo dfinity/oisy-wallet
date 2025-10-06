@@ -39,7 +39,7 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(initExchangeWorker).toHaveBeenCalledOnce();
+		expect(initExchangeWorker).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should start the worker once when mounted', async () => {
@@ -47,7 +47,7 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(stopExchangeTimer).toHaveBeenCalledOnce();
+		expect(stopExchangeTimer).toHaveBeenCalledExactlyOnceWith();
 
 		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith({
 			currentCurrency: Currency.USD,
@@ -62,7 +62,7 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(stopExchangeTimer).toHaveBeenCalledOnce();
+		expect(stopExchangeTimer).toHaveBeenCalledExactlyOnceWith();
 
 		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith({
 			currentCurrency: Currency.USD,
@@ -105,21 +105,21 @@ describe('ExchangeWorker', () => {
 
 		await waitTimer();
 
-		expect(stopExchangeTimer).toHaveBeenCalledOnce();
-		expect(startExchangeTimer).toHaveBeenCalledOnce();
+		expect(stopExchangeTimer).toHaveBeenCalledExactlyOnceWith();
+		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith();
 
 		currencyExchangeStore.setExchangeRate(1.5);
 
 		await waitTimer();
 
-		expect(stopExchangeTimer).toHaveBeenCalledOnce();
-		expect(startExchangeTimer).toHaveBeenCalledOnce();
+		expect(stopExchangeTimer).toHaveBeenCalledExactlyOnceWith();
+		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith();
 
 		currencyExchangeStore.setExchangeRate(101);
 
 		await waitTimer();
 
-		expect(stopExchangeTimer).toHaveBeenCalledOnce();
-		expect(startExchangeTimer).toHaveBeenCalledOnce();
+		expect(stopExchangeTimer).toHaveBeenCalledExactlyOnceWith();
+		expect(startExchangeTimer).toHaveBeenCalledExactlyOnceWith();
 	});
 });

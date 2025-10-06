@@ -28,7 +28,7 @@ describe('wizard-modal.utils', () => {
 					stepName: step.name
 				});
 
-				expect(mockModal.set).toHaveBeenCalledWith(index);
+				expect(mockModal.set).toHaveBeenCalledExactlyOnceWith(index);
 			});
 		});
 
@@ -39,7 +39,7 @@ describe('wizard-modal.utils', () => {
 				stepName: 'nonExistentStep' as WizardStepsSend
 			});
 
-			expect(mockModal.set).toHaveBeenCalledWith(0);
+			expect(mockModal.set).toHaveBeenCalledExactlyOnceWith(0);
 		});
 	});
 });

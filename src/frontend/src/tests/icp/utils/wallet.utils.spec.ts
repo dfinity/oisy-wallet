@@ -69,7 +69,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcpWalletWorker).toHaveBeenCalledOnce();
+			expect(initIcpWalletWorker).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 });

@@ -113,7 +113,7 @@ describe('kong_backend.canister', () => {
 			const res = await swapAmounts(swapAmountsParams);
 
 			expect(res).toEqual(response.Ok);
-			expect(service.swap_amounts).toHaveBeenCalledWith(
+			expect(service.swap_amounts).toHaveBeenCalledExactlyOnceWith(
 				getKongIcTokenIdentifier(sourceToken),
 				sourceAmount,
 				getKongIcTokenIdentifier(destinationToken)
@@ -174,7 +174,7 @@ describe('kong_backend.canister', () => {
 			const res = await swap(swapParams);
 
 			expect(res).toEqual(response.Ok);
-			expect(service.swap_async).toHaveBeenCalledWith({
+			expect(service.swap_async).toHaveBeenCalledExactlyOnceWith({
 				pay_token: getKongIcTokenIdentifier(swapParams.sourceToken),
 				receive_token: getKongIcTokenIdentifier(swapParams.destinationToken),
 				pay_amount: swapParams.sendAmount,

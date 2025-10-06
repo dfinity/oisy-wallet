@@ -43,13 +43,13 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(transactionFeeSpy).toHaveBeenCalledOnce();
-			expect(transactionFeeSpy).toHaveBeenCalledWith({
+			expect(transactionFeeSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(transactionFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId,
 				identity: mockIdentity
 			});
-			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				tokenSymbol: ICP_TOKEN.symbol,
 				fee: mockFee
 			});
@@ -67,7 +67,7 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(nullishSignOutSpy).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -119,8 +119,8 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(setIcTokenFeeSpy).toHaveBeenCalledOnce();
-			expect(setIcTokenFeeSpy).toHaveBeenCalledWith({
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(setIcTokenFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				tokenSymbol: ICP_TOKEN.symbol,
 				fee: ICP_TOKEN.fee
 			});

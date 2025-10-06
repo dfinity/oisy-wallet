@@ -55,9 +55,9 @@ describe('scheduler', () => {
 
 				await scheduler.start(mockParams);
 
-				expect(loadIdentity).toHaveBeenCalledOnce();
+				expect(loadIdentity).toHaveBeenCalledExactlyOnceWith();
 
-				expect(console.error).toHaveBeenCalledOnce();
+				expect(console.error).toHaveBeenCalledExactlyOnceWith();
 				expect(console.error).toHaveBeenNthCalledWith(
 					1,
 					'Attempted to initiate a worker without an authenticated identity.'
@@ -83,7 +83,7 @@ describe('scheduler', () => {
 			it('should execute job once immediately', async () => {
 				await scheduler.start(mockParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 				expect(mockJob).toHaveBeenNthCalledWith(1, { identity: mockIdentity, data: mockData });
 			});
 
@@ -103,7 +103,7 @@ describe('scheduler', () => {
 				await scheduler.start(mockParams);
 				await scheduler.start(mockParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should not execute the job twice if one is in progress', async () => {
@@ -115,17 +115,17 @@ describe('scheduler', () => {
 
 				await scheduler.start(mockParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should not set timer if interval is not provided', async () => {
 				await scheduler.start({ ...mockParams, interval: 'disabled' });
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 
 				vi.advanceTimersByTime(mockInterval * 10);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should handle job errors', async () => {
@@ -133,9 +133,9 @@ describe('scheduler', () => {
 
 				await scheduler.start(mockParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 
-				expect(console.error).toHaveBeenCalledOnce();
+				expect(console.error).toHaveBeenCalledExactlyOnceWith();
 				expect(console.error).toHaveBeenNthCalledWith(1, new Error('Job failed'));
 
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
@@ -158,11 +158,11 @@ describe('scheduler', () => {
 
 				await scheduler.start(mockParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 
 				vi.advanceTimersByTime(mockInterval * 10);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 		});
 
@@ -174,9 +174,9 @@ describe('scheduler', () => {
 
 				await scheduler.trigger(mockTriggerParams);
 
-				expect(loadIdentity).toHaveBeenCalledOnce();
+				expect(loadIdentity).toHaveBeenCalledExactlyOnceWith();
 
-				expect(console.error).toHaveBeenCalledOnce();
+				expect(console.error).toHaveBeenCalledExactlyOnceWith();
 				expect(console.error).toHaveBeenNthCalledWith(
 					1,
 					'Attempted to execute a worker without an authenticated identity.'
@@ -202,18 +202,18 @@ describe('scheduler', () => {
 			it('should execute job', async () => {
 				await scheduler.trigger(mockTriggerParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 				expect(mockJob).toHaveBeenNthCalledWith(1, { identity: mockIdentity, data: mockData });
 			});
 
 			it('should not set interval for the job', async () => {
 				await scheduler.trigger(mockTriggerParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 
 				vi.advanceTimersByTime(mockInterval * 10);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should not execute the job twice if one is in progress', async () => {
@@ -225,7 +225,7 @@ describe('scheduler', () => {
 
 				await scheduler.trigger(mockTriggerParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should handle job errors', async () => {
@@ -233,9 +233,9 @@ describe('scheduler', () => {
 
 				await scheduler.trigger(mockTriggerParams);
 
-				expect(mockJob).toHaveBeenCalledOnce();
+				expect(mockJob).toHaveBeenCalledExactlyOnceWith();
 
-				expect(console.error).toHaveBeenCalledOnce();
+				expect(console.error).toHaveBeenCalledExactlyOnceWith();
 				expect(console.error).toHaveBeenNthCalledWith(1, new Error('Job failed'));
 
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
@@ -268,9 +268,9 @@ describe('scheduler', () => {
 
 				scheduler.stop();
 
-				expect(spyClearInterval).toHaveBeenCalledOnce();
+				expect(spyClearInterval).toHaveBeenCalledExactlyOnceWith();
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }
@@ -286,7 +286,7 @@ describe('scheduler', () => {
 
 				expect(spyClearInterval).not.toHaveBeenCalled();
 
-				expect(postMessageMock).toHaveBeenCalledOnce();
+				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
 					msg: statusMsg,
 					data: { state: 'idle' }

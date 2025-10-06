@@ -157,7 +157,7 @@ describe('AcceptAgreementsModal', () => {
 
 		await fireEvent.click(getByRole('button', { name: get(i18n).core.text.reject }));
 
-		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
+		expect(authServices.warnSignOut).toHaveBeenCalledExactlyOnceWith(get(i18n).agreements.text.reject_warning);
 	});
 
 	it('clicking Accept calls nullishSignOut if the identity is nullish', async () => {
@@ -167,7 +167,7 @@ describe('AcceptAgreementsModal', () => {
 
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
-		expect(authServices.nullishSignOut).toHaveBeenCalledOnce();
+		expect(authServices.nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 
 		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
 
@@ -222,7 +222,7 @@ describe('AcceptAgreementsModal', () => {
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY));
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
-		expect(toastsError).toHaveBeenCalledWith({
+		expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 			msg: { text: en.agreements.error.cannot_update_user_agreements },
 			err: mockError
 		});

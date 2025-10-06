@@ -105,7 +105,7 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(trackEvent).toHaveBeenCalledOnce();
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith();
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 				metadata: {
@@ -235,7 +235,7 @@ describe('eth-balance.services', () => {
 
 			expect(result).toEqual({ success: false });
 
-			expect(trackEvent).toHaveBeenCalledOnce();
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith();
 			expect(trackEvent).toHaveBeenNthCalledWith(1, {
 				name: TRACK_COUNT_ETH_LOADING_BALANCE_ERROR,
 				metadata: {
@@ -322,10 +322,10 @@ describe('eth-balance.services', () => {
 				data: mockBalance
 			});
 
-			expect(infuraProviders).toHaveBeenCalledOnce();
+			expect(infuraProviders).toHaveBeenCalledExactlyOnceWith();
 			expect(infuraProviders).toHaveBeenNthCalledWith(1, ETHEREUM_NETWORK_ID);
 
-			expect(mockGetBalance).toHaveBeenCalledOnce();
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith();
 			expect(mockGetBalance).toHaveBeenNthCalledWith(1, mockEthAddress);
 		});
 
@@ -339,10 +339,10 @@ describe('eth-balance.services', () => {
 				data: mockBalance
 			});
 
-			expect(infuraErc20Providers).toHaveBeenCalledOnce();
+			expect(infuraErc20Providers).toHaveBeenCalledExactlyOnceWith();
 			expect(infuraErc20Providers).toHaveBeenNthCalledWith(1, mockValidErc20Token.network.id);
 
-			expect(mockGetBalance).toHaveBeenCalledOnce();
+			expect(mockGetBalance).toHaveBeenCalledExactlyOnceWith();
 			expect(mockGetBalance).toHaveBeenNthCalledWith(1, mockEthAddress);
 		});
 	});

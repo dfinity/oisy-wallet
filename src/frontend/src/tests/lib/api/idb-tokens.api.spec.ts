@@ -121,7 +121,7 @@ describe('idb-tokens.api', () => {
 				...mockParams
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -136,7 +136,7 @@ describe('idb-tokens.api', () => {
 				tokens: []
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -153,7 +153,7 @@ describe('idb-tokens.api', () => {
 			const result = await getIdbAllCustomTokens(mockPrincipal);
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 
@@ -164,7 +164,7 @@ describe('idb-tokens.api', () => {
 			const result = await getIdbEthTokensDeprecated(mockPrincipal);
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(mockPrincipal.toText(), expect.any(Object));
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(mockPrincipal.toText(), expect.any(Object));
 		});
 	});
 
@@ -172,7 +172,7 @@ describe('idb-tokens.api', () => {
 		it('should delete all custom tokens', async () => {
 			await deleteIdbAllCustomTokens(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
 		});
 	});
@@ -181,7 +181,7 @@ describe('idb-tokens.api', () => {
 		it('should delete ETH tokens', async () => {
 			await deleteIdbEthTokensDeprecated(mockPrincipal);
 
-			expect(idbKeyval.del).toHaveBeenCalledOnce();
+			expect(idbKeyval.del).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.del).toHaveBeenNthCalledWith(1, mockPrincipal.toText(), expect.any(Object));
 		});
 	});
@@ -199,7 +199,7 @@ describe('idb-tokens.api', () => {
 				token: userTokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -220,7 +220,7 @@ describe('idb-tokens.api', () => {
 				token: userTokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -249,7 +249,7 @@ describe('idb-tokens.api', () => {
 				token: userTokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -276,7 +276,7 @@ describe('idb-tokens.api', () => {
 				token: userTokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -297,7 +297,7 @@ describe('idb-tokens.api', () => {
 				token: tokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -316,7 +316,7 @@ describe('idb-tokens.api', () => {
 				token: tokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -351,7 +351,7 @@ describe('idb-tokens.api', () => {
 				token: tokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -380,7 +380,7 @@ describe('idb-tokens.api', () => {
 				token: tokenToDelete
 			});
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),

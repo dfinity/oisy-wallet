@@ -79,7 +79,7 @@ describe('NftImageConsentModal', () => {
 		const saveBtn = screen.getByTestId(`${TEST_ID}-saveButton`);
 		await fireEvent.click(saveBtn);
 
-		expect(saveSpy).toHaveBeenCalledWith({
+		expect(saveSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
 			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
 		});
@@ -94,7 +94,7 @@ describe('NftImageConsentModal', () => {
 		const cancelBtn = screen.getByTestId(`${TEST_ID}-cancelButton`);
 		await fireEvent.click(cancelBtn);
 
-		expect(closeSpy).toHaveBeenCalledOnce();
+		expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('renders address, display preference, and NFT media list under the expected testIds', () => {

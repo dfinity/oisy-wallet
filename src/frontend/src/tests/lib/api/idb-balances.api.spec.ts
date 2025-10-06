@@ -211,7 +211,7 @@ describe('idb-balances.api', () => {
 			});
 
 			expect(result).toEqual(mockTokens);
-			expect(idbKeyval.get).toHaveBeenCalledWith(
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith(
 				[mockPrincipal.toText(), mockToken1.id.description, mockToken1.network.id.description],
 				expect.any(Object)
 			);

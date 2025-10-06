@@ -56,7 +56,7 @@ describe('reward-code', () => {
 
 			const campaignEligibilities = await getCampaignEligibilities({ identity: mockIdentity });
 
-			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -77,7 +77,7 @@ describe('reward-code', () => {
 
 			await getCampaignEligibilities({ identity: mockIdentity });
 
-			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledWith({
+			expect(getCampaignEligibilitiesSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -107,7 +107,7 @@ describe('reward-code', () => {
 
 				const { isVip } = await getUserRoles({ identity: mockIdentity });
 
-				expect(getUserInfoSpy).toHaveBeenCalledWith({
+				expect(getUserInfoSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
@@ -121,7 +121,7 @@ describe('reward-code', () => {
 
 				const { isVip } = await getUserRoles({ identity: mockIdentity });
 
-				expect(getUserInfoSpy).toHaveBeenCalledWith({
+				expect(getUserInfoSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
@@ -138,7 +138,7 @@ describe('reward-code', () => {
 
 				const { isGold } = await getUserRoles({ identity: mockIdentity });
 
-				expect(getUserInfoSpy).toHaveBeenCalledWith({
+				expect(getUserInfoSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
@@ -152,7 +152,7 @@ describe('reward-code', () => {
 
 				const { isGold } = await getUserRoles({ identity: mockIdentity });
 
-				expect(getUserInfoSpy).toHaveBeenCalledWith({
+				expect(getUserInfoSpy).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					certified: false,
 					nullishIdentityErrorMessage
@@ -176,7 +176,7 @@ describe('reward-code', () => {
 
 			const vipReward = await getNewReward({ campaignId: QrCodeType.VIP, identity: mockIdentity });
 
-			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+			expect(getNewVipRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				rewardType: { campaign_id: 'vip' },
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
@@ -191,7 +191,7 @@ describe('reward-code', () => {
 
 			await getNewReward({ campaignId: QrCodeType.VIP, identity: mockIdentity });
 
-			expect(getNewVipRewardSpy).toHaveBeenCalledWith({
+			expect(getNewVipRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				rewardType: { campaign_id: 'vip' },
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
@@ -216,7 +216,7 @@ describe('reward-code', () => {
 
 			const result = await claimVipReward({ identity: mockIdentity, code: '1234567890' });
 
-			expect(claimRewardSpy).toHaveBeenCalledWith({
+			expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
@@ -235,7 +235,7 @@ describe('reward-code', () => {
 
 			const result = await claimVipReward({ identity: mockIdentity, code: '1234567890' });
 
-			expect(claimRewardSpy).toHaveBeenCalledWith({
+			expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
@@ -257,7 +257,7 @@ describe('reward-code', () => {
 
 			const result = await claimVipReward({ identity: mockIdentity, code: '1234567890' });
 
-			expect(claimRewardSpy).toHaveBeenCalledWith({
+			expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
@@ -279,7 +279,7 @@ describe('reward-code', () => {
 
 			const result = await claimVipReward({ identity: mockIdentity, code: '1234567890' });
 
-			expect(claimRewardSpy).toHaveBeenCalledWith({
+			expect(claimRewardSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				vipReward: { code: '1234567890' },
 				nullishIdentityErrorMessage
@@ -326,7 +326,7 @@ describe('reward-code', () => {
 
 			const result = await getRewards({ identity: mockIdentity });
 
-			expect(getUserInfoSpy).toHaveBeenCalledWith({
+			expect(getUserInfoSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -350,7 +350,7 @@ describe('reward-code', () => {
 
 			const result = await getReferrerInfo({ identity: mockIdentity });
 
-			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
+			expect(getReferrerInfoSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -366,7 +366,7 @@ describe('reward-code', () => {
 
 			const result = await getReferrerInfo({ identity: mockIdentity });
 
-			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
+			expect(getReferrerInfoSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -385,7 +385,7 @@ describe('reward-code', () => {
 
 			await getReferrerInfo({ identity: mockIdentity });
 
-			expect(getReferrerInfoSpy).toHaveBeenCalledWith({
+			expect(getReferrerInfoSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -408,7 +408,7 @@ describe('reward-code', () => {
 				referrerCode: mockedReferrerCode
 			});
 
-			expect(setReferrerSpy).toHaveBeenCalledWith({
+			expect(setReferrerSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				referrerCode: mockedReferrerCode,
 				nullishIdentityErrorMessage
@@ -424,7 +424,7 @@ describe('reward-code', () => {
 
 			await setReferrer({ identity: mockIdentity, referrerCode: mockedReferrerCode });
 
-			expect(setReferrerSpy).toHaveBeenCalledWith({
+			expect(setReferrerSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				referrerCode: mockedReferrerCode,
 				nullishIdentityErrorMessage

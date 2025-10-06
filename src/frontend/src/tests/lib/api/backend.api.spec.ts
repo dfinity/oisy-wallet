@@ -333,7 +333,7 @@ describe('backend.api', () => {
 			const result = await createUserProfile(mockParams);
 
 			expect(result).toEqual(mockUserProfile);
-			expect(backendCanisterMock.createUserProfile).toHaveBeenCalledOnce();
+			expect(backendCanisterMock.createUserProfile).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw an error if identity is undefined', async () => {

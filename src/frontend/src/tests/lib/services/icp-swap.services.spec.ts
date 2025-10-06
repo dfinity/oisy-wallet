@@ -64,7 +64,7 @@ describe('icpSwapAmounts', () => {
 
 		await icpSwapAmounts(params);
 
-		expect(getQuoteSpy).toHaveBeenCalledWith({
+		expect(getQuoteSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
 			canisterId: 'aaaaa-aa',
 			amountIn: '1000',
@@ -85,7 +85,7 @@ describe('icpSwapAmounts', () => {
 
 		await icpSwapAmounts(params);
 
-		expect(getQuoteSpy).toHaveBeenCalledWith({
+		expect(getQuoteSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
 			canisterId: 'aaaaa-aa',
 			amountIn: '1000',
@@ -133,8 +133,8 @@ describe('fetchIcpSwap', () => {
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).resolves.not.toThrow();
 
-		expect(swapArgs.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(swapArgs.progress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(swapArgs.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
+		expect(swapArgs.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.UPDATE_UI);
 		expect(sendIcrc).toHaveBeenCalled();
 		expect(deposit).toHaveBeenCalled();
 		expect(swapIcp).toHaveBeenCalled();

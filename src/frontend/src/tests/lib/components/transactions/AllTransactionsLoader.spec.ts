@@ -267,7 +267,7 @@ describe('AllTransactionsLoader', () => {
 					({ data: transaction }) => transaction
 				);
 
-				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledExactlyOnceWith({
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					owner: mockIdentity.getPrincipal(),
@@ -293,7 +293,7 @@ describe('AllTransactionsLoader', () => {
 					({ data: transaction }) => transaction
 				);
 
-				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledExactlyOnceWith({
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					owner: mockIdentity.getPrincipal(),
@@ -317,7 +317,7 @@ describe('AllTransactionsLoader', () => {
 					({ data: transaction }) => transaction
 				);
 
-				expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextIcTransactions).toHaveBeenCalledExactlyOnceWith({
 					minTimestamp: mockMinTimestamp,
 					transactions,
 					owner: mockIdentity.getPrincipal(),
@@ -412,7 +412,7 @@ describe('AllTransactionsLoader', () => {
 					({ data: transaction }) => transaction
 				);
 
-				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
@@ -434,7 +434,7 @@ describe('AllTransactionsLoader', () => {
 					({ data: transaction }) => transaction
 				);
 
-				expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+				expect(spyLoadNextSolTransactions).toHaveBeenCalledExactlyOnceWith({
 					identity: mockIdentity,
 					minTimestamp: mockMinTimestamp,
 					transactions,
@@ -527,7 +527,7 @@ describe('AllTransactionsLoader', () => {
 				({ data: transaction }) => transaction
 			);
 
-			expect(spyLoadNextIcTransactions).toHaveBeenCalledWith({
+			expect(spyLoadNextIcTransactions).toHaveBeenCalledExactlyOnceWith({
 				minTimestamp: mockMinTimestamp,
 				transactions,
 				owner: mockIdentity.getPrincipal(),
@@ -543,7 +543,7 @@ describe('AllTransactionsLoader', () => {
 				({ data: transaction }) => transaction
 			);
 
-			expect(spyLoadNextSolTransactions).toHaveBeenCalledWith({
+			expect(spyLoadNextSolTransactions).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				minTimestamp: mockMinTimestamp,
 				transactions,

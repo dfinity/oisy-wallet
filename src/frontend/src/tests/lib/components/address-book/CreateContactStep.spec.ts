@@ -94,8 +94,8 @@ describe('CreateContactStep', () => {
 		await fireEvent.click(saveButton);
 
 		// Check that onSave was called with the correct contact
-		expect(onSave).toHaveBeenCalledOnce();
-		expect(onSave).toHaveBeenCalledWith({
+		expect(onSave).toHaveBeenCalledExactlyOnceWith();
+		expect(onSave).toHaveBeenCalledExactlyOnceWith({
 			name: 'Test Contact',
 			addresses: [{ address: mockSolAddress, addressType: 'Sol', label: 'Test alias' }]
 		});
@@ -114,6 +114,6 @@ describe('CreateContactStep', () => {
 		await fireEvent.click(cancelButton);
 
 		// Check that close was called
-		expect(onBack).toHaveBeenCalledOnce();
+		expect(onBack).toHaveBeenCalledExactlyOnceWith();
 	});
 });

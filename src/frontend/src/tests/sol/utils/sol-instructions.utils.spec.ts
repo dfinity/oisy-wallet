@@ -110,7 +110,7 @@ describe('sol-instructions.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
-			expect(console.warn).toHaveBeenCalledWith(
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				`Could not map Solana instruction of type ${instruction.parsed.type} for program ${instruction.programAddress}`,
 				instruction
 			);

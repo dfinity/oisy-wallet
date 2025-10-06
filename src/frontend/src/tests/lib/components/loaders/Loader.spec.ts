@@ -120,7 +120,7 @@ describe('Loader', () => {
 		render(Loader, { children: mockSnippet });
 
 		await waitFor(() => {
-			expect(initLoader).toHaveBeenCalledOnce();
+			expect(initLoader).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -215,9 +215,9 @@ describe('Loader', () => {
 				setupUserNetworksStore('onlyMainnets');
 
 				await waitFor(() => {
-					expect(loadEthAddress).toHaveBeenCalledOnce();
-					expect(loadBtcAddressMainnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+					expect(loadEthAddress).toHaveBeenCalledExactlyOnceWith();
+					expect(loadBtcAddressMainnet).toHaveBeenCalledExactlyOnceWith();
+					expect(loadSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 
 					expect(loadBtcAddressTestnet).not.toHaveBeenCalled();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
@@ -266,7 +266,7 @@ describe('Loader', () => {
 
 				await waitFor(() => {
 					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
-					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 				});
 			});
 		});
@@ -303,7 +303,7 @@ describe('Loader', () => {
 
 				await waitFor(() => {
 					expect(loadBtcAddressMainnet).not.toHaveBeenCalled();
-					expect(loadSolAddressMainnet).toHaveBeenCalledOnce();
+					expect(loadSolAddressMainnet).toHaveBeenCalledExactlyOnceWith();
 					expect(loadSolAddressDevnet).not.toHaveBeenCalled();
 				});
 			});
@@ -316,9 +316,9 @@ describe('Loader', () => {
 				setupUserNetworksStore('allEnabled');
 
 				await waitFor(() => {
-					expect(loadEthAddress).toHaveBeenCalledOnce();
-					expect(loadBtcAddressTestnet).toHaveBeenCalledOnce();
-					expect(loadSolAddressDevnet).toHaveBeenCalledOnce();
+					expect(loadEthAddress).toHaveBeenCalledExactlyOnceWith();
+					expect(loadBtcAddressTestnet).toHaveBeenCalledExactlyOnceWith();
+					expect(loadSolAddressDevnet).toHaveBeenCalledExactlyOnceWith();
 
 					expect(loadBtcAddressRegtest).not.toHaveBeenCalled();
 					expect(loadSolAddressLocal).not.toHaveBeenCalled();
@@ -353,8 +353,8 @@ describe('Loader', () => {
 				setupUserNetworksStore('allEnabled');
 
 				await waitFor(() => {
-					expect(loadBtcAddressRegtest).toHaveBeenCalledOnce();
-					expect(loadSolAddressLocal).toHaveBeenCalledOnce();
+					expect(loadBtcAddressRegtest).toHaveBeenCalledExactlyOnceWith();
+					expect(loadSolAddressLocal).toHaveBeenCalledExactlyOnceWith();
 				});
 			});
 		});

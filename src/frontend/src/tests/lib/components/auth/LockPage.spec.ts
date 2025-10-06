@@ -44,8 +44,8 @@ describe('LockPage', () => {
 
 		await fireEvent.click(unlockButton);
 
-		expect(signInMock).toHaveBeenCalledWith({});
-		expect(authLocked.unlock).toHaveBeenCalledWith({
+		expect(signInMock).toHaveBeenCalledExactlyOnceWith({});
+		expect(authLocked.unlock).toHaveBeenCalledExactlyOnceWith({
 			source: 'login from lock page'
 		});
 	});

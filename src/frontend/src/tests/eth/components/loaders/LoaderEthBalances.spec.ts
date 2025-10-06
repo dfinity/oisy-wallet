@@ -105,7 +105,7 @@ describe('LoaderEthBalances', () => {
 
 		await tick();
 
-		expect(loadEthBalances).toHaveBeenCalledOnce();
+		expect(loadEthBalances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 	});
 
@@ -116,7 +116,7 @@ describe('LoaderEthBalances', () => {
 
 		await tick();
 
-		expect(loadEthBalances).toHaveBeenCalledOnce();
+		expect(loadEthBalances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, allTokens);
 	});
 
@@ -125,7 +125,7 @@ describe('LoaderEthBalances', () => {
 
 		await tick();
 
-		expect(loadErc20Balances).toHaveBeenCalledOnce();
+		expect(loadErc20Balances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
 			erc20Tokens: mockErc20DefaultTokens
@@ -153,10 +153,10 @@ describe('LoaderEthBalances', () => {
 
 		await tick();
 
-		expect(loadEthBalances).toHaveBeenCalledOnce();
+		expect(loadEthBalances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 
-		expect(loadErc20Balances).toHaveBeenCalledOnce();
+		expect(loadErc20Balances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
 			erc20Tokens: mockErc20DefaultTokens
@@ -191,10 +191,10 @@ describe('LoaderEthBalances', () => {
 
 		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 
-		expect(loadEthBalances).toHaveBeenCalledOnce();
+		expect(loadEthBalances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadEthBalances).toHaveBeenNthCalledWith(1, mainnetTokens);
 
-		expect(loadErc20Balances).toHaveBeenCalledOnce();
+		expect(loadErc20Balances).toHaveBeenCalledExactlyOnceWith();
 		expect(loadErc20Balances).toHaveBeenNthCalledWith(1, {
 			address: mockEthAddress,
 			erc20Tokens: mockErc20DefaultTokens

@@ -45,7 +45,7 @@ describe('sol-sign.utils', () => {
 
 			const signature = await signer.signTransactions([mockTransaction]);
 
-			expect(spySignWithSchnorr).toHaveBeenCalledWith({
+			expect(spySignWithSchnorr).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				derivationPath: [SOLANA_DERIVATION_PATH_PREFIX, mockNetwork],
 				keyId: SOLANA_KEY_ID,

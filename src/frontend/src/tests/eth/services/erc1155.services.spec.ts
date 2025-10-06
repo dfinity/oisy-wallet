@@ -197,7 +197,7 @@ describe('erc1155.services', () => {
 
 			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(toastsError).toHaveBeenCalledOnce();
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith();
 			expect(toastsError).toHaveBeenNthCalledWith(1, {
 				msg: { text: en.init.error.erc1155_custom_tokens },
 				err: mockError
@@ -207,7 +207,7 @@ describe('erc1155.services', () => {
 		it('should cache the custom tokens in IDB on update call', async () => {
 			await loadCustomTokens({ identity: mockIdentity });
 
-			expect(idbKeyval.set).toHaveBeenCalledOnce();
+			expect(idbKeyval.set).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
@@ -219,7 +219,7 @@ describe('erc1155.services', () => {
 		it('should fetch the cached custom tokens in IDB on query call', async () => {
 			await loadCustomTokens({ identity: mockIdentity, useCache: true });
 
-			expect(idbKeyval.get).toHaveBeenCalledOnce();
+			expect(idbKeyval.get).toHaveBeenCalledExactlyOnceWith();
 			expect(idbKeyval.get).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),

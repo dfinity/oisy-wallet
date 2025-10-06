@@ -75,7 +75,7 @@ describe('worker.exchange.services', () => {
 
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopExchangeTimer' });
 
-			expect(workerInstance.terminate).toHaveBeenCalledOnce();
+			expect(workerInstance.terminate).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		describe('onmessage', () => {

@@ -66,7 +66,7 @@ describe('EnableTokenToggle', () => {
 
 		await fireEvent.click(checkbox);
 
-		expect(mockOnToggle).toHaveBeenCalledOnce();
+		expect(mockOnToggle).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('should not call onToggle on clicking it if it is disabled', async () => {

@@ -306,7 +306,7 @@ describe('solana.api', () => {
 			});
 
 			expect(transactions).toHaveLength(2);
-			expect(mockGetSignaturesForAddress).toHaveBeenCalledOnce();
+			expect(mockGetSignaturesForAddress).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should handle empty signatures response', async () => {
@@ -382,7 +382,7 @@ describe('solana.api', () => {
 			});
 
 			expect(account).toEqual(mockSplAddress);
-			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledOnce();
+			expect(mockGetTokenAccountsByOwner).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should return undefined if no token account exists', async () => {
@@ -439,7 +439,7 @@ describe('solana.api', () => {
 			const fee = await getSolCreateAccountFee(SolanaNetworks.mainnet);
 
 			expect(fee).toEqual(mockCreateAccountFee);
-			expect(mockGetMinimumBalanceForRentExemption).toHaveBeenCalledWith(ATA_SIZE);
+			expect(mockGetMinimumBalanceForRentExemption).toHaveBeenCalledExactlyOnceWith(ATA_SIZE);
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -456,7 +456,7 @@ describe('solana.api', () => {
 			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
 			expect(fee).toEqual(mockPriorityFee);
-			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(undefined);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledExactlyOnceWith(undefined);
 		});
 
 		it('should estimate the recent max priority fee if addresses are passed too', async () => {
@@ -466,7 +466,7 @@ describe('solana.api', () => {
 			});
 
 			expect(fee).toEqual(mockPriorityFee);
-			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith(mockAddresses);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledExactlyOnceWith(mockAddresses);
 		});
 
 		it('should handle gracefully when addresses are empty', async () => {
@@ -476,7 +476,7 @@ describe('solana.api', () => {
 			});
 
 			expect(fee).toEqual(mockPriorityFee);
-			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledWith([]);
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledExactlyOnceWith([]);
 		});
 
 		it('should handle gracefully the return of an empty array of fees', async () => {
@@ -487,7 +487,7 @@ describe('solana.api', () => {
 			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
 			expect(fee).toEqual(0n);
-			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
+			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -520,7 +520,7 @@ describe('solana.api', () => {
 			});
 
 			expect(info).toEqual(mockAccountInfo);
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAddress1, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress1, { encoding: 'jsonParsed' });
 		});
 
 		it('should cache account info by address and network', async () => {
@@ -539,7 +539,7 @@ describe('solana.api', () => {
 			});
 
 			expect(secondCall).toEqual(firstCall);
-			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith();
 
 			const thirdCall = await getAccountInfo({
 				address: mockAddress2,
@@ -580,7 +580,7 @@ describe('solana.api', () => {
 			});
 
 			expect(secondCall).toEqual(firstCall);
-			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -603,7 +603,7 @@ describe('solana.api', () => {
 				mintAuthority: mockSolAddress3,
 				freezeAuthority: mockSolAddress4
 			});
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSplAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSplAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -691,7 +691,7 @@ describe('solana.api', () => {
 			});
 
 			expect(owner).toEqual(mockSolAddress);
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -733,7 +733,7 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeTruthy();
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should return true if it is a non-ATA address', async () => {
@@ -745,7 +745,7 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeTruthy();
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockSolAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockSolAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should return false if the ATA address has no info data', async () => {
@@ -757,7 +757,7 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeFalsy();
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should return false if the ATA address if the info data are nullish', async () => {
@@ -769,7 +769,7 @@ describe('solana.api', () => {
 			});
 
 			expect(result).toBeFalsy();
-			expect(mockGetAccountInfo).toHaveBeenCalledWith(mockAtaAddress, { encoding: 'jsonParsed' });
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAtaAddress, { encoding: 'jsonParsed' });
 		});
 
 		it('should throw error when RPC call fails', async () => {

@@ -91,10 +91,10 @@ describe('AuthHelpForm', () => {
 		await waitFor(() => {
 			lostIdentityButton?.click();
 
-			expect(onLostIdentityMock).toHaveBeenCalledOnce();
+			expect(onLostIdentityMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_LOST_INTERNET_IDENTITY });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_LOST_INTERNET_IDENTITY });
 
 		const securityButton: HTMLButtonElement | null =
 			container.querySelector(securityButtonSelector);
@@ -104,10 +104,10 @@ describe('AuthHelpForm', () => {
 		await waitFor(() => {
 			securityButton?.click();
 
-			expect(onOtherMock).toHaveBeenCalledOnce();
+			expect(onOtherMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
-		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_CONCERNED_ABOUT_SECURITY });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_CONCERNED_ABOUT_SECURITY });
 
 		const gotConfusedButton: HTMLButtonElement | null =
 			container.querySelector(gotConfusedButtonSelector);
@@ -120,7 +120,7 @@ describe('AuthHelpForm', () => {
 			expect(onOtherMock).toHaveBeenCalledTimes(2);
 		});
 
-		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_GOT_CONFUSED });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_GOT_CONFUSED });
 
 		const otherButton: HTMLButtonElement | null = container.querySelector(otherButtonSelector);
 
@@ -132,6 +132,6 @@ describe('AuthHelpForm', () => {
 			expect(onOtherMock).toHaveBeenCalledTimes(3);
 		});
 
-		expect(analyticSpy).toHaveBeenCalledWith({ name: TRACK_HELP_OTHER });
+		expect(analyticSpy).toHaveBeenCalledExactlyOnceWith({ name: TRACK_HELP_OTHER });
 	});
 });

@@ -349,6 +349,6 @@ describe('AddressBookModal', () => {
 
 		await fireEvent.click(getByTestId(BUTTON_MODAL_CLOSE));
 
-		expect(onComplete).toHaveBeenCalledOnce();
+		expect(onComplete).toHaveBeenCalledExactlyOnceWith();
 	});
 });

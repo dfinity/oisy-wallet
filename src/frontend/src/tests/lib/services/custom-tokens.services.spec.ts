@@ -128,7 +128,7 @@ describe('custom-tokens.services', () => {
 		it('should sign out if the identity is nullish', async () => {
 			await expect(loadNetworkCustomTokens({ ...mockParams, identity: null })).resolves.toEqual([]);
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 
 			await expect(
 				loadNetworkCustomTokens({ ...mockParams, identity: undefined })

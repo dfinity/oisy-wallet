@@ -16,7 +16,7 @@ describe('eth-transactions.services', () => {
 
 		syncCkEthMinterError({ tokenId: mockTokenId, error: mockError });
 
-		expect(trackEvent).toHaveBeenCalledWith({
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR,
 			metadata: {
 				error: mockError.toString()

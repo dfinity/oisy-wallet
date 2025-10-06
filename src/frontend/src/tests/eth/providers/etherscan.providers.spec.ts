@@ -61,7 +61,7 @@ describe('etherscan.providers', () => {
 			const provider = new EtherscanProvider(network, chainId);
 
 			expect(provider).toBeDefined();
-			expect(EtherscanProviderLib).toHaveBeenCalledWith(network, ETHERSCAN_API_KEY);
+			expect(EtherscanProviderLib).toHaveBeenCalledExactlyOnceWith(network, ETHERSCAN_API_KEY);
 		});
 
 		describe('transactions method', () => {
@@ -240,7 +240,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledOnce();
+					expect(mockFetch).toHaveBeenCalledExactlyOnceWith();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});
@@ -310,7 +310,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledOnce();
+					expect(mockFetch).toHaveBeenCalledExactlyOnceWith();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});
@@ -380,7 +380,7 @@ describe('etherscan.providers', () => {
 
 					expect(provider).toBeDefined();
 
-					expect(mockFetch).toHaveBeenCalledOnce();
+					expect(mockFetch).toHaveBeenCalledExactlyOnceWith();
 
 					expect(result).toStrictEqual(expectedTransactions);
 				});
@@ -431,7 +431,7 @@ describe('etherscan.providers', () => {
 					contractAddress: mockValidErc721Token.address
 				});
 
-				expect(mockFetch).toHaveBeenCalledOnce();
+				expect(mockFetch).toHaveBeenCalledExactlyOnceWith();
 
 				expect(tokenIds).toStrictEqual(expectedTokenIds);
 			});

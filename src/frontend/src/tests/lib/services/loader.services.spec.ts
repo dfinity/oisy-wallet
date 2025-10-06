@@ -97,8 +97,8 @@ describe('loader.services', () => {
 
 			await initSignerAllowance();
 
-			expect(spySignOut).toHaveBeenCalledOnce();
-			expect(spy).toHaveBeenCalledOnce();
+			expect(spySignOut).toHaveBeenCalledExactlyOnceWith();
+			expect(spy).toHaveBeenCalledExactlyOnceWith();
 
 			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
 				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
@@ -132,13 +132,13 @@ describe('loader.services', () => {
 		it('should sign out if the identity is nullish', async () => {
 			await initLoader({ ...mockParams, identity: null });
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
+			expect(nullishSignOut).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should load the user profile', async () => {
 			await initLoader(mockParams);
 
-			expect(loadUserProfile).toHaveBeenCalledOnce();
+			expect(loadUserProfile).toHaveBeenCalledExactlyOnceWith();
 			expect(loadUserProfile).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 		});
 
@@ -147,16 +147,16 @@ describe('loader.services', () => {
 
 			await initLoader(mockParams);
 
-			expect(signOut).toHaveBeenCalledOnce();
+			expect(signOut).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		it('should load addresses from IDB', async () => {
 			await initLoader(mockParams);
 
-			expect(loadIdbAddresses).toHaveBeenCalledOnce();
+			expect(loadIdbAddresses).toHaveBeenCalledExactlyOnceWith();
 
-			expect(mockProgressAndLoad).toHaveBeenCalledOnce();
-			expect(mockValidateAddresses).toHaveBeenCalledOnce();
+			expect(mockProgressAndLoad).toHaveBeenCalledExactlyOnceWith();
+			expect(mockValidateAddresses).toHaveBeenCalledExactlyOnceWith();
 
 			expect(get(initialLoading)).toBeFalsy();
 		});
@@ -187,10 +187,10 @@ describe('loader.services', () => {
 			it('should load addresses from the backend', async () => {
 				await initLoader(mockParams);
 
-				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenCalledExactlyOnceWith();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
-				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenCalledExactlyOnceWith();
 				expect(loadAddresses).toHaveBeenNthCalledWith(1, [
 					ETHEREUM_NETWORK_ID,
 					SOLANA_MAINNET_NETWORK_ID
@@ -222,10 +222,10 @@ describe('loader.services', () => {
 
 				await initLoader(mockParams);
 
-				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenCalledExactlyOnceWith();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
-				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenCalledExactlyOnceWith();
 				expect(loadAddresses).toHaveBeenNthCalledWith(1, [SOLANA_MAINNET_NETWORK_ID]);
 			});
 
@@ -252,10 +252,10 @@ describe('loader.services', () => {
 
 				await initLoader(mockParams);
 
-				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenCalledExactlyOnceWith();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
-				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenCalledExactlyOnceWith();
 				expect(loadAddresses).toHaveBeenNthCalledWith(1, [ETHEREUM_NETWORK_ID]);
 			});
 
@@ -264,10 +264,10 @@ describe('loader.services', () => {
 
 				await initLoader(mockParams);
 
-				expect(allowSigning).toHaveBeenCalledOnce();
+				expect(allowSigning).toHaveBeenCalledExactlyOnceWith();
 				expect(allowSigning).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 
-				expect(loadAddresses).toHaveBeenCalledOnce();
+				expect(loadAddresses).toHaveBeenCalledExactlyOnceWith();
 				expect(loadAddresses).toHaveBeenNthCalledWith(1, []);
 			});
 		});

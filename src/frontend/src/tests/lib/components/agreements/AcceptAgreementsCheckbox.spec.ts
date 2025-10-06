@@ -60,7 +60,7 @@ describe('AcceptAgreementsCheckbox', () => {
 
 		await fireEvent.click(checkbox);
 
-		expect(onChange).toHaveBeenCalledOnce();
+		expect(onChange).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('is controlled: click triggers onChange, parent updates checked', async () => {
@@ -82,7 +82,7 @@ describe('AcceptAgreementsCheckbox', () => {
 
 		await fireEvent.click(checkbox);
 
-		expect(onChange).toHaveBeenCalledOnce();
+		expect(onChange).toHaveBeenCalledExactlyOnceWith();
 
 		await rerender({
 			checked: false,

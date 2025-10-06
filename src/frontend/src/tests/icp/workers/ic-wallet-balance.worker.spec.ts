@@ -168,9 +168,9 @@ describe('ic-wallet-balance.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusIdle);
 				});
 
 				it('should postMessage with balance', async () => {
@@ -178,9 +178,9 @@ describe('ic-wallet-balance.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageNotCertified);
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageCertified);
 				});
 			}
 		};
@@ -223,7 +223,7 @@ describe('ic-wallet-balance.worker', () => {
 					// error
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
-					expect(postMessageMock).toHaveBeenCalledWith({
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith({
 						msg: `${msg}Error`,
 						data: {
 							error: err

@@ -120,7 +120,7 @@ describe('spl-custom-tokens.services', () => {
 		it('should set the custom tokens in the backend', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(setManyCustomTokens).toHaveBeenCalledOnce();
+			expect(setManyCustomTokens).toHaveBeenCalledExactlyOnceWith();
 			expect(setManyCustomTokens).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				tokens: expectedTokens,
@@ -131,14 +131,14 @@ describe('spl-custom-tokens.services', () => {
 		it('should reset disabled tokens via splCustomTokensStore', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(splCustomTokensStore.reset).toHaveBeenCalledOnce();
+			expect(splCustomTokensStore.reset).toHaveBeenCalledExactlyOnceWith();
 			expect(splCustomTokensStore.reset).toHaveBeenNthCalledWith(1, mockTokenId1);
 		});
 
 		it('should reload all custom tokens after saving', async () => {
 			await saveCustomTokens(mockParams);
 
-			expect(loadCustomTokens).toHaveBeenCalledOnce();
+			expect(loadCustomTokens).toHaveBeenCalledExactlyOnceWith();
 			expect(loadCustomTokens).toHaveBeenNthCalledWith(1, { identity: mockIdentity });
 		});
 
@@ -147,7 +147,7 @@ describe('spl-custom-tokens.services', () => {
 
 			await expect(saveCustomTokens(mockParams)).rejects.toThrow('Network error');
 
-			expect(progress).toHaveBeenCalledOnce();
+			expect(progress).toHaveBeenCalledExactlyOnceWith();
 			expect(progress).toHaveBeenNthCalledWith(1, ProgressStepsAddToken.SAVE);
 			expect(progress).not.toHaveBeenCalledWith(ProgressStepsAddToken.UPDATE_UI);
 

@@ -150,7 +150,7 @@ describe('ModalTokensList', () => {
 		if (networkButton) {
 			await fireEvent.click(networkButton);
 
-			expect(handler).toHaveBeenCalledOnce();
+			expect(handler).toHaveBeenCalledExactlyOnceWith();
 		}
 	});
 

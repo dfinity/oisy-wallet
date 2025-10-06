@@ -103,7 +103,7 @@ describe('AuthHelpOtherForm', () => {
 		await waitFor(() => {
 			backButton?.click();
 
-			expect(onBackMock).toHaveBeenCalledOnce();
+			expect(onBackMock).toHaveBeenCalledExactlyOnceWith();
 		});
 
 		const doneButton: HTMLButtonElement | null = container.querySelector(doneButtonSelector);
@@ -113,7 +113,7 @@ describe('AuthHelpOtherForm', () => {
 		await waitFor(() => {
 			doneButton?.click();
 
-			expect(onDoneMock).toHaveBeenCalledOnce();
+			expect(onDoneMock).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 });

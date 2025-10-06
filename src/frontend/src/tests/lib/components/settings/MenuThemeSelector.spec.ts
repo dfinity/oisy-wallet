@@ -47,20 +47,20 @@ describe('MenuThemeSelector', () => {
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
 		expect(get(themeStore)).toBe(Theme.DARK);
-		expect(spy).toHaveBeenCalledWith(Theme.DARK);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(Theme.DARK);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
 
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.LIGHT}`));
 
 		expect(get(themeStore)).toBe(Theme.LIGHT);
-		expect(spy).toHaveBeenCalledWith(Theme.LIGHT);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(Theme.LIGHT);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.LIGHT));
 
 		// We repeat the test just to make sure that the theme is actually changing
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${Theme.DARK}`));
 
 		expect(get(themeStore)).toBe(Theme.DARK);
-		expect(spy).toHaveBeenCalledWith(Theme.DARK);
+		expect(spy).toHaveBeenCalledExactlyOnceWith(Theme.DARK);
 		expect(localStorage.getItem(THEME_KEY)).toBe(JSON.stringify(Theme.DARK));
 
 		spy.mockRestore();
@@ -78,7 +78,7 @@ describe('MenuThemeSelector', () => {
 		await fireEvent.click(getByTestId(`${THEME_SELECTOR_CARD}-${THEME_SYSTEM}`));
 
 		expect(get(themeStore)).toBe(Theme.LIGHT);
-		expect(spy).toHaveBeenCalledOnce();
+		expect(spy).toHaveBeenCalledExactlyOnceWith();
 		expect(localStorage.getItem(THEME_KEY)).toBeNull();
 
 		spy.mockRestore();

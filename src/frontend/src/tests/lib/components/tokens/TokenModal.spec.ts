@@ -84,10 +84,10 @@ describe('TokenModal', () => {
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
 		await waitFor(() => {
-			expect(removeUserTokenMock).toHaveBeenCalledOnce();
-			expect(toasts).toHaveBeenCalledOnce();
-			expect(idbTokensApi).toHaveBeenCalledOnce();
-			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+			expect(removeUserTokenMock).toHaveBeenCalledExactlyOnceWith();
+			expect(toasts).toHaveBeenCalledExactlyOnceWith();
+			expect(idbTokensApi).toHaveBeenCalledExactlyOnceWith();
+			expect(gotoReplaceRoot).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -116,8 +116,8 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith();
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				indexCanisterId: MOCK_CANISTER_ID_1,
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
@@ -126,7 +126,7 @@ describe('TokenModal', () => {
 			}),
 			identity: mockIdentity
 		});
-		expect(loadCustomTokens).toHaveBeenCalledOnce();
+		expect(loadCustomTokens).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('saves token after all required steps if indexCanisterId was present', async () => {
@@ -155,8 +155,8 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith();
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
 				enabled: true,
@@ -164,7 +164,7 @@ describe('TokenModal', () => {
 			}),
 			identity: mockIdentity
 		});
-		expect(loadCustomTokens).toHaveBeenCalledOnce();
+		expect(loadCustomTokens).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('does not save token if indexCanisterId assertion failed', async () => {
@@ -254,7 +254,7 @@ describe('TokenModal', () => {
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 		expect(idbTokensApi).not.toHaveBeenCalledOnce();
-		expect(signOutSpy).toHaveBeenCalledOnce();
+		expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('does not find delete button if token is not deletable', () => {
@@ -294,8 +294,8 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).toHaveBeenCalledOnce();
-		expect(toastsError).toHaveBeenCalledOnce();
+		expect(removeUserTokenMock).toHaveBeenCalledExactlyOnceWith();
+		expect(toastsError).toHaveBeenCalledExactlyOnceWith();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 		expect(idbTokensApi).not.toHaveBeenCalledOnce();
 	});

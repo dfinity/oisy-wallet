@@ -24,7 +24,7 @@ describe('user-experimental-features.utils', () => {
 				mockUserExperimentalFeaturesMap
 			);
 
-			expect(console.warn).toHaveBeenCalledOnce();
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith();
 			expect(console.warn).toHaveBeenNthCalledWith(1, `Unknown featureId: ${unknownFeatureId}`);
 		});
 

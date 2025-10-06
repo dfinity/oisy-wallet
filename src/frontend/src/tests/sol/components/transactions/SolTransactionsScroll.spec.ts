@@ -57,7 +57,7 @@ describe('SolTransactionsScroll', () => {
 		it('should load next transactions', () => {
 			render(SolTransactionsScroll, { token: mockToken, children: mockSnippet });
 
-			expect(loadNextSolTransactions).toHaveBeenCalledOnce();
+			expect(loadNextSolTransactions).toHaveBeenCalledExactlyOnceWith();
 			expect(loadNextSolTransactions).toHaveBeenNthCalledWith(1, {
 				token: mockToken,
 				before: mockLastSignature,

@@ -19,7 +19,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: true });
 
-		expect(spyStoreSet).toHaveBeenCalledWith({
+		expect(spyStoreSet).toHaveBeenCalledExactlyOnceWith({
 			key: 'privacy-mode',
 			value: { enabled: true }
 		});
@@ -31,7 +31,7 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: false });
 
-		expect(spyStoreSet).toHaveBeenCalledWith({
+		expect(spyStoreSet).toHaveBeenCalledExactlyOnceWith({
 			key: 'privacy-mode',
 			value: { enabled: false }
 		});
@@ -41,7 +41,7 @@ describe('setPrivacyMode', () => {
 	it('should enable privacy mode and show toast', () => {
 		setPrivacyMode({ enabled: true, withToast: true });
 
-		expect(spyToastsShow).toHaveBeenCalledWith({
+		expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 			text: en.navigation.text.privacy_mode_enabled,
 			level: 'info',
 			duration: 7000
@@ -51,7 +51,7 @@ describe('setPrivacyMode', () => {
 	it('should disable privacy mode and show toast', () => {
 		setPrivacyMode({ enabled: false, withToast: true });
 
-		expect(spyToastsShow).toHaveBeenCalledWith({
+		expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
 			text: en.navigation.text.privacy_mode_disabled,
 			level: 'info',
 			duration: 7000
@@ -63,8 +63,8 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: true, source: 'User menu click' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith();
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'true',
@@ -79,8 +79,8 @@ describe('setPrivacyMode', () => {
 
 		setPrivacyMode({ enabled: false, withToast: true, source: 'keypress P' });
 
-		expect(spyTrackEvent).toHaveBeenCalledOnce();
-		expect(spyTrackEvent).toHaveBeenCalledWith({
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith();
+		expect(spyTrackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_PRIVACY_MODE_CHANGE,
 			metadata: {
 				enabled: 'false',

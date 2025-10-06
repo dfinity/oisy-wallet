@@ -22,7 +22,7 @@ describe('ListItemButton', () => {
 
 		await fireEvent.click(getByRole('button', { name: LABEL }));
 
-		expect(onClick).toHaveBeenCalledOnce();
+		expect(onClick).toHaveBeenCalledExactlyOnceWith();
 	});
 
 	it('forwards testId to the underlying Button element', () => {

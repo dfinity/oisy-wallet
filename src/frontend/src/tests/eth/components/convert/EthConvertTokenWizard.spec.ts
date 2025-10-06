@@ -187,7 +187,7 @@ describe('EthConvertTokenWizard', () => {
 
 		const [[args]] = sendSpy.mock.calls;
 
-		expect(sendSpy).toHaveBeenCalledOnce();
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith();
 		expect(stringifyJson({ value: args })).toBe(
 			stringifyJson({
 				value: {

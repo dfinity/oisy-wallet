@@ -112,7 +112,7 @@ describe('alchemy.providers', () => {
 				tokens: [mockValidErc1155Token]
 			});
 
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledExactlyOnceWith();
 			expect(nfts).toStrictEqual(expectedTokenIds);
 		});
 
@@ -144,7 +144,7 @@ describe('alchemy.providers', () => {
 				tokens: [mockValidErc1155Token]
 			});
 
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledExactlyOnceWith();
 
 			expect(nfts).toStrictEqual([
 				{
@@ -176,7 +176,7 @@ describe('alchemy.providers', () => {
 				provider.getNftsByOwner({ address: mockEthAddress, tokens: [mockValidErc1155Token] })
 			).rejects.toThrow('Nfts Error');
 
-			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 
@@ -217,7 +217,7 @@ describe('alchemy.providers', () => {
 
 			const contracts = await provider.getTokensForOwner(mockEthAddress);
 
-			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledExactlyOnceWith();
 
 			expect(contracts).toStrictEqual(expectedContracts);
 		});
@@ -245,7 +245,7 @@ describe('alchemy.providers', () => {
 
 			const contracts = await provider.getTokensForOwner(mockEthAddress);
 
-			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getContractsForOwner).toHaveBeenCalledExactlyOnceWith();
 
 			expect(contracts).toStrictEqual(expectedContracts);
 		});
@@ -285,7 +285,7 @@ describe('alchemy.providers', () => {
 
 			const metadata = await provider.getContractMetadata(mockEthAddress);
 
-			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledExactlyOnceWith();
 
 			expect(metadata).toStrictEqual(expectedMetadata);
 		});
@@ -309,7 +309,7 @@ describe('alchemy.providers', () => {
 				'Invalid token standard'
 			);
 
-			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledOnce();
+			expect(Alchemy.prototype.nft.getContractMetadata).toHaveBeenCalledExactlyOnceWith();
 		});
 	});
 

@@ -53,7 +53,7 @@ describe('EthAddTokenReview', () => {
 			}
 		});
 
-		expect(toastsError).toHaveBeenCalledWith({
+		expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 			msg: { text: en.tokens.import.error.missing_contract_address }
 		});
 	});
@@ -68,7 +68,7 @@ describe('EthAddTokenReview', () => {
 			}
 		});
 
-		expect(toastsError).toHaveBeenCalledWith({
+		expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 			msg: { text: en.tokens.error.already_available }
 		});
 	});
@@ -110,7 +110,7 @@ describe('EthAddTokenReview', () => {
 		await vi.waitFor(() => {
 			expect(mockErc20Metadata).not.toHaveBeenCalled();
 			expect(mockErc721Metadata).not.toHaveBeenCalled();
-			expect(mockErc1155Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
+			expect(mockErc1155Metadata).toHaveBeenCalledExactlyOnceWith({ address: mockEthAddress });
 		});
 	});
 
@@ -141,7 +141,7 @@ describe('EthAddTokenReview', () => {
 
 		await vi.waitFor(() => {
 			expect(mockErc20Metadata).not.toHaveBeenCalled();
-			expect(mockErc721Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
+			expect(mockErc721Metadata).toHaveBeenCalledExactlyOnceWith({ address: mockEthAddress });
 			expect(mockErc1155Metadata).not.toHaveBeenCalled();
 		});
 	});
@@ -164,7 +164,7 @@ describe('EthAddTokenReview', () => {
 		});
 
 		await vi.waitFor(() => {
-			expect(mockErc20Metadata).toHaveBeenCalledWith({ address: mockEthAddress });
+			expect(mockErc20Metadata).toHaveBeenCalledExactlyOnceWith({ address: mockEthAddress });
 			expect(mockErc721Metadata).not.toHaveBeenCalled();
 			expect(mockErc1155Metadata).not.toHaveBeenCalled();
 		});
@@ -188,7 +188,7 @@ describe('EthAddTokenReview', () => {
 		});
 
 		await vi.waitFor(() => {
-			expect(toastsError).toHaveBeenCalledWith({
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.tokens.error.incomplete_metadata }
 			});
 		});
@@ -212,7 +212,7 @@ describe('EthAddTokenReview', () => {
 		});
 
 		await vi.waitFor(() => {
-			expect(toastsError).toHaveBeenCalledWith({
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.tokens.error.incomplete_metadata }
 			});
 		});
@@ -250,7 +250,7 @@ describe('EthAddTokenReview', () => {
 		});
 
 		await vi.waitFor(() => {
-			expect(toastsError).toHaveBeenCalledWith({
+			expect(toastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.tokens.error.duplicate_metadata }
 			});
 		});

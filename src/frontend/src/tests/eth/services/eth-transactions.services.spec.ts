@@ -122,7 +122,7 @@ describe('eth-transactions.services', () => {
 						standard: mockStandard
 					});
 
-					expect(mockErcTransactions).toHaveBeenCalledWith({
+					expect(mockErcTransactions).toHaveBeenCalledExactlyOnceWith({
 						contract: { ...token, enabled: true },
 						address: mockEthAddress
 					});
@@ -235,7 +235,7 @@ describe('eth-transactions.services', () => {
 
 					expect(transactionStore[mockTokenId]).toEqual(null);
 
-					expect(trackEvent).toHaveBeenCalledWith({
+					expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 						name: TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR,
 						metadata: {
 							tokenId: mockTokenId.description,

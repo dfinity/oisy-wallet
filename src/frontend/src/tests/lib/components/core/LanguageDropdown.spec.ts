@@ -97,7 +97,7 @@ describe('LanguageDropdown', () => {
 			}
 		}
 
-		expect(trackEvent).toHaveBeenCalledWith({
+		expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 			name: TRACK_CHANGE_LANGUAGE,
 			metadata: {
 				language: Languages.GERMAN,

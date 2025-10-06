@@ -39,7 +39,7 @@ describe('RewardsEligibilityContext', () => {
 
 		render(RewardsEligibilityContext);
 
-		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledOnce();
-		expect(initStoreSpy).toHaveBeenCalledOnce();
+		expect(getCampaignEligibilitiesSpy).toHaveBeenCalledExactlyOnceWith();
+		expect(initStoreSpy).toHaveBeenCalledExactlyOnceWith();
 	});
 });

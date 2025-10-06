@@ -143,7 +143,7 @@ describe('nav.utils', () => {
 		it('should navigate to "/" when pop is false', async () => {
 			await back({ pop: false });
 
-			expect(mockGoTo).toHaveBeenCalledWith('/');
+			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/');
 		});
 	});
 
@@ -151,7 +151,7 @@ describe('nav.utils', () => {
 		it('should navigate to "/" with replaceState', async () => {
 			await gotoReplaceRoot();
 
-			expect(mockGoTo).toHaveBeenCalledWith('/', { replaceState: true });
+			expect(mockGoTo).toHaveBeenCalledExactlyOnceWith('/', { replaceState: true });
 		});
 	});
 
@@ -169,7 +169,7 @@ describe('nav.utils', () => {
 
 			removeSearchParam({ url, searchParam: 'code' });
 
-			expect(pushStateMock).toHaveBeenCalledWith(url, {});
+			expect(pushStateMock).toHaveBeenCalledExactlyOnceWith(url, {});
 			expect(url.toString()).toBe(urlString);
 		});
 	});

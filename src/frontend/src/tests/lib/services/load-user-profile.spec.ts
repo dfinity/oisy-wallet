@@ -33,7 +33,7 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
@@ -54,12 +54,12 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(createUserProfileSpy).toHaveBeenCalledWith({
+			expect(createUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				nullishIdentityErrorMessage
 			});
@@ -75,12 +75,12 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				certified: true,
 				nullishIdentityErrorMessage
