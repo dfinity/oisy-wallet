@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% 去中心化",
+			"title_part_1": "您的数字资产",
+			"title_part_2": "私密且安全",
 			"logout": "退出登录",
 			"lock": "锁定",
 			"authenticate": "打开或创建",
-			"asset_types": "比特币、Solana、以太坊、ICP 等",
-			"instant_and_private": "随时随地实现即时且私密的访问",
-			"advanced_cryptography": "100% 上链：通过先进加密技术确保安心使用"
+			"asset_types": "管理 BTC、SOL、ETH、ICP 等多种资产",
+			"instant_and_private": "内置 AI 助手 — 隐私保护为标准配置",
+			"advanced_cryptography": "先进加密技术保护 — 100% 链上"
 		},
 		"alt": {
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
@@ -422,6 +422,11 @@
 				"participate_title": "通过保持活跃（现在还可以邀请他人）赚取 BTC。",
 				"description": "满足简单的每周要求：登录、进行两次交易并持有至少价值 20 美元的代币，即可每天有资格获得高达 50 美元的 BTC 空投。<br>现在还有推荐奖励：邀请朋友设置钱包，你们都将获得保证的 Sprinkles。进入前 4 名推荐人，即可赢得大奖。",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "欢迎来到 $oisy_short！",
+					"subtitle": "准备好赚取收益了吗？",
+					"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐 4 位朋友即可获得保证奖金。"
+				},
 				"win": {
 					"default": {
 						"title": "您已获得奖励",
@@ -457,6 +462,11 @@
 				"participate_title": "通过活跃度和推荐赚取代币。更多连锁意味着更多机会。",
 				"description": "保持活跃超过 10 天即可获得资格：经常登录、完成钱包操作并持有至少 20 美元。<br/>每个活跃链都会通过多链乘数提高您的几率。<br/>从符合资格的朋友那里赚取 10%，并排名前 3 位即可赢得 200 美元的超级洒水。",
 				"campaign_href": "",
+				"welcome": {
+					"title": "欢迎来到 $oisy_short！",
+					"subtitle": "准备好赚取收益了吗？",
+					"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
+				},
 				"win": {
 					"default": {
 						"title": "您已获得奖励",
@@ -1267,7 +1277,11 @@
 			"block": "区块",
 			"interacted_with": "交互对象（接收方）",
 			"status": "状态",
-			"confirmations": "确认数"
+			"confirmations": "确认数",
+			"for": "",
+			"for_copied": "",
+			"expiration": "",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "已确认",
@@ -1305,7 +1319,8 @@
 		"alt": {
 			"open_block_explorer": "在区块浏览器中打开此交易",
 			"open_from_block_explorer": "在区块浏览器中打开“发送自”地址",
-			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址"
+			"open_to_block_explorer": "在区块浏览器中打开“发送至”地址",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "无法获取区块号。",
@@ -1507,6 +1522,15 @@
 			"title": "扫描二维码"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1585,7 +1609,8 @@
 			"reject_warning": "你必须接受条款与条件才能继续。你可以随时再次尝试。",
 			"i_have_accepted": "我已阅读并同意",
 			"i_have_accepted_updated": "我已阅读并同意更新后的",
-			"accept_and_continue": "接受并继续"
+			"accept_and_continue": "接受并继续",
+			"updated_agreements_warning": ""
 		},
 		"error": {
 			"cannot_update_user_agreements": "更新你的协议时发生错误。"
@@ -1594,23 +1619,11 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "许可协议",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "$oisy_name 许可协议（“许可协议”）",
-			"paragraph_1": "感谢你对 $oisy_name 的兴趣。$oisy_name 是基于浏览器的自托管多链钱包应用，托管于 Internet Computer 公有区块链网络（“$oisy_short”）。关于 $oisy_short 的开源代码和相关许可信息，请参阅此 GitHub 仓库：$oisy_repo_url。",
-			"paragraph_2": "本许可协议规范你（“你”）对 $oisy_short 的使用。使用 $oisy_short 即表示你已阅读、理解并同意受此许可协议约束。如不同意，请勿使用 $oisy_short。",
-			"paragraph_3": "若你选择使用 $oisy_short，代表你与 DFINITY 基金会及其附属公司（统称“DFINITY”）达成如下共识：",
-			"limited_license": "<strong>1. 有限许可。</strong> 根据本协议条款和条件，DFINITY 授予你一项有限的、非独占的、不可转让的、不可再许可的、可撤销的许可，仅限于用于接收、持有和发送代币（如 ICP、ICRC-1、ETH、ERC20 及其他未来支持的代币）。你可根据各开源组件的许可条款创建衍生作品。",
-			"restrictions": "<strong>2. 使用限制。</strong> 你对自己使用 $oisy_short 的所有活动负全责，无论是否经你授权或由你、你的员工或第三方代表你进行。你明白 DFINITY 对与你的钱包相关的任何活动或交易（无论是否完成）概不负责。你不得歪曲你与 DFINITY 的关系，不得暗示 DFINITY 支持、赞助或背书你或你的业务。未经许可，你不得使用 $oisy_short 名称、logo 或商标。",
-			"applicable_laws": "<strong>3. 适用法律。</strong> 使用 $oisy_short 过程中你应遵守所有适用法律法规（包括但不限于出口管制、反洗钱或经济制裁等法律）。",
-			"reservation_rights": "<strong>4. 权利保留。</strong> $oisy_short 为 DFINITY 所有，并以许可方式提供。其内容、界面、交互功能、信息、代码和设计等受知识产权保护。DFINITY 保留未明确授予你的所有权利。",
-			"feedback": "<strong>5. 反馈。</strong> 若你向 DFINITY 提供任何反馈（包括建议、bug 报告、改进建议等），即视为非保密性提交，DFINITY 可自由使用该反馈。你授予 DFINITY 永久性、不可撤销、可转让、可再许可、非独占、免版税的全球许可。",
-			"termination": "<strong>6. 期限与终止。</strong> 本协议在你违反协议时立即终止。你可随时通过清空钱包并停止使用 $oisy_short 来终止协议。DFINITY 可随时基于任何理由终止此协议，包括滥用行为或违反协议。",
-			"warranty_liability": "<strong>7. 免责声明及责任限制。</strong> 在法律允许的最大范围内，$oisy_short 按“现状”提供，不附带任何形式的保证。DFINITY 不保证其始终可用、安全、准确或适合特定目的。在任何情况下，DFINITY 对任何间接、附带、惩罚性或特殊损失不承担责任，其责任总额不超过 100 瑞士法郎。",
-			"indemnity": "<strong>8. 赔偿条款。</strong> 你同意赔偿 DFINITY 及其相关方，免受因你使用 $oisy_short 或违反本协议引起的任何索赔与损失（包括合理律师费）。",
-			"governing_law": "<strong>9. 适用法律与管辖权。</strong> 本协议适用瑞士法律，任何争议由瑞士苏黎世法院专属管辖，可上诉至瑞士联邦法院。",
-			"entire_agreement": "<strong>10. 完整协议与可分割性。</strong> 本协议为双方之间就此事项的完整协议。如其中任一条款被认定无效，应按法律允许的最小限度修改或分割，其余条款仍具效力。",
-			"assignment": "<strong>11. 协议转让。</strong> 未经 DFINITY 书面同意，你不得转让本协议，DFINITY 可自由转让本协议。",
-			"no_waiver": "<strong>12. 权利不弃权。</strong> DFINITY 未行使权利不构成放弃，亦不影响未来主张该权利。",
-			"english_version": "<strong>13. 英文版本。</strong> 本协议以英文版本为正式版本，如有冲突，以英文版本为准。",
 			"body": "感谢您对 $oisy_name 的关注。$oisy_name 是一个基于浏览器、自托管、支持多链的钱包去中心化应用，托管于 Internet Computer 公共区块链网络（以下简称“$oisy_short”）。如需了解更多关于 $oisy_short 的信息、其开源代码及相关许可，请访问位于此处的 $oisy_short GitHub 仓库：$oisy_repo_url。本许可协议约束您对 $oisy_short 的使用（“您”）。使用 $oisy_short，即表示您已阅读、理解并同意受本许可协议的约束。如果您不同意本协议，则不得使用 $oisy_short。如果您选择使用 $oisy_short，您与 DFINITY 基金会（包括其关联公司及子公司，统称为“DFINITY”）承认并同意如下条款：### 1. 有限许可。在遵守本许可协议条款和条件的前提下，DFINITY 授予您一项有限的、非专属的、不可转让的、不可再许可的、可撤销的许可，仅允许您使用 $oisy_short 以接收、持有和发送代币，如原生 ICP、ICRC-1、ETH 和 ERC20 代币，以及不时可能推出的其他代币。对于包含在 $oisy_short 中的任何开源组件，您可以在适用许可条款允许的范围内创作衍生作品。### 2. 限制。您对与使用 $oisy_short 相关的所有活动负责，无论这些活动是否由您授权，或由您、您的员工或第三方代表您进行。您理解 DFINITY 不对与您的 $oisy_name 相关的任何活动或交易（无论是否完成）负责。您不得歪曲或夸大您与 DFINITY 之间的关系，包括不得表示或暗示 DFINITY 通过您使用 $oisy_short 支持、赞助、认可或参与您或您的商业活动。除非本许可协议明确允许，您不得暗示与 DFINITY 之间存在任何关系或关联。您不得以任何方式使用 $oisy_short 的名称、标识或任何相关商标，从而暗示认可或关联，歪曲与 $oisy_short 的关系，或引起关于 $oisy_short 来源的混淆。### 3. 适用法律。您在使用 $oisy_short 以及与您的 $oisy_name 相关的任何交易中，必须遵守所有适用的法律法规（包括但不限于出口管制、反洗钱或经济制裁方面的法律法规）。### 4. DFINITY 的权利保留。$oisy_short 由 DFINITY 拥有并许可给您使用，而非出售。$oisy_short 的内容、可视界面、交互功能、信息、图形、设计、汇编、计算机代码、产品、服务以及所有其他元素及相关文档，均受适用的知识产权法律保护。DFINITY 拥有 $oisy_short 及其相关知识产权的全部和唯一所有权，或拥有其子公司、关联公司或第三方许可方的授权，适用开源许可除外。DFINITY 保留本许可协议未明确授予的所有权利。您不因本协议获得任何权利、所有权或利益，无论是明示、默示还是其他方式，除非本许可协议或开源组件的相关许可条款明确规定。您无权使用 $oisy_short 的名称、标识或其他相关商标。### 5. 反馈。若您向 DFINITY 提供任何评论、建议、错误报告、增强意见、推荐或修改（统称为“反馈”），则该反馈为非保密性质，DFINITY 有权自行决定如何使用，包括但不限于将其整合进 DFINITY 材料、$oisy_short 或其他服务中。您在此授予 DFINITY 一项永久性的、不可撤销的、可转让的、可再许可的、非排他性、免版税的许可，以使用您的反馈用于任何目的，包括制造和销售产品及服务，并同意提供所需协助以帮助 DFINITY 完善和维护其对反馈的权利。您同意 DFINITY 可不时联系您以获取反馈，但您可通过发送书面通知至 legalnotice@dfinity.org 来选择退出。### 6. 条款与终止。本许可协议在终止前一直有效。若您违反本许可协议，协议及您的使用权和许可将立即终止。您可随时通过清空 $oisy_name 中的代币并停止使用 $oisy_short 来终止本协议。DFINITY 可基于任何理由随时终止本协议，包括但不限于您对 $oisy_short 的实际或涉嫌滥用或违反本协议的行为。第 3 至第 13 条在协议终止后仍然有效。### 7. 免责声明与责任限制。在适用法律允许的最大范围内，$oisy_short 以“按现状”提供，不附带任何形式的担保。DFINITY 在适用法律允许的最大范围内，明确不提供任何明示、默示、法定或其他形式的担保，包括但不限于适销性、特定用途适用性、权利、质量、结果或非侵权性。DFINITY 不保证 $oisy_short 当前或将来始终可用、安全或可靠。DFINITY 明确不对 $oisy_short 的准确性或功能性、您使用过程中获得的信息或功能（当前或将来）、或通过使用获得的结果的准确性、有效性或完整性提供任何担保。在适用法律允许的最大范围内，DFINITY 不对因您使用或无法使用 $oisy_short 或 DFINITY 材料而引起的任何间接、特殊、附带、惩罚性或后果性损害负责，即使已被告知可能发生此类损害，且即使任何有限救济未能实现其基本目的。在任何情况下，DFINITY 所承担的损害赔偿责任总额不超过 100 瑞士法郎（CHF）。### 8. 赔偿。您同意对因您使用或滥用 $oisy_short、违反本许可协议或适用法律法规所导致的任何责任和费用（包括合理的律师费用），为 DFINITY 及其附属公司、高管、董事、供应商、许可方和其他用户进行赔偿、辩护并使其免受损害。### 9. 适用法律与争议解决。任何与 $oisy_short 有关的索赔应适用瑞士法律，并排除其法律冲突规则。与本许可协议相关的任何争议（包括非合同争议及其解释）应由瑞士苏黎世法院专属管辖，且可上诉至瑞士联邦法院。### 10. 完整协议与可分割性。本许可协议构成您与 DFINITY 之间关于本协议主题事项的完整协议，取代此前所有的书面或口头协议、协商或沟通。当 DFINITY 发布新版本的 $oisy_short 时，可能会修改本协议。若本协议某条款被裁定为无效或不可执行：（a）该条款应在严格必要的范围内进行修改以使其有效可执行；如无法修改，则应视为与本协议分离；（b）本协议其他条款的有效性与可执行性不受影响。### 11. 不得转让。未经 DFINITY 事先书面同意，您不得转让本协议，无论是明示还是法律上转让（包括合并或控制权变更），任何此类尝试转让将视为无效。DFINITY 可在无需通知您的情况下自由转让本协议。在此前提下，本协议对双方及其各自的继承人和被许可的受让人具有约束力。### 12. 权利不放弃。未行使或延迟行使本协议或法律授予的任何权利、权力或救济，不构成对该权利的放弃。DFINITY 对您违反本协议的容忍或放弃不构成对其他违约行为的放弃。### 13. 英文版本为准。如出现任何争议，本许可协议的英文版本为正式且具约束力的版本。根据本协议进行的所有沟通与通知必须使用英文。"
 		},
 		"alt": {
@@ -1620,6 +1633,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "使用条款",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"instruction": "点击此按钮即表示你同意$link",
 			"body": ""
@@ -1631,6 +1648,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "隐私政策",
+			"det": {
+				"article": "",
+				"possessive": ""
+			},
 			"title": "",
 			"body": ""
 		},
@@ -1662,11 +1683,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 奖励"
 		}
-	},
-	"welcome": {
-		"title": "欢迎来到 $oisy_short！",
-		"subtitle": "准备好赚取收益了吗？",
-		"description": "距离您的第一份奖励仅差 2 步：登录，持有 20 美元以上，并完成 2 个操作。这就是开始赚取 Sprinkles 的全部条件。<br><br>想要更多？推荐您的朋友，每当他们中有人赢得点数时，您就会获得奖金。"
 	},
 	"temporal": {
 		"seconds_to_duration": {

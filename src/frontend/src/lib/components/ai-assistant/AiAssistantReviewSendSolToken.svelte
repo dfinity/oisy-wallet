@@ -29,6 +29,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -101,6 +102,11 @@
 		feeDecimalsStore.set(solanaNativeToken.decimals);
 	});
 
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
+	});
+
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
 		initFeeContext({
@@ -109,7 +115,8 @@
 			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore,
-			feeTokenIdStore
+			feeTokenIdStore,
+			feeExchangeRateStore
 		})
 	);
 

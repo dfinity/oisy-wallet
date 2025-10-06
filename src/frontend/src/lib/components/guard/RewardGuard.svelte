@@ -8,7 +8,12 @@
 	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { modalRewardState, modalRewardStateData, modalWelcome } from '$lib/derived/modal.derived';
+	import {
+		modalRewardState,
+		modalRewardStateData,
+		modalWelcome,
+		modalWelcomeData
+	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
@@ -52,28 +57,35 @@
 	});
 
 	const handleWelcomeModal = (timestamp: bigint) => {
+		if (timestamp !== ZERO || nonNullish($modalStore?.type) || hasDisplayedWelcome || $hasUrlCode) {
+			return;
+		}
+
 		const season1Episode4Campaign = rewardCampaigns.find(
 			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
 		);
 
+		if (isNullish(season1Episode4Campaign)) {
+			return;
+		}
+
 		if (
-			nonNullish(timestamp) &&
-			timestamp === ZERO &&
-			nonNullish(season1Episode4Campaign) &&
 			isOngoingCampaign({
 				startDate: season1Episode4Campaign.startDate,
 				endDate: season1Episode4Campaign.endDate
-			}) &&
-			isNullish($modalStore?.type) &&
-			!hasDisplayedWelcome &&
-			!$hasUrlCode
+			})
 		) {
 			hasDisplayedWelcome = true;
+
 			trackEvent({
 				name: TRACK_WELCOME_OPEN,
 				metadata: { campaignId: `${season1Episode4Campaign.id}` }
 			});
-			modalStore.openWelcome(welcomeModalId);
+
+			modalStore.openWelcome({
+				id: welcomeModalId,
+				data: { reward: season1Episode4Campaign }
+			});
 		}
 	};
 
@@ -94,6 +106,6 @@
 		reward={$modalRewardStateData.reward}
 		rewardType={$modalRewardStateData.rewardType}
 	/>
-{:else if $modalWelcome}
-	<WelcomeModal />
+{:else if $modalWelcome && nonNullish($modalWelcomeData)}
+	<WelcomeModal reward={$modalWelcomeData.reward} />
 {/if}
