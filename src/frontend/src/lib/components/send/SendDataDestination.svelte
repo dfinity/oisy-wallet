@@ -20,7 +20,7 @@
 </script>
 
 <WalletConnectModalValue label={$i18n.send.text.destination} ref="destination">
-	<div class="flex flex-col">
+	<div class="flex flex-col gap-1">
 		{destination}
 		{#if nonNullish(contact)}
 			<ContactWithAvatar {contact} {contactAddress} />
