@@ -56,17 +56,6 @@
 			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
 		);
 
-		console.log('season1Episode4Campaign', {
-			season1Episode4Campaign,
-			timestamp,
-			ongoing: isOngoingCampaign({
-				startDate: season1Episode4Campaign.startDate,
-				endDate: season1Episode4Campaign.endDate
-			}),
-			hasDisplayedWelcome,
-			$hasUrlCode
-		});
-
 		if (
 			nonNullish(timestamp) &&
 			timestamp === ZERO &&
