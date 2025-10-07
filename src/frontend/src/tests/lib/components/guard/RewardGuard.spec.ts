@@ -8,6 +8,7 @@ import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
 import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
 import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
+import { ZERO } from '$lib/constants/app.constants';
 import { RewardType } from '$lib/enums/reward-type';
 import { trackEvent } from '$lib/services/analytics.services';
 import { modalStore } from '$lib/stores/modal.store';
@@ -255,7 +256,7 @@ describe('RewardGuard', () => {
 				superpowers: [],
 				airdrops: [],
 				usage_awards: [],
-				last_snapshot_timestamp: [0n],
+				last_snapshot_timestamp: [ZERO],
 				sprinkles: []
 			};
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -286,7 +287,7 @@ describe('RewardGuard', () => {
 				superpowers: [],
 				airdrops: [],
 				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [0n],
+				last_snapshot_timestamp: [ZERO],
 				sprinkles: []
 			};
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
