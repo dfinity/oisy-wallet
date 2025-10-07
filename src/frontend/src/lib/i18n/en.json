@@ -36,7 +36,9 @@
 			"select": "Select",
 			"language": "Language",
 			"currency": "Currency",
-			"confirm": "Confirm"
+			"confirm": "Confirm",
+            "more": "More",
+            "less": "Less"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
