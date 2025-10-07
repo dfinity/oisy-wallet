@@ -19,7 +19,7 @@
 		easing?: string;
 		styleClass?: string;
 		controlsWidthStyleClass?: string;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let {
@@ -294,7 +294,7 @@
 >
 	<div bind:this={container} class="w-full overflow-hidden">
 		<div bind:this={sliderFrame} style="width: 9999px" class="flex" data-tid={CAROUSEL_SLIDE}>
-			{@render children?.()}
+			{@render children()}
 		</div>
 	</div>
 	{#if nonNullish(slides) && slides.length > 1}
