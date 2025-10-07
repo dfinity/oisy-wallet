@@ -7,7 +7,7 @@ import {
 import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 import { networks } from '$lib/derived/networks.derived';

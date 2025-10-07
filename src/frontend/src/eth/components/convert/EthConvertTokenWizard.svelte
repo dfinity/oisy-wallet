@@ -26,7 +26,7 @@
 	import {
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_ERROR,
 		TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
