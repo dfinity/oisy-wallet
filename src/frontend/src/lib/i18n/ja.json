@@ -1623,11 +1623,11 @@
 				"article": "",
 				"possessive": ""
 			},
-			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"license_agreement": "$oisy_nameライセンス契約"
+			"license_agreement": ""
 		}
 	},
 	"terms_of_use": {
