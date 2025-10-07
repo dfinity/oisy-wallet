@@ -183,7 +183,7 @@ export const isIcrcTokenSupportIcrc2 = async ({
 }: {
 	identity: OptionIdentity;
 	ledgerCanisterId: CanisterIdText;
-}) => {
+}): Promise<boolean> => {
 	const supportedStandards = await icrc1SupportedStandards({
 		identity,
 		ledgerCanisterId

@@ -23,7 +23,6 @@
 		destinationToken?: Token;
 		slippageValue: OptionAmount;
 		children?: Snippet;
-		isSourceTokenIcrc2: boolean;
 		isSwapAmountsLoading: boolean;
 		enableAmountUpdates?: boolean;
 		pauseAmountUpdates?: boolean;
@@ -35,7 +34,6 @@
 		destinationToken,
 		slippageValue,
 		children,
-		isSourceTokenIcrc2,
 		isSwapAmountsLoading = $bindable(false),
 		enableAmountUpdates = true,
 		pauseAmountUpdates = false
@@ -96,7 +94,6 @@
 				amount,
 				tokens: $tokens,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
-				isSourceTokenIcrc2,
 				userEthAddress: $ethAddress
 			});
 

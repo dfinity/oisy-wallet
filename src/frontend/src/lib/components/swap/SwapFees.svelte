@@ -13,8 +13,13 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { IcToken } from '$icp/types/ic-token';
+	import { ADDRESS_BOOK_FALLBACK_MESSAGE } from '$lib/constants/test-ids.constants';
+	import { isIcToken, isNotIcToken } from '$icp/validation/ic-token.validation';
 
-	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
+	const { destinationToken, sourceToken, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
@@ -29,10 +34,29 @@
 			: '0'
 	);
 
+	let isSourceTokenIcrc2 = $state(false);
+
+	$effect(() => {
+		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
+			return;
+		}
+
+		(async () => {
+			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity: $authIdentity,
+				ledgerCanisterId: $sourceToken.ledgerCanisterId
+			});
+		})();
+	});
+
+	$effect(() => {
+		console.log({ isSourceTokenIcrc2 }, 'in SwapIcpForm');
+	});
+
 	let sourceTokenTransferFee = $derived(Number(sourceTokenTransferFeeDisplay));
 
 	let sourceTokenApproveFeeDisplay = $derived(
-		$isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0'
+		isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0'
 	);
 
 	let sourceTokenApproveFee = $derived(Number(sourceTokenApproveFeeDisplay));
@@ -73,7 +97,7 @@
 		{/snippet}
 
 		{#snippet listItems()}
-			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
+			{#if isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
 					feeLabel={$i18n.swap.text.approval_fee}

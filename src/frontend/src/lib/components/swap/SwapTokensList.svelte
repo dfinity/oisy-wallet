@@ -7,6 +7,7 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		allCrossChainSwapTokens,
+		allIcrcTokens,
 		allKongSwapCompatibleIcrcTokens,
 		allSwappableTokensDerived
 	} from '$lib/derived/all-tokens.derived';
@@ -38,9 +39,7 @@
 		pinTokensWithBalanceAtTop({
 			$tokens: [
 				{ ...ICP_TOKEN, enabled: true },
-				...($allKongSwapCompatibleIcrcTokens.length === 0
-					? $allSwappableTokensDerived
-					: $allKongSwapCompatibleIcrcTokens),
+				...$allIcrcTokens,
 				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
 			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id

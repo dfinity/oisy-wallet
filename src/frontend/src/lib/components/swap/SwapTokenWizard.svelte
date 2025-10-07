@@ -36,7 +36,7 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2 } =
+	const { sourceToken, destinationToken } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let isSwapAmountsLoading = $state(false);
@@ -59,7 +59,6 @@
 	amount={swapAmount}
 	destinationToken={$destinationToken}
 	{enableAmountUpdates}
-	isSourceTokenIcrc2={$isSourceTokenIcrc2}
 	pauseAmountUpdates={shouldPause}
 	{slippageValue}
 	sourceToken={$sourceToken}

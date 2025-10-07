@@ -94,8 +94,7 @@ export const fetchKongSwap = async ({
 	swapAmount,
 	receiveAmount,
 	slippageValue,
-	sourceTokenFee,
-	isSourceTokenIcrc2
+	sourceTokenFee
 }: SwapParams) => {
 	progress(ProgressStepsSwap.SWAP);
 
@@ -110,6 +109,11 @@ export const fetchKongSwap = async ({
 		amount: parsedSwapAmount,
 		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
 	};
+
+	const isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+		identity,
+		ledgerCanisterId
+	});
 
 	const txBlockIndex = !isSourceTokenIcrc2
 		? isTokenIcrc(sourceToken)
@@ -226,7 +230,6 @@ export const fetchSwapAmounts = async ({
 	amount,
 	tokens,
 	slippage,
-	isSourceTokenIcrc2,
 	userEthAddress
 }: FetchSwapAmountsParams): Promise<SwapMappedResult[]> => {
 	const sourceAmount = parseToken({
@@ -241,8 +244,7 @@ export const fetchSwapAmounts = async ({
 				destinationToken,
 				amount: sourceAmount,
 				tokens,
-				slippage,
-				isSourceTokenIcrc2
+				slippage
 			})
 		: await fetchSwapAmountsEVM({
 				sourceToken: sourceToken as Erc20Token,
@@ -258,8 +260,7 @@ const fetchSwapAmountsICP = async ({
 	destinationToken,
 	amount,
 	tokens,
-	slippage,
-	isSourceTokenIcrc2
+	slippage
 }: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
 	SwapMappedResult[]
 > => {
@@ -275,6 +276,13 @@ const fetchSwapAmountsICP = async ({
 			})
 		)
 	);
+
+	const isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+		identity,
+		ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
+	});
+
+	console.log({ isSourceTokenIcrc2 }, 'in service');
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
@@ -315,7 +323,6 @@ export const fetchIcpSwap = async ({
 	receiveAmount,
 	slippageValue,
 	sourceTokenFee,
-	isSourceTokenIcrc2,
 	tryToWithdraw = false,
 	withdrawDestinationTokens = false
 }: SwapParams): Promise<void> => {
@@ -339,6 +346,11 @@ export const fetchIcpSwap = async ({
 		token1: { address: destinationLedgerCanisterId, standard: destinationStandard },
 		nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity,
 		fee: ICP_SWAP_POOL_FEE
+	});
+
+	const isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+		identity,
+		ledgerCanisterId: sourceLedgerCanisterId
 	});
 
 	if (isNullish(pool)) {

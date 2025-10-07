@@ -66,7 +66,6 @@
 	const {
 		sourceToken,
 		destinationToken,
-		isSourceTokenIcrc2,
 		failedSwapError,
 		sourceTokenExchangeRate
 	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -134,7 +133,6 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2: $isSourceTokenIcrc2,
 				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&

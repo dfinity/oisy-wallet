@@ -59,7 +59,6 @@ export interface FetchSwapAmountsParams {
 	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
-	isSourceTokenIcrc2: boolean;
 	userEthAddress: OptionEthAddress;
 }
 
@@ -141,7 +140,6 @@ export interface SwapParams {
 	receiveAmount: bigint;
 	slippageValue: Amount;
 	sourceTokenFee: bigint;
-	isSourceTokenIcrc2: boolean;
 	setFailedProgressStep?: (step: ProgressStepsSwap) => void;
 	tryToWithdraw?: boolean;
 	withdrawDestinationTokens?: boolean;

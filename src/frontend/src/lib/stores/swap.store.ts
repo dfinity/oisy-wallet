@@ -46,14 +46,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			nonNullish($destinationToken) ? $exchanges?.[$destinationToken.id]?.usd : undefined
 	);
 
-	const isSourceTokenIcrc2 = derived(
-		[kongSwapTokensStore, sourceToken],
-		([$kongSwapTokensStore, $sourceToken]) =>
-			nonNullish($sourceToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-			$kongSwapTokensStore[$sourceToken.symbol].icrc2
-	);
+	// const isSourceTokenIcrc2 = derived(
+	// 	[sourceToken],
+	// 	([$kongSwapTokensStore, $sourceToken]) =>
+	// 		nonNullish($sourceToken) &&
+	// 		nonNullish($kongSwapTokensStore) &&
+	// 		nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
+	// 		$kongSwapTokensStore[$sourceToken.symbol].icrc2
+	// );
 
 	return {
 		sourceToken,
@@ -62,7 +62,6 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		destinationTokenBalance,
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
-		isSourceTokenIcrc2,
 		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: Token) =>
 			update((state) => ({
@@ -89,7 +88,6 @@ export interface SwapContext {
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	isSourceTokenIcrc2: Readable<boolean>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;

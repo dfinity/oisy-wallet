@@ -10,6 +10,9 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { validateUserAmount } from '$lib/utils/user-amount.utils';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import type { IcToken } from '$icp/types/ic-token';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -33,12 +36,27 @@
 		onNext
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance, isSourceTokenIcrc2 } =
+	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
+	let isSourceTokenIcrc2 = $state(true);
+
+	$effect(() => {
+		(async () => {
+			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity: $authIdentity,
+				ledgerCanisterId: ($sourceToken as IcToken).ledgerCanisterId
+			});
+		})();
+	});
+
+	$effect(() => {
+		console.log({ isSourceTokenIcrc2 }, 'in SwapIcpForm');
+	});
+
+	let totalFee = $derived((sourceTokenFee ?? ZERO) * (isSourceTokenIcrc2 ? 2n : 1n));
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
