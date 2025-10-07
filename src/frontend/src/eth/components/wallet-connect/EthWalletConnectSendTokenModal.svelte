@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
-	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
+	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
 		nativeEthereumTokenWithFallback,
@@ -38,17 +39,20 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
-	import type { Network } from '$lib/types/network';
 	import type { TokenId } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { formatToken } from '$lib/utils/format.utils';
 
-	export let request: WalletKitTypes.SessionRequest;
-	export let firstTransaction: WalletConnectEthSendTransactionParams;
-	export let sourceNetwork: EthereumNetwork;
+	interface Props {
+		request: WalletKitTypes.SessionRequest;
+		firstTransaction: WalletConnectEthSendTransactionParams;
+		sourceNetwork: EthereumNetwork;
+		listener: OptionWalletConnectListener;
+	}
 
-	let erc20Approve = false;
-	$: erc20Approve = isErc20TransactionApprove(firstTransaction.data);
+	let { request, firstTransaction, sourceNetwork, listener }: Props = $props();
+
+	let erc20Approve = $derived(isErc20TransactionApprove(firstTransaction.data));
 
 	/**
 	 * Send context store
@@ -63,13 +67,14 @@
 	const feeStore = initEthFeeStore();
 
 	const feeSymbolStore = writable<string | undefined>(undefined);
-	$: feeSymbolStore.set($sendToken.symbol);
-
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
-	$: feeTokenIdStore.set($sendToken.id);
-
 	const feeDecimalsStore = writable<number | undefined>(undefined);
-	$: feeDecimalsStore.set($sendToken.decimals);
+
+	$effect(() => {
+		feeSymbolStore.set($sendToken.symbol);
+		feeTokenIdStore.set($sendToken.id);
+		feeDecimalsStore.set($sendToken.decimals);
+	});
 
 	setContext<FeeContextType>(
 		ETH_FEE_CONTEXT_KEY,
@@ -85,21 +90,23 @@
 	 * Network
 	 */
 
-	let destination = '';
-	$: destination = firstTransaction.to ?? '';
+	let destination = $derived(firstTransaction.to ?? '');
 
-	let targetNetwork: Network | undefined = undefined;
-	$: targetNetwork =
+	let targetNetwork = $derived(
 		destination === toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$sendTokenId])
 			? ICP_NETWORK
-			: $sendToken.network;
+			: $sendToken.network
+	);
 
-	let sendWithApproval: boolean;
-	$: sendWithApproval = shouldSendWithApproval({
-		to: destination,
-		tokenId: $sendTokenId,
-		erc20HelperContractAddress: $ckErc20HelperContractAddress
-	});
+	let sendWithApproval = $derived(
+		shouldSendWithApproval({
+			to: destination,
+			tokenId: $sendTokenId,
+			erc20HelperContractAddress: $ckErc20HelperContractAddress
+		})
+	);
+
+	let application = $derived(request.verifyContext.verified.origin);
 
 	/**
 	 * Modal
@@ -116,16 +123,10 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSend> | undefined;
-	let modal: WizardModal<WizardStepsSend>;
+	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSend>>();
 
 	const close = () => modalStore.close();
-
-	/**
-	 * WalletConnect
-	 */
-
-	export let listener: OptionWalletConnectListener;
 
 	/**
 	 * Reject a transaction
@@ -141,12 +142,15 @@
 	 * Send and approve
 	 */
 
-	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	let sendProgressStep = $state<ProgressStep>(ProgressStepsSend.INITIALIZATION);
 
-	let amount: bigint;
-	$: amount = BigInt(firstTransaction?.value ?? ZERO);
+	let amount = $derived(BigInt(firstTransaction?.value ?? ZERO));
 
 	const send = async () => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		const { success } = await sendServices({
 			request,
 			listener,
@@ -192,8 +196,9 @@
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.REVIEW}
-				<WalletConnectSendReview
+				<EthWalletConnectSendReview
 					{amount}
+					{application}
 					{data}
 					{destination}
 					{erc20Approve}

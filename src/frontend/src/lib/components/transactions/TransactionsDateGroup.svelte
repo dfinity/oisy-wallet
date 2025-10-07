@@ -3,8 +3,9 @@
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction';
+	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction-ui';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
 
 	interface Props {
@@ -18,7 +19,11 @@
 
 {#if transactions.length > 0}
 	<div class="mb-5 flex flex-col gap-3" data-tid={testId}>
-		<span class="text-lg font-medium text-tertiary first-letter:capitalize">{formattedDate}</span>
+		<StickyHeader>
+			<span class="mb-3 flex text-lg font-medium text-tertiary first-letter:capitalize"
+				>{formattedDate}</span
+			>
+		</StickyHeader>
 
 		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
 			{@const { component, token, transaction } = transactionUi}

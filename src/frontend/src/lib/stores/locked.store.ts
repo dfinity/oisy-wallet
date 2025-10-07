@@ -1,7 +1,7 @@
 import {
 	TRACK_LOCK_MODE_ACTIVATED,
 	TRACK_LOCK_MODE_DEACTIVATED
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { initStorageStore } from '$lib/stores/storage.store';
 import { get } from 'svelte/store';
@@ -16,8 +16,10 @@ export interface AuthLockStore extends ReturnType<typeof initStorageStore<boolea
 	unlock: (options?: ToggleLockOptions) => void;
 }
 
+export const AUTH_LOCK_KEY = 'authLocked';
+
 const createAuthLockStore = (): AuthLockStore => {
-	const store = initStorageStore<boolean>({ key: 'authLocked', defaultValue: false });
+	const store = initStorageStore<boolean>({ key: AUTH_LOCK_KEY, defaultValue: false });
 
 	const updateLock = ({
 		newValue,

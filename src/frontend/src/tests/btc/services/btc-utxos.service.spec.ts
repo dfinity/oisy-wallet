@@ -157,7 +157,7 @@ describe('btc-utxos.service', () => {
 			const result = await prepareBtcSend(defaultParams);
 
 			expect(result).toEqual({
-				feeSatoshis: 0n,
+				feeSatoshis: ZERO,
 				utxos: [],
 				error: BtcPrepareSendError.InsufficientBalance
 			});

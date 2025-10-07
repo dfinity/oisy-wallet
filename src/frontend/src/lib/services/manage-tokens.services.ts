@@ -6,7 +6,7 @@ import {
 	TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_ENABLE_SUCCESS,
 	TRACK_COUNT_MANAGE_TOKENS_SAVE_ERROR
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import { nullishSignOut } from '$lib/services/auth.services';

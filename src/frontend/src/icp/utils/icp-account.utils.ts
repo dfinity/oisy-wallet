@@ -1,9 +1,8 @@
 import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
-import { assertNever } from '$lib/types/utils';
 import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import type { Principal } from '@dfinity/principal';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });
@@ -52,7 +51,7 @@ export const getIcrcv2AccountIdString = (accountId: Icrcv2AccountId): string => 
 		});
 	}
 
-	return assertNever({ variable: accountId, typeName: 'Icrcv2AccountId' });
+	assertNever(accountId, `Unexpected Icrcv2AccountId: ${accountId}`);
 };
 
 /**

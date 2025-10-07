@@ -28,7 +28,8 @@ export const getAgreementLastUpdated = ({
 export const mapUserAgreement = (backendUserAgreement: BackendUserAgreement): AgreementData => ({
 	accepted: fromNullable(backendUserAgreement.accepted),
 	lastAcceptedTimestamp: fromNullable(backendUserAgreement.last_accepted_at_ns),
-	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms)
+	lastUpdatedTimestamp: fromNullable(backendUserAgreement.last_updated_at_ms),
+	textSha256: fromNullable(backendUserAgreement.text_sha256)
 });
 
 const mapBackendUserAgreement = (userAgreement: AgreementData | undefined): BackendUserAgreement =>
@@ -36,12 +37,14 @@ const mapBackendUserAgreement = (userAgreement: AgreementData | undefined): Back
 		? {
 				accepted: toNullable(userAgreement.accepted),
 				last_accepted_at_ns: toNullable(userAgreement.lastAcceptedTimestamp),
-				last_updated_at_ms: toNullable(userAgreement.lastUpdatedTimestamp)
+				last_updated_at_ms: toNullable(userAgreement.lastUpdatedTimestamp),
+				text_sha256: toNullable(userAgreement.textSha256)
 			}
 		: {
 				accepted: toNullable(),
 				last_accepted_at_ns: toNullable(),
-				last_updated_at_ms: toNullable()
+				last_updated_at_ms: toNullable(),
+				text_sha256: toNullable()
 			};
 
 export const mapBackendUserAgreements = (
