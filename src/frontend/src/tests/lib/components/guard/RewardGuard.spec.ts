@@ -552,7 +552,7 @@ describe('RewardGuard', () => {
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue({
 				...mockedUserData,
 				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [0n]
+				last_snapshot_timestamp: [ZERO]
 			});
 
 			modalStore.openIcrcReceive(Symbol());
