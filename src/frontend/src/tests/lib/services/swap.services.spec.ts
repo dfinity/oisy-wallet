@@ -1,11 +1,13 @@
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
-import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
+import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -23,6 +25,7 @@ import {
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import {
 	SwapErrorCodes,
@@ -43,9 +46,6 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
-import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
-import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 
 vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
 	const actual = await importOriginal();
