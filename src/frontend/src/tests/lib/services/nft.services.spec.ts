@@ -18,7 +18,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { Network, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
-import type { Mock, MockInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	alchemyProviders: vi.fn(),
@@ -26,8 +26,6 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
-	let erc721CustomTokensSpy: MockInstance;
-
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
@@ -250,16 +248,12 @@ describe('nft.services', () => {
 	});
 
 	describe('updateNftSection', () => {
-		let erc721Spy: ReturnType<typeof vi.spyOn>;
-		let erc1155Spy: ReturnType<typeof vi.spyOn>;
+		let erc721Spy: MockInstance;
+		let erc1155Spy: MockInstance;
 
 		beforeEach(() => {
-			erc721Spy = vi
-				.spyOn(erc721CustomTokens, 'saveCustomTokens')
-				.mockResolvedValue(undefined) as unknown as Mock;
-			erc1155Spy = vi
-				.spyOn(erc1155CustomTokens, 'saveCustomTokens')
-				.mockResolvedValue(undefined) as unknown as Mock;
+			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
 		});
 
 		afterEach(() => {
@@ -273,7 +267,7 @@ describe('nft.services', () => {
 			id: parseTokenId('721'),
 			name: 'My721',
 			network: ETHEREUM_NETWORK,
-			standard: 'erc721' as const,
+			standard: 'erc721',
 			symbol: 'MY721',
 			section: undefined
 		};
@@ -285,7 +279,7 @@ describe('nft.services', () => {
 			id: parseTokenId('1155'),
 			name: 'My1155',
 			network: ETHEREUM_NETWORK,
-			standard: 'erc1155' as const,
+			standard: 'erc1155',
 			symbol: 'MY1155',
 			section: undefined
 		};
@@ -382,7 +376,7 @@ describe('nft.services', () => {
 		it('does nothing if token is undefined', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
-				token: undefined as any,
+				token: undefined as unknown as NonFungibleToken,
 				$authIdentity: mockIdentity
 			});
 
