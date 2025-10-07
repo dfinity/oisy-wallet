@@ -4,7 +4,6 @@ import * as screenUtils from '$lib/utils/screens.utils';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
-
 const testId = 'mock-button';
 const createMockButtonSnippet = () =>
 	createRawSnippet((params: () => () => void) => ({
@@ -15,8 +14,8 @@ const createMockButtonSnippet = () =>
 	}));
 
 describe('ConfirmButtonWithModal', () => {
-	beforeAll(() => {
-		vi.spyOn(screenUtils, 'getActiveScreen').mockResolvedValue('lg');
+	beforeEach(() => {
+		vi.spyOn(screenUtils, 'getActiveScreen').mockReturnValue('md');
 	});
 
 	it('should not render the modal initially', () => {
