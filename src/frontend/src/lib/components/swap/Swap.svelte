@@ -98,13 +98,19 @@
 
 		modalStore.openSwap(tokenId);
 
+		console.warn('Loading disabled tokens:', $disabledIcrcTokens);
+		console.warn('Disabled tokens count:', $disabledIcrcTokens.length);
+
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
 			disabledIcrcTokens: $disabledIcrcTokens
 		});
+		console.warn('Disabled tokens balances loaded');
+		
 		await loadDisabledIcrcTokensExchanges({
 			disabledIcrcTokens: $disabledIcrcTokens
 		});
+		console.warn('Disabled tokens exchanges loaded');
 	};
 </script>
 
