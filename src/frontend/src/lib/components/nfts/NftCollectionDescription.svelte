@@ -43,7 +43,7 @@
 {#if nonNullish(collection)}
 	<div class="my-5 flex flex-col rounded-lg bg-primary p-5">
 		<div class="mb-6 flex flex-row justify-between gap-3">
-			<div class=" flex flex-col items-start gap-3">
+			<div class="flex flex-col items-start gap-3">
 				<h5>{collection.name}</h5>
 
 				<p class="mb-0 text-sm">{collection.description}</p>
@@ -60,7 +60,7 @@
 			</div>
 
 			{#if nonNullish(collection.bannerImageUrl) && hasConsent}
-				<div class="flex aspect-auto h-32 w-32 overflow-hidden rounded-lg">
+				<div class="flex h-32 min-w-32 overflow-hidden rounded-lg">
 					<BgImg imageUrl={collection.bannerImageUrl} size="cover" />
 				</div>
 			{/if}
