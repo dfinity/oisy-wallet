@@ -103,12 +103,12 @@
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $disabledIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 		console.warn('Disabled tokens balances loaded');
-		
+
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $disabledIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 		console.warn('Disabled tokens exchanges loaded');
 	};
