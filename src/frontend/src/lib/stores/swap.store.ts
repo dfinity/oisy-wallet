@@ -1,9 +1,10 @@
+import { allSwappableTokensDerived } from '$lib/derived/all-tokens.derived';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
@@ -47,12 +48,28 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	);
 
 	const isSourceTokenIcrc2 = derived(
-		[kongSwapTokensStore, sourceToken],
-		([$kongSwapTokensStore, $sourceToken]) =>
-			nonNullish($sourceToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-			$kongSwapTokensStore[$sourceToken.symbol].icrc2
+		[kongSwapTokensStore, sourceToken, allSwappableTokensDerived],
+		([$kongSwapTokensStore, $sourceToken, $allSwappableTokensDerived]) => {
+			if (isNullish($sourceToken)) {
+				return false;
+			}
+
+			if (
+				nonNullish($kongSwapTokensStore) &&
+				nonNullish($kongSwapTokensStore[$sourceToken.symbol])
+			) {
+				return $kongSwapTokensStore[$sourceToken.symbol].icrc2;
+			}
+
+			if (nonNullish($allSwappableTokensDerived)) {
+				return (
+					$allSwappableTokensDerived.find((token) => token.symbol === $sourceToken.symbol)
+						?.isIcrc2 ?? false
+				);
+			}
+
+			return false;
+		}
 	);
 
 	return {
