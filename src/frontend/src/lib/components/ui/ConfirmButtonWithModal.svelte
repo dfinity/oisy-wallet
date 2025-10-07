@@ -6,7 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		title: Snippet;
+		title?: Snippet;
 		button: Snippet<[onclick: () => void]>;
 		onConfirm: () => void;
 		children: Snippet;
@@ -29,7 +29,7 @@
 
 <Modal onClose={onCancelHandler} role="alert" {testId} visible={open}>
 	{#snippet title()}
-		<div class="p-3">{@render innerTitle()}</div>
+		<div class="p-3">{@render innerTitle?.()}</div>
 	{/snippet}
 
 	{@render children()}
