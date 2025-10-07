@@ -26,6 +26,7 @@
 		isSwapAmountsLoading: boolean;
 		enableAmountUpdates?: boolean;
 		pauseAmountUpdates?: boolean;
+		isIcrcTokenIcrc2?: boolean;
 	}
 
 	let {
@@ -34,6 +35,7 @@
 		destinationToken,
 		slippageValue,
 		children,
+		isIcrcTokenIcrc2,
 		isSwapAmountsLoading = $bindable(false),
 		enableAmountUpdates = true,
 		pauseAmountUpdates = false
@@ -93,6 +95,7 @@
 				destinationToken,
 				amount,
 				tokens: $tokens,
+				isIcrcTokenIcrc2,
 				slippage: slippageValue ?? SWAP_DEFAULT_SLIPPAGE_VALUE,
 				userEthAddress: $ethAddress
 			});

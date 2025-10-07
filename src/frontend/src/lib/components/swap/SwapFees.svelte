@@ -19,6 +19,8 @@
 	import { ADDRESS_BOOK_FALLBACK_MESSAGE } from '$lib/constants/test-ids.constants';
 	import { isIcToken, isNotIcToken } from '$icp/validation/ic-token.validation';
 
+	let { isSourceTokenIcrc2 }: { isSourceTokenIcrc2?: boolean } = $props();
+
 	const { destinationToken, sourceToken, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
@@ -33,21 +35,6 @@
 				})
 			: '0'
 	);
-
-	let isSourceTokenIcrc2 = $state(false);
-
-	$effect(() => {
-		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
-			return;
-		}
-
-		(async () => {
-			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
-				identity: $authIdentity,
-				ledgerCanisterId: $sourceToken.ledgerCanisterId
-			});
-		})();
-	});
 
 	$effect(() => {
 		console.log({ isSourceTokenIcrc2 }, 'in SwapIcpForm');

@@ -20,6 +20,7 @@
 		slippageValue: OptionAmount;
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
+		isSourceTokenIcrc2?: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
@@ -32,6 +33,7 @@
 		sourceTokenFee,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		isSourceTokenIcrc2,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -40,17 +42,6 @@
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
-
-	let isSourceTokenIcrc2 = $state(true);
-
-	$effect(() => {
-		(async () => {
-			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
-				identity: $authIdentity,
-				ledgerCanisterId: ($sourceToken as IcToken).ledgerCanisterId
-			});
-		})();
-	});
 
 	$effect(() => {
 		console.log({ isSourceTokenIcrc2 }, 'in SwapIcpForm');
@@ -88,7 +79,7 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
-				<SwapFees />
+				<SwapFees {isSourceTokenIcrc2} />
 			</div>
 		{/if}
 	{/snippet}

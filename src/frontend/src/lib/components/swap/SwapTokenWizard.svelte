@@ -42,6 +42,8 @@
 	let isSwapAmountsLoading = $state(false);
 	let manualPause = $state(false);
 
+	let isIcrcTokenIcrc2 = $state(undefined);
+
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
 
 	const onStopTriggerAmount = () => {
@@ -62,6 +64,7 @@
 	pauseAmountUpdates={shouldPause}
 	{slippageValue}
 	sourceToken={$sourceToken}
+	{isIcrcTokenIcrc2}
 	bind:isSwapAmountsLoading
 >
 	{#if isNullish($sourceToken) || isNetworkIdICP($sourceToken.network.id)}
@@ -76,6 +79,7 @@
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
+			bind:isIcrcTokenIcrc2
 			on:icClose
 			on:icShowTokensList
 			on:icShowProviderList

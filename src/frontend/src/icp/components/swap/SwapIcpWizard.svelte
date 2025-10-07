@@ -35,11 +35,14 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
+		isIcrcTokenIcrc2?: boolean;
 		swapProgressStep: ProgressStepsSwap;
 		swapFailedProgressSteps?: ProgressStepsSwap[];
 		currentStep?: WizardStep;
@@ -54,6 +57,7 @@
 		receiveAmount = $bindable(),
 		slippageValue = $bindable(),
 		swapProgressStep = $bindable(),
+		isIcrcTokenIcrc2 = $bindable(),
 		swapFailedProgressSteps = $bindable([]),
 		currentStep,
 		isSwapAmountsLoading,
@@ -63,12 +67,8 @@
 		onBack
 	}: Props = $props();
 
-	const {
-		sourceToken,
-		destinationToken,
-		failedSwapError,
-		sourceTokenExchangeRate
-	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
+		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -87,6 +87,23 @@
 			? `${Number(swapAmount) * $sourceTokenExchangeRate}`
 			: undefined
 	);
+
+	let isSourceTokenIcrc2 = $state<boolean | undefined>(undefined);
+
+	$effect(() => {
+		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
+			return;
+		}
+
+		(async () => {
+			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity: $authIdentity,
+				ledgerCanisterId: $sourceToken.ledgerCanisterId
+			});
+
+			isIcrcTokenIcrc2 = isSourceTokenIcrc2;
+		})();
+	});
 
 	const clearFailedProgressStep = () => {
 		swapFailedProgressSteps = [];
@@ -111,7 +128,8 @@
 			isNullish(swapAmount) ||
 			isNullish(sourceTokenFee) ||
 			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount) ||
-			isNullish($swapAmountsStore?.selectedProvider?.provider)
+			isNullish($swapAmountsStore?.selectedProvider?.provider) ||
+			isNullish(isSourceTokenIcrc2)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -133,6 +151,7 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
+				isSourceTokenIcrc2,
 				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
@@ -223,6 +242,7 @@
 			{onNext}
 			{onShowTokensList}
 			{sourceTokenFee}
+			{isSourceTokenIcrc2}
 			on:icShowProviderList
 			bind:swapAmount
 			bind:receiveAmount
@@ -231,7 +251,7 @@
 	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
 		<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
 			{#snippet swapFees()}
-				<SwapFees />
+				<SwapFees {isSourceTokenIcrc2} />
 			{/snippet}
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}

@@ -85,15 +85,15 @@
 
 		busy.stop();
 
-		if (kongSwapTokensStatus !== 'ready') {
-			toastsShow({
-				text: $i18n.swap.error.kong_not_available,
-				level: 'info',
-				duration: 3000
-			});
+		// if (kongSwapTokensStatus !== 'ready') {
+		// 	toastsShow({
+		// 		text: $i18n.swap.error.kong_not_available,
+		// 		level: 'info',
+		// 		duration: 3000
+		// 	});
 
-			return;
-		}
+		// 	return;
+		// }
 
 		modalStore.openSwap(tokenId);
 
