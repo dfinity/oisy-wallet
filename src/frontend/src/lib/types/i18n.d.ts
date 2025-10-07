@@ -110,7 +110,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string };
+	message: { refreshed_authentication: string; session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
