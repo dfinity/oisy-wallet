@@ -122,7 +122,8 @@
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",

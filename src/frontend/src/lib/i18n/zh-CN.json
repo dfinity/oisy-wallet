@@ -122,7 +122,8 @@
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
