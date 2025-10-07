@@ -7,7 +7,8 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		allCrossChainSwapTokens,
-		allKongSwapCompatibleIcrcTokens
+		allKongSwapCompatibleIcrcTokens,
+		allSwappableTokensDerived
 	} from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -20,6 +21,7 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
@@ -37,8 +39,9 @@
 		pinTokensWithBalanceAtTop({
 			$tokens: [
 				{ ...ICP_TOKEN, enabled: true },
-				...$allKongSwapCompatibleIcrcTokens,
-				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
+				...($allKongSwapCompatibleIcrcTokens.length === 0
+					? $allSwappableTokensDerived
+					: $allKongSwapCompatibleIcrcTokens)
 			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 			),
