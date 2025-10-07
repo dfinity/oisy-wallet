@@ -348,7 +348,7 @@
 			warningType="manage"
 		/>
 	{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
-		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
+		<AddTokenByNetwork onBack={modal.back} onNext={modal.next} bind:network bind:tokenData />
 	{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
 		<ManageTokens
 			{infoElement}
