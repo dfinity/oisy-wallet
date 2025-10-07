@@ -61,8 +61,6 @@ describe('auth.services', () => {
 		localStorage.clear();
 	});
 
-	describe('signIn', () => {});
-
 	describe('signOut', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
