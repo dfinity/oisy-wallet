@@ -16,7 +16,7 @@
 		exchangeRate?: number;
 		balance: OptionBalance;
 		source: string;
-application: string;
+		application: string;
 		showNullishAmountLabel?: boolean;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
@@ -31,7 +31,7 @@ application: string;
 		exchangeRate,
 		balance,
 		source,
-application
+		application,
 		showNullishAmountLabel = false,
 		sourceNetwork,
 		destinationNetwork,
