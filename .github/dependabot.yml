@@ -22,8 +22,5 @@ updates:
     ignore:
       - dependency-name: '@dfinity/*'
       - dependency-name: '@types/*'
-      - dependency-name: '@typescript-eslint/*'
-      - dependency-name: 'eslint'
-      - dependency-name: 'eslint-*'
       - dependency-name: 'typescript'
     open-pull-requests-limit: 10

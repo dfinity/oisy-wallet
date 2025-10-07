@@ -15,7 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {

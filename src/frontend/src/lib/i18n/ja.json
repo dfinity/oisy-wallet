@@ -104,14 +104,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "究極の分散型ウォレット",
+			"title_part_1": "あなたのデジタル資産を",
+			"title_part_2": "プライベートで、安全に。",
 			"logout": "ログアウト",
 			"lock": "ロック",
 			"authenticate": "開く／作成",
-			"asset_types": "Bitcoin、Solana、Ethereum、ICP 等に対応",
-			"instant_and_private": "いつでもどこでも、すぐにプライベートアクセス",
-			"advanced_cryptography": "100％オンチェーン。高度な暗号技術で守られる安全性。"
+			"asset_types": "BTC / SOL / ETH / ICP など幅広い資産を一元管理",
+			"instant_and_private": "AIアシスタント搭載 ― プライバシーを標準装備",
+			"advanced_cryptography": "先端暗号技術で保護 ― 全てを100％オンチェーンで"
 		},
 		"alt": {
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
@@ -423,6 +423,11 @@
 				"participate_title": "アクティブに活動してBTCを獲得 - そして今、友達を招待することでも獲得できます。",
 				"description": "簡単な週次要件を満たしてください：ログイン、2回の取引、そして少なくとも20ドル相当のトークンを保有して、毎日最大50ドルのBTCドロップの資格を維持します。<br>紹介報酬も登場：友達を招待してウォレットを設定すると、二人とも保証されたSprinklesを獲得できます。トップ4のリファラーに入ると、ジャックポットを獲得できます。",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "$oisy_shortへようこそ！",
+					"subtitle": "稼ぐ準備はできましたか？",
+					"description": "最初の報酬まであと2ステップ：ログインし、$20以上を保有し、2つのアクションを完了してください。これだけでSprinklesを獲得し始められます。<br><br>もっと欲しいですか？友達を4人紹介して、保証されたボーナスをゲットしましょう。"
+				},
 				"win": {
 					"default": {
 						"title": "報酬を獲得しました",
@@ -458,6 +463,11 @@
 				"participate_title": "アクティビティや紹介に応じてトークンを獲得できます。チェーン数が増えるほど、チャンスも増えます。",
 				"description": "資格を得るには、10 日間アクティブに活動してください。頻繁にログインし、ウォレット アクションを完了し、少なくとも 20 ドルを保有してください。<br/>アクティブなチェーンごとに、マルチチェーン マルチプライヤーによって当選確率が上がります。<br/>資格を得た友人から 10% を獲得し、上位 3 位に入ると 200 ドルのスーパー スプリンクルを獲得できます。",
 				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_shortへようこそ！",
+					"subtitle": "稼ぐ準備はできましたか？",
+					"description": ""
+				},
 				"win": {
 					"default": {
 						"title": "報酬を獲得しました",
@@ -1674,11 +1684,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 報酬"
 		}
-	},
-	"welcome": {
-		"title": "$oisy_shortへようこそ！",
-		"subtitle": "稼ぐ準備はできましたか？",
-		"description": "最初の報酬まであと2ステップ：ログインし、$20以上を保有し、2つのアクションを完了してください。これだけでSprinklesを獲得し始められます。<br><br>もっと欲しいですか？友達を4人紹介して、保証されたボーナスをゲットしましょう。"
 	},
 	"temporal": {
 		"seconds_to_duration": {

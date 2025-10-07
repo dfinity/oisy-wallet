@@ -6,7 +6,7 @@
 	import { writable } from 'svelte/store';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
-	import WalletConnectSendReview from '$eth/components/wallet-connect/WalletConnectSendReview.svelte';
+	import EthWalletConnectSendReview from '$eth/components/wallet-connect/EthWalletConnectSendReview.svelte';
 	import { walletConnectSendSteps } from '$eth/constants/steps.constants';
 	import {
 		nativeEthereumTokenWithFallback,
@@ -194,7 +194,7 @@
 					steps={walletConnectSendSteps({ i18n: $i18n, sendWithApproval })}
 				/>
 			{:else if currentStep?.name === WizardStepsSend.REVIEW}
-				<WalletConnectSendReview
+				<EthWalletConnectSendReview
 					{amount}
 					{data}
 					{destination}

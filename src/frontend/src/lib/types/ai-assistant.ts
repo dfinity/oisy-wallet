@@ -1,7 +1,8 @@
 import type { Address } from '$lib/types/address';
 import type { ContactAddressUiWithId, ExtendedAddressContactUi } from '$lib/types/contact';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenStandard, TokenUi } from '$lib/types/token';
+import type { Token, TokenStandard } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 
 export interface ChatMessageContent {
 	text?: string;

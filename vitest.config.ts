@@ -3,7 +3,7 @@ import { svelteTesting } from '@testing-library/svelte/vite';
 import { resolve } from 'path';
 import type { UserConfig } from 'vite';
 import { defineConfig } from 'vitest/config';
-import { CSS_CONFIG_OPTIONS, defineViteReplacements, readCanisterIds } from './vite.utils';
+import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
 process.env = {
 	...process.env,
@@ -13,7 +13,6 @@ process.env = {
 export default defineConfig(
 	(): UserConfig => ({
 		plugins: [sveltekit(), svelteTesting()],
-		...CSS_CONFIG_OPTIONS,
 		resolve: {
 			alias: [
 				{
@@ -78,10 +77,10 @@ export default defineConfig(
 				// TODO: increase the thresholds slowly up to an acceptable 90% at least
 				thresholds: {
 					autoUpdate: true,
-					statements: 78.73,
-					branches: 85.37,
-					functions: 73.47,
-					lines: 78.73
+					statements: 78.88,
+					branches: 85.46,
+					functions: 73.62,
+					lines: 78.88
 				}
 			}
 		}

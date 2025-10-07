@@ -104,14 +104,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "لامركزي 100%",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "تسجيل الخروج",
 			"lock": "",
 			"authenticate": "فتح أو إنشاء",
-			"asset_types": "بيتكوين، سولانا، إيثريوم، الانترنت كمبيوتر، والمزيد",
-			"instant_and_private": "وصول فوري وخاص في أي مكان",
-			"advanced_cryptography": "100% على السلسلة: راحة البال من خلال التشفير المتقدم"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
@@ -423,6 +423,11 @@
 				"participate_title": "اكسب BTC من خلال البقاء نشطًا - والآن من خلال دعوة الآخرين.",
 				"description": "استوفِ متطلبات أسبوعية بسيطة: سجل الدخول، وقم بإجراء معاملتين، واحتفظ بما لا يقل عن 20 دولارًا من التوكنات لتظل مؤهلاً للحصول على ما يصل إلى 50 دولارًا من إسقاطات BTC كل يوم.<br>الآن مع مكافآت الإحالة: قم بدعوة صديق لإنشاء محفظة وستكسبان كلاكما رشات مضمونة. كن من بين أفضل 4 مُحيلين واربح جائزة كبرى.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "!مرحبًا بك في $oisy_short",
+					"subtitle": "هل أنت مستعد للكسب؟",
+					"description": "أنت على بعد خطوتين من مكافأتك الأولى: سجّل الدخول، احتفظ بـ +$20، وأكمل إجراءين. هذا كل ما يتطلبه الأمر لبدء كسب الرشات.<br><br>هل تريد المزيد؟ أحِل 4 أصدقاء واحصل على مكافأة مضمونة."
+				},
 				"win": {
 					"default": {
 						"title": "لقد حصلت على مكافأة",
@@ -458,6 +463,11 @@
 				"participate_title": "",
 				"description": "",
 				"campaign_href": "",
+				"welcome": {
+					"title": "!مرحبًا بك في $oisy_short",
+					"subtitle": "هل أنت مستعد للكسب؟",
+					"description": ""
+				},
 				"win": {
 					"default": {
 						"title": "",
@@ -1674,11 +1684,6 @@
 			"sprinkles_title": "رشات",
 			"sprinkles_description": "مكافآت OISY"
 		}
-	},
-	"welcome": {
-		"title": "!مرحبًا بك في $oisy_short",
-		"subtitle": "هل أنت مستعد للكسب؟",
-		"description": "أنت على بعد خطوتين من مكافأتك الأولى: سجّل الدخول، احتفظ بـ +$20، وأكمل إجراءين. هذا كل ما يتطلبه الأمر لبدء كسب الرشات.<br><br>هل تريد المزيد؟ أحِل 4 أصدقاء واحصل على مكافأة مضمونة."
 	},
 	"temporal": {
 		"seconds_to_duration": {

@@ -10,8 +10,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let icCkToken: OptionIcCkToken;
-	$: icCkToken = $pageToken as OptionIcCkToken;
+	let icCkToken = $derived($pageToken as OptionIcCkToken);
 </script>
 
 <ConvertEth
@@ -20,8 +19,13 @@
 	})}
 	nativeTokenId={$ckEthereumNativeTokenId}
 >
-	<IconCkConvert slot="icon" size="24" />
-	<span>{$ckEthereumTwinToken.symbol}</span>
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
+
+	{#snippet label()}
+		<span>{$ckEthereumTwinToken.symbol}</span>
+	{/snippet}
 </ConvertEth>
 
 {#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}

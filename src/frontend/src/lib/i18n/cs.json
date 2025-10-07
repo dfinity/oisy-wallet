@@ -104,14 +104,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Decentralizované",
+			"title_part_1": "Vaše Digitální Aktiva",
+			"title_part_2": "Soukromá a Bezpečná",
 			"logout": "Odhlásit se",
 			"lock": "Zamknout",
 			"authenticate": "Otevřít nebo vytvořit",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP a další",
-			"instant_and_private": "Okamžitý a soukromý přístup kdekoli",
-			"advanced_cryptography": "100% onchain: klidné spaní díky pokročilé kryptografii"
+			"asset_types": "Spravujte aktiva v rámci Bitcoinu, Solany, Etherea, ICP a dalších platforem",
+			"instant_and_private": "Vestavěný AI asistent se soukromím jako standardem",
+			"advanced_cryptography": "Zabezpečeno pokročilou kryptografií - 100% onchain"
 		},
 		"alt": {
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
@@ -423,6 +423,11 @@
 				"participate_title": "Vydělávejte BTC tím, že zůstanete aktivní - a nyní i tím, že pozvete ostatní.",
 				"description": "Splňte jednoduché týdenní požadavky: přihlaste se, proveďte dvě transakce a držte alespoň 20 dolarů v tokenech, abyste zůstali způsobilí pro BTC odměny až do výše 50 dolarů každý den.<br>Nyní s odměnami za doporučení: pozvěte přítele, aby si založil peněženku, a oba získáte zaručené Sprinkles. Dostaňte se mezi 4 nejlepší doporučovatele a vyhrajte jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Vítejte v $oisy_short!",
+					"subtitle": "Jste připraveni vydělávat?",
+					"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte 4 přátele a získejte zaručený bonus."
+				},
 				"win": {
 					"default": {
 						"title": "Byli jste odměněni",
@@ -458,6 +463,11 @@
 				"participate_title": "Získejte tokeny za aktivitu a doporučení. Více řetězců znamená více šancí.",
 				"description": "Zůstaňte aktivní déle než 10 dní, abyste se kvalifikovali: často se přihlašujte, provádějte akce v peněžence a držte alespoň 20 $.<br/>Každý aktivní řetězec zvyšuje vaše šance pomocí multiplikátoru Multichain.<br/>Získejte 10 % od přátel, kteří se kvalifikují, a umístěte se mezi 3 nejlepšími, abyste vyhráli Super Sprinkle v hodnotě 200 $.",
 				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Vítejte v $oisy_short!",
+					"subtitle": "Jste připraveni vydělávat?",
+					"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte své přátele a získejte bonus pokaždé, když jeden z nich získá posypky."
+				},
 				"win": {
 					"default": {
 						"title": "Byli jste odměněni",
@@ -1674,11 +1684,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Odměny OISY"
 		}
-	},
-	"welcome": {
-		"title": "Vítejte v $oisy_short!",
-		"subtitle": "Jste připraveni vydělávat?",
-		"description": "Jste 2 kroky od své první odměny: Přihlaste se, držte více než 20 dolarů a dokončete 2 akce. To je vše, co je potřeba k tomu, abyste začali vydělávat Sprinkles.<br><br>Chcete víc? Doporučte své přátele a získejte bonus pokaždé, když jeden z nich získá posypky."
 	},
 	"temporal": {
 		"seconds_to_duration": {

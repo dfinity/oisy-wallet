@@ -104,14 +104,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% विकेन्द्रीकृत",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "लॉगआउट करें",
 			"lock": "लॉक करें",
 			"authenticate": "खोलें या बनाएँ",
-			"asset_types": "बिटकॉइन, सोलाना, एथेरियम, ICP, और बहुत कुछ",
-			"instant_and_private": "कहीं भी तत्काल और निजी पहुँच",
-			"advanced_cryptography": "100% ऑनचेन: उन्नत क्रिप्टोग्राफी के माध्यम से मन की शांति"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
@@ -423,6 +423,11 @@
 				"participate_title": "सक्रिय रहकर BTC कमाएँ - और अब दूसरों को आमंत्रित करके।",
 				"description": "सरल साप्ताहिक आवश्यकताओं को पूरा करें: लॉग इन करें, दो लेनदेन करें, और प्रत्येक दिन $50 तक के BTC ड्रॉप्स के लिए पात्र बने रहने के लिए कम से कम $20 के टोकन रखें।<br>अब रेफरल पुरस्कारों के साथ: एक दोस्त को वॉलेट स्थापित करने के लिए आमंत्रित करें और आप दोनों को गारंटीशुदा स्प्रिंकल्स मिलेंगे। शीर्ष 4 रेफर करने वालों में शामिल हों और एक जैकपॉट जीतें।",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "$oisy_short में आपका स्वागत है!",
+					"subtitle": "कमाने के लिए तैयार हैं?",
+					"description": "आप अपने पहले पुरस्कार से 2 कदम दूर हैं: लॉग इन करें, $20+ रखें, और 2 क्रियाएं पूरी करें। स्प्रिंकल्स कमाना शुरू करने के लिए बस इतना ही चाहिए।<br><br>और चाहिए? 4 दोस्तों को रेफर करें और एक गारंटीकृत बोनस प्राप्त करें।"
+				},
 				"win": {
 					"default": {
 						"title": "आपको पुरस्कृत किया गया",
@@ -458,6 +463,11 @@
 				"participate_title": "",
 				"description": "",
 				"campaign_href": "",
+				"welcome": {
+					"title": "$oisy_short में आपका स्वागत है!",
+					"subtitle": "कमाने के लिए तैयार हैं?",
+					"description": ""
+				},
 				"win": {
 					"default": {
 						"title": "",
@@ -1674,11 +1684,6 @@
 			"sprinkles_title": "स्प्रिंकल्स",
 			"sprinkles_description": "OISY पुरस्कार"
 		}
-	},
-	"welcome": {
-		"title": "$oisy_short में आपका स्वागत है!",
-		"subtitle": "कमाने के लिए तैयार हैं?",
-		"description": "आप अपने पहले पुरस्कार से 2 कदम दूर हैं: लॉग इन करें, $20+ रखें, और 2 क्रियाएं पूरी करें। स्प्रिंकल्स कमाना शुरू करने के लिए बस इतना ही चाहिए।<br><br>और चाहिए? 4 दोस्तों को रेफर करें और एक गारंटीकृत बोनस प्राप्त करें।"
 	},
 	"temporal": {
 		"seconds_to_duration": {
