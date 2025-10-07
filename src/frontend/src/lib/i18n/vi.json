@@ -1200,6 +1200,7 @@
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
 			"spender": "",
+			"application": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
 			"methods": "Hàm",
@@ -1610,7 +1611,7 @@
 			"i_have_accepted": "Tôi đã đọc và đồng ý với",
 			"i_have_accepted_updated": "Tôi đã đọc và đồng ý với phiên bản cập nhật của",
 			"accept_and_continue": "Chấp nhận và tiếp tục",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Chúng tôi đã cập nhật $agreements. Bằng cách sử dụng $oisy_short, bạn xác nhận rằng bạn đã đọc và đồng ý với các cập nhật."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Đã xảy ra lỗi khi cập nhật các thỏa thuận của bạn."

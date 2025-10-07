@@ -106,6 +106,8 @@
 		})
 	);
 
+	let application = $derived(request.verifyContext.verified.origin);
+
 	/**
 	 * Modal
 	 */
@@ -196,6 +198,7 @@
 			{:else if currentStep?.name === WizardStepsSend.REVIEW}
 				<EthWalletConnectSendReview
 					{amount}
+					{application}
 					{data}
 					{destination}
 					{erc20Approve}
