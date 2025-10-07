@@ -22,6 +22,11 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+	import {
+		loadDisabledIcrcTokensBalances,
+		loadDisabledIcrcTokensExchanges
+	} from '$icp/services/icrc.services';
+	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
@@ -52,6 +57,23 @@
 	$effect(() => {
 		setTokens(tokens);
 	});
+
+	// $effect(() => {
+	// 	(async () => {
+	// 		try {
+	// 			await loadDisabledIcrcTokensBalances({
+	// 				identity: $authIdentity,
+	// 				disabledIcrcTokens: $allIcrcTokens
+	// 			});
+
+	// 			await loadDisabledIcrcTokensExchanges({
+	// 				disabledIcrcTokens: $allIcrcTokens
+	// 			});
+	// 		} catch {
+	// 			console.warn('Disabled tokens balances loaded');
+	// 		}
+	// 	})();
+	// });
 
 	const onTokenButtonClick = (token: TokenUi) => {
 		onSelectToken(token);

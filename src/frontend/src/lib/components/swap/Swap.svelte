@@ -32,7 +32,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
-	import { disabledIcrcTokens } from '$icp/derived/icrc.derived';
+	import { disabledIcrcTokens, enabledIcrcTokens } from '$icp/derived/icrc.derived';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
@@ -98,8 +98,11 @@
 
 		modalStore.openSwap(tokenId);
 
-		console.warn('Loading disabled tokens:', $disabledIcrcTokens);
-		console.warn('Disabled tokens count:', $disabledIcrcTokens.length);
+		console.log({
+			allTokens: $allIcrcTokens,
+			enabledTokens: $enabledIcrcTokens,
+			disabledIcrcTokens: $disabledIcrcTokens
+		});
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
