@@ -956,6 +956,7 @@ interface I18nNfts {
 		review_description: string;
 		learn_more: string;
 		token_id: string;
+		go_to_collection: string;
 	};
 	alt: {
 		placeholder_image: string;

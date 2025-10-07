@@ -1149,7 +1149,8 @@
 			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
 			"learn_more": "Tìm hiểu thêm",
-			"token_id": "ID token"
+			"token_id": "ID token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",

@@ -1149,7 +1149,8 @@
 			"review_title": "Examiner les sources de médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
 			"learn_more": "En savoir plus",
-			"token_id": "ID du token"
+			"token_id": "ID du token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
