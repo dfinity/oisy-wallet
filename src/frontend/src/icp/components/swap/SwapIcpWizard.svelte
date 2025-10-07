@@ -90,47 +90,21 @@
 	);
 
 	let isSourceTokenIcrc2 = $state<boolean | undefined>(undefined);
-	let previousSourceToken = $state<Token | undefined>(undefined);
 
 	$effect(() => {
-		const currentSourceToken = $sourceToken;
-
-		if (currentSourceToken === previousSourceToken) {
-			return;
-		}
-
-		previousSourceToken = currentSourceToken;
-
-		if (isNullish(currentSourceToken) || !isIcToken(currentSourceToken)) {
+		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
 			return;
 		}
 
 		(async () => {
 			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
 				identity: $authIdentity,
-				ledgerCanisterId: currentSourceToken.ledgerCanisterId
+				ledgerCanisterId: $sourceToken.ledgerCanisterId
 			});
 
 			isIcrcTokenIcrc2 = isSourceTokenIcrc2;
 		})();
 	});
-
-	// let isSourceTokenIcrc2 = $state<boolean | undefined>(undefined);
-
-	// $effect(() => {
-	// 	if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
-	// 		return;
-	// 	}
-
-	// 	(async () => {
-	// 		isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
-	// 			identity: $authIdentity,
-	// 			ledgerCanisterId: $sourceToken.ledgerCanisterId
-	// 		});
-
-	// 		isIcrcTokenIcrc2 = isSourceTokenIcrc2;
-	// 	})();
-	// });
 
 	$effect(() => {
 		console.log({ isSourceTokenIcrc2 }, 'in Swap Wizard');
