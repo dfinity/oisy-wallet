@@ -2,7 +2,7 @@
 	import IconSprinkles from '$lib/components/icons/IconSprinkles.svelte';
 	import IconUpRight from '$lib/components/icons/lucide/IconUpRight.svelte';
 	import Sprinkles from '$lib/components/sprinkles/Sprinkles.svelte';
-	import { TRACK_SPRINKLES_BANNER_CLICK } from '$lib/constants/analytics.contants';
+	import { TRACK_SPRINKLES_BANNER_CLICK } from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 

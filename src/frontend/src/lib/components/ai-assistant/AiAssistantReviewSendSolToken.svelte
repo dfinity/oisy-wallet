@@ -16,7 +16,7 @@
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,

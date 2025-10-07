@@ -8,7 +8,7 @@ import { ckBtcPendingUtxosStore } from '$icp/stores/ckbtc-utxos.store';
 import { ckBtcMinterInfoStore } from '$icp/stores/ckbtc.store';
 import type { CkBtcUpdateBalanceParams } from '$icp/types/ckbtc';
 import type { IcCkMetadata, IcCkToken, IcToken } from '$icp/types/ic-token';
-import { TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_CKBTC_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.constants';
 import { ProgressStepsUpdateBalanceCkBtc } from '$lib/enums/progress-steps';
 import { waitWalletReady } from '$lib/services/actions.services';
 import { trackEvent } from '$lib/services/analytics.services';
