@@ -87,8 +87,8 @@
 					</h1>
 				</div>
 
-				{#if nonNullish(nft) && nonNullish(token)}
-					<NftActionButtons {token} />
+				{#if nonNullish(nft)}
+					<NftActionButtons />
 				{/if}
 			</div>
 		{:else}
