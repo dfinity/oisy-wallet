@@ -1200,6 +1200,7 @@
 			"or_use_link": "أو استخدم رابط WalletConnect",
 			"proposer": "المقترح",
 			"spender": "",
+			"application": "",
 			"review": "مراجعة الأذونات المطلوبة لـ $chain_name ($key)",
 			"method": "الطريقة",
 			"methods": "الطرق",

@@ -21,6 +21,7 @@
 	interface Props {
 		amount: bigint;
 		destination: string;
+		application: string;
 		data?: string;
 		erc20Approve: boolean;
 		sourceNetwork: EthereumNetwork;
@@ -32,6 +33,7 @@
 	let {
 		amount,
 		destination,
+		application,
 		data,
 		erc20Approve,
 		sourceNetwork: sourceNetworkProp,
@@ -50,6 +52,7 @@
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
+		{application}
 		balance={$balance}
 		{destination}
 		source={$ethAddress ?? ''}
