@@ -17,7 +17,7 @@
 	 * Send modal context store
 	 */
 	const { sendToken, ...rest } = initSendContext({
-		token: selectedToken
+		token: token ?? DEFAULT_ETHEREUM_TOKEN
 	});
 
 	setContext<SendContext>(SEND_CONTEXT_KEY, {
