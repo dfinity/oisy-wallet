@@ -13,7 +13,7 @@ import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.stor
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
-import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_ETH_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';

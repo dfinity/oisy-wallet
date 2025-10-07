@@ -1,4 +1,4 @@
-import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
+import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.constants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import { Languages } from '$lib/enums/languages';
 import cs from '$lib/i18n/cs.json';

@@ -29,7 +29,7 @@
 		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
