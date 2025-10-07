@@ -56,7 +56,18 @@
 				updateNftSection({ section: CustomTokenSection.HIDDEN, token, $authIdentity })}
 			button={hideButton}
 		>
-			<p>Are you sure?</p>
+			<div class="flex w-full flex-col items-center text-center">
+				<span
+					class="m-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
+				>
+					<IconEyeOff size="32" />
+				</span>
+				<h4 class="my-3">Move collection to spam?</h4>
+				<p class="text-sm"
+					>This will move all NFTs of this collection to spam. They'll be hidden from your main
+					view, but you can always find and restore them later.</p
+				>
+			</div>
 		</ConfirmButtonWithModal>
 	{:else}
 		{@render hideButton(() =>
