@@ -48,6 +48,10 @@ export const IcTokenSchema = z.object({
 
 export const IcTokenWithoutIdSchema = IcTokenSchema.omit({ id: true }).strict();
 
+export const IcTokenWithIcrc2SupportedSchema = IcTokenSchema.extend({
+	isIcrc2: z.boolean()
+}).strict();
+
 export const IcCkTokenSchema = z.object({
 	...IcTokenSchema.shape,
 	...IcCkMetadataSchema.partial().shape

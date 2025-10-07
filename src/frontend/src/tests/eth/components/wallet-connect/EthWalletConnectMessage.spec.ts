@@ -46,6 +46,14 @@ describe('EthWalletConnectMessage', () => {
 				]
 			},
 			chainId: ETHEREUM_NETWORK.chainId.toString()
+		},
+		verifyContext: {
+			verified: {
+				verifyUrl: 'https://verify.walletconnect.org',
+				validation: 'VALID',
+				origin: 'https://app.uniswap.org',
+				isScam: false
+			}
 		}
 	} as WalletKitTypes.SessionRequest;
 
@@ -75,6 +83,30 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
 
 		expect(getByText('{ ... }')).toBeInTheDocument();
+	});
+
+	it('should render the application', () => {
+		const { getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(getByText(`${en.wallet_connect.text.application}:`)).toBeInTheDocument();
+
+		expect(getByText('https://app.uniswap.org')).toBeInTheDocument();
+	});
+
+	it('should render the method', () => {
+		const { getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(getByText(`${en.wallet_connect.text.method}:`)).toBeInTheDocument();
+
+		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
 	});
 
 	it('should render the token if it is enabled', () => {
@@ -163,6 +195,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle an empty token in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
@@ -232,6 +265,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle missing details in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
@@ -278,6 +312,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle empty details in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
