@@ -1201,6 +1201,7 @@
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
 			"spender": "",
+			"application": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
 			"methods": "Métodos",
@@ -1611,7 +1612,7 @@
 			"i_have_accepted": "Li e concordo com os",
 			"i_have_accepted_updated": "Li e concordo com os atualizados",
 			"accept_and_continue": "Aceite e continue",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Atualizamos $agreements. Ao usar $oisy_short, você confirma que leu e concorda com as atualizações."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
@@ -1621,10 +1622,10 @@
 		"text": {
 			"license_agreement": "Contrato de Licença",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "o ",
+				"possessive": "nosso "
 			},
-			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1635,8 +1636,8 @@
 		"text": {
 			"terms_of_use": "Termos de Uso",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "os ",
+				"possessive": "nossos "
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
@@ -1650,8 +1651,8 @@
 		"text": {
 			"privacy_policy": "Política de Privacidade",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "a ",
+				"possessive": "nossa "
 			},
 			"title": "",
 			"body": ""
