@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import type { SolAddress } from '$lib/types/address';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
@@ -103,7 +104,7 @@ describe('sol-send.services', () => {
 			signTransactions: expect.any(Function)
 		});
 		const mockDestination = mockSolAddress2;
-		const mockPrioritizationFee = 0n;
+		const mockPrioritizationFee = ZERO;
 		const mockParams = {
 			identity: mockIdentity,
 			amount: mockAmount,

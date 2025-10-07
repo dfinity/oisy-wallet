@@ -7,6 +7,7 @@ import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
@@ -190,7 +191,7 @@ describe('fetchSwapAmounts', () => {
 	});
 
 	it('should filter out providers with receiveAmount = 0', async () => {
-		const kongSwapResponse = { receive_amount: 0n, slippage: 0.5 } as SwapAmountsReply;
+		const kongSwapResponse = { receive_amount: ZERO, slippage: 0.5 } as SwapAmountsReply;
 		const icpSwapResponse = {
 			receiveAmount: 950n,
 			slippage: 0.5
@@ -809,7 +810,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 100n,
-			balance1: 0n
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
@@ -845,8 +846,8 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		const result = await withdrawICPSwapAfterFailedSwap({
@@ -888,7 +889,7 @@ describe('performManualWithdraw', () => {
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 1n,
-			balance1: 0n
+			balance1: ZERO
 		});
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
 
@@ -918,8 +919,8 @@ describe('performManualWithdraw', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		const result = await performManualWithdraw({
@@ -950,7 +951,7 @@ describe('performManualWithdraw', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
+			balance0: ZERO,
 			balance1: 1n
 		});
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
@@ -1007,8 +1008,8 @@ describe('withdrawUserUnusedBalance', () => {
 
 	it('should reject if both balances are zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
@@ -1032,7 +1033,7 @@ describe('withdrawUserUnusedBalance', () => {
 	it('should only withdraw destinationToken if only balance0 is non-zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 1500n,
-			balance1: 0n
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
@@ -1059,7 +1060,7 @@ describe('withdrawUserUnusedBalance', () => {
 
 	it('should only withdraw sourceToken if only balance1 is non-zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
+			balance0: ZERO,
 			balance1: 1500n
 		});
 
