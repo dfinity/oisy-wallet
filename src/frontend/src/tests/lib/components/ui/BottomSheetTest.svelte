@@ -9,8 +9,6 @@
 	}
 
 	let { visible = $bindable(), contentTest, footerTest }: Props = $props();
-
-	
 </script>
 
 <BottomSheet bind:visible>

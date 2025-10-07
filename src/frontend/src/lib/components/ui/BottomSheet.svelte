@@ -19,7 +19,7 @@
 	<div class="z-14 fixed inset-0">
 		<BottomSheet transition on:nnsClose={() => (visible = false)}>
 			{#snippet header()}
-						<div  class="w-full p-4">
+				<div class="w-full p-4">
 					<ButtonIcon
 						ariaLabel={$i18n.core.alt.close_details}
 						onclick={() => (visible = false)}
@@ -30,7 +30,7 @@
 						{/snippet}
 					</ButtonIcon>
 				</div>
-					{/snippet}
+			{/snippet}
 			<div class="min-h-[30vh] w-full p-4">
 				{@render content()}
 			</div>

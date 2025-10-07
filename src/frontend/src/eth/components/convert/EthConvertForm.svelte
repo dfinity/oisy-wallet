@@ -68,7 +68,7 @@
 	{/snippet}
 
 	{#snippet fee()}
-		<EthFeeDisplay >
+		<EthFeeDisplay>
 			{#snippet label()}
 				<Html text={$i18n.fee.text.convert_fee} />
 			{/snippet}

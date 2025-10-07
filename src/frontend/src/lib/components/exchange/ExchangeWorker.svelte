@@ -1,8 +1,6 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { debounce } from '@dfinity/utils';
-	import { type Snippet, onDestroy, onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { EXCHANGE_DISABLED } from '$env/exchange.env';
 	import { enabledIcrcLedgerCanisterIdsNoCk } from '$icp/derived/icrc.derived';
 	import { enabledMergedErc20TokensAddresses } from '$icp-eth/derived/icrc-erc20.derived';

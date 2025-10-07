@@ -65,45 +65,39 @@
 	{#each features as feature (feature)}
 		<SettingsCardItem>
 			{#snippet key()}
-					
-					{labelsByFeatureId[feature].title}
-				
-					{/snippet}
+				{labelsByFeatureId[feature].title}
+			{/snippet}
 
 			{#snippet value()}
-					
-					<Toggle
-						ariaLabel={$userExperimentalFeatures?.[feature].enabled
-							? $i18n.settings.text.disable_beta_feature
-							: $i18n.settings.text.enable_beta_feature}
-						checked={$userExperimentalFeatures?.[feature].enabled ?? false}
-						disabled={loading}
-						on:nnsToggle={async () => {
-							await save({
-								[feature]: {
-									...$userExperimentalFeatures?.[feature],
-									enabled: !$userExperimentalFeatures?.[feature].enabled
-								}
-							});
-						}}
-					/>
-				
-					{/snippet}
+				<Toggle
+					ariaLabel={$userExperimentalFeatures?.[feature].enabled
+						? $i18n.settings.text.disable_beta_feature
+						: $i18n.settings.text.enable_beta_feature}
+					checked={$userExperimentalFeatures?.[feature].enabled ?? false}
+					disabled={loading}
+					on:nnsToggle={async () => {
+						await save({
+							[feature]: {
+								...$userExperimentalFeatures?.[feature],
+								enabled: !$userExperimentalFeatures?.[feature].enabled
+							}
+						});
+					}}
+				/>
+			{/snippet}
 			{#snippet info()}
-					
-					<span>
-						{labelsByFeatureId[feature].description}
+				<span>
+					{labelsByFeatureId[feature].description}
 
-						{#if nonNullish(labelsByFeatureId[feature].learnMore)}
-							<ExternalLink
-								ariaLabel={$i18n.rewards.text.learn_more}
-								href={labelsByFeatureId[feature].learnMore}
-								iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
-							>
-						{/if}
-					</span>
-				
-					{/snippet}
+					{#if nonNullish(labelsByFeatureId[feature].learnMore)}
+						<ExternalLink
+							ariaLabel={$i18n.rewards.text.learn_more}
+							href={labelsByFeatureId[feature].learnMore}
+							iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+						>
+					{/if}
+				</span>
+			{/snippet}
 		</SettingsCardItem>
 	{/each}
 </SettingsCard>

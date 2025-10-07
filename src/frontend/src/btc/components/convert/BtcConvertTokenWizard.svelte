@@ -176,8 +176,8 @@
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
 			{#snippet cancel()}
-								<ButtonBack  onclick={back} />
-							{/snippet}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />

@@ -1,9 +1,7 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { Input } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { type Snippet, onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 
 	interface Props {
 		innerEnd?: Snippet;

@@ -1,8 +1,6 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, type Snippet } from 'svelte';
 	import { loadNextIcTransactionsByOldest } from '$icp/services/ic-transactions.services';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import { normalizeTimestampToSeconds } from '$icp/utils/date.utils';

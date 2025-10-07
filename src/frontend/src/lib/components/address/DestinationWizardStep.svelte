@@ -61,15 +61,14 @@
 		on:click={() => (activeAddressType = 'custom')}
 	>
 		{#snippet content()}
-				<IcSendDestination
-				
+			<IcSendDestination
 				{networkId}
 				{onQRCodeScan}
 				{tokenStandard}
 				bind:destination
 				bind:invalidDestination
 			/>
-			{/snippet}
+		{/snippet}
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}

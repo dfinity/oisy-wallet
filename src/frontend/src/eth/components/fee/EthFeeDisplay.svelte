@@ -1,8 +1,6 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import FeeDisplay from '$lib/components/fee/FeeDisplay.svelte';
 

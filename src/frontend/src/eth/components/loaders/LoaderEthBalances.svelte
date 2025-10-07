@@ -1,8 +1,6 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { type Snippet, onMount, type Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { loadErc20Balances, loadEthBalances } from '$eth/services/eth-balance.services';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
