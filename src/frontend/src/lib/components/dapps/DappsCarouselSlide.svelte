@@ -7,7 +7,7 @@
 	import {
 		TRACK_COUNT_CAROUSEL_CLOSE,
 		TRACK_COUNT_CAROUSEL_OPEN
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

@@ -1,4 +1,5 @@
 import { solvePowChallenge } from '$icp/services/pow-protector.services';
+import { ZERO } from '$lib/constants/app.constants';
 
 // Mock the allowance function
 vi.mock('$icp/api/icrc-ledger.api', () => ({
@@ -36,7 +37,7 @@ describe('pow-protector.services', () => {
 			const result = await solvePowChallenge({ timestamp, difficulty });
 
 			expect(result).toBeTypeOf('bigint');
-			expect(result).toBeGreaterThanOrEqual(0n);
+			expect(result).toBeGreaterThanOrEqual(ZERO);
 		});
 
 		it('should solve a challenge with higher difficulty', async () => {
@@ -46,7 +47,7 @@ describe('pow-protector.services', () => {
 			const result = await solvePowChallenge({ timestamp, difficulty });
 
 			expect(result).toBeTypeOf('bigint');
-			expect(result).toBeGreaterThanOrEqual(0n);
+			expect(result).toBeGreaterThanOrEqual(ZERO);
 		});
 
 		it('should return different nonces for different timestamps', async () => {
@@ -69,7 +70,7 @@ describe('pow-protector.services', () => {
 			const result = await solvePowChallenge({ timestamp, difficulty });
 
 			expect(result).toBeTypeOf('bigint');
-			expect(result).toBeGreaterThanOrEqual(0n);
+			expect(result).toBeGreaterThanOrEqual(ZERO);
 		});
 
 		it('should solve challenges with different difficulty levels', async () => {
@@ -80,7 +81,7 @@ describe('pow-protector.services', () => {
 				const result = await solvePowChallenge({ timestamp, difficulty });
 
 				expect(result).toBeTypeOf('bigint');
-				expect(result).toBeGreaterThanOrEqual(0n);
+				expect(result).toBeGreaterThanOrEqual(ZERO);
 			}
 		});
 	});

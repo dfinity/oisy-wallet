@@ -6,7 +6,7 @@
 		HOME_PAGE_ROUTE,
 		TOKEN_VIEW_ROUTE,
 		TRACK_BUY_TOKEN
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { modalBuy } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { trackEvent } from '$lib/services/analytics.services';

@@ -1,9 +1,9 @@
 <script lang="ts">
 
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { untrack } from 'svelte';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,
@@ -23,8 +23,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionSolAddress } from '$lib/types/address';
-	import type { NetworkId } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
@@ -42,54 +40,50 @@
 		network: SolanaNetwork;
 	}
 
-	let { listener, request, network }: Props = $props();
+	let { listener = $bindable(), request, network }: Props = $props();
 
 	/**
 	 * Transaction
 	 */
 
-	let networkId: NetworkId = $state();
-	run(() => {
-		({ id: networkId } = network);
-	});
+	let { id: networkId } = $derived(network);
 
-	let address: OptionSolAddress = $state();
-	let token: Token = $state();
-	run(() => {
-		[address, token] = isNetworkIdSOLDevnet(networkId)
+	let [address, token] = $derived(
+		isNetworkIdSOLDevnet(networkId)
 			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
 			: isNetworkIdSOLLocal(networkId)
 				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-				: [$solAddressMainnet, SOLANA_TOKEN];
-	});
+				: [$solAddressMainnet, SOLANA_TOKEN]
+	);
 
-	let signWithSending = $state(false);
-	let data: string = $state();
-	let amount: bigint | undefined = $state();
-	let destination: OptionSolAddress = $state();
-	let application: string = $state();
-
-	onMount(async () => {
-		const {
-			params: {
-				request: {
-					method,
-					params: { transaction }
-				}
-			},
-			verifyContext: {
-				verified: { origin }
+	let {
+		params: {
+			request: {
+				method,
+				params: { transaction: data }
 			}
-		} = request;
+		},
+		verifyContext: {
+			verified: { origin: application }
+		}
+	} = $derived(request);
 
-		signWithSending = method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION;
-		data = transaction;
-		application = origin;
+	let signWithSending = $derived(method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION);
 
+	let amount = $state<bigint | undefined>();
+	let destination = $state<OptionSolAddress>();
+
+	const updateData = async () => {
 		({ amount, destination } = await decodeService({
 			base64EncodedTransactionMessage: data,
 			networkId
 		}));
+	};
+
+	$effect(() => {
+		[data, networkId];
+
+		untrack(() => updateData());
 	});
 
 	/**
@@ -107,8 +101,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined = $state();
-	let modal: WizardModal<WizardStepsSign> = $state();
+	let currentStep = $state<WizardStep<WizardStepsSign> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSign>>();
 
 	const close = () => modalStore.close();
 
@@ -116,7 +110,9 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = $state(ProgressStepsSign.INITIALIZATION);
+	let signProgressStep = $state<ProgressStepsSign | ProgressStepsSendSol.SEND>(
+		ProgressStepsSign.INITIALIZATION
+	);
 
 	/**
 	 * Reject a transaction
@@ -133,6 +129,10 @@
 	 */
 
 	const sign = async () => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		const { success } = await signService({
 			request,
 			listener,

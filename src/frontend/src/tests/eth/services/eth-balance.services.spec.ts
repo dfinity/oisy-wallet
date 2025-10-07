@@ -15,7 +15,7 @@ import {
 	reloadEthereumBalance
 } from '$eth/services/eth-balance.services';
 import type { Erc20Token } from '$eth/types/erc20';
-import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_ETH_LOADING_BALANCE_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';

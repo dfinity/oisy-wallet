@@ -1,5 +1,6 @@
 import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockBtcTransactionUi } from '$tests/mocks/blockchain-transactions.mock';
@@ -24,7 +25,7 @@ describe('BtcTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockBtcTransactionUi.value ?? 0n,
+			value: mockBtcTransactionUi.value ?? ZERO,
 			unitName: BTC_MAINNET_TOKEN.decimals,
 			displayDecimals: BTC_MAINNET_TOKEN.decimals
 		})} ${BTC_MAINNET_TOKEN.symbol}`;

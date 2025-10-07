@@ -1,4 +1,5 @@
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
+import { ZERO } from '$lib/constants/app.constants';
 import * as solanaApi from '$sol/api/solana.api';
 import { loadSplTokenBalance } from '$sol/services/spl-accounts.services';
 import { SolanaNetworks } from '$sol/types/network';
@@ -68,7 +69,7 @@ describe('spl-account.services', () => {
 
 			const balance = await loadSplTokenBalance(mockParams);
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 
 			expect(spyLoadTokenBalance).not.toHaveBeenCalled();
 		});
@@ -78,7 +79,7 @@ describe('spl-account.services', () => {
 
 			const balance = await loadSplTokenBalance(mockParams);
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should calculate the ATA address when the input address is not an ATA', async () => {

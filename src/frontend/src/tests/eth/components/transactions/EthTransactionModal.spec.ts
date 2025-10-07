@@ -1,5 +1,6 @@
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import EthTransactionModal from '$eth/components/transactions/EthTransactionModal.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
@@ -31,7 +32,7 @@ describe('EthTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockEthTransactionUi.value ?? 0n,
+			value: mockEthTransactionUi.value ?? ZERO,
 			unitName: ETHEREUM_TOKEN.decimals,
 			displayDecimals: ETHEREUM_TOKEN.decimals
 		})} ${ETHEREUM_TOKEN.symbol}`;
@@ -46,7 +47,7 @@ describe('EthTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockErc721TransactionUi.value ?? 0n,
+			value: mockErc721TransactionUi.value ?? ZERO,
 			unitName: mockValidErc721Token.decimals,
 			displayDecimals: mockValidErc721Token.decimals
 		})} ${mockValidErc721Token.symbol}`;

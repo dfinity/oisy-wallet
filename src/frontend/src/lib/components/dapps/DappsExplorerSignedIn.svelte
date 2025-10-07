@@ -10,7 +10,7 @@
 	import {
 		TRACK_COUNT_DAPP_FILTER_BUTTON,
 		TRACK_COUNT_DAPP_OPEN_INFO_MODAL
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';

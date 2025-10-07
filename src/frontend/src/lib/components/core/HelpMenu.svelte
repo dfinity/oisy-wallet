@@ -11,7 +11,7 @@
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import { OISY_REPO_URL } from '$lib/constants/oisy.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,

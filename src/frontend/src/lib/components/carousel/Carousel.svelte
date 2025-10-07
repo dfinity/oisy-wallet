@@ -8,7 +8,7 @@
 	import {
 		TRACK_COUNT_CAROUSEL_NEXT,
 		TRACK_COUNT_CAROUSEL_PREVIOUS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { CAROUSEL_CONTAINER, CAROUSEL_SLIDE } from '$lib/constants/test-ids.constants';
 	import { SLIDE_PARAMS } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
