@@ -100,7 +100,7 @@
 	});
 </script>
 
-<p class="mb-0 font-bold">{$i18n.wallet_connect.text.method}:</p>
+<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}:</p>
 <p class="mb-4 font-normal">{method}</p>
 
 {#if nonNullish(token)}
