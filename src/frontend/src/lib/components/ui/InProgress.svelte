@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
+	import { untrack } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { untrack } from 'svelte';
 
 	interface Props {
 		progressStep: string;
