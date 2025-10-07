@@ -54,7 +54,7 @@
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
-  		{application}
+		{application}
 		{balance}
 		{destination}
 		source={$ethAddress ?? ''}
