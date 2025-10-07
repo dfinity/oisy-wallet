@@ -48,6 +48,10 @@ export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
 );
+export const modalGldtStake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gldt-stake'
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'
