@@ -42,7 +42,7 @@
 <Responsive up="md">
 	<Modal onClose={onCancelHandler} role="alert" {testId} visible={open} {footer}>
 		{#snippet title()}
-			<div class="p-3">{@render innerTitle?.()}</div>
+			<div class="p-3">{@render innerTitle()}</div>
 		{/snippet}
 
 		{@render children()}
