@@ -210,7 +210,7 @@
 			>
 				{#snippet tokenInput()}
 					<TokenInput
-						amount={receiveAmount}
+						amount={swapAmountsLoading ? 0 : receiveAmount}
 						disabled={true}
 						displayUnit={inputUnit}
 						exchangeRate={$destinationTokenExchangeRate}
