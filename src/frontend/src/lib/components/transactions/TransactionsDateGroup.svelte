@@ -3,10 +3,10 @@
 	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import EthTransaction from '$eth/components/transactions/EthTransaction.svelte';
 	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
+	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import type { AllTransactionUiWithCmpNonEmptyList } from '$lib/types/transaction-ui';
 	import SolTransaction from '$sol/components/transactions/SolTransaction.svelte';
-	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 
 	interface Props {
 		formattedDate: string;
