@@ -1,4 +1,5 @@
 import type { UserProfile } from '$declarations/backend/backend.did';
+import { ZERO } from '$lib/constants/app.constants';
 import { hasPouhCredential } from '$lib/utils/credentials.utils';
 import { mockUserProfile } from '$tests/mocks/user-profile.mock';
 
@@ -19,7 +20,7 @@ describe('credentials utils', () => {
 						verified_date_timestamp: [123456n]
 					}
 				],
-				version: [0n]
+				version: [ZERO]
 			};
 
 			expect(hasPouhCredential(profile)).toBeTruthy();
@@ -35,7 +36,7 @@ describe('credentials utils', () => {
 						verified_date_timestamp: []
 					}
 				],
-				version: [0n]
+				version: [ZERO]
 			};
 
 			expect(hasPouhCredential(profile)).toBeFalsy();
@@ -44,7 +45,7 @@ describe('credentials utils', () => {
 		it('should return false if the user has no credentials', () => {
 			const profile: UserProfile = {
 				...mockUserProfile,
-				version: [0n]
+				version: [ZERO]
 			};
 
 			expect(hasPouhCredential(profile)).toBeFalsy();

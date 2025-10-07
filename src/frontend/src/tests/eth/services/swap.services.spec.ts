@@ -7,6 +7,7 @@ import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import { swap } from '$eth/services/swap.services';
 import * as signerApiLib from '$lib/api/signer.api';
 import { signTransaction } from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
@@ -64,7 +65,7 @@ describe('swap.services', () => {
 			gasLimit: 21000n,
 			gasPrice: 20000000000n,
 			to: mockEthAddress2,
-			value: 0n,
+			value: ZERO,
 			data: '0x1234',
 			chainId: 1,
 			from: mockEthAddress,

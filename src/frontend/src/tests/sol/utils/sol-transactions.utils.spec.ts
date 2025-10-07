@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { MappedSolTransaction } from '$sol/types/sol-transaction';
 import * as solInstructionsUtils from '$sol/utils/sol-instructions.utils';
 import { mapSolTransactionMessage } from '$sol/utils/sol-transactions.utils';
@@ -89,7 +90,9 @@ describe('sol-transactions.utils', () => {
 		});
 
 		it('should treat zero amounts correctly (sum remains accurate)', () => {
-			spyMapSolInstruction.mockReturnValueOnce({ amount: 0n }).mockReturnValueOnce({ amount: 10n });
+			spyMapSolInstruction
+				.mockReturnValueOnce({ amount: ZERO })
+				.mockReturnValueOnce({ amount: 10n });
 
 			expect(
 				mapSolTransactionMessage({

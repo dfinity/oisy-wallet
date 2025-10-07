@@ -5,6 +5,7 @@ import {
 	SPRINKLES_SEASON_1_EPISODE_5_ID
 } from '$env/reward-campaigns.env';
 import * as rewardApi from '$lib/api/reward.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { RewardType } from '$lib/enums/reward-type';
 import type { RewardResponseInfo } from '$lib/types/reward';
@@ -368,7 +369,7 @@ describe('rewards.utils', () => {
 				superpowers: [],
 				airdrops: [],
 				usage_awards: [],
-				last_snapshot_timestamp: [0n],
+				last_snapshot_timestamp: [ZERO],
 				sprinkles: []
 			};
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -377,7 +378,7 @@ describe('rewards.utils', () => {
 
 			const { lastTimestamp } = await loadRewardResult(mockIdentity);
 
-			expect(lastTimestamp).toBe(0n);
+			expect(lastTimestamp).toBe(ZERO);
 		});
 	});
 

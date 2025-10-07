@@ -259,7 +259,7 @@ describe('swap utils', () => {
 		});
 
 		it('returns 0 for full slippage (100%)', () => {
-			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
+			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(ZERO);
 		});
 	});
 
