@@ -1,17 +1,17 @@
 <script lang="ts">
-	import type { NonFungibleToken } from '$lib/types/nft';
 	import { nonNullish } from '@dfinity/utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
 		NFT_COLLECTION_ACTION_HIDE,
 		NFT_COLLECTION_ACTION_UNHIDE
 	} from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { updateNftSection } from '$lib/services/nft.services';
-	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
-	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
 		token: NonFungibleToken;

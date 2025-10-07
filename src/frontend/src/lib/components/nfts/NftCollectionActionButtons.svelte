@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { NonFungibleToken } from '$lib/types/nft';
-	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
+	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
 		token: NonFungibleToken;
