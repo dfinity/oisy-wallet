@@ -4,6 +4,7 @@ import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
 import type { SolAddress } from '$lib/types/address';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
@@ -258,6 +259,34 @@ describe('sol-send.services', () => {
 					amount: mockAmount
 				},
 				{ programAddress: DEVNET_USDC_TOKEN.owner }
+			);
+		});
+
+		it('should send Token-2022 SPL tokens successfully', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					token: { ...DEVNET_USDC_TOKEN, owner: TOKEN_2022_PROGRAM_ADDRESS } as SplToken
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+
+			expect(pipe).toHaveBeenCalledTimes(4);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-checked-instruction'],
+				mockTx
+			);
+			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
+				{
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					mint: DEVNET_USDC_TOKEN.address,
+					decimals: DEVNET_USDC_TOKEN.decimals,
+					authority: mockSigner,
+					amount: mockAmount
+				},
+				{ programAddress: TOKEN_2022_PROGRAM_ADDRESS }
 			);
 		});
 
