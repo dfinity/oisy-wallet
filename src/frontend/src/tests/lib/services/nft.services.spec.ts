@@ -252,7 +252,7 @@ describe('nft.services', () => {
 		erc721CustomTokensSpy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens');
 		erc721CustomTokensSpy.mockResolvedValue(undefined);
 
-		it('should correctly update the NFT section', () => {
+		it('should correctly update the NFT section', async () => {
 			const token721: NonFungibleToken = {
 				address: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
 				category: 'custom',
@@ -265,7 +265,7 @@ describe('nft.services', () => {
 				section: undefined
 			};
 
-			updateNftSection({
+			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: token721,
 				$authIdentity: mockIdentity
