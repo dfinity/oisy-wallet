@@ -1,8 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import * as authServices from '$lib/services/auth.services';
-import { loadNfts, sendNft } from '$lib/services/nft.services';
+import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -15,6 +17,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { Network, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	alchemyProviders: vi.fn(),
@@ -22,6 +25,8 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 }));
 
 describe('nft.services', () => {
+	let erc721CustomTokensSpy: MockInstance;
+
 	const mockAlchemyProvider = {
 		network: new Network('ethereum', 1),
 		provider: {},
@@ -240,6 +245,42 @@ describe('nft.services', () => {
 			expect(signOutSpy).toHaveBeenCalledOnce();
 			expect(transfer721Spy).not.toHaveBeenCalled();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('updateNftSection', () => {
+		erc721CustomTokensSpy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens');
+		erc721CustomTokensSpy.mockResolvedValue(undefined);
+
+		it('should correctly update the NFT section', async () => {
+			const token721: NonFungibleToken = {
+				address: '0xf2e508d5b8f44f08bd81c7d19e9f1f5277e31f95',
+				category: 'custom',
+				decimals: 0,
+				id: parseTokenId('721'),
+				name: 'My721',
+				network: ETHEREUM_NETWORK,
+				standard: 'erc721',
+				symbol: 'MY721',
+				section: undefined
+			};
+
+			updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: token721,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc721CustomTokensSpy).toHaveBeenCalledWith({
+				tokens: [
+					{
+						...token721,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN
+					}
+				],
+				identity: mockIdentity
+			});
 		});
 	});
 });

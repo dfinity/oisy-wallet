@@ -7,6 +7,19 @@
 	import { modalSend } from '$lib/derived/modal.derived.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
+	import type { NonFungibleToken } from '$lib/types/nft';
+	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
+	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { nftStore } from '$lib/stores/nft.store';
+	import { nonNullish } from '@dfinity/utils';
+	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
+
+	interface Props {
+		token: NonFungibleToken;
+	}
+
+	let { token }: Props = $props();
 </script>
 
 <div class="flex gap-2">
