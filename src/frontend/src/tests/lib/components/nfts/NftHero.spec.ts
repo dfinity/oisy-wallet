@@ -27,7 +27,7 @@ describe('NftHero', () => {
 	it('should render the nft data', () => {
 		const { getByText } = render(NftHero, {
 			props: {
-				nft: mockValidErc1155Nft
+				nft: { ...mockValidErc1155Nft, description: 'Test description about the NFT' }
 			}
 		});
 
@@ -38,6 +38,12 @@ describe('NftHero', () => {
 		);
 
 		expect(name).toBeInTheDocument();
+
+		const description: HTMLElement | null = getByText('Test description about the NFT');
+
+		assertNonNullish(description);
+
+		expect(description).toBeInTheDocument();
 
 		const standard: HTMLElement | null = getByText(mockNftollectionUi.collection.standard);
 

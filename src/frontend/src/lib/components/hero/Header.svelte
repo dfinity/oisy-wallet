@@ -9,7 +9,7 @@
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
-	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.contants';
+	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy, modalWalletConnect } from '$lib/derived/modal.derived';
 	import { isRouteTransactions } from '$lib/utils/nav.utils';

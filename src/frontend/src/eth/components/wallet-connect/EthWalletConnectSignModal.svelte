@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
@@ -12,16 +13,18 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionString } from '$lib/types/string';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	export let listener: OptionWalletConnectListener;
-	export let request: WalletKitTypes.SessionRequest;
+	interface Props {
+		listener: OptionWalletConnectListener;
+		request: WalletKitTypes.SessionRequest;
+	}
 
-	let domainName: OptionString;
-	$: ({
+	let { listener = $bindable(), request }: Props = $props();
+
+	let {
 		domain: { name: domainName }
-	} = getSignParamsMessageTypedDataV4(request.params.request.params));
+	} = $derived(getSignParamsMessageTypedDataV4(request.params.request.params));
 
 	/**
 	 * Modal
@@ -38,8 +41,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined;
-	let modal: WizardModal<WizardStepsSign>;
+	let currentStep = $state<WizardStep<WizardStepsSign> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSign>>();
 
 	const close = () => modalStore.close();
 
@@ -47,7 +50,7 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
+	let signProgressStep = $state<ProgressStepsSign>(ProgressStepsSign.INITIALIZATION);
 
 	/**
 	 * Reject a message
@@ -60,6 +63,10 @@
 	};
 
 	const approve = async () => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		const { success } = await signMessage({
 			request,
 			listener,

@@ -30,7 +30,7 @@
 	import {
 		TRACK_DELETE_TOKEN_SUCCESS,
 		TRACK_EDIT_TOKEN_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { TOKEN_MODAL_SAVE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';

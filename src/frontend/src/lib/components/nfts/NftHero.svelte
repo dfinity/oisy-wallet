@@ -8,6 +8,7 @@
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
@@ -95,6 +96,12 @@
 			<span class="block max-w-80">
 				<SkeletonText />
 			</span>
+		{/if}
+
+		{#if nonNullish(nft?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText maxWords={20} text={nft.description} />
+			</div>
 		{/if}
 
 		<NftMetadataList {nft} />
