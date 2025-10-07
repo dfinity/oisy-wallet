@@ -224,8 +224,6 @@ describe('auth.services', () => {
 		});
 
 		it('should call the signOut function of the authStore and clear the session storage', async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			sessionStorage.setItem('key', 'value');
 
 			expect(sessionStorage.getItem('key')).toEqual('value');
@@ -258,8 +256,6 @@ describe('auth.services', () => {
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			await errorSignOut(mockText);
 
 			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -354,8 +350,6 @@ describe('auth.services', () => {
 		});
 
 		it('should call the signOut function of the authStore and clear the session storage', async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			sessionStorage.setItem('key', 'value');
 
 			expect(sessionStorage.getItem('key')).toEqual('value');
@@ -388,8 +382,6 @@ describe('auth.services', () => {
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			await warnSignOut(mockText);
 
 			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -484,8 +476,6 @@ describe('auth.services', () => {
 		});
 
 		it('should call the signOut function of the authStore and clear the session storage', async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			sessionStorage.setItem('key', 'value');
 
 			expect(sessionStorage.getItem('key')).toEqual('value');
@@ -518,8 +508,6 @@ describe('auth.services', () => {
 		});
 
 		it("should disconnect WalletConnect's session", async () => {
-			const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 			await nullishSignOut();
 
 			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -619,8 +607,6 @@ describe('auth.services', () => {
 			});
 
 			it('should call the signOut function of the authStore and clear the session storage', async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				sessionStorage.setItem('key', 'value');
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
@@ -651,8 +637,6 @@ describe('auth.services', () => {
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				await idleSignOut();
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -745,8 +729,6 @@ describe('auth.services', () => {
 			});
 
 			it('should call the signOut function of the authStore and clear the session storage', async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				sessionStorage.setItem('key', 'value');
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
@@ -777,8 +759,6 @@ describe('auth.services', () => {
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				await idleSignOut();
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
