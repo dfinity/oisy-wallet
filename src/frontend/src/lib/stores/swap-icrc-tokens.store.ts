@@ -1,11 +1,7 @@
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { writable, type Readable } from 'svelte/store';
 
-export type SwappableToken = IcToken & {
-	isIcrc2: boolean;
-};
-
-export type SwappableTokensStoreData = SwappableToken[];
+export type SwappableTokensStoreData = IcTokenWithIcrc2Supported[];
 
 export interface SwappableTokensStore extends Readable<SwappableTokensStoreData> {
 	setSwappableTokens: (data: SwappableTokensStoreData) => void;
