@@ -77,6 +77,18 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText('{ ... }')).toBeInTheDocument();
 	});
 
+	it('should render the method', () => {
+		const { getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(getByText(`${en.wallet_connect.text.method}:`)).toBeInTheDocument();
+
+		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
+	});
+
 	it('should render the token if it is enabled', () => {
 		const { getByText } = render(EthWalletConnectMessage, {
 			props: {
@@ -163,6 +175,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle an empty token in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
@@ -232,6 +245,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle missing details in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
@@ -278,6 +292,7 @@ describe('EthWalletConnectMessage', () => {
 
 	it('should handle empty details in the message', () => {
 		const newRequest: WalletKitTypes.SessionRequest = {
+			...request,
 			params: {
 				request: {
 					method: SESSION_REQUEST_ETH_SIGN_V4,
