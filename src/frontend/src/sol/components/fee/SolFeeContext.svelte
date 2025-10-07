@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, type Snippet } from 'svelte';
+	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -57,7 +57,7 @@
 	$effect(() => {
 		[$sendTokenNetworkId];
 
-		(async () => await updateFee())();
+		untrack(() => updateFee());
 	});
 
 	let timer = $state<NodeJS.Timeout | undefined>();
@@ -74,7 +74,7 @@
 
 		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
-		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
+		// we check if it is an ATA address and if it is not closed, if it isn't an ATA address or has been closed, we need to charge the ATA fee
 		if (
 			(await isAtaAddress({ address: destination, network: solNetwork })) &&
 			(await checkIfAccountExists({ address: destination, network: solNetwork }))
@@ -102,7 +102,7 @@
 	$effect(() => {
 		[destination, $sendToken];
 
-		updateAtaFee();
+		untrack(() => updateAtaFee());
 	});
 </script>
 
