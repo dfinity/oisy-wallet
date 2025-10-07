@@ -127,7 +127,16 @@
 		}
 	};
 
-	const debounceLoadSwapAmounts = debounce(() => loadSwapAmounts(false));
+	// const debounceLoadSwapAmounts = debounce(() => loadSwapAmounts(false));
+
+	let debounceTimer: NodeJS.Timeout | undefined;
+
+	const clearDebounceTimer = () => {
+		if (nonNullish(debounceTimer)) {
+			clearTimeout(debounceTimer);
+			debounceTimer = undefined;
+		}
+	};
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
@@ -140,11 +149,16 @@
 	$effect(() => {
 		[amount, sourceToken, destinationToken];
 
-		debounceLoadSwapAmounts();
+		clearDebounceTimer();
+
+		debounceTimer = setTimeout(() => {
+			loadSwapAmounts(false);
+		}, 300);
 	});
 
 	onDestroy(() => {
 		clearTimer();
+		clearDebounceTimer();
 	});
 </script>
 

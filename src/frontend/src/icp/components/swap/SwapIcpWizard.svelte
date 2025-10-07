@@ -105,6 +105,10 @@
 		})();
 	});
 
+	$effect(() => {
+		console.log({ isSourceTokenIcrc2 }, 'in Swap Wizard');
+	});
+
 	const clearFailedProgressStep = () => {
 		swapFailedProgressSteps = [];
 	};
