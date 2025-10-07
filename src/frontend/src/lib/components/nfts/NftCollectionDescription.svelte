@@ -4,6 +4,7 @@
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -11,7 +12,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -51,8 +51,8 @@
 				<span>
 					<Button
 						link
-						paddingSmall
 						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+						paddingSmall
 						styleClass="inline-block text-sm"
 						>{$i18n.nfts.text.go_to_collection}<IconExpand axis="y" /></Button
 					>
