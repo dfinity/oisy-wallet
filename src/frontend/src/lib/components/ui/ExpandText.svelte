@@ -21,7 +21,7 @@
 	{expanded ? text : truncated}
 
 	{#if wordsSplit.length > maxWords}
-		<Button styleClass="inline-block" link onclick={() => (expanded = !expanded)}>
+		<Button link onclick={() => (expanded = !expanded)} styleClass="inline-block">
 			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
 		</Button>
 	{/if}
