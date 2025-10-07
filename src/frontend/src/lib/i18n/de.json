@@ -9,7 +9,7 @@
 			"close": "Schließen",
 			"change": "Ändern",
 			"apply": "Anwenden",
-			"retry": "",
+			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
 			"name": "Name",
 			"symbol": "Symbol",
@@ -52,7 +52,7 @@
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": ""
+			"standalone_mode": "Deine $oisy_short Wallet is momentan als Standalone App auf deinem Mobiltelefon installiert. Dies verhindert, dass andere ICP Applikationen auf $oisy_short zugreifen können. Du kannst $oisy_short von deinem Homescreen löschen, und es dann erneut installieren. $oisy_short wird dann so instaklliert, dass du in anderen apps auf $oisy_short zugreifen und Transacktionen signieren kannst."
 		}
 	},
 	"navigation": {
@@ -1278,9 +1278,9 @@
 			"interacted_with": "Interagierte mit (Ziel)",
 			"status": "Status",
 			"confirmations": "Bestätigungen",
-			"for": "",
-			"for_copied": "",
-			"expiration": "",
+			"for": "Für",
+			"for_copied": "Adresse in die Zwischenablage kopiert.",
+			"expiration": "Ablaufdatum",
 			"approve_label": ""
 		},
 		"status": {
@@ -1610,7 +1610,7 @@
 			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
 			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
 			"accept_and_continue": "Zustimmen und weiterfahren",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Wir haben $agreements aktualisiert. Wenn sie $oisy_short weiterhin benutzen, bestätigen sie, die Änderungen gelesen und akzeptiert zu haben."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
@@ -1623,7 +1623,7 @@
 				"article": "die ",
 				"possessive": "unsere "
 			},
-			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {

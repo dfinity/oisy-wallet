@@ -1610,7 +1610,7 @@
 			"i_have_accepted": "Przeczytałem i akceptuję",
 			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
 			"accept_and_continue": "Zaakceptuj i kontynuuj",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Zaktualizowaliśmy $agreements. Korzystając z $oisy_short, potwierdzasz, że przeczytałeś(-aś) i akceptujesz aktualizacje."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Wystąpił błąd podczas aktualizacji umów."
@@ -1621,9 +1621,9 @@
 			"license_agreement": "Umowa licencyjna",
 			"det": {
 				"article": "",
-				"possessive": ""
+				"possessive": "naszą "
 			},
-			"title": "Umowa licencyjna $oisy_name („Umowa licencyjna”)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1635,7 +1635,7 @@
 			"terms_of_use": "Warunki użytkowania",
 			"det": {
 				"article": "",
-				"possessive": ""
+				"possessive": "nasze "
 			},
 			"title": "",
 			"instruction": "Klikając ten przycisk, zgadzasz się na $link",
@@ -1650,7 +1650,7 @@
 			"privacy_policy": "Polityka prywatności",
 			"det": {
 				"article": "",
-				"possessive": ""
+				"possessive": "naszą "
 			},
 			"title": "",
 			"body": ""
