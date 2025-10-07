@@ -12,7 +12,7 @@
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { balance } from '$lib/derived/balances.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
@@ -46,14 +46,16 @@
 		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
 	);
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let balance = $derived($balancesStore?.[$sendTokenId]?.data);
 </script>
 
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
 		{application}
-		balance={$balance}
+		{balance}
 		{destination}
 		source={$ethAddress ?? ''}
 		token={$sendToken}

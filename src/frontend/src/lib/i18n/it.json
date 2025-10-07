@@ -35,7 +35,11 @@
 			"more_items": "+$items in più",
 			"select": "Seleziona",
 			"language": "Lingua",
-			"currency": "Valuta"
+			"currency": "Valuta",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -48,7 +52,9 @@
 			"open_details": "Apri dettagli",
 			"close_details": "Chiudi dettagli",
 			"switch_language": "Cambia lingua",
-			"switch_currency": "Cambia valuta"
+			"switch_currency": "Cambia valuta",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
@@ -116,7 +122,8 @@
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",

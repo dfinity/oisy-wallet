@@ -301,3 +301,6 @@ export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner
 
 // UI components
 export const DATE_BADGE_ICON = 'date-badge-icon';
+
+// Confirmation modal
+export const CONFIRMATION_MODAL = 'confirmation-modal';

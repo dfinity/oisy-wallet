@@ -35,7 +35,11 @@
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
 			"language": "Sprache",
-			"currency": "Währung"
+			"currency": "Währung",
+			"confirm": "Bestätigen",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -48,7 +52,9 @@
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
 			"switch_language": "Sprache wechseln",
-			"switch_currency": "Währung wechseln"
+			"switch_currency": "Währung wechseln",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
@@ -116,7 +122,8 @@
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",

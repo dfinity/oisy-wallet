@@ -16,8 +16,10 @@ export interface AuthLockStore extends ReturnType<typeof initStorageStore<boolea
 	unlock: (options?: ToggleLockOptions) => void;
 }
 
+export const AUTH_LOCK_KEY = 'authLocked';
+
 const createAuthLockStore = (): AuthLockStore => {
-	const store = initStorageStore<boolean>({ key: 'authLocked', defaultValue: false });
+	const store = initStorageStore<boolean>({ key: AUTH_LOCK_KEY, defaultValue: false });
 
 	const updateLock = ({
 		newValue,

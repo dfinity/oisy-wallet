@@ -35,7 +35,11 @@
 			"more_items": "+$items další",
 			"select": "Vybrat",
 			"language": "Jazyk",
-			"currency": "Měna"
+			"currency": "Měna",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -48,7 +52,9 @@
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
 			"switch_language": "Přepnout jazyk",
-			"switch_currency": "Přepnout měnu"
+			"switch_currency": "Přepnout měnu",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
@@ -116,7 +122,8 @@
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
