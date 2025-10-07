@@ -1,4 +1,4 @@
-import NftDescription from '$lib/components/nfts/NftDescription.svelte';
+import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
 import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -6,7 +6,7 @@ import { render } from '@testing-library/svelte';
 
 describe('NftDescription', () => {
 	it('renders the description if available', () => {
-		const { container } = render(NftDescription, {
+		const { container } = render(NftCollectionCard, {
 			props: {
 				nft: { ...mockValidErc1155Nft, description: 'Test description' }
 			}
@@ -27,7 +27,7 @@ describe('NftDescription', () => {
 	});
 
 	it('should not render anything if no description is available', () => {
-		const { container } = render(NftDescription, {
+		const { container } = render(NftCollectionCard, {
 			props: {
 				nft: mockValidErc1155Nft
 			}
@@ -42,7 +42,7 @@ describe('NftDescription', () => {
 	});
 
 	it('should render some skeletons if nft is not loaded yet', () => {
-		const { getAllByTestId } = render(NftDescription, {
+		const { getAllByTestId } = render(NftCollectionCard, {
 			props: {
 				nft: undefined
 			}
