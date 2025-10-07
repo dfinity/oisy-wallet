@@ -45,12 +45,12 @@
 </script>
 
 {#if nonNullish(collection)}
-	<div class="my-5 flex flex-col gap-2 rounded-lg bg-primary p-5">
-		<div class="flex flex-row gap-2">
-			<div class="flex flex-col gap-2">
+	<div class="my-5 flex flex-col rounded-lg bg-primary p-5">
+		<div class="flex flex-row gap-3">
+			<div class="mb-2 flex flex-col gap-3">
 				<h5>{collection.name}</h5>
 
-				<div class="text-sm">{collection.description}</div>
+				<p class="mb-0 text-sm">{collection.description}</p>
 
 				<Button
 					styleClass="inline-block mb-3 text-sm"
@@ -70,7 +70,7 @@
 		<Hr />
 
 		{#if nonNullish(token)}
-			<div class="mt-5 flex w-full gap-2">
+			<div class="mt-6 flex w-full gap-2">
 				<span><NftSpamButton {token} /></span>
 				<span><NftHideButton {token} /></span>
 			</div>

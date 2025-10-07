@@ -1,14 +1,17 @@
 import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
-import { TOKEN_SKELETON_TEXT } from '$lib/constants/test-ids.constants';
+import {
+	NFT_COLLECTION_ACTION_HIDE,
+	NFT_COLLECTION_ACTION_SPAM
+} from '$lib/constants/test-ids.constants';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
-describe('NftDescription', () => {
+describe('NftCollectionDescription', () => {
 	it('renders the description if available', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {
-				nft: { ...mockValidErc1155Nft, description: 'Test description' }
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
 		});
 
@@ -29,7 +32,7 @@ describe('NftDescription', () => {
 	it('should not render anything if no description is available', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {
-				nft: mockValidErc1155Nft
+				collection: mockValidErc1155Nft.collection
 			}
 		});
 
@@ -41,15 +44,19 @@ describe('NftDescription', () => {
 		expect(desc).not.toBeInTheDocument();
 	});
 
-	it('should render some skeletons if nft is not loaded yet', () => {
-		const { getAllByTestId } = render(NftCollectionCard, {
+	it('should render action buttons', () => {
+		const { findByTestId } = render(NftCollectionCard, {
 			props: {
-				nft: undefined
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
 		});
 
-		const skeletons = getAllByTestId(TOKEN_SKELETON_TEXT);
+		const spamBtn = findByTestId(NFT_COLLECTION_ACTION_SPAM);
 
-		expect(skeletons).toHaveLength(3);
+		expect(spamBtn).toBeInTheDocument();
+
+		const hideBtn = findByTestId(NFT_COLLECTION_ACTION_HIDE);
+
+		expect(hideBtn).toBeInTheDocument();
 	});
 });
