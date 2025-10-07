@@ -4,6 +4,7 @@
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import { untrack } from 'svelte';
 
 	interface Props {
 		progressStep: string;
@@ -42,7 +43,7 @@
 	$effect(() => {
 		[progressStep];
 
-		updateSteps();
+		untrack(() => updateSteps());
 	});
 </script>
 
