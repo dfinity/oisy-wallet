@@ -1201,6 +1201,7 @@
 			"or_use_link": "or use WalletConnect link",
 			"proposer": "Proposer",
 			"spender": "Spender",
+			"application": "Application",
 			"review": "Review $chain_name ($key) required permissions",
 			"method": "Method",
 			"methods": "Methods",

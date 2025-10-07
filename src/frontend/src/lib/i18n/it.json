@@ -1201,6 +1201,7 @@
 			"or_use_link": "o usa il link WalletConnect",
 			"proposer": "Proponente",
 			"spender": "",
+			"application": "",
 			"review": "Rivedi i permessi richiesti per $chain_name ($key)",
 			"method": "Metodo",
 			"methods": "Metodi",
@@ -1611,7 +1612,7 @@
 			"i_have_accepted": "Ho letto e accetto i",
 			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
 			"accept_and_continue": "Accetta e continua",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Abbiamo aggiornato $agreements. Utilizzando $oisy_short, confermi di aver letto e accettato gli aggiornamenti."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
@@ -1624,7 +1625,7 @@
 				"article": "l'",
 				"possessive": "il nostro "
 			},
-			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {

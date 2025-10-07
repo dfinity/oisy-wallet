@@ -20,6 +20,8 @@
 
 	let { request }: Props = $props();
 
+	let application = $derived(request.verifyContext.verified.origin);
+
 	let method = $derived(request.params.request.method);
 
 	let json = $derived.by(() => {
@@ -99,6 +101,9 @@
 		}
 	});
 </script>
+
+<p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.application}:</p>
+<p class="mb-4 font-normal">{application}</p>
 
 <p class="mb-0.5 font-bold">{$i18n.wallet_connect.text.method}:</p>
 <p class="mb-4 font-normal">{method}</p>
