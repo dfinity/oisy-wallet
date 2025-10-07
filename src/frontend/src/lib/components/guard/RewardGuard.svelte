@@ -68,7 +68,7 @@
 					bStartDate.getTime() - aStartDate.getTime() || bId.localeCompare(aId)
 			);
 
-		const campaignToDisplay = onGoingCampaigns.length > 0 ? onGoingCampaigns[0] : undefined;
+		const campaignToDisplay = ongoingCampaigns.length > 0 ? ongoingCampaigns[0] : undefined;
 
 		if (isNullish(campaignToDisplay)) {
 			return;
