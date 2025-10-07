@@ -36,7 +36,10 @@
 			"select": "Выбрать",
 			"language": "Язык",
 			"currency": "Валюта",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -49,7 +52,9 @@
 			"open_details": "Открыть детали",
 			"close_details": "Закрыть детали",
 			"switch_language": "Сменить язык",
-			"switch_currency": "Сменить валюту"
+			"switch_currency": "Сменить валюту",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
@@ -117,7 +122,8 @@
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",

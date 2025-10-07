@@ -36,7 +36,10 @@
 			"select": "चुनें",
 			"language": "भाषा",
 			"currency": "मुद्रा",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -49,7 +52,9 @@
 			"open_details": "विवरण खोलें",
 			"close_details": "विवरण बंद करें",
 			"switch_language": "भाषा बदलें",
-			"switch_currency": "मुद्रा बदलें"
+			"switch_currency": "मुद्रा बदलें",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
@@ -117,7 +122,8 @@
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
