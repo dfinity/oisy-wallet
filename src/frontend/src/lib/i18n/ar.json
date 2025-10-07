@@ -36,7 +36,10 @@
 			"select": "تحديد",
 			"language": "اللغة",
 			"currency": "العملة",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -49,7 +52,9 @@
 			"open_details": "فتح التفاصيل",
 			"close_details": "إغلاق التفاصيل",
 			"switch_language": "تبديل اللغة",
-			"switch_currency": "تبديل العملة"
+			"switch_currency": "تبديل العملة",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",

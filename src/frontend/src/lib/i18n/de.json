@@ -36,7 +36,10 @@
 			"select": "Auswählen",
 			"language": "Sprache",
 			"currency": "Währung",
-			"confirm": "Bestätigen"
+			"confirm": "Bestätigen",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -49,7 +52,9 @@
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
 			"switch_language": "Sprache wechseln",
-			"switch_currency": "Währung wechseln"
+			"switch_currency": "Währung wechseln",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",

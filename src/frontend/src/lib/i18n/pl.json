@@ -36,7 +36,10 @@
 			"select": "Wybierz",
 			"language": "Język",
 			"currency": "Waluta",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
@@ -49,7 +52,9 @@
 			"open_details": "Otwórz szczegóły",
 			"close_details": "Zamknij szczegóły",
 			"switch_language": "Zmień język",
-			"switch_currency": "Zmień walutę"
+			"switch_currency": "Zmień walutę",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
