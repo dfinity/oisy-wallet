@@ -55,7 +55,7 @@
 	<BottomSheet {footer} bind:visible={open}>
 		{#snippet content()}
 			{#if nonNullish(innerTitle)}
-				<h5>{@render innerTitle()}</h5>
+				<h5 class="w-full py-3">{@render innerTitle()}</h5>
 			{/if}
 			{@render children()}
 		{/snippet}
