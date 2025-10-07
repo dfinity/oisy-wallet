@@ -1201,6 +1201,7 @@
 			"or_use_link": "या वॉलेटकनेक्ट लिंक का उपयोग करें",
 			"proposer": "प्रस्तावक",
 			"spender": "",
+			"application": "",
 			"review": "$chain_name ($key) आवश्यक अनुमतियाँ समीक्षा करें",
 			"method": "विधि",
 			"methods": "विधियाँ",
