@@ -40,6 +40,9 @@ interface I18nCore {
 		language: string;
 		currency: string;
 		confirm: string;
+		more: string;
+		less: string;
+		ellipsis: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -50,6 +53,8 @@ interface I18nCore {
 		close_details: string;
 		switch_language: string;
 		switch_currency: string;
+		more: string;
+		less: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -111,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string };
+	message: { refreshed_authentication: string; session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;

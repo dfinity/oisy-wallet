@@ -36,7 +36,10 @@
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
 			"currency": "Tiền tệ",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -49,7 +52,9 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": "Chuyển đổi tiền tệ"
+			"switch_currency": "Chuyển đổi tiền tệ",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
@@ -117,7 +122,8 @@
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",

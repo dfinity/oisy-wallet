@@ -36,7 +36,10 @@
 			"select": "選択",
 			"language": "言語",
 			"currency": "通貨",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -49,7 +52,9 @@
 			"open_details": "詳細を開く",
 			"close_details": "詳細を閉じる",
 			"switch_language": "言語を切り替え",
-			"switch_currency": "通貨を切り替え"
+			"switch_currency": "通貨を切り替え",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "取引完了までタブを閉じないでください",
@@ -117,7 +122,8 @@
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
