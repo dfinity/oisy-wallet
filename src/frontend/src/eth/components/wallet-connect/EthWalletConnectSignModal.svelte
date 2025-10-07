@@ -1,9 +1,7 @@
 <script lang="ts">
-
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
 	import type { WalletKitTypes } from '@reown/walletkit';
-	import { run } from 'svelte/legacy';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
