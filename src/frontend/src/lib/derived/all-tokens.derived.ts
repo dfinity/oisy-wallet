@@ -7,9 +7,11 @@ import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import { defaultIcpTokens } from '$icp/derived/tokens.derived';
+import type { IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { sortIcTokens } from '$icp/utils/icrc.utils';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { nonNullish } from '@dfinity/utils';
@@ -51,6 +53,11 @@ export const allDisabledKongSwapCompatibleIcrcTokens: Readable<IcTokenToggleable
 
 		return allKongSwapCompatibleIcrcTokens.filter(({ id }) => !enabledIcrcTokenIds.includes(id));
 	}
+);
+
+export const allSwappableTokensDerived: Readable<IcTokenWithIcrc2Supported[]> = derived(
+	[swappableIcrcTokensStore],
+	([$swappableTokensStore]) => $swappableTokensStore ?? []
 );
 
 export const allTokens = derived(
