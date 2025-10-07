@@ -18,17 +18,19 @@
 {#if visible}
 	<div class="z-14 fixed inset-0">
 		<BottomSheet transition on:nnsClose={() => (visible = false)}>
-			<div slot="header" class="w-full p-4">
-				<ButtonIcon
-					ariaLabel={$i18n.core.alt.close_details}
-					onclick={() => (visible = false)}
-					styleClass="text-disabled float-right"
-				>
-					{#snippet icon()}
-						<IconClose size="24" />
+			{#snippet header()}
+						<div  class="w-full p-4">
+					<ButtonIcon
+						ariaLabel={$i18n.core.alt.close_details}
+						onclick={() => (visible = false)}
+						styleClass="text-disabled float-right"
+					>
+						{#snippet icon()}
+							<IconClose size="24" />
+						{/snippet}
+					</ButtonIcon>
+				</div>
 					{/snippet}
-				</ButtonIcon>
-			</div>
 			<div class="min-h-[30vh] w-full p-4">
 				{@render content()}
 			</div>

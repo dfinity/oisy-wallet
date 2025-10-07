@@ -24,12 +24,15 @@
 </script>
 
 <ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.convert_fee} />
-		{/snippet}
-	</EthFeeDisplay>
+	{#snippet fee()}
+		<EthFeeDisplay >
+			{#snippet label()}
+				<Html text={$i18n.fee.text.convert_fee} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
+	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->

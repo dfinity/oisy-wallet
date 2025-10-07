@@ -58,44 +58,52 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">{$i18n.settings.text.beta_features}</svelte:fragment>
+	{#snippet title()}
+		{$i18n.settings.text.beta_features}
+	{/snippet}
 
 	{#each features as feature (feature)}
 		<SettingsCardItem>
-			<svelte:fragment slot="key">
-				{labelsByFeatureId[feature].title}
-			</svelte:fragment>
+			{#snippet key()}
+					
+					{labelsByFeatureId[feature].title}
+				
+					{/snippet}
 
-			<svelte:fragment slot="value">
-				<Toggle
-					ariaLabel={$userExperimentalFeatures?.[feature].enabled
-						? $i18n.settings.text.disable_beta_feature
-						: $i18n.settings.text.enable_beta_feature}
-					checked={$userExperimentalFeatures?.[feature].enabled ?? false}
-					disabled={loading}
-					on:nnsToggle={async () => {
-						await save({
-							[feature]: {
-								...$userExperimentalFeatures?.[feature],
-								enabled: !$userExperimentalFeatures?.[feature].enabled
-							}
-						});
-					}}
-				/>
-			</svelte:fragment>
-			<svelte:fragment slot="info">
-				<span>
-					{labelsByFeatureId[feature].description}
+			{#snippet value()}
+					
+					<Toggle
+						ariaLabel={$userExperimentalFeatures?.[feature].enabled
+							? $i18n.settings.text.disable_beta_feature
+							: $i18n.settings.text.enable_beta_feature}
+						checked={$userExperimentalFeatures?.[feature].enabled ?? false}
+						disabled={loading}
+						on:nnsToggle={async () => {
+							await save({
+								[feature]: {
+									...$userExperimentalFeatures?.[feature],
+									enabled: !$userExperimentalFeatures?.[feature].enabled
+								}
+							});
+						}}
+					/>
+				
+					{/snippet}
+			{#snippet info()}
+					
+					<span>
+						{labelsByFeatureId[feature].description}
 
-					{#if nonNullish(labelsByFeatureId[feature].learnMore)}
-						<ExternalLink
-							ariaLabel={$i18n.rewards.text.learn_more}
-							href={labelsByFeatureId[feature].learnMore}
-							iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
-						>
-					{/if}
-				</span>
-			</svelte:fragment>
+						{#if nonNullish(labelsByFeatureId[feature].learnMore)}
+							<ExternalLink
+								ariaLabel={$i18n.rewards.text.learn_more}
+								href={labelsByFeatureId[feature].learnMore}
+								iconVisible={false}>{$i18n.rewards.text.learn_more}</ExternalLink
+							>
+						{/if}
+					</span>
+				
+					{/snippet}
 		</SettingsCardItem>
 	{/each}
 </SettingsCard>

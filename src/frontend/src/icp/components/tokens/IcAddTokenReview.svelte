@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run as run_1 } from 'svelte/legacy';
+
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
 	import { run } from 'svelte/legacy';
@@ -22,12 +24,18 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let ledgerCanisterId: string | undefined;
-	export let indexCanisterId: string | undefined;
-	export let metadata: ValidateTokenData | undefined;
+	interface Props {
+		ledgerCanisterId: string | undefined;
+		indexCanisterId: string | undefined;
+		metadata: ValidateTokenData | undefined;
+	}
 
-	let invalid = true;
-	$: invalid = isNullish(metadata);
+	let { ledgerCanisterId, indexCanisterId, metadata = $bindable() }: Props = $props();
+
+	let invalid = $state(true);
+	run_1(() => {
+		invalid = isNullish(metadata);
+	});
 
 	const dispatch = createEventDispatcher();
 	const back = () => dispatch('icBack');

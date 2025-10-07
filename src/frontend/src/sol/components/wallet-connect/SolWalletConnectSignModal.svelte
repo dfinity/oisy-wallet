@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onMount } from 'svelte';
@@ -34,30 +36,38 @@
 	} from '$sol/services/wallet-connect.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 
-	export let listener: OptionWalletConnectListener;
-	export let request: WalletKitTypes.SessionRequest;
-	export let network: SolanaNetwork;
+	interface Props {
+		listener: OptionWalletConnectListener;
+		request: WalletKitTypes.SessionRequest;
+		network: SolanaNetwork;
+	}
+
+	let { listener, request, network }: Props = $props();
 
 	/**
 	 * Transaction
 	 */
 
-	let networkId: NetworkId;
-	$: ({ id: networkId } = network);
+	let networkId: NetworkId = $state();
+	run(() => {
+		({ id: networkId } = network);
+	});
 
-	let address: OptionSolAddress;
-	let token: Token;
-	$: [address, token] = isNetworkIdSOLDevnet(networkId)
-		? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
-		: isNetworkIdSOLLocal(networkId)
-			? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
-			: [$solAddressMainnet, SOLANA_TOKEN];
+	let address: OptionSolAddress = $state();
+	let token: Token = $state();
+	run(() => {
+		[address, token] = isNetworkIdSOLDevnet(networkId)
+			? [$solAddressDevnet, SOLANA_DEVNET_TOKEN]
+			: isNetworkIdSOLLocal(networkId)
+				? [$solAddressLocal, SOLANA_LOCAL_TOKEN]
+				: [$solAddressMainnet, SOLANA_TOKEN];
+	});
 
-	let signWithSending = false;
-	let data: string;
-	let amount: bigint | undefined;
-	let destination: OptionSolAddress;
-	let application: string;
+	let signWithSending = $state(false);
+	let data: string = $state();
+	let amount: bigint | undefined = $state();
+	let destination: OptionSolAddress = $state();
+	let application: string = $state();
 
 	onMount(async () => {
 		const {
@@ -97,8 +107,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined;
-	let modal: WizardModal<WizardStepsSign>;
+	let currentStep: WizardStep<WizardStepsSign> | undefined = $state();
+	let modal: WizardModal<WizardStepsSign> = $state();
 
 	const close = () => modalStore.close();
 
@@ -106,7 +116,7 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
+	let signProgressStep: string = $state(ProgressStepsSign.INITIALIZATION);
 
 	/**
 	 * Reject a transaction

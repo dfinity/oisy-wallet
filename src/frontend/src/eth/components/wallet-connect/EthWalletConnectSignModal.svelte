@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from 'svelte/legacy';
+
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
@@ -15,13 +17,19 @@
 	import type { OptionString } from '$lib/types/string';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 
-	export let listener: OptionWalletConnectListener;
-	export let request: WalletKitTypes.SessionRequest;
+	interface Props {
+		listener: OptionWalletConnectListener;
+		request: WalletKitTypes.SessionRequest;
+	}
 
-	let domainName: OptionString;
-	$: ({
-		domain: { name: domainName }
-	} = getSignParamsMessageTypedDataV4(request.params.request.params));
+	let { listener, request }: Props = $props();
+
+	let domainName: OptionString = $state();
+	run(() => {
+		({
+			domain: { name: domainName }
+		} = getSignParamsMessageTypedDataV4(request.params.request.params));
+	});
 
 	/**
 	 * Modal
@@ -38,8 +46,8 @@
 		}
 	];
 
-	let currentStep: WizardStep<WizardStepsSign> | undefined;
-	let modal: WizardModal<WizardStepsSign>;
+	let currentStep: WizardStep<WizardStepsSign> | undefined = $state();
+	let modal: WizardModal<WizardStepsSign> = $state();
 
 	const close = () => modalStore.close();
 
@@ -47,7 +55,7 @@
 	 * WalletConnect
 	 */
 
-	let signProgressStep: string = ProgressStepsSign.INITIALIZATION;
+	let signProgressStep: string = $state(ProgressStepsSign.INITIALIZATION);
 
 	/**
 	 * Reject a message

@@ -1,3 +1,5 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'progressStep' has already been declared
+https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
 	import { run } from 'svelte/legacy';

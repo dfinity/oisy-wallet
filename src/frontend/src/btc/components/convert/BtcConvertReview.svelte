@@ -25,6 +25,7 @@
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `info-message` is an invalid identifier -->
 	<div slot="info-message" class="mt-4">
 		<MessageBox>{$i18n.convert.text.conversion_may_take}</MessageBox>
 	</div>

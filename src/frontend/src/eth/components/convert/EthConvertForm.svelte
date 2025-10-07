@@ -67,11 +67,13 @@
 		{/if}
 	{/snippet}
 
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.convert_fee} />
-		{/snippet}
-	</EthFeeDisplay>
+	{#snippet fee()}
+		<EthFeeDisplay >
+			{#snippet label()}
+				<Html text={$i18n.fee.text.convert_fee} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 
 	{#snippet cancel()}
 		{@render cancel_render?.()}

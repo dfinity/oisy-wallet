@@ -1,3 +1,5 @@
+<!-- @migration-task Error while migrating Svelte code: Identifier 'Snippet' has already been declared
+https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { type Snippet, getContext, type Snippet } from 'svelte';

@@ -60,14 +60,16 @@
 		label={$i18n.convert.text.custom_destination}
 		on:click={() => (activeAddressType = 'custom')}
 	>
-		<IcSendDestination
-			slot="content"
-			{networkId}
-			{onQRCodeScan}
-			{tokenStandard}
-			bind:destination
-			bind:invalidDestination
-		/>
+		{#snippet content()}
+				<IcSendDestination
+				
+				{networkId}
+				{onQRCodeScan}
+				{tokenStandard}
+				bind:destination
+				bind:invalidDestination
+			/>
+			{/snippet}
 	</DestinationWizardStepSection>
 
 	{#snippet toolbar()}
