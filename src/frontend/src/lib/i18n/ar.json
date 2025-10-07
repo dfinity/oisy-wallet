@@ -36,7 +36,9 @@
 			"select": "تحديد",
 			"language": "اللغة",
 			"currency": "العملة",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",

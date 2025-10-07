@@ -36,7 +36,9 @@
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
 			"currency": "Tiền tệ",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",

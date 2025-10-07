@@ -36,7 +36,9 @@
 			"select": "選択",
 			"language": "言語",
 			"currency": "通貨",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",

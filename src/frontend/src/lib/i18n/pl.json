@@ -36,7 +36,9 @@
 			"select": "Wybierz",
 			"language": "Język",
 			"currency": "Waluta",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",

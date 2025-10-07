@@ -36,7 +36,9 @@
 			"select": "选择",
 			"language": "语言",
 			"currency": "货币",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",

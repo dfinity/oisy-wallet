@@ -36,7 +36,9 @@
 			"select": "Выбрать",
 			"language": "Язык",
 			"currency": "Валюта",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",

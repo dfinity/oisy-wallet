@@ -36,7 +36,9 @@
 			"select": "Auswählen",
 			"language": "Sprache",
 			"currency": "Währung",
-			"confirm": "Bestätigen"
+			"confirm": "Bestätigen",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
