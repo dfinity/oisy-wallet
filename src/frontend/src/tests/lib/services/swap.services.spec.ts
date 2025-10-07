@@ -1,12 +1,16 @@
 import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
@@ -15,12 +19,14 @@ import {
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
+	loadAllIcrcTokensWithSupportedStandards,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
 import {
 	SwapErrorCodes,
@@ -49,6 +55,10 @@ vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
 		ICP_SWAP_ENABLED: true
 	};
 });
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
 
 vi.mock('$lib/api/kong_backend.api', () => ({
 	kongSwapAmounts: vi.fn(),
@@ -190,7 +200,7 @@ describe('fetchSwapAmounts', () => {
 	});
 
 	it('should filter out providers with receiveAmount = 0', async () => {
-		const kongSwapResponse = { receive_amount: 0n, slippage: 0.5 } as SwapAmountsReply;
+		const kongSwapResponse = { receive_amount: ZERO, slippage: 0.5 } as SwapAmountsReply;
 		const icpSwapResponse = {
 			receiveAmount: 950n,
 			slippage: 0.5
@@ -767,6 +777,75 @@ describe('loadKongSwapTokens', () => {
 	});
 });
 
+describe('loadAllIcrcTokensWithSupportedStandards', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('properly updates swappableIcrcTokensStore store with the fetched tokens', async () => {
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		};
+
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		]);
+
+		const result = await isIcrcTokenSupportIcrc2(params);
+
+		expect(result).toBeTruthy();
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		});
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: true }]);
+	});
+
+	it('properly updates swappableIcrcTokensStore store with the fetched tokens but with icrc1', async () => {
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		};
+
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' }
+		]);
+
+		const result = await isIcrcTokenSupportIcrc2(params);
+
+		expect(result).toBeFalsy();
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		});
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: false }]);
+	});
+
+	it('skip updating swappableIcrcTokensStore store if supportedIcrcStandardFailed', async () => {
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockRejectedValue('Error');
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([]);
+	});
+});
+
 describe('withdrawICPSwapAfterFailedSwap', () => {
 	const identity = mockIdentity;
 	const canisterId = 'test-canister-id';
@@ -809,7 +888,7 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 100n,
-			balance1: 0n
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
@@ -845,8 +924,8 @@ describe('withdrawICPSwapAfterFailedSwap', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		const result = await withdrawICPSwapAfterFailedSwap({
@@ -888,7 +967,7 @@ describe('performManualWithdraw', () => {
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 1n,
-			balance1: 0n
+			balance1: ZERO
 		});
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
 
@@ -918,8 +997,8 @@ describe('performManualWithdraw', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		const result = await performManualWithdraw({
@@ -950,7 +1029,7 @@ describe('performManualWithdraw', () => {
 			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
 		} as PoolMetadata);
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
+			balance0: ZERO,
 			balance1: 1n
 		});
 		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
@@ -1007,8 +1086,8 @@ describe('withdrawUserUnusedBalance', () => {
 
 	it('should reject if both balances are zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
-			balance1: 0n
+			balance0: ZERO,
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
@@ -1032,7 +1111,7 @@ describe('withdrawUserUnusedBalance', () => {
 	it('should only withdraw destinationToken if only balance0 is non-zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
 			balance0: 1500n,
-			balance1: 0n
+			balance1: ZERO
 		});
 
 		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
@@ -1059,7 +1138,7 @@ describe('withdrawUserUnusedBalance', () => {
 
 	it('should only withdraw sourceToken if only balance1 is non-zero', async () => {
 		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 0n,
+			balance0: ZERO,
 			balance1: 1500n
 		});
 

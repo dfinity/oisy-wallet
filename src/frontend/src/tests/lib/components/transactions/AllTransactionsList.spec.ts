@@ -155,9 +155,7 @@ describe('AllTransactionsList', () => {
 		it('should render the transactions list with all the transactions', () => {
 			const { container } = render(AllTransactionsList);
 
-			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement?.parentElement?.parentElement === container
-			);
+			const transactionComponents = Array.from(container.querySelectorAll('button.contents'));
 
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber

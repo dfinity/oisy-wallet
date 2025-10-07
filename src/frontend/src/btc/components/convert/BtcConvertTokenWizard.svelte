@@ -15,7 +15,7 @@
 	import {
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR,
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,

@@ -7,7 +7,8 @@
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import {
 		allCrossChainSwapTokens,
-		allKongSwapCompatibleIcrcTokens
+		allKongSwapCompatibleIcrcTokens,
+		allSwappableTokensDerived
 	} from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -17,7 +18,8 @@
 		type ModalTokensListContext
 	} from '$lib/stores/modal-tokens-list.store';
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { Token, TokenUi } from '$lib/types/token';
+	import type { Token } from '$lib/types/token';
+	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -36,7 +38,9 @@
 		pinTokensWithBalanceAtTop({
 			$tokens: [
 				{ ...ICP_TOKEN, enabled: true },
-				...$allKongSwapCompatibleIcrcTokens,
+				...($allKongSwapCompatibleIcrcTokens.length === 0
+					? $allSwappableTokensDerived
+					: $allKongSwapCompatibleIcrcTokens),
 				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
 			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id

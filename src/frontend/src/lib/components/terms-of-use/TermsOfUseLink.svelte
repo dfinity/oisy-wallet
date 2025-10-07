@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.contants';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.constants';
+  import { AppPath } from '$lib/constants/routes.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
