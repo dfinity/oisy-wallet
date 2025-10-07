@@ -24,7 +24,9 @@ import type { Token, TokenId } from '$lib/types/token';
 import * as networkUtils from '$lib/utils/network.utils';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
+import type { Snippet } from 'svelte';
 import { readable, writable, type Writable } from 'svelte/store';
 
 describe('EthFeeContext', () => {
@@ -55,6 +57,7 @@ describe('EthFeeContext', () => {
 		sendToken: Token;
 		sendTokenId: TokenId;
 		sendNft: Nft | undefined;
+		children: Snippet;
 	} = {
 		observe: true,
 		destination,
@@ -65,7 +68,8 @@ describe('EthFeeContext', () => {
 		nativeEthereumToken,
 		sendToken: ETHEREUM_TOKEN,
 		sendTokenId: ETHEREUM_TOKEN.id,
-		sendNft: undefined
+		sendNft: undefined,
+		children: mockSnippet
 	};
 
 	beforeEach(() => {
