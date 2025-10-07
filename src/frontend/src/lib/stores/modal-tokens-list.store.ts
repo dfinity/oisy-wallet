@@ -2,7 +2,8 @@ import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token, TokenUi } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import {
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks

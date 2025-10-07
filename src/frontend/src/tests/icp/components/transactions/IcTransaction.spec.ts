@@ -3,6 +3,7 @@ import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
@@ -92,11 +93,13 @@ describe('IcTransaction', () => {
 		assertNonNullish(labelElement);
 
 		expect(labelElement.textContent).toBe(
-			`${get(i18n).transaction.type.approve} ${formatToken({
-				value: 12345n,
-				displayDecimals: EIGHT_DECIMALS,
-				unitName: ICP_TOKEN.decimals,
-				showPlusSign: false
+			`${replacePlaceholders(get(i18n).transaction.text.approve_label, {
+				$approveAmount: formatToken({
+					value: 12345n,
+					displayDecimals: EIGHT_DECIMALS,
+					unitName: ICP_TOKEN.decimals,
+					showPlusSign: false
+				})
 			})} ${getTokenDisplaySymbol(ICP_TOKEN)} `
 		);
 	});

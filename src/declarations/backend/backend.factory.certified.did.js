@@ -255,6 +255,7 @@ export const idlFactory = ({ IDL }) => {
 	});
 	const UserAgreement = IDL.Record({
 		last_accepted_at_ns: IDL.Opt(IDL.Nat64),
+		text_sha256: IDL.Opt(IDL.Text),
 		accepted: IDL.Opt(IDL.Bool),
 		last_updated_at_ms: IDL.Opt(IDL.Nat64)
 	});

@@ -4,7 +4,7 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
-import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
+import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -47,6 +47,10 @@ export const modalReceiveId: Readable<symbol | undefined> = derived(
 export const modalSend: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'send'
+);
+export const modalGldtStake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gldt-stake'
 );
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
@@ -238,6 +242,11 @@ export const modalRewardStateData: Readable<RewardStateData | undefined> = deriv
 export const modalWelcome: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'welcome'
+);
+export const modalWelcomeData: Readable<WelcomeData | undefined> = derived(
+	modalStore,
+	($modalStore) =>
+		$modalStore?.type === 'welcome' ? ($modalStore?.data as WelcomeData) : undefined
 );
 
 export const modalWalletConnect: Readable<boolean> = derived(

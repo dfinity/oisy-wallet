@@ -57,6 +57,7 @@
 	let data: string;
 	let amount: bigint | undefined;
 	let destination: OptionSolAddress;
+	let application: string;
 
 	onMount(async () => {
 		const {
@@ -65,11 +66,15 @@
 					method,
 					params: { transaction }
 				}
+			},
+			verifyContext: {
+				verified: { origin }
 			}
 		} = request;
 
 		signWithSending = method === SESSION_REQUEST_SOL_SIGN_AND_SEND_TRANSACTION;
 		data = transaction;
+		application = origin;
 
 		({ amount, destination } = await decodeService({
 			base64EncodedTransactionMessage: data,
@@ -147,6 +152,7 @@
 	{:else if currentStep?.name === WizardStepsSign.REVIEW}
 		<SolWalletConnectSignReview
 			{amount}
+			{application}
 			{data}
 			destination={destination ?? ''}
 			onApprove={sign}

@@ -73,12 +73,14 @@ describe('user-agreements.services', () => {
 					licenseAgreement: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp,
+						textSha256: agreementsData.licenseAgreement.textSha256
 					},
 					termsOfUse: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp,
+						textSha256: agreementsData.termsOfUse.textSha256
 					}
 				},
 				currentUserVersion: mockUserVersion
@@ -138,17 +140,20 @@ describe('user-agreements.services', () => {
 					licenseAgreement: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp,
+						textSha256: agreementsData.licenseAgreement.textSha256
 					},
 					privacyPolicy: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp,
+						textSha256: agreementsData.privacyPolicy.textSha256
 					},
 					termsOfUse: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp,
+						textSha256: agreementsData.termsOfUse.textSha256
 					}
 				},
 				currentUserVersion: mockUserVersion
@@ -187,7 +192,8 @@ describe('user-agreements.services', () => {
 					licenseAgreement: {
 						accepted: true,
 						lastAcceptedTimestamp: mockedNow,
-						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp
+						lastUpdatedTimestamp: agreementsData.licenseAgreement.lastUpdatedTimestamp,
+						textSha256: agreementsData.licenseAgreement.textSha256
 					}
 				},
 				currentUserVersion: mockUserVersion

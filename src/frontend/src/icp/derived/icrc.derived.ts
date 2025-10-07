@@ -169,3 +169,13 @@ export const allKnownIcrcTokensLedgerCanisterIds: Readable<LedgerCanisterIdText[
 		];
 	}
 );
+
+export const icrcCustomTokensInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensStore],
+	([$icrcCustomTokensStore]) => $icrcCustomTokensStore !== undefined
+);
+
+export const icrcCustomTokensNotInitialized: Readable<boolean> = derived(
+	[icrcCustomTokensInitialized],
+	([$icrcCustomTokensInitialized]) => !$icrcCustomTokensInitialized
+);
