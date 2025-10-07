@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import type { Snippet } from 'svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		title?: Snippet;
@@ -39,7 +39,7 @@
 {@render button(() => (open = true))}
 
 <Responsive up="md">
-	<Modal onClose={onCancelHandler} role="alert" {testId} visible={open} {footer}>
+	<Modal {footer} onClose={onCancelHandler} role="alert" {testId} visible={open}>
 		{#snippet title()}
 			<div class="p-3">{@render innerTitle?.()}</div>
 		{/snippet}
@@ -49,5 +49,5 @@
 </Responsive>
 
 <Responsive down="sm">
-	<BottomSheet bind:visible={open} {footer} content={children}></BottomSheet>
+	<BottomSheet content={children} {footer} bind:visible={open}></BottomSheet>
 </Responsive>
