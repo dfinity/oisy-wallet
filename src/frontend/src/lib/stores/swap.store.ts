@@ -54,21 +54,14 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				return false;
 			}
 
-			if (
-				nonNullish($kongSwapTokensStore) &&
-				nonNullish($kongSwapTokensStore[$sourceToken.symbol])
-			) {
-				return $kongSwapTokensStore[$sourceToken.symbol].icrc2;
-			}
+			const isKongSwapTokenIcrc2 =
+				nonNullish($kongSwapTokensStore?.[$sourceToken.symbol]) &&
+				$kongSwapTokensStore[$sourceToken.symbol].icrc2;
+			const isSwappableTokenIcrc2 = $allSwappableTokensDerived.find(
+				(token) => token.symbol === $sourceToken.symbol
+			)?.isIcrc2;
 
-			if (nonNullish($allSwappableTokensDerived)) {
-				return (
-					$allSwappableTokensDerived.find((token) => token.symbol === $sourceToken.symbol)
-						?.isIcrc2 ?? false
-				);
-			}
-
-			return false;
+			return isKongSwapTokenIcrc2 || isSwappableTokenIcrc2;
 		}
 	);
 
