@@ -3,8 +3,7 @@ import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import {
 	SPRINKLES_SEASON_1_EPISODE_3_ID,
 	SPRINKLES_SEASON_1_EPISODE_4_ID,
-	SPRINKLES_SEASON_1_EPISODE_5_ID,
-	rewardCampaigns
+	SPRINKLES_SEASON_1_EPISODE_5_ID
 } from '$env/reward-campaigns.env';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
 import * as rewardApi from '$lib/api/reward.api';
@@ -50,7 +49,7 @@ describe('RewardGuard', () => {
 				}
 			};
 		}
-		return campaign;
+		return { ...campaign, startDate: mockStartDateEarlier, endDate: mockStartDate };
 	});
 
 	beforeEach(() => {
@@ -75,7 +74,7 @@ describe('RewardGuard', () => {
 		campaign_id: SPRINKLES_SEASON_1_EPISODE_3_ID
 	};
 
-	const mockRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
+	const mockRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
 		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
@@ -83,6 +82,28 @@ describe('RewardGuard', () => {
 	vi.mock('$lib/services/analytics.services', () => ({
 		trackEvent: vi.fn()
 	}));
+
+	it("shouldn't render anything if the user is not authenticated", async () => {
+		mockAuthStore(null);
+
+		render(RewardGuard);
+
+		await waitFor(() => {
+			expect(get(modalStore)).not.toEqual({
+				id: get(modalStore)?.id,
+				data: expect.any(Object),
+				type: 'reward-state'
+			});
+
+			expect(get(modalStore)).not.toEqual({
+				id: get(modalStore)?.id,
+				data: expect.any(Object),
+				type: 'welcome'
+			});
+		});
+
+		expect(trackEvent).not.toHaveBeenCalled();
+	});
 
 	describe('reward state modal', () => {
 		it('should open for leaderboard', async () => {
@@ -494,6 +515,7 @@ describe('RewardGuard', () => {
 			await waitFor(() => {
 				expect(get(modalStore)).not.toEqual({
 					id: get(modalStore)?.id,
+					data: expect.any(Object),
 					type: 'welcome'
 				});
 			});
@@ -502,16 +524,11 @@ describe('RewardGuard', () => {
 		});
 
 		it('should not open if there are no ongoing campaigns', async () => {
-			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
-				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
-					return {
-						...campaign,
-						startDate: mockStartDateEarlier,
-						endDate: mockStartDate
-					};
-				}
-				return campaign;
-			});
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => ({
+				...campaign,
+				startDate: mockStartDateEarlier,
+				endDate: mockStartDate
+			}));
 
 			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
 				() => newMockRewardCampaigns
@@ -522,6 +539,7 @@ describe('RewardGuard', () => {
 			await waitFor(() => {
 				expect(get(modalStore)).not.toEqual({
 					id: get(modalStore)?.id,
+					data: expect.any(Object),
 					type: 'welcome'
 				});
 			});
@@ -539,6 +557,7 @@ describe('RewardGuard', () => {
 
 				expect(get(modalStore)).not.toEqual({
 					id: get(modalStore)?.id,
+					data: expect.any(Object),
 					type: 'welcome'
 				});
 			});
