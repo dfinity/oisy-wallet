@@ -13,7 +13,7 @@
 	import {
 		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
 		AI_ASSISTANT_MESSAGE_SENT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		aiAssistantLlmMessages,
 		aiAssistantChatMessages

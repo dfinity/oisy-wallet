@@ -2,7 +2,7 @@ import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { idleSignOut, signOut } from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
