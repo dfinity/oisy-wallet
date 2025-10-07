@@ -18,6 +18,10 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
 describe('RewardGuard', () => {
 	const now = new Date();
 	const mockStartDateEarlier = new Date(now.getFullYear() - 5, now.getMonth(), now.getDate());
@@ -78,10 +82,6 @@ describe('RewardGuard', () => {
 		({ id }) => id === SPRINKLES_SEASON_1_EPISODE_3_ID
 	);
 	assertNonNullish(mockRewardCampaign);
-
-	vi.mock('$lib/services/analytics.services', () => ({
-		trackEvent: vi.fn()
-	}));
 
 	it("shouldn't render anything if the user is not authenticated", async () => {
 		mockAuthStore(null);
@@ -547,19 +547,23 @@ describe('RewardGuard', () => {
 			expect(trackEvent).not.toHaveBeenCalled();
 		});
 
-		it('should not open if another modal is already opened', async () => {
+		it('should not open if another modal is already opened', () => {
+			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue({
+				...mockedUserData,
+				usage_awards: [[mockedReward]],
+				last_snapshot_timestamp: [0n]
+			});
+
 			modalStore.openIcrcReceive(Symbol());
 
 			render(RewardGuard);
 
-			await waitFor(() => {
-				expect(get(modalStore)).toBeDefined();
+			expect(get(modalStore)?.type).toBeDefined();
 
-				expect(get(modalStore)).not.toEqual({
-					id: get(modalStore)?.id,
-					data: expect.any(Object),
-					type: 'welcome'
-				});
+			expect(get(modalStore)).not.toEqual({
+				id: get(modalStore)?.id,
+				data: expect.any(Object),
+				type: 'welcome'
 			});
 
 			expect(trackEvent).not.toHaveBeenCalled();
