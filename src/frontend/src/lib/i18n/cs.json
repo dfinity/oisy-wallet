@@ -36,7 +36,9 @@
 			"select": "Vybrat",
 			"language": "Jazyk",
 			"currency": "Měna",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",

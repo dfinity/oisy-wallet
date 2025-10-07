@@ -36,7 +36,9 @@
 			"select": "चुनें",
 			"language": "भाषा",
 			"currency": "मुद्रा",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
