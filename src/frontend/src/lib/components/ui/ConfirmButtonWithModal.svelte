@@ -42,7 +42,9 @@
 <Responsive up="md">
 	<Modal onClose={onCancelHandler} role="alert" {testId} visible={open} {footer}>
 		{#snippet title()}
-			<div class="p-3">{@render innerTitle()}</div>
+			{#if nonNullish(innerTitle)}
+				<div class="p-3">{@render innerTitle()}</div>
+			{/if}
 		{/snippet}
 
 		{@render children()}
@@ -53,7 +55,7 @@
 	<BottomSheet bind:visible={open} {footer}>
 		{#snippet content()}
 			{#if nonNullish(innerTitle)}
-				<h5>{@render innerTitle?.()}</h5>
+				<h5>{@render innerTitle()}</h5>
 			{/if}
 			{@render children()}
 		{/snippet}
