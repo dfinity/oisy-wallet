@@ -38,7 +38,8 @@
 			"currency": "Moeda",
 			"confirm": "",
 			"more": "",
-			"less": ""
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -51,7 +52,9 @@
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
 			"switch_language": "Mudar linguagem",
-			"switch_currency": "Mudar moeda"
+			"switch_currency": "Mudar moeda",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",

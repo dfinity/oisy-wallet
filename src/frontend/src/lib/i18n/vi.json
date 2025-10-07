@@ -38,7 +38,8 @@
 			"currency": "Tiền tệ",
 			"confirm": "",
 			"more": "",
-			"less": ""
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -51,7 +52,9 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": "Chuyển đổi tiền tệ"
+			"switch_currency": "Chuyển đổi tiền tệ",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",

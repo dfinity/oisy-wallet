@@ -38,7 +38,8 @@
 			"currency": "Valuta",
 			"confirm": "",
 			"more": "",
-			"less": ""
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -51,7 +52,9 @@
 			"open_details": "Apri dettagli",
 			"close_details": "Chiudi dettagli",
 			"switch_language": "Cambia lingua",
-			"switch_currency": "Cambia valuta"
+			"switch_currency": "Cambia valuta",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",

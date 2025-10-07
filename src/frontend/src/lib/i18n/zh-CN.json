@@ -38,7 +38,8 @@
 			"currency": "货币",
 			"confirm": "",
 			"more": "",
-			"less": ""
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",
@@ -51,7 +52,9 @@
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
 			"switch_language": "切换语言",
-			"switch_currency": "切换货币"
+			"switch_currency": "切换货币",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页",

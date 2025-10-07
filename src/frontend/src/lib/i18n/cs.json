@@ -38,7 +38,8 @@
 			"currency": "Měna",
 			"confirm": "",
 			"more": "",
-			"less": ""
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -51,7 +52,9 @@
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
 			"switch_language": "Přepnout jazyk",
-			"switch_currency": "Přepnout měnu"
+			"switch_currency": "Přepnout měnu",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",

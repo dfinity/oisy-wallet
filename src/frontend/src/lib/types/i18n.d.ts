@@ -42,6 +42,7 @@ interface I18nCore {
 		confirm: string;
 		more: string;
 		less: string;
+		ellipsis: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -52,6 +53,8 @@ interface I18nCore {
 		close_details: string;
 		switch_language: string;
 		switch_currency: string;
+		more: string;
+		less: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
