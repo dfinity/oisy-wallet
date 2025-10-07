@@ -2,9 +2,13 @@ import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { POW_MIN_CYCLES_THRESHOLD, POW_ZERO_CYCLES_THRESHOLD } from '$lib/constants/pow.constants';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
+
+const formatBigIntWithApostrophes = (value: bigint): string =>
+	value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "'");
 
 export const hasRequiredCycles = async ({
 	identity,
@@ -26,6 +30,14 @@ export const hasRequiredCycles = async ({
 			subaccount: getIcrcSubaccount(identity.getPrincipal())
 		}
 	});
+	console.warn(
+		'cycles: allowed = ',
+		formatBigIntWithApostrophes(allowanceResult.allowance),
+		', min threshold delta = ',
+		formatBigIntWithApostrophes(allowanceResult.allowance - POW_MIN_CYCLES_THRESHOLD),
+		', zero threshold delta = ',
+		formatBigIntWithApostrophes(allowanceResult.allowance - POW_ZERO_CYCLES_THRESHOLD)
+	);
 	return allowanceResult.allowance >= requiredCycles;
 };
 
