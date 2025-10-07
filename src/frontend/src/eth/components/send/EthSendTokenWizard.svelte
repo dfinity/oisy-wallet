@@ -100,6 +100,8 @@
 		})
 	);
 
+	let customNonce = $state<number | undefined>();
+
 	/**
 	 * Fee context store
 	 */
@@ -283,6 +285,7 @@
 
 		try {
 			await executeSend({
+				customNonce,
 				from: $ethAddress,
 				to: isErc20Icp($sendToken) ? destination : mapAddressStartsWith0x(destination),
 				progress: (step: ProgressStep) => (sendProgressStep = step),
@@ -364,6 +367,7 @@
 			{selectedContact}
 			bind:destination
 			bind:amount
+			bind:customNonce
 		>
 			{#snippet cancel()}
 				<ButtonBack onclick={back} />

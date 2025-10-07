@@ -17,6 +17,7 @@
 	interface Props {
 		amount: OptionAmount;
 		destination?: string;
+		customNonce?: number;
 		nativeEthereumToken: Token;
 		selectedContact?: ContactUi;
 		onBack: () => void;
@@ -28,6 +29,7 @@
 	let {
 		amount = $bindable(),
 		destination = $bindable(''),
+		customNonce = $bindable(),
 		nativeEthereumToken,
 		selectedContact,
 		onBack,
@@ -65,6 +67,7 @@
 				<Html text={$i18n.fee.text.max_fee_eth} />
 			{/snippet}
 		</EthFeeDisplay>
+		<input min="0" placeholder="Custom Nonce" type="number" bind:value={customNonce} />
 	{/snippet}
 
 	{#snippet info()}
@@ -74,4 +77,6 @@
 			feeTokenId={$feeTokenIdStore}
 		/>
 	{/snippet}
+
+
 </SendForm>
