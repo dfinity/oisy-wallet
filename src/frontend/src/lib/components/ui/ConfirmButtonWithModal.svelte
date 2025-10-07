@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		title?: Snippet;
@@ -49,5 +50,12 @@
 </Responsive>
 
 <Responsive down="sm">
-	<BottomSheet bind:visible={open} {footer} content={children}></BottomSheet>
+	<BottomSheet bind:visible={open} {footer}>
+		{#snippet content()}
+			{#if nonNullish(innerTitle)}
+				<h5>{@render innerTitle?.()}</h5>
+			{/if}
+			{@render children()}
+		{/snippet}
+	</BottomSheet>
 </Responsive>
