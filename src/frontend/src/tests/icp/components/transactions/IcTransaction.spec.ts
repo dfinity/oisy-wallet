@@ -1,6 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
-import { EIGHT_DECIMALS } from '$lib/constants/app.constants';
+import { EIGHT_DECIMALS, ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { formatToken } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -39,7 +39,7 @@ describe('IcTransaction', () => {
 	it('should render correct amount for receive transactions', () => {
 		const { container } = render(IcTransaction, {
 			props: {
-				transaction: { ...mockTrx, value: 12345n, fee: 0n, type: 'receive', incoming: true },
+				transaction: { ...mockTrx, value: 12345n, fee: ZERO, type: 'receive', incoming: true },
 				token: ICP_TOKEN
 			}
 		});

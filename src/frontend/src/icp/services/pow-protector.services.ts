@@ -1,7 +1,7 @@
 import { CYCLES_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { allowance } from '$icp/api/icrc-ledger.api';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
-import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
+import { BACKEND_CANISTER_PRINCIPAL, SIGNER_CANISTER_ID, ZERO } from '$lib/constants/app.constants';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 import { hashText } from '@dfinity/utils';
@@ -49,7 +49,7 @@ export const solvePowChallenge = async ({
 	}
 
 	// This is the value we need to find to solve the challenge (changed to bigint)
-	let nonce = 0n;
+	let nonce = ZERO;
 
 	// Target is proportional to 1/difficulty (converted target to bigint)
 	const target = BigInt(Math.floor(0xffffffff / difficulty));
