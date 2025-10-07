@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { VELORA_SWAP_ENABLED } from '$env/velora-swap.env';
@@ -21,7 +22,6 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
