@@ -13,7 +13,9 @@
 
 	const wordsSplit = $derived(text.split(' '));
 	const truncated = $derived(
-		wordsSplit.length > maxWords ? `${wordsSplit.slice(0, maxWords).join(' ')}…` : text
+		wordsSplit.length > maxWords
+			? `${wordsSplit.slice(0, maxWords).join(' ')}${$i18n.core.text.ellipsis}`
+			: text
 	);
 </script>
 
@@ -21,7 +23,12 @@
 	{expanded ? text : truncated}
 
 	{#if wordsSplit.length > maxWords}
-		<Button styleClass="inline-block" link onclick={() => (expanded = !expanded)}>
+		<Button
+			styleClass="inline-block"
+			link
+			onclick={() => (expanded = !expanded)}
+			ariaLabel={expanded ? $i18n.core.alt.less : $i18n.core.alt.more}
+		>
 			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
 		</Button>
 	{/if}

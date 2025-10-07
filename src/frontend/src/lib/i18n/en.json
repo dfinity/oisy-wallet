@@ -38,7 +38,8 @@
 			"currency": "Currency",
 			"confirm": "Confirm",
             "more": "More",
-            "less": "Less"
+            "less": "Less",
+            "ellipsis": "…"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -51,8 +52,10 @@
 			"open_details": "Open details",
 			"close_details": "Close details",
 			"switch_language": "Switch language",
-			"switch_currency": "Switch currency"
-		},
+			"switch_currency": "Switch currency",
+            "more": "Show full text",
+            "less": "Show less text"
+        },
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
 			"standalone_mode": "Your $oisy_short Wallet is currently installed as standalone app on your mobile phone, which prevents it from connecting to other ICP dapps. You can delete $oisy_short from your homescreen, and do the installation again. This will install $oisy_short in a different way, which will then allow to connect to other dapps and sign transactions."
