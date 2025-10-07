@@ -25,30 +25,40 @@ describe('RewardGuard', () => {
 	const mockStartDate = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
 	const mockEndDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
 
-	const originalRewardCampaigns = rewardCampaignsEnv.rewardCampaigns;
+	const mockRewardCampaigns = rewardCampaignsEnv.rewardCampaigns.map((campaign) => {
+		if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+			return {
+				...campaign,
+				startDate: mockStartDate,
+				endDate: mockEndDate,
+				welcome: {
+					title: 'Title',
+					subtitle: 'Subtitle',
+					description: 'Description'
+				}
+			};
+		}
+		if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+			return {
+				...campaign,
+				startDate: mockStartDateEarlier,
+				endDate: mockEndDate,
+				welcome: {
+					title: 'Title',
+					subtitle: 'Subtitle',
+					description: 'Description'
+				}
+			};
+		}
+		return campaign;
+	});
 
 	beforeEach(() => {
 		vi.clearAllMocks();
 		modalStore.close();
 
-		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
-			originalRewardCampaigns.map((campaign) => {
-				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
-					return {
-						...campaign,
-						startDate: mockStartDate,
-						endDate: mockEndDate
-					};
-				}
-				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
-					return {
-						...campaign,
-						startDate: mockStartDateEarlier,
-						endDate: mockEndDate
-					};
-				}
-				return campaign;
-			})
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+			() => mockRewardCampaigns
 		);
 
 		sessionStorage.clear();
@@ -262,33 +272,34 @@ describe('RewardGuard', () => {
 	});
 
 	describe('welcome modal', () => {
-		it('should open with the most recent ongoing campaign', async () => {
-			const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
-				({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
-			);
+		const expectedRewardCampaign: RewardCampaignDescription | undefined = mockRewardCampaigns.find(
+			({ id }) => id === SPRINKLES_SEASON_1_EPISODE_4_ID
+		);
 
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [0n],
-				sprinkles: []
-			};
+		const mockedUserData: UserData = {
+			is_vip: [false],
+			superpowers: [],
+			airdrops: [],
+			usage_awards: [],
+			last_snapshot_timestamp: [0n],
+			sprinkles: []
+		};
+
+		beforeEach(() => {
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+		});
 
+		it('should open with the most recent ongoing campaign', async () => {
 			render(RewardGuard);
 
 			await waitFor(() => {
 				expect(get(modalStore)).toEqual({
 					id: get(modalStore)?.id,
-					data: {
-						reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
-					},
+					data: { reward: expectedRewardCampaign },
 					type: 'welcome'
 				});
 
-				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_WELCOME_OPEN,
 					metadata: {
 						campaignId: SPRINKLES_SEASON_1_EPISODE_4_ID
@@ -298,52 +309,161 @@ describe('RewardGuard', () => {
 		});
 
 		it('should open with the alphabetically-first ongoing campaign', async () => {
-			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
-				originalRewardCampaigns.map((campaign) => {
-					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
-						return {
-							...campaign,
-							startDate: mockStartDate,
-							endDate: mockEndDate
-						};
-					}
-					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
-						return {
-							...campaign,
-							startDate: mockStartDate,
-							endDate: mockEndDate
-						};
-					}
-					return campaign;
-				})
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_4_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate
+					};
+				}
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate
+					};
+				}
+				return campaign;
+			});
+
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
 			);
 
-			const expectedRewardCampaign: RewardCampaignDescription | undefined = rewardCampaigns.find(
-				({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID
-			);
-
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [],
-				last_snapshot_timestamp: [0n],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			const expectedRewardCampaign: RewardCampaignDescription | undefined =
+				newMockRewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID);
 
 			render(RewardGuard);
 
 			await waitFor(() => {
 				expect(get(modalStore)).toEqual({
 					id: get(modalStore)?.id,
-					data: {
-						reward: { ...expectedRewardCampaign, startDate: mockStartDate, endDate: mockEndDate }
-					},
+					data: { reward: expectedRewardCampaign },
 					type: 'welcome'
 				});
 
-				expect(trackEvent).toHaveBeenNthCalledWith(1, {
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_WELCOME_OPEN,
+					metadata: {
+						campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
+					}
+				});
+			});
+		});
+
+		it('should open if there is at least the title', async () => {
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate,
+						welcome: {
+							title: 'Title'
+						}
+					};
+				}
+				return campaign;
+			});
+
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
+			);
+
+			const expectedRewardCampaign: RewardCampaignDescription | undefined =
+				newMockRewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: expectedRewardCampaign },
+					type: 'welcome'
+				});
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_WELCOME_OPEN,
+					metadata: {
+						campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
+					}
+				});
+			});
+		});
+
+		it('should open if there is at least the subtitle', async () => {
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate,
+						welcome: {
+							subtitle: 'Subtitle'
+						}
+					};
+				}
+				return campaign;
+			});
+
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
+			);
+
+			const expectedRewardCampaign: RewardCampaignDescription | undefined =
+				newMockRewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: expectedRewardCampaign },
+					type: 'welcome'
+				});
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+					name: TRACK_WELCOME_OPEN,
+					metadata: {
+						campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
+					}
+				});
+			});
+		});
+
+		it('should open if there is at least the description', async () => {
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate,
+						welcome: {
+							description: 'Description'
+						}
+					};
+				}
+				return campaign;
+			});
+
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
+			);
+
+			const expectedRewardCampaign: RewardCampaignDescription | undefined =
+				newMockRewardCampaigns.find(({ id }) => id === SPRINKLES_SEASON_1_EPISODE_5_ID);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).toEqual({
+					id: get(modalStore)?.id,
+					data: { reward: expectedRewardCampaign },
+					type: 'welcome'
+				});
+
+				expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
 					name: TRACK_WELCOME_OPEN,
 					metadata: {
 						campaignId: SPRINKLES_SEASON_1_EPISODE_5_ID
@@ -353,29 +473,21 @@ describe('RewardGuard', () => {
 		});
 
 		it('should not open if there are no modal text', async () => {
-			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(() =>
-				originalRewardCampaigns.map((campaign) => {
-					if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
-						return {
-							...campaign,
-							startDate: mockStartDate,
-							endDate: mockEndDate,
-							welcome: undefined
-						};
-					}
-					return campaign;
-				})
-			);
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDate,
+						endDate: mockEndDate,
+						welcome: undefined
+					};
+				}
+				return campaign;
+			});
 
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [0n],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
+			);
 
 			render(RewardGuard);
 
@@ -385,27 +497,55 @@ describe('RewardGuard', () => {
 					type: 'welcome'
 				});
 			});
+
+			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('should not open if there are no ongoing campaigns', async () => {
+			const newMockRewardCampaigns = mockRewardCampaigns.map((campaign) => {
+				if (campaign.id === SPRINKLES_SEASON_1_EPISODE_5_ID) {
+					return {
+						...campaign,
+						startDate: mockStartDateEarlier,
+						endDate: mockStartDate
+					};
+				}
+				return campaign;
+			});
+
+			vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockImplementation(
+				() => newMockRewardCampaigns
+			);
+
+			render(RewardGuard);
+
+			await waitFor(() => {
+				expect(get(modalStore)).not.toEqual({
+					id: get(modalStore)?.id,
+					type: 'welcome'
+				});
+			});
+
+			expect(trackEvent).not.toHaveBeenCalled();
 		});
 
 		it('should not open if another modal is already opened', async () => {
-			const mockedUserData: UserData = {
-				is_vip: [false],
-				superpowers: [],
-				airdrops: [],
-				usage_awards: [[mockedReward]],
-				last_snapshot_timestamp: [0n],
-				sprinkles: []
-			};
-			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
+			modalStore.openIcrcReceive(Symbol());
 
 			render(RewardGuard);
 
 			await waitFor(() => {
+				expect(get(modalStore)).toBeDefined();
+
 				expect(get(modalStore)).not.toEqual({
 					id: get(modalStore)?.id,
 					type: 'welcome'
 				});
 			});
+
+			expect(trackEvent).not.toHaveBeenCalled();
+
+			modalStore.close();
 		});
 	});
 });
