@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
+	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import { i18n } from '$lib/stores/i18n.store';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
-	import { nonNullish } from '@dfinity/utils';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		title?: Snippet;
@@ -40,7 +40,7 @@
 {@render button(() => (open = true))}
 
 <Responsive up="md">
-	<Modal onClose={onCancelHandler} role="alert" {testId} visible={open} {footer}>
+	<Modal {footer} onClose={onCancelHandler} role="alert" {testId} visible={open}>
 		{#snippet title()}
 			{#if nonNullish(innerTitle)}
 				<div class="p-3">{@render innerTitle()}</div>
@@ -52,7 +52,7 @@
 </Responsive>
 
 <Responsive down="sm">
-	<BottomSheet bind:visible={open} {footer}>
+	<BottomSheet {footer} bind:visible={open}>
 		{#snippet content()}
 			{#if nonNullish(innerTitle)}
 				<h5>{@render innerTitle()}</h5>
