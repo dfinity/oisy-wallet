@@ -12,9 +12,10 @@
 	import Divider from '$lib/components/common/Divider.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import BgImg from '$lib/components/ui/BgImg.svelte';
 
 	interface Props {
 		collection?: NftCollection;
@@ -31,20 +32,40 @@
 				})
 			: undefined
 	);
+
+	const hasConsent: boolean | undefined = $derived(
+		nonNullish(collection)
+			? getAllowMediaForNft({
+					tokens: $nonFungibleTokens,
+					networkId: collection.network.id,
+					address: collection.address
+				})
+			: false
+	);
 </script>
 
 {#if nonNullish(collection)}
 	<div class="my-5 flex flex-col gap-2 rounded-lg bg-primary p-5">
-		<h5>{collection.name}</h5>
+		<div class="flex flex-row gap-2">
+			<div class="flex flex-col gap-2">
+				<h5>{collection.name}</h5>
 
-		<div>{collection.description}</div>
+				<div class="text-sm">{collection.description}</div>
 
-		<Button
-			styleClass="inline-block mb-3"
-			link
-			onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
-			>Go to collection <IconExpand axis="y" expanded /></Button
-		>
+				<Button
+					styleClass="inline-block mb-3 text-sm"
+					link
+					onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+					>Go to collection <IconExpand axis="y" expanded /></Button
+				>
+			</div>
+
+			{#if nonNullish(collection.bannerImageUrl) && hasConsent}
+				<div class="max-h-30 flex min-w-6 overflow-hidden rounded-lg">
+					<Img src={collection.bannerImageUrl} />
+				</div>
+			{/if}
+		</div>
 
 		<Hr />
 

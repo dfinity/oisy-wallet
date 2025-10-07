@@ -99,7 +99,7 @@
 		{/if}
 
 		{#if nonNullish(nft?.description)}
-			<div class="mb-5">
+			<div class="mb-5 text-sm">
 				<ExpandText text={nft.description} maxWords={20} />
 			</div>
 		{/if}
