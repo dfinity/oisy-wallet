@@ -14,7 +14,7 @@
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,

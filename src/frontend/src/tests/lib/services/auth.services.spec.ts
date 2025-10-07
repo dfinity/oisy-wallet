@@ -1,10 +1,18 @@
 import { walletConnectPaired } from '$eth/stores/wallet-connect.store';
 import {
+	TRACK_SIGN_OUT_ERROR,
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { idleSignOut, signOut } from '$lib/services/auth.services';
+import {
+	errorSignOut,
+	idleSignOut,
+	lockSession,
+	nullishSignOut,
+	signOut,
+	warnSignOut
+} from '$lib/services/auth.services';
 import { authStore } from '$lib/stores/auth.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import * as eventsUtils from '$lib/utils/events.utils';
@@ -60,6 +68,8 @@ describe('auth.services', () => {
 
 		localStorage.clear();
 	});
+
+	describe.todo('signIn', () => {});
 
 	describe('signOut', () => {
 		beforeEach(() => {
@@ -195,6 +205,384 @@ describe('auth.services', () => {
 		});
 	});
 
+	describe('errorSignOut', () => {
+		const mockText = 'An error occurred';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call the signOut function of the authStore without resetting the url', async () => {
+			mockLocation(activityLocation);
+
+			expect(window.location.href).toEqual(activityLocation);
+
+			await errorSignOut(mockText);
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(window.location.href).toEqual(activityLocation);
+		});
+
+		it('should call the signOut function of the authStore and clear the session storage', async () => {
+			sessionStorage.setItem('key', 'value');
+
+			expect(sessionStorage.getItem('key')).toEqual('value');
+
+			await errorSignOut(mockText);
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should clean the IDB storage for the current principal', async () => {
+			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+				fn({ identity: mockIdentity });
+				return () => {};
+			});
+
+			await errorSignOut(mockText);
+
+			// 3 addresses + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+
+			// 4 transactions + 1 balances
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
+		});
+
+		it('should not clean the IDB storage for all principals', async () => {
+			await errorSignOut(mockText);
+
+			expect(idbKeyval.clear).not.toHaveBeenCalled();
+		});
+
+		it("should disconnect WalletConnect's session", async () => {
+			await errorSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it("should wait for WalletConnect's session to be disconnected", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			let i = 0;
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(async () => {
+				i++;
+				if (i >= maxSeconds / 2) {
+					walletConnectPaired.set(false);
+				}
+				await Promise.resolve();
+			});
+
+			await errorSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds / 2);
+
+			Array.from({ length: maxSeconds / 2 }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it("should wait for WalletConnect's session to be disconnected for a maximum 10 seconds", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			await errorSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds);
+
+			Array.from({ length: maxSeconds }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it('should track the sign out event', async () => {
+			await errorSignOut(mockText);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_SIGN_OUT_ERROR,
+				metadata: {
+					reason: 'error',
+					level: 'error',
+					text: mockText,
+					source: 'app',
+					resetUrl: 'false',
+					clearStorages: 'true'
+				}
+			});
+		});
+
+		it('should append a message to the reload URL', async () => {
+			await errorSignOut(mockText);
+
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=error`)
+			);
+		});
+	});
+
+	describe('warnSignOut', () => {
+		const mockText = 'A warning occurred';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call the signOut function of the authStore without resetting the url', async () => {
+			mockLocation(activityLocation);
+
+			expect(window.location.href).toEqual(activityLocation);
+
+			await warnSignOut(mockText);
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(window.location.href).toEqual(activityLocation);
+		});
+
+		it('should call the signOut function of the authStore and clear the session storage', async () => {
+			sessionStorage.setItem('key', 'value');
+
+			expect(sessionStorage.getItem('key')).toEqual('value');
+
+			await warnSignOut(mockText);
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should clean the IDB storage for the current principal', async () => {
+			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+				fn({ identity: mockIdentity });
+				return () => {};
+			});
+
+			await warnSignOut(mockText);
+
+			// 3 addresses + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+
+			// 4 transactions + 1 balances
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
+		});
+
+		it('should not clean the IDB storage for all principals', async () => {
+			await warnSignOut(mockText);
+
+			expect(idbKeyval.clear).not.toHaveBeenCalled();
+		});
+
+		it("should disconnect WalletConnect's session", async () => {
+			await warnSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it("should wait for WalletConnect's session to be disconnected", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			let i = 0;
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(async () => {
+				i++;
+				if (i >= maxSeconds / 2) {
+					walletConnectPaired.set(false);
+				}
+				await Promise.resolve();
+			});
+
+			await warnSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds / 2);
+
+			Array.from({ length: maxSeconds / 2 }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it("should wait for WalletConnect's session to be disconnected for a maximum 10 seconds", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			await warnSignOut(mockText);
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds);
+
+			Array.from({ length: maxSeconds }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it('should track the sign out event', async () => {
+			await warnSignOut(mockText);
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_SIGN_OUT_WITH_WARNING,
+				metadata: {
+					reason: 'warning',
+					level: 'warn',
+					text: mockText,
+					source: 'app',
+					resetUrl: 'false',
+					clearStorages: 'true'
+				}
+			});
+		});
+
+		it('should append a message to the reload URL', async () => {
+			await warnSignOut(mockText);
+
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(mockText))}&level=warn`)
+			);
+		});
+	});
+
+	describe('nullishSignOut', () => {
+		const expectedText = en.auth.warning.not_signed_in;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call the signOut function of the authStore without resetting the url', async () => {
+			mockLocation(activityLocation);
+
+			expect(window.location.href).toEqual(activityLocation);
+
+			await nullishSignOut();
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(window.location.href).toEqual(activityLocation);
+		});
+
+		it('should call the signOut function of the authStore and clear the session storage', async () => {
+			sessionStorage.setItem('key', 'value');
+
+			expect(sessionStorage.getItem('key')).toEqual('value');
+
+			await nullishSignOut();
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should clean the IDB storage for the current principal', async () => {
+			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+				fn({ identity: mockIdentity });
+				return () => {};
+			});
+
+			await nullishSignOut();
+
+			// 3 addresses + 1(+1) tokens
+			expect(idbKeyval.del).toHaveBeenCalledTimes(5);
+
+			// 4 transactions + 1 balances
+			expect(delMultiKeysByPrincipal).toHaveBeenCalledTimes(5);
+		});
+
+		it('should not clean the IDB storage for all principals', async () => {
+			await nullishSignOut();
+
+			expect(idbKeyval.clear).not.toHaveBeenCalled();
+		});
+
+		it("should disconnect WalletConnect's session", async () => {
+			await nullishSignOut();
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it("should wait for WalletConnect's session to be disconnected", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			let i = 0;
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(async () => {
+				i++;
+				if (i >= maxSeconds / 2) {
+					walletConnectPaired.set(false);
+				}
+				await Promise.resolve();
+			});
+
+			await nullishSignOut();
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds / 2);
+
+			Array.from({ length: maxSeconds / 2 }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it("should wait for WalletConnect's session to be disconnected for a maximum 10 seconds", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			await nullishSignOut();
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds);
+
+			Array.from({ length: maxSeconds }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it('should track the sign out event', async () => {
+			await nullishSignOut();
+
+			expect(trackEvent).toHaveBeenCalledExactlyOnceWith({
+				name: TRACK_SIGN_OUT_WITH_WARNING,
+				metadata: {
+					reason: 'warning',
+					level: 'warn',
+					text: expectedText,
+					source: 'app',
+					resetUrl: 'false',
+					clearStorages: 'true'
+				}
+			});
+		});
+
+		it('should append a message to the reload URL', async () => {
+			await nullishSignOut();
+
+			expect(window.history.replaceState).toHaveBeenCalledExactlyOnceWith(
+				{},
+				'',
+				new URL(`${rootLocation}?msg=${encodeURI(encodeURI(expectedText))}&level=warn`)
+			);
+		});
+	});
+
 	describe('idleSignOut', () => {
 		beforeEach(() => {
 			vi.clearAllMocks();
@@ -219,8 +607,6 @@ describe('auth.services', () => {
 			});
 
 			it('should call the signOut function of the authStore and clear the session storage', async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				sessionStorage.setItem('key', 'value');
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
@@ -251,8 +637,6 @@ describe('auth.services', () => {
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				await idleSignOut();
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -345,8 +729,6 @@ describe('auth.services', () => {
 			});
 
 			it('should call the signOut function of the authStore and clear the session storage', async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				sessionStorage.setItem('key', 'value');
 
 				expect(sessionStorage.getItem('key')).toEqual('value');
@@ -377,8 +759,6 @@ describe('auth.services', () => {
 			});
 
 			it("should disconnect WalletConnect's session", async () => {
-				const signOutSpy = vi.spyOn(authStore, 'signOut');
-
 				await idleSignOut();
 
 				expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
@@ -452,4 +832,127 @@ describe('auth.services', () => {
 			});
 		});
 	});
+
+	describe('lockSession', () => {
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
+		it('should call the signOut function of the authStore without resetting the url', async () => {
+			mockLocation(activityLocation);
+
+			await lockSession({});
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(window.location.href).toEqual(activityLocation);
+		});
+
+		it('should call the signOut function of the authStore and resetting the url', async () => {
+			vi.mock('$lib/utils/nav.utils', () => ({
+				gotoReplaceRoot: () => mockLocation(rootLocation)
+			}));
+
+			mockLocation(activityLocation);
+
+			expect(window.location.href).toEqual(activityLocation);
+
+			await lockSession({ resetUrl: true });
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(window.location.href).toEqual(rootLocation);
+		});
+
+		it('should call the signOut function of the authStore and clear the session storage', async () => {
+			sessionStorage.setItem('key', 'value');
+
+			expect(sessionStorage.getItem('key')).toEqual('value');
+
+			await lockSession({});
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+			expect(sessionStorage.getItem('key')).toBeNull();
+		});
+
+		it('should not clean the IDB storage for the current principal', async () => {
+			vi.spyOn(authStore, 'subscribe').mockImplementation((fn) => {
+				fn({ identity: mockIdentity });
+				return () => {};
+			});
+
+			await lockSession({});
+
+			expect(idbKeyval.del).not.toHaveBeenCalled();
+
+			expect(delMultiKeysByPrincipal).not.toHaveBeenCalled();
+		});
+
+		it('should not clean the IDB storage for all principals', async () => {
+			await lockSession({});
+
+			expect(idbKeyval.clear).not.toHaveBeenCalled();
+		});
+
+		it("should disconnect WalletConnect's session", async () => {
+			await lockSession({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(signOutSpy).toHaveBeenCalledExactlyOnceWith();
+		});
+
+		it("should wait for WalletConnect's session to be disconnected", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			let i = 0;
+			vi.spyOn(timeUtils, 'randomWait').mockImplementation(async () => {
+				i++;
+				if (i >= maxSeconds / 2) {
+					walletConnectPaired.set(false);
+				}
+				await Promise.resolve();
+			});
+
+			await lockSession({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds / 2);
+
+			Array.from({ length: maxSeconds / 2 }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it("should wait for WalletConnect's session to be disconnected for a maximum 10 seconds", async () => {
+			const maxSeconds = 10;
+
+			walletConnectPaired.set(true);
+
+			await lockSession({});
+
+			expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyDisconnectWalletConnect' });
+
+			expect(randomWait).toHaveBeenCalledTimes(maxSeconds);
+
+			Array.from({ length: maxSeconds }).forEach((_, i) => {
+				expect(randomWait).toHaveBeenNthCalledWith(i + 1, { min: 1000, max: 1000 });
+			});
+		});
+
+		it('should not track the sign out event', async () => {
+			await lockSession({});
+
+			expect(trackEvent).not.toHaveBeenCalled();
+		});
+
+		it('should not append a message to the reload URL', async () => {
+			await lockSession({});
+
+			expect(window.history.replaceState).not.toHaveBeenCalled();
+		});
+	});
+
+	describe.todo('displayAndCleanLogoutMsg', () => {});
 });
