@@ -5,6 +5,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
@@ -15,6 +16,7 @@ import {
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
 	fetchVeloraMarketSwap,
+	loadAllIcrcTokensWithSupportedStandards,
 	loadKongSwapTokens,
 	performManualWithdraw,
 	withdrawICPSwapAfterFailedSwap,
@@ -41,6 +43,9 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 
 vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -49,6 +54,10 @@ vi.mock(import('$env/icp-swap.env'), async (importOriginal) => {
 		ICP_SWAP_ENABLED: true
 	};
 });
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
 
 vi.mock('$lib/api/kong_backend.api', () => ({
 	kongSwapAmounts: vi.fn(),
@@ -764,6 +773,75 @@ describe('loadKongSwapTokens', () => {
 		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
 		expect(get(kongSwapTokensStore)).toStrictEqual({});
+	});
+});
+
+describe('loadAllIcrcTokensWithSupportedStandards', () => {
+	beforeEach(() => {
+		vi.resetAllMocks();
+	});
+
+	it('properly updates swappableIcrcTokensStore store with the fetched tokens', async () => {
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		};
+
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		]);
+
+		const result = await isIcrcTokenSupportIcrc2(params);
+
+		expect(result).toBeTruthy();
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		});
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: true }]);
+	});
+
+	it('properly updates swappableIcrcTokensStore store with the fetched tokens but with icrc1', async () => {
+		const params = {
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		};
+
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' }
+		]);
+
+		const result = await isIcrcTokenSupportIcrc2(params);
+
+		expect(result).toBeFalsy();
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+			identity: mockIdentity,
+			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+		});
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: false }]);
+	});
+
+	it('skip updating swappableIcrcTokensStore store if supportedIcrcStandardFailed', async () => {
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockRejectedValue('Error');
+
+		await loadAllIcrcTokensWithSupportedStandards({
+			identity: mockIdentity,
+			allTokens: [ICP_TOKEN]
+		});
+
+		expect(get(swappableIcrcTokensStore)).toStrictEqual([]);
 	});
 });
 

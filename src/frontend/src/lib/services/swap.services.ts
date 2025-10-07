@@ -10,7 +10,7 @@ import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
@@ -47,6 +47,7 @@ import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
@@ -188,6 +189,34 @@ export const loadKongSwapTokens = async ({
 	}, {});
 
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
+};
+
+export const loadAllIcrcTokensWithSupportedStandards = async ({
+	allTokens,
+	identity
+}: {
+	allTokens: IcToken[];
+	identity: Identity;
+}): Promise<void> => {
+	const tokens = await Promise.allSettled(
+		allTokens.map(async (token: IcToken) => {
+			const isIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity,
+				ledgerCanisterId: token.ledgerCanisterId
+			});
+
+			return { ...token, isIcrc2 };
+		})
+	);
+
+	const supportedTokens = tokens.reduce<Array<IcToken & { isIcrc2: boolean }>>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			acc.push(result.value);
+		}
+		return acc;
+	}, []);
+
+	swappableIcrcTokensStore.setSwappableTokens(supportedTokens);
 };
 
 export const fetchSwapAmounts = async ({
