@@ -61,7 +61,7 @@
 			return;
 		}
 
-		const onGoingCampaigns = rewardCampaigns
+		const ongoingCampaigns = rewardCampaigns
 			.filter(({ startDate, endDate }) => isOngoingCampaign({ startDate, endDate }))
 			.sort(
 				({ id: aId, startDate: aStartDate }, { id: bId, startDate: bStartDate }) =>
