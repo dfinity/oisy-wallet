@@ -87,6 +87,14 @@ const enabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
 );
 
 /**
+ * The list of default tokens that are enabled - i.e. the list of default ICRC tokens minus those disabled by the user.
+ */
+const disabledIcrcDefaultTokens: Readable<IcToken[]> = derived(
+	[icrcDefaultTokensToggleable],
+	([$icrcDefaultTokensToggleable]) => $icrcDefaultTokensToggleable.filter(({ enabled }) => !enabled)
+);
+
+/**
  * The list of ICRC tokens enabled by the user - i.e. saved in the backend canister as enabled - minus those that duplicate default tokens.
  * We do so because the default statically configured are those to be used for various features. This is notably useful for ERC20 <> ckERC20 conversion given that tokens on both sides (ETH an IC) should know about each other ("Twin Token" links).
  */
@@ -106,6 +114,11 @@ const enabledIcrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
 	([$icrcCustomTokens]) => $icrcCustomTokens.filter(({ enabled }) => enabled)
 );
 
+const disabledIcrcCustomTokens: Readable<IcrcCustomToken[]> = derived(
+	[icrcCustomTokens],
+	([$icrcCustomTokens]) => $icrcCustomTokens.filter(({ enabled }) => !enabled)
+);
+
 /**
  * The list of all ICRC tokens.
  */
@@ -120,6 +133,14 @@ export const icrcTokens: Readable<IcrcCustomToken[]> = derived(
 export const sortedIcrcTokens: Readable<IcrcCustomToken[]> = derived(
 	[icrcTokens],
 	([$icrcTokens]) => $icrcTokens.sort(sortIcTokens)
+);
+
+export const disabledIcrcTokens: Readable<IcToken[]> = derived(
+	[disabledIcrcDefaultTokens, disabledIcrcCustomTokens],
+	([$disabledIcrcDefaultTokens, $disabledIcrcCustomTokens]) => [
+		...$disabledIcrcDefaultTokens,
+		...$disabledIcrcCustomTokens
+	]
 );
 
 /**

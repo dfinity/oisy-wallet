@@ -37,6 +37,7 @@
 	import { isSwapError } from '$lib/utils/swap.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -89,21 +90,47 @@
 	);
 
 	let isSourceTokenIcrc2 = $state<boolean | undefined>(undefined);
+	let previousSourceToken = $state<Token | undefined>(undefined);
 
 	$effect(() => {
-		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
+		const currentSourceToken = $sourceToken;
+
+		if (currentSourceToken === previousSourceToken) {
+			return;
+		}
+
+		previousSourceToken = currentSourceToken;
+
+		if (isNullish(currentSourceToken) || !isIcToken(currentSourceToken)) {
 			return;
 		}
 
 		(async () => {
 			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
 				identity: $authIdentity,
-				ledgerCanisterId: $sourceToken.ledgerCanisterId
+				ledgerCanisterId: currentSourceToken.ledgerCanisterId
 			});
 
 			isIcrcTokenIcrc2 = isSourceTokenIcrc2;
 		})();
 	});
+
+	// let isSourceTokenIcrc2 = $state<boolean | undefined>(undefined);
+
+	// $effect(() => {
+	// 	if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
+	// 		return;
+	// 	}
+
+	// 	(async () => {
+	// 		isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
+	// 			identity: $authIdentity,
+	// 			ledgerCanisterId: $sourceToken.ledgerCanisterId
+	// 		});
+
+	// 		isIcrcTokenIcrc2 = isSourceTokenIcrc2;
+	// 	})();
+	// });
 
 	$effect(() => {
 		console.log({ isSourceTokenIcrc2 }, 'in Swap Wizard');

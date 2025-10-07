@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, type Snippet } from 'svelte';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
@@ -44,13 +44,19 @@
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let timer: NodeJS.Timeout | undefined;
-
-	let isFetching = $state(false);
+	let debounceTimer: NodeJS.Timeout | undefined;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
 			clearInterval(timer);
 			timer = undefined;
+		}
+	};
+
+	const clearDebounceTimer = () => {
+		if (nonNullish(debounceTimer)) {
+			clearTimeout(debounceTimer);
+			debounceTimer = undefined;
 		}
 	};
 
@@ -70,10 +76,6 @@
 			return;
 		}
 
-		if (isFetching) {
-			return;
-		}
-
 		if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
 			store.reset();
 			return;
@@ -86,7 +88,6 @@
 		}
 
 		isSwapAmountsLoading = true;
-		isFetching = true;
 
 		try {
 			const swapAmounts = await fetchSwapAmounts({
@@ -115,7 +116,6 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
-			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
@@ -123,18 +123,6 @@
 			});
 		} finally {
 			isSwapAmountsLoading = false;
-			isFetching = false;
-		}
-	};
-
-	// const debounceLoadSwapAmounts = debounce(() => loadSwapAmounts(false));
-
-	let debounceTimer: NodeJS.Timeout | undefined;
-
-	const clearDebounceTimer = () => {
-		if (nonNullish(debounceTimer)) {
-			clearTimeout(debounceTimer);
-			debounceTimer = undefined;
 		}
 	};
 

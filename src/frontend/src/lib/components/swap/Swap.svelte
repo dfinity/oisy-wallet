@@ -32,6 +32,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
+	import { disabledIcrcTokens } from '$icp/derived/icrc.derived';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
 		store: initSwapAmountsStore()
@@ -99,10 +100,10 @@
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $disabledIcrcTokens
 		});
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $disabledIcrcTokens
 		});
 	};
 </script>
