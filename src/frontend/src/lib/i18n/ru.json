@@ -1201,6 +1201,7 @@
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
 			"spender": "",
+			"application": "",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
 			"methods": "Методы",

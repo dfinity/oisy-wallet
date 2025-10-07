@@ -1000,6 +1000,7 @@ interface I18nWallet_connect {
 		or_use_link: string;
 		proposer: string;
 		spender: string;
+		application: string;
 		review: string;
 		method: string;
 		methods: string;
