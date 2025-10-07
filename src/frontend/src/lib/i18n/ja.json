@@ -1200,6 +1200,7 @@
 			"or_use_link": "またはWalletConnectリンクを使用",
 			"proposer": "提案者",
 			"spender": "",
+			"application": "",
 			"review": "$chain_name ($key)のに必須な権限を確認",
 			"method": "方法",
 			"methods": "方法",
@@ -1623,11 +1624,11 @@
 				"article": "",
 				"possessive": ""
 			},
-			"title": "$oisy_nameライセンス契約（以下「本ライセンス契約」）",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
-			"license_agreement": "$oisy_nameライセンス契約"
+			"license_agreement": ""
 		}
 	},
 	"terms_of_use": {

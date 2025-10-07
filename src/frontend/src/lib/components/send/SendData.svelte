@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import SendDataApplication from '$lib/components/send/SendDataApplication.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
@@ -15,6 +16,7 @@
 		exchangeRate?: number;
 		balance: OptionBalance;
 		source: string;
+		application: string;
 		showNullishAmountLabel?: boolean;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
@@ -29,6 +31,7 @@
 		exchangeRate,
 		balance,
 		source,
+		application,
 		showNullishAmountLabel = false,
 		sourceNetwork,
 		destinationNetwork,
@@ -36,6 +39,8 @@
 		children
 	}: Props = $props();
 </script>
+
+<SendDataApplication {application} />
 
 {@render sourceNetwork()}
 

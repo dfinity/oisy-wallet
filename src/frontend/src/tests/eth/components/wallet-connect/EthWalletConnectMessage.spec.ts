@@ -46,6 +46,14 @@ describe('EthWalletConnectMessage', () => {
 				]
 			},
 			chainId: ETHEREUM_NETWORK.chainId.toString()
+		},
+		verifyContext: {
+			verified: {
+				verifyUrl: 'https://verify.walletconnect.org',
+				validation: 'VALID',
+				origin: 'https://app.uniswap.org',
+				isScam: false
+			}
 		}
 	} as WalletKitTypes.SessionRequest;
 
@@ -75,6 +83,18 @@ describe('EthWalletConnectMessage', () => {
 		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
 
 		expect(getByText('{ ... }')).toBeInTheDocument();
+	});
+
+	it('should render the application', () => {
+		const { getByText } = render(EthWalletConnectMessage, {
+			props: {
+				request
+			}
+		});
+
+		expect(getByText(`${en.wallet_connect.text.application}:`)).toBeInTheDocument();
+
+		expect(getByText('https://app.uniswap.org')).toBeInTheDocument();
 	});
 
 	it('should render the method', () => {
