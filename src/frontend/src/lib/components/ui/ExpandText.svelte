@@ -24,10 +24,10 @@
 
 	{#if wordsSplit.length > maxWords}
 		<Button
-			styleClass="inline-block"
+			ariaLabel={expanded ? $i18n.core.alt.less : $i18n.core.alt.more}
 			link
 			onclick={() => (expanded = !expanded)}
-			ariaLabel={expanded ? $i18n.core.alt.less : $i18n.core.alt.more}
+			styleClass="inline-block"
 		>
 			{expanded ? $i18n.core.text.less : $i18n.core.text.more}
 		</Button>
