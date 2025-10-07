@@ -209,7 +209,7 @@ const createSplTokenTransactionMessage = async ({
 
 	const config = { programAddress: solAddress(tokenOwnerAddress) };
 
-	// Theoretically, transferChecked is available for Token program address too, not only Token 2022 program address.
+	// Theoretically, `transferChecked` is available for Token program address too, not only Token 2022 program address.
 	// It is indeed safer, and we should use it whenever possible.
 	// However, some wallets do not support it yet and the transaction will be rejected.
 	// So we use it only when we are sure the token is a Token 2022 one,
