@@ -276,11 +276,11 @@ const fetchSwapAmountsICP = async ({
 				})
 			)
 		),
-		isIcrcTokenIcrc2 ??
-			isIcrcTokenSupportIcrc2({
-				identity,
-				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
-			})
+
+		isIcrcTokenSupportIcrc2({
+			identity,
+			ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
+		})
 	]);
 
 	console.log({ isSourceTokenIcrc2 }, 'in service');
