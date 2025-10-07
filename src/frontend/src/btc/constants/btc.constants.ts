@@ -1,9 +1,9 @@
+import { ZERO } from '$lib/constants/app.constants';
+
 // We want to show the latest balance.
 // Even if it's not totally confirmed (6 confirmations).
 // There is no difference between 0 and 1
 // because the bitcoin canister doesn't know about the mempool and unconfirmed transactions.
-import { ZERO } from '$lib/constants/app.constants';
-
 export const BTC_BALANCE_MIN_CONFIRMATIONS = 1;
 
 // block_index (and hence confirmations value) is undefined - transaction status "pending"
