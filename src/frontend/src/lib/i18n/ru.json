@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Децентрализованный",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "Выйти",
 			"lock": "",
 			"authenticate": "Открыть или Создать",
-			"asset_types": "Биткойн, Солана, Эфириум, ICP и другие",
-			"instant_and_private": "Мгновенный и приватный доступ в любом месте",
-			"advanced_cryptography": "100% ончейн: душевное спокойствие благодаря продвинутой криптографии"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"

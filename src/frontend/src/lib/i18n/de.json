@@ -103,14 +103,14 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Dezentralisiert",
+			"title_part_1": "Dein Digitales Vermögen",
+			"title_part_2": "Vertraulich und Sicher",
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
-			"instant_and_private": "Sofortiger und privater Zugriff überall",
-			"advanced_cryptography": "100% On-Chain: Sicherheit durch fortschrittliche Kryptographie"
+			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
+			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
