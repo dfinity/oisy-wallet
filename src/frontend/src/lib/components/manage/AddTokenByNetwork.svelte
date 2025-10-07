@@ -98,9 +98,9 @@
 		{/if}
 
 		{#if isIcpNetwork}
-			<IcAddTokenForm on:icBack bind:ledgerCanisterId bind:indexCanisterId />
+			<IcAddTokenForm bind:ledgerCanisterId bind:indexCanisterId />
 		{:else if isEthereumNetwork || isEvmNetwork}
-			<EthAddTokenForm on:icBack bind:contractAddress={ethContractAddress} />
+			<EthAddTokenForm bind:contractAddress={ethContractAddress} />
 		{:else if isSolanaNetwork}
 			<SolAddTokenForm bind:tokenAddress={splTokenAddress} />
 		{:else if nonNullish($selectedNetwork)}
