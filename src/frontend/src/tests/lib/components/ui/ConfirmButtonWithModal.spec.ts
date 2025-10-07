@@ -1,8 +1,10 @@
 import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 import { CONFIRMATION_MODAL } from '$lib/constants/test-ids.constants';
+import * as screenUtils from '$lib/utils/screens.utils';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { createRawSnippet } from 'svelte';
+import { beforeAll } from 'vitest';
 
 const testId = 'mock-button';
 const createMockButtonSnippet = () =>
@@ -14,6 +16,10 @@ const createMockButtonSnippet = () =>
 	}));
 
 describe('ConfirmButtonWithModal', () => {
+	beforeAll(() => {
+		vi.spyOn(screenUtils, 'getActiveScreen').mockResolvedValue('lg');
+	});
+
 	it('should not render the modal initially', () => {
 		const { queryByTestId } = render(ConfirmButtonWithModal, {
 			props: {
