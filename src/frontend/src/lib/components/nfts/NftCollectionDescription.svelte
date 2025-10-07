@@ -6,7 +6,6 @@
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
