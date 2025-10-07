@@ -13,9 +13,9 @@
 <span class="flex">
 	<span
 		class="flex origin-center transition-transform duration-500"
-		class:rotate-x-180={expanded}
-		class:rotate-x-0={!expanded}
 		class:-rotate-90={axis === 'y'}
+		class:rotate-x-0={!expanded}
+		class:rotate-x-180={expanded}
 	>
 		<IconExpandMore {size} />
 	</span>
