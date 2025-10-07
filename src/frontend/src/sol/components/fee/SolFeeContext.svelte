@@ -60,7 +60,7 @@
 		(async () => await updateFee())();
 	});
 
-	let timer: NodeJS.Timeout | undefined;
+	let timer = $state<NodeJS.Timeout | undefined>();
 
 	const clearTimer = () => clearInterval(timer);
 
