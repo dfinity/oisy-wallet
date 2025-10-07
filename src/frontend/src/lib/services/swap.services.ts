@@ -265,25 +265,23 @@ const fetchSwapAmountsICP = async ({
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const [settledResults, isSourceTokenIcrc2] = await Promise.all([
+		Promise.allSettled(
+			enabledProviders.map(({ getQuote }) =>
+				getQuote({
+					identity,
+					sourceToken: sourceToken as IcToken,
+					destinationToken: destinationToken as IcToken,
+					sourceAmount: amount
+				})
+			)
+		),
+		isIcrcTokenIcrc2 ??
+			isIcrcTokenSupportIcrc2({
 				identity,
-				sourceToken: sourceToken as IcToken,
-				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
+				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
 			})
-		)
-	);
-
-	let isSourceTokenIcrc2 = isIcrcTokenIcrc2;
-
-	if (isNullish(isIcrcTokenIcrc2)) {
-		isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
-			identity,
-			ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
-		});
-	}
+	]);
 
 	console.log({ isSourceTokenIcrc2 }, 'in service');
 
