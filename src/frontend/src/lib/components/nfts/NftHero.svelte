@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -95,6 +96,12 @@
 			<span class="block max-w-80">
 				<SkeletonText />
 			</span>
+		{/if}
+
+		{#if nonNullish(nft?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText text={nft.description} maxWords={20} />
+			</div>
 		{/if}
 
 		<NftMetadataList {nft} />
