@@ -151,14 +151,16 @@ describe('solana.api', () => {
 		});
 
 		it('should handle zero balance', async () => {
-			mockGetBalance.mockReturnValueOnce({ send: () => Promise.resolve({ value: lamports(0n) }) });
+			mockGetBalance.mockReturnValueOnce({
+				send: () => Promise.resolve({ value: lamports(ZERO) })
+			});
 
 			const balance = await loadSolLamportsBalance({
 				address: mockSolAddress,
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should throw error when RPC call fails', async () => {
@@ -203,7 +205,7 @@ describe('solana.api', () => {
 				network: SolanaNetworks.mainnet
 			});
 
-			expect(balance).toEqual(0n);
+			expect(balance).toEqual(ZERO);
 		});
 
 		it('should handle undefined balance', async () => {
@@ -486,7 +488,7 @@ describe('solana.api', () => {
 
 			const fee = await estimatePriorityFee({ network: SolanaNetworks.mainnet });
 
-			expect(fee).toEqual(0n);
+			expect(fee).toEqual(ZERO);
 			expect(mockGetRecentPrioritizationFees).toHaveBeenCalledOnce();
 		});
 

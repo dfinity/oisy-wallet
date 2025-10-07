@@ -1,3 +1,4 @@
+import { ZERO } from '$lib/constants/app.constants';
 import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
@@ -194,7 +195,7 @@ export const estimatePriorityFee = async ({
 
 	return fees.reduce<bigint>(
 		(max, { prioritizationFee: current }) => (BigInt(current) > max ? BigInt(current) : max),
-		0n
+		ZERO
 	);
 };
 

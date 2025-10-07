@@ -5,7 +5,7 @@
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardCard from '$lib/components/rewards/RewardCard.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
-	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.contants';
+	import { TRACK_REWARD_CAMPAIGN_OPEN } from '$lib/constants/analytics.constants';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { modalStore } from '$lib/stores/modal.store';

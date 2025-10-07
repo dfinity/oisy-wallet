@@ -9,7 +9,7 @@
 			"close": "Schließen",
 			"change": "Ändern",
 			"apply": "Anwenden",
-			"retry": "",
+			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
 			"name": "Name",
 			"symbol": "Symbol",
@@ -35,7 +35,11 @@
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
 			"language": "Sprache",
-			"currency": "Währung"
+			"currency": "Währung",
+			"confirm": "Bestätigen",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -48,11 +52,13 @@
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
 			"switch_language": "Sprache wechseln",
-			"switch_currency": "Währung wechseln"
+			"switch_currency": "Währung wechseln",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": ""
+			"standalone_mode": "Deine $oisy_short Wallet is momentan als Standalone App auf deinem Mobiltelefon installiert. Dies verhindert, dass andere ICP Applikationen auf $oisy_short zugreifen können. Du kannst $oisy_short von deinem Homescreen löschen, und es dann erneut installieren. $oisy_short wird dann so instaklliert, dass du in anderen apps auf $oisy_short zugreifen und Transacktionen signieren kannst."
 		}
 	},
 	"navigation": {
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Dezentralisiert",
+			"title_part_1": "Dein Digitales Vermögen",
+			"title_part_2": "Vertraulich und Sicher",
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
-			"instant_and_private": "Sofortiger und privater Zugriff überall",
-			"advanced_cryptography": "100% On-Chain: Sicherheit durch fortschrittliche Kryptographie"
+			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
+			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
@@ -422,6 +429,11 @@
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
 				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -457,6 +469,11 @@
 				"participate_title": "Verdiene Tokens für Aktivitäten und Empfehlungen. Mehr Netzwerke bedeuten mehr Chancen.",
 				"description": "Bleibe 10 Tage lang aktiv, um dich zu qualifizieren: Melden dich häufig an, führe Wallet-Aktionen durch und halte mindestens $20.<br/>Jedes aktive Netzwerk erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10% von Freunden, die sich qualifizieren, und lande unter den ersten drei, um einen Super Sprinkle im Wert von $200 zu gewinnen.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "oder WalletConnect-Link verwenden",
 			"proposer": "Anfragender",
 			"spender": "",
+			"application": "",
 			"review": "Erforderliche Berechtigungen für $chain_name ($key) prüfen",
 			"method": "Methode",
 			"methods": "Methoden",
@@ -1267,7 +1285,11 @@
 			"block": "Block",
 			"interacted_with": "Interagierte mit (Ziel)",
 			"status": "Status",
-			"confirmations": "Bestätigungen"
+			"confirmations": "Bestätigungen",
+			"for": "Für",
+			"for_copied": "Adresse in die Zwischenablage kopiert.",
+			"expiration": "Ablaufdatum",
+			"approve_label": ""
 		},
 		"status": {
 			"confirmed": "Bestätigt",
@@ -1305,7 +1327,8 @@
 		"alt": {
 			"open_block_explorer": "Diese Transaktion in einem Block-Explorer öffnen",
 			"open_from_block_explorer": "Die Absenderadresse in einem Block-Explorer öffnen",
-			"open_to_block_explorer": "Die Empfängeradresse in einem Block-Explorer öffnen"
+			"open_to_block_explorer": "Die Empfängeradresse in einem Block-Explorer öffnen",
+			"open_for_block_explorer": ""
 		},
 		"error": {
 			"get_block_number": "Kann Blocknummer nicht abrufen.",
@@ -1507,6 +1530,15 @@
 			"title": "QR-Code scannen"
 		}
 	},
+	"pow_protector": {
+		"text": {
+			"title": "Preparing Signer",
+			"description": "Verifying that you are not a robot",
+			"request_challenge": "Waiting for new challenge",
+			"solve_challenge": "Solving challenge",
+			"grant_cycles": "Enabling signing"
+		}
+	},
 	"signer": {
 		"sign_in": {
 			"text": {
@@ -1585,7 +1617,8 @@
 			"reject_warning": "Du musst den Geschäftsbedingungen zustimmen um weiterzufahren.",
 			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
 			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
-			"accept_and_continue": "Zustimmen und weiterfahren"
+			"accept_and_continue": "Zustimmen und weiterfahren",
+			"updated_agreements_warning": "Wir haben $agreements aktualisiert. Wenn sie $oisy_short weiterhin benutzen, bestätigen sie, die Änderungen gelesen und akzeptiert zu haben."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
@@ -1594,23 +1627,11 @@
 	"license_agreement": {
 		"text": {
 			"license_agreement": "Lizenzvereinbarung",
-			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
-			"paragraph_1": "Danke für Dein Interesse an $oisy_name, einer browserbasierten, selbstverwahrenden und Multi-Chain-Wallet-DApp, gehostet im öffentlichen Blockchain-Netzwerk des Internet Computer („$oisy_short“). Weitere Informationen zu $oisy_short, seinem Open-Source-Code und den zugehörigen Lizenzen findest Du im $oisy_short-GitHub-Repository hier: $oisy_repo_url.",
-			"paragraph_2": "Diese Lizenzvereinbarung regelt Deine Nutzung von $oisy_short („Du“). DURCH DIE NUTZUNG VON $oisy_short BESTÄTIGST DU, DASS DU DIESE LIZENZVEREINBARUNG GELESEN, VERSTANDEN UND AKZEPTIERT HAST. WENN DU NICHT ZUSTIMMST, DARFST DU $oisy_short NICHT NUTZEN.",
-			"paragraph_3": "Wenn Du Dich für die Nutzung von $oisy_short entscheidest, erkennen Du und die DFINITY Foundation, einschließlich ihrer verbundenen Unternehmen (zusammen „DFINITY“), Folgendes an und stimmen dem zu:",
-			"limited_license": "<strong>1. BEGRENZTE LIZENZ.</strong> Vorbehaltlich der Bedingungen dieser Lizenzvereinbarung gewährt Dir DFINITY eine eingeschränkte, nicht-exklusive, nicht übertragbare, nicht unterlizenzierbare, widerrufbare Lizenz zur Nutzung von $oisy_short ausschließlich zum Empfangen, Halten und Senden von Token wie nativen ICP, ICRC-1, ETH und ERC20-Token sowie anderen Token, die von Zeit zu Zeit verfügbar gemacht werden. Du darfst abgeleitete Werke in dem Umfang erstellen, der durch die Lizenzbedingungen der Open-Source-Komponenten in $oisy_short gestattet ist.",
-			"restrictions": "<strong>2. EINSCHRÄNKUNGEN.</strong> Du bist verantwortlich für alle Aktivitäten im Zusammenhang mit Deiner Nutzung von $oisy_short, unabhängig davon, ob die Aktivitäten von Dir autorisiert sind oder von Dir, Deinen Mitarbeitern oder Dritten in Deinem Auftrag durchgeführt werden. DU VERSTEHST, DASS DFINITY NICHT FÜR IRGENDWELCHE AKTIVITÄTEN ODER TRANSAKTIONEN (OB ABGESCHLOSSEN ODER NICHT) IM ZUSAMMENHANG MIT DEINER NUTZUNG VON $oisy_name VERANTWORTLICH IST. Du darfst die Beziehung zwischen Dir und DFINITY nicht falsch darstellen oder überhöhen, einschließlich des Ausdrucks oder der Andeutung, dass DFINITY Dich oder Deine geschäftlichen Aktivitäten durch Deine Nutzung von $oisy_short unterstützt, sponsert, befürwortet oder zu diesen beiträgt. Du darfst keine Beziehung oder Zugehörigkeit zu DFINITY implizieren, außer wie in dieser Lizenzvereinbarung ausdrücklich gestattet. Du darfst den Namen, das Logo oder andere Marken von $oisy_short in keiner Weise verwenden, die eine Befürwortung oder Zugehörigkeit andeutet, Deine Beziehung zu $oisy_short falsch darstellt oder Verwirrung hinsichtlich der Herkunft von $oisy_short stiftet.",
-			"applicable_laws": "<strong>3. ANWENDBARES RECHT.</strong> Du wirst alle geltenden Gesetze und Vorschriften (einschließlich, aber nicht beschränkt auf Exportkontrollen, Geldwäsche oder Wirtschaftssanktionen) in Verbindung mit Deiner Nutzung von $oisy_short und allen mit Deinem $oisy_name verbundenen Transaktionen einhalten.",
-			"reservation_rights": "<strong>4. VORBEHALT DER RECHTE VON DFINITY.</strong> $oisy_short gehört DFINITY und wird Dir lizenziert, nicht verkauft. Der Inhalt, die visuellen Oberflächen, interaktiven Funktionen, Informationen, Grafiken, das Design, die Zusammenstellung, der Computer-Code, Produkte, Dienstleistungen und alle anderen Elemente von $oisy_short und zugehöriger Dokumentation sind durch geltendes Urheberrecht geschützt. Im Verhältnis zwischen Dir und DFINITY sind alle Materialien von DFINITY und $oisy_short, einschließlich der damit verbundenen geistigen Eigentumsrechte, alleiniges und ausschließliches Eigentum von DFINITY oder seinen Tochtergesellschaften, verbundenen Unternehmen oder Drittlizenzgebern, vorbehaltlich etwaiger Open-Source-Lizenzen. DFINITY behält alle Rechte vor, die in dieser Lizenzvereinbarung nicht ausdrücklich gewährt werden. Du erwirbst keine Rechte, Titel oder Interessen an den Materialien von DFINITY oder $oisy_short, weder durch Auslegung, Verwirkung noch anderweitig, außer den in dieser Lizenzvereinbarung und den Lizenzbedingungen der Open-Source-Komponenten ausdrücklich gewährten Rechten. Diese Lizenzvereinbarung gewährt Dir kein Recht zur Nutzung des Namens, Logos oder anderer Marken von $oisy_short oder DFINITY.",
-			"feedback": "<strong>5. FEEDBACK.</strong> Wenn Du DFINITY Kommentare, Ideen, Fehlerberichte, Feedback, Verbesserungen, Empfehlungen oder Modifikationen in Bezug auf $oisy_short („Feedback“) zur Verfügung stellst, erfolgt dies auf nicht vertraulicher Basis, und DFINITY darf dieses Feedback nach eigenem Ermessen nutzen, einschließlich, aber nicht beschränkt auf die Integration der vorgeschlagenen Änderungen in die Materialien von DFINITY, $oisy_short oder andere Dienste. Hiermit gewährst Du DFINITY eine unbefristete, unwiderrufliche, übertragbare, unterlizenzierbare, nicht exklusive, gebührenfreie Lizenz, alle notwendigen Rechte zur Integration und Nutzung Deines Feedbacks zu besitzen, einschließlich zur Herstellung und zum Verkauf von Produkten und Dienstleistungen, und erklärst Dich bereit, DFINITY bei Bedarf bei der Dokumentation, Perfektionierung und Aufrechterhaltung der Rechte von DFINITY an dem Feedback zu unterstützen. Du erklärst Dich damit einverstanden, DFINITY gelegentlich für Feedback zu kontaktieren, kannst jedoch widersprechen, indem Du eine schriftliche Mitteilung an legalnotice@dfinity.org sendest.",
-			"termination": "<strong>6. DAUER UND BEENDIGUNG.</strong> Diese Lizenzvereinbarung bleibt bis zur Beendigung in Kraft. Die Lizenzvereinbarung und Deine hierin enthaltenen Rechte und Lizenzen enden sofort bei Deinem Verstoß gegen die Lizenzvereinbarung. Du kannst die Lizenzvereinbarung jederzeit beenden, indem Du Deine $oisy_name leerst und die Nutzung von $oisy_short einstellst. DFINITY kann diese Lizenzvereinbarung jederzeit aus beliebigen Gründen beenden, einschließlich tatsächlichem oder vermutetem Missbrauch von $oisy_short durch Dich oder Verstoß gegen diese Lizenzvereinbarung. Die Abschnitte 3 bis 13 überdauern jede Beendigung dieser Lizenzvereinbarung.",
-			"warranty_liability": "<strong>7. HAFTUNGSAUSSCHLUSS UND HAFTUNGSBEGRENZUNG.</strong> Soweit gesetzlich zulässig, wird $oisy_short OHNE JEGLICHE GEWÄHRLEISTUNG bereitgestellt. Soweit gesetzlich zulässig, lehnt DFINITY alle Gewährleistungen und Bedingungen, ausdrücklich, stillschweigend, gesetzlich oder anderweitig, ab, einschließlich, aber nicht beschränkt auf stillschweigende Gewährleistungen oder Bedingungen der Eignung für einen bestimmten Zweck, Marktgängigkeit, Titel, Qualität, Ergebnisse und Nichtverletzung. DFINITY garantiert NICHT, dass $oisy_short jederzeit verfügbar, sicher oder geschützt ist (jetzt und in Zukunft). DFINITY lehnt ausdrücklich jegliche Gewährleistung in Bezug auf die Genauigkeit oder Funktionalität von $oisy_short sowie die Genauigkeit, Gültigkeit oder Vollständigkeit jeglicher durch Deine Nutzung von $oisy_short verfügbaren Informationen oder Funktionen (jetzt und in Zukunft) oder die Qualität oder Konsistenz der durch dessen Nutzung erzielten Ergebnisse ab. Soweit gesetzlich zulässig, haftet DFINITY unter keinen Umständen für Folgeschäden, spezielle Schäden, indirekte Schäden, zufällige oder strafrechtliche Schäden, die sich aus der Nutzung oder Unfähigkeit zur Nutzung von $oisy_short oder DFINITY-Materialien ergeben, selbst wenn DFINITY auf die Möglichkeit solcher Schäden hingewiesen wurde, und dies gilt unabhängig vom Scheitern eines wesentlichen Zwecks einer begrenzten Abhilfe. Soweit gesetzlich zulässig, übersteigen DFINITYs gesamthaftige Haftungsschäden aus dieser Lizenzvereinbarung oder Deiner Nutzung oder Unfähigkeit zur Nutzung von $oisy_short 100 CHF nicht.",
-			"indemnity": "<strong>8. SCHADLOSHALTUNG.</strong> Du erklärst Dich bereit, DFINITY und seine verbundenen Unternehmen, Führungskräfte, Direktoren, Lieferanten, Lizenzgeber und andere Kunden von jeglicher Haftung und Kosten, einschließlich angemessener Anwaltsgebühren, in Verbindung mit Deiner Nutzung oder missbräuchlichen Nutzung von $oisy_short oder Deinem Verstoß gegen diese Lizenzvereinbarung oder geltendes Recht zu verteidigen und freizustellen.",
-			"governing_law": "<strong>9. ANWENDBARES RECHT; GERICHTSSTAND.</strong> Ansprüche in Bezug auf $oisy_short unterliegen dem Recht der Schweiz unter Ausschluss der Kollisionsnormen. Streitigkeiten im Zusammenhang mit dieser Lizenzvereinbarung werden ausschließlich vor den Gerichten in Zürich, Schweiz, verhandelt, mit Berufungsmöglichkeit beim Bundesgericht der Schweiz.",
-			"entire_agreement": "<strong>10. GESAMTVEREINBARUNG UND SALVATORISCHE KLAUSEL.</strong> Diese Lizenzvereinbarung stellt die gesamte Vereinbarung zwischen Dir und DFINITY dar und ersetzt alle vorherigen Vereinbarungen, Verhandlungen oder Mitteilungen zwischen Dir und DFINITY in Bezug auf den Gegenstand. DFINITY kann diese Lizenzvereinbarung ändern, wenn neue Versionen von $oisy_short verfügbar gemacht werden. Sollte eine Bestimmung dieser Lizenzvereinbarung ungültig oder undurchsetzbar sein, wird sie so weit wie nötig angepasst, um gültig und durchsetzbar zu sein, oder, wenn das nicht möglich ist, aus dieser Lizenzvereinbarung entfernt; die Gültigkeit und Durchsetzbarkeit der übrigen Bestimmungen bleibt unberührt.",
-			"assignment": "<strong>11. ABTRETUNG.</strong> Du darfst diese Lizenzvereinbarung nicht ohne vorherige schriftliche Zustimmung von DFINITY abtreten, sonst ist sie ungültig. DFINITY kann diese Lizenzvereinbarung ohne Einschränkung und ohne Benachrichtigung Dir gegenüber abtreten. Vorbehaltlich dessen bleibt diese Lizenzvereinbarung für die Parteien und deren rechtliche Nachfolger und zulässige Abtretungsempfänger verbindlich.",
-			"no_waiver": "<strong>12. KEIN VERZICHT.</strong> Der Verzicht auf Ausübung oder Verzögerung bei Ausübung eines Rechts, einer Befugnis oder eines Rechtsmittels aus dieser Lizenzvereinbarung oder gesetzlich gilt nicht als Verzicht. Der Verzicht von DFINITY auf eine Verpflichtung oder einen Verstoß gegen diese Lizenzvereinbarung gilt nicht als Verzicht auf andere Verpflichtungen oder künftige Verstöße.",
-			"english_version": "<strong>13. ENGLISCHE VERSION.</strong> Die englische Version dieser Lizenzvereinbarung ist verbindlich, falls ein Konflikt entsteht. Alle Mitteilungen und Benachrichtigungen gemäß dieser Lizenzvereinbarung müssen in Englisch erfolgen.",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1620,6 +1641,10 @@
 	"terms_of_use": {
 		"text": {
 			"terms_of_use": "Nutzungsbedingungen",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
 			"title": "",
 			"instruction": "Durch Klicken auf diese Schaltfläche stimmst du den $link zu",
 			"body": ""
@@ -1631,6 +1656,10 @@
 	"privacy_policy": {
 		"text": {
 			"privacy_policy": "Datenschutzrichtlinie",
+			"det": {
+				"article": "die ",
+				"possessive": "unsere "
+			},
 			"title": "",
 			"body": ""
 		},
@@ -1662,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
-	},
-	"welcome": {
-		"title": "Wilkommen bei $oisy_short!",
-		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {

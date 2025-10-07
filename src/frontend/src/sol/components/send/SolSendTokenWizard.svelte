@@ -14,7 +14,7 @@
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
@@ -22,6 +22,7 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -109,6 +110,12 @@
 		feeDecimalsStore.set(solanaNativeToken.decimals);
 	});
 
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
+	});
+
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
 		initFeeContext({
@@ -117,7 +124,8 @@
 			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore,
-			feeTokenIdStore
+			feeTokenIdStore,
+			feeExchangeRateStore
 		})
 	);
 

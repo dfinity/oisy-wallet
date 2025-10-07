@@ -41,19 +41,22 @@
 	isSelectable={false}
 	token={$destinationToken}
 >
-	<div slot="amount-info" class="text-tertiary">
-		<TokenInputAmountExchange
-			amount={receiveAmount}
-			exchangeRate={$destinationTokenExchangeRate}
-			token={$destinationToken}
-			bind:displayUnit={exchangeValueUnit}
-		/>
-	</div>
+	{#snippet amountInfo()}
+		<div class="text-tertiary">
+			<TokenInputAmountExchange
+				amount={receiveAmount}
+				exchangeRate={$destinationTokenExchangeRate}
+				token={$destinationToken}
+				bind:displayUnit={exchangeValueUnit}
+			/>
+		</div>
+	{/snippet}
 
-	<TokenInputBalance
-		slot="balance"
-		balance={$destinationTokenBalance}
-		testId="convert-amount-destination-balance"
-		token={$destinationToken}
-	/>
+	{#snippet balance()}
+		<TokenInputBalance
+			balance={$destinationTokenBalance}
+			testId="convert-amount-destination-balance"
+			token={$destinationToken}
+		/>
+	{/snippet}
 </TokenInput>

@@ -13,7 +13,7 @@
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
 		TRACK_COUNT_BTC_VALIDATION_ERROR
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,

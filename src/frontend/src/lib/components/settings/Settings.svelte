@@ -16,7 +16,7 @@
 		SETTINGS_ADDRESS_LABEL
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum

@@ -235,7 +235,7 @@
 			<SendQrCodeScan
 				expectedToken={$token}
 				{onDecodeQrCode}
-				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+				onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
 				bind:destination
 				bind:amount
 			/>

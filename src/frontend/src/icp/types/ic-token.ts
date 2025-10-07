@@ -8,6 +8,7 @@ import type {
 	IcFeeSchema,
 	IcInterfaceSchema,
 	IcTokenSchema,
+	IcTokenWithIcrc2SupportedSchema,
 	IcTokenWithoutIdSchema
 } from '$icp/schema/ic-token.schema';
 import type { Option } from '$lib/types/utils';
@@ -26,6 +27,8 @@ export type IcCkMetadata = z.infer<typeof IcCkMetadataSchema>;
 export type IcInterface = z.infer<typeof IcInterfaceSchema>;
 
 export type IcToken = z.infer<typeof IcTokenSchema>;
+
+export type IcTokenWithIcrc2Supported = z.infer<typeof IcTokenWithIcrc2SupportedSchema>;
 
 export type IcTokenWithoutId = z.infer<typeof IcTokenWithoutIdSchema>;
 

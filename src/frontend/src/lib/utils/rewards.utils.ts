@@ -1,5 +1,6 @@
 import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
+import { ZERO } from '$lib/constants/app.constants';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { RewardType } from '$lib/enums/reward-type';
 import { getRewards } from '$lib/services/reward.services';
@@ -40,7 +41,7 @@ export const loadRewardResult = async (identity: Identity): Promise<RewardResult
 			};
 		}
 
-		if (lastTimestamp === 0n) {
+		if (lastTimestamp === ZERO) {
 			return { lastTimestamp };
 		}
 	}

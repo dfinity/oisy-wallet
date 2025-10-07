@@ -16,6 +16,7 @@ import * as ethUtils from '$eth/utils/eth.utils';
 import * as tokenUtils from '$eth/utils/token.utils';
 import * as evmNativeUtils from '$evm/utils/native-token.utils';
 import * as ckethStoreMod from '$icp-eth/stores/cketh.store';
+import { ZERO } from '$lib/constants/app.constants';
 import * as addressDerived from '$lib/derived/address.derived';
 import type { Network } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
@@ -97,8 +98,8 @@ describe('EthFeeContext', () => {
 						maxPriorityFeePerGas: 5n
 					})
 				),
-			safeEstimateGas: async () => await new Promise((resolve) => resolve(0n)),
-			estimateGas: async () => await new Promise((resolve) => resolve(0n))
+			safeEstimateGas: async () => await new Promise((resolve) => resolve(ZERO)),
+			estimateGas: async () => await new Promise((resolve) => resolve(ZERO))
 		} as unknown as ReturnType<typeof infuraMod.infuraProviders>);
 
 		vi.spyOn(infuraGasRestMod, 'InfuraGasRest').mockImplementation(
@@ -115,8 +116,8 @@ describe('EthFeeContext', () => {
 		);
 
 		vi.spyOn(feeServices, 'getEthFeeData').mockReturnValue(21n);
-		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(0n);
-		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(0n);
+		vi.spyOn(feeServices, 'getCkErc20FeeData').mockResolvedValue(ZERO);
+		vi.spyOn(feeServices, 'getErc20FeeData').mockResolvedValue(ZERO);
 
 		vi.spyOn(nftSend, 'encodeErc721SafeTransfer').mockReturnValue({
 			to: '0x2222222222222222222222222222222222222222',

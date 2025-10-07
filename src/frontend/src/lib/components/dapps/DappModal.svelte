@@ -11,7 +11,7 @@
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';

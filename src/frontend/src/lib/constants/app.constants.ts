@@ -159,6 +159,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
+// eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 
 // NFTs

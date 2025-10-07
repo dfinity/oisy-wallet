@@ -1,5 +1,5 @@
 import { syncCkEthMinterError } from '$icp/services/cketh-listener.services';
-import { TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_CKETH_LOADING_MINTER_INFO_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import type { TokenId } from '$lib/types/token';
 import en from '$tests/mocks/i18n.mock';
