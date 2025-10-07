@@ -35,7 +35,8 @@
 			"more_items": "+$items अधिक",
 			"select": "चुनें",
 			"language": "भाषा",
-			"currency": "मुद्रा"
+			"currency": "मुद्रा",
+			"confirm": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",

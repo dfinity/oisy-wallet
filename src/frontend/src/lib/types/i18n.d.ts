@@ -39,6 +39,7 @@ interface I18nCore {
 		select: string;
 		language: string;
 		currency: string;
+		confirm: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
