@@ -14,7 +14,7 @@
 		"build:compress": "./scripts/build.compress.sh",
 		"build:csp": "node scripts/build.csp.mjs",
 		"build:metadata": "node scripts/build.metadata.mjs",
-        "build:seo": "node scripts/build.seo.mjs",
+		"build:seo": "node scripts/build.seo.mjs",
 		"build:style": "node scripts/build.style.mjs",
 		"build:ic-domains": "node scripts/build.ic-domains.mjs",
 		"build:ii-alternative-origins": "node scripts/build.ii-alternative-origins.mjs",
