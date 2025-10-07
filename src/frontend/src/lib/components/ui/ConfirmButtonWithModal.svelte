@@ -4,6 +4,8 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
 
 	interface Props {
 		title?: Snippet;
@@ -25,21 +27,27 @@
 	const onCancelHandler = () => (open = false);
 </script>
 
+{#snippet footer()}
+	<div class="my-3 flex w-full justify-between gap-3">
+		<ButtonCancel onclick={onCancelHandler} testId={`${testId}-cancel`} />
+		<Button onclick={onConfirmHandler} testId={`${testId}-confirm`}
+			>{$i18n.core.text.confirm}</Button
+		>
+	</div>
+{/snippet}
+
 {@render button(() => (open = true))}
 
-<Modal onClose={onCancelHandler} role="alert" {testId} visible={open}>
-	{#snippet title()}
-		<div class="p-3">{@render innerTitle?.()}</div>
-	{/snippet}
+<Responsive up="md">
+	<Modal onClose={onCancelHandler} role="alert" {testId} visible={open} {footer}>
+		{#snippet title()}
+			<div class="p-3">{@render innerTitle?.()}</div>
+		{/snippet}
 
-	{@render children()}
+		{@render children()}
+	</Modal>
+</Responsive>
 
-	{#snippet footer()}
-		<div class="my-3 flex w-full justify-between gap-3">
-			<ButtonCancel onclick={onCancelHandler} testId={`${testId}-cancel`} />
-			<Button onclick={onConfirmHandler} testId={`${testId}-confirm`}
-				>{$i18n.core.text.confirm}</Button
-			>
-		</div>
-	{/snippet}
-</Modal>
+<Responsive down="sm">
+	<BottomSheet bind:visible={open} {footer} content={children}></BottomSheet>
+</Responsive>
