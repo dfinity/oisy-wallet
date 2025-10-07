@@ -89,6 +89,8 @@
 
 		isSwapAmountsLoading = true;
 
+		console.log({ isIcrcTokenIcrc2 }, 'inSwapContext');
+
 		try {
 			const swapAmounts = await fetchSwapAmounts({
 				identity: $authIdentity,

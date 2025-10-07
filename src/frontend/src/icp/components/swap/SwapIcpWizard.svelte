@@ -37,7 +37,6 @@
 	import { isSwapError } from '$lib/utils/swap.utils';
 	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
-	import type { Token } from '$lib/types/token';
 
 	interface Props {
 		swapAmount: OptionAmount;
