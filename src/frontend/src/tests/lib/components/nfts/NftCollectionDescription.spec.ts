@@ -1,15 +1,21 @@
-import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
+import * as navUtils from '$app/navigation';
+import NftCollectionDescription from '$lib/components/nfts/NftCollectionDescription.svelte';
+import { AppPath } from '$lib/constants/routes.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
+import { i18n } from '$lib/stores/i18n.store';
+import * as nftsUtils from '$lib/utils/nfts.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import { render } from '@testing-library/svelte';
+import { fireEvent, render } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 describe('NftCollectionDescription', () => {
 	it('renders the description if available', () => {
-		const { container } = render(NftCollectionCard, {
+		const { container } = render(NftCollectionDescription, {
 			props: {
 				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
@@ -21,7 +27,7 @@ describe('NftCollectionDescription', () => {
 		assertNonNullish(title);
 
 		expect(title).toBeInTheDocument();
-		expect(title.innerHTML).toEqual(mockValidErc1155Nft.name);
+		expect(title.innerHTML).toEqual(mockValidErc1155Nft.collection.name);
 
 		assertNonNullish(desc);
 
@@ -29,10 +35,10 @@ describe('NftCollectionDescription', () => {
 		expect(desc.innerHTML).toEqual('Test description');
 	});
 
-	it('should not render anything if no description is available', () => {
-		const { container } = render(NftCollectionCard, {
+	it('should not render anything if no collection data is available', () => {
+		const { container } = render(NftCollectionDescription, {
 			props: {
-				collection: mockValidErc1155Nft.collection
+				collection: undefined
 			}
 		});
 
@@ -45,18 +51,40 @@ describe('NftCollectionDescription', () => {
 	});
 
 	it('should render action buttons', () => {
-		const { findByTestId } = render(NftCollectionCard, {
+		vi.spyOn(nftsUtils, 'findNonFungibleToken').mockReturnValue(mockValidErc1155Token);
+
+		const { getByTestId } = render(NftCollectionDescription, {
 			props: {
 				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
 		});
 
-		const spamBtn = findByTestId(NFT_COLLECTION_ACTION_SPAM);
+		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
 
 		expect(spamBtn).toBeInTheDocument();
 
-		const hideBtn = findByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 
 		expect(hideBtn).toBeInTheDocument();
+	});
+
+	it('should render a working link to the collection page', async () => {
+		const gotoSpy = vi.spyOn(navUtils, 'goto');
+
+		const collection = { ...mockValidErc1155Nft.collection, description: 'Test description' };
+
+		const { getByText } = render(NftCollectionDescription, {
+			props: {
+				collection
+			}
+		});
+
+		const link = getByText(get(i18n).nfts.text.go_to_collection);
+
+		await fireEvent.click(link);
+
+		expect(gotoSpy).toHaveBeenCalledWith(
+			`${AppPath.Nfts}${collection.network.name}-${collection.address}`
+		);
 	});
 });
