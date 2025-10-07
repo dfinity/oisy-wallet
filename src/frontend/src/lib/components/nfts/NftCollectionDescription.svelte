@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import Img from '$lib/components/ui/Img.svelte';
-	import type { NftCollection } from '$lib/types/nft';
-	import Button from '$lib/components/ui/Button.svelte';
 	import { goto } from '$app/navigation';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
-	import Hr from '$lib/components/ui/Hr.svelte';
-	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import Hr from '$lib/components/ui/Hr.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { NftCollection } from '$lib/types/nft';
+	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -49,9 +49,9 @@
 				<p class="mb-0 text-sm">{collection.description}</p>
 
 				<Button
-					styleClass="inline-block mb-3 text-sm"
 					link
 					onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+					styleClass="inline-block mb-3 text-sm"
 					>{$i18n.nfts.text.go_to_collection}<IconExpand axis="y" expanded /></Button
 				>
 			</div>
