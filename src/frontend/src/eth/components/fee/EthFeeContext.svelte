@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, onMount, type Snippet } from 'svelte';
+	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -216,7 +216,7 @@
 
 	let isDestroyed = $state(false);
 
-	const obverseFeeData = async (watch: boolean) => {
+	const obverseFeeData = async () => {
 		const throttledCallback = () => {
 			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
@@ -236,7 +236,7 @@
 			return;
 		}
 
-		if (!watch) {
+		if (!observe) {
 			return;
 		}
 
@@ -265,15 +265,17 @@
 	 */
 
 	$effect(() => {
-		obverseFeeData(observe);
+		[observe];
+
+		untrack(() => obverseFeeData());
 	});
 
 	$effect(() => {
 		[$ckEthMinterInfoStore];
 
-		(() => {
-			observe && debounceUpdateFeeData();
-		})();
+		if (observe) {
+			untrack(() => debounceUpdateFeeData());
+		}
 	});
 
 	/**
