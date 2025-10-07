@@ -215,7 +215,7 @@ const createSplTokenTransactionMessage = async ({
 	// So we use it only when we are sure the token is a Token 2022 one,
 	// or if it has a mint authority (which is not the case of locked tokens).
 	const useCheckedTransfer =
-		nonNullish(tokenMintAuthority) || tokenOwnerAddress === TOKEN_2022_PROGRAM_ADDRESS;
+		tokenOwnerAddress === TOKEN_2022_PROGRAM_ADDRESS || nonNullish(tokenMintAuthority);
 
 	const transferInstruction = useCheckedTransfer
 		? getTransferCheckedInstruction(
