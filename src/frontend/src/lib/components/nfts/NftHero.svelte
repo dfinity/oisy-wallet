@@ -8,13 +8,13 @@
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -100,7 +100,7 @@
 
 		{#if nonNullish(nft?.description)}
 			<div class="mb-5 text-sm">
-				<ExpandText text={nft.description} maxWords={20} />
+				<ExpandText maxWords={20} text={nft.description} />
 			</div>
 		{/if}
 
