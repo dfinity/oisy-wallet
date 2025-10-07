@@ -39,6 +39,10 @@ interface I18nCore {
 		select: string;
 		language: string;
 		currency: string;
+		confirm: string;
+		more: string;
+		less: string;
+		ellipsis: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -49,6 +53,8 @@ interface I18nCore {
 		close_details: string;
 		switch_language: string;
 		switch_currency: string;
+		more: string;
+		less: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -110,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string };
+	message: { refreshed_authentication: string; session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -317,6 +323,7 @@ interface I18nRewards {
 			participate_title: string;
 			description: string;
 			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
 			win: {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
@@ -332,6 +339,7 @@ interface I18nRewards {
 			participate_title: string;
 			description: string;
 			campaign_href: string;
+			welcome: { title: string; subtitle: string; description: string };
 			win: {
 				default: { title: string; description: string; share_href: string };
 				jackpot: { title: string; description: string; share_href: string };
@@ -997,6 +1005,7 @@ interface I18nWallet_connect {
 		or_use_link: string;
 		proposer: string;
 		spender: string;
+		application: string;
 		review: string;
 		method: string;
 		methods: string;
@@ -1360,12 +1369,6 @@ interface I18nEarning {
 	};
 }
 
-interface I18nWelcome {
-	title: string;
-	subtitle: string;
-	description: string;
-}
-
 interface I18nTemporal {
 	seconds_to_duration: {
 		year: string;
@@ -1455,7 +1458,6 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
-	welcome: I18nWelcome;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

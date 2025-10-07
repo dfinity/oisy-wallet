@@ -35,7 +35,11 @@
 			"more_items": "+$items in più",
 			"select": "Seleziona",
 			"language": "Lingua",
-			"currency": "Valuta"
+			"currency": "Valuta",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Solo a scopo di test!",
@@ -48,7 +52,9 @@
 			"open_details": "Apri dettagli",
 			"close_details": "Chiudi dettagli",
 			"switch_language": "Cambia lingua",
-			"switch_currency": "Cambia valuta"
+			"switch_currency": "Cambia valuta",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Non chiudere questa scheda finché la transazione non è completata",
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Decentralizzato",
+			"title_part_1": "I Tuoi Asset Digitali",
+			"title_part_2": "Privato e Sicuro",
 			"logout": "Esci",
 			"lock": "Blocca",
 			"authenticate": "Accedi o Crea",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP e altro",
-			"instant_and_private": "Accesso istantaneo e privato ovunque",
-			"advanced_cryptography": "100% onchain: tranquillità grazie alla crittografia avanzata"
+			"asset_types": "Gestisci gli asset su Bitcoin, Solana, Ethereum, ICP e altro",
+			"instant_and_private": "Assistente AI integrato con privacy come standard",
+			"advanced_cryptography": "Protetto da crittografia avanzata – 100% on-chain"
 		},
 		"alt": {
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Non sei connesso. Effettua il login per continuare.",
@@ -422,6 +429,11 @@
 				"participate_title": "Guadagna BTC rimanendo attivo - e ora invitando altri.",
 				"description": "Soddisfa semplici requisiti settimanali: accedi, effettua due transazioni e detieni almeno 20$ in token per rimanere idoneo a drop di BTC fino a 50$ ogni giorno.<br>Ora con ricompense per i referral: invita un amico a creare un portafoglio e guadagnerete entrambi Sprinkles garantiti. Entra tra i primi 4 referrer e vinci un jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Benvenuto in $oisy_short!",
+					"subtitle": "Pronto a guadagnare?",
+					"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Invita 4 amici e ottieni un bonus garantito."
+				},
 				"win": {
 					"default": {
 						"title": "Sei stato ricompensato",
@@ -457,6 +469,11 @@
 				"participate_title": "Guadagna token per attività e referral. Più reti significano più possibilità.",
 				"description": "Rimani attivo per oltre 10 giorni per qualificarti: accedi spesso, completa le azioni del portafoglio e detieni almeno $ 20.<br/>Ogni rete attiva aumenta le tue probabilità con un moltiplicatore multireti.<br/>Guadagna il 10% dagli amici che si qualificano e classificati tra i primi 3 per vincere un Super Sprinkle da $ 200.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Benvenuto in $oisy_short!",
+					"subtitle": "Pronto a guadagnare?",
+					"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Segnala i tuoi amici e ricevi un bonus ogni volta che uno di loro guadagna Sprinkles."
+				},
 				"win": {
 					"default": {
 						"title": "Sei stato ricompensato",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "o usa il link WalletConnect",
 			"proposer": "Proponente",
 			"spender": "",
+			"application": "",
 			"review": "Rivedi i permessi richiesti per $chain_name ($key)",
 			"method": "Metodo",
 			"methods": "Metodi",
@@ -1600,7 +1618,7 @@
 			"i_have_accepted": "Ho letto e accetto i",
 			"i_have_accepted_updated": "Ho letto e accetto i aggiornati",
 			"accept_and_continue": "Accetta e continua",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Abbiamo aggiornato $agreements. Utilizzando $oisy_short, confermi di aver letto e accettato gli aggiornamenti."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Si è verificato un errore durante l'aggiornamento dei tuoi accordi."
@@ -1613,7 +1631,7 @@
 				"article": "l'",
 				"possessive": "il nostro "
 			},
-			"title": "Accordo di Licenza di $oisy_name (“Accordo di Licenza”)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1673,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Ricompense OISY"
 		}
-	},
-	"welcome": {
-		"title": "Benvenuto in $oisy_short!",
-		"subtitle": "Pronto a guadagnare?",
-		"description": "Sei a 2 passi dalla tua prima ricompensa: accedi, detieni 20$+ e completa 2 azioni. È tutto ciò che serve per iniziare a guadagnare Sprinkles.<br><br>Vuoi di più? Segnala i tuoi amici e ricevi un bonus ogni volta che uno di loro guadagna Sprinkles."
 	},
 	"temporal": {
 		"seconds_to_duration": {

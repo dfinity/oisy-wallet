@@ -9,7 +9,7 @@
 			"close": "Schließen",
 			"change": "Ändern",
 			"apply": "Anwenden",
-			"retry": "",
+			"retry": "Erneut versuchen",
 			"refresh": "Aktualisieren",
 			"name": "Name",
 			"symbol": "Symbol",
@@ -35,7 +35,11 @@
 			"more_items": "+$items mehr",
 			"select": "Auswählen",
 			"language": "Sprache",
-			"currency": "Währung"
+			"currency": "Währung",
+			"confirm": "Bestätigen",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Nur zu Testzwecken!",
@@ -48,11 +52,13 @@
 			"open_details": "Details öffnen",
 			"close_details": "Details schließen",
 			"switch_language": "Sprache wechseln",
-			"switch_currency": "Währung wechseln"
+			"switch_currency": "Währung wechseln",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Schließe diesen Tab nicht, bis die Transaktion abgeschlossen ist",
-			"standalone_mode": ""
+			"standalone_mode": "Deine $oisy_short Wallet is momentan als Standalone App auf deinem Mobiltelefon installiert. Dies verhindert, dass andere ICP Applikationen auf $oisy_short zugreifen können. Du kannst $oisy_short von deinem Homescreen löschen, und es dann erneut installieren. $oisy_short wird dann so instaklliert, dass du in anderen apps auf $oisy_short zugreifen und Transacktionen signieren kannst."
 		}
 	},
 	"navigation": {
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Dezentralisiert",
+			"title_part_1": "Dein Digitales Vermögen",
+			"title_part_2": "Vertraulich und Sicher",
 			"logout": "Abmelden",
 			"lock": "Sperren",
 			"authenticate": "Anmelden",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP und mehr",
-			"instant_and_private": "Sofortiger und privater Zugriff überall",
-			"advanced_cryptography": "100% On-Chain: Sicherheit durch fortschrittliche Kryptographie"
+			"asset_types": "Verwalte Vermögen in Bitcoin, Solana, Ethereum, ICP und mehr",
+			"instant_and_private": "Eingebauter KI Assistent, mit Vertraulichkeit als Standard",
+			"advanced_cryptography": "Sicherheit durch fortschrittliche Kryptographie - 100% On-Chain"
 		},
 		"alt": {
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Du bist nicht angemeldet. Bitte melde Dich an, um fortzufahren.",
@@ -422,6 +429,11 @@
 				"participate_title": "Verdiene BTC durch Aktivität – und jetzt auch durch Einladungen.",
 				"description": "Erfülle einfache wöchentliche Bedingungen: Melde Dich an, mach zwei Transaktionen und halte mindestens $20 in Token, um täglich für bis zu $50 in BTC-Drops berechtigt zu sein.<br>Jetzt neu mit Empfehlungsbelohnungen: Lade einen Freund ein, eine Wallet einzurichten – und ihr bekommt beide garantierte Sprinkles. Schaffst Du es unter die Top 4 Werber, gewinnst Du den Jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=Ich%20verdiene%20%24BTC%20mit%20%40OISY%20Sprinkles%20%E2%80%93%20so%20einfach%20war%E2%80%99s%20noch%20nie.%0A%0A%E2%80%93%20Anmelden%0A%E2%80%93%20Token%20halten%0A%E2%80%93%202%20Aktionen%20ausf%C3%BChren%0A%0A...und%20ich%20bin%20f%C3%BCr%20bis%20zu%20%2450%20in%20Token%20berechtigt.%0A%0ALade%20ich%204%20Freunde%20ein%2C%20bekommen%20wir%20beide%20garantiert%20%23Airdrop%20Belohnungen%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Werbe vier Freunde und sichere dir einen garantierten Bonus."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -457,6 +469,11 @@
 				"participate_title": "Verdiene Tokens für Aktivitäten und Empfehlungen. Mehr Netzwerke bedeuten mehr Chancen.",
 				"description": "Bleibe 10 Tage lang aktiv, um dich zu qualifizieren: Melden dich häufig an, führe Wallet-Aktionen durch und halte mindestens $20.<br/>Jedes aktive Netzwerk erhöht deine Chancen mit einem Multichain-Multiplikator.<br/>Verdiene 10% von Freunden, die sich qualifizieren, und lande unter den ersten drei, um einen Super Sprinkle im Wert von $200 zu gewinnen.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Wilkommen bei $oisy_short!",
+					"subtitle": "Bereit zum Verdienen?",
+					"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
+				},
 				"win": {
 					"default": {
 						"title": "Du wurdest belohnt",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "oder WalletConnect-Link verwenden",
 			"proposer": "Anfragender",
 			"spender": "",
+			"application": "",
 			"review": "Erforderliche Berechtigungen für $chain_name ($key) prüfen",
 			"method": "Methode",
 			"methods": "Methoden",
@@ -1268,9 +1286,9 @@
 			"interacted_with": "Interagierte mit (Ziel)",
 			"status": "Status",
 			"confirmations": "Bestätigungen",
-			"for": "",
-			"for_copied": "",
-			"expiration": "",
+			"for": "Für",
+			"for_copied": "Adresse in die Zwischenablage kopiert.",
+			"expiration": "Ablaufdatum",
 			"approve_label": ""
 		},
 		"status": {
@@ -1600,7 +1618,7 @@
 			"i_have_accepted": "Ich habe die Bedingungen gelesen und stimme ihnen zu:",
 			"i_have_accepted_updated": "Ich habe die angepassten Bedingungen gelesen und stimme ihnen zu:",
 			"accept_and_continue": "Zustimmen und weiterfahren",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Wir haben $agreements aktualisiert. Wenn sie $oisy_short weiterhin benutzen, bestätigen sie, die Änderungen gelesen und akzeptiert zu haben."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Beim Speichern deiner Bestätigung ist ein Fehler aufgetreten."
@@ -1613,7 +1631,7 @@
 				"article": "die ",
 				"possessive": "unsere "
 			},
-			"title": "$oisy_name Lizenzvereinbarung („Lizenzvereinbarung“)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1673,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
 		}
-	},
-	"welcome": {
-		"title": "Wilkommen bei $oisy_short!",
-		"subtitle": "Bereit zum Verdienen?",
-		"description": "Nur noch zwei Schritte bis zu deiner ersten Prämie: Logge dich ein, halte mindestens $20 und führe zwei Aktionen aus. So kannst du Sprinkles sammeln.<br><br>Du willst mehr? Empfehle uns deinen Freunden und sichere dir jedes mal einen Bonus, wenn einer Sprinkles bekommt."
 	},
 	"temporal": {
 		"seconds_to_duration": {

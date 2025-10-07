@@ -35,7 +35,11 @@
 			"more_items": "+$items еще",
 			"select": "Выбрать",
 			"language": "Язык",
-			"currency": "Валюта"
+			"currency": "Валюта",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Только для тестирования!",
@@ -48,7 +52,9 @@
 			"open_details": "Открыть детали",
 			"close_details": "Закрыть детали",
 			"switch_language": "Сменить язык",
-			"switch_currency": "Сменить валюту"
+			"switch_currency": "Сменить валюту",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Децентрализованный",
+			"title_part_1": "",
+			"title_part_2": "",
 			"logout": "Выйти",
 			"lock": "",
 			"authenticate": "Открыть или Создать",
-			"asset_types": "Биткойн, Солана, Эфириум, ICP и другие",
-			"instant_and_private": "Мгновенный и приватный доступ в любом месте",
-			"advanced_cryptography": "100% ончейн: душевное спокойствие благодаря продвинутой криптографии"
+			"asset_types": "",
+			"instant_and_private": "",
+			"advanced_cryptography": ""
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Вы не вошли в систему. Пожалуйста, войдите, чтобы продолжить.",
@@ -422,6 +429,11 @@
 				"participate_title": "Зарабатывайте BTC, оставаясь активными, и теперь, приглашая других.",
 				"description": "Выполняйте простые еженедельные требования: войдите в систему, совершите две транзакции и держите не менее $20 в токенах, чтобы иметь право на раздачи BTC до $50 каждый день.<br>Теперь с реферальными вознаграждениями: пригласите друга настроить кошелек, и вы оба получите гарантированные Sprinkles. Попадите в топ-4 рефереров и выиграйте джекпот.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Добро пожаловать в $oisy_short!",
+					"subtitle": "Готовы зарабатывать?",
+					"description": "Вы в 2 шагах от своей первой награды: войдите в систему, держите $20+ и выполните 2 действия. Это все что нужно чтобы начать зарабатывать Sprinkles.<br><br>Хотите больше? Пригласите 4 друзей и получите гарантированный бонус."
+				},
 				"win": {
 					"default": {
 						"title": "Вы получили вознаграждение",
@@ -457,6 +469,11 @@
 				"participate_title": "",
 				"description": "",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Добро пожаловать в $oisy_short!",
+					"subtitle": "Готовы зарабатывать?",
+					"description": ""
+				},
 				"win": {
 					"default": {
 						"title": "",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "или использовать ссылку WalletConnect",
 			"proposer": "Инициатор",
 			"spender": "",
+			"application": "",
 			"review": "Проверить необходимые разрешения $chain_name ($key)",
 			"method": "Метод",
 			"methods": "Методы",
@@ -1673,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Награды OISY"
 		}
-	},
-	"welcome": {
-		"title": "Добро пожаловать в $oisy_short!",
-		"subtitle": "Готовы зарабатывать?",
-		"description": "Вы в 2 шагах от своей первой награды: войдите в систему, держите $20+ и выполните 2 действия. Это все что нужно чтобы начать зарабатывать Sprinkles.<br><br>Хотите больше? Пригласите 4 друзей и получите гарантированный бонус."
 	},
 	"temporal": {
 		"seconds_to_duration": {

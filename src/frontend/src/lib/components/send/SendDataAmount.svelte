@@ -7,20 +7,15 @@
 	import { parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		token: Token;
 		exchangeRate?: number;
 		showNullishLabel?: boolean;
 	}
 
-	let {
-		amount = undefined,
-		token,
-		exchangeRate = undefined,
-		showNullishLabel = false
-	}: Props = $props();
+	let { amount, token, exchangeRate, showNullishLabel = false }: Props = $props();
 
-	let bigNumberAmount: bigint = $derived(
+	let bigNumberAmount = $derived(
 		parseToken({
 			value: `${amount ?? 0}`,
 			unitName: token.decimals

@@ -12,7 +12,7 @@
 	import WalletConnectData from '$lib/components/wallet-connect/WalletConnectData.svelte';
 	import WalletConnectModalValue from '$lib/components/wallet-connect/WalletConnectModalValue.svelte';
 	import { ethAddress } from '$lib/derived/address.derived';
-	import { balance } from '$lib/derived/balances.derived';
+	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
@@ -21,6 +21,7 @@
 	interface Props {
 		amount: bigint;
 		destination: string;
+		application: string;
 		data?: string;
 		erc20Approve: boolean;
 		sourceNetwork: EthereumNetwork;
@@ -32,9 +33,10 @@
 	let {
 		amount,
 		destination,
+		application,
 		data,
 		erc20Approve,
-		sourceNetwork,
+		sourceNetwork: sourceNetworkProp,
 		targetNetwork,
 		onApprove,
 		onReject
@@ -44,26 +46,27 @@
 		erc20Approve && nonNullish(data) ? decodeErc20AbiDataValue({ data }) : amount
 	);
 
-	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	const { sendToken, sendTokenId } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	let balance = $derived($balancesStore?.[$sendTokenId]?.data);
 </script>
 
 <ContentWithToolbar>
 	<SendData
 		amount={formatToken({ value: amountDisplay })}
-		balance={$balance}
+		{application}
+		{balance}
 		{destination}
 		source={$ethAddress ?? ''}
 		token={$sendToken}
 	>
-		<WalletConnectModalValue
-			slot="sourceNetwork"
-			label={$i18n.send.text.source_network}
-			ref="source-network"
-		>
-			<NetworkWithLogo network={sourceNetwork} />
-		</WalletConnectModalValue>
+		{#snippet sourceNetwork()}
+			<WalletConnectModalValue label={$i18n.send.text.source_network} ref="source-network">
+				<NetworkWithLogo network={sourceNetworkProp} />
+			</WalletConnectModalValue>
+		{/snippet}
 
-		<div slot="destinationNetwork">
+		{#snippet destinationNetwork()}
 			{#if nonNullish(targetNetwork)}
 				<WalletConnectModalValue
 					label={$i18n.send.text.destination_network}
@@ -72,13 +75,15 @@
 					<NetworkWithLogo network={targetNetwork} />
 				</WalletConnectModalValue>
 			{/if}
-		</div>
+		{/snippet}
 
-		<EthFeeDisplay slot="fee">
-			{#snippet label()}
-				<Html text={$i18n.fee.text.max_fee_eth} />
-			{/snippet}
-		</EthFeeDisplay>
+		{#snippet fee()}
+			<EthFeeDisplay>
+				{#snippet label()}
+					<Html text={$i18n.fee.text.max_fee_eth} />
+				{/snippet}
+			</EthFeeDisplay>
+		{/snippet}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 	</SendData>

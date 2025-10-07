@@ -35,7 +35,11 @@
 			"more_items": "+$items mục khác",
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
-			"currency": "Tiền tệ"
+			"currency": "Tiền tệ",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -48,7 +52,9 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": "Chuyển đổi tiền tệ"
+			"switch_currency": "Chuyển đổi tiền tệ",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Phi tập trung",
+			"title_part_1": "Tài sản số của bạn",
+			"title_part_2": "Riêng tư và An toàn",
 			"logout": "Đăng xuất",
 			"lock": "Khóa",
 			"authenticate": "Mở hoặc Tạo",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP và hơn thế nữa",
-			"instant_and_private": "Nhanh và riêng tư mọi lúc mọi nơi",
-			"advanced_cryptography": "100% onchain: yên tâm với công nghê bảo mật hàng đầu"
+			"asset_types": "Quản lý tài sản trên BTC, SOL, ETH, ICP và nhiều hơn nữa",
+			"instant_and_private": "Trợ lý AI tích hợp theo chuẩn bảo mật",
+			"advanced_cryptography": "Được bảo mật bằng mã hoá tiên tiến — 100% onchain"
 		},
 		"alt": {
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
@@ -422,6 +429,11 @@
 				"participate_title": "Kiếm BTC bằng cách duy trì hoạt động - và bây giờ bằng cách mời người khác.",
 				"description": "Đáp ứng các yêu cầu hàng tuần đơn giản: đăng nhập, thực hiện hai giao dịch và giữ ít nhất 20$ token để đủ điều kiện nhận các đợt phát BTC lên đến 50$ mỗi ngày.<br>Giờ đây với phần thưởng giới thiệu: mời một người bạn thiết lập ví và cả hai bạn sẽ kiếm được Sprinkles được đảm bảo. Lọt vào top 4 người giới thiệu hàng đầu và giành được giải độc đắc.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu 4 người bạn và nhận một khoản tiền thưởng."
+				},
 				"win": {
 					"default": {
 						"title": "Bạn đã được thưởng",
@@ -457,6 +469,11 @@
 				"participate_title": "Nhận token cho hoạt động và lượt giới thiệu. Nhiều chuỗi hơn đồng nghĩa với nhiều cơ hội hơn.",
 				"description": "Duy trì hoạt động trong hơn 10 ngày để đủ điều kiện: đăng nhập thường xuyên, hoàn thành các hành động trong ví và giữ ít nhất 20 đô la.<br/>Mỗi chuỗi hoạt động sẽ tăng cơ hội của bạn với Hệ số nhân đa chuỗi.<br/>Kiếm 10% từ những người bạn đủ điều kiện và xếp hạng trong top 3 để giành được giải thưởng Super Sprinkle trị giá 200 đô la.",
 				"campaign_href": "https://x.com/intent/post?text=Sprinkles%20are%20live%20on%20%40OISY%20Wallet.%0A%24BTC%20drops.%20All%20day.%20Every%20day.%0A%0AI%20just%20got%20mine.%20OISY.com%20is%20where%20it%E2%80%99s%20happening.",
+				"welcome": {
+					"title": "Chào mừng đến với $oisy_short!",
+					"subtitle": "Sẵn sàng kiếm tiền?",
+					"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
+				},
 				"win": {
 					"default": {
 						"title": "Bạn đã được thưởng",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "hoặc sử dụng liên kết WalletConnect",
 			"proposer": "Người đề xuất",
 			"spender": "",
+			"application": "",
 			"review": "Xem lại quyền cần thiết của $chain_name ($key)",
 			"method": "Hàm",
 			"methods": "Hàm",
@@ -1600,7 +1618,7 @@
 			"i_have_accepted": "Tôi đã đọc và đồng ý với",
 			"i_have_accepted_updated": "Tôi đã đọc và đồng ý với phiên bản cập nhật của",
 			"accept_and_continue": "Chấp nhận và tiếp tục",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Chúng tôi đã cập nhật $agreements. Bằng cách sử dụng $oisy_short, bạn xác nhận rằng bạn đã đọc và đồng ý với các cập nhật."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Đã xảy ra lỗi khi cập nhật các thỏa thuận của bạn."
@@ -1673,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Phần thưởng OISY"
 		}
-	},
-	"welcome": {
-		"title": "Chào mừng đến với $oisy_short!",
-		"subtitle": "Sẵn sàng kiếm tiền?",
-		"description": "Bạn chỉ còn 2 bước nữa là nhận phần thưởng đầu tiên: Đăng nhập, giữ hơn $20 và hoàn thành 2 hành động. Đó là tất cả những gì cần thiết để bắt đầu kiếm Sprinkles.<br><br>Muốn nhiều hơn? Giới thiệu bạn bè và nhận tiền thưởng mỗi khi một trong số họ kiếm được điểm."
 	},
 	"temporal": {
 		"seconds_to_duration": {

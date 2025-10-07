@@ -2,6 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import SendDataAmount from '$lib/components/send/SendDataAmount.svelte';
+	import SendDataApplication from '$lib/components/send/SendDataApplication.svelte';
 	import SendDataDestination from '$lib/components/send/SendDataDestination.svelte';
 	import SendSource from '$lib/components/send/SendSource.svelte';
 	import type { OptionBalance } from '$lib/types/balance';
@@ -10,39 +11,45 @@
 
 	interface Props {
 		destination: string | null;
-		amount?: OptionAmount;
+		amount: OptionAmount;
 		token: Token;
 		exchangeRate?: number;
 		balance: OptionBalance;
 		source: string;
+		application: string;
 		showNullishAmountLabel?: boolean;
-		network?: Snippet;
-		children?: Snippet;
+		sourceNetwork: Snippet;
+		destinationNetwork?: Snippet;
 		fee?: Snippet;
+		children?: Snippet;
 	}
 
 	let {
 		destination,
-		amount = undefined,
+		amount,
 		token,
-		exchangeRate = undefined,
+		exchangeRate,
 		balance,
 		source,
+		application,
 		showNullishAmountLabel = false,
-		network,
-		children,
-		fee
+		sourceNetwork,
+		destinationNetwork,
+		fee,
+		children
 	}: Props = $props();
 </script>
 
-<slot name="sourceNetwork" />
+<SendDataApplication {application} />
 
-{@render network?.()}
+{@render sourceNetwork()}
+
+{@render destinationNetwork?.()}
 
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
 {@render children?.()}
 
-<SendSource {balance} {exchangeRate} {source} {token} />
-
 {@render fee?.()}
+
+{@render children?.()}

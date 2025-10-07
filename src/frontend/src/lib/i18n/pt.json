@@ -35,7 +35,11 @@
 			"more_items": "+$items mais",
 			"select": "Selecionar",
 			"language": "Linguagem",
-			"currency": "Moeda"
+			"currency": "Moeda",
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Apenas para fins de teste!",
@@ -48,7 +52,9 @@
 			"open_details": "Abrir detalhes",
 			"close_details": "Fechar detalhes",
 			"switch_language": "Mudar linguagem",
-			"switch_currency": "Mudar moeda"
+			"switch_currency": "Mudar moeda",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Não feche esta aba até que a transação esteja concluída",
@@ -103,20 +109,21 @@
 	},
 	"auth": {
 		"text": {
-			"title_part_1": "$oisy_name",
-			"title_part_2": "100% Descentralizado",
+			"title_part_1": "Seus Ativos Digitais",
+			"title_part_2": "Privados e Seguros",
 			"logout": "Sair",
 			"lock": "Bloquear",
 			"authenticate": "Abrir ou Criar",
-			"asset_types": "Bitcoin, Solana, Ethereum, ICP e mais",
-			"instant_and_private": "Acesso instantâneo e privado em qualquer lugar",
-			"advanced_cryptography": "100% onchain: tranquilidade através de criptografia avançada"
+			"asset_types": "Gerencie ativos em BTC, SOL, ETH, ICP e muito mais",
+			"instant_and_private": "Assistente IA integrado — Privacidade como padrão",
+			"advanced_cryptography": "Protegido por criptografia avançada — 100% onchain"
 		},
 		"alt": {
 			"preview": "Pré-visualização de $oisy_name após o login, tanto no desktop quanto no celular"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Você não está logado. Por favor, faça login para continuar.",
@@ -422,6 +429,11 @@
 				"participate_title": "Ganhe BTC mantendo-se ativo - e agora também por convidar outras pessoas.",
 				"description": "Cumpra requisitos semanais simples: inicie sessão, faça duas transações e tenha pelo menos 20 dólares em tokens para continuar elegível para ganhar até 50 dólares em BTC por dia. <br>Agora com recompensas por referência: convide um amigo para criar uma carteira e ambos ganharão Sprinkles garantidos. Esteja entre os 4 melhores nomeados e ganhe um jackpot.",
 				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique 4 amigos e ganhe um bônus garantido."
+				},
 				"win": {
 					"default": {
 						"title": "Você foi recompensado",
@@ -457,6 +469,11 @@
 				"participate_title": "Ganhe tokens por atividades e indicações. Mais cadeias significam mais chances.",
 				"description": "Permaneça ativo por mais de 10 dias para se qualificar: faça login com frequência, conclua ações da carteira e mantenha pelo menos US$ 20.<br/>Cada cadeia ativa aumenta suas chances com um Multiplicador Multicadeia.<br/>Ganhe 10% de amigos que se qualificarem e fique entre os 3 primeiros para ganhar um Super Sprinkle de US$ 200.",
 				"campaign_href": "",
+				"welcome": {
+					"title": "Bem vindo ao $oisy_curtas!",
+					"subtitle": "Pronto para ganhar?",
+					"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
+				},
 				"win": {
 					"default": {
 						"title": "Você foi recompensado",
@@ -1190,6 +1207,7 @@
 			"or_use_link": "ou usar link WalletConnect",
 			"proposer": "Proponente",
 			"spender": "",
+			"application": "",
 			"review": "Rever permissões necessárias de $chain_name ($key)",
 			"method": "Método",
 			"methods": "Métodos",
@@ -1600,7 +1618,7 @@
 			"i_have_accepted": "Li e concordo com os",
 			"i_have_accepted_updated": "Li e concordo com os atualizados",
 			"accept_and_continue": "Aceite e continue",
-			"updated_agreements_warning": ""
+			"updated_agreements_warning": "Atualizamos $agreements. Ao usar $oisy_short, você confirma que leu e concorda com as atualizações."
 		},
 		"error": {
 			"cannot_update_user_agreements": "Algo deu errado ao atualizar seus acordos."
@@ -1610,10 +1628,10 @@
 		"text": {
 			"license_agreement": "Contrato de Licença",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "o ",
+				"possessive": "nosso "
 			},
-			"title": "Contrato de Licença $oisy_name (“Contrato de Licença”)",
+			"title": "",
 			"body": ""
 		},
 		"alt": {
@@ -1624,8 +1642,8 @@
 		"text": {
 			"terms_of_use": "Termos de Uso",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "os ",
+				"possessive": "nossos "
 			},
 			"title": "",
 			"instruction": "Ao clicar neste botão, você concorda com os $link",
@@ -1639,8 +1657,8 @@
 		"text": {
 			"privacy_policy": "Política de Privacidade",
 			"det": {
-				"article": "",
-				"possessive": ""
+				"article": "a ",
+				"possessive": "nossa "
 			},
 			"title": "",
 			"body": ""
@@ -1673,11 +1691,6 @@
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Recompensas OISY"
 		}
-	},
-	"welcome": {
-		"title": "Bem vindo ao $oisy_curtas!",
-		"subtitle": "Pronto para ganhar?",
-		"description": "Você está a 2 passos da sua primeira recompensa: faça login, mantenha mais de US $20 em tokens e conclua 2 ações. É tudo o que você precisa para começar a ganhar Sprinkles.<br><br>Quer mais? Indique seus amigos e ganhe um bônus toda vez que um deles ganhar granulados."
 	},
 	"temporal": {
 		"seconds_to_duration": {

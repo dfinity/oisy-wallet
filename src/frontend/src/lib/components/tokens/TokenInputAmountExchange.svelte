@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { preventDefault } from 'svelte/legacy';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
@@ -19,8 +20,8 @@
 
 	interface Props {
 		amount: OptionAmount;
-		exchangeRate: number | undefined;
-		token?: Token | undefined;
+		exchangeRate?: number;
+		token?: Token;
 		displayUnit?: DisplayUnit;
 		disabled?: boolean;
 	}
@@ -28,7 +29,7 @@
 	let {
 		amount,
 		exchangeRate,
-		token = undefined,
+		token,
 		displayUnit = $bindable('usd'),
 		disabled = false
 	}: Props = $props();
@@ -37,7 +38,7 @@
 		displayUnit = displayUnit === 'usd' ? 'token' : 'usd';
 	};
 
-	let formattedUSDAmount: string | undefined = $derived(
+	let formattedUSDAmount = $derived(
 		formatCurrency({
 			value: nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : 0,
 			currency: $currentCurrency,
@@ -46,7 +47,7 @@
 		})
 	);
 
-	let formattedTokenAmount: string | undefined = $derived(
+	let formattedTokenAmount = $derived(
 		nonNullish(token) ? `${nonNullish(amount) ? amount : 0} ${token.symbol}` : '0'
 	);
 </script>

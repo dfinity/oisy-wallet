@@ -17,13 +17,13 @@
 		exchangeRate?: number;
 	}
 
-	let { amount = undefined, exchangeRate = undefined }: Props = $props();
+	let { amount, exchangeRate }: Props = $props();
 
-	let usdValue: number | undefined = $derived(
+	let usdValue = $derived(
 		nonNullish(amount) && nonNullish(exchangeRate) ? Number(amount) * exchangeRate : undefined
 	);
 
-	let displayValue: string | undefined = $derived(
+	let displayValue = $derived(
 		nonNullish(usdValue)
 			? formatCurrency({
 					value: usdValue,
