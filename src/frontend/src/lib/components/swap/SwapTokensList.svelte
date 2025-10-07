@@ -21,7 +21,6 @@
 	import type { Token } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import { pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
-	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		onSelectToken: (token: Token) => void;
@@ -41,7 +40,8 @@
 				{ ...ICP_TOKEN, enabled: true },
 				...($allKongSwapCompatibleIcrcTokens.length === 0
 					? $allSwappableTokensDerived
-					: $allKongSwapCompatibleIcrcTokens)
+					: $allKongSwapCompatibleIcrcTokens),
+				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
 			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
 			),
