@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { run } from 'svelte/legacy';
 
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import { onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 	import {
 		SOLANA_DEVNET_TOKEN,
 		SOLANA_LOCAL_TOKEN,

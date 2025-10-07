@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { run as run_1 } from 'svelte/legacy';
 
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
-	import { blur, fade } from 'svelte/transition';
+	import { run as run_1 , run } from 'svelte/legacy';
+		import { blur, fade } from 'svelte/transition';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		loadAndAssertAddCustomToken,
