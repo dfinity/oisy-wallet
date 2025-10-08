@@ -285,7 +285,7 @@ describe('wallet-connect.providers', () => {
 				expect(mockOff).toHaveBeenCalledExactlyOnceWith('session_request', callback);
 			});
 
-			it('should remove a listener for the session proposal event', async () => {
+			it('should remove a listener for the session request event', async () => {
 				const callback = vi.fn();
 
 				const listener = await initWalletConnect(mockParams);
