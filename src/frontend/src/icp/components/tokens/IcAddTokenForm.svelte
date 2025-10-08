@@ -11,8 +11,8 @@
 	}
 
 	let {
-		ledgerCanisterId = $bindable(''),
-		indexCanisterId = $bindable(''),
+		ledgerCanisterId = $bindable(),
+		indexCanisterId = $bindable(),
 		editMode = false
 	}: Props = $props();
 </script>
