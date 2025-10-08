@@ -19,7 +19,6 @@
 	} from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -45,7 +44,6 @@
 
 	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -69,7 +67,6 @@
 
 	const onOpenSwap = async (tokenId: symbol) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

@@ -21,7 +21,6 @@
 	import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 	import { WizardStepsSwap } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { swapService } from '$lib/services/swap.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -101,7 +100,6 @@
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
