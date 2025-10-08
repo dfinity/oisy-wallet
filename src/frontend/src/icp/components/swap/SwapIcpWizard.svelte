@@ -10,6 +10,8 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
+	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
 	import SwapReview from '$lib/components/swap/SwapReview.svelte';
@@ -35,8 +37,6 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
-	import { isIcToken } from '$icp/validation/ic-token.validation';
-	import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -232,12 +232,12 @@
 <IcTokenFeeContext token={$sourceToken as IcToken}>
 	{#if currentStep?.name === WizardStepsSwap.SWAP}
 		<SwapIcpForm
+			{isSourceTokenIcrc2}
 			{isSwapAmountsLoading}
 			{onClose}
 			{onNext}
 			{onShowTokensList}
 			{sourceTokenFee}
-			{isSourceTokenIcrc2}
 			on:icShowProviderList
 			bind:swapAmount
 			bind:receiveAmount
