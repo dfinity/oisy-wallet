@@ -267,8 +267,8 @@ export const loadDisabledIcrcTokensBalances = async ({
 }: {
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
-}): Promise<void[]> =>
-	Promise.all(
+}): Promise<void> => {
+	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
@@ -276,6 +276,13 @@ export const loadDisabledIcrcTokensBalances = async ({
 				ledgerCanisterId
 			});
 
+			return { id, icrcTokenBalance };
+		})
+	);
+
+	results.forEach((result) => {
+		if (result.status === 'fulfilled') {
+			const { id, icrcTokenBalance } = result.value;
 			balancesStore.set({
 				id,
 				data: {
@@ -283,8 +290,9 @@ export const loadDisabledIcrcTokensBalances = async ({
 					certified: true
 				}
 			});
-		})
-	);
+		}
+	});
+};
 
 export const loadDisabledIcrcTokensExchanges = async ({
 	disabledIcrcTokens
