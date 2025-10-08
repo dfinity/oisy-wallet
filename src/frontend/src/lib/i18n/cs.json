@@ -1149,6 +1149,7 @@
 			"media_disabled": "Média zakázána",
 			"enable_media": "Povolit média",
 			"disable_media": "Zakázat média",
+			"keep_media_disabled": "",
 			"open_in_new_tab": "Otevřít v nové záložce",
 			"review_title": "Prohlédnout mediální zdroje pro \"$collectionName\"",
 			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",

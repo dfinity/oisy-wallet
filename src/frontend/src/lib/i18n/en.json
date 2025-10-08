@@ -1149,7 +1149,7 @@
 			"media_disabled": "Media disabled",
 			"enable_media": "Enable media",
 			"disable_media": "Disable media",
-            "keep_media_disabled": "Keep media disabled",
+			"keep_media_disabled": "Keep media disabled",
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
