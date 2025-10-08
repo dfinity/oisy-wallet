@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
+	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
@@ -51,11 +51,11 @@
 
 				<span>
 					<Button
+						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
 						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
 						paddingSmall
 						styleClass="inline-block text-sm"
-						ariaLabel={$i18n.nfts.alt.go_to_collection}
 					>
 						{$i18n.nfts.text.go_to_collection}<IconExpand axis="y" />
 					</Button>
