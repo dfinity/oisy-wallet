@@ -38,7 +38,7 @@
 		to?: string;
 		from?: string;
 		tokenId?: number;
-		children?: Snippet;
+		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
 	}
@@ -95,7 +95,7 @@
 		<Card noMargin withGap>
 			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
 				<span class="truncate first-letter:capitalize">
-					{@render children?.()}
+					{@render children()}
 				</span>
 
 				{#if nonNullish(network)}
