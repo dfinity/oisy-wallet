@@ -1,14 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import {
+		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
-		NFT_COLLECTION_ACTION_NOT_SPAM,
-		NFT_COLLECTION_ACTION_SPAM,
 		NFT_COLLECTION_ACTION_UNHIDE
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -57,6 +55,7 @@
 			button={hideButton}
 			onConfirm={() =>
 				updateNftSection({ section: CustomTokenSection.HIDDEN, token, $authIdentity })}
+			testId={CONFIRMATION_MODAL}
 		>
 			<div class="flex w-full flex-col items-center text-center">
 				<span

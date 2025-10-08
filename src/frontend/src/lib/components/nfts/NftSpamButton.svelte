@@ -4,6 +4,7 @@
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import {
+		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,
 		NFT_COLLECTION_ACTION_SPAM
 	} from '$lib/constants/test-ids.constants';
@@ -50,6 +51,7 @@
 	<ConfirmButtonWithModal
 		button={spamButton}
 		onConfirm={() => updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })}
+		testId={CONFIRMATION_MODAL}
 	>
 		<div class="flex w-full flex-col items-center text-center">
 			<span
