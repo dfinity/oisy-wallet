@@ -271,8 +271,6 @@
 	export const removeSlide = (idx: number) => {
 		slides = (slides ?? []).filter((_, i) => i !== idx);
 
-		totalSlides = slides.length;
-
 		initializeCarousel();
 
 		goToNextSlide();
