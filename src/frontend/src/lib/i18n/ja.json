@@ -1149,7 +1149,8 @@
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
@@ -1157,7 +1158,8 @@
 				"image": "トークンIDが$tokenIdのNFTの画像"
 			},
 			"copy_address": "このアドレスをクリップボードにコピー",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
