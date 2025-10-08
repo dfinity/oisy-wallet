@@ -4,7 +4,6 @@ import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.servic
 import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import * as authServices from '$lib/services/auth.services';
 import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
@@ -129,8 +128,6 @@ describe('nft.services', () => {
 			.spyOn(nftSendServices, 'transferErc1155')
 			.mockResolvedValue({} as unknown as TransactionResponse);
 
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue(undefined);
-
 		const token721: NonFungibleToken = {
 			address: fromAddress,
 			category: 'custom',
@@ -229,7 +226,7 @@ describe('nft.services', () => {
 			);
 		});
 
-		it('signs out (nullishSignOut) and does not call transfer functions when identity is nullish', async () => {
+		it('returns early and does not call transfer functions when identity is nullish', async () => {
 			await sendNft({
 				token: token721,
 				tokenId: parseNftId(42),
@@ -241,7 +238,6 @@ describe('nft.services', () => {
 				maxPriorityFeePerGas
 			});
 
-			expect(signOutSpy).toHaveBeenCalledOnce();
 			expect(transfer721Spy).not.toHaveBeenCalled();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
 		});

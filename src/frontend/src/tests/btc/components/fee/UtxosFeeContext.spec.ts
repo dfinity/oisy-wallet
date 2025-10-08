@@ -11,7 +11,6 @@ import {
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import * as authServices from '$lib/services/auth.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -75,7 +74,7 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call prepareBtcSend if no authIdentity available', async () => {
-		const nullishSignOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const prepareBtcSendSpy = mockBtcUtxosService();
 
 		mockAuthStore(null);
 
@@ -85,7 +84,7 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
 		});
 	});
 

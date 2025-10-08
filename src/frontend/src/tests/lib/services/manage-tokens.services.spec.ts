@@ -12,16 +12,11 @@ import {
 } from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { saveTokens } from '$lib/services/manage-tokens.services';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$lib/services/analytics.services', () => ({
 	trackEvent: vi.fn()
@@ -63,10 +58,9 @@ describe('manage-tokens.services', () => {
 			vi.spyOn(toastsStore, 'toastsError');
 		});
 
-		it('should call nullishSignOut if identity is nullish', async () => {
+		it('should return early if identity is nullish', async () => {
 			await saveTokens({ ...params, identity: null });
 
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 			expect(mockSave).not.toHaveBeenCalled();
 		});
 
