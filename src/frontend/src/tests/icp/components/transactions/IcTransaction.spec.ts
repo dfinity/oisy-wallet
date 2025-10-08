@@ -88,7 +88,7 @@ describe('IcTransaction', () => {
 			}
 		});
 
-		const labelElement = container.querySelector('span.text-left span.truncate');
+		const labelElement = container.querySelector('span.basis-0 span.truncate');
 
 		assertNonNullish(labelElement);
 
