@@ -5,11 +5,7 @@
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
-	import {
-		allCrossChainSwapTokens,
-		allKongSwapCompatibleIcrcTokens,
-		allSwappableTokensDerived
-	} from '$lib/derived/all-tokens.derived';
+	import { allCrossChainSwapTokens, allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,9 +34,7 @@
 		pinTokensWithBalanceAtTop({
 			$tokens: [
 				{ ...ICP_TOKEN, enabled: true },
-				...($allKongSwapCompatibleIcrcTokens.length === 0
-					? $allSwappableTokensDerived
-					: $allKongSwapCompatibleIcrcTokens),
+				...$allIcrcTokens,
 				...(VELORA_SWAP_ENABLED ? $allCrossChainSwapTokens : [])
 			].filter(
 				(token: Token) => token.id !== $sourceToken?.id && token.id !== $destinationToken?.id
