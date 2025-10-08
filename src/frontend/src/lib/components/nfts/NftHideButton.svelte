@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEye from '$lib/components/icons/lucide/IconEye.svelte';
@@ -17,9 +18,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
-	import { findNftsByToken } from '$lib/utils/nfts.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { Html } from '@dfinity/gix-components';
+	import { findNftsByToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		token: NonFungibleToken;
