@@ -2,24 +2,24 @@
 https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { ProgressSteps as ProgressStepsCmp, type ProgressStep } from '@dfinity/gix-components';
-	import { run } from 'svelte/legacy';
+	import { untrack } from 'svelte';
 	import StaticSteps from '$lib/components/ui/StaticSteps.svelte';
 	import type { ProgressSteps } from '$lib/types/progress-steps';
 	import type { StaticStep } from '$lib/types/steps';
 	import type { NonEmptyArray } from '$lib/types/utils';
 
-	export let progressStep: string;
-	export let steps: NonEmptyArray<ProgressStep | StaticStep>;
-	export let type: 'progress' | 'static' = 'progress';
-	export let failedSteps: string[] = [];
+	interface Props {
+		progressStep: string;
+		steps: NonEmptyArray<ProgressStep | StaticStep>;
+		type?: 'progress' | 'static';
+		failedSteps?: string[];
+	}
 
-	let { progressStep, steps, type = 'progress' }: Props = $props();
+	let { progressStep, steps, type = 'progress', failedSteps = [] }: Props = $props();
 
-	let cmp: typeof StaticSteps | typeof ProgressStepsCmp = $derived(
-		type === 'static' ? StaticSteps : ProgressStepsCmp
-	);
+	let Cmp = $derived(type === 'static' ? StaticSteps : ProgressStepsCmp);
 
-	let dynamicSteps: ProgressSteps = $state([
+	let dynamicSteps = $state<ProgressSteps>([
 		// TODO: have a look if there is a better solution than casting
 		...(steps as ProgressSteps)
 	]);
@@ -42,13 +42,13 @@ https://svelte.dev/e/js_parse_error -->
 		}) as ProgressSteps;
 	};
 
-	run(() => {
-		(progressStep, updateSteps());
-	});
+	$effect(() => {
+		[progressStep];
 
-	const SvelteComponent = $derived(cmp);
+		untrack(() => updateSteps());
+	});
 </script>
 
 <div class="px-2 pb-3">
-	<SvelteComponent steps={dynamicSteps} />
+	<Cmp steps={dynamicSteps} />
 </div>

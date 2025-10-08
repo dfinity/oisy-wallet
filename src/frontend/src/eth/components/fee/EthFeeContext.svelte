@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext, onDestroy, onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -47,23 +46,25 @@
 		amount?: OptionAmount;
 		data?: string;
 		sourceNetwork: EthereumNetwork;
-		targetNetwork?: Network | undefined;
+		targetNetwork?: Network;
 		nativeEthereumToken: Token;
 		sendToken: Token;
 		sendTokenId: TokenId;
-		children?: Snippet;
+		sendNft?: Nft;
+		children: Snippet;
 	}
 
 	let {
 		observe,
 		destination = '',
-		amount = undefined,
-		data = undefined,
+		amount,
+		data,
 		sourceNetwork,
-		targetNetwork = undefined,
+		targetNetwork,
 		nativeEthereumToken,
 		sendToken,
 		sendTokenId,
+		sendNft,
 		children
 	}: Props = $props();
 
@@ -73,7 +74,7 @@
 	 * Updating and fetching fee
 	 */
 
-	let listener: WebSocketListener | undefined = undefined;
+	let listener = $state<WebSocketListener | undefined>();
 
 	const errorMsgs: symbol[] = [];
 
@@ -210,11 +211,11 @@
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
-	let listenerCallbackTimer: NodeJS.Timeout | undefined;
+	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 
-	let isDestroyed = false;
+	let isDestroyed = $state(false);
 
-	const obverseFeeData = async (watch: boolean) => {
+	const obverseFeeData = async () => {
 		const throttledCallback = () => {
 			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
@@ -234,7 +235,7 @@
 			return;
 		}
 
-		if (!watch) {
+		if (!observe) {
 			return;
 		}
 
@@ -250,6 +251,7 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
+
 	onDestroy(async () => {
 		isDestroyed = true;
 		await listener?.disconnect();
@@ -261,15 +263,18 @@
 	 * Observe input properties for erc20
 	 */
 
-	run(() => {
-		obverseFeeData(observe);
+	$effect(() => {
+		[observe];
+
+		untrack(() => obverseFeeData());
 	});
 
-	run(() => {
-		($ckEthMinterInfoStore,
-			(() => {
-				observe && debounceUpdateFeeData();
-			})());
+	$effect(() => {
+		[$ckEthMinterInfoStore];
+
+		if (observe) {
+			untrack(() => debounceUpdateFeeData());
+		}
 	});
 
 	/**
@@ -278,4 +283,4 @@
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
-{@render children?.()}
+{@render children()}

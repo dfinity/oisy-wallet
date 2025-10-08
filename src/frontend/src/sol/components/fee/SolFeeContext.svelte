@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext, onDestroy } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import {
@@ -22,7 +21,7 @@
 	interface Props {
 		observe: boolean;
 		destination?: string;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { observe, destination = '', children }: Props = $props();
@@ -55,11 +54,13 @@
 		timer = setInterval(estimateFee, 5000);
 	};
 
-	run(() => {
-		($sendTokenNetworkId, (async () => await updateFee())());
+	$effect(() => {
+		[$sendTokenNetworkId];
+
+		untrack(() => updateFee());
 	});
 
-	let timer: NodeJS.Timeout | undefined;
+	let timer = $state<NodeJS.Timeout | undefined>();
 
 	const clearTimer = () => clearInterval(timer);
 
@@ -73,7 +74,7 @@
 
 		const solNetwork = safeMapNetworkIdToNetwork($sendTokenNetworkId);
 
-		// we check if it is an ATA address and if it is not closed, if it isnt an ATA address or has been closed we need to charge the ATA fee
+		// we check if it is an ATA address and if it is not closed, if it isn't an ATA address or has been closed, we need to charge the ATA fee
 		if (
 			(await isAtaAddress({ address: destination, network: solNetwork })) &&
 			(await checkIfAccountExists({ address: destination, network: solNetwork }))
@@ -98,9 +99,11 @@
 		ataFeeStore.setFee(ataFee);
 	};
 
-	run(() => {
-		(destination, $sendToken, updateAtaFee());
+	$effect(() => {
+		[destination, $sendToken];
+
+		untrack(() => updateAtaFee());
 	});
 </script>
 
-{@render children?.()}
+{@render children()}

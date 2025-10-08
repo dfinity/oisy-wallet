@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
-	import { run, preventDefault } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import EthAddTokenForm from '$eth/components/tokens/EthAddTokenForm.svelte';
 	import IcAddTokenForm from '$icp/components/tokens/IcAddTokenForm.svelte';
@@ -24,46 +23,36 @@
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
 
 	interface Props {
-		network: Network | undefined;
+		network?: Network;
 		tokenData: Partial<AddTokenData>;
+		onBack: () => void;
+		onNext: () => void;
 	}
 
-	let { network = $bindable(), tokenData = $bindable() }: Props = $props();
+	let { network = $bindable(), tokenData = $bindable(), onBack, onNext }: Props = $props();
 
-	let networkName: string | undefined = $state(network?.name);
-	run(() => {
-		(networkName,
-			(network = nonNullish(networkName)
-				? $networks.find(({ name }) => name === networkName)
-				: undefined));
+	let networkName = $state<string | undefined>(network?.name);
+
+	$effect(() => {
+		network = nonNullish(networkName)
+			? $networks.find(({ name }) => name === networkName)
+			: undefined;
 	});
 
-	let isIcpNetwork = $state(false);
-	run(() => {
-		isIcpNetwork = isNetworkIdICP(network?.id);
-	});
+	let isIcpNetwork = $derived(isNetworkIdICP(network?.id));
 
-	let isEthereumNetwork = $state(false);
-	run(() => {
-		isEthereumNetwork = isNetworkIdEthereum(network?.id);
-	});
+	let isEthereumNetwork = $derived(isNetworkIdEthereum(network?.id));
 
-	let isEvmNetwork = $state(false);
-	run(() => {
-		isEvmNetwork = isNetworkIdEvm(network?.id);
-	});
+	let isEvmNetwork = $derived(isNetworkIdEvm(network?.id));
 
-	let isSolanaNetwork = $state(false);
-	run(() => {
-		isSolanaNetwork = isNetworkIdSolana(network?.id);
-	});
+	let isSolanaNetwork = $derived(isNetworkIdSolana(network?.id));
 
 	let { ledgerCanisterId, indexCanisterId, ethContractAddress, splTokenAddress } =
-		$state(tokenData);
+		$derived(tokenData);
 
-	// Since we persist the values of relevant variables when switching networks, this ensures that
-	// only the data related to the selected network is passed.
-	run(() => {
+	$effect(() => {
+		// Since we persist the values of relevant variables when switching networks, this ensures that
+		// only the data related to the selected network is passed.
 		if (isIcpNetwork) {
 			tokenData = {
 				ledgerCanisterId,
@@ -81,49 +70,33 @@
 		}
 	});
 
-	const dispatch = createEventDispatcher();
+	let invalidEth = $derived(isNullishOrEmpty(ethContractAddress));
 
-	let invalidEth = $state(true);
-	run(() => {
-		invalidEth = isNullishOrEmpty(ethContractAddress);
-	});
+	let invalidIc = $derived(isNullishOrEmpty(ledgerCanisterId));
 
-	let invalidIc = $state(true);
-	run(() => {
-		invalidIc = isNullishOrEmpty(ledgerCanisterId);
-	});
+	let invalidSpl = $derived(isNullishOrEmpty(splTokenAddress));
 
-	let invalidSpl = $state(true);
-	run(() => {
-		invalidSpl = isNullishOrEmpty(splTokenAddress);
-	});
-
-	let invalid = $state(true);
-	run(() => {
-		invalid = isIcpNetwork
+	let invalid = $derived(
+		isIcpNetwork
 			? invalidIc
 			: isEthereumNetwork || isEvmNetwork
 				? invalidEth
 				: isSolanaNetwork
 					? invalidSpl
-					: true;
-	});
+					: true
+	);
 
-	let enabledNetworkSelector = $state(true);
-	run(() => {
-		enabledNetworkSelector = isNullish($selectedNetwork);
-	});
+	let enabledNetworkSelector = $derived(isNullish($selectedNetwork));
 
-	let availableNetworks: Network[] = $state([]);
 	// filter out BTC networks - they do not have custom tokens
-	run(() => {
-		availableNetworks = (
-			$selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets
-		).filter(({ id }) => !isNetworkIdBitcoin(id));
-	});
+	let availableNetworks = $derived(
+		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
+			({ id }) => !isNetworkIdBitcoin(id)
+		)
+	);
 </script>
 
-<form class="min-h-auto" method="POST" onsubmit={preventDefault(() => dispatch('icNext'))} in:fade>
+<form class="min-h-auto" method="POST" onsubmit={preventDefault(onNext)} in:fade>
 	<ContentWithToolbar>
 		{#if enabledNetworkSelector}
 			<AddTokenByNetworkDropdown {availableNetworks} bind:networkName />
@@ -140,7 +113,7 @@
 		{/if}
 
 		{#snippet toolbar()}
-			<AddTokenByNetworkToolbar {invalid} on:icBack />
+			<AddTokenByNetworkToolbar {invalid} {onBack} />
 		{/snippet}
 	</ContentWithToolbar>
 </form>
