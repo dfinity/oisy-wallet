@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "$oisy_short is currently installed as 'Web App' on your mobile phone, which prevents it from being connected to other ICP dapps. Install it without the 'Open as Web App' setting to allow signing transactions from other applications."
+			"standalone_mode": "$oisy_short is currently installed as 'Web App' on your mobile phone, which prevents it from being connected to other ICP dapps. <br>You can remove it from your Homescreen and install it again (on iPhones, de-select the 'Open as Web App' option!). This will install $oisy_short in a way that will allow you to sign transactions from other applications."
 		}
 	},
 	"navigation": {
