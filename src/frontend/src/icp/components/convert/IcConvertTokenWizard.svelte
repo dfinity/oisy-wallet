@@ -229,7 +229,6 @@
 				{receiveAmount}
 				{sendAmount}
 				on:icConvert={convert}
-				on:icBack={onBack}
 			>
 				<ButtonBack slot="cancel" onclick={back} />
 			</IcConvertReview>

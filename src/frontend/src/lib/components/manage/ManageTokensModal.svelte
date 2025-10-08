@@ -320,16 +320,16 @@
 			<IcAddTokenReview
 				{indexCanisterId}
 				{ledgerCanisterId}
-				on:icBack={modal.back}
-				on:icSave={addIcrcToken}
+				onBack={modal.back}
+				onSave={addIcrcToken}
 				bind:metadata={icrcMetadata}
 			/>
 		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
 			<EthAddTokenReview
 				contractAddress={ethContractAddress}
 				{network}
-				on:icBack={modal.back}
-				on:icSave={saveEthToken}
+				onBack={modal.back}
+				onSave={saveEthToken}
 				bind:metadata={ethMetadata}
 			/>
 		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
@@ -348,7 +348,7 @@
 			warningType="manage"
 		/>
 	{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
-		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
+		<AddTokenByNetwork onBack={modal.back} onNext={modal.next} bind:network bind:tokenData />
 	{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
 		<ManageTokens
 			{infoElement}

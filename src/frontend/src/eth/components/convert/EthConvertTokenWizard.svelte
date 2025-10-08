@@ -10,7 +10,10 @@
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { nativeEthereumTokenWithFallback } from '$eth/derived/token.derived';
 	import { send as executeSend } from '$eth/services/send.services';
-	import { ETH_FEE_CONTEXT_KEY } from '$eth/stores/eth-fee.store';
+	import {
+		type EthFeeContext as EthFeeContextType,
+		ETH_FEE_CONTEXT_KEY
+	} from '$eth/stores/eth-fee.store';
 	import type { ProgressStep } from '$eth/types/send';
 	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isErc20Icp } from '$eth/utils/token.utils';
@@ -66,7 +69,7 @@
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	const { feeStore } = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+	const { feeStore } = getContext<EthFeeContextType>(ETH_FEE_CONTEXT_KEY);
 
 	let destination = $derived(
 		isTokenErc20($sourceToken)
@@ -204,7 +207,7 @@
 			</svelte:fragment>
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
+		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert}>
 			<ButtonBack slot="cancel" onclick={back} />
 		</EthConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
