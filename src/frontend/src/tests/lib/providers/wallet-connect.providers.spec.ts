@@ -4,7 +4,6 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
-import type { ICore, IPairing } from '@walletconnect/types';
 import { getSdkError } from '@walletconnect/utils';
 
 describe('wallet-connect.providers', () => {
@@ -51,11 +50,11 @@ describe('wallet-connect.providers', () => {
 			respondSessionRequest: mockRespondSessionRequest,
 			core: {
 				pairing: { pair: mockPair }
-			} ,
+			},
 			on: mockOn,
 			off: mockOff,
 			removeListener: mockRemoveListener
-		} as unknown as Awaited<ReturnType<typeof WalletKit.init>>
+		} as unknown as Awaited<ReturnType<typeof WalletKit.init>>;
 
 		beforeEach(() => {
 			vi.clearAllMocks();
