@@ -37,7 +37,7 @@
 {/if}
 
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-{#if (isPWAStandalone() && pwaBannerVisible)}
+{#if isPWAStandalone() && pwaBannerVisible}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
