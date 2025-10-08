@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import NetworkSwitcherList from '$lib/components/networks/NetworkSwitcherList.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -14,17 +14,16 @@
 	interface Props {
 		allNetworksEnabled?: boolean;
 		filteredNetworks?: Network[];
+		onNetworkFilter: () => void;
 	}
 
-	let { allNetworksEnabled, filteredNetworks }: Props = $props();
+	let { allNetworksEnabled, filteredNetworks, onNetworkFilter }: Props = $props();
 
 	const { setFilterNetwork, filterNetwork } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
 	);
 
-	const dispatch = createEventDispatcher();
-
-	const back = () => dispatch('icNetworkFilter');
+	const back = () => onNetworkFilter();
 
 	const onNetworkSelect = (networkId: OptionNetworkId) => {
 		const network = $networks.find(({ id }) => id === networkId);
