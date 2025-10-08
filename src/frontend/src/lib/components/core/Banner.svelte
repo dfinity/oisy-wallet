@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { IconClose, IconWarning } from '@dfinity/gix-components';
+	import { Html, IconClose, IconWarning } from '@dfinity/gix-components';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -37,12 +37,14 @@
 {/if}
 
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-{#if isPWAStandalone() && pwaBannerVisible}
+{#if (isPWAStandalone() && pwaBannerVisible) || true}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
-			<span class="w-full px-2">{replaceOisyPlaceholders($i18n.core.warning.standalone_mode)}</span>
+			<span class="w-full px-2">
+				<Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} />
+			</span>
 			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
 				<IconClose />
 			</button>
