@@ -36,11 +36,11 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, isSourceTokenIcrc2 } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const { sourceToken, destinationToken } = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let isSwapAmountsLoading = $state(false);
 	let manualPause = $state(false);
+	let isSourceTokenIcrc2 = $state(undefined);
 
 	let enableAmountUpdates = $derived(!isNetworkIdICP($sourceToken?.network?.id));
 
@@ -59,7 +59,7 @@
 	amount={swapAmount}
 	destinationToken={$destinationToken}
 	{enableAmountUpdates}
-	isSourceTokenIcrc2={$isSourceTokenIcrc2}
+	{isSourceTokenIcrc2}
 	pauseAmountUpdates={shouldPause}
 	{slippageValue}
 	sourceToken={$sourceToken}
@@ -77,6 +77,7 @@
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
+			bind:isSourceTokenIcrc2
 			on:icClose
 			on:icShowTokensList
 			on:icShowProviderList
