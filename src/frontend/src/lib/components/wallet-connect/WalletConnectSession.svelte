@@ -336,11 +336,6 @@
 			}
 		});
 
-	const cancel = () => {
-		resetListener();
-		modal?.back();
-	};
-
 	const approve = async () =>
 		await answer({
 			callback: listener?.approveSession,
