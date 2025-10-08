@@ -226,11 +226,13 @@
 			<IcConvertReview
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
+				onConvert={convert}
 				{receiveAmount}
 				{sendAmount}
-				on:icConvert={convert}
 			>
-				<ButtonBack slot="cancel" onclick={back} />
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />.
+				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />
