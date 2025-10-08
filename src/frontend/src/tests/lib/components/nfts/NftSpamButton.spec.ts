@@ -58,6 +58,8 @@ describe('NftSpamButton', () => {
 
 		await fireEvent.click(spamBtn);
 
-		expect(queryByTestId(CONFIRMATION_MODAL)).toBeNull();
+		await waitFor(() => {
+			expect(queryByTestId(CONFIRMATION_MODAL)).toBeNull();
+		});
 	});
 });
