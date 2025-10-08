@@ -13,10 +13,7 @@
 	} from '$icp/stores/ic-token-fee.store';
 	import SwapButtonWithModal from '$lib/components/swap/SwapButtonWithModal.svelte';
 	import SwapModal from '$lib/components/swap/SwapModal.svelte';
-	import {
-		allDisabledKongSwapCompatibleIcrcTokens,
-		allIcrcTokens
-	} from '$lib/derived/all-tokens.derived';
+	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
@@ -30,7 +27,6 @@
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext
 	} from '$lib/stores/swap-amounts.store';
-	import { toastsShow } from '$lib/stores/toasts.store';
 	import { waitReady } from '$lib/utils/timeout.utils';
 
 	setContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY, {
@@ -78,31 +74,18 @@
 		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
 		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
 		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
-		const kongSwapTokensStatus = await Promise.any([
-			waitReady({ retries: 20, isDisabled }),
-			loadKongSwapTokens()
-		]);
+		await Promise.any([waitReady({ retries: 20, isDisabled }), loadKongSwapTokens()]);
 
 		busy.stop();
-
-		if (kongSwapTokensStatus !== 'ready') {
-			toastsShow({
-				text: $i18n.swap.error.kong_not_available,
-				level: 'info',
-				duration: 3000
-			});
-
-			return;
-		}
 
 		modalStore.openSwap(tokenId);
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 	};
 </script>
