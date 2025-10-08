@@ -174,8 +174,10 @@
 			</svelte:fragment>
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert}>
-			<ButtonBack slot="cancel" onclick={back} />
+		<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />
