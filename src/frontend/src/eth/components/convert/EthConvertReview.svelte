@@ -20,8 +20,6 @@
 	let { sendAmount, receiveAmount, onConvert, cancel }: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
-
-	const cancel_render = $derived(cancel);
 </script>
 
 <ConvertReview {cancel} {onConvert} {receiveAmount} {sendAmount}>

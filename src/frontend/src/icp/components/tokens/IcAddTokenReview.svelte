@@ -56,9 +56,6 @@
 
 		metadata = data;
 	});
-	run(() => {
-		invalid = isNullish(token);
-	});
 </script>
 
 <ContentWithToolbar>

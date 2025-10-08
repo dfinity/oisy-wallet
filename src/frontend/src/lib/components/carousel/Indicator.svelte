@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createBubbler } from 'svelte/legacy';
 	import { fade } from 'svelte/transition';
 	import { CAROUSEL_SLIDE_NAVIGATION } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';

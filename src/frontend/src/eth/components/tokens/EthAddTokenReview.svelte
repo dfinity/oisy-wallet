@@ -23,6 +23,7 @@
 	import type { Network } from '$lib/types/network';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import type { Erc1155Metadata } from '$eth/types/erc1155';
 
 	interface Props {
 		contractAddress?: string;
