@@ -3,7 +3,6 @@
 	import { metamaskNotInitialized } from '$eth/derived/metamask.derived';
 	import ReceiveButtonWithModal from '$lib/components/receive/ReceiveButtonWithModal.svelte';
 	import ReceiveModal from '$lib/components/receive/ReceiveModal.svelte';
-	import { ethAddressNotCertified } from '$lib/derived/address.derived';
 	import { modalEthReceive } from '$lib/derived/modal.derived';
 	import { networkAddress, networkEthereum } from '$lib/derived/network.derived';
 	import { waitWalletReady } from '$lib/services/actions.services';
@@ -17,7 +16,7 @@
 
 	let { token }: Props = $props();
 
-	const isDisabled = (): boolean => $ethAddressNotCertified || $metamaskNotInitialized;
+	const isDisabled = (): boolean => $metamaskNotInitialized;
 
 	const openReceive = async (modalId: symbol) => {
 		if (isDisabled()) {

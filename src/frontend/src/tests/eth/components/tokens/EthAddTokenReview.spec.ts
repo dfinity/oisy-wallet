@@ -37,6 +37,11 @@ describe('EthAddTokenReview', () => {
 		.fn()
 		.mockResolvedValue({ name: 'Test Token2', symbol: 'HSI', decimals: 8 });
 
+	const baseProps = {
+		onBack: vi.fn(),
+		onSave: vi.fn()
+	};
+
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -48,6 +53,7 @@ describe('EthAddTokenReview', () => {
 	it('should render an error if no contract address is defined', () => {
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: undefined,
 				network: ETHEREUM_NETWORK
 			}
@@ -63,6 +69,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockErc721CustomToken.address,
 				network: ETHEREUM_NETWORK
 			}
@@ -102,6 +109,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}
@@ -134,6 +142,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}
@@ -158,6 +167,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}
@@ -182,6 +192,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}
@@ -206,6 +217,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}
@@ -244,6 +256,7 @@ describe('EthAddTokenReview', () => {
 
 		render(EthAddTokenReview, {
 			props: {
+				...baseProps,
 				contractAddress: mockEthAddress,
 				network: ETHEREUM_NETWORK
 			}

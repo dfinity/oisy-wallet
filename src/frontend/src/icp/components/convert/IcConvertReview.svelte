@@ -15,7 +15,7 @@
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 </script>
 
-<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
+<ConvertReview {receiveAmount} {sendAmount} on:icConvert>
 	<svelte:fragment slot="destination">
 		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken} />
 	</svelte:fragment>
