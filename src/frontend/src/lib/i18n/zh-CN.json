@@ -1158,7 +1158,8 @@
 				"image": "代币 ID 为 $tokenId 的 NFT 图片"
 			},
 			"copy_address": "复制此地址到剪贴板",
-			"review_preference": "更改显示偏好"
+			"review_preference": "更改显示偏好",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

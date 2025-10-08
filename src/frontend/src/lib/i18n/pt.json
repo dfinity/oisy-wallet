@@ -1158,7 +1158,8 @@
 				"image": "Imagem do NFT com token ID: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

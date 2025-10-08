@@ -1158,7 +1158,8 @@
 				"image": "Hình ảnh NFT với ID token: $tokenId"
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
-			"review_preference": "Thay đổi tùy chọn hiển thị"
+			"review_preference": "Thay đổi tùy chọn hiển thị",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

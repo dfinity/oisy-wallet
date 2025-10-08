@@ -1158,7 +1158,8 @@
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
-			"review_preference": "Změnit předvolbu zobrazení"
+			"review_preference": "Změnit předvolbu zobrazení",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

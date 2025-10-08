@@ -1159,7 +1159,7 @@
 			},
 			"copy_address": "Copy this address to clipboard",
 			"review_preference": "Change display preference",
-            "go_to_collection": "Open the collection page"
+			"go_to_collection": "Open the collection page"
 		}
 	},
 	"fee": {

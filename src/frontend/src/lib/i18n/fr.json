@@ -1158,7 +1158,8 @@
 				"image": "Image du NFT avec l'ID de token : $tokenId"
 			},
 			"copy_address": "Copier cette adresse dans le presse-papiers",
-			"review_preference": "Modifier la préférence d'affichage"
+			"review_preference": "Modifier la préférence d'affichage",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

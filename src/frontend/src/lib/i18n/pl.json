@@ -1158,7 +1158,8 @@
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

@@ -963,6 +963,7 @@ interface I18nNfts {
 		card: { image: string };
 		copy_address: string;
 		review_preference: string;
+		go_to_collection: string;
 	};
 }
 
