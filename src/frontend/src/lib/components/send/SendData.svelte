@@ -48,7 +48,11 @@
 
 <SendDataAmount {amount} {exchangeRate} showNullishLabel={showNullishAmountLabel} {token} />
 
-{@render children?.()}
+<SendSource {balance} {exchangeRate} {source} {token} />
+
+{#if nonNullish(destination)}
+	<SendDataDestination {destination} />
+{/if}
 
 {@render fee?.()}
 

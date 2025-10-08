@@ -12,7 +12,12 @@
 	import SendTokensList from '$lib/components/send/SendTokensList.svelte';
 	import SendWizard from '$lib/components/send/SendWizard.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
-	import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+	import {
+		allSendNftsWizardSteps,
+		allSendWizardSteps,
+		sendNftsWizardSteps,
+		sendWizardStepsWithQrCodeScan
+	} from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import {
 		btcAddressMainnetNotLoaded,
