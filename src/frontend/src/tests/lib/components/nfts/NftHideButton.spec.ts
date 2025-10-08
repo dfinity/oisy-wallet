@@ -19,7 +19,7 @@ describe('NftHideButton', () => {
 		nftStore.addAll([]);
 	});
 
-	it('renders Unhide button when token.section is HIDDEN', async () => {
+	it('renders Unhide button when token.section is HIDDEN', () => {
 		const token = { ...mockToken, section: CustomTokenSection.HIDDEN };
 		const { getByTestId } = render(NftHideButton, { props: { token } });
 
@@ -28,7 +28,7 @@ describe('NftHideButton', () => {
 		expect(notSpamBtn).toBeInTheDocument();
 	});
 
-	it('renders ConfirmButtonWithModal when collection has multiple NFTs', () => {
+	it('renders ConfirmButtonWithModal when collection has multiple NFTs', async () => {
 		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
