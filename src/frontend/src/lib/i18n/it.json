@@ -1149,7 +1149,8 @@
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1157,7 +1158,8 @@
 				"image": "Immagine dell'NFT con token ID: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

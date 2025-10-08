@@ -1149,7 +1149,8 @@
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Jeszcze brak NFT",
@@ -1157,7 +1158,8 @@
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
