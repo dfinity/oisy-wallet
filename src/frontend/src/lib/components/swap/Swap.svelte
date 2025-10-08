@@ -85,24 +85,24 @@
 
 		busy.stop();
 
-		if (kongSwapTokensStatus !== 'ready') {
-			toastsShow({
-				text: $i18n.swap.error.kong_not_available,
-				level: 'info',
-				duration: 3000
-			});
+		// if (kongSwapTokensStatus !== 'ready') {
+		// 	toastsShow({
+		// 		text: $i18n.swap.error.kong_not_available,
+		// 		level: 'info',
+		// 		duration: 3000
+		// 	});
 
-			return;
-		}
+		// 	return;
+		// }
 
 		modalStore.openSwap(tokenId);
 
 		await loadDisabledIcrcTokensBalances({
 			identity: $authIdentity,
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 		await loadDisabledIcrcTokensExchanges({
-			disabledIcrcTokens: $allDisabledKongSwapCompatibleIcrcTokens
+			disabledIcrcTokens: $allIcrcTokens
 		});
 	};
 </script>
