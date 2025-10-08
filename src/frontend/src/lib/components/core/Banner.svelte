@@ -39,7 +39,7 @@
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
 {#if isPWAStandalone() && pwaBannerVisible}
 	<div
-		class="fixed left-[50%] top-6 z-10 flex -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{replaceOisyPlaceholders($i18n.core.warning.standalone_mode)}</span>
