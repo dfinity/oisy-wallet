@@ -21,7 +21,6 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
-
 const nftAzuki1 = {
 	...mockValidErc721Nft,
 	id: parseNftId(1),
