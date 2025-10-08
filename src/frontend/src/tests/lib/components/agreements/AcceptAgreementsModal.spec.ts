@@ -52,7 +52,6 @@ describe('AcceptAgreementsModal', () => {
 		vi.spyOn(agreementsDerived, 'outdatedAgreements', 'get').mockReturnValue(outdatedStore);
 
 		vi.spyOn(authServices, 'warnSignOut').mockImplementation(vi.fn());
-		vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 
 		vi.spyOn(backendApi, 'updateUserAgreements').mockImplementation(vi.fn());
 
@@ -160,14 +159,12 @@ describe('AcceptAgreementsModal', () => {
 		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
 	});
 
-	it('clicking Accept calls nullishSignOut if the identity is nullish', async () => {
+	it('clicking Accept does not call updateUserAgreements if the identity is nullish', async () => {
 		mockAuthStore(null);
 
 		const { getByTestId } = render(AcceptAgreementsModal);
 
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
-
-		expect(authServices.nullishSignOut).toHaveBeenCalledOnce();
 
 		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
 

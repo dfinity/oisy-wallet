@@ -11,8 +11,12 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
+vi.mock('$icp/utils/icrc.utils', () => ({
+	isIcrcTokenSupportIcrc2: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
@@ -60,6 +64,7 @@ describe('SwapIcpWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		mockContext = createContext();
 		mockAuthStore();
 	});

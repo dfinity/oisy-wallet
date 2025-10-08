@@ -7,7 +7,6 @@ import {
 	type IcTokenFeeStore
 } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
-import * as authServices from '$lib/services/auth.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import type { Identity } from '@dfinity/agent';
@@ -57,7 +56,7 @@ describe('IcTokenFeeContext', () => {
 	});
 
 	it('should not call transactionFee if no authIdentity available', async () => {
-		const nullishSignOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const transactionFeeSpy = mockTransactionFee();
 
 		mockAuthStore(null);
 
@@ -67,7 +66,7 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(transactionFeeSpy).not.toHaveBeenCalled();
 		});
 	});
 

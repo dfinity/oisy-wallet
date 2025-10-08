@@ -26,7 +26,6 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -77,7 +76,6 @@
 
 	const save = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

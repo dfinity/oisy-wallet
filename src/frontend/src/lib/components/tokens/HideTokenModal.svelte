@@ -15,7 +15,6 @@
 	import { pageTokenToggleable } from '$lib/derived/page-token.derived';
 	import { ProgressStepsHideToken } from '$lib/enums/progress-steps';
 	import { WizardStepsHideToken } from '$lib/enums/wizard-steps';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -46,7 +45,6 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
