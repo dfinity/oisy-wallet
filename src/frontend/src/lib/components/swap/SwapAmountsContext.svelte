@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, type Snippet } from 'svelte';
+	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
@@ -44,7 +44,7 @@
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let timer: NodeJS.Timeout | undefined;
-	let debounceTimer: NodeJS.Timeout | undefined;
+	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -138,10 +138,12 @@
 	$effect(() => {
 		[amount, sourceToken, destinationToken];
 
-		clearDebounceTimer();
-		debounceTimer = setTimeout(() => {
-			loadSwapAmounts(false);
-		}, 300);
+		untrack(() => {
+			clearDebounceTimer();
+			debounceTimer = setTimeout(() => {
+				loadSwapAmounts(false);
+			}, 300);
+		});
 	});
 
 	onDestroy(() => {
