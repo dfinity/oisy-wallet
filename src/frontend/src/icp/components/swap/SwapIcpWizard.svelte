@@ -59,7 +59,6 @@
 		swapProgressStep = $bindable(),
 		swapFailedProgressSteps = $bindable([]),
 		isSourceTokenIcrc2 = $bindable(),
-
 		currentStep,
 		isSwapAmountsLoading,
 		onShowTokensList,
