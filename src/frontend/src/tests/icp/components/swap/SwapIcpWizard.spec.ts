@@ -19,6 +19,10 @@ vi.mock('$icp/utils/icrc.utils', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
 }));
 
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
+
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
 const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
 
@@ -64,6 +68,7 @@ describe('SwapIcpWizard', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		mockContext = createContext();
 		mockAuthStore();
 	});
