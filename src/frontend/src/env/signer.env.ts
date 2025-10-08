@@ -5,3 +5,5 @@ import { BETA, PROD, STAGING } from '$lib/constants/app.constants';
 // https://internetcomputer.org/docs/current/developer-docs/smart-contracts/signatures/signing-messages-t-schnorr#signing-messages
 export const SIGNER_ROOT_KEY_NAME =
 	PROD || BETA ? 'key_1' : STAGING ? 'test_key_1' : 'dfx_test_key';
+
+console.log('Using SIGNER_ROOT_KEY_NAME:', SIGNER_ROOT_KEY_NAME);

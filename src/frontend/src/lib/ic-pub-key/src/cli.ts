@@ -14,8 +14,7 @@ import {
 } from './ecdsa/secp256k1.js';
 
 /* istanbul ignore next */
-export const deriveEthAddress = async (user: string): Promise<string> => {
-	const pubkey = '0259761672ec7ee3bdc5eca95ba5f6a493d1133b86a76163b68af30c06fe3b75c0';
+export const deriveEthAddress = async (user: string, pubkey: string): Promise<string> => {
 	const chaincode = 'f666a98c7f70fe281ca8142f14eb4d1e0934a439237da83869e2cfd924b270c0';
 
 	let principal = Principal.fromText(user);
@@ -45,8 +44,11 @@ function mapBitcoinNetworkToBitcoinJS(network: BitcoinNetwork): Network {
 }
 
 /* istanbul ignore next */
-export const deriveBtcAddress = async (user: string, network: BitcoinNetwork): Promise<string> => {
-	const pubkey = '0259761672ec7ee3bdc5eca95ba5f6a493d1133b86a76163b68af30c06fe3b75c0';
+export const deriveBtcAddress = async (
+	user: string,
+	pubkey: string,
+	network: BitcoinNetwork
+): Promise<string> => {
 	const chaincode = 'f666a98c7f70fe281ca8142f14eb4d1e0934a439237da83869e2cfd924b270c0';
 
 	let principal = Principal.fromText(user);
@@ -71,8 +73,11 @@ export const deriveBtcAddress = async (user: string, network: BitcoinNetwork): P
 };
 
 /* istanbul ignore next */
-export const deriveSolAddress = async (user: string, derivationPath: string[]): Promise<string> => {
-	const pubkey = '476374d9df3a8af28d3164dc2422cff894482eadd1295290b6d9ad92b2eeaa5c';
+export const deriveSolAddress = async (
+	user: string,
+	pubkey: string,
+	derivationPath: string[]
+): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 
 	const principal = Principal.fromText(user);
