@@ -1149,7 +1149,8 @@
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1157,7 +1158,8 @@
 				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
