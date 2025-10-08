@@ -142,6 +142,10 @@ describe('fetchSwapAmounts', () => {
 	const amount = 1000;
 	const slippage = 0.5;
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
 		const kongSwapResponse = {
 			receive_amount: 950n,
