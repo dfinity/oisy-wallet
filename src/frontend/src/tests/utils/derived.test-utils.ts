@@ -3,8 +3,6 @@ import {
 	btcAddressMainnet,
 	btcAddressTestnet,
 	ethAddress,
-	ethAddressCertified,
-	ethAddressNotCertified,
 	ethAddressNotLoaded
 } from '$lib/derived/address.derived';
 import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
@@ -67,8 +65,6 @@ const derivedList: Record<string, Readable<unknown>> = {
 	exchangeInitialized,
 	exchanges,
 	ethAddress,
-	ethAddressCertified,
-	ethAddressNotCertified,
 	ethAddressNotLoaded,
 	hideZeroBalances,
 	isBusy,
