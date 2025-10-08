@@ -24,6 +24,7 @@ describe('NftSpamButton', () => {
 		const { getByTestId } = render(NftSpamButton, { props: { token } });
 
 		const notSpamBtn = getByTestId(NFT_COLLECTION_ACTION_NOT_SPAM);
+
 		expect(notSpamBtn).toBeInTheDocument();
 	});
 
@@ -33,6 +34,7 @@ describe('NftSpamButton', () => {
 		const { getByTestId } = render(NftSpamButton, { props: { token: mockToken } });
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
+
 		expect(spamBtn).toBeInTheDocument();
 
 		await fireEvent.click(spamBtn);
@@ -54,6 +56,7 @@ describe('NftSpamButton', () => {
 		const { getByTestId, queryByTestId } = render(NftSpamButton, { props: { token: mockToken } });
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
+
 		expect(spamBtn).toBeInTheDocument();
 
 		await fireEvent.click(spamBtn);

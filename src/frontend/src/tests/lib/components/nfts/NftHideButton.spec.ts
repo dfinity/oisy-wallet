@@ -24,6 +24,7 @@ describe('NftHideButton', () => {
 		const { getByTestId } = render(NftHideButton, { props: { token } });
 
 		const notSpamBtn = getByTestId(NFT_COLLECTION_ACTION_UNHIDE);
+
 		expect(notSpamBtn).toBeInTheDocument();
 	});
 
@@ -33,6 +34,7 @@ describe('NftHideButton', () => {
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+
 		expect(spamBtn).toBeInTheDocument();
 
 		await fireEvent.click(spamBtn);
@@ -54,6 +56,7 @@ describe('NftHideButton', () => {
 		const { getByTestId, queryByTestId } = render(NftHideButton, { props: { token: mockToken } });
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+
 		expect(spamBtn).toBeInTheDocument();
 
 		await fireEvent.click(spamBtn);
