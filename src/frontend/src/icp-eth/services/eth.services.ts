@@ -17,7 +17,6 @@ import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { EthAddress } from '$lib/types/address';
@@ -124,7 +123,6 @@ const loadPendingTransactions = async ({
 	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
 } & IcCkLinkedAssets) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

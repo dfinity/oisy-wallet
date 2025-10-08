@@ -8,7 +8,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -23,7 +22,7 @@
 		destinationToken?: Token;
 		slippageValue: OptionAmount;
 		children?: Snippet;
-		isSourceTokenIcrc2: boolean;
+		isSourceTokenIcrc2?: boolean;
 		isSwapAmountsLoading: boolean;
 		enableAmountUpdates?: boolean;
 		pauseAmountUpdates?: boolean;
@@ -72,7 +71,6 @@
 
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

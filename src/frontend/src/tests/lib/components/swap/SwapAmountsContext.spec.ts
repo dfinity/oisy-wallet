@@ -4,7 +4,6 @@ import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
 import * as addressDerived from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as tokensStore from '$lib/derived/tokens.derived';
-import * as authServices from '$lib/services/auth.services';
 import * as swapService from '$lib/services/swap.services';
 import { SWAP_AMOUNTS_CONTEXT_KEY, initSwapAmountsStore } from '$lib/stores/swap-amounts.store';
 import { SWAP_CONTEXT_KEY } from '$lib/stores/swap.store';
@@ -89,22 +88,6 @@ describe('SwapAmountsContext.svelte', () => {
 
 	afterEach(() => {
 		vi.restoreAllMocks();
-	});
-
-	it('calls nullishSignOut when authIdentity is null', async () => {
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
-		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(null));
-
-		await renderWithContext({
-			amount: '100',
-			sourceToken,
-			destinationToken,
-			slippageValue: '0.5'
-		});
-
-		await waitForDebounce();
-
-		expect(signOutSpy).toHaveBeenCalled();
 	});
 
 	it('resets store when amount is undefined', async () => {
