@@ -2,6 +2,7 @@
 /* istanbul ignore file */
 /* v8 ignore start */
 
+import { STAGING } from '$lib/constants/app.constants';
 import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
@@ -83,7 +84,9 @@ export const deriveSolAddress = async (
 	const principal = Principal.fromText(user);
 
 	let derivationPathObj = new DerivationPath([
-		Uint8Array.from([0, 0, 0, 0, 2, 48, 0, 113, 1, 1]),
+		Uint8Array.from(
+			STAGING ? [0, 0, 0, 0, 0, 96, 0, 209, 1, 1] : [0, 0, 0, 0, 2, 48, 0, 113, 1, 1]
+		),
 		Uint8Array.from([0xfe]),
 		principal.toUint8Array(),
 		...mapDerivationPath(derivationPath)
