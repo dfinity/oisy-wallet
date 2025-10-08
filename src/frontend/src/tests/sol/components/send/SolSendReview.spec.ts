@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -93,7 +94,7 @@ describe('SolSendReview', () => {
 		const insufficientFundsForFeeTestId = 'sol-send-form-insufficient-funds-for-fee';
 		const buttonTestId = REVIEW_FORM_SEND_BUTTON;
 
-		mockFeeStore.setFee(0n);
+		mockFeeStore.setFee(ZERO);
 
 		const { getByTestId } = render(SolSendReview, {
 			props: {

@@ -13,6 +13,7 @@ import {
 	PowChallengeError,
 	PowCreateChallengeError
 } from '$lib/canisters/backend.errors';
+import { ZERO } from '$lib/constants/app.constants';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -87,7 +88,7 @@ describe('pow-protector.worker', () => {
 
 		// Mock the allowance API call that hasRequiredCycles depends on
 		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({
-			allowance: 0n,
+			allowance: ZERO,
 			expires_at: []
 		}); // Return insufficient allowance by default
 

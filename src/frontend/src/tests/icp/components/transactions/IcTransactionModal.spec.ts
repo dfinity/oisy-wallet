@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
+import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	formatNanosecondsToDate,
@@ -29,7 +30,7 @@ describe('IcTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockIcTransactionUi.value ?? 0n,
+			value: mockIcTransactionUi.value ?? ZERO,
 			unitName: ICP_TOKEN.decimals,
 			displayDecimals: ICP_TOKEN.decimals
 		})} ${ICP_TOKEN.symbol}`;
@@ -74,7 +75,7 @@ describe('IcTransactionModal', () => {
 		});
 
 		const formattedAmount = `${formatToken({
-			value: mockIcTransactionUi.fee ?? 0n,
+			value: mockIcTransactionUi.fee ?? ZERO,
 			unitName: ICP_TOKEN.decimals,
 			displayDecimals: ICP_TOKEN.decimals
 		})} ${ICP_TOKEN.symbol}`;

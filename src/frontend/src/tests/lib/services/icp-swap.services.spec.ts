@@ -212,7 +212,7 @@ describe('fetchIcpSwap', () => {
 
 		vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
 			ledgerCanisterId: 'ledger-0',
-			fee: 0n
+			fee: ZERO
 		} as unknown as IcTokenToggleable);
 
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
@@ -242,7 +242,7 @@ describe('fetchIcpSwap', () => {
 
 		vi.spyOn(swapUtils, 'getWithdrawableToken').mockReturnValueOnce({
 			ledgerCanisterId: 'ledger-1',
-			fee: 0n
+			fee: ZERO
 		} as unknown as IcTokenToggleable);
 
 		vi.mocked(withdraw).mockResolvedValueOnce(1n);
@@ -273,13 +273,13 @@ describe('fetchIcpSwap', () => {
 		const tokenFor0: IcTokenToggleable = {
 			...mockValidIcToken,
 			ledgerCanisterId: 'ledger-0',
-			fee: 0n
+			fee: ZERO
 		} as IcTokenToggleable;
 
 		const tokenFor1: IcTokenToggleable = {
 			...mockValidIcrcToken,
 			ledgerCanisterId: 'ledger-1',
-			fee: 0n
+			fee: ZERO
 		} as IcTokenToggleable;
 
 		const getWithdrawableTokenSpy = vi
@@ -316,7 +316,7 @@ describe('fetchIcpSwap', () => {
 			expect.objectContaining({
 				token: 'ledger-0',
 				amount: 1n,
-				fee: 0n
+				fee: ZERO
 			})
 		);
 
@@ -325,7 +325,7 @@ describe('fetchIcpSwap', () => {
 			expect.objectContaining({
 				token: 'ledger-1',
 				amount: 1n,
-				fee: 0n
+				fee: ZERO
 			})
 		);
 	});
