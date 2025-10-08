@@ -202,11 +202,6 @@
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
-		// Prevent race condition
-		if (isNullish(listener)) {
-			return;
-		}
-
 		proposal = sessionProposal;
 	};
 
