@@ -1130,9 +1130,13 @@
 			"address_copied": "Adresa $address zkopírována",
 			"spam": "Spam",
 			"not_spam": "Ne spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Skrýt",
 			"unhide": "Zobrazit",
 			"hidden": "Skryté",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
 			"img_consent_disabled": "Zakázali jste obrázky z této kolekce",
 			"img_consent_none": "Obrázek je z bezpečnostních důvodů zakázán.",
@@ -1149,7 +1153,8 @@
 			"review_title": "Prohlédnout mediální zdroje pro \"$collectionName\"",
 			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",
 			"learn_more": "Zjistěte více",
-			"token_id": "Token ID"
+			"token_id": "Token ID",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
@@ -1157,7 +1162,8 @@
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
-			"review_preference": "Změnit předvolbu zobrazení"
+			"review_preference": "Změnit předvolbu zobrazení",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

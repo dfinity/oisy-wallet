@@ -1130,9 +1130,13 @@
 			"address_copied": "Đã sao chép địa chỉ $address",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Ẩn",
 			"unhide": "Bỏ ẩn",
 			"hidden": "Đã ẩn",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Mở hợp đồng này trong trình khám phá blockchain",
 			"img_consent_disabled": "Bạn đã tắt hình ảnh từ bộ sưu tập này",
 			"img_consent_none": "Hình ảnh bị tắt vì lý do bảo mật",
@@ -1149,7 +1153,8 @@
 			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
 			"learn_more": "Tìm hiểu thêm",
-			"token_id": "ID token"
+			"token_id": "ID token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",
@@ -1157,7 +1162,8 @@
 				"image": "Hình ảnh NFT với ID token: $tokenId"
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
-			"review_preference": "Thay đổi tùy chọn hiển thị"
+			"review_preference": "Thay đổi tùy chọn hiển thị",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

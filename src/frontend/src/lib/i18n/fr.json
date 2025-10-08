@@ -1130,9 +1130,13 @@
 			"address_copied": "Adresse $address copiée",
 			"spam": "Spam",
 			"not_spam": "Pas de spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Masquer",
 			"unhide": "Afficher",
 			"hidden": "Masqué",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Ouvrir ce contrat dans l'explorateur blockchain",
 			"img_consent_disabled": "Vous avez désactivé les images de cette collection",
 			"img_consent_none": "Image désactivée pour des raisons de sécurité",
@@ -1149,7 +1153,8 @@
 			"review_title": "Examiner les sources de médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
 			"learn_more": "En savoir plus",
-			"token_id": "ID du token"
+			"token_id": "ID du token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
@@ -1157,7 +1162,8 @@
 				"image": "Image du NFT avec l'ID de token : $tokenId"
 			},
 			"copy_address": "Copier cette adresse dans le presse-papiers",
-			"review_preference": "Modifier la préférence d'affichage"
+			"review_preference": "Modifier la préférence d'affichage",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

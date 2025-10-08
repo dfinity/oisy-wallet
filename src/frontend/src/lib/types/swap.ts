@@ -59,7 +59,7 @@ export interface FetchSwapAmountsParams {
 	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
-	isSourceTokenIcrc2: boolean;
+	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
 }
 
