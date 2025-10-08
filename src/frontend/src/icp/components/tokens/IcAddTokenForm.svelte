@@ -4,9 +4,17 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	export let ledgerCanisterId = '';
-	export let indexCanisterId = '';
-	export let editMode = false;
+	interface Props {
+		ledgerCanisterId?: string;
+		indexCanisterId?: string;
+		editMode?: boolean;
+	}
+
+	let {
+		ledgerCanisterId = $bindable(''),
+		indexCanisterId = $bindable(''),
+		editMode = false
+	}: Props = $props();
 </script>
 
 <p class="mb-6 text-sm">{$i18n.tokens.import.text.info}</p>

@@ -10,7 +10,7 @@
 		TRACK_HELP_GOT_CONFUSED,
 		TRACK_HELP_LOST_INTERNET_IDENTITY,
 		TRACK_HELP_OTHER
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		HELP_AUTH_GOT_CONFUSED_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,

@@ -12,7 +12,7 @@
 	import {
 		TRACK_REWARD_CAMPAIGN_WIN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_WIN_SHARE
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { OISY_REWARDS_URL } from '$lib/constants/oisy.constants';
 	import {
 		REWARDS_STATE_MODAL_IMAGE_BANNER,

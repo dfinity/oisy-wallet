@@ -15,7 +15,7 @@
 	import {
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR,
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -174,7 +174,7 @@
 			</svelte:fragment>
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
+		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert}>
 			<ButtonBack slot="cancel" onclick={back} />
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}

@@ -36,7 +36,7 @@
 		TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
@@ -229,7 +229,6 @@
 				{receiveAmount}
 				{sendAmount}
 				on:icConvert={convert}
-				on:icBack={onBack}
 			>
 				<ButtonBack slot="cancel" onclick={back} />
 			</IcConvertReview>

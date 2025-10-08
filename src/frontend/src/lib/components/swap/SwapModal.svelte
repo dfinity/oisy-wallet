@@ -224,7 +224,7 @@
 		<ModalNetworksFilter
 			{allNetworksEnabled}
 			filteredNetworks={$filteredNetworks}
-			on:icNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+			onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
 		/>
 	{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 		<SwapProviderListModal

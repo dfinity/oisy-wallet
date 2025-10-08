@@ -78,7 +78,9 @@ describe('SwapEthWizard', () => {
 		render(SwapEthWizard, {
 			props: {
 				...BASE_PROPS,
-				currentStep: { name: step, title: 'Swap' }
+				currentStep: { name: step, title: 'Swap' },
+				onStartTriggerAmount: vi.fn(),
+				onStopTriggerAmount: vi.fn()
 			},
 			context: mockContext
 		});

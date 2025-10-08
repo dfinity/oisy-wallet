@@ -199,7 +199,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: 100n,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 
 					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([]);
@@ -224,7 +224,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: 100n,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 
 					spyMetadata = ledgerCanisterMock.metadata.mockResolvedValue([
@@ -362,7 +362,7 @@ describe('ic-add-custom-tokens.service', () => {
 					spyGetTransactions = indexCanisterMock.getTransactions.mockResolvedValue({
 						balance: expectedBalance,
 						transactions: [],
-						oldest_tx_id: [0n]
+						oldest_tx_id: [ZERO]
 					});
 				});
 

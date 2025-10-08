@@ -12,7 +12,7 @@
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
