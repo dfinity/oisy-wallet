@@ -15,6 +15,10 @@ vi.mock('$lib/services/auth.services', () => ({
 	nullishSignOut: vi.fn()
 }));
 
+vi.mock('$icp/utils/icrc.utils', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
+
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
 const mockDestToken = { ...mockValidIcCkToken, enabled: true } as IcToken;
 
