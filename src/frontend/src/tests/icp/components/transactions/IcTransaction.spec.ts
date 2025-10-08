@@ -100,7 +100,7 @@ describe('IcTransaction', () => {
 					unitName: ICP_TOKEN.decimals,
 					showPlusSign: false
 				})
-			})} ${getTokenDisplaySymbol(ICP_TOKEN)} `
+			})}`
 		);
 	});
 });
