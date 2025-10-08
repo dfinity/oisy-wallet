@@ -16,7 +16,6 @@
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
 		isSourceTokenIcrc2?: boolean;
-
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
