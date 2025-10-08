@@ -19,7 +19,7 @@ describe('NftSpamButton', () => {
 		nftStore.addAll([]);
 	});
 
-	it('renders Not Spam button when token.section is SPAM', async () => {
+	it('renders Not Spam button when token.section is SPAM', () => {
 		const token = { ...mockToken, section: CustomTokenSection.SPAM };
 		const { getByTestId } = render(NftSpamButton, { props: { token } });
 
@@ -39,7 +39,7 @@ describe('NftSpamButton', () => {
 
 		await fireEvent.click(spamBtn);
 
-		await waitFor(async () => {
+		await waitFor(() => {
 			const modal = getByTestId(CONFIRMATION_MODAL);
 
 			expect(modal).toBeInTheDocument();

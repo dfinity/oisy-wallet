@@ -28,7 +28,7 @@ describe('NftHideButton', () => {
 		expect(notSpamBtn).toBeInTheDocument();
 	});
 
-	it('renders ConfirmButtonWithModal when collection has multiple NFTs', async () => {
+	it('renders ConfirmButtonWithModal when collection has multiple NFTs', () => {
 		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
@@ -39,7 +39,7 @@ describe('NftHideButton', () => {
 
 		await fireEvent.click(spamBtn);
 
-		await waitFor(async () => {
+		await waitFor(() => {
 			const modal = getByTestId(CONFIRMATION_MODAL);
 
 			expect(modal).toBeInTheDocument();
