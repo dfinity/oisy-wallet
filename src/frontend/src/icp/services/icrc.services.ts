@@ -261,6 +261,7 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
+// TODO: Refactor to use queryAndUpdate
 export const loadDisabledIcrcTokensBalances = async ({
 	identity,
 	disabledIcrcTokens
@@ -280,6 +281,7 @@ export const loadDisabledIcrcTokensBalances = async ({
 		})
 	);
 
+	// TODO: Reduce the number of loops
 	results.forEach((result) => {
 		if (result.status === 'fulfilled') {
 			const { id, icrcTokenBalance } = result.value;
