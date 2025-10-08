@@ -17,7 +17,7 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -261,7 +261,7 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-export const loadDisabledIcrcTokensBalances = ({
+export const loadDisabledIcrcTokensBalances = async ({
 	identity,
 	disabledIcrcTokens
 }: {
@@ -291,7 +291,7 @@ export const loadDisabledIcrcTokensExchanges = async ({
 }: {
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
-	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
+	const results = await Promise.allSettled([
 		exchangeRateERC20ToUsd({
 			coingeckoPlatformId: 'ethereum',
 			contractAddresses: disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
@@ -319,8 +319,12 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		)
 	]);
 
+	const [erc20Result, icrcResult] = results;
+
 	exchangeStore.set([
-		...(nonNullish(currentErc20Prices) ? [currentErc20Prices] : []),
-		...(nonNullish(currentIcrcPrices) ? [currentIcrcPrices] : [])
+		...(erc20Result.status === 'fulfilled' && nonNullish(erc20Result.value)
+			? [erc20Result.value]
+			: []),
+		...(icrcResult.status === 'fulfilled' && nonNullish(icrcResult.value) ? [icrcResult.value] : [])
 	]);
 };
