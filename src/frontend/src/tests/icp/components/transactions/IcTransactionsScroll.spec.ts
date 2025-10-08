@@ -4,7 +4,6 @@ import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { token } from '$lib/stores/token.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -17,10 +16,6 @@ import {
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { createIcTransactionUiMockList } from '$tests/utils/transactions-stores.test-utils';
 import { render } from '@testing-library/svelte';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$icp/services/ic-transactions.services', () => ({
 	loadNextIcTransactions: vi.fn()
@@ -82,8 +77,6 @@ describe('IcTransactionsScroll', () => {
 			render(IcTransactionsScroll, { token: mockToken, children: mockSnippet });
 
 			expect(loadNextIcTransactions).not.toHaveBeenCalled();
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 
 		it('should not load next transactions if the token is nullish', () => {

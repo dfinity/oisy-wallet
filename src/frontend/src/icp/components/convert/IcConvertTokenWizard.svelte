@@ -42,7 +42,6 @@
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -114,7 +113,6 @@
 			: customDestination;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

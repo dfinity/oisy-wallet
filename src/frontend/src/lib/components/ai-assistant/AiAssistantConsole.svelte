@@ -21,7 +21,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { askLlm } from '$lib/services/ai-assistant.services';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
@@ -74,7 +73,6 @@
 		context?: string;
 	}) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

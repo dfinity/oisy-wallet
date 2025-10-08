@@ -37,7 +37,6 @@
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -147,7 +146,6 @@
 
 	const onTokenDelete = async (tokenToDelete: OptionToken) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -223,7 +221,6 @@
 
 	const onTokenEdit = async (tokenToEdit: OptionToken) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

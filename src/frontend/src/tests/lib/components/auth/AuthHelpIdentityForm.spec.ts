@@ -14,8 +14,7 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 vi.mock('$lib/services/auth.services', () => ({
-	signIn: vi.fn(),
-	nullishSignOut: vi.fn()
+	signIn: vi.fn()
 }));
 
 describe('AuthHelpIdentityForm', () => {
