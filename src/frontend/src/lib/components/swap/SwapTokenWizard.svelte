@@ -77,7 +77,7 @@
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
-			bind:isIcrcTokenIcrc2
+			bind:isSourceTokenIcrc2
 			on:icClose
 			on:icShowTokensList
 			on:icShowProviderList
