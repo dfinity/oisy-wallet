@@ -18,7 +18,6 @@
 		isSourceTokenIcrc2?: boolean;
 	}
 	let { isSourceTokenIcrc2 }: Props = $props();
-	
 
 	const { destinationToken, sourceToken, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
