@@ -936,9 +936,13 @@ interface I18nNfts {
 		address_copied: string;
 		spam: string;
 		not_spam: string;
+		spam_warning: string;
+		spam_warning_text: string;
 		hide: string;
 		unhide: string;
 		hidden: string;
+		hide_warning: string;
+		hide_warning_text: string;
 		open_explorer: string;
 		img_consent_disabled: string;
 		img_consent_none: string;
