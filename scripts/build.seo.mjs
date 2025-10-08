@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { ENV, OISY_IC_DOMAIN, findHtmlFiles } from './build.utils.mjs';
+import { OISY_IC_DOMAIN, findHtmlFiles } from './build.utils.mjs';
 
 const OUTPUT_DIR = join(process.cwd(), 'build');
-const SITE_ROOT_CANONICAL = ENV !== 'production' ? OISY_IC_DOMAIN : 'https://oisy.com';
+const SITE_ROOT_CANONICAL = OISY_IC_DOMAIN;
 
 const updateCanonical = (htmlFilePath) => {
 	// 1. We determine the route based on the output
