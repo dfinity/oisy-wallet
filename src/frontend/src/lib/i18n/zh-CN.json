@@ -1149,6 +1149,7 @@
 			"media_disabled": "媒体已禁用",
 			"enable_media": "启用媒体",
 			"disable_media": "禁用媒体",
+			"keep_media_disabled": "",
 			"open_in_new_tab": "在新标签页中打开",
 			"review_title": "为 \"$collectionName\" 审核媒体来源",
 			"review_description": "注意！这些图片来自未验证的来源。启用它们可能会将你的 IP 地址共享给第三方，并带来潜在的安全风险。",

@@ -20,7 +20,6 @@ import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
-import { beforeAll } from 'vitest';
 
 const nftAzuki1 = {
 	...mockValidErc721Nft,

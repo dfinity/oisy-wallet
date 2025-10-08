@@ -7,10 +7,14 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
+	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
@@ -26,10 +30,6 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
-	import ExpandText from '$lib/components/ui/ExpandText.svelte';
-	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 
 	interface Props {
