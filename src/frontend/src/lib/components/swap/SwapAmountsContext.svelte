@@ -22,7 +22,7 @@
 		destinationToken?: Token;
 		slippageValue: OptionAmount;
 		children?: Snippet;
-		isSourceTokenIcrc2: boolean;
+		isSourceTokenIcrc2?: boolean;
 		isSwapAmountsLoading: boolean;
 		enableAmountUpdates?: boolean;
 		pauseAmountUpdates?: boolean;

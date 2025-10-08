@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
+	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
 	import {
+		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,
 		NFT_COLLECTION_ACTION_SPAM
 	} from '$lib/constants/test-ids.constants';
@@ -10,14 +13,29 @@
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { nftStore } from '$lib/stores/nft.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { findNftsByToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		token: NonFungibleToken;
 	}
 
 	let { token }: Props = $props();
+
+	const hasMultipleNfts = $derived(
+		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
+	);
 </script>
+
+{#snippet spamButton(onclick: () => void)}
+	<NftActionButton label={$i18n.nfts.text.spam} {onclick} testId={NFT_COLLECTION_ACTION_SPAM}>
+		{#snippet icon()}
+			<IconAlertOctagon size="18" />
+		{/snippet}
+	</NftActionButton>
+{/snippet}
 
 {#if nonNullish(token.section) && token.section === CustomTokenSection.SPAM}
 	<NftActionButton
@@ -29,14 +47,30 @@
 			<IconAlertOctagon size="18" />
 		{/snippet}
 	</NftActionButton>
-{:else}
-	<NftActionButton
-		label={$i18n.nfts.text.spam}
-		onclick={() => updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })}
-		testId={NFT_COLLECTION_ACTION_SPAM}
+{:else if hasMultipleNfts}
+	<ConfirmButtonWithModal
+		button={spamButton}
+		onConfirm={() => updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })}
+		testId={CONFIRMATION_MODAL}
 	>
-		{#snippet icon()}
-			<IconAlertOctagon size="18" />
-		{/snippet}
-	</NftActionButton>
+		<div class="flex w-full flex-col items-center text-center">
+			<span
+				class="mb-3 inline-flex aspect-square w-[56px] rounded-full bg-warning-primary p-3 text-white"
+			>
+				<IconAlertOctagon size="32" />
+			</span>
+			<h4 class="my-3">
+				{replacePlaceholders($i18n.nfts.text.spam_warning, { $collection: token.name })}
+			</h4>
+			<p class="text-sm">
+				<Html
+					text={replacePlaceholders($i18n.nfts.text.spam_warning_text, { $collection: token.name })}
+				/>
+			</p>
+		</div>
+	</ConfirmButtonWithModal>
+{:else}
+	{@render spamButton(() =>
+		updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })
+	)}
 {/if}
