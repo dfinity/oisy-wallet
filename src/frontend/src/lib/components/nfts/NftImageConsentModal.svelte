@@ -16,6 +16,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -30,7 +31,6 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 
 	interface Props {
 		collection: NftCollection;
