@@ -494,7 +494,7 @@
 		{/snippet}
 
 		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-			<WalletConnectReview onApprove={approve} onCancel={cancel} onReject={reject} {proposal} />
+			<WalletConnectReview onApprove={approve} onCancel={reject} onReject={reject} {proposal} />
 		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
 			<WalletConnectForm onConnect={userConnect} />
 		{/if}
