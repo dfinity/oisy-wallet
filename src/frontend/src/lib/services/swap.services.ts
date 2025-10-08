@@ -265,16 +265,23 @@ const fetchSwapAmountsICP = async ({
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const [settledResults, isTokenIcrc2] = await Promise.all([
+		Promise.allSettled(
+			enabledProviders.map(({ getQuote }) =>
+				getQuote({
+					identity,
+					sourceToken: sourceToken as IcToken,
+					destinationToken: destinationToken as IcToken,
+					sourceAmount: amount
+				})
+			)
+		),
+		isSourceTokenIcrc2 ??
+			isIcrcTokenSupportIcrc2({
 				identity,
-				sourceToken: sourceToken as IcToken,
-				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
+				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
 			})
-		)
-	);
+	]);
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
@@ -288,7 +295,7 @@ const fetchSwapAmountsICP = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
