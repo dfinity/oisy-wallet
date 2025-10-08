@@ -36,12 +36,47 @@
 	setContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY, {
 		store: icTokenFeeStore
 	});
-	
+
+	const isDisabled = (): boolean => isNullish($kongSwapTokensStore);
+
+	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
+		if (isNullish($authIdentity)) {
+			await nullishSignOut();
+			return;
+		}
+
+		if (!isDisabled()) {
+			return 'ready';
+		}
+
+		try {
+			await loadKongSwapTokensService({
+				identity: $authIdentity,
+				allIcrcTokens: [ICP_TOKEN, ...$allIcrcTokens]
+			});
+
+			return 'ready';
+		} catch (_err: unknown) {
+			console.warn('Failed to load KongSwap tokens.');
+
+			return undefined;
+		}
+	};
+
 	const onOpenSwap = async (tokenId: symbol) => {
 		if (isNullish($authIdentity)) {
 			await nullishSignOut();
 			return;
 		}
+
+		busy.start({ msg: $i18n.init.info.hold_loading });
+
+		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
+		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
+		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
+		await Promise.any([waitReady({ retries: 5, isDisabled }), loadKongSwapTokens()]);
+
+		busy.stop();
 
 		modalStore.openSwap(tokenId);
 
