@@ -16,7 +16,7 @@ vi.mock('$lib/services/auth.services', () => ({
 }));
 
 vi.mock('$icp/utils/icrc.utils', () => ({
-	icrc1SupportedStandards: vi.fn()
+	isIcrcTokenSupportIcrc2: vi.fn()
 }));
 
 const mockToken = { ...mockValidIcToken, enabled: true } as IcToken;
