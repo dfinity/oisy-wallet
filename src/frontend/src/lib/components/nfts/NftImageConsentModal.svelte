@@ -44,7 +44,7 @@
 			tokens: $nonFungibleTokens,
 			networkId: collection.network.id,
 			address: collection.address
-		}) ?? undefined
+		})
 	);
 
 	const shortCollectionName = $derived(
