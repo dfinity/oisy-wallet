@@ -9,7 +9,6 @@ import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/uti
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { BtcAddress } from '$lib/types/address';
@@ -42,10 +41,9 @@ export type SendBtcParams = BtcSendServiceParams & {
  * @param $i18n I18n - The i18n store containing translation strings
  * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
  */
-export const handleBtcValidationError = async ({ err }: { err: BtcValidationError }) => {
+export const handleBtcValidationError = ({ err }: { err: BtcValidationError }) => {
 	switch (err.type) {
 		case BtcSendValidationError.AuthenticationRequired:
-			await nullishSignOut();
 			return;
 		case BtcSendValidationError.NoNetworkId:
 			toastsError({

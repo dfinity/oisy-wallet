@@ -6,7 +6,6 @@ import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { createBatches } from '$lib/services/batch.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Address, OptionEthAddress } from '$lib/types/address';
@@ -102,7 +101,6 @@ export const sendNft = async ({
 	progress?: (step: ProgressStepsSend) => void;
 }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

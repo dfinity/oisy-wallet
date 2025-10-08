@@ -39,10 +39,6 @@ import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('BtcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const transactionId = 'txid';
