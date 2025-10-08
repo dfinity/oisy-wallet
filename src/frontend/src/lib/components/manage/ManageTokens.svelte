@@ -116,7 +116,7 @@
 {/if}
 
 {#if showNetworks}
-	<ModalNetworksFilter on:icNetworkFilter={() => (showNetworks = false)} />
+	<ModalNetworksFilter onNetworkFilter={() => (showNetworks = false)} />
 {:else}
 	<ModalTokensList
 		networkSelectorViewOnly={nonNullish($selectedNetwork)}
