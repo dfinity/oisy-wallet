@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade } from 'svelte/transition';
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
@@ -41,7 +42,7 @@
 </script>
 
 {#if nonNullish(collection)}
-	<div class="my-5 flex flex-col rounded-lg bg-primary p-5">
+	<div class="my-5 flex flex-col rounded-lg bg-primary p-5" in:fade>
 		<div class="mb-6 flex flex-row justify-between gap-3">
 			<div class="flex flex-col items-start gap-3">
 				<h5>{collection.name}</h5>
@@ -54,8 +55,10 @@
 						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
 						paddingSmall
 						styleClass="inline-block text-sm"
-						>{$i18n.nfts.text.go_to_collection}<IconExpand axis="y" /></Button
+						ariaLabel={$i18n.nfts.alt.go_to_collection}
 					>
+						{$i18n.nfts.text.go_to_collection}<IconExpand axis="y" />
+					</Button>
 				</span>
 			</div>
 
