@@ -11,6 +11,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -50,6 +51,12 @@
 			<span class="block max-w-40">
 				<SkeletonText />
 			</span>
+		{/if}
+
+		{#if nonNullish(token?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText maxWords={20} text={token.description} />
+			</div>
 		{/if}
 
 		<NftMetadataList {token} />
