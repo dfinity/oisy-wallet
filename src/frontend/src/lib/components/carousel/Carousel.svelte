@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { onMount, type Snippet } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import Controls from '$lib/components/carousel/Controls.svelte';
 	import Indicators from '$lib/components/carousel/Indicators.svelte';
@@ -20,48 +19,45 @@
 		easing?: string;
 		styleClass?: string;
 		controlsWidthStyleClass?: string;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let {
 		autoplay = 5000,
 		duration = 300,
 		easing = 'ease-out',
-		styleClass = undefined,
-		controlsWidthStyleClass = undefined,
+		styleClass,
+		controlsWidthStyleClass,
 		children
 	}: Props = $props();
 
 	/**
 	 * Carousel container element variables
 	 */
-	let container: HTMLDivElement | undefined = $state();
-	let containerWidth = 0;
+	let container = $state<HTMLDivElement | undefined>();
+	let containerWidth = $state(0);
 
 	/**
 	 * Computed slider frame element that wraps all slides
 	 */
-	let sliderFrame: HTMLDivElement | undefined = $state();
+	let sliderFrame = $state<HTMLDivElement | undefined>();
 
 	/**
 	 * Variables related to the slides
 	 */
-	let slides: Node[] = $state();
+	let slides = $state<Node[] | undefined>();
 	let currentSlide = $state(0);
-	let totalSlides: number = $state();
-	run(() => {
-		totalSlides = slides?.length ?? 0;
-	});
+	let totalSlides = $derived(slides?.length ?? 0);
 
 	/**
 	 * Autoplay timer
 	 */
-	let autoplayTimer: NodeJS.Timeout | undefined = undefined;
+	let autoplayTimer = $state<NodeJS.Timeout | undefined>();
 
 	/**
 	 * Slide transition timer that needed for last-to-first and first-to-last non-animated transform
 	 */
-	let slideTransformTimer: NodeJS.Timeout | undefined = undefined;
+	let slideTransformTimer = $state<NodeJS.Timeout | undefined>();
 
 	/**
 	 * Initialise all required data
@@ -134,7 +130,7 @@
 	 * Start autoplay timer
 	 */
 	const initialiseAutoplayTimer = () => {
-		if (slides.length <= 1) {
+		if (nonNullish(slides) && slides.length <= 1) {
 			return;
 		}
 
@@ -273,9 +269,7 @@
 	};
 
 	export const removeSlide = (idx: number) => {
-		slides = slides.filter((_, i) => i !== idx);
-
-		totalSlides = slides.length;
+		slides = (slides ?? []).filter((_, i) => i !== idx);
 
 		initializeCarousel();
 
@@ -298,7 +292,7 @@
 >
 	<div bind:this={container} class="w-full overflow-hidden">
 		<div bind:this={sliderFrame} style="width: 9999px" class="flex" data-tid={CAROUSEL_SLIDE}>
-			{@render children?.()}
+			{@render children()}
 		</div>
 	</div>
 	{#if nonNullish(slides) && slides.length > 1}

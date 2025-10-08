@@ -30,6 +30,14 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	}))
 }));
 
+vi.mock('$icp/utils/icrc.utils', () => ({
+	isIcrcTokenSupportIcrc2: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
+}));
+
 describe('SwapTokenWizard', () => {
 	const mockContext = new Map();
 

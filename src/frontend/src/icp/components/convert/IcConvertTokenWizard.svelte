@@ -226,10 +226,9 @@
 			<IcConvertReview
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
+				onConvert={convert}
 				{receiveAmount}
 				{sendAmount}
-				on:icConvert={convert}
-				on:icBack={onBack}
 			>
 				{#snippet cancel()}
 					<ButtonBack onclick={back} />

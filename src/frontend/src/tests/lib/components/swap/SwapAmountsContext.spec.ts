@@ -1,6 +1,7 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY } from '$icp/stores/ic-token-fee.store';
 import type { IcToken } from '$icp/types/ic-token';
 import SwapAmountsContext from '$lib/components/swap/SwapAmountsContext.svelte';
+import * as addressDerived from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as tokensStore from '$lib/derived/tokens.derived';
 import * as authServices from '$lib/services/auth.services';
@@ -22,6 +23,8 @@ interface SwapAmountsContextProps {
 	sourceToken: IcToken | undefined;
 	destinationToken: IcToken | undefined;
 	slippageValue: OptionAmount;
+	enableAmountUpdates?: boolean;
+	pauseAmountUpdates?: boolean;
 }
 
 describe('SwapAmountsContext.svelte', () => {
@@ -31,7 +34,7 @@ describe('SwapAmountsContext.svelte', () => {
 	let store: ReturnType<typeof initSwapAmountsStore>;
 
 	const renderWithContext = async (componentProps: SwapAmountsContextProps) => {
-		await act(() =>
+		const result = await act(() =>
 			render(SwapAmountsContext, {
 				props: {
 					...componentProps,
@@ -44,10 +47,16 @@ describe('SwapAmountsContext.svelte', () => {
 		);
 
 		await tick();
+		return result;
+	};
+
+	const waitForDebounce = async () => {
 		await new Promise((resolve) => setTimeout(resolve, 350));
+		await tick();
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
 		store = initSwapAmountsStore();
 
 		context = new Map([
@@ -75,6 +84,7 @@ describe('SwapAmountsContext.svelte', () => {
 		vi.spyOn(tokensStore, 'tokens', 'get').mockImplementation(() =>
 			readable([sourceToken, destinationToken])
 		);
+		vi.spyOn(addressDerived, 'ethAddress', 'get').mockImplementation(() => readable('0x123'));
 	});
 
 	afterEach(() => {
@@ -92,6 +102,8 @@ describe('SwapAmountsContext.svelte', () => {
 			slippageValue: '0.5'
 		});
 
+		await waitForDebounce();
+
 		expect(signOutSpy).toHaveBeenCalled();
 	});
 
@@ -102,6 +114,34 @@ describe('SwapAmountsContext.svelte', () => {
 			destinationToken,
 			slippageValue: '0.3'
 		});
+
+		await waitForDebounce();
+
+		expect(get(store)).toBeNull();
+	});
+
+	it('resets store when source token is undefined', async () => {
+		await renderWithContext({
+			amount: '100',
+			sourceToken: undefined,
+			destinationToken,
+			slippageValue: '0.3'
+		});
+
+		await waitForDebounce();
+
+		expect(get(store)).toBeNull();
+	});
+
+	it('resets store when destination token is undefined', async () => {
+		await renderWithContext({
+			amount: '100',
+			sourceToken,
+			destinationToken: undefined,
+			slippageValue: '0.3'
+		});
+
+		await waitForDebounce();
 
 		expect(get(store)).toBeNull();
 	});
@@ -115,6 +155,8 @@ describe('SwapAmountsContext.svelte', () => {
 			destinationToken,
 			slippageValue: '0.1'
 		});
+
+		await waitForDebounce();
 
 		expect(get(store)).toEqual({
 			amountForSwap: 15,
@@ -135,6 +177,8 @@ describe('SwapAmountsContext.svelte', () => {
 			slippageValue: '0.3'
 		});
 
+		await waitForDebounce();
+
 		expect(fetchMock).toHaveBeenCalled();
 
 		const value = get(store);
@@ -154,10 +198,56 @@ describe('SwapAmountsContext.svelte', () => {
 			slippageValue: '0.2'
 		});
 
+		await waitForDebounce();
+
 		const value = get(store);
 
 		expect(value?.swaps).toEqual([]);
 		expect(value?.selectedProvider).toBeUndefined();
 		expect(value?.amountForSwap).toBe(20);
+	});
+
+	it('debounces fetchSwapAmounts calls', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3'
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 200));
+
+		expect(fetchMock).not.toHaveBeenCalled();
+
+		await new Promise((resolve) => setTimeout(resolve, 200));
+
+		expect(fetchMock).toHaveBeenCalledOnce();
+	});
+
+	it('does not call fetchSwapAmounts if amount has not changed', async () => {
+		const fetchMock = vi
+			.spyOn(swapService, 'fetchSwapAmounts')
+			.mockResolvedValue(mockSwapProviders);
+
+		store.setSwaps({
+			swaps: mockSwapProviders,
+			amountForSwap: 10,
+			selectedProvider: mockSwapProviders[0]
+		});
+
+		await renderWithContext({
+			amount: '10',
+			sourceToken,
+			destinationToken,
+			slippageValue: '0.3'
+		});
+
+		await waitForDebounce();
+
+		expect(fetchMock).not.toHaveBeenCalled();
 	});
 });

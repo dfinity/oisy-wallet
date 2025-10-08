@@ -1130,9 +1130,13 @@
 			"address_copied": "地址 $address 已复制",
 			"spam": "垃圾信息",
 			"not_spam": "非垃圾信息",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "隐藏",
 			"unhide": "取消隐藏",
 			"hidden": "已隐藏",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "在区块链浏览器中打开此合约",
 			"img_consent_disabled": "你已禁用该合集的图片",
 			"img_consent_none": "出于安全原因图片已禁用",
@@ -1149,7 +1153,8 @@
 			"review_title": "为 \"$collectionName\" 审核媒体来源",
 			"review_description": "注意！这些图片来自未验证的来源。启用它们可能会将你的 IP 地址共享给第三方，并带来潜在的安全风险。",
 			"learn_more": "了解更多",
-			"token_id": "代币 ID"
+			"token_id": "代币 ID",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "还没有 NFT",
@@ -1157,7 +1162,8 @@
 				"image": "代币 ID 为 $tokenId 的 NFT 图片"
 			},
 			"copy_address": "复制此地址到剪贴板",
-			"review_preference": "更改显示偏好"
+			"review_preference": "更改显示偏好",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

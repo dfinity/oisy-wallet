@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { erc1155Tokens } from '$eth/derived/erc1155.derived';
 	import { erc20Tokens } from '$eth/derived/erc20.derived';
@@ -26,19 +25,21 @@
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
-		contractAddress: string | undefined;
-		metadata: Erc20Metadata | Erc721Metadata | undefined;
+		contractAddress?: string;
+		metadata?: Erc20Metadata | Erc721Metadata | Erc1155Metadata;
 		network: Network;
+		onBack: () => void;
+		onSave: () => void;
 	}
 
-	let { contractAddress, metadata = $bindable(), network }: Props = $props();
+	let { contractAddress, metadata = $bindable(), network, onBack, onSave }: Props = $props();
 
 	const validateMetadata = () => {
 		if (isNullish(metadata?.symbol) || isNullish(metadata?.name)) {
 			toastsError({
 				msg: { text: $i18n.tokens.error.incomplete_metadata }
 			});
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -54,7 +55,7 @@
 				msg: { text: $i18n.tokens.error.duplicate_metadata }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 	};
@@ -65,7 +66,7 @@
 				msg: { text: $i18n.tokens.import.error.missing_contract_address }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -74,7 +75,7 @@
 				msg: { text: $i18n.tokens.import.error.no_network }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -92,7 +93,7 @@
 				msg: { text: $i18n.tokens.error.already_available }
 			});
 
-			dispatch('icBack');
+			onBack();
 			return;
 		}
 
@@ -116,16 +117,11 @@
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });
 
-			dispatch('icBack');
+			onBack();
 		}
 	});
 
-	let invalid = $state(true);
-	run(() => {
-		invalid = isNullishOrEmpty(contractAddress) || isNullish(metadata);
-	});
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(isNullishOrEmpty(contractAddress) || isNullish(metadata));
 </script>
 
 <ContentWithToolbar>
@@ -192,8 +188,8 @@
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			<ButtonBack onclick={() => dispatch('icBack')} />
-			<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+			<ButtonBack onclick={onBack} />
+			<Button disabled={invalid} onclick={onSave}>
 				{$i18n.tokens.import.text.add_the_token}
 			</Button>
 		</ButtonGroup>

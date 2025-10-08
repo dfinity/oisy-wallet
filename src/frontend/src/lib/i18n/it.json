@@ -1130,9 +1130,13 @@
 			"address_copied": "",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
@@ -1149,7 +1153,8 @@
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",
@@ -1157,7 +1162,8 @@
 				"image": "Immagine dell'NFT con token ID: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {

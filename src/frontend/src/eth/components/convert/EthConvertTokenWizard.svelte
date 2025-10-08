@@ -207,7 +207,7 @@
 			{/snippet}
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
+		<EthConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
 			{#snippet cancel()}
 				<ButtonBack onclick={back} />
 			{/snippet}

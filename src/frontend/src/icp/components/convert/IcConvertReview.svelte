@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
 	import DestinationValue from '$lib/components/address/DestinationValue.svelte';
 	import ConvertReview from '$lib/components/convert/ConvertReview.svelte';
@@ -8,17 +8,19 @@
 
 	interface Props {
 		sendAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		destination?: string;
 		isDestinationCustom?: boolean;
-		cancel?: Snippet;
+		onConvert: () => void;
+		cancel: Snippet;
 	}
 
 	let {
 		sendAmount,
 		receiveAmount,
-		destination = '',
+		destination: destinationProp = '',
 		isDestinationCustom = false,
+		onConvert,
 		cancel
 	}: Props = $props();
 
@@ -28,9 +30,13 @@
 	const cancel_render = $derived(cancel);
 </script>
 
-<ConvertReview {receiveAmount} {sendAmount} on:icConvert on:icBack>
+<ConvertReview {cancel} {onConvert} {receiveAmount} {sendAmount}>
 	{#snippet destination()}
-		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken} />
+		<DestinationValue
+			destination={destinationProp}
+			{isDestinationCustom}
+			token={$destinationToken}
+		/>
 	{/snippet}
 
 	{#snippet fee()}
@@ -39,9 +45,5 @@
 			sourceToken={$sourceToken}
 			sourceTokenExchangeRate={$sourceTokenExchangeRate}
 		/>
-	{/snippet}
-
-	{#snippet cancel()}
-		{@render cancel_render?.()}
 	{/snippet}
 </ConvertReview>
