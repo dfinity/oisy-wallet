@@ -9,7 +9,6 @@ import {
 } from '$lib/constants/analytics.constants';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
@@ -60,7 +59,6 @@ export const saveTokens = async <
 	const $i18n = get(i18n);
 
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

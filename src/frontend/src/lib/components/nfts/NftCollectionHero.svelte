@@ -7,6 +7,7 @@
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -50,6 +51,12 @@
 			<span class="block max-w-40">
 				<SkeletonText />
 			</span>
+		{/if}
+
+		{#if nonNullish(token?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText maxWords={20} text={token.description} />
+			</div>
 		{/if}
 
 		<NftMetadataList {token} />

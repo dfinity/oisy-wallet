@@ -15,10 +15,6 @@ vi.mock('$lib/utils/parse.utils', () => ({
 	parseToken: vi.fn()
 }));
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 const mockToken = { ...mockValidErc20Token, enabled: true };
 const mockDestToken = { ...ETHEREUM_TOKEN, enabled: true };
 

@@ -3,7 +3,6 @@
 	import { type Snippet, getContext } from 'svelte';
 	import { run } from 'svelte/legacy';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 
 	interface Props {
@@ -16,9 +15,8 @@
 		accountsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	const onAccountsPrompt = async () => {
+	const onAccountsPrompt = () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -35,7 +33,7 @@
 	};
 
 	run(() => {
-		($payload, (async () => await onAccountsPrompt())());
+		($payload, (() => onAccountsPrompt())());
 	});
 </script>
 

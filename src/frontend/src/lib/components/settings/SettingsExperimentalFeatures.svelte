@@ -9,7 +9,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { userExperimentalFeatures } from '$lib/derived/user-experimental-features.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { toastsShow } from '$lib/stores/toasts.store';
 	import type {
@@ -25,7 +24,6 @@
 
 	const save = async (features: UserExperimentalFeatures) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

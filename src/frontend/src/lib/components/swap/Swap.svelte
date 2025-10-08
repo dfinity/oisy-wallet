@@ -16,7 +16,6 @@
 	import { allIcrcTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { modalSwap } from '$lib/derived/modal.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadKongSwapTokens as loadKongSwapTokensService } from '$lib/services/swap.services';
 	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -41,7 +40,6 @@
 
 	const loadKongSwapTokens = async (): Promise<'ready' | undefined> => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -65,7 +63,6 @@
 
 	const onOpenSwap = async (tokenId: symbol) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -74,7 +71,7 @@
 		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
 		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
 		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
-		await Promise.any([waitReady({ retries: 20, isDisabled }), loadKongSwapTokens()]);
+		await Promise.any([waitReady({ retries: 10, isDisabled }), loadKongSwapTokens()]);
 
 		busy.stop();
 

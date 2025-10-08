@@ -11,10 +11,6 @@ import { mockSwapProviders } from '$tests/mocks/swap.mocks';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$icp/utils/icrc.utils', () => ({
 	isIcrcTokenSupportIcrc2: vi.fn()
 }));
