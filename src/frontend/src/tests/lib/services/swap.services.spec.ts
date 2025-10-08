@@ -142,6 +142,10 @@ describe('fetchSwapAmounts', () => {
 	const amount = 1000;
 	const slippage = 0.5;
 
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
 		const kongSwapResponse = {
 			receive_amount: 950n,
@@ -164,6 +168,83 @@ describe('fetchSwapAmounts', () => {
 			isSourceTokenIcrc2: true,
 			userEthAddress: mockEthAddress
 		});
+
+		expect(result).toHaveLength(2);
+
+		const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+		const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
+
+		expect(kongSwapResult).toBeDefined();
+		expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
+
+		expect(icpSwapResult).toBeDefined();
+		expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+	});
+
+	it('should make a call to ledger to get icrc token supported standards', async () => {
+		const kongSwapResponse = {
+			receive_amount: 950n,
+			slippage: 0.5
+		} as SwapAmountsReply;
+		const icpSwapResponse = {
+			receiveAmount: 975
+		} as unknown as ICPSwapAmountReply;
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+		]);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage,
+			isSourceTokenIcrc2: undefined,
+			userEthAddress: mockEthAddress
+		});
+
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalled();
+
+		expect(result).toHaveLength(2);
+
+		const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+		const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
+
+		expect(kongSwapResult).toBeDefined();
+		expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
+
+		expect(icpSwapResult).toBeDefined();
+		expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+	});
+
+	it('should not make a call to ledger to get icrc token supported standards', async () => {
+		const kongSwapResponse = {
+			receive_amount: 950n,
+			slippage: 0.5
+		} as SwapAmountsReply;
+		const icpSwapResponse = {
+			receiveAmount: 975
+		} as unknown as ICPSwapAmountReply;
+
+		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+		const result = await fetchSwapAmounts({
+			identity: mockIdentity,
+			sourceToken,
+			destinationToken,
+			amount,
+			tokens: mockTokens,
+			slippage,
+			isSourceTokenIcrc2: true,
+			userEthAddress: mockEthAddress
+		});
+
+		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
 
 		expect(result).toHaveLength(2);
 
