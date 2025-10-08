@@ -2,21 +2,25 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
 import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+import {
+	NFT_COLLECTION_ACTION_HIDE,
+	NFT_COLLECTION_ACTION_SPAM
+} from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
+import { beforeAll } from 'vitest';
 
 const nftAzuki1 = {
 	...mockValidErc721Nft,
@@ -47,7 +51,9 @@ describe('NftImageConsentModal', () => {
 	const closeSpy = vi.spyOn(modalStoreMod.modalStore, 'close').mockImplementation(() => {});
 
 	// save util
-	const saveSpy = vi.spyOn(erc721TokenServices, 'saveCustomTokens').mockResolvedValue(undefined);
+	const saveSpy = vi
+		.spyOn(erc721TokenServices, 'saveCustomTokens')
+		.mockReturnValue(new Promise((resolve) => resolve()));
 
 	// NFT utils: toggle & collection
 	const getAllowMediaSpy = vi.spyOn(nftsUtils, 'getAllowMediaForNft');
@@ -60,6 +66,11 @@ describe('NftImageConsentModal', () => {
 
 	beforeAll(() => {
 		nftStore.addAll([nftAzuki1, nftAzuki2]);
+	});
+
+	beforeEach(() => {
+		getAllowMediaSpy.mockClear();
+		closeSpy.mockClear();
 	});
 
 	it('calls saveAllCustomTokens with toggled allowMedia and correct key on Save', async () => {
@@ -83,32 +94,76 @@ describe('NftImageConsentModal', () => {
 			identity: mockIdentity,
 			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
 		});
-	});
-
-	it('closes the modal when clicking Cancel', async () => {
-		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
-
-		closeSpy.mockClear();
-
-		const cancelBtn = screen.getByTestId(`${TEST_ID}-cancelButton`);
-		await fireEvent.click(cancelBtn);
 
 		expect(closeSpy).toHaveBeenCalledOnce();
 	});
 
-	it('renders address, display preference, and NFT media list under the expected testIds', () => {
+	it('calls saveAllCustomTokens to set allowMedia to false to keep disabled', async () => {
+		getAllowMediaSpy.mockReturnValue(undefined);
+
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'net-icp' } },
+			allowExternalContentSource: true,
+			standard: 'erc721'
+		} as Erc721Token;
+		findTokenSpy.mockReturnValue(token);
+
+		const TEST_ID = 'nft-modal';
+		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
+
+		const keepDisabledBtn = screen.getByTestId(`${TEST_ID}-keepMediaDisabledButton`);
+		await fireEvent.click(keepDisabledBtn);
+
+		expect(saveSpy).toHaveBeenCalledWith({
+			identity: mockIdentity,
+			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
+		});
+
+		expect(closeSpy).toHaveBeenCalledOnce();
+	});
+
+	it('closes the modal when clicking Cancel', async () => {
+		getAllowMediaSpy.mockReturnValue(true);
+
+		const TEST_ID = 'nft-modal';
+		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
+
+		const cancelBtn1 = screen.getByTestId(`${TEST_ID}-cancelButton`);
+
+		assertNonNullish(cancelBtn1);
+
 		getAllowMediaSpy.mockReturnValue(false);
-		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
+
+		const cancelBtn2 = screen.getByTestId(`${TEST_ID}-cancelButton`);
+
+		assertNonNullish(cancelBtn2);
+
+		await fireEvent.click(cancelBtn2);
+
+		expect(closeSpy).toHaveBeenCalledOnce();
+	});
+
+	it('renders collection info, display preference, and NFT media list', () => {
+		getAllowMediaSpy.mockReturnValue(false);
+		findTokenSpy.mockReturnValue({
+			...mockValidErc721Token,
+			description: 'Some valid description'
+		});
 		getCollectionUiSpy.mockReturnValue([
 			{
-				collection: nftAzuki1.collection,
+				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
 				nfts: [nftAzuki1, nftAzuki2]
 			}
 		]);
 
 		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
+		render(NftImageConsentModal, {
+			props: {
+				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
+				testId: TEST_ID
+			}
+		});
 
 		// Collection address
 		const addrOut = screen.getByTestId(`${TEST_ID}-collectionAddress`);
@@ -142,11 +197,22 @@ describe('NftImageConsentModal', () => {
 				expect(utils.queryByText(`#${nft.id}`)).toBeNull();
 			}
 		}
+
+		// Collection data and actions
+		const colTitle = screen.getByTestId(`${TEST_ID}-collectionTitle`);
+		const colDescription = screen.getByTestId(`${TEST_ID}-collectionDescription`);
+		const spamButton = screen.getByTestId(NFT_COLLECTION_ACTION_SPAM);
+		const hideButton = screen.getByTestId(NFT_COLLECTION_ACTION_HIDE);
+
+		expect(colTitle).toBeInTheDocument();
+		expect(colDescription).toBeInTheDocument();
+		expect(spamButton).toBeInTheDocument();
+		expect(hideButton).toBeInTheDocument();
 	});
 
 	it('should not render media link icon if consent has not been given', () => {
 		getAllowMediaSpy.mockReturnValue(false);
-		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
+		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
 				collection: nftAzuki1.collection,
@@ -171,7 +237,7 @@ describe('NftImageConsentModal', () => {
 
 	it('should render media link icon if consent has been given', () => {
 		getAllowMediaSpy.mockReturnValue(true);
-		findTokenSpy.mockReturnValue(mockValidErc721Nft as unknown as NonFungibleToken);
+		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
 				collection: nftAzuki1.collection,
