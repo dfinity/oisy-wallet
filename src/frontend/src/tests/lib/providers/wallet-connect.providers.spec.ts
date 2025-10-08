@@ -114,7 +114,7 @@ describe('wallet-connect.providers', () => {
 			});
 		});
 
-		it('should disconnect previous sessions if cleanSlate is false', async () => {
+		it('should not disconnect previous sessions if cleanSlate is false', async () => {
 			mockGetActiveSessions.mockReturnValue({
 				session1: { topic: 'topic1' },
 				session2: { topic: 'topic2' }
