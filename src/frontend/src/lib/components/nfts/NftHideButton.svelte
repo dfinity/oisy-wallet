@@ -18,6 +18,8 @@
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import { Html } from '@dfinity/gix-components';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -58,15 +60,20 @@
 		>
 			<div class="flex w-full flex-col items-center text-center">
 				<span
-					class="m-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
+					class="mb-3 inline-flex aspect-square w-[56px] rounded-full bg-brand-primary p-3 text-white"
 				>
 					<IconEyeOff size="32" />
 				</span>
-				<h4 class="my-3">Move collection to spam?</h4>
-				<p class="text-sm"
-					>This will move all NFTs of this collection to spam. They'll be hidden from your main
-					view, but you can always find and restore them later.</p
-				>
+				<h4 class="my-3">
+					{replacePlaceholders($i18n.nfts.text.hide_warning, { $collection: token.name })}
+				</h4>
+				<p class="text-sm">
+					<Html
+						text={replacePlaceholders($i18n.nfts.text.hide_warning_text, {
+							$collection: token.name
+						})}
+					/>
+				</p>
 			</div>
 		</ConfirmButtonWithModal>
 	{:else}
