@@ -30,6 +30,7 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 
 	interface Props {
 		collection: NftCollection;
@@ -132,7 +133,7 @@
 				{$i18n.nfts.text.review_description}
 				<ExternalLink
 					ariaLabel={$i18n.nfts.text.learn_more}
-					href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
+					href={OISY_NFT_DOCS_URL}
 					iconAsLast
 					iconSize="18"
 					styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
