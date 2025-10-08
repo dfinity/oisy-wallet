@@ -38,7 +38,7 @@
 		to?: string;
 		from?: string;
 		tokenId?: number;
-		children?: Snippet;
+		children: Snippet;
 		onClick?: () => void;
 		approveSpender?: string;
 	}
@@ -93,12 +93,13 @@
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
 	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
 		<Card noMargin withGap>
-			<span
-				class="relative inline-flex items-center gap-1 whitespace-nowrap first-letter:capitalize"
-			>
-				{@render children?.()}
+			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
+				<span class="truncate first-letter:capitalize">
+					{@render children()}
+				</span>
+
 				{#if nonNullish(network)}
-					<div class="flex">
+					<div class="shrink-0">
 						<NetworkLogo {network} testId="transaction-network" transparent />
 					</div>
 				{/if}
