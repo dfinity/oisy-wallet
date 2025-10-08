@@ -231,7 +231,7 @@
 				{sendAmount}
 			>
 				{#snippet cancel()}
-					<ButtonBack onclick={back} />.
+					<ButtonBack onclick={back} />
 				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
