@@ -14,7 +14,12 @@
 	import { formatToken, formatCurrency } from '$lib/utils/format.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	const { destinationToken, sourceToken, sourceTokenExchangeRate, isSourceTokenIcrc2 } =
+	interface Props {
+		isSourceTokenIcrc2?: boolean;
+	}
+	let { isSourceTokenIcrc2 }: Props = $props();
+
+	const { destinationToken, sourceToken, sourceTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: icTokenFeeStore } = getContext<IcTokenFeeContext>(IC_TOKEN_FEE_CONTEXT_KEY);
@@ -32,7 +37,7 @@
 	let sourceTokenTransferFee = $derived(Number(sourceTokenTransferFeeDisplay));
 
 	let sourceTokenApproveFeeDisplay = $derived(
-		$isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0'
+		isSourceTokenIcrc2 ? sourceTokenTransferFeeDisplay : '0'
 	);
 
 	let sourceTokenApproveFee = $derived(Number(sourceTokenApproveFeeDisplay));
@@ -53,7 +58,7 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+					{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol]) || isNullish(isSourceTokenIcrc2)}
 						<div class="w-14 sm:w-16">
 							<SkeletonText />
 						</div>
@@ -73,7 +78,7 @@
 		{/snippet}
 
 		{#snippet listItems()}
-			{#if $isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
+			{#if isSourceTokenIcrc2 && sourceTokenApproveFee !== 0}
 				<SwapFee
 					fee={sourceTokenApproveFeeDisplay}
 					feeLabel={$i18n.swap.text.approval_fee}

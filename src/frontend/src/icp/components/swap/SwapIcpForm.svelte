@@ -15,6 +15,8 @@
 		swapAmount: OptionAmount;
 		receiveAmount?: number;
 		slippageValue: OptionAmount;
+		isSourceTokenIcrc2?: boolean;
+
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
@@ -26,6 +28,7 @@
 		swapAmount = $bindable(),
 		receiveAmount = $bindable(),
 		slippageValue = $bindable(),
+		isSourceTokenIcrc2,
 		sourceTokenFee,
 		isSwapAmountsLoading,
 		onShowTokensList,
@@ -33,12 +36,16 @@
 		onNext
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance, isSourceTokenIcrc2 } =
+	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
+	let totalFee = $derived(
+		nonNullish(isSourceTokenIcrc2)
+			? (sourceTokenFee ?? ZERO) * (isSourceTokenIcrc2 ? 2n : 1n)
+			: undefined
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
@@ -70,7 +77,7 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
-				<SwapFees />
+				<SwapFees {isSourceTokenIcrc2} />
 			</div>
 		{/if}
 	{/snippet}
