@@ -26,7 +26,6 @@ import type { EthereumNetwork } from '$eth/types/network';
 import { mapErc20Icon, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
 import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsErrorNoTrace } from '$lib/stores/toasts.store';
@@ -161,7 +160,6 @@ const loadNetworkUserTokens = async ({
 	useCache = false
 }: LoadUserTokenParams): Promise<UserToken[]> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return [];
 	}
 

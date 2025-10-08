@@ -21,7 +21,8 @@ describe('NftCollectionHero', () => {
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
-		network: POLYGON_MAINNET_NETWORK
+		network: POLYGON_MAINNET_NETWORK,
+		description: 'Some descriptive text'
 	};
 
 	beforeAll(() => {
@@ -43,6 +44,10 @@ describe('NftCollectionHero', () => {
 		names.forEach((n) => {
 			expect(n).toBeInTheDocument();
 		});
+
+		const description: HTMLElement | null = getByText(mockToken.description as string);
+
+		expect(description).toBeInTheDocument();
 
 		const standard: HTMLElement | null = getByText(mockToken.standard);
 

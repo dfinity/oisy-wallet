@@ -107,7 +107,6 @@
 
 	const resetListener = () => {
 		listener = undefined;
-		proposal = null;
 	};
 
 	const initListener = async () => {
@@ -171,12 +170,12 @@
 			return;
 		}
 
-		// Address is not defined. We need it at least one between the Ethereum address and the Solana address.
+		// Address is not defined. We need at least one between the Ethereum address and the Solana address.
 		if (isNullish($ethAddress) && isNullish($solAddressMainnet)) {
 			return;
 		}
 
-		// For simplicity reason we just display an error for now if the user has already opened the WalletConnect modal.
+		// For simplicity reason, we just display an error for now if the user has already opened the WalletConnect modal.
 		// Technically, we could potentially check which steps are in progress and eventually jump or not, but let's keep it simple for now.
 		if ($modalWalletConnectAuth) {
 			toastsError({
@@ -203,11 +202,6 @@
 	});
 
 	const onSessionProposal = (sessionProposal: WalletKitTypes.SessionProposal) => {
-		// Prevent race condition
-		if (isNullish(listener)) {
-			return;
-		}
-
 		proposal = sessionProposal;
 	};
 

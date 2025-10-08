@@ -3,6 +3,7 @@ import Transaction from '$lib/components/transactions/Transaction.svelte';
 import type { Token as AppToken } from '$lib/types/token';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, screen } from '@testing-library/svelte';
 
 export interface Token {
@@ -75,7 +76,8 @@ describe('Transaction (single)', () => {
 			timestamp: 1_690_000_000,
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			from: fromAddress
+			from: fromAddress,
+			children: mockSnippet
 		});
 
 		await expect(screen.findByText(/From/i)).resolves.toBeInTheDocument();
@@ -91,7 +93,8 @@ describe('Transaction (single)', () => {
 			status: 'confirmed',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: toAddress
+			to: toAddress,
+			children: mockSnippet
 		});
 
 		expect(screen.getByText(/^to$/i)).toBeInTheDocument();
@@ -107,7 +110,8 @@ describe('Transaction (single)', () => {
 			status: 'confirmed',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: toAddress
+			to: toAddress,
+			children: mockSnippet
 		});
 
 		expect(getByText(/^to$/i)).toBeInTheDocument();
@@ -124,7 +128,8 @@ describe('Transaction (single)', () => {
 			token: ICP_TOKEN,
 			iconType: 'transaction',
 			to: '0xSOMEADDRESS',
-			approveSpender: forAddress
+			approveSpender: forAddress,
+			children: mockSnippet
 		});
 
 		expect(getByText(/^for$/i)).toBeInTheDocument();
@@ -140,7 +145,8 @@ describe('Transaction (single)', () => {
 			status: 'pending',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: '0xaddr'
+			to: '0xaddr',
+			children: mockSnippet
 		});
 
 		expect(screen.queryByText(/ICP/)).toBeNull();
@@ -156,7 +162,8 @@ describe('Transaction (single)', () => {
 			status: 'confirmed',
 			token: NFT_TEST_TOKEN as unknown as AppToken,
 			iconType: 'transaction',
-			to: '0xaddr'
+			to: '0xaddr',
+			children: mockSnippet
 		});
 
 		expect(screen.queryByText(/COOLNFT/)).toBeNull();
@@ -171,7 +178,8 @@ describe('Transaction (single)', () => {
 			token: NFT_TEST_TOKEN as unknown as AppToken,
 			iconType: 'token',
 			from: '0xaddr',
-			tokenId: 1
+			tokenId: 1,
+			children: mockSnippet
 		});
 
 		expect(screen.getByLabelText('receive')).toBeInTheDocument(); // badge
@@ -189,7 +197,8 @@ describe('Transaction (single)', () => {
 			token: ICP_TOKEN,
 			iconType: 'token',
 			from: '0xaddr',
-			displayAmount: 1n
+			displayAmount: 1n,
+			children: mockSnippet
 		});
 
 		await expect(screen.findByText(/ICP/)).resolves.toBeInTheDocument();
@@ -201,7 +210,8 @@ describe('Transaction (single)', () => {
 			status: 'pending',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: '0xaddr'
+			to: '0xaddr',
+			children: mockSnippet
 		});
 
 		expect(screen.getByText(/^to$/i)).toBeInTheDocument();
