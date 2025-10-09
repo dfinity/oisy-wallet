@@ -23,6 +23,7 @@ import {
 } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
+import { TRACK_SWAP_OFFER } from '$lib/constants/analytics.constants';
 import {
 	KONG_BACKEND_CANISTER_ID,
 	NANO_SECONDS_IN_MINUTE,
@@ -36,6 +37,7 @@ import {
 	SWAP_MODE,
 	SWAP_SIDE
 } from '$lib/constants/swap.constants';
+import { exchanges } from '$lib/derived/exchange.derived';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -260,9 +262,9 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
-	SwapMappedResult[]
-> => {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
+	amount: bigint;
+}): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const [settledResults, isTokenIcrc2] = await Promise.all([
@@ -283,10 +285,37 @@ const fetchSwapAmountsICP = async ({
 			})
 	]);
 
+	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+
+	const trackEventBaseParams = {
+		sourceToken: sourceToken.symbol,
+		sourceTokenNetwork: sourceToken.network.name,
+		sourceTokenCanister: (sourceToken as IcToken).ledgerCanisterId,
+		sourceAmount: amount.toString(),
+		sourceUSDValue: nonNullish(sourceTokenUsdValue)
+			? `${sourceTokenUsdValue * Number(amount)}`
+			: '',
+		destinationToken: destinationToken.symbol,
+		destinationTokenNetwork: destinationToken.network.name,
+		destinationTokenCanister: (destinationToken as IcToken).ledgerCanisterId,
+		amount: amount.toString()
+	};
+
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
+				trackEvent({
+					name: TRACK_SWAP_OFFER,
+					metadata: {
+						resultStatus: 'error',
+						error: result.reason,
+						provider: provider.key,
+						...trackEventBaseParams
+					}
+				});
+
 				return acc;
 			}
 
@@ -302,6 +331,19 @@ const fetchSwapAmountsICP = async ({
 
 			if (mapped && Number(mapped.receiveAmount) > 0) {
 				acc.push(mapped);
+
+				trackEvent({
+					name: TRACK_SWAP_OFFER,
+					metadata: {
+						resultStatus: 'success',
+						provider: provider.key,
+						receiveAmount: mapped.receiveAmount.toString(),
+						receiveAmountUSDValue: nonNullish(destinationUsdValue)
+							? `${destinationUsdValue * Number(mapped.receiveAmount)}`
+							: '',
+						...trackEventBaseParams
+					}
+				});
 			}
 
 			return acc;
