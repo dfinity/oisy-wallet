@@ -238,6 +238,10 @@ export const fetchSwapAmounts = async ({
 		unitName: sourceToken.decimals
 	});
 
+
+	console.log('here is in fetchSwapAmount');
+	
+
 	return isNetworkIdICP(sourceToken.network.id)
 		? await fetchSwapAmountsICP({
 				identity,
@@ -267,6 +271,10 @@ const fetchSwapAmountsICP = async ({
 }: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
+
+
+	console.log('here is hello');
+	
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const [settledResults, isTokenIcrc2] = await Promise.all([
@@ -318,7 +326,7 @@ const fetchSwapAmountsICP = async ({
 					name: TRACK_SWAP_OFFER,
 					metadata: {
 						resultStatus: 'error',
-						error: result.reason,
+						error: result.reason.message,
 						provider: provider.key,
 						...trackEventBaseParams
 					}
