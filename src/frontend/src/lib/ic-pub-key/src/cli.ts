@@ -16,8 +16,7 @@ import {
 } from './ecdsa/secp256k1.js';
 
 /* istanbul ignore next */
-export const deriveEthAddress = async (user: string): Promise<string> => {
-	const pubkey = '02121bc3a5c38f38ca76487c72007ebbfd34bc6c4cb80a671655aa94585bbd0a02';
+export const deriveEthAddress = async (user: string, pubkey: string): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 
 	assertNonNullish(
@@ -56,8 +55,11 @@ function mapBitcoinNetworkToBitcoinJS(network: BitcoinNetwork): Network {
 }
 
 /* istanbul ignore next */
-export const deriveBtcAddress = async (user: string, network: BitcoinNetwork): Promise<string> => {
-	const pubkey = '02121bc3a5c38f38ca76487c72007ebbfd34bc6c4cb80a671655aa94585bbd0a02';
+export const deriveBtcAddress = async (
+	user: string,
+	network: BitcoinNetwork,
+	pubkey: string
+): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 
 	assertNonNullish(
@@ -91,8 +93,11 @@ export const deriveBtcAddress = async (user: string, network: BitcoinNetwork): P
 };
 
 /* istanbul ignore next */
-export const deriveSolAddress = async (user: string, derivationPath: string[]): Promise<string> => {
-	const pubkey = '476374d9df3a8af28d3164dc2422cff894482eadd1295290b6d9ad92b2eeaa5c';
+export const deriveSolAddress = async (
+	user: string,
+	derivationPath: string[],
+	pubkey: string
+): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 
 	const principal = Principal.fromText(user);
