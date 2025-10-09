@@ -308,3 +308,5 @@ export const CONFIRMATION_MODAL = 'confirmation-modal';
 // Stake
 export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
 export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
+export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
+export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
