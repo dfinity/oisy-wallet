@@ -207,7 +207,6 @@
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
 				on:icNext={onNext}
-				on:icClose={onClose}
 				on:icDestination={onDestination}
 				bind:sendAmount
 				bind:receiveAmount
