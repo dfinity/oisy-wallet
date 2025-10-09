@@ -9,6 +9,10 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
+	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
+	import FilesizeLimitExceededImage from '$lib/components/icons/nfts/FilesizeLimitExceeded.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -18,6 +22,8 @@
 	}
 
 	const { nft, children, showMessage = true, type }: Props = $props();
+
+	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(nft)
@@ -39,10 +45,18 @@
 </script>
 
 {#if nonNullish(hasConsent) && hasConsent}
-	{@render children()}
+	{#if mediaStatus === NftMediaStatusEnum.OK}
+		{@render children()}
+	{:else if mediaStatus === NftMediaStatusEnum.INVALID_DATA}
+		<InvalidDataImage />
+	{:else if mediaStatus === NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE}
+		<UnsupportedMediaTypeImage />
+	{:else if mediaStatus === NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
+		<FilesizeLimitExceededImage />
+	{/if}
 {:else}
 	<div
-		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-secondary-alt text-center"
+		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-brand-light-alt text-center"
 		class:animate-pulse={isLoading}
 		class:bg-disabled-alt={isLoading}
 		class:rounded-t-xl={type === 'hero-banner'}
