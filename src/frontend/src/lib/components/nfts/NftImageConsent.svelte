@@ -11,7 +11,8 @@
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
-	import Img from '$lib/components/ui/Img.svelte';
+	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
+	import FilesizeLimitExceededImage from '$lib/components/icons/nfts/FilesizeLimitExceeded.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -47,19 +48,15 @@
 	{#if mediaStatus === NftMediaStatusEnum.OK}
 		{@render children()}
 	{:else if mediaStatus === NftMediaStatusEnum.INVALID_DATA}
-		<span class="text-brand-light">
-			<UnsupportedMediaTypeImage />
-		</span>
+		<InvalidDataImage />
 	{:else if mediaStatus === NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE}
-		<span class="text-brand-primary">
-			<UnsupportedMediaTypeImage />
-		</span>
-	{:else if mediaStatus === NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
 		<UnsupportedMediaTypeImage />
+	{:else if mediaStatus === NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
+		<FilesizeLimitExceededImage />
 	{/if}
 {:else}
 	<div
-		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-secondary-alt text-center"
+		class="bg-brand-light-alt flex aspect-square h-full w-full flex-col items-center justify-center gap-2 text-center"
 		class:animate-pulse={isLoading}
 		class:bg-disabled-alt={isLoading}
 		class:rounded-t-xl={type === 'hero-banner'}
