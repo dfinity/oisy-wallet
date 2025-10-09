@@ -20,6 +20,8 @@ command -v jq &>/dev/null || {
   exit 1
 } >&2
 
+declarations_base="src/declarations"
+
 # Gets all .did files listed in dfx.json.
 #
 # .did files are placed in the local .dfx directory, where the .did files are expected by `dfx generate` and other commands.
@@ -29,9 +31,8 @@ function install_did_files() {
       IFS=', ' read -r -a array <<<"$line"
       canister_name="${array[0]}"
       source="${array[1]}"
-      filename="${source##*/}"
-      filename="${filename//-/_}" # dfx uses underscores rather than hyphens
-      destination=".dfx/local/canisters/${array[0]}/${filename}"
+      filename="${canister_name}.did"
+      destination="$declarations_base/${canister_name}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
       http*) scripts/download-immutable.sh "$source" "$destination" ;;
@@ -62,7 +63,6 @@ install_did_files
 # Generate Rust bindings
 scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
-declarations_base="src/declarations"
 mapfile -t canisters < <(ls "$declarations_base")
 for canister in "${canisters[@]}"; do
   declaration_path="$declarations_base/$canister"
