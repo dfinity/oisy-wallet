@@ -113,7 +113,7 @@
 			}
 		},
 		"frontend": {
-			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.20.0/src/distributed/assetstorage.did",
+			"candid": "https://raw.githubusercontent.com/dfinity/sdk/release-0.22.0/src/distributed/assetstorage.did",
 			"frontend": {
 				"entrypoint": "build/index.html"
 			},
