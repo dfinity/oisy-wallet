@@ -9,6 +9,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
+	import Img from '$lib/components/ui/Img.svelte';
 
 	interface Props {
 		nft?: Nft;
@@ -29,6 +32,8 @@
 			: false
 	);
 
+	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
+
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft.collection });
@@ -39,7 +44,19 @@
 </script>
 
 {#if nonNullish(hasConsent) && hasConsent}
-	{@render children()}
+	{#if mediaStatus === NftMediaStatusEnum.OK}
+		{@render children()}
+	{:else if mediaStatus === NftMediaStatusEnum.INVALID_DATA}
+		<span class="text-brand-light">
+			<UnsupportedMediaTypeImage />
+		</span>
+	{:else if mediaStatus === NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE}
+		<span class="text-brand-primary">
+			<UnsupportedMediaTypeImage />
+		</span>
+	{:else if mediaStatus === NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED}
+		<UnsupportedMediaTypeImage />
+	{/if}
 {:else}
 	<div
 		class="flex aspect-square h-full w-full flex-col items-center justify-center gap-2 bg-secondary-alt text-center"
