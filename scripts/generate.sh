@@ -24,7 +24,7 @@ declarations_base="src/declarations"
 
 # Gets all .did files listed in dfx.json.
 #
-# .did files are placed in the local .dfx directory, where the .did files are expected by `dfx generate` and other commands.
+# .did files are placed in the `declarations` directory, where the .did files are expected by `icp-bindgen` and other commands.
 function install_did_files() {
   jq -r '.canisters | to_entries | .[] | select(.value.candid != null) | "\(.key) \(.value.candid)"' dfx.json |
     while read -r line; do
@@ -39,6 +39,18 @@ function install_did_files() {
       *) if test -e "$source"; then cp "$source" "$destination"; else echo "WARNING: $canister_name did file not found at $source"; fi ;;
       esac
     done
+}
+
+# Generate Rust bindings for cycles_ledger canister
+#
+# It first copy the candid file in the local .dfx directory (where dfx expects it), then calls the rust.sh script to generate the bindings.
+function generate_rust_bindings() {
+  filename="cycles_ledger.did"
+  origin="$declarations_base/cycles_ledger/${filename}"
+  destination=".dfx/local/canisters/cycles_ledger/${filename}"
+  mkdir -p "$(dirname "$destination")"
+  cp "$origin" "$destination"
+  scripts/bind/rust.sh cycles_ledger
 }
 
 # Create local .did files
@@ -61,7 +73,7 @@ DFX_NETWORK=ic ./scripts/build.llm.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
-scripts/bind/rust.sh cycles_ledger
+generate_rust_bindings
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
 mapfile -t canisters < <(ls "$declarations_base")
 for canister in "${canisters[@]}"; do
