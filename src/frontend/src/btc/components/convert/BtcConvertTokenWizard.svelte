@@ -156,19 +156,19 @@
 <UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
 		<BtcConvertForm
+			{onNext}
 			source={sourceAddress}
-			on:icNext={onNext}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:amountError
 		>
-			<svelte:fragment slot="cancel">
+			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
 				{:else}
 					<ButtonCancel onclick={close} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
