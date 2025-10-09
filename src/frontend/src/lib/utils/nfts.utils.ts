@@ -320,7 +320,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		const size = response.headers.get('Content-Length');
 
 		if (isNullish(type) || isNullish(size)) {
-			throw new Error('Invalid response headers');
+			return NftMediaStatusEnum.INVALID_DATA;
 		}
 
 		if (nonNullish(type) && !type.startsWith('image/')) {
