@@ -1,5 +1,5 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
@@ -23,11 +23,11 @@ const nftAzuki = {
 	}
 };
 
-describe('NftImageConsent', () => {
+describe('NftDisplayGuard', () => {
 	it('should render the review consent when hasConsent is undefined', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
 
-		const { getByRole, getByText } = render(NftImageConsent, {
+		const { getByRole, getByText } = render(NftDisplayGuard, {
 			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: true,
@@ -49,7 +49,7 @@ describe('NftImageConsent', () => {
 	it('should render the review consent with a different text when hasConsent is false', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(false);
 
-		const { getByRole, getByText } = render(NftImageConsent, {
+		const { getByRole, getByText } = render(NftDisplayGuard, {
 			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: true,
@@ -71,7 +71,7 @@ describe('NftImageConsent', () => {
 	it('should open the review consent modal when review is clicked', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
 
-		const { getByRole } = render(NftImageConsent, {
+		const { getByRole } = render(NftDisplayGuard, {
 			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: true,
@@ -91,7 +91,7 @@ describe('NftImageConsent', () => {
 	it('should render the children if hasConsent is true', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
 
-		const { queryAllByRole, queryByText, getByTestId } = render(NftImageConsent, {
+		const { queryAllByRole, queryByText, getByTestId } = render(NftDisplayGuard, {
 			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: true,
@@ -111,7 +111,7 @@ describe('NftImageConsent', () => {
 	it('should not show the text and button if showMessage is false', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(false);
 
-		const { queryAllByRole, queryByText } = render(NftImageConsent, {
+		const { queryAllByRole, queryByText } = render(NftDisplayGuard, {
 			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: false,

@@ -3,7 +3,7 @@
 	import { slide } from 'svelte/transition';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
@@ -28,9 +28,9 @@
 
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
-		<NftImageConsent nft={nfts?.[0]} type="hero-banner">
+		<NftDisplayGuard nft={nfts?.[0]} type="hero-banner">
 			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
-		</NftImageConsent>
+		</NftDisplayGuard>
 	</div>
 
 	<div class="bg-primary p-4">
