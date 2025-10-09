@@ -35,7 +35,8 @@ export const themeVariables = {
 			secondary: 'var(--color-background-brand-secondary)',
 			tertiary: 'var(--color-background-brand-tertiary)',
 			disabled: 'var(--color-background-brand-disabled)',
-			light: 'var(--color-background-brand-light)'
+			light: 'var(--color-background-brand-light)',
+			'light-alt': 'var(--color-background-brand-light-alt)'
 		},
 		success: {
 			'subtle-10': 'var(--color-background-success-subtle-10)',
