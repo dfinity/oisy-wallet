@@ -13,7 +13,7 @@ export const WETH_TOKEN_ID: TokenId = parseTokenId(WETH_SYMBOL);
 
 export const WETH_TOKEN: RequiredAdditionalErc20Token = {
 	id: WETH_TOKEN_ID,
-	network: Base_MAINNET_NETWORK,
+	network: BASE_MAINNET_NETWORK,
 	standard: 'erc20',
 	category: 'default',
 	name: 'Wrapped Ether',
