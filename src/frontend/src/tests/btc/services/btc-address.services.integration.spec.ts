@@ -2,7 +2,7 @@ import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
 
-// These tests are done with real addresses from out test wallets
+// These tests are done with real addresses from our test wallets
 describe('btc-address.services integration', () => {
 	type EnvCheck = (c: { PROD: boolean; BETA: boolean }) => boolean;
 	const prodEnvs: ReadonlyArray<{ env: 'ic' | 'beta'; checkEnv: EnvCheck }> = [
