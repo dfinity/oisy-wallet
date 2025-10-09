@@ -54,7 +54,11 @@
 
 <ContentWithToolbar>
 	{#if isNullish(nft)}
-		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken} />
+		<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken}>
+			{#snippet subtitle()}
+				{$i18n.send.text.send_review_subtitle}
+			{/snippet}
+		</SendTokenReview>
 	{:else}
 		<SendNftReview {nft} />
 	{/if}
