@@ -10,37 +10,11 @@ export interface AccountBalance {
 	balance0: bigint;
 	balance1: bigint;
 }
-export type Action =
-	| { Withdraw: WithdrawInfo }
-	| { RemoveLimitOrder: RemoveLimitOrderInfo }
-	| { AddLiquidity: AddLiquidityInfo }
-	| { OneStepSwap: OneStepSwapInfo }
-	| { Deposit: DepositInfo }
-	| { Refund: RefundInfo }
-	| { Swap: SwapInfo }
-	| { ExecuteLimitOrder: ExecuteLimitOrderInfo }
-	| { TransferPosition: TransferPositionInfo }
-	| { DecreaseLiquidity: DecreaseLiquidityInfo }
-	| { Claim: ClaimInfo }
-	| { AddLimitOrder: AddLimitOrderInfo };
-export interface AddLimitOrderInfo {
-	err: [] | [Error__1];
-	status: AddLimitOrderStatus;
-	token1AmountIn: bigint;
-	token0AmountIn: bigint;
-	positionId: bigint;
-	token0: Token__1;
-	token1: Token__1;
-	tickLimit: bigint;
-}
 export type AddLimitOrderStatus = { Failed: null } | { Created: null } | { Completed: null };
 export interface AddLiquidityInfo {
 	err: [] | [Error__1];
 	status: AddLiquidityStatus;
 	liquidity: bigint;
-	positionId: bigint;
-	amount0: bigint;
-	amount1: bigint;
 	token0: Token__1;
 	token1: Token__1;
 }

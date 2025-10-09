@@ -4,22 +4,6 @@ type WithdrawToSubaccountArgs = record {
 	subaccount : blob;
 	token : text
 };
-type WithdrawStatus = variant {
-	Completed;
-	Created;
-	CreditCompleted;
-	Failed
-};
-type WithdrawInfo = record {
-	err : opt Error__1;
-	status : WithdrawStatus;
-	transfer : Transfer
-};
-type WithdrawArgs = record {
-	amount : nat;
-	fee : nat;
-	token : text
-};
 type UserPositionInfoWithTokenAmount = record {
 	feeGrowthInside0LastX128 : nat;
 	feeGrowthInside1LastX128 : nat;
