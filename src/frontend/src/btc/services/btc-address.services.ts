@@ -56,7 +56,7 @@ const bitcoinMapper: Record<
 	}
 };
 
-const getBtcAddress = async ({
+export const getBtcAddress = async ({
 	identity,
 	network
 }: {
