@@ -5,10 +5,8 @@ set -exuo pipefail
   cat <<-EOF
 	Gets .did files and generates canister bindings from them.
 
-	Note: This does so WITHOUT deploying any canisters.  Typically "dfx generate"
-	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
-	This code just downloads the candid files and puts them where they would normally
-	be found for a local deployment.  Much faster!
+	Note: This does so WITHOUT deploying any canisters. This code just downloads the candid files
+	and puts them where they would normally be found for a local deployment.
 
 	Dependencies:
 	- Please install jq before running this script.
@@ -67,8 +65,9 @@ scripts/bind/rust.sh cycles_ledger
 mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
   candid_file="$(jq -r ".canisters.$canister.candid" dfx.json)"
-  echo "Generating bindings for $canister using $candid_file"
-  icp-bindgen --did-file "$candid_file"
+  declaration_file="src/declarations/$canister"
+  echo "Generating bindings for $canister in $declaration_file using $candid_file"
+  icp-bindgen --did-file "$candid_file" --out-dir "$declaration_file"
 done
 # Clean up..
 node scripts/did.update.types.mjs
