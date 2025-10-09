@@ -3,16 +3,16 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import IconShieldHalftone from '$lib/components/icons/IconShieldHalftone.svelte';
+	import FilesizeLimitExceededImage from '$lib/components/icons/nfts/FilesizeLimitExceeded.svelte';
+	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
+	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
-	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
-	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
-	import FilesizeLimitExceededImage from '$lib/components/icons/nfts/FilesizeLimitExceeded.svelte';
 
 	interface Props {
 		nft?: Nft;
