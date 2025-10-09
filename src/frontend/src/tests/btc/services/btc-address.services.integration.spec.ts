@@ -4,10 +4,39 @@ import { Principal } from '@dfinity/principal';
 
 // These tests are done with real addresses from our test wallets
 describe('btc-address.services integration', () => {
-	type EnvCheck = (c: { PROD: boolean; BETA: boolean }) => boolean;
-	const prodEnvs: ReadonlyArray<{ env: 'ic' | 'beta'; checkEnv: EnvCheck }> = [
+	type EnvCheck = (c: {
+		PROD: boolean;
+		BETA: boolean;
+		STAGING: boolean;
+		TEST_FE: boolean;
+		AUDIT: boolean;
+	}) => boolean;
+	type EnvName =
+		| 'ic'
+		| 'beta'
+		| 'staging'
+		| 'audit'
+		| 'test_fe_any'
+		| 'test_fe_1'
+		| 'test_fe_2'
+		| 'test_fe_3'
+		| 'test_fe_4'
+		| 'test_fe_5'
+		| 'test_fe_6';
+	const prodEnvs: ReadonlyArray<{ env: EnvName; checkEnv: EnvCheck }> = [
 		{ env: 'ic', checkEnv: (c) => c.PROD },
 		{ env: 'beta', checkEnv: (c) => c.BETA }
+	];
+	const stagingEnvs: ReadonlyArray<{ env: EnvName; checkEnv: EnvCheck }> = [
+		{ env: 'staging', checkEnv: (c) => c.STAGING },
+		{ env: 'audit', checkEnv: (c) => c.STAGING && c.AUDIT },
+		{ env: 'test_fe_any', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_1', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_2', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_3', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_4', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_5', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		{ env: 'test_fe_6', checkEnv: (c) => c.STAGING && c.TEST_FE }
 	];
 
 	beforeEach(() => {
@@ -31,11 +60,22 @@ describe('btc-address.services integration', () => {
 					expected: 'bc1q0zs8e2pk5z6hwlcafvwmv27chxlgen67lklf45',
 					envs: prodEnvs
 				},
+				{
+					principal: '4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe',
+					expected: 'bc1q44r2nattvp03mvcw986848l3s8squ88477rusl',
+					envs: stagingEnvs
+				},
+
 				// Test wallet 2663584
 				{
 					principal: 'v2smi-hhewl-kr7al-mrhkv-ubkqe-px4w7-c5qj7-vosjk-iwjkj-b55qg-5ae',
 					expected: 'bc1q53c0j85fwe5rxwd6s0xwsyc9mc9qhm6pg56re5',
 					envs: prodEnvs
+				},
+				{
+					principal: 'ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe',
+					expected: 'bc1q0uy4sck2mp6cqst5lcxvpc4yfhmu274jaguasr',
+					envs: stagingEnvs
 				}
 			];
 
@@ -78,11 +118,21 @@ describe('btc-address.services integration', () => {
 					expected: 'tb1q0zs8e2pk5z6hwlcafvwmv27chxlgen674sy6w8',
 					envs: prodEnvs
 				},
+				{
+					principal: '4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe',
+					expected: 'tb1q44r2nattvp03mvcw986848l3s8squ8845cc0tv',
+					envs: stagingEnvs
+				},
 				// Test wallet 2663584
 				{
 					principal: 'v2smi-hhewl-kr7al-mrhkv-ubkqe-px4w7-c5qj7-vosjk-iwjkj-b55qg-5ae',
 					expected: 'tb1q53c0j85fwe5rxwd6s0xwsyc9mc9qhm6pzjpsz8',
 					envs: prodEnvs
+				},
+				{
+					principal: 'ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe',
+					expected: 'tb1q0uy4sck2mp6cqst5lcxvpc4yfhmu274jhw8wts',
+					envs: stagingEnvs
 				}
 			];
 
