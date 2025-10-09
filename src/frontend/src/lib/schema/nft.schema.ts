@@ -33,10 +33,18 @@ export const NftCollectionSchema = z.object({
 	network: NftNetworkSchema
 });
 
+export enum NftMediaStatusEnum {
+	OK = 'ok',
+	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
+	NON_SUPPORTED_MEDIA_TYPE = 'non_supported_media_type',
+	INVALID_DATA = 'invalid_data'
+}
+
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
-	collection: NftCollectionSchema
+	collection: NftCollectionSchema,
+	mediaStatus: z.enum(NftMediaStatusEnum).optional()
 });
 
 export const OwnedContractSchema = z.object({
