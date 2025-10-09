@@ -20,18 +20,14 @@
 	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let selectedTransaction = $state<BtcTransactionUi | undefined>();
-	let selectedToken = $state<OptionToken>();
-	$effect(() => {
-		({ transaction: selectedTransaction, token: selectedToken } =
-			mapTransactionModalData<BtcTransactionUi>({
-				$modalOpen: $modalBtcTransaction,
-				$modalStore
-			}));
-	});
+	let { transaction: selectedTransaction, token: selectedToken } = $derived(
+		mapTransactionModalData<BtcTransactionUi>({
+			$modalOpen: $modalBtcTransaction,
+			$modalStore
+		})
+	);
 
 	let token = $derived($pageToken ?? DEFAULT_BITCOIN_TOKEN);
 
