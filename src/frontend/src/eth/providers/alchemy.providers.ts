@@ -17,7 +17,7 @@ import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { getMediaStatus, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -171,7 +171,7 @@ export class AlchemyProvider {
 			}
 		);
 
-		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
+		const nftPromises = result.ownedNfts.map(async (ownedNft) => {
 			const {
 				raw: {
 					metadata: { attributes }
@@ -186,7 +186,7 @@ export class AlchemyProvider {
 				})
 			);
 			if (isNullish(token)) {
-				return acc;
+				return null; // filter out later
 			}
 
 			const mappedAttributes = nonNullish(attributes)
@@ -196,13 +196,21 @@ export class AlchemyProvider {
 					}))
 				: [];
 
+			const mediaStatus = await getMediaStatus(ownedNft.image?.originalUrl);
+
 			const nft: Nft = {
 				id: parseNftId(parseInt(ownedNft.tokenId)),
 				...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
-				...(nonNullish(ownedNft.image?.originalUrl) && { imageUrl: ownedNft.image?.originalUrl }),
-				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
+				...(nonNullish(ownedNft.image?.originalUrl) && {
+					imageUrl: ownedNft.image?.originalUrl
+				}),
+				...(nonNullish(ownedNft.description) && {
+					description: ownedNft.description
+				}),
 				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
-				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
+				...(nonNullish(ownedNft.balance) && {
+					balance: Number(ownedNft.balance)
+				}),
 				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
 					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
 				}),
@@ -214,11 +222,17 @@ export class AlchemyProvider {
 					...(nonNullish(ownedNft.contract.openSeaMetadata?.description) && {
 						description: ownedNft.contract.openSeaMetadata?.description
 					})
-				}
+				},
+				mediaStatus
 			};
 
-			return [...acc, nft];
-		}, []);
+			return nft;
+		});
+
+		const nfts = await Promise.all(nftPromises);
+
+		// Remove entries that are null because the token could not be found
+		return nfts.filter((nft): nft is Nft => nft !== null);
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
