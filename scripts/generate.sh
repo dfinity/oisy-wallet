@@ -80,9 +80,14 @@ mapfile -t canisters < <(ls "$declarations_base")
 for canister in "${canisters[@]}"; do
   declaration_path="$declarations_base/$canister"
   candid_file="$declaration_path/${canister}.did"
-  echo "Generating bindings for $canister"
-  icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
+  if [[ -f "$candid_file" ]]; then
+    echo "Generating bindings for $canister"
+    icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
+  else
+    echo "WARNING: Candid file not found for $canister at $candid_file"
+  fi
 done
+
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
