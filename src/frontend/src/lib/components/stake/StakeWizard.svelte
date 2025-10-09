@@ -39,5 +39,5 @@
 {#if isGldtToken}
 	<GldtStakeWizard {currentStep} {onBack} {onClose} {onNext} bind:amount bind:stakeProgressStep />
 {:else}
-	<div class="mt-6"><MessageBox>{$i18n.stake.text.unsupported_token_staking}</MessageBox></div>
+	<MessageBox styleClass="mt-6">{$i18n.stake.text.unsupported_token_staking}</MessageBox>
 {/if}
