@@ -331,7 +331,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			// 1MB
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
-	} catch (e: unknown) {
+	} catch (_: unknown) {
 		return NftMediaStatusEnum.INVALID_DATA;
 	}
 
