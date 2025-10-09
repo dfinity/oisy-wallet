@@ -233,7 +233,6 @@ export class AlchemyProvider {
 			return [...acc, promise];
 		}, []);
 
-		// No need to filter because we never added nulls
 		return Promise.all(nftPromises);
 	};
 
