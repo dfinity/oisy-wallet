@@ -65,9 +65,9 @@ scripts/bind/rust.sh cycles_ledger
 mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
   candid_file="$(jq -r ".canisters.$canister.candid" dfx.json)"
-  declaration_file="src/declarations/$canister"
-  echo "Generating bindings for $canister in $declaration_file using $candid_file"
-  icp-bindgen --did-file "$candid_file" --out-dir "$declaration_file"
+  declaration_path="src/declarations/$canister"
+  echo "Generating bindings for $canister in $declaration_path using $candid_file"
+  icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
 done
 # Clean up..
 node scripts/did.update.types.mjs
