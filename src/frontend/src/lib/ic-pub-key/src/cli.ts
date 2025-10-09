@@ -3,10 +3,12 @@
 /* v8 ignore start */
 
 import { STAGING } from '$lib/constants/app.constants';
+import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { Principal } from '@dfinity/principal';
+import { assertNonNullish } from '@dfinity/utils';
 import { networks, payments, type Network } from 'bitcoinjs-lib';
 import { computeAddress } from 'ethers/transaction';
 import {
@@ -16,11 +18,20 @@ import {
 
 /* istanbul ignore next */
 export const deriveEthAddress = async (user: string, pubkey: string): Promise<string> => {
-	const chaincode = 'f666a98c7f70fe281ca8142f14eb4d1e0934a439237da83869e2cfd924b270c0';
+	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
+  
+  	assertNonNullish(
+		SIGNER_CANISTER_DERIVATION_PATH,
+		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
+	);
 
 	let principal = Principal.fromText(user);
 	let principal_as_bytes = principal.toUint8Array();
-	let derivation_path = new DerivationPath([Uint8Array.from([0x01]), principal_as_bytes]);
+	let derivation_path = new DerivationPath([
+		Uint8Array.from(SIGNER_CANISTER_DERIVATION_PATH),
+		Uint8Array.from([0x01]),
+		principal_as_bytes
+	]);
 	let signer_pubkey_with_chain_code = Secp256k1PublicKeyWithChainCode.fromString({
 		public_key: pubkey,
 		chain_code: chaincode
@@ -50,11 +61,20 @@ export const deriveBtcAddress = async (
 	pubkey: string,
 	network: BitcoinNetwork
 ): Promise<string> => {
-	const chaincode = 'f666a98c7f70fe281ca8142f14eb4d1e0934a439237da83869e2cfd924b270c0';
+	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
+  
+  	assertNonNullish(
+		SIGNER_CANISTER_DERIVATION_PATH,
+		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
+	);
 
 	let principal = Principal.fromText(user);
 	let principal_as_bytes = principal.toUint8Array();
-	let derivation_path = new DerivationPath([Uint8Array.from([0x00]), principal_as_bytes]);
+	let derivation_path = new DerivationPath([
+		Uint8Array.from(SIGNER_CANISTER_DERIVATION_PATH),
+		Uint8Array.from([0x00]),
+		principal_as_bytes
+	]);
 	let signer_pubkey_with_chain_code = Secp256k1PublicKeyWithChainCode.fromString({
 		public_key: pubkey,
 		chain_code: chaincode
@@ -83,10 +103,13 @@ export const deriveSolAddress = async (
 
 	const principal = Principal.fromText(user);
 
+	assertNonNullish(
+		SIGNER_CANISTER_DERIVATION_PATH,
+		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
+	);
+
 	let derivationPathObj = new DerivationPath([
-		Uint8Array.from(
-			STAGING ? [0, 0, 0, 0, 0, 96, 0, 209, 1, 1] : [0, 0, 0, 0, 2, 48, 0, 113, 1, 1]
-		),
+		Uint8Array.from(SIGNER_CANISTER_DERIVATION_PATH),
 		Uint8Array.from([0xfe]),
 		principal.toUint8Array(),
 		...mapDerivationPath(derivationPath)
