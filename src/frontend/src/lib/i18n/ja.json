@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
 			"zero_fee": "無料",
 			"total_fee": "合計手数料",
-			"ata_fee": "ATA手数料"
+			"ata_fee": "ATA手数料",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"
@@ -1697,6 +1700,17 @@
 			"stablecoins_description": "近日公開",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 報酬"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {
