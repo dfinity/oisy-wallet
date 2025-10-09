@@ -8,9 +8,9 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
@@ -38,11 +38,16 @@ import {
 } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { trackEvent } from '$lib/services/analytics.services';
+import { retryWithDelay } from '$lib/services/rest.services';
+import { throwSwapError } from '$lib/services/swap-errors.services';
+import { autoLoadSingleToken } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
@@ -80,10 +85,6 @@ import {
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
-import { trackEvent } from './analytics.services';
-import { retryWithDelay } from './rest.services';
-import { throwSwapError } from './swap-errors.services';
-import { autoLoadSingleToken } from './token.services';
 
 export const fetchKongSwap = async ({
 	identity,
@@ -190,6 +191,34 @@ export const loadKongSwapTokens = async ({
 	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
 };
 
+export const loadAllIcrcTokensWithSupportedStandards = async ({
+	allTokens,
+	identity
+}: {
+	allTokens: IcToken[];
+	identity: Identity;
+}): Promise<void> => {
+	const tokens = await Promise.allSettled(
+		allTokens.map(async (token: IcToken): Promise<IcTokenWithIcrc2Supported> => {
+			const isIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity,
+				ledgerCanisterId: token.ledgerCanisterId
+			});
+
+			return { ...token, isIcrc2 };
+		})
+	);
+
+	const supportedTokens = tokens.reduce<IcTokenWithIcrc2Supported[]>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			acc.push(result.value);
+		}
+		return acc;
+	}, []);
+
+	swappableIcrcTokensStore.setSwappableTokens(supportedTokens);
+};
+
 export const fetchSwapAmounts = async ({
 	identity,
 	sourceToken,
@@ -236,16 +265,23 @@ const fetchSwapAmountsICP = async ({
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const [settledResults, isTokenIcrc2] = await Promise.all([
+		Promise.allSettled(
+			enabledProviders.map(({ getQuote }) =>
+				getQuote({
+					identity,
+					sourceToken: sourceToken as IcToken,
+					destinationToken: destinationToken as IcToken,
+					sourceAmount: amount
+				})
+			)
+		),
+		isSourceTokenIcrc2 ??
+			isIcrcTokenSupportIcrc2({
 				identity,
-				sourceToken: sourceToken as IcToken,
-				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
+				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
 			})
-		)
-	);
+	]);
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
@@ -259,7 +295,7 @@ const fetchSwapAmountsICP = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}

@@ -60,8 +60,8 @@
 			{#if type !== 'card-selectable' && type !== 'nft-logo'}
 				<span
 					class="max-h-full overflow-hidden opacity-100 transition-all duration-300 ease-in-out group-hover:max-h-full group-hover:opacity-100"
-					class:lg:max-h-0={type === 'card'}
-					class:lg:opacity-0={type === 'card'}
+					class:lg:max-h-0={type === 'card' && nonNullish(hasConsent)}
+					class:lg:opacity-0={type === 'card' && nonNullish(hasConsent)}
 				>
 					<Button
 						colorStyle="secondary-light"

@@ -1,8 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { alchemyProviders, type AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as erc1155CustomTokens from '$eth/services/erc1155-custom-tokens.services';
+import * as erc721CustomTokens from '$eth/services/erc721-custom-tokens.services';
 import * as nftSendServices from '$eth/services/nft-send.services';
-import * as authServices from '$lib/services/auth.services';
-import { loadNfts, sendNft } from '$lib/services/nft.services';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -15,6 +17,7 @@ import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { Network, type TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';
+import type { MockInstance } from 'vitest';
 
 vi.mock('$eth/providers/alchemy.providers', () => ({
 	alchemyProviders: vi.fn(),
@@ -125,8 +128,6 @@ describe('nft.services', () => {
 			.spyOn(nftSendServices, 'transferErc1155')
 			.mockResolvedValue({} as unknown as TransactionResponse);
 
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue(undefined);
-
 		const token721: NonFungibleToken = {
 			address: fromAddress,
 			category: 'custom',
@@ -225,7 +226,7 @@ describe('nft.services', () => {
 			);
 		});
 
-		it('signs out (nullishSignOut) and does not call transfer functions when identity is nullish', async () => {
+		it('returns early and does not call transfer functions when identity is nullish', async () => {
 			await sendNft({
 				token: token721,
 				tokenId: parseNftId(42),
@@ -237,9 +238,146 @@ describe('nft.services', () => {
 				maxPriorityFeePerGas
 			});
 
-			expect(signOutSpy).toHaveBeenCalledOnce();
 			expect(transfer721Spy).not.toHaveBeenCalled();
 			expect(transfer1155Spy).not.toHaveBeenCalled();
+		});
+	});
+
+	describe('updateNftSection', () => {
+		let erc721Spy: MockInstance;
+		let erc1155Spy: MockInstance;
+
+		beforeEach(() => {
+			erc721Spy = vi.spyOn(erc721CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+			erc1155Spy = vi.spyOn(erc1155CustomTokens, 'saveCustomTokens').mockResolvedValue(undefined);
+		});
+
+		afterEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		const base721: NonFungibleToken = {
+			address: '0x111',
+			category: 'custom',
+			decimals: 0,
+			id: parseTokenId('721'),
+			name: 'My721',
+			network: ETHEREUM_NETWORK,
+			standard: 'erc721',
+			symbol: 'MY721',
+			section: undefined
+		};
+
+		const base1155: NonFungibleToken = {
+			address: '0x222',
+			category: 'custom',
+			decimals: 0,
+			id: parseTokenId('1155'),
+			name: 'My1155',
+			network: ETHEREUM_NETWORK,
+			standard: 'erc1155',
+			symbol: 'MY1155',
+			section: undefined
+		};
+
+		it('does nothing if auth identity is nullish', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: base721,
+				$authIdentity: null
+			});
+
+			expect(erc721Spy).not.toHaveBeenCalled();
+			expect(erc1155Spy).not.toHaveBeenCalled();
+		});
+
+		it('updates ERC721 token with section=HIDDEN', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: base721,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc721Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base721,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN
+					}
+				]
+			});
+		});
+
+		it('updates ERC721 token with section=SPAM (should disable allowExternalContentSource)', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.SPAM,
+				token: base721,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc721Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base721,
+						enabled: true,
+						section: CustomTokenSection.SPAM,
+						allowExternalContentSource: false
+					}
+				]
+			});
+		});
+
+		it('updates ERC1155 token with section=HIDDEN', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: base1155,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc1155Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base1155,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN
+					}
+				]
+			});
+		});
+
+		it('updates ERC1155 token with section=SPAM (should disable allowExternalContentSource)', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.SPAM,
+				token: base1155,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc1155Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base1155,
+						enabled: true,
+						section: CustomTokenSection.SPAM,
+						allowExternalContentSource: false
+					}
+				]
+			});
+		});
+
+		it('does nothing if token is undefined', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: undefined as unknown as NonFungibleToken,
+				$authIdentity: mockIdentity
+			});
+
+			expect(erc721Spy).not.toHaveBeenCalled();
+			expect(erc1155Spy).not.toHaveBeenCalled();
 		});
 	});
 });

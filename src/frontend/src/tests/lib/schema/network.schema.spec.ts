@@ -1,7 +1,5 @@
-import icpDark from '$lib/assets/networks/dark/icp.svg';
 import {
 	NetworkAppMetadataSchema,
-	NetworkBuySchema,
 	NetworkEnvironmentSchema,
 	NetworkIdSchema,
 	NetworkSchema
@@ -43,28 +41,6 @@ describe('network.schema', () => {
 		});
 	});
 
-	describe('NetworkBuySchema', () => {
-		it('should validate with an optional onramperId', () => {
-			const validBuy = { onramperId: 'icp' };
-
-			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
-		});
-
-		it('should validate with an empty object (onramperId optional)', () => {
-			const validBuy = {};
-
-			expect(NetworkBuySchema.parse(validBuy)).toEqual(validBuy);
-		});
-
-		// TODO: unskip the below when we have a way to validate OnramperNetworkId
-		// For now this test is failing because the OnramperNetworkId is not correctly validated
-		it.skip('should fail validation with an invalid onramperId', () => {
-			const invalidBuy = { onramperId: 'invalid-id' };
-
-			expect(() => NetworkBuySchema.parse(invalidBuy)).toThrow();
-		});
-	});
-
 	describe('NetworkAppMetadataSchema', () => {
 		it('should validate complete metadata', () => {
 			const validMetadata = {
@@ -98,8 +74,7 @@ describe('network.schema', () => {
 
 		const validNetwork = {
 			...validNetworkWithRequiredFields,
-			iconLight: 'https://example.com/icon.svg',
-			iconDark: icpDark,
+			icon: 'https://example.com/icon.svg',
 			buy: { onramperId: 'icp' }
 		};
 
@@ -134,7 +109,7 @@ describe('network.schema', () => {
 		it('should fail validation when icon is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				iconLight: 'https://example.com/invalid-icon.png'
+				icon: 'https://example.com/invalid-icon.png'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
@@ -143,7 +118,7 @@ describe('network.schema', () => {
 		it('should fail validation when iconBW is not a valid SVG string', () => {
 			const invalidNetwork = {
 				...validNetwork,
-				iconLight: 'https://example.com/invalid-icon-bw.png'
+				icon: 'https://example.com/invalid-icon-bw.png'
 			};
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();

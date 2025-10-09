@@ -36,13 +36,12 @@
 		TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -64,8 +63,8 @@
 		onNext: () => void;
 		onDestination: () => void;
 		onDestinationBack: () => void;
-		onIcQrCodeBack: () => void;
-		onIcQrCodeScan: () => void;
+		onQRCodeBack: () => void;
+		onQRCodeScan: () => void;
 	}
 
 	let {
@@ -80,8 +79,8 @@
 		onNext,
 		onDestination,
 		onDestinationBack,
-		onIcQrCodeBack,
-		onIcQrCodeScan
+		onQRCodeBack,
+		onQRCodeScan
 	}: Props = $props();
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
@@ -114,7 +113,6 @@
 			: customDestination;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -226,31 +224,31 @@
 			<IcConvertReview
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
+				onConvert={convert}
 				{receiveAmount}
 				{sendAmount}
-				on:icConvert={convert}
-				on:icBack={onBack}
 			>
-				<ButtonBack slot="cancel" onclick={back} />
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />
 		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
 			<DestinationWizardStep
 				{networkId}
+				{onDestinationBack}
+				{onQRCodeScan}
 				tokenStandard={$destinationToken.standard}
-				on:icBack={back}
 				bind:customDestination
-				on:icQRCodeScan={onIcQrCodeScan}
-				on:icDestinationBack={onDestinationBack}
 			>
-				<svelte:fragment slot="title">{$i18n.convert.text.send_to}</svelte:fragment>
+				{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
 			</DestinationWizardStep>
 		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 			<SendQrCodeScan
 				expectedToken={$destinationToken}
 				onDecodeQrCode={decodeQrCode}
-				{onIcQrCodeBack}
+				{onQRCodeBack}
 				bind:destination={customDestination}
 				bind:amount={sendAmount}
 			/>

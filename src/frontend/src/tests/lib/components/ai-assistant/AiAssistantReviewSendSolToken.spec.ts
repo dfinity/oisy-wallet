@@ -18,10 +18,6 @@ import { mockSolAddress, mockSolAddress2 } from '$tests/mocks/sol.mock';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendSolToken', () => {
 	const sendAmount = 0.001;
 

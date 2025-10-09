@@ -20,14 +20,16 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	defineEnabledTokens,
 	filterEnabledTokens,
 	filterTokens,
+	filterTokensByNft,
 	findToken,
 	groupTogglableTokens,
 	pinEnabledTokensAtTop,
@@ -853,6 +855,39 @@ describe('tokens.utils', () => {
 			expect(saveIcrcCustomTokens).toHaveBeenCalledWith(
 				expect.objectContaining({ progress, onSuccess, modalNext })
 			);
+		});
+	});
+
+	describe('filterTokensByNft', () => {
+		const nft1 = { ...mockValidErc721Token, name: 'Cool Nft' };
+		const nft2 = { ...mockValidErc1155Token, name: 'Even cooler Nft' };
+		const tokens = [ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN, nft1, nft2];
+
+		it('should return all tokens when no filter is provided', () => {
+			const result = filterTokensByNft({ tokens });
+
+			expect(result).toHaveLength(5);
+			expect(result).toEqual(tokens);
+		});
+
+		it('should return all non Nfts when filterNfts is false', () => {
+			const result = filterTokensByNft({ tokens, filterNfts: false });
+
+			expect(result).toHaveLength(3);
+			expect(result).toEqual([ETHEREUM_TOKEN, SOLANA_TOKEN, BONK_TOKEN]);
+		});
+
+		it('should return all Nfts when filterNfts is true', () => {
+			const result = filterTokensByNft({ tokens, filterNfts: true });
+
+			expect(result).toHaveLength(2);
+			expect(result).toEqual([nft1, nft2]);
+		});
+
+		it('should return an empty list if tokens is empty', () => {
+			const result = filterTokensByNft({ tokens: [], filterNfts: false });
+
+			expect(result).toHaveLength(0);
 		});
 	});
 });

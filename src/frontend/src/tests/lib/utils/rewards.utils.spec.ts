@@ -1,6 +1,11 @@
 import type { EligibilityReport, RewardInfo, UserData } from '$declarations/rewards/rewards.did';
-import { SPRINKLES_SEASON_1_EPISODE_3_ID } from '$env/reward-campaigns.env';
+import {
+	SPRINKLES_SEASON_1_EPISODE_3_ID,
+	SPRINKLES_SEASON_1_EPISODE_4_ID,
+	SPRINKLES_SEASON_1_EPISODE_5_ID
+} from '$env/reward-campaigns.env';
 import * as rewardApi from '$lib/api/reward.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
 import { RewardType } from '$lib/enums/reward-type';
 import type { RewardResponseInfo } from '$lib/types/reward';
@@ -12,7 +17,8 @@ import {
 	isUpcomingCampaign,
 	loadRewardResult,
 	mapEligibilityReport,
-	normalizeNetworkMultiplier
+	normalizeNetworkMultiplier,
+	sortRewards
 } from '$lib/utils/rewards.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
@@ -363,7 +369,7 @@ describe('rewards.utils', () => {
 				superpowers: [],
 				airdrops: [],
 				usage_awards: [],
-				last_snapshot_timestamp: [0n],
+				last_snapshot_timestamp: [ZERO],
 				sprinkles: []
 			};
 			vi.spyOn(rewardApi, 'getUserInfo').mockResolvedValue(mockedUserData);
@@ -372,7 +378,7 @@ describe('rewards.utils', () => {
 
 			const { lastTimestamp } = await loadRewardResult(mockIdentity);
 
-			expect(lastTimestamp).toBe(0n);
+			expect(lastTimestamp).toBe(ZERO);
 		});
 	});
 
@@ -846,6 +852,28 @@ describe('rewards.utils', () => {
 			const result = normalizeNetworkMultiplier(22);
 
 			expect(result).toEqual(1);
+		});
+	});
+
+	describe('sortRewards', () => {
+		it('should sort rewards by end date (asc)', () => {
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'asc' });
+
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_5_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_3_ID
+			]);
+		});
+
+		it('should sort rewards by end date (desc)', () => {
+			const result = sortRewards({ rewards: mockRewardCampaigns, sortByEndDate: 'desc' });
+
+			expect(result.map((reward) => reward.id)).toEqual([
+				SPRINKLES_SEASON_1_EPISODE_3_ID,
+				SPRINKLES_SEASON_1_EPISODE_4_ID,
+				SPRINKLES_SEASON_1_EPISODE_5_ID
+			]);
 		});
 	});
 });

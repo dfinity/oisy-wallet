@@ -2,7 +2,7 @@ import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
 import * as authClientApi from '$lib/api/auth-client.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
-import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
@@ -58,8 +58,8 @@ describe('btc-wallet.worker', () => {
 					certified,
 					data: {
 						confirmed: mockBalance,
-						unconfirmed: 0n,
-						locked: 0n,
+						unconfirmed: ZERO,
+						locked: ZERO,
 						total: mockBalance
 					}
 				},

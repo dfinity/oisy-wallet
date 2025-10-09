@@ -45,10 +45,6 @@ import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));

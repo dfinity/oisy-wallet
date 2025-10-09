@@ -15,7 +15,6 @@ import {
 	getIdbEthTokensDeprecated,
 	setIdbTokensStore
 } from '$lib/api/idb-tokens.api';
-import * as authServices from '$lib/services/auth.services';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
 import {
 	createMockErc20CustomTokens,
@@ -30,10 +29,6 @@ import { createStore } from 'idb-keyval';
 
 vi.mock('$app/environment', () => ({
 	browser: true
-}));
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
 }));
 
 describe('idb-tokens.api', () => {
@@ -324,20 +319,6 @@ describe('idb-tokens.api', () => {
 				mockIdbTokensStore
 			);
 		});
-
-		it('should call nullishSignOur if no identity provided', async () => {
-			const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
-			const [tokenToDelete, ...rest] = icMockTokens;
-
-			vi.mocked(idbKeyval.get).mockResolvedValue([tokenToDelete, ...rest]);
-
-			await deleteIdbIcToken({
-				identity: undefined,
-				token: tokenToDelete
-			});
-
-			expect(signOutSpy).toHaveBeenCalled();
-		});
 	});
 
 	describe('deleteIdbSolToken', () => {
@@ -387,19 +368,6 @@ describe('idb-tokens.api', () => {
 				[...splMainnetMockTokens, ...splDevnetMockTokens],
 				mockIdbTokensStore
 			);
-		});
-
-		it('should call nullishSignOur if no identity provided', async () => {
-			const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
-
-			vi.mocked(idbKeyval.get).mockResolvedValue([...splMainnetMockTokens, ...splDevnetMockTokens]);
-
-			await deleteIdbIcToken({
-				identity: undefined,
-				token: splMainnetMockTokens[0]
-			});
-
-			expect(signOutSpy).toHaveBeenCalled();
 		});
 	});
 

@@ -1,5 +1,5 @@
 import { EnvIcrcTokenMetadataSchema, EnvIcTokenSchema } from '$env/schema/env-icrc-token.schema';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export const EnvDip20TokenSchema = EnvIcTokenSchema.pick({ ledgerCanisterId: true }).extend({
 	metadata: EnvIcrcTokenMetadataSchema

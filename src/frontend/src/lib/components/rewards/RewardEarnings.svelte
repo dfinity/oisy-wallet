@@ -23,7 +23,6 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -89,7 +88,6 @@
 		loadingRewards = true;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

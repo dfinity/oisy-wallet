@@ -1,18 +1,12 @@
-import type { BtcTransactionUi } from '$btc/types/btc';
-import type { EthTransactionUi } from '$eth/types/eth-transaction';
-import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import type {
 	TransactionIdSchema,
 	TransactionStatusSchema,
 	TransactionTypeSchema
 } from '$lib/schema/transaction.schema';
-import type { Token } from '$lib/types/token';
-import type { NonEmptyArray } from '$lib/types/utils';
-import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { TransactionResponse as AlchemyTransactionResponse } from 'alchemy-sdk';
 import type { FeeData } from 'ethers/providers';
 import type { Transaction as EthersTransactionLib } from 'ethers/transaction';
-import type * as z from 'zod/v4';
+import type * as z from 'zod';
 
 export type TransactionId = z.infer<typeof TransactionIdSchema>;
 
@@ -66,32 +60,3 @@ export interface TransactionUiCommon {
 	fromExplorerUrl?: string;
 	blockNumber?: number;
 }
-
-export type AnyTransaction = BtcTransactionUi | Transaction | IcTransactionUi | SolTransactionUi;
-
-export type AnyTransactionUi =
-	| BtcTransactionUi
-	| EthTransactionUi
-	| IcTransactionUi
-	| SolTransactionUi;
-
-export type AnyTransactionUiWithToken = AnyTransactionUi & {
-	token: Token;
-};
-
-export type AnyTransactionUiWithCmp =
-	| { component: 'bitcoin'; transaction: BtcTransactionUi }
-	| { component: 'ethereum'; transaction: EthTransactionUi }
-	| { component: 'ic'; transaction: IcTransactionUi }
-	| { component: 'solana'; transaction: SolTransactionUi };
-
-export type AllTransactionUiWithCmp = AnyTransactionUiWithCmp & {
-	token: Token;
-};
-
-export type AllTransactionUiWithCmpNonEmptyList = NonEmptyArray<AllTransactionUiWithCmp>;
-
-export type TransactionsUiDateGroup<T extends AnyTransactionUiWithCmp> = Record<
-	string,
-	NonEmptyArray<T>
->;

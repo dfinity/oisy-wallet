@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isEmptyString, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import KnownDestination from '$lib/components/send/KnownDestination.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
@@ -18,15 +18,15 @@
 		knownDestinations?: KnownDestinations;
 		networkContacts?: NetworkContacts;
 		selectedContact?: ContactUi;
+		onNext: () => void;
 	}
 	let {
 		knownDestinations,
 		destination = $bindable(),
 		selectedContact = $bindable(),
-		networkContacts
+		networkContacts,
+		onNext
 	}: Props = $props();
-
-	const dispatch = createEventDispatcher();
 
 	const { sendTokenNetworkId } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
@@ -94,7 +94,7 @@
 									selectedContact = networkContact;
 								}
 
-								dispatch('icNext');
+								onNext();
 							}}
 						/>
 					</li>

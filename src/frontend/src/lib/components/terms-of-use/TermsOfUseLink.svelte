@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.contants';
+	import { TRACK_OPEN_AGREEMENT } from '$lib/constants/analytics.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -10,9 +10,10 @@
 		noUnderline?: boolean;
 		testId?: string;
 		icon?: Snippet;
+		color?: 'blue' | 'inherit';
 	}
 
-	let { noUnderline = false, testId, icon }: Props = $props();
+	let { noUnderline = false, testId, icon, color = 'inherit' }: Props = $props();
 
 	const handleClick = () => {
 		trackEvent({
@@ -23,8 +24,13 @@
 </script>
 
 <a
-	class="flex items-center gap-1"
+	class="inline-flex items-center gap-1"
+	class:active:text-brand-primary-alt={color === 'inherit'}
+	class:active:text-brand-secondary={color === 'blue'}
+	class:hover:text-brand-primary-alt={color === 'inherit'}
+	class:hover:text-brand-secondary={color === 'blue'}
 	class:no-underline={noUnderline}
+	class:text-brand-primary-alt={color === 'blue'}
 	aria-label={replaceOisyPlaceholders($i18n.terms_of_use.alt.terms_of_use)}
 	data-tid={testId}
 	href="/terms-of-use"

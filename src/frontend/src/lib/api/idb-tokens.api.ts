@@ -1,7 +1,6 @@
 import { browser } from '$app/environment';
 import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
-import { nullishSignOut } from '$lib/services/auth.services';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -27,7 +26,6 @@ export const setIdbTokensStore = async <T extends CustomToken | UserToken>({
 	idbTokensStore: UseStore;
 }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -65,7 +63,6 @@ export const deleteIdbEthTokenDeprecated = async ({
 	token
 }: DeleteIdbTokenParams<UserToken>): Promise<void> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -86,7 +83,6 @@ export const deleteIdbEthToken = async ({
 	token
 }: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -122,7 +118,6 @@ export const deleteIdbIcToken = async ({
 	token
 }: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -155,7 +150,6 @@ export const deleteIdbSolToken = async ({
 	token
 }: DeleteIdbTokenParams<CustomToken>): Promise<void> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

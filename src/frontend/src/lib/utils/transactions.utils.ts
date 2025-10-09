@@ -27,7 +27,7 @@ import type {
 	AllTransactionUiWithCmp,
 	AnyTransactionUi,
 	AnyTransactionUiWithToken
-} from '$lib/types/transaction';
+} from '$lib/types/transaction-ui';
 import type { KnownDestinations, TransactionsStoreCheckParams } from '$lib/types/transactions';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {

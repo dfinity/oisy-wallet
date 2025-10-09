@@ -10,9 +10,9 @@ import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
+import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
-import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -25,9 +25,10 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
@@ -419,3 +420,17 @@ export const saveAllCustomTokens = async ({
 			: [])
 	]);
 };
+
+export const filterTokensByNft = ({
+	tokens,
+	filterNfts
+}: {
+	tokens: Token[];
+	filterNfts?: boolean;
+}): Token[] =>
+	isNullish(filterNfts)
+		? tokens
+		: tokens.filter((t) => {
+				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				return filterNfts ? isNft : !isNft;
+			});

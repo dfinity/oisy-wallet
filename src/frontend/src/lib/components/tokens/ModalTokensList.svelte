@@ -1,10 +1,9 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { notEmptyString } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, type Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
-	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
 	import { MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS } from '$lib/constants/test-ids.constants';
@@ -16,21 +15,23 @@
 	import type { Token } from '$lib/types/token';
 	import { isDesktop } from '$lib/utils/device.utils';
 
-	let {
-		networkSelectorViewOnly = false,
-		loading,
-		tokenListItem,
-		toolbar,
-		noResults
-	}: {
+	interface Props {
 		networkSelectorViewOnly: boolean;
-		loading: boolean;
 		tokenListItem: Snippet<[Token, () => void]>;
 		toolbar: Snippet;
 		noResults?: Snippet;
-	} = $props();
+		onSelectNetworkFilter: () => void;
+		onTokenButtonClick?: (token: Token) => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let {
+		networkSelectorViewOnly = false,
+		tokenListItem,
+		toolbar,
+		noResults,
+		onSelectNetworkFilter,
+		onTokenButtonClick
+	}: Props = $props();
 
 	const { filteredTokens, filterNetwork, setFilterQuery } = getContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY
@@ -61,7 +62,7 @@
 			class:hover:border-brand-primary={networkSelectorViewOnly}
 			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
 			disabled={networkSelectorViewOnly}
-			onclick={() => !networkSelectorViewOnly && dispatch('icSelectNetworkFilter')}
+			onclick={() => !networkSelectorViewOnly && onSelectNetworkFilter()}
 		>
 			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
 			<IconExpandMore size="24" />
@@ -71,25 +72,23 @@
 
 <div class="my-4 flex flex-col overflow-y-hidden sm:max-h-[26rem]">
 	<div class="gap-6 overflow-y-auto overscroll-contain">
-		<TokensSkeletons {loading}>
-			{#if noTokensMatch}
-				{#if noResults}
-					{@render noResults()}
-				{:else}
-					<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
-						{$i18n.core.text.no_results}
-					</p>
-				{/if}
+		{#if noTokensMatch}
+			{#if noResults}
+				{@render noResults()}
 			{:else}
-				<List noPadding>
-					{#each $filteredTokens as token (token.id)}
-						<ListItem styleClass="first-of-type:border-t-1">
-							{@render tokenListItem(token, () => dispatch('icTokenButtonClick', token))}
-						</ListItem>
-					{/each}
-				</List>
+				<p class="text-primary" data-tid={MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS}>
+					{$i18n.core.text.no_results}
+				</p>
 			{/if}
-		</TokensSkeletons>
+		{:else}
+			<List noPadding>
+				{#each $filteredTokens as token (token.id)}
+					<ListItem styleClass="first-of-type:border-t-1">
+						{@render tokenListItem(token, () => onTokenButtonClick?.(token))}
+					</ListItem>
+				{/each}
+			</List>
+		{/if}
 	</div>
 </div>
 

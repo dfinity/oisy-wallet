@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -41,16 +41,33 @@
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let observe: boolean;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let data: string | undefined = undefined;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let nativeEthereumToken: Token;
-	export let sendToken: Token;
-	export let sendTokenId: TokenId;
-	export let sendNft: Nft | undefined = undefined;
+	interface Props {
+		observe: boolean;
+		destination?: string;
+		amount?: OptionAmount;
+		data?: string;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		sendNft?: Nft;
+		children: Snippet;
+	}
+
+	let {
+		observe,
+		destination = '',
+		amount,
+		data,
+		sourceNetwork,
+		targetNetwork,
+		nativeEthereumToken,
+		sendToken,
+		sendTokenId,
+		sendNft,
+		children
+	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -58,7 +75,7 @@
 	 * Updating and fetching fee
 	 */
 
-	let listener: WebSocketListener | undefined = undefined;
+	let listener = $state<WebSocketListener | undefined>();
 
 	const errorMsgs: symbol[] = [];
 
@@ -195,11 +212,11 @@
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
-	let listenerCallbackTimer: NodeJS.Timeout | undefined;
+	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
 
-	let isDestroyed = false;
+	let isDestroyed = $state(false);
 
-	const obverseFeeData = async (watch: boolean) => {
+	const obverseFeeData = async () => {
 		const throttledCallback = () => {
 			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
@@ -219,7 +236,7 @@
 			return;
 		}
 
-		if (!watch) {
+		if (!observe) {
 			return;
 		}
 
@@ -235,6 +252,7 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
+
 	onDestroy(async () => {
 		isDestroyed = true;
 		await listener?.disconnect();
@@ -246,12 +264,19 @@
 	 * Observe input properties for erc20
 	 */
 
-	$: obverseFeeData(observe);
+	$effect(() => {
+		[observe];
 
-	$: ($ckEthMinterInfoStore,
-		(() => {
-			observe && debounceUpdateFeeData();
-		})());
+		untrack(() => obverseFeeData());
+	});
+
+	$effect(() => {
+		[$ckEthMinterInfoStore];
+
+		if (observe) {
+			untrack(() => debounceUpdateFeeData());
+		}
+	});
 
 	/**
 	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
@@ -259,4 +284,4 @@
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
-<slot />
+{@render children()}

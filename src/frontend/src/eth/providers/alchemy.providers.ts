@@ -1,8 +1,13 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type {
+	AlchemyProviderContract,
+	AlchemyProviderContracts
+} from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
+import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
@@ -118,7 +123,10 @@ export const initPendingTransactionsListener = ({
 };
 
 export class AlchemyProvider {
-	// TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	/**
+	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	 * @deprecated This approach works for now but does not align with the new architectural requirements.
+	 */
 	private readonly deprecatedProvider: Alchemy;
 
 	constructor(private readonly network: Network) {
@@ -238,6 +246,40 @@ export class AlchemyProvider {
 
 			return acc;
 		}, []);
+	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
+	getContractMetadata = async (address: EthAddress): Promise<Erc1155Metadata | Erc721Metadata> => {
+		const result: AlchemyProviderContract =
+			await this.deprecatedProvider.nft.getContractMetadata(address);
+
+		const tokenStandard =
+			result.tokenType === 'ERC721'
+				? 'erc721'
+				: result.tokenType === 'ERC1155'
+					? 'erc1155'
+					: undefined;
+
+		if (isNullish(tokenStandard)) {
+			throw new Error('Invalid token standard');
+		}
+
+		const maybeName =
+			nonNullish(result.openSeaMetadata?.collectionName) &&
+			!result.openSeaMetadata?.collectionName.toLowerCase().includes('unidentified')
+				? result.openSeaMetadata?.collectionName
+				: nonNullish(result.name)
+					? result.name
+					: undefined;
+
+		return {
+			...(nonNullish(maybeName) && { name: maybeName }),
+			...(nonNullish(result.symbol) && { symbol: result.symbol }),
+			...(nonNullish(result.openSeaMetadata?.description) && {
+				description: result.openSeaMetadata.description
+			}),
+			decimals: 0
+		};
 	};
 }
 

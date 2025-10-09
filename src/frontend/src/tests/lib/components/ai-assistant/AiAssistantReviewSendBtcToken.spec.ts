@@ -22,10 +22,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
