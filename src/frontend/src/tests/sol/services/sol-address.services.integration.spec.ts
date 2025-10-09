@@ -30,10 +30,9 @@ describe('sol-address.services integration', () => {
 		{ env: 'staging', checkEnv: (c) => c.STAGING },
 		{ env: 'audit', checkEnv: (c) => c.STAGING && c.AUDIT },
 		{ env: 'test_fe_any', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		// Generate test_fe_1 to test_fe_6 programmatically
 		...Array.from({ length: 6 }, (_, i) => ({
 			env: `test_fe_${i + 1}` as EnvName,
-			checkEnv: (c) => c.STAGING && c.TEST_FE
+			checkEnv: ((c) => c.STAGING && c.TEST_FE) as EnvCheck
 		}))
 	];
 
