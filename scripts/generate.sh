@@ -68,7 +68,7 @@ mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
   candid_file="$(jq -r ".canisters.$canister.candid" dfx.json)"
   echo "Generating bindings for $canister using $candid_file"
-  icp-bindgen --did-file "$canister"
+  icp-bindgen --did-file "$candid_file"
 done
 # Clean up..
 node scripts/did.update.types.mjs
