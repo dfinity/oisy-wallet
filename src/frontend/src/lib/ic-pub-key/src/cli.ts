@@ -2,7 +2,6 @@
 /* istanbul ignore file */
 /* v8 ignore start */
 
-import { STAGING } from '$lib/constants/app.constants';
 import { SIGNER_CANISTER_DERIVATION_PATH } from '$env/signer.env';
 import { schnorr_ed25519_derive } from '$lib/ic-pub-key/src/schnorr/ed25519';
 import { mapDerivationPath } from '$lib/utils/signer.utils.js';
@@ -19,8 +18,8 @@ import {
 /* istanbul ignore next */
 export const deriveEthAddress = async (user: string, pubkey: string): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
-  
-  	assertNonNullish(
+
+	assertNonNullish(
 		SIGNER_CANISTER_DERIVATION_PATH,
 		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
 	);
@@ -62,8 +61,8 @@ export const deriveBtcAddress = async (
 	pubkey: string
 ): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
-  
-  	assertNonNullish(
+
+	assertNonNullish(
 		SIGNER_CANISTER_DERIVATION_PATH,
 		'SIGNER_CANISTER_DERIVATION_PATH is not defined'
 	);
