@@ -86,6 +86,7 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
+import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 export const fetchKongSwap = async ({
@@ -287,6 +288,7 @@ const fetchSwapAmountsICP = async ({
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatUnits(amount, sourceToken.decimals);
 
 	const trackEventBaseParams = {
 		sourceToken: sourceToken.symbol,
@@ -294,12 +296,12 @@ const fetchSwapAmountsICP = async ({
 		sourceTokenCanister: (sourceToken as IcToken).ledgerCanisterId,
 		sourceAmount: amount.toString(),
 		sourceUSDValue: nonNullish(sourceTokenUsdValue)
-			? `${sourceTokenUsdValue * Number(amount)}`
+			? `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
 			: '',
 		destinationToken: destinationToken.symbol,
 		destinationTokenNetwork: destinationToken.network.name,
 		destinationTokenCanister: (destinationToken as IcToken).ledgerCanisterId,
-		amount: amount.toString()
+		amount: sourceTokenToDecimals
 	};
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
@@ -332,14 +334,19 @@ const fetchSwapAmountsICP = async ({
 			if (mapped && Number(mapped.receiveAmount) > 0) {
 				acc.push(mapped);
 
+				const destinationTokenToDecimals = formatUnits(
+					mapped.receiveAmount,
+					destinationToken.decimals
+				);
+
 				trackEvent({
 					name: TRACK_SWAP_OFFER,
 					metadata: {
 						resultStatus: 'success',
 						provider: provider.key,
-						receiveAmount: mapped.receiveAmount.toString(),
+						receiveAmount: formatUnits(mapped.receiveAmount, destinationToken.decimals),
 						receiveAmountUSDValue: nonNullish(destinationUsdValue)
-							? `${destinationUsdValue * Number(mapped.receiveAmount)}`
+							? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
 							: '',
 						...trackEventBaseParams
 					}
