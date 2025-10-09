@@ -7,11 +7,16 @@
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import IconImageDownload from '$lib/components/icons/IconImageDownload.svelte';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
+	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
+	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
+	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -34,12 +39,12 @@
 
 	const { collection, testId }: Props = $props();
 
-	const hasConsent = $derived(
+	const allowMedia = $derived(
 		getAllowMediaForNft({
 			tokens: $nonFungibleTokens,
 			networkId: collection.network.id,
 			address: collection.address
-		}) ?? false
+		})
 	);
 
 	const shortCollectionName = $derived(
@@ -61,7 +66,7 @@
 
 	let saveLoading = $state(false);
 
-	const save = async () => {
+	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
 			if (isTokenErc721(token)) {
@@ -69,7 +74,7 @@
 					tokens: [
 						{
 							...token,
-							allowExternalContentSource: !hasConsent,
+							allowExternalContentSource: allowMedia,
 							enabled: true // must be true otherwise we couldnt see it at this point
 						}
 					],
@@ -80,7 +85,7 @@
 					tokens: [
 						{
 							...token,
-							allowExternalContentSource: !hasConsent,
+							allowExternalContentSource: allowMedia,
 							enabled: true // must be true otherwise we couldnt see it at this point
 						}
 					],
@@ -106,125 +111,162 @@
 	};
 </script>
 
-<Modal {onClose} {testId}>
-	<ContentWithToolbar>
-		<div class="my-5 flex flex-col items-center justify-center gap-6 text-center">
-			<span class="flex text-warning-primary">
-				<IconImageDownload />
-			</span>
-			{#if nonNullish(shortCollectionName)}
-				<h3
-					>{replacePlaceholders($i18n.nfts.text.review_title, {
-						$collectionName: shortCollectionName
-					})}</h3
-				>
-			{/if}
-		</div>
+<div style="--color-border-secondary: transparent">
+	<Modal {onClose} {testId}>
+		{#snippet title()}{/snippet}
 
-		<p class="mb-5">
-			{$i18n.nfts.text.review_description}
-			<ExternalLink
-				ariaLabel={$i18n.nfts.text.learn_more}
-				href="https://docs.oisy.com/using-oisy-wallet/how-tos/nfts"
-				iconAsLast
-				iconSize="18"
-				styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
-			>
-		</p>
-
-		<div class="flex flex-col gap-2 text-sm">
-			<div class="flex w-full flex-col justify-between md:flex-row">
-				<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span><span
-					>{shortCollectionName}</span
-				>
-			</div>
-			<div class="flex w-full flex-col justify-between md:flex-row">
-				<span class="text-tertiary">{$i18n.networks.network}</span><span
-					><NetworkWithLogo network={collection.network} /></span
-				>
-			</div>
-			<div class="flex w-full flex-col justify-between md:flex-row">
-				<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
-				<span class="inline-flex">
-					<output data-tid={`${testId}-collectionAddress`}
-						>{shortenWithMiddleEllipsis({ text: collection.address })}</output
-					>
-					<AddressActions
-						copyAddress={collection.address}
-						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-							$address: collection.address
-						})}
-						externalLink={getContractExplorerUrl({
-							network: collection.network,
-							contractAddress: collection.address
-						})}
-						externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
-					/>
+		<ContentWithToolbar>
+			<div class="-mt-3 mb-5 flex flex-col items-center justify-center gap-6 text-center">
+				<span class="flex text-warning-primary">
+					<IconImageDownload />
 				</span>
+				{#if nonNullish(shortCollectionName)}
+					<h3
+						>{replacePlaceholders($i18n.nfts.text.review_title, {
+							$collectionName: shortCollectionName
+						})}</h3
+					>
+				{/if}
 			</div>
-			<div class="flex w-full flex-col justify-between md:flex-row">
-				<span class="text-tertiary" data-tid={`${testId}-displayPreferences`}
-					>{$i18n.nfts.text.display_preference}</span
-				><span>{hasConsent ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span>
-			</div>
-			<div class="flex w-full flex-col justify-between md:flex-row">
-				<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
-				<span class="justify-items-between flex-col" data-tid={`${testId}-nfts-media`}>
-					{#if nonNullish(collection.bannerImageUrl)}
-						<span class="flex w-full items-start justify-start md:items-center md:justify-end">
-							<output class="text-tertiary"
-								>{shortenWithMiddleEllipsis({
-									text: collection.bannerImageUrl,
-									splitLength: 20
-								})}</output
-							>
-							<AddressActions
-								copyAddress={collection.bannerImageUrl}
-								copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-									$address: collection.bannerImageUrl
-								})}
-								{...hasConsent && {
-									externalLink: collection.bannerImageUrl,
-									externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
-								}}
-							/>
-						</span>
-					{/if}
-					{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
-						{#if nonNullish(nft?.imageUrl)}
-							<span class="flex w-full items-start justify-end md:items-center">
-								#{nft.id} &nbsp;
-								<output class="truncate text-tertiary"
-									>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
+
+			<p class="mb-5">
+				{$i18n.nfts.text.review_description}
+				<ExternalLink
+					ariaLabel={$i18n.nfts.text.learn_more}
+					href={OISY_NFT_DOCS_URL}
+					iconAsLast
+					iconSize="18"
+					styleClass="font-bold ml-2">{$i18n.nfts.text.learn_more}</ExternalLink
+				>
+			</p>
+
+			<div class="flex flex-col gap-2 rounded-lg border border-tertiary bg-secondary p-3 text-sm">
+				<div class="flex items-center gap-2">
+					<NftBadge {token} />
+					<span class="text-lg font-bold" data-tid={`${testId}-collectionTitle`}
+						>{collection.name}</span
+					>
+				</div>
+
+				{#if nonNullish(collection?.description)}
+					<div class="mb-5 text-sm" data-tid={`${testId}-collectionDescription`}>
+						<ExpandText maxWords={20} text={collection.description} />
+					</div>
+				{/if}
+
+				{#if nonNullish(token)}
+					<div class="mb-6 flex w-full gap-2">
+						<span><NftSpamButton {token} /></span>
+						<span><NftHideButton {token} /></span>
+					</div>
+				{/if}
+
+				<div class="flex w-full flex-col justify-between md:flex-row">
+					<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span><span
+						>{shortCollectionName}</span
+					>
+				</div>
+				<div class="flex w-full flex-col justify-between md:flex-row">
+					<span class="text-tertiary">{$i18n.networks.network}</span><span
+						><NetworkWithLogo network={collection.network} /></span
+					>
+				</div>
+				<div class="flex w-full flex-col justify-between md:flex-row">
+					<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
+					<span class="inline-flex">
+						<output data-tid={`${testId}-collectionAddress`}
+							>{shortenWithMiddleEllipsis({ text: collection.address })}</output
+						>
+						<AddressActions
+							copyAddress={collection.address}
+							copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+								$address: collection.address
+							})}
+							externalLink={getContractExplorerUrl({
+								network: collection.network,
+								contractAddress: collection.address
+							})}
+							externalLinkAriaLabel={$i18n.nfts.text.open_explorer}
+						/>
+					</span>
+				</div>
+				<div class="flex w-full flex-col justify-between md:flex-row">
+					<span class="text-tertiary" data-tid={`${testId}-displayPreferences`}
+						>{$i18n.nfts.text.display_preference}</span
+					><span>{allowMedia ? $i18n.nfts.text.media_enabled : $i18n.nfts.text.media_disabled}</span
+					>
+				</div>
+				<div class="flex w-full flex-col justify-between md:flex-row">
+					<span class="text-tertiary">{$i18n.nfts.text.media_urls}</span>
+					<span class="justify-items-between flex-col" data-tid={`${testId}-nfts-media`}>
+						{#if nonNullish(collection.bannerImageUrl)}
+							<span class="flex w-full items-start justify-start md:items-center md:justify-end">
+								<output class="text-tertiary"
+									>{shortenWithMiddleEllipsis({
+										text: collection.bannerImageUrl,
+										splitLength: 20
+									})}</output
 								>
 								<AddressActions
-									copyAddress={nft.imageUrl}
+									copyAddress={collection.bannerImageUrl}
 									copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
-										$address: nft.imageUrl
+										$address: collection.bannerImageUrl
 									})}
-									{...hasConsent && {
-										externalLink: nft.imageUrl,
+									{...allowMedia && {
+										externalLink: collection.bannerImageUrl,
 										externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
 									}}
 								/>
 							</span>
 						{/if}
-					{/each}
-				</span>
+						{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
+							{#if nonNullish(nft?.imageUrl)}
+								<span class="flex w-full items-start justify-end md:items-center">
+									#{nft.id} &nbsp;
+									<output class="truncate text-tertiary"
+										>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
+									>
+									<AddressActions
+										copyAddress={nft.imageUrl}
+										copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+											$address: nft.imageUrl
+										})}
+										{...allowMedia && {
+											externalLink: nft.imageUrl,
+											externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
+										}}
+									/>
+								</span>
+							{/if}
+						{/each}
+					</span>
+				</div>
 			</div>
-		</div>
 
-		{#snippet toolbar()}
-			<div class="flex w-full gap-3">
-				<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
-				<Button
-					colorStyle="primary"
-					loading={saveLoading}
-					onclick={() => save()}
-					testId={`${testId}-saveButton`}
-					>{hasConsent ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}</Button
-				>
-			</div>
-		{/snippet}
-	</ContentWithToolbar>
-</Modal>
+			{#snippet toolbar()}
+				<div class="flex w-full gap-3">
+					{#if nonNullish(allowMedia)}
+						<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
+					{:else}
+						<Button
+							colorStyle="secondary-light"
+							loading={saveLoading}
+							onclick={() => save(false)}
+							testId={`${testId}-keepMediaDisabledButton`}
+						>
+							{$i18n.nfts.text.keep_media_disabled}
+						</Button>
+					{/if}
+					<Button
+						colorStyle="primary"
+						loading={saveLoading}
+						onclick={() => save(!allowMedia)}
+						testId={`${testId}-saveButton`}
+					>
+						{allowMedia ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}
+					</Button>
+				</div>
+			{/snippet}
+		</ContentWithToolbar>
+	</Modal>
+</div>
