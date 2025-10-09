@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "Taxa de rede Bitcoin",
 			"zero_fee": "Taxa grátis",
 			"total_fee": "Taxa total",
-			"ata_fee": "Taxa ATA"
+			"ata_fee": "Taxa ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insuficiente para cobrir as taxas."
@@ -1697,6 +1700,17 @@
 			"stablecoins_description": "Em breve",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Recompensas OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {
