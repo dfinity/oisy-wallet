@@ -1,4 +1,4 @@
-import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
@@ -310,3 +310,30 @@ export const getAllowMediaForNft = (params: {
 	address: EthAddress;
 	networkId: NetworkId;
 }): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
+
+export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	try {
+		const url = new URL(mediaUrl ?? '');
+		const response = await fetch(url.href, { method: 'HEAD' });
+
+		const type = response.headers.get('Content-Type');
+		const size = response.headers.get('Content-Length');
+
+		if (isNullish(type) || isNullish(size)) {
+			throw new Error('Invalid response headers');
+		}
+
+		if (nonNullish(type) && !type.startsWith('image/')) {
+			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+		}
+
+		if (nonNullish(size) && Number(size) > 1024 * 1024) {
+			// 1MB
+			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
+		}
+	} catch (e: unknown) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	return NftMediaStatusEnum.OK;
+};
