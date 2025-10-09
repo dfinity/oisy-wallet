@@ -64,8 +64,8 @@ scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
 mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
-  candid_file="$(jq -r ".canisters.$canister.candid" dfx.json)"
   declaration_path="src/declarations/$canister"
+  candid_file="$declaration_path/${canister}.did"
   echo "Generating bindings for $canister in $declaration_path using $candid_file"
   icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
 done
