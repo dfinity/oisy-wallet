@@ -838,11 +838,13 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/image.png');
+
 			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
+
 			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
 		});
 
@@ -850,6 +852,7 @@ describe('nfts.utils', () => {
 			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
 
 			const result = await getMediaStatus('https://example.com/image.png');
+
 			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
 		});
 
@@ -859,6 +862,7 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/image.png');
+
 			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
 		});
 
@@ -871,6 +875,7 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/video.mp4');
+
 			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
 		});
 
@@ -887,6 +892,7 @@ describe('nfts.utils', () => {
 			});
 
 			const result = await getMediaStatus('https://example.com/large.jpg');
+
 			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 		});
 	});
