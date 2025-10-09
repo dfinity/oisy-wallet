@@ -17,7 +17,7 @@ import * as solAddressServices from '$sol/services/sol-address.services';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -31,8 +31,6 @@ import type { MockInstance } from 'vitest';
 
 describe('AddressGuard', () => {
 	let apiMock: MockInstance;
-
-	const mockSnippet = createMockSnippet('Mock Snippet');
 
 	beforeEach(() => {
 		vi.restoreAllMocks();

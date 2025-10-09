@@ -3,53 +3,10 @@ import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
 import type { NetworkId } from '$lib/types/network';
-import type {
-	Nft,
-	NftCollection,
-	NftCollectionUi,
-	NftId,
-	NftsByNetwork,
-	NonFungibleToken,
-	OwnedNft
-} from '$lib/types/nft';
+import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
-
-export const getNftsByNetworks = ({
-	tokens,
-	nfts
-}: {
-	tokens: NonFungibleToken[];
-	nfts: Nft[];
-}): NftsByNetwork => {
-	const nftsByToken: NftsByNetwork = {};
-
-	tokens.forEach(({ address, network: { id: networkId } }) => {
-		if (isNullish(nftsByToken[networkId])) {
-			nftsByToken[networkId] = {};
-		}
-		nftsByToken[networkId][address.toLowerCase()] = [];
-	});
-
-	nfts.forEach((nft) => {
-		const {
-			collection: {
-				network: { id: networkId },
-				address
-			}
-		} = nft;
-		const normalizedAddress = address.toLowerCase();
-
-		if (
-			nonNullish(nftsByToken[networkId]) &&
-			nonNullish(nftsByToken[networkId][normalizedAddress])
-		) {
-			nftsByToken[networkId][normalizedAddress].push(nft);
-		}
-	});
-
-	return nftsByToken;
-};
 
 export const findNft = ({
 	nfts,
@@ -62,8 +19,31 @@ export const findNft = ({
 }): Nft | undefined =>
 	nfts.find(
 		({ id, collection: { address, network } }) =>
-			address === tokenAddress && network === tokenNetwork && id === tokenId
+			address === tokenAddress && network.id === tokenNetwork.id && id === tokenId
 	);
+
+export const findNftsByToken = ({
+	nfts,
+	token: { address: tokenAddress, network: tokenNetwork }
+}: {
+	nfts: Nft[];
+	token: NonFungibleToken;
+}): Nft[] =>
+	nfts.filter((nft) =>
+		areAddressesEqual({
+			address1: nft.collection.address,
+			address2: tokenAddress,
+			networkId: tokenNetwork.id
+		})
+	);
+
+export const findNftsByNetwork = ({
+	nfts,
+	networkId
+}: {
+	nfts: Nft[];
+	networkId: NetworkId;
+}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
 
 export const findNewNftIds = ({
 	nfts,
@@ -98,7 +78,7 @@ export const getUpdatedNfts = ({
 }: {
 	nfts: Nft[];
 	token: NonFungibleToken;
-	inventory: OwnedNft[];
+	inventory: Nft[];
 }): Nft[] =>
 	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
 		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
@@ -159,7 +139,8 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		network: token.network,
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
-		...(notEmptyString(token.name) && { name: token.name })
+		...(notEmptyString(token.name) && { name: token.name }),
+		...(notEmptyString(token.description) && { description: token.description })
 	});
 
 export const getEnabledNfts = ({
@@ -245,6 +226,46 @@ interface FilterSortByCollection {
 	(params: NftCollectionFilterAndSortParams): NftCollectionUi[];
 }
 
+const isCollectionUi = (item: Nft | NftCollectionUi): item is NftCollectionUi =>
+	'nfts' in item && 'collection' in item;
+const isNft = (item: Nft | NftCollectionUi): item is Nft =>
+	'collection' in item && !('nfts' in item);
+
+const matchesFilter = ({
+	item,
+	filter
+}: {
+	item: Nft | NftCollectionUi;
+	filter: string;
+}): boolean => {
+	const lower = filter.toLowerCase();
+
+	if (isCollectionUi(item)) {
+		// search by collection name
+		const collectionName = item.collection?.name?.toLowerCase() ?? '';
+		if (collectionName.includes(lower)) {
+			return true;
+		}
+		// search by collections nfts name or id
+		return (item.nfts ?? []).some(
+			(nft) =>
+				(nft.name?.toLowerCase().includes(lower) ?? false) ||
+				(String(nft.id)?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	// search nfts by id, name or collection name
+	if (isNft(item)) {
+		return (
+			(String(item.id)?.toLowerCase().includes(lower) ?? false) ||
+			(item.name?.toLowerCase().includes(lower) ?? false) ||
+			(item.collection?.name?.toLowerCase().includes(lower) ?? false)
+		);
+	}
+
+	return false;
+};
+
 // Single implementation (T is Nft or NftCollectionUi)
 export const filterSortByCollection: FilterSortByCollection = <T extends Nft | NftCollectionUi>({
 	items,
@@ -254,9 +275,7 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 	let result = items;
 
 	if (nonNullish(filter)) {
-		result = result.filter((it) =>
-			(it.collection?.name?.toLowerCase() ?? '').includes(filter.toLowerCase())
-		);
+		result = result.filter((item) => matchesFilter({ item, filter }));
 	}
 
 	if (nonNullish(sort)) {

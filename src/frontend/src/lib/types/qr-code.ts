@@ -1,5 +1,5 @@
 import type { TokenMetadata } from '$lib/types/token';
-import * as z from 'zod/v4';
+import * as z from 'zod';
 
 export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
 

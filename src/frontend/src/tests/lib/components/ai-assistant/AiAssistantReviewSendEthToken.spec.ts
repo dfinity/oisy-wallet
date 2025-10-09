@@ -22,10 +22,6 @@ import { isNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendEthToken', () => {
 	const sendAmount = 0.001;
 	const mockFees = {

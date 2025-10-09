@@ -1,10 +1,8 @@
 import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('TransactionsSkeletons', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	it('should render SkeletonCards when loading is true', () => {
 		const { getByTestId } = render(TransactionsSkeletons, {
 			props: { loading: true, testIdPrefix: 'skeleton-card', children: mockSnippet }

@@ -31,7 +31,7 @@
 	};
 </script>
 
-<svelte:window on:oisyRefreshUserProfile={reload} />
+<svelte:window onoisyRefreshUserProfile={reload} />
 
 {#if $userProfileLoaded}
 	{@render children()}

@@ -1,19 +1,12 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
-import { IC_CKETH_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
-import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
+import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -21,46 +14,6 @@ vi.mock('$lib/api/backend.api', () => ({
 
 describe('custom-tokens.services', () => {
 	describe('loadNetworkCustomTokens', () => {
-		const mockCustomTokens: CustomToken[] = [
-			{
-				token: {
-					Icrc: {
-						ledger_id: Principal.fromText(mockLedgerCanisterId),
-						index_id: toNullable(Principal.fromText(mockIndexCanisterId))
-					}
-				},
-				version: toNullable(2n),
-				enabled: true,
-				section: toNullable(),
-				allow_external_content_source: toNullable()
-			},
-			{
-				token: {
-					Icrc: {
-						ledger_id: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID),
-						index_id: toNullable()
-					}
-				},
-				version: toNullable(1n),
-				enabled: false,
-				section: toNullable(),
-				allow_external_content_source: toNullable()
-			},
-			{
-				token: {
-					SplDevnet: {
-						decimals: toNullable(18),
-						symbol: toNullable(),
-						token_address: BONK_TOKEN.address
-					}
-				},
-				version: toNullable(),
-				enabled: true,
-				section: toNullable(),
-				allow_external_content_source: toNullable()
-			}
-		];
-
 		const mockSetIdbTokens = vi.fn();
 		const mockGetIdbTokens = vi.fn();
 
@@ -165,18 +118,6 @@ describe('custom-tokens.services', () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
 			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
-		});
-
-		it('should sign out if the identity is nullish', async () => {
-			await expect(loadNetworkCustomTokens({ ...mockParams, identity: null })).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
-
-			await expect(
-				loadNetworkCustomTokens({ ...mockParams, identity: undefined })
-			).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledTimes(2);
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {

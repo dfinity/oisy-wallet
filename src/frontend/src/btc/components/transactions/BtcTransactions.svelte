@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import BtcTokenModal from '$btc/components/tokens/BtcTokenModal.svelte';
-	import BtcTransaction from '$btc/components/transactions/BtcTransaction.svelte';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import BtcTransactionsHeader from '$btc/components/transactions/BtcTransactionsHeader.svelte';
 	import {
@@ -10,10 +8,11 @@
 		btcTransactionsNotInitialized
 	} from '$btc/derived/btc-transactions.derived';
 	import type { BtcTransactionUi } from '$btc/types/btc';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import TransactionsSkeletons from '$lib/components/transactions/TransactionsSkeletons.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { DEFAULT_BITCOIN_TOKEN } from '$lib/constants/tokens.constants';
-	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import {
 		modalBtcToken,
 		modalBtcTokenData,
@@ -21,31 +20,48 @@
 	} from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken, Token } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import type { OptionToken } from '$lib/types/token';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let selectedTransaction: BtcTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<BtcTransactionUi>({
-			$modalOpen: $modalBtcTransaction,
-			$modalStore
-		}));
+	let selectedTransaction = $state<BtcTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<BtcTransactionUi>({
+				$modalOpen: $modalBtcTransaction,
+				$modalStore
+			}));
+	});
 
-	let token: Token;
-	$: token = $pageToken ?? DEFAULT_BITCOIN_TOKEN;
+	let token = $derived($pageToken ?? DEFAULT_BITCOIN_TOKEN);
+
+	let groupedTransactions = $derived(
+		nonNullish($sortedBtcTransactions)
+			? groupTransactionsByDate(
+					$sortedBtcTransactions.map(({ data: transaction }) => ({
+						component: 'bitcoin',
+						transaction,
+						token
+					}))
+				)
+			: undefined
+	);
 </script>
 
 <BtcTransactionsHeader />
 
 <TransactionsSkeletons loading={$btcTransactionsNotInitialized}>
-	{#each $sortedBtcTransactions as transaction (transaction.data.id)}
-		<div transition:slide={SLIDE_DURATION}>
-			<BtcTransaction {token} transaction={transaction.data} />
-		</div>
-	{/each}
+	{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+		{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+			<TransactionsDateGroup
+				{formattedDate}
+				testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-btc-${index}`}
+				{transactions}
+			/>
+		{/each}
+	{/if}
 
-	{#if $sortedBtcTransactions.length === 0}
+	{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
 		<TransactionsPlaceholder />
 	{/if}
 </TransactionsSkeletons>

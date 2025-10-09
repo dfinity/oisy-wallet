@@ -8,9 +8,9 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
-import type { IcToken } from '$icp/types/ic-token';
+import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
-import { isTokenIcrc } from '$icp/utils/icrc.utils';
+import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
 import { setCustomToken } from '$lib/api/backend.api';
 import { getPoolCanister } from '$lib/api/icp-swap-factory.api';
 import {
@@ -28,6 +28,7 @@ import {
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
+import { OISY_URL_HOSTNAME } from '$lib/constants/oisy.constants';
 import {
 	ICP_SWAP_POOL_FEE,
 	SWAP_DELTA_INTERVAL_MS,
@@ -37,11 +38,16 @@ import {
 } from '$lib/constants/swap.constants';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
+import { trackEvent } from '$lib/services/analytics.services';
+import { retryWithDelay } from '$lib/services/rest.services';
+import { throwSwapError } from '$lib/services/swap-errors.services';
+import { autoLoadSingleToken } from '$lib/services/token.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
 	kongSwapTokensStore,
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
+import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
@@ -74,16 +80,11 @@ import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	constructSimpleSDK,
-	type BridgePrice,
 	type DeltaAuction,
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
-import { trackEvent } from './analytics.services';
-import { retryWithDelay } from './rest.services';
-import { throwSwapError } from './swap-errors.services';
-import { autoLoadSingleToken } from './token.services';
 
 export const fetchKongSwap = async ({
 	identity,
@@ -158,20 +159,64 @@ export const fetchKongSwap = async ({
 	await waitAndTriggerWallet();
 };
 
-export const loadKongSwapTokens = async ({ identity }: { identity: Identity }): Promise<void> => {
-	const kongSwapTokens = await kongTokens({
-		identity
-	});
-
-	kongSwapTokensStore.setKongSwapTokens(
-		kongSwapTokens.reduce<KongSwapTokensStoreData>(
-			(acc, kongToken) =>
-				'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
-					? { ...acc, [kongToken.IC.symbol]: kongToken.IC }
-					: acc,
-			{}
+export const loadKongSwapTokens = async ({
+	identity,
+	allIcrcTokens
+}: {
+	identity: Identity;
+	allIcrcTokens: IcToken[];
+}): Promise<void> => {
+	const kongSwapTokens = await Promise.allSettled(
+		allIcrcTokens.map(({ ledgerCanisterId: tokenLedgerCanisterId }: IcToken) =>
+			kongTokens({
+				identity,
+				tokenLedgerCanisterId
+			})
 		)
 	);
+
+	const supportedTokens = kongSwapTokens.reduce<KongSwapTokensStoreData>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			return result.value.reduce<KongSwapTokensStoreData>(
+				(innerAcc, kongToken) =>
+					'IC' in kongToken && !kongToken.IC.is_removed && kongToken.IC.chain === 'IC'
+						? { ...innerAcc, [kongToken.IC.symbol]: kongToken.IC }
+						: innerAcc,
+				acc
+			);
+		}
+		return acc;
+	}, {});
+
+	kongSwapTokensStore.setKongSwapTokens(supportedTokens);
+};
+
+export const loadAllIcrcTokensWithSupportedStandards = async ({
+	allTokens,
+	identity
+}: {
+	allTokens: IcToken[];
+	identity: Identity;
+}): Promise<void> => {
+	const tokens = await Promise.allSettled(
+		allTokens.map(async (token: IcToken): Promise<IcTokenWithIcrc2Supported> => {
+			const isIcrc2 = await isIcrcTokenSupportIcrc2({
+				identity,
+				ledgerCanisterId: token.ledgerCanisterId
+			});
+
+			return { ...token, isIcrc2 };
+		})
+	);
+
+	const supportedTokens = tokens.reduce<IcTokenWithIcrc2Supported[]>((acc, result) => {
+		if (result.status === 'fulfilled') {
+			acc.push(result.value);
+		}
+		return acc;
+	}, []);
+
+	swappableIcrcTokensStore.setSwappableTokens(supportedTokens);
 };
 
 export const fetchSwapAmounts = async ({
@@ -220,16 +265,23 @@ const fetchSwapAmountsICP = async ({
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const settledResults = await Promise.allSettled(
-		enabledProviders.map(({ getQuote }) =>
-			getQuote({
+	const [settledResults, isTokenIcrc2] = await Promise.all([
+		Promise.allSettled(
+			enabledProviders.map(({ getQuote }) =>
+				getQuote({
+					identity,
+					sourceToken: sourceToken as IcToken,
+					destinationToken: destinationToken as IcToken,
+					sourceAmount: amount
+				})
+			)
+		),
+		isSourceTokenIcrc2 ??
+			isIcrcTokenSupportIcrc2({
 				identity,
-				sourceToken: sourceToken as IcToken,
-				destinationToken: destinationToken as IcToken,
-				sourceAmount: amount
+				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
 			})
-		)
-	);
+	]);
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
@@ -243,7 +295,7 @@ const fetchSwapAmountsICP = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
@@ -615,7 +667,8 @@ const fetchVeloraSwapAmount = async ({
 		destDecimals: destinationToken.decimals,
 		mode: SWAP_MODE,
 		side: SWAP_SIDE,
-		userAddress: userEthAddress
+		userAddress: userEthAddress,
+		partner: OISY_URL_HOSTNAME
 	};
 
 	const data = await sdk.quote.getQuote(
@@ -739,13 +792,14 @@ export const fetchVeloraDeltaSwap = async ({
 	progress(ProgressStepsSwap.SWAP);
 
 	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails as DeltaPrice | BridgePrice,
+		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork.chainId)
+		destChainId: Number(destinationNetwork.chainId),
+		partner: OISY_URL_HOSTNAME
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
@@ -875,7 +929,8 @@ export const fetchVeloraMarketSwap = async ({
 		srcAmount: swapDetails.srcAmount,
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
-		userAddress
+		userAddress,
+		partner: OISY_URL_HOSTNAME
 	});
 
 	await swap({

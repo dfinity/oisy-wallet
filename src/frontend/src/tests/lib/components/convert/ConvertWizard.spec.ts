@@ -39,12 +39,16 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('ConvertWizard', () => {
 	const sendAmount = 20;
+
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
+	const onDestination = vi.fn();
+	const onDestinationBack = vi.fn();
+	const onQRCodeScan = vi.fn();
+	const onQRCodeBack = vi.fn();
 
 	const props = {
 		sendAmount,
@@ -54,7 +58,13 @@ describe('ConvertWizard', () => {
 			name: WizardStepsConvert.CONVERT,
 			title: 'title'
 		},
-		onIcQrCodeBack: () => {}
+		onBack,
+		onClose,
+		onNext,
+		onDestination,
+		onDestinationBack,
+		onQRCodeBack,
+		onQRCodeScan
 	};
 
 	const mockContext = (sourceToken: Token) =>

@@ -1,4 +1,5 @@
 import type { SolInstruction, SolParsedToken2022Instruction } from '$sol/types/sol-instructions';
+import { assertNever } from '@dfinity/utils';
 import {
 	Token2022Instruction,
 	identifyToken2022Instruction,
@@ -49,6 +50,7 @@ import {
 	parseInitializeMultisig2Instruction,
 	parseInitializeMultisigInstruction,
 	parseInitializeNonTransferableMintInstruction,
+	parseInitializePausableConfigInstruction,
 	parseInitializePermanentDelegateInstruction,
 	parseInitializeScaledUiAmountMintInstruction,
 	parseInitializeTokenGroupInstruction,
@@ -58,8 +60,10 @@ import {
 	parseInitializeTransferHookInstruction,
 	parseMintToCheckedInstruction,
 	parseMintToInstruction,
+	parsePauseInstruction,
 	parseReallocateInstruction,
 	parseRemoveTokenMetadataKeyInstruction,
+	parseResumeInstruction,
 	parseRevokeInstruction,
 	parseSetAuthorityInstruction,
 	parseSetTransferFeeInstruction,
@@ -91,7 +95,7 @@ import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@s
 
 export const parseSolToken2022Instruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedToken2022Instruction => {
+): SolParsedToken2022Instruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
@@ -476,6 +480,21 @@ export const parseSolToken2022Instruction = (
 				...parseUpdateMultiplierScaledUiMintInstruction(instruction),
 				instructionType: Token2022Instruction.UpdateMultiplierScaledUiMint
 			};
+		case Token2022Instruction.InitializePausableConfig:
+			return {
+				...parseInitializePausableConfigInstruction(instruction),
+				instructionType: Token2022Instruction.InitializePausableConfig
+			};
+		case Token2022Instruction.Pause:
+			return {
+				...parsePauseInstruction(instruction),
+				instructionType: Token2022Instruction.Pause
+			};
+		case Token2022Instruction.Resume:
+			return {
+				...parseResumeInstruction(instruction),
+				instructionType: Token2022Instruction.Resume
+			};
 		case Token2022Instruction.InitializeTokenMetadata:
 			return {
 				...parseInitializeTokenMetadataInstruction(instruction),
@@ -521,7 +540,11 @@ export const parseSolToken2022Instruction = (
 				...parseInitializeTokenGroupMemberInstruction(instruction),
 				instructionType: Token2022Instruction.InitializeTokenGroupMember
 			};
-		default:
-			return instruction;
+		default: {
+			assertNever(
+				decodedInstruction,
+				`Unknown Solana Token 2022 instruction: ${decodedInstruction}`
+			);
+		}
 	}
 };

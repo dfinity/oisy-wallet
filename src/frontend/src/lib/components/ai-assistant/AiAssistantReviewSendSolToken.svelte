@@ -16,7 +16,7 @@
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
@@ -29,8 +29,8 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -60,9 +60,10 @@
 		destination: Address;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const {
 		sendToken,
@@ -100,6 +101,11 @@
 		feeDecimalsStore.set(solanaNativeToken.decimals);
 	});
 
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
+	});
+
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
 		initFeeContext({
@@ -108,7 +114,8 @@
 			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore,
-			feeTokenIdStore
+			feeTokenIdStore,
+			feeExchangeRateStore
 		})
 	);
 
@@ -165,7 +172,6 @@
 		};
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -217,10 +223,9 @@
 				metadata: sendTrackingEventMetadata
 			});
 
-			sendCompleted = true;
+			onSendCompleted();
 			loading = false;
 		} catch (err: unknown) {
-			sendCompleted = false;
 			loading = false;
 
 			trackEvent({
@@ -272,7 +277,10 @@
 		{$i18n.send.text.send}
 	</Button>
 {:else}
-	<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+	<p
+		class="text-center text-sm text-success-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+	>
 		{$i18n.ai_assistant.text.send_token_succeeded}
 	</p>
 {/if}

@@ -4,6 +4,7 @@ import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { loadTokenAccount } from '$sol/api/solana.api';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import {
@@ -19,14 +20,17 @@ import { isAtaAddress } from '$sol/utils/sol-address.utils';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { isTokenSpl } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { getSetComputeUnitPriceInstruction } from '@solana-program/compute-budget';
+import {
+	estimateComputeUnitLimitFactory,
+	getSetComputeUnitPriceInstruction
+} from '@solana-program/compute-budget';
 import { getTransferSolInstruction } from '@solana-program/system';
 import { getTransferCheckedInstruction, getTransferInstruction } from '@solana-program/token';
 import {
 	appendTransactionMessageInstructions,
-	assertTransactionIsFullySigned,
+	assertIsFullySignedTransaction,
+	assertIsTransactionWithinSizeLimit,
 	createTransactionMessage,
-	getComputeUnitEstimateForTransactionMessageFactory,
 	lamports,
 	pipe,
 	prependTransactionMessageInstruction,
@@ -35,13 +39,13 @@ import {
 	setTransactionMessageLifetimeUsingBlockhash,
 	address as solAddress,
 	type Commitment,
-	type ITransactionMessageWithFeePayer,
 	type Rpc,
 	type RpcSubscriptions,
 	type Signature,
 	type SolanaRpcApi,
 	type SolanaRpcSubscriptionsApi,
 	type TransactionMessage,
+	type TransactionMessageWithFeePayer,
 	type TransactionPartialSigner,
 	type TransactionSigner,
 	type TransactionVersion
@@ -58,7 +62,7 @@ const setFeePayerToTransaction = ({
 }: {
 	transactionMessage: TransactionMessage;
 	feePayer: TransactionSigner;
-}): TransactionMessage & ITransactionMessageWithFeePayer =>
+}): TransactionMessage & TransactionMessageWithFeePayer =>
 	pipe(transactionMessage, (tx) => setTransactionMessageFeePayerSigner(feePayer, tx));
 
 export const setLifetimeAndFeePayerToTransaction = async ({
@@ -73,15 +77,10 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	const { getLatestBlockhash } = rpc;
 	const { value: latestBlockhash } = await getLatestBlockhash({ commitment: 'confirmed' }).send();
 
-	const correctedLatestBlockhash = {
-		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-	};
-
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(correctedLatestBlockhash, tx)
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
 	);
 };
 
@@ -210,7 +209,15 @@ const createSplTokenTransactionMessage = async ({
 
 	const config = { programAddress: solAddress(tokenOwnerAddress) };
 
-	const transferInstruction = nonNullish(tokenMintAuthority)
+	// Theoretically, `transferChecked` is available for Token program address too, not only Token 2022 program address.
+	// It is indeed safer, and we should use it whenever possible.
+	// However, some wallets do not support it yet and the transaction will be rejected.
+	// So we use it only when we are sure the token is a Token 2022 one,
+	// or if it has a mint authority (which is not the case of locked tokens).
+	const useCheckedTransfer =
+		tokenOwnerAddress === TOKEN_2022_PROGRAM_ADDRESS || nonNullish(tokenMintAuthority);
+
+	const transferInstruction = useCheckedTransfer
 		? getTransferCheckedInstruction(
 				{
 					...transferParams,
@@ -219,7 +226,7 @@ const createSplTokenTransactionMessage = async ({
 				},
 				config
 			)
-		: getTransferInstruction(transferParams, { programAddress: solAddress(tokenOwnerAddress) });
+		: getTransferInstruction(transferParams, config);
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(
@@ -238,7 +245,8 @@ export const sendSignedTransaction = async ({
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
-	assertTransactionIsFullySigned(signedTransaction);
+	assertIsFullySignedTransaction(signedTransaction);
+	assertIsTransactionWithinSizeLimit(signedTransaction);
 
 	const sendTransaction = sendTransactionWithoutConfirmingFactory({ rpc });
 
@@ -256,7 +264,7 @@ const confirmSignedTransaction = async ({
 	signedTransaction: SolSignedTransaction;
 	commitment?: Commitment;
 }) => {
-	assertTransactionIsFullySigned(signedTransaction);
+	assertIsFullySignedTransaction(signedTransaction);
 
 	const getBlockHeightExceedencePromise = createBlockHeightExceedencePromiseFactory({
 		rpc,
@@ -268,7 +276,7 @@ const confirmSignedTransaction = async ({
 		rpcSubscriptions
 	});
 
-	return await waitForRecentTransactionConfirmation({
+	await waitForRecentTransactionConfirmation({
 		transaction: signedTransaction,
 		commitment,
 		getBlockHeightExceedencePromise,
@@ -332,10 +340,9 @@ export const sendSol = async ({
 				network: solNetwork
 			});
 
-	const getComputeUnitEstimateForTransactionMessage =
-		getComputeUnitEstimateForTransactionMessageFactory({
-			rpc
-		});
+	const getComputeUnitEstimateForTransactionMessage = estimateComputeUnitLimitFactory({
+		rpc
+	});
 
 	const computeUnitsEstimate =
 		await getComputeUnitEstimateForTransactionMessage(transactionMessage);

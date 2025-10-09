@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { IconGitHub } from '@dfinity/gix-components';
 	import { page } from '$app/state';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
 	import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
 	import IconDfinity from '$lib/components/icons/IconDfinity.svelte';
 	import IconHeart from '$lib/components/icons/IconHeart.svelte';
 	import IconTwitter from '$lib/components/icons/IconTwitter.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
+	import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 	import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
 	import TermsOfUseLink from '$lib/components/terms-of-use/TermsOfUseLink.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -23,55 +22,24 @@
 </script>
 
 <footer
-	class="pointer-events-none mx-auto flex w-full max-w-screen-2.5xl flex-1 flex-col items-center justify-end px-4 pt-5 sm:flex-1 sm:grow sm:flex-row sm:items-end sm:justify-between sm:px-8 md:pb-5 md:pt-12 lg:fixed lg:inset-x-0 lg:bottom-0"
+	class="pointer-events-none mx-auto mt-5 flex w-full max-w-screen-2.5xl flex-col items-center justify-end px-4 sm:flex-row sm:items-end sm:justify-between sm:px-8 md:pb-5"
 	class:md:bottom-0={$authSignedIn}
 	class:md:fixed={$authSignedIn}
-	class:md:h-md:grid={$authNotSignedIn}
-	class:md:h-md:grid-cols-2={$authNotSignedIn}
 	class:md:h-md:pr-0={$authNotSignedIn}
 	class:md:inset-x-0={$authSignedIn}
-	class:pb-24={$authSignedIn}
-	class:sm:sticky={$authNotSignedIn}
+	class:pb-18={$authSignedIn}
 	class:z-1={!$aiAssistantConsoleOpen}
 	class:z-3={$aiAssistantConsoleOpen}
 >
 	<div
-		class="pointer-events-none flex w-full flex-col items-center justify-between md:flex-row md:gap-4"
+		class="pointer-events-none flex w-full flex-col items-center justify-between sm:items-end md:flex-row md:gap-4"
 		class:sm:flex-row={$authNotSignedIn}
 		class:sm:gap-4={$authNotSignedIn}
-		class:sm:items-end={NEW_AGREEMENTS_ENABLED || $authSignedIn}
 	>
-		{#if NEW_AGREEMENTS_ENABLED}
-			<div
-				class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
-			>
-				<div class="flex items-center gap-4">
-					<ExternalLinkIcon
-						ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
-						href={OISY_TWITTER_URL}
-					>
-						<IconTwitter />
-					</ExternalLinkIcon>
-
-					<ExternalLinkIcon
-						ariaLabel={$i18n.navigation.text.source_code_on_github}
-						href={OISY_REPO_URL}
-					>
-						<IconGitHub />
-					</ExternalLinkIcon>
-				</div>
-				{#if $authNotSignedIn}
-					<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
-						<TermsOfUseLink />
-						<PrivacyPolicyLink />
-						<LicenseLink />
-					</div>
-				{/if}
-			</div>
-		{:else}
-			<div
-				class={`pointer-events-auto flex flex-row items-center gap-4 ${isHomePage ? '' : 'hidden md:flex'}`}
-			>
+		<div
+			class={`pointer-events-auto flex flex-col items-center gap-4 sm:items-start ${isHomePage ? '' : 'hidden md:flex'}`}
+		>
+			<div class="flex items-center gap-4">
 				<ExternalLinkIcon
 					ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.open_twitter)}
 					href={OISY_TWITTER_URL}
@@ -86,7 +54,14 @@
 					<IconGitHub />
 				</ExternalLinkIcon>
 			</div>
-		{/if}
+			{#if $authNotSignedIn}
+				<div class="mb-2 flex gap-2 text-nowrap text-xs text-tertiary">
+					<TermsOfUseLink />
+					<PrivacyPolicyLink />
+					<LicenseAgreementLink />
+				</div>
+			{/if}
+		</div>
 
 		{#if $aiAssistantConsoleOpen}
 			<AiAssistantConsole />
@@ -112,7 +87,7 @@
 					<span class="-mt-[0.35rem]"><IconDfinity size="30" /></span>
 					<span
 						class="text-center md:text-left"
-						class:1.5md:h-md:block={$authNotSignedIn}
+						class:lg:h-md:block={$authNotSignedIn}
 						class:md:h-md:hidden={$authNotSignedIn}
 						class:md:hidden={$authSignedIn}
 						class:xl:block={$authSignedIn}

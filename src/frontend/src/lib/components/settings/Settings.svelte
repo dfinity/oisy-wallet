@@ -2,9 +2,11 @@
 	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';
 	import SettingsCard from '$lib/components/settings/SettingsCard.svelte';
 	import SettingsCardItem from '$lib/components/settings/SettingsCardItem.svelte';
+	import SettingsExperimentalFeatures from '$lib/components/settings/SettingsExperimentalFeatures.svelte';
 	import SettingsVersion from '$lib/components/settings/SettingsVersion.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Copy from '$lib/components/ui/Copy.svelte';
@@ -14,7 +16,7 @@
 		SETTINGS_ADDRESS_LABEL
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+	import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
 	import {
 		type SettingsModalType,
 		SettingsModalType as SettingsModalEnum
@@ -57,7 +59,7 @@
 </script>
 
 <SettingsCard>
-	<svelte:fragment slot="title">General</svelte:fragment>
+	<svelte:fragment slot="title">{$i18n.settings.text.general}</svelte:fragment>
 
 	<SettingsCardItem>
 		<svelte:fragment slot="key">
@@ -114,6 +116,10 @@
 		</svelte:fragment>
 	</SettingsCardItem>
 </SettingsCard>
+
+{#if AI_ASSISTANT_CONSOLE_ENABLED}
+	<SettingsExperimentalFeatures />
+{/if}
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>

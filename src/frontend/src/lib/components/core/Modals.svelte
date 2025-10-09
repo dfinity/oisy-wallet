@@ -5,10 +5,11 @@
 	import AddressBookModal from '$lib/components/address-book/AddressBookModal.svelte';
 	import DappModalDetails from '$lib/components/dapps/DappModalDetails.svelte';
 	import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+	import ReceiveAddressModal from '$lib/components/receive/ReceiveAddressModal.svelte';
+	import ReceiveAddresses from '$lib/components/receive/ReceiveAddresses.svelte';
 	import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
-	import RewardModal from '$lib/components/rewards/RewardModal.svelte';
-	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 	import SettingsModal from '$lib/components/settings/SettingsModal.svelte';
+	import FullscreenImgModal from '$lib/components/ui/FullscreenImgModal.svelte';
 	import VipQrCodeModal from '$lib/components/vip/VipQrCodeModal.svelte';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import {
@@ -24,11 +25,14 @@
 		modalVipQrCodeData,
 		modalIcHideTokenData,
 		modalHideTokenData,
-		modalRewardDetails,
-		modalRewardDetailsData,
 		modalNftImageConsent,
-		modalNftImageConsentData
+		modalNftImageConsentData,
+		modalNftFullscreenDisplayData,
+		modalNftFullscreenDisplayOpen,
+		modalReceive,
+		modalReceiveId
 	} from '$lib/derived/modal.derived';
+	import { getSymbol } from '$lib/utils/modal.utils';
 	import SolHideTokenModal from '$sol/components/tokens/SolHideTokenModal.svelte';
 
 	/**
@@ -53,11 +57,11 @@
 		<ReferralCodeModal />
 	{:else if $modalAddressBook}
 		<AddressBookModal />
-	{:else if $modalRewardDetails && nonNullish($modalRewardDetailsData)}
-		<RewardsEligibilityContext>
-			<RewardModal reward={$modalRewardDetailsData} />
-		</RewardsEligibilityContext>
 	{:else if $modalNftImageConsent && nonNullish($modalNftImageConsentData)}
 		<NftImageConsentModal collection={$modalNftImageConsentData} />
+	{:else if $modalNftFullscreenDisplayOpen && nonNullish($modalNftFullscreenDisplayData?.imageUrl)}
+		<FullscreenImgModal imageSrc={$modalNftFullscreenDisplayData.imageUrl} />
+	{:else if $modalReceive && $modalReceiveId === getSymbol('menu-addresses')}
+		<ReceiveAddressModal infoCmp={ReceiveAddresses} />
 	{/if}
 {/if}

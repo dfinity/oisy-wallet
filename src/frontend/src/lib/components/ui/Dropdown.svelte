@@ -59,11 +59,7 @@
 
 	<Responsive down="md">
 		{#if visible}
-			<Modal on:nnsClose={close}>
-				<svelte:fragment slot="title">
-					{@render title?.()}
-				</svelte:fragment>
-
+			<Modal onClose={close} {title}>
 				{@render items()}
 			</Modal>
 		{/if}

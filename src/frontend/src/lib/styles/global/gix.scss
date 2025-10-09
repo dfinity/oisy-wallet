@@ -71,8 +71,8 @@
 	--alert-max-width: 100vw;
 	--alert-max-height: 100dvh;
 	--alert-border-radius: var(--border-radius-xs);
-	--alert-padding-y: 0;
-	--alert-padding-x: 0;
+	--alert-padding-y: var(--padding-2x);
+	--alert-padding-x: var(--padding-3x);
 
 	--dialog-width: 100vw;
 	--dialog-max-width: var(--alert-max-width);
@@ -95,6 +95,7 @@
 		--dialog-width: 560px;
 		--alert-max-width: calc(100vw - var(--padding-4x));
 		--alert-max-height: initial;
+		--alert-border-radius: calc(var(--border-radius-sm) * 3);
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
 	}
 
@@ -349,7 +350,8 @@ div.step {
 	}
 }
 
-div.checkbox {
+div.checkbox,
+div.radio {
 	&:hover input {
 		--secondary: var(--color-background-brand-secondary) !important;
 		--input-custom-border-color: var(--color-background-brand-secondary);
@@ -357,7 +359,8 @@ div.checkbox {
 		--input-background: var(--color-background-brand-secondary);
 	}
 
-	input[type='checkbox'] {
+	input[type='checkbox'],
+	input[type='radio'] {
 		--secondary: var(--color-primary);
 		--focus-background: var(--color-background-primary);
 

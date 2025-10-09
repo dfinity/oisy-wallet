@@ -13,7 +13,7 @@
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
@@ -22,7 +22,6 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -35,9 +34,10 @@
 		destination: Address;
 		sendCompleted: boolean;
 		sendEnabled: boolean;
+		onSendCompleted: () => void;
 	}
 
-	let { amount, destination, sendCompleted = $bindable(), sendEnabled }: Props = $props();
+	let { amount, destination, sendCompleted, onSendCompleted, sendEnabled }: Props = $props();
 
 	const { sendToken, sendBalance, sendTokenStandard, sendTokenSymbol, sendTokenDecimals } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -79,7 +79,6 @@
 		};
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -126,10 +125,9 @@
 				sendCompleted: trackAnalyticsOnSendComplete
 			});
 
-			sendCompleted = true;
+			onSendCompleted();
 			loading = false;
 		} catch (err: unknown) {
-			sendCompleted = false;
 			loading = false;
 
 			trackEvent({
@@ -169,7 +167,10 @@
 		{$i18n.send.text.send}
 	</Button>
 {:else}
-	<p class="text-sm text-success-primary" data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}>
+	<p
+		class="text-center text-sm text-success-primary"
+		data-tid={AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE}
+	>
 		{$i18n.ai_assistant.text.send_token_succeeded}
 	</p>
 {/if}

@@ -19,7 +19,7 @@ import {
 	setIdbTransactionsStore
 } from '$lib/api/idb-transactions.api';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
-import { createMockBtcTransactionsUi } from '$tests/mocks/btc-transactions.mock';
+import { createMockBtcTransactionsUi } from '$tests/mocks/blockchain-transactions.mock';
 import { createMockEthTransactions } from '$tests/mocks/eth-transactions.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import * as idbKeyval from 'idb-keyval';
@@ -28,10 +28,6 @@ import { get } from 'svelte/store';
 
 vi.mock('$app/environment', () => ({
 	browser: true
-}));
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
 }));
 
 vi.mock('$lib/utils/idb.utils', () => ({

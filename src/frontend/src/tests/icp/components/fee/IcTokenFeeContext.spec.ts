@@ -7,8 +7,8 @@ import {
 	type IcTokenFeeStore
 } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
-import * as authServices from '$lib/services/auth.services';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -22,7 +22,8 @@ describe('IcTokenFeeContext', () => {
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
 	const props = {
-		token: ICP_TOKEN
+		token: ICP_TOKEN,
+		children: mockSnippet
 	};
 
 	beforeEach(() => {
@@ -55,7 +56,7 @@ describe('IcTokenFeeContext', () => {
 	});
 
 	it('should not call transactionFee if no authIdentity available', async () => {
-		const nullishSignOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const transactionFeeSpy = mockTransactionFee();
 
 		mockAuthStore(null);
 
@@ -65,7 +66,7 @@ describe('IcTokenFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(transactionFeeSpy).not.toHaveBeenCalled();
 		});
 	});
 
@@ -75,7 +76,7 @@ describe('IcTokenFeeContext', () => {
 		mockAuthStore();
 
 		render(IcTokenFeeContext, {
-			props: { token: undefined },
+			props: { ...props, token: undefined },
 			context: mockContext(icTokenFeeStore)
 		});
 

@@ -29,11 +29,11 @@ import {
 	type VeloraSwapDetails
 } from '$lib/types/swap';
 import type { Token } from '$lib/types/token';
+import { formatToken } from '$lib/utils/format.utils';
+import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { BridgePrice, DeltaPrice, OptimalRate } from '@velora-dex/sdk';
-import { formatToken } from './format.utils';
-import { isNullishOrEmpty } from './input.utils';
+import type { DeltaPrice, OptimalRate } from '@velora-dex/sdk';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -170,9 +170,9 @@ export const formatReceiveOutMinimum = ({
 	});
 };
 
-export const mapVeloraSwapResult = (swap: DeltaPrice | BridgePrice): SwapMappedResult => ({
+export const mapVeloraSwapResult = (swap: DeltaPrice): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
-	receiveAmount: 'bridge' in swap ? BigInt(swap.destAmountAfterBridge) : BigInt(swap.destAmount),
+	receiveAmount: BigInt(swap.destAmount),
 	swapDetails: swap as VeloraSwapDetails,
 	type: VeloraSwapTypes.DELTA
 });

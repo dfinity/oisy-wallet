@@ -159,6 +159,7 @@ export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
 // Just a value that looks good visually.
 export const EIGHT_DECIMALS = 8;
 
+// eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 
 // NFTs
@@ -202,3 +203,6 @@ export const CONTACT_MAX_LABEL_LENGTH = 50;
 
 // Contact validation
 export const CONTACT_MAX_NAME_LENGTH = 100;
+
+// Network bonus multiplier
+export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;

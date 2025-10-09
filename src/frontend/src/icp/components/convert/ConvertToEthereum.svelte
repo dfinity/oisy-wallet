@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { OptionIcCkToken } from '$icp/types/ic-token';
-	import ConvertETH from '$icp-eth/components/convert/ConvertETH.svelte';
+	import ConvertEth from '$icp-eth/components/convert/ConvertEth.svelte';
 	import { ckEthereumTwinToken, ckEthereumNativeTokenId } from '$icp-eth/derived/cketh.derived';
 	import ConvertModal from '$lib/components/convert/ConvertModal.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
@@ -10,19 +10,23 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let icCkToken: OptionIcCkToken;
-	$: icCkToken = $pageToken as OptionIcCkToken;
+	let icCkToken = $derived($pageToken as OptionIcCkToken);
 </script>
 
-<ConvertETH
+<ConvertEth
 	ariaLabel={replacePlaceholders($i18n.convert.text.convert_to_token, {
 		$token: $ckEthereumTwinToken.symbol
 	})}
 	nativeTokenId={$ckEthereumNativeTokenId}
 >
-	<IconCkConvert slot="icon" size="24" />
-	<span>{$ckEthereumTwinToken.symbol}</span>
-</ConvertETH>
+	{#snippet icon()}
+		<IconCkConvert size="24" />
+	{/snippet}
+
+	{#snippet label()}
+		<span>{$ckEthereumTwinToken.symbol}</span>
+	{/snippet}
+</ConvertEth>
 
 {#if $modalConvertToTwinTokenEth && nonNullish(icCkToken) && nonNullish(icCkToken.twinToken)}
 	<ConvertModal destinationToken={icCkToken.twinToken} sourceToken={icCkToken} />

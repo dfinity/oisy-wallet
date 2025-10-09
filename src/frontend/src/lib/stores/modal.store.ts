@@ -7,10 +7,10 @@ import type { SettingsModalType } from '$lib/enums/settings-modal-types';
 import type { AddressBookModalParams } from '$lib/types/address-book';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
-import type { NftCollection } from '$lib/types/nft';
-import type { RewardStateData, VipRewardStateData } from '$lib/types/reward';
+import type { Nft, NftCollection } from '$lib/types/nft';
+import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
 import type { Token } from '$lib/types/token';
-import type { AnyTransactionUi } from '$lib/types/transaction';
+import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 import type { Option } from '$lib/types/utils';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
 import type { WalletKitTypes } from '@reown/walletkit';
@@ -63,7 +63,9 @@ export interface Modal<T> {
 		| 'welcome'
 		| 'settings'
 		| 'auth-help'
-		| 'nft-image-consent';
+		| 'nft-image-consent'
+		| 'nft-fullscreen-display'
+		| 'gldt-stake';
 	data?: T;
 	id?: symbol;
 }
@@ -125,10 +127,12 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openVipRewardState: (params: SetWithDataParams<VipRewardStateData>) => void;
 	openRewardDetails: (params: SetWithDataParams<RewardCampaignDescription>) => void;
 	openRewardState: (params: SetWithDataParams<RewardStateData>) => void;
-	openWelcome: (id: symbol) => void;
+	openWelcome: (params: SetWithDataParams<WelcomeData>) => void;
 	openSettings: (params: SetWithDataParams<SettingsModalType>) => void;
 	openAuthHelp: (params: SetWithDataParams<boolean>) => void;
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
+	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
+	openGldtStake: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -221,7 +225,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openRewardState: <(params: SetWithDataParams<RewardStateData>) => void>(
 			setTypeWithData('reward-state')
 		),
-		openWelcome: setType('welcome'),
+		openWelcome: <(params: SetWithDataParams<WelcomeData>) => void>setTypeWithData('welcome'),
 		openSettings: <(params: SetWithDataParams<SettingsModalType>) => void>(
 			setTypeWithData('settings')
 		),
@@ -229,6 +233,10 @@ const initModalStore = <T>(): ModalStore<T> => {
 		openNftImageConsent: <(params: SetWithDataParams<NftCollection>) => void>(
 			setTypeWithData('nft-image-consent')
 		),
+		openNftFullscreenDisplay: <(params: SetWithDataParams<Nft>) => void>(
+			setTypeWithData('nft-fullscreen-display')
+		),
+		openGldtStake: setType('gldt-stake'),
 		close: () => set(null),
 		subscribe
 	};

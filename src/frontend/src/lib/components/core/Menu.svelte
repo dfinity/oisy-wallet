@@ -3,16 +3,12 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { NEW_AGREEMENTS_ENABLED } from '$env/agreements.env';
-	import { LOCK_SCREEN_ENABLED } from '$env/lock-screen.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import ButtonAuthenticateWithHelp from '$lib/components/auth/ButtonAuthenticateWithHelp.svelte';
-	import ButtonAuthenticateWithLicense from '$lib/components/auth/ButtonAuthenticateWithLicense.svelte';
 	import LockOrSignOut from '$lib/components/core/LockOrSignOut.svelte';
 	import MenuAddresses from '$lib/components/core/MenuAddresses.svelte';
 	import MenuLanguageSelector from '$lib/components/core/MenuLanguageSelector.svelte';
 	import MenuThemeSelector from '$lib/components/core/MenuThemeSelector.svelte';
-	import SignOut from '$lib/components/core/SignOut.svelte';
 	import MenuCurrencySelector from '$lib/components/currency/MenuCurrencySelector.svelte';
 	import IconBinance from '$lib/components/icons/IconBinance.svelte';
 	import IconVipQr from '$lib/components/icons/IconVipQr.svelte';
@@ -20,13 +16,12 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import IconShare from '$lib/components/icons/lucide/IconShare.svelte';
 	import IconUsersRound from '$lib/components/icons/lucide/IconUsersRound.svelte';
-	import LicenseLink from '$lib/components/license-agreement/LicenseLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import SupportLink from '$lib/components/navigation/SupportLink.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ButtonMenu from '$lib/components/ui/ButtonMenu.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { USER_MENU_ROUTE } from '$lib/constants/analytics.contants';
+	import { USER_MENU_ROUTE } from '$lib/constants/analytics.constants';
 	import {
 		NAVIGATION_MENU_BUTTON,
 		NAVIGATION_MENU,
@@ -112,11 +107,7 @@
 	>
 		{#if $authNotSignedIn}
 			<span class="mb-2 text-center">
-				{#if NEW_AGREEMENTS_ENABLED}
-					<ButtonAuthenticateWithHelp fullWidth needHelpLink={false} />
-				{:else}
-					<ButtonAuthenticateWithLicense fullWidth licenseAlignment="center" needHelpLink={false} />
-				{/if}
+				<ButtonAuthenticateWithHelp fullWidth helpAlignment="center" needHelpLink={false} />
 			</span>
 			<Hr />
 
@@ -219,17 +210,8 @@
 	{#if $authSignedIn}
 		<Hr />
 
-		<div class="flex max-w-80 flex-col gap-3 pt-3">
-			{#if LOCK_SCREEN_ENABLED}
-				<LockOrSignOut onHidePopover={hidePopover} />
-			{:else}
-				<SignOut on:icLogoutTriggered={hidePopover} />
-			{/if}
-			<Hr />
-
-			<span class="text-center text-sm text-tertiary">
-				<LicenseLink noUnderline />
-			</span>
+		<div class="flex max-w-80 flex-col pt-3">
+			<LockOrSignOut onHidePopover={hidePopover} />
 		</div>
 	{/if}
 </Popover>

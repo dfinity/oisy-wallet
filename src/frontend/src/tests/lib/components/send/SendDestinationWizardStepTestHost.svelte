@@ -8,15 +8,25 @@
 	import type { ContactUi } from '$lib/types/contact';
 	import type { SendDestinationTab } from '$lib/types/send';
 
-	let {
-		destination,
-		activeSendDestinationTab,
-		selectedContact = $bindable()
-	}: {
+	interface Props {
 		destination: string;
 		activeSendDestinationTab: SendDestinationTab;
 		selectedContact: Writable<ContactUi>;
-	} = $props();
+		onBack: () => void;
+		onNext: () => void;
+		onClose: () => void;
+		onQRCodeScan: () => void;
+	}
+
+	let {
+		destination,
+		activeSendDestinationTab,
+		selectedContact = $bindable(),
+		onBack,
+		onNext,
+		onClose,
+		onQRCodeScan
+	}: Props = $props();
 
 	const steps = allSendWizardSteps({ i18n: $i18n });
 
@@ -27,6 +37,10 @@
 	<SendDestinationWizardStep
 		{activeSendDestinationTab}
 		{destination}
+		{onBack}
+		{onClose}
+		{onNext}
+		{onQRCodeScan}
 		bind:selectedContact={$selectedContact}
 	/>
 </WizardModal>

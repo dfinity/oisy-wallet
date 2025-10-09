@@ -11,12 +11,15 @@ export type WalletConnectApproveRequestMessage =
 	| WalletConnectSolApproveRequestMessage;
 
 export interface WalletConnectListener extends WebSocketListener {
-	pair: () => Promise<PairingTypes.Struct>;
+	pair: (uri: string) => Promise<PairingTypes.Struct>;
 	approveSession: (proposal: WalletKitTypes.SessionProposal) => Promise<void>;
 	rejectSession: (proposal: WalletKitTypes.SessionProposal) => Promise<void>;
 	sessionProposal: (callback: (proposal: WalletKitTypes.SessionProposal) => void) => void;
 	sessionDelete: (callback: () => void) => void;
 	sessionRequest: (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => void;
+	offSessionProposal: (callback: (proposal: WalletKitTypes.SessionProposal) => void) => void;
+	offSessionDelete: (callback: () => void) => void;
+	offSessionRequest: (callback: (request: WalletKitTypes.SessionRequest) => Promise<void>) => void;
 	rejectRequest: (params: { id: number; topic: string; error: ErrorResponse }) => Promise<void>;
 	getActiveSessions: () => Record<string, SessionTypes.Struct>;
 	approveRequest: (params: {

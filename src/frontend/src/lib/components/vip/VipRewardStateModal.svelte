@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { GLDT_IC_DATA } from '$env/networks/networks.icrc.env';
+	import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
@@ -17,7 +17,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -31,17 +30,16 @@
 	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
 
 	const goldToken = $derived(
-		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId)
+		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_LEDGER_CANISTER_ID)
 	);
 
 	const enableGldtToken = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
 		const token = $icrcTokens.find(
-			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_IC_DATA?.ledgerCanisterId
+			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_LEDGER_CANISTER_ID
 		);
 
 		await autoLoadSingleToken({
@@ -66,14 +64,14 @@
 	<Sprinkles />
 {/if}
 
-<Modal on:nnsClose={close}>
-	<svelte:fragment slot="title">
+<Modal onClose={close}>
+	{#snippet title()}
 		<span class="text-xl"
 			>{isSuccessful
 				? $i18n.vip.reward.text.title_successful
 				: $i18n.vip.reward.text.title_failed}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ImgBanner

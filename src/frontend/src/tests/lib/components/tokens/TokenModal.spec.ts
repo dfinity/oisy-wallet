@@ -11,7 +11,6 @@ import {
 	TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
 	TOKEN_MODAL_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as authServices from '$lib/services/auth.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -24,14 +23,10 @@ import en from '$tests/mocks/i18n.mock';
 import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { fireEvent, render } from '@testing-library/svelte';
+import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadCustomTokens: vi.fn()
-}));
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
 }));
 
 describe('TokenModal', () => {
@@ -83,10 +78,12 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_DELETE_BUTTON));
 
-		expect(removeUserTokenMock).toHaveBeenCalledOnce();
-		expect(toasts).toHaveBeenCalledOnce();
-		expect(idbTokensApi).toHaveBeenCalledOnce();
-		expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		await waitFor(() => {
+			expect(removeUserTokenMock).toHaveBeenCalledOnce();
+			expect(toasts).toHaveBeenCalledOnce();
+			expect(idbTokensApi).toHaveBeenCalledOnce();
+			expect(gotoReplaceRoot).toHaveBeenCalledOnce();
+		});
 	});
 
 	it('saves token after all required steps if indexCanisterId was missing', async () => {
@@ -224,7 +221,6 @@ describe('TokenModal', () => {
 	});
 
 	it('does not delete token if authIdentity is not available', async () => {
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
 		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: {
@@ -252,7 +248,6 @@ describe('TokenModal', () => {
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 		expect(idbTokensApi).not.toHaveBeenCalledOnce();
-		expect(signOutSpy).toHaveBeenCalledOnce();
 	});
 
 	it('does not find delete button if token is not deletable', () => {

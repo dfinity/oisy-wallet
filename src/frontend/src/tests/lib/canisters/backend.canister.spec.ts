@@ -22,6 +22,10 @@ import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { getMockContacts } from '$tests/mocks/contacts.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { mockUserAgreements } from '$tests/mocks/user-agreements.mock';
+import {
+	mockUserExperimentalFeatures,
+	mockUserExperimentalFeaturesMap
+} from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
 import type { ActorSubclass } from '@dfinity/agent';
@@ -1088,6 +1092,45 @@ describe('backend.canister', () => {
 		});
 	});
 
+	describe('updateUserExperimentalFeatureSettings', () => {
+		it('should update user experimental feature settings', async () => {
+			const response = { Ok: null };
+
+			service.update_user_experimental_feature_settings.mockResolvedValue(response);
+
+			const { updateUserExperimentalFeatureSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = await updateUserExperimentalFeatureSettings({
+				experimentalFeatures: mockUserExperimentalFeatures
+			});
+
+			expect(service.update_user_experimental_feature_settings).toHaveBeenCalledWith({
+				experimental_features: mockUserExperimentalFeaturesMap,
+				current_user_version: []
+			});
+			expect(res).toBeUndefined();
+		});
+
+		it('should throw an error if update_user_experimental_feature_settings throws', async () => {
+			service.update_user_experimental_feature_settings.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { updateUserExperimentalFeatureSettings } = await createBackendCanister({
+				serviceOverride: service
+			});
+
+			const res = updateUserExperimentalFeatureSettings({
+				experimentalFeatures: mockUserExperimentalFeatures
+			});
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
 	describe('updateUserAgreements', () => {
 		it('should update user agreements', async () => {
 			const response = { Ok: null };
@@ -1128,7 +1171,8 @@ describe('backend.canister', () => {
 					license_agreement: {
 						accepted: toNullable(),
 						last_accepted_at_ns: toNullable(),
-						last_updated_at_ms: toNullable()
+						last_updated_at_ms: toNullable(),
+						text_sha256: toNullable()
 					}
 				},
 				current_user_version: []

@@ -19,7 +19,6 @@
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -32,7 +31,6 @@
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -43,10 +41,10 @@
 	});
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl">{$i18n.referral.invitation.text.title}</span>
-	</svelte:fragment>
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl">{$i18n.referral.invitation.text.title}</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">

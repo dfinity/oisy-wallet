@@ -105,8 +105,13 @@ pub async fn create_pow_challenge() -> Result<StoredChallenge, CreateChallengeEr
             format_challenge(&stored_challenge),
         );
 
-        // we re-use the previous challenge so we can dynamically adapt the difficulty
-        difficulty = stored_challenge.difficulty;
+        // If auto-adjustment is disabled, always use START_DIFFICULTY
+        if DIFFICULTY_AUTO_ADJUSTMENT {
+            // we re-use the previous challenge so we can dynamically adapt the difficulty
+            difficulty = stored_challenge.difficulty;
+        } else {
+            difficulty = START_DIFFICULTY;
+        }
 
         // to protect this service from overflow the service, it can only be called by a principle
         // again once the challenge has expired.

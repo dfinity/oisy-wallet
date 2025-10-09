@@ -4,6 +4,9 @@ use ic_cdk::api::time;
 use shared::types::{
     agreement::{UpdateAgreementsError, UserAgreements},
     dapp::AddDappSettingsError,
+    experimental_feature::{
+        ExperimentalFeatureSettingsMap, UpdateExperimentalFeaturesSettingsError,
+    },
     network::{NetworkSettingsMap, SetTestnetsSettingsError, UpdateNetworksSettingsError},
     user_profile::{AddUserCredentialError, GetUserProfileError, StoredUserProfile},
     verifiable_credential::CredentialType,
@@ -170,6 +173,37 @@ pub fn update_agreements(
         .map_err(|_| UpdateAgreementsError::UserNotFound)?;
     let now = time();
     let new_profile = user_profile.with_agreements(profile_version, now, agreements)?;
+    user_profile_model.store_new(principal, now, &new_profile);
+    Ok(())
+}
+
+/// Updates the user's experimental feature settings, merging with any existing settings.
+///
+/// # Arguments
+/// * `principal` - The principal of the user.
+/// * `profile_version` - The version of the user's profile.
+/// * `experimental_features` - The new experimental feature settings to save.
+/// * `user_profile_model` - The user profile model.
+///
+/// # Returns
+/// - Returns `Ok(())` if the settings were successfully updated.
+///
+/// # Errors
+/// - Returns `Err` if the user profile is not found, or the user profile version is not up-to-date.
+pub fn update_experimental_feature_settings(
+    principal: StoredPrincipal,
+    profile_version: Option<Version>,
+    experimental_features: ExperimentalFeatureSettingsMap,
+    user_profile_model: &mut UserProfileModel,
+) -> Result<(), UpdateExperimentalFeaturesSettingsError> {
+    let user_profile = find_profile(principal, user_profile_model)
+        .map_err(|_| UpdateExperimentalFeaturesSettingsError::UserNotFound)?;
+    let now = time();
+    let new_profile = user_profile.with_experimental_features_settings(
+        profile_version,
+        now,
+        experimental_features,
+    )?;
     user_profile_model.store_new(principal, now, &new_profile);
     Ok(())
 }

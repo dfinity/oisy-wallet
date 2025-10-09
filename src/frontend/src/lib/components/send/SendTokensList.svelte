@@ -1,7 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
-	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import ModalTokensList from '$lib/components/tokens/ModalTokensList.svelte';
 	import ModalTokensListItem from '$lib/components/tokens/ModalTokensListItem.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';
@@ -9,21 +7,22 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onSendToken: (token: Token) => void;
+		onSelectNetworkFilter: () => void;
+	}
 
-	let loading: boolean;
-	$: loading = $erc20UserTokensNotInitialized;
+	let { onSendToken, onSelectNetworkFilter }: Props = $props();
 
-	const onIcTokenButtonClick = ({ detail: token }: CustomEvent<Token>) => {
-		dispatch('icSendToken', token);
+	const onTokenButtonClick = (token: Token) => {
+		onSendToken(token);
 	};
 </script>
 
 <ModalTokensList
-	{loading}
 	networkSelectorViewOnly={nonNullish($selectedNetwork)}
-	on:icSelectNetworkFilter
-	on:icTokenButtonClick={onIcTokenButtonClick}
+	{onSelectNetworkFilter}
+	{onTokenButtonClick}
 >
 	{#snippet tokenListItem(token, onClick)}
 		<ModalTokensListItem {onClick} {token} />

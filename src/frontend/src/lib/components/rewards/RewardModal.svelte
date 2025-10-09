@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { isNullish } from '@dfinity/utils';
+	import { getContext, onMount } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardBanner from '$lib/components/rewards/RewardBanner.svelte';
-	import RewardDateBadge from '$lib/components/rewards/RewardDateBadge.svelte';
 	import RewardEarnings from '$lib/components/rewards/RewardEarnings.svelte';
 	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -14,8 +14,11 @@
 	import {
 		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_SHARE
-	} from '$lib/constants/analytics.contants';
-	import { REWARDS_MODAL, REWARDS_MODAL_DATE_BADGE } from '$lib/constants/test-ids.constants';
+	} from '$lib/constants/analytics.constants';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
+	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import {
@@ -23,7 +26,11 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import { getCampaignState, isEndedCampaign } from '$lib/utils/rewards.utils';
+	import {
+		getCampaignState,
+		isEndedCampaign,
+		normalizeNetworkMultiplier
+	} from '$lib/utils/rewards.utils';
 
 	interface Props {
 		reward: RewardCampaignDescription;
@@ -31,22 +38,41 @@
 
 	let { reward }: Props = $props();
 
-	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
+	const { getCampaignEligibility, store } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
-	const campaignEligibility = getCampaignEligibility(reward.id);
+	const loadEligibilityReport = async () => {
+		if (isNullish($authIdentity)) {
+			return;
+		}
+
+		const campaignEligibilities = await getCampaignEligibilities({ identity: $authIdentity });
+		store.setCampaignEligibilities(campaignEligibilities);
+	};
+
+	onMount(loadEligibilityReport);
+
+	const campaignEligibility = $derived(getCampaignEligibility(reward.id));
 	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
+	const networkBonusMultiplier = $derived(
+		normalizeNetworkMultiplier(
+			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
+		)
+	);
 	const criteria = $derived($campaignEligibility?.criteria ?? []);
 	const hasEnded = $derived(isEndedCampaign(reward.endDate));
 
 	let amountOfRewards = $state(0);
 </script>
 
-<Modal testId={REWARDS_MODAL} on:nnsClose={modalStore.close}>
-	<span slot="title" class="text-center text-xl">
-		{resolveText({ i18n: $i18n, path: reward.title })}
-	</span>
+<Modal onClose={modalStore.close} testId={REWARDS_MODAL}>
+	{#snippet title()}
+		<span class="text-center text-xl">
+			{resolveText({ i18n: $i18n, path: reward.title })}
+		</span>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<RewardBanner {reward} />
@@ -56,12 +82,10 @@
 			<Hr spacing="md" />
 		{/if}
 
-		<div class="flex w-full justify-between text-lg font-semibold">
-			<span class="inline-flex">{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span>
-			<span>
-				<RewardDateBadge date={reward.endDate} testId={REWARDS_MODAL_DATE_BADGE} />
-			</span>
-		</div>
+		<span class="inline-flex text-lg font-semibold"
+			>{resolveText({ i18n: $i18n, path: reward.participateTitle })}</span
+		>
+
 		<p class="my-3"><Html text={resolveText({ i18n: $i18n, path: reward.description })} /></p>
 
 		{#if !hasEnded}
@@ -92,7 +116,13 @@
 			{#if criteria.length > 0}
 				<Hr spacing="md" />
 
-				<RewardsRequirements {criteria} {isEligible} />
+				<RewardsRequirements
+					{criteria}
+					{hasNetworkBonus}
+					{isEligible}
+					{networkBonusMultiplier}
+					{reward}
+				/>
 			{/if}
 		{/if}
 

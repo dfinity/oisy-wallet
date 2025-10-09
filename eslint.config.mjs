@@ -14,6 +14,25 @@ export default [
 	},
 
 	{
+		files: ['src/frontend/src/**/*'],
+		rules: {
+			'local-rules/no-relative-imports': 'error'
+		}
+	},
+
+	{
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "Literal[raw='0n']",
+					message: 'Use the shared constant `ZERO` instead of `0n`.'
+				}
+			]
+		}
+	},
+
+	{
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',

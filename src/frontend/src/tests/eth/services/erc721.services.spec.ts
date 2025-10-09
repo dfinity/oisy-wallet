@@ -1,10 +1,9 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { InfuraErc721Provider } from '$eth/providers/infura-erc721.providers';
-import * as infuraProvidersModule from '$eth/providers/infura-erc721.providers';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { loadCustomTokens, loadErc721Tokens } from '$eth/services/erc721.services';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721Metadata } from '$eth/types/erc721';
@@ -12,10 +11,10 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokensErc721 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -24,50 +23,7 @@ vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
 
-vi.mock('$eth/providers/infura-erc721.providers', () => ({
-	infuraErc721Providers: vi.fn()
-}));
-
 describe('erc721.services', () => {
-	const mockCustomTokens: CustomToken[] = [
-		{
-			version: toNullable(1n),
-			enabled: true,
-			token: {
-				Erc721: {
-					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		},
-		{
-			version: toNullable(2n),
-			enabled: true,
-			token: {
-				Erc721: {
-					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase()
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		},
-		{
-			version: toNullable(),
-			enabled: false,
-			token: {
-				Erc721: {
-					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		}
-	];
-
 	const mockMetadata1: Erc721Metadata = {
 		name: 'Test Token',
 		symbol: 'MetadataTTK',
@@ -128,7 +84,7 @@ describe('erc721.services', () => {
 	];
 
 	describe('loadErc721Tokens', () => {
-		let infuraProvidersSpy: MockInstance;
+		let alchemyProvidersSpy: MockInstance;
 
 		const mockMetadata = vi.fn();
 
@@ -142,17 +98,17 @@ describe('erc721.services', () => {
 
 			erc721CustomTokensStore.resetAll();
 
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc721);
 
-			mockMetadata.mockImplementation(({ address }) =>
+			mockMetadata.mockImplementation((address) =>
 				address === mockEthAddress ? mockMetadata1 : mockMetadata2
 			);
 
-			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc721Providers');
+			alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 
-			infuraProvidersSpy.mockReturnValue({
-				metadata: mockMetadata
-			} as unknown as InfuraErc721Provider);
+			alchemyProvidersSpy.mockReturnValue({
+				getContractMetadata: mockMetadata
+			} as unknown as AlchemyProvider);
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -187,7 +143,7 @@ describe('erc721.services', () => {
 	});
 
 	describe('loadCustomTokens', () => {
-		let infuraProvidersSpy: MockInstance;
+		let alchemyProvidersSpy: MockInstance;
 
 		const mockMetadata = vi.fn();
 
@@ -200,19 +156,19 @@ describe('erc721.services', () => {
 
 			erc721CustomTokensStore.resetAll();
 
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc721);
 
-			mockMetadata.mockImplementation(({ address }) => {
-				assert('Erc721' in mockCustomTokens[0].token);
+			mockMetadata.mockImplementation((address) => {
+				assert('Erc721' in mockCustomTokensErc721[0].token);
 
 				return address === mockEthAddress ? mockMetadata1 : mockMetadata2;
 			});
 
-			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc721Providers');
+			alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 
-			infuraProvidersSpy.mockReturnValue({
-				metadata: mockMetadata
-			} as unknown as InfuraErc721Provider);
+			alchemyProvidersSpy.mockReturnValue({
+				getContractMetadata: mockMetadata
+			} as unknown as AlchemyProvider);
 		});
 
 		it('should load custom ERC721 tokens', async () => {
@@ -236,40 +192,39 @@ describe('erc721.services', () => {
 			await loadCustomTokens({ identity: mockIdentity });
 
 			// query + update
-			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokens.length * 2);
+			expect(mockMetadata).toHaveBeenCalledTimes(mockCustomTokensErc721.length * 2);
 
 			// query
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc721.forEach(({ token }, index) => {
 				assert('Erc721' in token);
 
 				const {
 					Erc721: { token_address }
 				} = token;
 
-				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
+				expect(alchemyProvidersSpy).toHaveBeenNthCalledWith(
 					index + 1,
 					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1, {
-					address: token_address
-				});
+				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1, token_address);
 			});
 
 			// update
-			mockCustomTokens.forEach(({ token }, index) => {
+			mockCustomTokensErc721.forEach(({ token }, index) => {
 				assert('Erc721' in token);
 
 				const {
 					Erc721: { token_address }
 				} = token;
 
-				expect(infuraProvidersSpy).toHaveBeenNthCalledWith(
-					index + 1 + mockCustomTokens.length,
+				expect(alchemyProvidersSpy).toHaveBeenNthCalledWith(
+					index + 1 + mockCustomTokensErc721.length,
 					expectedCustomTokens[index].data.network.id
 				);
-				expect(mockMetadata).toHaveBeenNthCalledWith(index + 1 + mockCustomTokens.length, {
-					address: token_address
-				});
+				expect(mockMetadata).toHaveBeenNthCalledWith(
+					index + 1 + mockCustomTokensErc721.length,
+					token_address
+				);
 			});
 		});
 
@@ -321,7 +276,7 @@ describe('erc721.services', () => {
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
-				mockCustomTokens,
+				mockCustomTokensErc721,
 				expect.any(Object)
 			);
 		});

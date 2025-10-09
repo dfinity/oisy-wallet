@@ -1,0 +1,77 @@
+<script lang="ts">
+	import { IconExpandMore } from '@dfinity/gix-components';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import NftList from '$lib/components/nfts/NftList.svelte';
+	import EmptyState from '$lib/components/ui/EmptyState.svelte';
+	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		MODAL_TOKENS_LIST_CONTEXT_KEY,
+		type ModalTokensListContext
+	} from '$lib/stores/modal-tokens-list.store';
+	import { nftStore } from '$lib/stores/nft.store';
+	import type { Nft } from '$lib/types/nft';
+	import { isDesktop } from '$lib/utils/device.utils';
+	import { findNftsByNetwork } from '$lib/utils/nfts.utils';
+
+	interface Props {
+		onSelect: (nft: Nft) => void;
+		onSelectNetwork: () => void;
+	}
+
+	let { onSelect, onSelectNetwork }: Props = $props();
+
+	const { filterNetwork } = getContext<ModalTokensListContext>(MODAL_TOKENS_LIST_CONTEXT_KEY);
+
+	let filter = $state('');
+
+	const filteredByInput: Nft[] = $derived(
+		($nftStore ?? []).filter(
+			(nft) => nft?.name?.toLowerCase().includes(filter.toLowerCase()) ?? false
+		)
+	);
+	const filtered: Nft[] = $derived(
+		nonNullish($filterNetwork)
+			? findNftsByNetwork({ nfts: filteredByInput, networkId: $filterNetwork.id })
+			: filteredByInput
+	);
+
+	let noNftsMatch = $derived(filtered.length === 0);
+</script>
+
+<div>
+	<div class="input-field condensed mb-4 flex-1">
+		<InputSearch
+			autofocus={isDesktop()}
+			placeholder={$i18n.send.placeholder.search_nfts}
+			showResetButton={notEmptyString(filter)}
+			bind:filter
+		/>
+	</div>
+
+	<div class="flex items-center">
+		<button
+			class="dropdown-button h-[2.2rem] rounded-lg border border-solid border-primary"
+			aria-label={$filterNetwork?.name ?? $i18n.networks.chain_fusion}
+			onclick={onSelectNetwork}
+		>
+			<span class="font-medium">{$filterNetwork?.name ?? $i18n.networks.chain_fusion}</span>
+			<IconExpandMore size="24" />
+		</button>
+	</div>
+</div>
+
+{#if noNftsMatch}
+	<EmptyState
+		description={$i18n.send.text.no_nfts_found_desc}
+		title={$i18n.send.text.no_nfts_found}
+	/>
+{:else}
+	<NftList nfts={filtered}>
+		{#snippet nftListItem({ nft })}
+			<NftCard {nft} {onSelect} type="card-selectable" />
+		{/snippet}
+	</NftList>
+{/if}

@@ -1,4 +1,5 @@
 import type { SolInstruction, SolParsedSystemInstruction } from '$sol/types/sol-instructions';
+import { assertNever } from '@dfinity/utils';
 import {
 	SystemInstruction,
 	identifySystemInstruction,
@@ -20,7 +21,7 @@ import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@s
 
 export const parseSolSystemInstruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedSystemInstruction => {
+): SolParsedSystemInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
@@ -91,7 +92,8 @@ export const parseSolSystemInstruction = (
 				...parseUpgradeNonceAccountInstruction(instruction),
 				instructionType: SystemInstruction.UpgradeNonceAccount
 			};
-		default:
-			return instruction;
+		default: {
+			assertNever(decodedInstruction, `Unknown Solana System instruction: ${decodedInstruction}`);
+		}
 	}
 };

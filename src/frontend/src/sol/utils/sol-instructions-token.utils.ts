@@ -1,4 +1,5 @@
 import type { SolInstruction, SolParsedTokenInstruction } from '$sol/types/sol-instructions';
+import { assertNever } from '@dfinity/utils';
 import {
 	TokenInstruction,
 	identifyTokenInstruction,
@@ -32,7 +33,7 @@ import { assertIsInstructionWithAccounts, assertIsInstructionWithData } from '@s
 
 export const parseSolTokenInstruction = (
 	instruction: SolInstruction
-): SolInstruction | SolParsedTokenInstruction => {
+): SolParsedTokenInstruction => {
 	assertIsInstructionWithData<Uint8Array>(instruction);
 	assertIsInstructionWithAccounts(instruction);
 
@@ -163,7 +164,8 @@ export const parseSolTokenInstruction = (
 				...parseUiAmountToAmountInstruction(instruction),
 				instructionType: TokenInstruction.UiAmountToAmount
 			};
-		default:
-			return instruction;
+		default: {
+			assertNever(decodedInstruction, `Unknown Solana Token instruction: ${decodedInstruction}`);
+		}
 	}
 };

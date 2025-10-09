@@ -17,7 +17,7 @@ import {
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
-import { loading } from '$lib/stores/loader.store';
+import { initialLoading } from '$lib/stores/loader.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import {
@@ -29,7 +29,7 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import {
 	mockNetworksSettings,
@@ -96,25 +96,7 @@ vi.mock('$sol/services/sol-address.services', () => ({
 	})
 }));
 
-vi.mock('$eth/services/erc20.services', () => ({
-	loadErc20Tokens: vi.fn(() => Promise.resolve())
-}));
-
-vi.mock('$eth/services/erc721.services', () => ({
-	loadErc721Tokens: vi.fn(() => Promise.resolve())
-}));
-
-vi.mock('$icp/services/icrc.services', () => ({
-	loadIcrcTokens: vi.fn(() => Promise.resolve())
-}));
-
-vi.mock('$sol/services/spl.services', () => ({
-	loadSplTokens: vi.fn(() => Promise.resolve())
-}));
-
 describe('Loader', () => {
-	const mockSnippet = createMockSnippet('Mock Snippet');
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 
@@ -130,7 +112,7 @@ describe('Loader', () => {
 		await waitFor(() => {
 			expect(queryByTestId(LOADER_MODAL)).toBeNull();
 
-			expect(get(loading)).toBeFalsy();
+			expect(get(initialLoading)).toBeFalsy();
 		});
 	});
 
@@ -144,7 +126,7 @@ describe('Loader', () => {
 
 	describe('while loading', () => {
 		beforeEach(() => {
-			loading.set(true);
+			initialLoading.set(true);
 			vi.mocked(initLoader).mockImplementationOnce(
 				async ({ setProgressModal }: { setProgressModal: (value: boolean) => void }) => {
 					setProgressModal(true);
@@ -273,7 +255,6 @@ describe('Loader', () => {
 							...mockUserSettings,
 							networks: {
 								...mockNetworksSettings,
-								testnets: { show_testnets: true },
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }]
@@ -310,7 +291,6 @@ describe('Loader', () => {
 							...mockUserSettings,
 							networks: {
 								...mockNetworksSettings,
-								testnets: { show_testnets: true },
 								networks: [
 									[{ BitcoinMainnet: null }, { enabled: false, is_testnet: false }],
 									[{ SolanaMainnet: null }, { enabled: true, is_testnet: false }],

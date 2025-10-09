@@ -46,10 +46,10 @@ export const mapErc20Icon = (symbol: string): string | undefined => {
 	}
 };
 
+export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';
+
 export const isTokenEthereumUserToken = (token: Token): token is EthereumUserToken =>
-	(token.standard === 'ethereum' || token.standard === 'erc20') && 'enabled' in token;
+	(token.standard === 'ethereum' || isTokenErc20(token)) && 'enabled' in token;
 
 export const isTokenErc20UserToken = (token: Token): token is Erc20UserToken =>
-	token.standard === 'erc20' && 'enabled' in token && 'address' in token && 'exchange' in token;
-
-export const isTokenErc20 = (token: Token): token is Erc20Token => token.standard === 'erc20';
+	isTokenErc20(token) && 'enabled' in token && 'address' in token && 'exchange' in token;

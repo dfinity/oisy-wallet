@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { debounce, isNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, onMount } from 'svelte';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext, onDestroy, onMount, type Snippet, untrack } from 'svelte';
 	import { ETH_FEE_DATA_LISTENER_DELAY } from '$eth/constants/eth.constants';
 	import { infuraProviders } from '$eth/providers/infura.providers';
 	import { InfuraGasRest } from '$eth/rest/infura.rest';
@@ -11,9 +11,15 @@
 		getEthFeeData,
 		type GetFeeData
 	} from '$eth/services/fee.services';
+	import {
+		encodeErc1155SafeTransfer,
+		encodeErc721SafeTransfer
+	} from '$eth/services/nft-send.services';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
+	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
+	import { isCollectionErc721 } from '$eth/utils/erc721.utils';
 	import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 	import { isSupportedErc20TwinTokenId } from '$eth/utils/token.utils';
 	import { isSupportedEvmNativeTokenId } from '$evm/utils/native-token.utils';
@@ -28,21 +34,40 @@
 	import { toastsError, toastsHide } from '$lib/stores/toasts.store';
 	import type { WebSocketListener } from '$lib/types/listener';
 	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token, TokenId } from '$lib/types/token';
 	import { maxBigInt } from '$lib/utils/bigint.utils';
 	import { isNetworkICP } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 
-	export let observe: boolean;
-	export let destination = '';
-	export let amount: OptionAmount = undefined;
-	export let data: string | undefined = undefined;
-	export let sourceNetwork: EthereumNetwork;
-	export let targetNetwork: Network | undefined = undefined;
-	export let nativeEthereumToken: Token;
-	export let sendToken: Token;
-	export let sendTokenId: TokenId;
+	interface Props {
+		observe: boolean;
+		destination?: string;
+		amount?: OptionAmount;
+		data?: string;
+		sourceNetwork: EthereumNetwork;
+		targetNetwork?: Network;
+		nativeEthereumToken: Token;
+		sendToken: Token;
+		sendTokenId: TokenId;
+		sendNft?: Nft;
+		children: Snippet;
+	}
+
+	let {
+		observe,
+		destination = '',
+		amount,
+		data,
+		sourceNetwork,
+		targetNetwork,
+		nativeEthereumToken,
+		sendToken,
+		sendTokenId,
+		sendNft,
+		children
+	}: Props = $props();
 
 	const { feeStore }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
@@ -50,7 +75,7 @@
 	 * Updating and fetching fee
 	 */
 
-	let listener: WebSocketListener | undefined = undefined;
+	let listener = $state<WebSocketListener | undefined>();
 
 	const errorMsgs: symbol[] = [];
 
@@ -65,7 +90,7 @@
 				from: mapAddressStartsWith0x($ethAddress)
 			};
 
-			const { getFeeData, safeEstimateGas } = infuraProviders(sendToken.network.id);
+			const { getFeeData, safeEstimateGas, estimateGas } = infuraProviders(sendToken.network.id);
 
 			const { maxFeePerGas, maxPriorityFeePerGas, ...feeDataRest } = await getFeeData();
 
@@ -91,25 +116,32 @@
 				)
 			});
 
-			// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
-			// Otherwise, we would need to emulate the data that are provided to the minter contract address.
-			const estimatedGas = isNetworkICP(targetNetwork)
-				? undefined
-				: await safeEstimateGas({ ...params, data });
-
 			if (isSupportedEthTokenId(sendTokenId) || isSupportedEvmNativeTokenId(sendTokenId)) {
+				// We estimate gas only when it is not a ck-conversion (i.e. target network is not ICP).
+				// Otherwise, we would need to emulate the data that are provided to the minter contract address.
+				const estimatedGas = isNetworkICP(targetNetwork)
+					? undefined
+					: await safeEstimateGas({
+							...params,
+							...(nonNullish(amount)
+								? { value: parseToken({ value: amount.toString(), unitName: sendToken.decimals }) }
+								: {}),
+							data
+						});
+
 				feeStore.setFee({
 					...feeData,
 					gas: maxBigInt(feeDataGas, estimatedGas)
 				});
+
 				return;
 			}
 
 			const erc20GasFeeParams = {
+				...params,
 				contract: sendToken as Erc20Token,
 				amount: parseToken({ value: `${amount ?? '1'}`, unitName: sendToken.decimals }),
-				sourceNetwork,
-				...params
+				sourceNetwork
 			};
 
 			if (isSupportedErc20TwinTokenId(sendTokenId)) {
@@ -121,6 +153,36 @@
 							$ckEthMinterInfoStore?.[nativeEthereumToken.id]
 						)
 					})
+				});
+				return;
+			}
+
+			if (nonNullish(sendNft)) {
+				const { to, data } = isCollectionErc721(sendNft.collection)
+					? encodeErc721SafeTransfer({
+							contractAddress: sendNft.collection.address,
+							from: $ethAddress,
+							to: destination,
+							tokenId: sendNft.id
+						})
+					: isCollectionErc1155(sendNft.collection)
+						? encodeErc1155SafeTransfer({
+								contractAddress: sendNft.collection.address,
+								from: $ethAddress,
+								to: destination,
+								tokenId: sendNft.id,
+								amount: 1n,
+								data: '0x'
+							})
+						: (() => {
+								throw new Error($i18n.send.error.fee_calc_unsupported_standard);
+							})();
+
+				const estimatedGasNft = await estimateGas({ from: $ethAddress, to, data });
+
+				feeStore.setFee({
+					...feeData,
+					gas: estimatedGasNft
 				});
 				return;
 			}
@@ -150,10 +212,13 @@
 
 	const debounceUpdateFeeData = debounce(updateFeeData);
 
-	let listenerCallbackTimer: NodeJS.Timeout | undefined;
-	const obverseFeeData = async (watch: boolean) => {
+	let listenerCallbackTimer = $state<NodeJS.Timeout | undefined>();
+
+	let isDestroyed = $state(false);
+
+	const obverseFeeData = async () => {
 		const throttledCallback = () => {
-			// to make sure we don't update UI too often, we listen to the WS updates max. once per 10 secs
+			// to make sure we don't update the UI too often, we listen to the WS updates max. once per 10 secs
 			if (isNullish(listenerCallbackTimer)) {
 				listenerCallbackTimer = setTimeout(() => {
 					debounceUpdateFeeData();
@@ -165,11 +230,18 @@
 
 		await listener?.disconnect();
 
-		if (!watch) {
+		// There could be a race condition where the component is destroyed before the listener is connected.
+		// However, the flow still connects the listener and updates the UI.
+		if (isDestroyed) {
+			return;
+		}
+
+		if (!observe) {
 			return;
 		}
 
 		debounceUpdateFeeData();
+
 		listener = initMinedTransactionsListener({
 			// eslint-disable-next-line require-await
 			callback: async () => throttledCallback(),
@@ -180,8 +252,10 @@
 	onMount(() => {
 		observe && debounceUpdateFeeData();
 	});
-	onDestroy(() => {
-		listener?.disconnect();
+
+	onDestroy(async () => {
+		isDestroyed = true;
+		await listener?.disconnect();
 		listener = undefined;
 		clearTimeout(listenerCallbackTimer);
 	});
@@ -190,17 +264,24 @@
 	 * Observe input properties for erc20
 	 */
 
-	$: obverseFeeData(observe);
+	$effect(() => {
+		[observe];
 
-	$: ($ckEthMinterInfoStore,
-		(() => {
-			observe && debounceUpdateFeeData();
-		})());
+		untrack(() => obverseFeeData());
+	});
+
+	$effect(() => {
+		[$ckEthMinterInfoStore];
+
+		if (observe) {
+			untrack(() => debounceUpdateFeeData());
+		}
+	});
 
 	/**
-	 * Expose a call to evaluate, so that consumers can re-evaluate imperatively, for example, when the amount or destination is manually updated by the user.
+	 * Expose a call to evaluate so that consumers can re-evaluate imperatively, for example, when the user manually updates the amount or destination.
 	 */
 	export const triggerUpdateFee = () => debounceUpdateFeeData();
 </script>
 
-<slot />
+{@render children()}

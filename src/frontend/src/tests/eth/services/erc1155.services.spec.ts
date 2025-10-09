@@ -1,10 +1,9 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
 import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { SEPOLIA_PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { InfuraErc1155Provider } from '$eth/providers/infura-erc1155.providers';
-import * as infuraProvidersModule from '$eth/providers/infura-erc1155.providers';
+import type { AlchemyProvider } from '$eth/providers/alchemy.providers';
+import * as alchemyProvidersModule from '$eth/providers/alchemy.providers';
 import { loadCustomTokens, loadErc1155Tokens } from '$eth/services/erc1155.services';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
@@ -12,10 +11,10 @@ import { listCustomTokens } from '$lib/api/backend.api';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
+import { mockCustomTokensErc1155 } from '$tests/mocks/custom-tokens.mock';
 import { mockEthAddress, mockEthAddress2, mockEthAddress3 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
@@ -24,50 +23,7 @@ vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));
 
-vi.mock('$eth/providers/infura-erc1155.providers', () => ({
-	infuraErc1155Providers: vi.fn()
-}));
-
 describe('erc1155.services', () => {
-	const mockCustomTokens: CustomToken[] = [
-		{
-			version: toNullable(1n),
-			enabled: true,
-			token: {
-				Erc1155: {
-					chain_id: ETHEREUM_NETWORK.chainId,
-					token_address: mockEthAddress
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		},
-		{
-			version: toNullable(2n),
-			enabled: true,
-			token: {
-				Erc1155: {
-					chain_id: BASE_NETWORK.chainId,
-					token_address: mockEthAddress2.toUpperCase()
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		},
-		{
-			version: toNullable(),
-			enabled: false,
-			token: {
-				Erc1155: {
-					chain_id: POLYGON_AMOY_NETWORK.chainId,
-					token_address: mockEthAddress3
-				}
-			},
-			section: toNullable(),
-			allow_external_content_source: toNullable()
-		}
-	];
-
 	const mockMetadata1: Erc1155Metadata = {
 		name: 'Test Token',
 		symbol: 'MetadataTTK',
@@ -126,7 +82,7 @@ describe('erc1155.services', () => {
 	];
 
 	describe('loadErc1155Tokens', () => {
-		let infuraProvidersSpy: MockInstance;
+		let alchemyProvidersSpy: MockInstance;
 
 		const mockMetadata = vi.fn();
 
@@ -140,17 +96,17 @@ describe('erc1155.services', () => {
 
 			erc1155CustomTokensStore.resetAll();
 
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc1155);
 
-			mockMetadata.mockImplementation(({ address }) =>
+			mockMetadata.mockImplementation((address) =>
 				address === mockEthAddress ? mockMetadata1 : mockMetadata2
 			);
 
-			infuraProvidersSpy = vi.spyOn(infuraProvidersModule, 'infuraErc1155Providers');
+			alchemyProvidersSpy = vi.spyOn(alchemyProvidersModule, 'alchemyProviders');
 
-			infuraProvidersSpy.mockReturnValue({
-				metadata: mockMetadata
-			}) as unknown as InfuraErc1155Provider;
+			alchemyProvidersSpy.mockReturnValue({
+				getContractMetadata: mockMetadata
+			} as unknown as AlchemyProvider);
 		});
 
 		it('should save the custom tokens in the store', async () => {
@@ -187,7 +143,7 @@ describe('erc1155.services', () => {
 
 			erc1155CustomTokensStore.resetAll();
 
-			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokens);
+			vi.mocked(listCustomTokens).mockResolvedValue(mockCustomTokensErc1155);
 		});
 
 		it('should load custom ERC1155 tokens', async () => {
@@ -255,7 +211,7 @@ describe('erc1155.services', () => {
 			expect(idbKeyval.set).toHaveBeenNthCalledWith(
 				1,
 				mockIdentity.getPrincipal().toText(),
-				mockCustomTokens,
+				mockCustomTokensErc1155,
 				expect.any(Object)
 			);
 		});

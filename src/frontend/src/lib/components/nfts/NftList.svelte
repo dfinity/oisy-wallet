@@ -1,31 +1,36 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
-		title: string;
+		nftListItem: Snippet<[{ nft: Nft }]>;
+		title?: string;
 		icon?: Snippet;
 		nfts: Nft[];
-		hidden?: boolean;
-		spam?: boolean;
 		testId?: string;
+		asMainSection?: boolean;
 	}
 
-	let { title, icon, nfts, hidden, spam, testId }: Props = $props();
+	let { nftListItem, title, icon, nfts, testId, asMainSection = false }: Props = $props();
 </script>
 
-{#if nfts.length > 0}
-	<div data-tid={testId}>
+<div data-tid={testId}>
+	{#if nonNullish(title) && (nfts.length > 0 || asMainSection)}
 		<div class="mt-5 flex items-center gap-2">
 			{@render icon?.()}
 			<h5>{title}</h5>
 		</div>
+	{/if}
 
-		<div class="grid grid-cols-3 gap-3 gap-y-4 py-4">
-			{#each nfts as nft, index (`${String(nft.id)}-${index}`)}
-				<NftCard {hidden} {nft} {spam} />
+	{#if nfts.length > 0}
+		<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
+			{#each nfts as nft, index (`${nft.id}-${index}`)}
+				{@render nftListItem({ nft })}
 			{/each}
 		</div>
-	</div>
-{/if}
+	{:else if asMainSection}
+		<EmptyNftsList hideDescription />
+	{/if}
+</div>

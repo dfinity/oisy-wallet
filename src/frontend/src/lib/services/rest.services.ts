@@ -30,7 +30,7 @@ export const retry = async <Response, Error>({
 			}
 
 			await onRetry?.({ error: error as Error, retryCount });
-			console.warn(`Request attempt ${retryCount + 1} failed. Retrying...`);
+
 			return await executeRequest(retryCount + 1);
 		}
 	};

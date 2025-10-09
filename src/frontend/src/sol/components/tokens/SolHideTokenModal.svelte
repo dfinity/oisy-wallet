@@ -7,7 +7,7 @@
 	import {
 		HIDE_TOKEN_MODAL_ROUTE,
 		TRACK_COUNT_MANAGE_TOKENS_DISABLE_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -16,14 +16,18 @@
 	import { saveCustomTokens } from '$sol/services/spl-custom-tokens.services';
 	import type { SplCustomToken } from '$sol/types/spl-custom-token';
 
-	export let fromRoute: NavigationTarget | undefined;
+	interface Props {
+		fromRoute?: NavigationTarget;
+	}
 
-	let selectedToken: SplCustomToken;
+	let { fromRoute }: Props = $props();
+
+	let selectedToken = $state<SplCustomToken | undefined>();
 
 	// We must clone the reference to avoid the UI to rerender once we remove the token from the store.
 	onMount(() => (selectedToken = $token as SplCustomToken));
 
-	const assertHide = (): { valid: boolean } => {
+	const onAssertHide = (): { valid: boolean } => {
 		const contractAddress = selectedToken?.address;
 
 		if (isNullishOrEmpty(contractAddress)) {
@@ -36,7 +40,7 @@
 		return { valid: true };
 	};
 
-	const hideToken = async (params: { identity: Identity }) => {
+	const onHideToken = async (params: { identity: Identity }) => {
 		assertNonNullish(selectedToken);
 
 		trackEvent({
@@ -54,7 +58,7 @@
 	};
 
 	// UI gets updated automatically, resolve promise immediately
-	const updateUi = (): Promise<void> => Promise.resolve();
+	const onUpdateUi = (): Promise<void> => Promise.resolve();
 </script>
 
-<HideTokenModal {assertHide} {fromRoute} {hideToken} {updateUi} />
+<HideTokenModal {fromRoute} {onAssertHide} {onHideToken} {onUpdateUi} />

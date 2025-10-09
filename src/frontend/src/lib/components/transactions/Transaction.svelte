@@ -2,8 +2,9 @@
 	import { nonNullish } from '@dfinity/utils';
 	import type { Component, Snippet } from 'svelte';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
-	import Divider from '$lib/components/common/Divider.svelte';
+	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
+	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftLogo from '$lib/components/nfts/NftLogo.svelte';
 	import TokenLogo from '$lib/components/tokens/TokenLogo.svelte';
 	import TransactionStatusComponent from '$lib/components/transactions/TransactionStatus.svelte';
@@ -15,12 +16,11 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
-	import type { ContactUi } from '$lib/types/contact';
+	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
-	import { formatSecondsToDate } from '$lib/utils/format.utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { shortenWithMiddleEllipsis, formatSecondsToDate } from '$lib/utils/format.utils';
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -28,7 +28,7 @@
 	import { parseNftId } from '$lib/validation/nft.validation';
 
 	interface Props {
-		amount?: bigint;
+		displayAmount?: bigint;
 		type: TransactionType;
 		status: TransactionStatus;
 		timestamp?: number;
@@ -38,12 +38,13 @@
 		to?: string;
 		from?: string;
 		tokenId?: number;
-		children?: Snippet;
+		children: Snippet;
 		onClick?: () => void;
+		approveSpender?: string;
 	}
 
 	const {
-		amount: cardAmount,
+		displayAmount,
 		type,
 		status,
 		timestamp,
@@ -54,26 +55,33 @@
 		from,
 		tokenId,
 		children,
-		onClick
+		onClick,
+		approveSpender
 	}: Props = $props();
 
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
 
-	const contactAddress: string | undefined = $derived(
-		type === 'send' ? to : type === 'receive' ? from : undefined
+	const address: string | undefined = $derived(
+		type === 'send'
+			? to
+			: type === 'receive'
+				? from
+				: type === 'approve'
+					? approveSpender
+					: undefined
 	);
 
-	const contact: ContactUi | undefined = $derived(
-		nonNullish(contactAddress)
-			? getContactForAddress({ addressString: contactAddress, contactList: $contacts })
+	const contact = $derived(
+		nonNullish(address)
+			? getContactForAddress({ addressString: address, contactList: $contacts })
 			: undefined
 	);
 
-	const addressAlias: string | undefined = $derived(
-		filterAddressFromContact({ contact, address: contactAddress })?.label
-	);
+	const contactAddress = $derived(filterAddressFromContact({ contact, address }));
+
+	const network: Network | undefined = $derived(token.network);
 
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
@@ -83,18 +91,17 @@
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
-	<span class="block w-full rounded-xl px-3 py-2 hover:bg-brand-subtle-10">
-		<Card noMargin>
-			<span class="inline-block first-letter:capitalize">
-				{#if nonNullish(contact)}
-					{type === 'send'
-						? replacePlaceholders($i18n.transaction.text.sent_to, { $name: contact.name })
-						: replacePlaceholders($i18n.transaction.text.received_from, { $name: contact.name })}
-					{#if nonNullish(addressAlias) && addressAlias !== ''}
-						<span class="text-tertiary"><Divider />{addressAlias}</span>
-					{/if}
-				{:else}
-					{@render children?.()}
+	<span class="block w-full rounded-xl px-2 py-2 hover:bg-brand-subtle-10">
+		<Card noMargin withGap>
+			<span class="flex min-w-0 flex-1 basis-0 items-center gap-1">
+				<span class="truncate first-letter:capitalize">
+					{@render children()}
+				</span>
+
+				{#if nonNullish(network)}
+					<div class="shrink-0">
+						<NetworkLogo {network} testId="transaction-network" transparent />
+					</div>
 				{/if}
 			</span>
 
@@ -102,23 +109,31 @@
 				<div>
 					{#if iconType === 'token'}
 						{#if isTokenNonFungible(token) && nonNullish(nft)}
-							<NftLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} {nft} />
+							<NftLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								logoSize="md"
+								{nft}
+							/>
 						{:else}
-							<TokenLogo badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }} data={token} />
+							<TokenLogo
+								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
+								data={token}
+								logoSize="md"
+							/>
 						{/if}
 					{:else}
-						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} />
+						<RoundedIcon icon={cardIcon} opacity={iconWithOpacity} size="16" />
 					{/if}
 				</div>
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(cardAmount) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
 						<Amount
-							amount={cardAmount}
+							amount={displayAmount}
 							decimals={token.decimals}
 							formatPositiveAmount
 							symbol={getTokenDisplaySymbol(token)}
@@ -126,14 +141,48 @@
 					{/if}
 				{/if}
 			{/snippet}
+			{#snippet amountDescription()}
+				{#if nonNullish(timestamp)}
+					<span class="text-xs sm:text-sm" data-tid="receive-tokens-modal-transaction-timestamp">
+						{formatSecondsToDate({
+							seconds: Number(timestamp),
+							language: $currentLanguage,
+							formatOptions: {
+								hour: '2-digit',
+								minute: '2-digit',
+								hour12: false
+							},
+							timeOnly: true
+						})}
+					</span>
+				{/if}
+			{/snippet}
 
 			{#snippet description()}
-				<span data-tid="receive-tokens-modal-transaction-timestamp">
-					{#if nonNullish(timestamp)}
-						{formatSecondsToDate({ seconds: Number(timestamp), language: $currentLanguage })}
-					{/if}
+				<span
+					class="flex min-w-0 flex-col items-start items-center text-xs text-primary sm:flex-row sm:text-sm"
+				>
+					<span class="inline-flex min-w-0 items-center gap-1">
+						{#if type === 'send'}
+							<span class="shrink-0">{$i18n.transaction.text.to}</span>
+						{:else if type === 'receive'}
+							<span class="shrink-0">{$i18n.transaction.text.from}</span>
+						{:else if type === 'approve'}
+							<span class="shrink-0">{$i18n.transaction.text.for}</span>
+						{/if}
+
+						{#if nonNullish(contact)}
+							<ContactWithAvatar {contact} {contactAddress} />
+						{:else if nonNullish(address)}
+							<span class="max-w-38 inline-block flex min-w-0 flex-wrap items-center truncate">
+								{shortenWithMiddleEllipsis({ text: address })}
+							</span>
+						{/if}
+					</span>
+					<span class="truncate text-tertiary">
+						<TransactionStatusComponent {status} />
+					</span>
 				</span>
-				<TransactionStatusComponent {status} />
 			{/snippet}
 		</Card>
 	</span>

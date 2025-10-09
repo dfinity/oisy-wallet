@@ -38,10 +38,6 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('IcConvertTokenWizard', () => {
 	const sendAmount = 0.001;
 	const ckBtcToken = {
@@ -66,6 +62,14 @@ describe('IcConvertTokenWizard', () => {
 			[TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY, initTokenActionValidationErrorsContext()]
 		]);
 
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
+	const onDestination = vi.fn();
+	const onDestinationBack = vi.fn();
+	const onQRCodeScan = vi.fn();
+	const onQRCodeBack = vi.fn();
+
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -73,7 +77,14 @@ describe('IcConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext,
+		onDestination,
+		onDestinationBack,
+		onQRCodeBack,
+		onQRCodeScan
 	};
 	let sendSpy: MockInstance;
 

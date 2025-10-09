@@ -20,13 +20,33 @@ describe('AiAssistantToolResults', () => {
 
 	const extendedContacts = get(extendedAddressContacts);
 
-	it('renders show_contacts tool correctly', () => {
+	it('renders show_all_contacts tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
-						type: ToolResultType.SHOW_CONTACTS,
+						type: ToolResultType.SHOW_ALL_CONTACTS,
+						result: { contacts: Object.values(extendedContacts) }
+					}
+				]
+			}
+		});
+
+		expect(getByText(contacts[0].name)).toBeInTheDocument();
+	});
+
+	it('renders show_filtered_contacts tool correctly', () => {
+		const { getByText } = render(AiAssistantToolResults, {
+			props: {
+				isLastItem: false,
+				loading: false,
+				onSendMessage: () => Promise.resolve(),
+				results: [
+					{
+						type: ToolResultType.SHOW_FILTERED_CONTACTS,
 						result: { contacts: Object.values(extendedContacts) }
 					}
 				]
@@ -39,11 +59,19 @@ describe('AiAssistantToolResults', () => {
 	it('renders review_send_tokens tool correctly', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				results: [
 					{
 						type: ToolResultType.REVIEW_SEND_TOKENS,
-						result: { amount: 1, token: ICP_TOKEN, address: mockPrincipalText }
+						result: {
+							amount: 1,
+							token: ICP_TOKEN,
+							address: mockPrincipalText,
+							sendCompleted: false,
+							id: 'test'
+						}
 					}
 				]
 			}
@@ -53,9 +81,34 @@ describe('AiAssistantToolResults', () => {
 		expect(getByText(mockPrincipalText)).toBeInTheDocument();
 	});
 
+	it('renders show_balance tool correctly', () => {
+		const { getByText } = render(AiAssistantToolResults, {
+			props: {
+				isLastItem: false,
+				loading: false,
+				onSendMessage: () => Promise.resolve(),
+				results: [
+					{
+						type: ToolResultType.SHOW_BALANCE,
+						result: {
+							mainCard: {
+								token: { ...ICP_TOKEN, usdBalance: 1000, balance: 500n },
+								totalUsdBalance: 1000
+							}
+						}
+					}
+				]
+			}
+		});
+
+		expect(getByText('$1,000.00')).toBeInTheDocument();
+	});
+
 	it('does not render unknown tool', () => {
 		const { getByText } = render(AiAssistantToolResults, {
 			props: {
+				isLastItem: false,
+				loading: false,
 				onSendMessage: () => Promise.resolve(),
 				// @ts-expect-error Testing unknown tool type
 				results: [{ type: 'unknown_tool', result: contacts } as ToolResult]

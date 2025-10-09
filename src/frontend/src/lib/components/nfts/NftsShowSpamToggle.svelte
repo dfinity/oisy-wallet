@@ -9,6 +9,6 @@
 	const toggleShow = () => showSpamStore.set({ key: 'show-spam', value: { enabled: !checked } });
 </script>
 
-<svelte:window on:oisyToggleShowSpam={toggleShow} />
+<svelte:window onoisyToggleShowSpam={toggleShow} />
 
 <Toggle ariaLabel={$i18n.nfts.text.show_spam} {checked} on:nnsToggle={toggleShow} />

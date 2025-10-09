@@ -1,5 +1,5 @@
 import BgImg from '$lib/components/ui/BgImg.svelte';
-import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 const IMG = 'https://example.com/pic.png';
@@ -117,10 +117,10 @@ describe('BgImg', () => {
 		const { getByTestId } = render(BgImg, {
 			ariaLabel: 'with-children',
 			imageUrl: IMG,
-			children: createMockSnippet('children')
+			children: mockSnippet
 		});
 
-		expect(getByTestId('children')).toBeInTheDocument();
+		expect(getByTestId(mockSnippetTestId)).toBeInTheDocument();
 	});
 
 	it('omits box-shadow when shadow="none"', () => {

@@ -34,7 +34,9 @@ describe('NftImageConsentPreference', () => {
 	it('renders media_enabled text when hasConsent=true', () => {
 		getAllowMediaSpy.mockReturnValue(true);
 
-		const { getByText } = render(NftImageConsentPreference, { props: { nft: nftAzuki } });
+		const { getByText } = render(NftImageConsentPreference, {
+			props: { collection: nftAzuki.collection }
+		});
 
 		expect(getByText(get(i18n).nfts.text.media_enabled)).toBeInTheDocument();
 	});
@@ -42,7 +44,9 @@ describe('NftImageConsentPreference', () => {
 	it('renders media_disabled text when hasConsent=false', () => {
 		getAllowMediaSpy.mockReturnValue(false);
 
-		const { getByText } = render(NftImageConsentPreference, { props: { nft: nftAzuki } });
+		const { getByText } = render(NftImageConsentPreference, {
+			props: { collection: nftAzuki.collection }
+		});
 
 		expect(getByText(get(i18n).nfts.text.media_disabled)).toBeInTheDocument();
 	});
@@ -50,9 +54,11 @@ describe('NftImageConsentPreference', () => {
 	it('opens the consent modal with the collection when clicking the button', async () => {
 		getAllowMediaSpy.mockReturnValue(true);
 
-		const { getByRole } = render(NftImageConsentPreference, { props: { nft: nftAzuki } });
+		const { getByRole } = render(NftImageConsentPreference, {
+			props: { collection: nftAzuki.collection }
+		});
 
-		const btn = getByRole('button', { name: get(i18n).nfts.text.review_preference });
+		const btn = getByRole('button', { name: get(i18n).nfts.alt.review_preference });
 		assertNonNullish(btn);
 
 		await fireEvent.click(btn);

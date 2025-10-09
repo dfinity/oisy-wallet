@@ -10,7 +10,7 @@
 		TRACK_HELP_GOT_CONFUSED,
 		TRACK_HELP_LOST_INTERNET_IDENTITY,
 		TRACK_HELP_OTHER
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		HELP_AUTH_GOT_CONFUSED_BUTTON,
 		HELP_AUTH_IMAGE_BANNER,
@@ -21,8 +21,12 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	export let onLostIdentity: () => void;
-	export let onOther: () => void;
+	interface Props {
+		onLostIdentity: () => void;
+		onOther: () => void;
+	}
+
+	let { onLostIdentity, onOther }: Props = $props();
 </script>
 
 <div class="grid gap-6">

@@ -1,12 +1,16 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/Button.svelte';
-	import { TRACK_HELP_SIGNING_IN } from '$lib/constants/analytics.contants';
+	import { TRACK_HELP_SIGNING_IN } from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	export let styleClass = '';
-	export let testId: string | undefined = undefined;
+	interface Props {
+		styleClass?: string;
+		testId?: string;
+	}
+
+	let { styleClass = '', testId }: Props = $props();
 
 	const modalId = Symbol();
 

@@ -19,7 +19,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { QrCodeType } from '$lib/enums/qr-code-types';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getNewReward } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -39,7 +38,6 @@
 	let code: string | undefined = $state();
 	const generateCode = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -87,14 +85,14 @@
 
 <svelte:window on:visibilitychange={onVisibilityChange} />
 
-<Modal on:nnsClose={modalStore.close}>
-	<svelte:fragment slot="title"
-		><span class="text-xl"
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<span class="text-xl"
 			>{codeType === QrCodeType.VIP
 				? $i18n.vip.invitation.text.title
 				: $i18n.vip.invitation.text.binance_title}</span
 		>
-	</svelte:fragment>
+	{/snippet}
 
 	<ContentWithToolbar>
 		<div class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-full rounded-xl bg-white p-4">

@@ -16,7 +16,7 @@ import {
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import IcTransactionsCkBTCListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
+import IcTransactionsCkBtcListeners from '$icp/components/transactions/IcTransactionsCkBtcListeners.svelte';
 import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 import type { IcCkToken } from '$icp/types/ic-token';
 import type { OptionToken } from '$lib/types/token';
@@ -83,7 +83,7 @@ describe('mapListeners', () => {
 		const tokens: OptionToken[] = [mockCkBtcToken, mockCkEthToken, mockCkUSDCToken];
 
 		expect(mapListeners(tokens)).toEqual([
-			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
+			{ token: mockCkBtcToken, listener: IcTransactionsCkBtcListeners },
 			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
 			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners }
 		]);
@@ -100,7 +100,7 @@ describe('mapListeners', () => {
 		];
 
 		expect(mapListeners(tokens)).toEqual([
-			{ token: mockCkBtcToken, listener: IcTransactionsCkBTCListeners },
+			{ token: mockCkBtcToken, listener: IcTransactionsCkBtcListeners },
 			{ token: mockCkEthToken, listener: IcTransactionsCkEthereumListeners },
 			{ token: mockCkUSDCToken, listener: IcTransactionsCkEthereumListeners }
 		]);

@@ -23,11 +23,13 @@
 
 	let { content, address, addressToken, network, copyAriaLabel }: Props = $props();
 
-	const title = $derived(isNullish($pageToken) ? network.name : addressToken?.symbol);
+	const titleStr = $derived(isNullish($pageToken) ? network.name : addressToken?.symbol);
 </script>
 
-<Modal on:nnsClose={modalStore.close}>
-	<ReceiveTitle slot="title" {title} />
+<Modal onClose={modalStore.close}>
+	{#snippet title()}
+		<ReceiveTitle title={titleStr} />
+	{/snippet}
 
 	<ContentWithToolbar>
 		<ReceiveAddressQrCodeContent

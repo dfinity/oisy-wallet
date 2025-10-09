@@ -1,17 +1,13 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { slide } from 'svelte/transition';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import Info from '$icp/components/info/Info.svelte';
 	import IcTokenModal from '$icp/components/tokens/IcTokenModal.svelte';
+	import IcIndexCanisterStatus from '$icp/components/transactions/IcIndexCanisterStatus.svelte';
 	import IcNoIndexPlaceholder from '$icp/components/transactions/IcNoIndexPlaceholder.svelte';
-	import IcTransaction from '$icp/components/transactions/IcTransaction.svelte';
 	import IcTransactionModal from '$icp/components/transactions/IcTransactionModal.svelte';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusBalance.svelte';
-	import IcTransactionsBtcListeners from '$icp/components/transactions/IcTransactionsCkBTCListeners.svelte';
-	import IcTransactionsCkEthereumListeners from '$icp/components/transactions/IcTransactionsCkEthereumListeners.svelte';
 	import IcTransactionsEthereumStatus from '$icp/components/transactions/IcTransactionsEthereumStatus.svelte';
-	import IcTransactionsNoListener from '$icp/components/transactions/IcTransactionsNoListener.svelte';
 	import IcTransactionsScroll from '$icp/components/transactions/IcTransactionsScroll.svelte';
 	import IcTransactionsSkeletons from '$icp/components/transactions/IcTransactionsSkeletons.svelte';
 	import {
@@ -24,42 +20,42 @@
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { hasIndexCanister } from '$icp/validation/ic-token.validation';
-	import { ckEthereumNativeToken } from '$icp-eth/derived/cketh.derived';
+	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
 	import Header from '$lib/components/ui/Header.svelte';
+	import { TRANSACTIONS_DATE_GROUP_PREFIX } from '$lib/constants/test-ids.constants';
 	import { modalIcToken, modalIcTokenData, modalIcTransaction } from '$lib/derived/modal.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken, Token } from '$lib/types/token';
-	import { mapTransactionModalData } from '$lib/utils/transaction.utils';
+	import type { OptionToken } from '$lib/types/token';
+	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 
-	let ckEthereum: boolean;
-	$: ckEthereum = $tokenCkEthLedger || $tokenCkErc20Ledger;
+	let ckEthereum = $derived($tokenCkEthLedger || $tokenCkErc20Ledger);
 
-	let additionalListener:
-		| typeof IcTransactionsBtcListeners
-		| typeof IcTransactionsCkEthereumListeners
-		| typeof IcTransactionsNoListener;
-	$: additionalListener = $tokenCkBtcLedger
-		? IcTransactionsBtcListeners
-		: ckEthereum
-			? IcTransactionsCkEthereumListeners
-			: IcTransactionsNoListener;
+	let selectedTransaction = $state<IcTransactionUi | undefined>();
+	let selectedToken = $state<OptionToken>();
+	$effect(() => {
+		({ transaction: selectedTransaction, token: selectedToken } =
+			mapTransactionModalData<IcTransactionUi>({
+				$modalOpen: $modalIcTransaction,
+				$modalStore
+			}));
+	});
 
-	let selectedTransaction: IcTransactionUi | undefined;
-	let selectedToken: OptionToken;
-	$: ({ transaction: selectedTransaction, token: selectedToken } =
-		mapTransactionModalData<IcTransactionUi>({
-			$modalOpen: $modalIcTransaction,
-			$modalStore
-		}));
+	let noTransactions = $derived(
+		nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null
+	);
 
-	let noTransactions = false;
-	$: noTransactions = nonNullish($pageToken) && $icTransactionsStore?.[$pageToken.id] === null;
+	let token = $derived($pageToken ?? ICP_TOKEN);
 
-	let token: Token;
-	$: token = $pageToken ?? ICP_TOKEN;
+	let groupedTransactions = $derived(
+		nonNullish($icTransactions)
+			? groupTransactionsByDate(
+					$icTransactions.map(({ data: transaction }) => ({ component: 'ic', transaction, token }))
+				)
+			: undefined
+	);
 </script>
 
 <Info />
@@ -68,38 +64,38 @@
 	{$i18n.transactions.text.title}
 
 	{#snippet end()}
-		{#if $tokenCkBtcLedger}
-			<IcTransactionsBitcoinStatus />
-		{:else if ckEthereum}
-			<IcTransactionsEthereumStatus />
-		{/if}
+		<IcIndexCanisterStatus>
+			{#if $tokenCkBtcLedger}
+				<IcTransactionsBitcoinStatus />
+			{:else if ckEthereum}
+				<IcTransactionsEthereumStatus />
+			{/if}
+		</IcIndexCanisterStatus>
 	{/snippet}
 </Header>
 
 <IcTransactionsSkeletons>
-	<svelte:component
-		this={additionalListener}
-		ckEthereumNativeToken={$ckEthereumNativeToken}
-		{token}
-	>
-		{#if $icTransactions.length > 0}
-			<IcTransactionsScroll {token}>
-				{#each $icTransactions as transaction, index (`${transaction.data.id}-${index}`)}
-					<li in:slide={{ duration: transaction.data.status === 'pending' ? 250 : 0 }}>
-						<IcTransaction {token} transaction={transaction.data} />
-					</li>
+	{#if $icTransactions.length > 0}
+		<IcTransactionsScroll {token}>
+			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`${TRANSACTIONS_DATE_GROUP_PREFIX}-ic-${index}`}
+						{transactions}
+					/>
 				{/each}
-			</IcTransactionsScroll>
-		{/if}
+			{/if}
+		</IcTransactionsScroll>
+	{/if}
 
-		{#if noTransactions}
-			<IcNoIndexPlaceholder
-				placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
-			/>
-		{:else if $icTransactions.length === 0}
-			<TransactionsPlaceholder />
-		{/if}
-	</svelte:component>
+	{#if noTransactions}
+		<IcNoIndexPlaceholder
+			placeholderType={hasIndexCanister($tokenAsIcToken) ? 'not-working' : 'missing'}
+		/>
+	{:else if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+		<TransactionsPlaceholder />
+	{/if}
 </IcTransactionsSkeletons>
 
 {#if $modalIcTransaction && nonNullish(selectedTransaction)}

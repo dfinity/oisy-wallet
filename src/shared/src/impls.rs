@@ -16,6 +16,10 @@ use crate::{
             Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
+        experimental_feature::{
+            ExperimentalFeatureSettingsMap, ExperimentalFeaturesSettings,
+            UpdateExperimentalFeaturesSettingsError,
+        },
         network::{
             NetworkSettingsMap, NetworksSettings, SetTestnetsSettingsError,
             UpdateNetworksSettingsError,
@@ -209,6 +213,7 @@ impl StoredUserProfile {
                     hidden_dapp_ids: Vec::new(),
                 },
             },
+            experimental_features: ExperimentalFeaturesSettings::default(),
         };
         let agreements = Agreements::default();
         let credentials: BTreeMap<CredentialType, UserCredential> = BTreeMap::new();
@@ -416,6 +421,43 @@ impl StoredUserProfile {
         };
         new_profile.updated_timestamp = now;
 
+        Ok(new_profile)
+    }
+
+    /// Returns a copy with experimental features settings map set to the specified value.
+    ///
+    /// # Errors
+    ///
+    /// Will return Err if there is a version mismatch.
+    pub fn with_experimental_features_settings(
+        &self,
+        profile_version: Option<Version>,
+        now: Timestamp,
+        experimental_features: ExperimentalFeatureSettingsMap,
+    ) -> Result<StoredUserProfile, UpdateExperimentalFeaturesSettingsError> {
+        if profile_version != self.version {
+            return Err(UpdateExperimentalFeaturesSettingsError::VersionMismatch);
+        }
+
+        let settings = self.settings.clone().unwrap_or_default();
+
+        let new_experimental_features = {
+            let mut merged = settings.experimental_features.experimental_features.clone();
+            merged.extend(experimental_features); // Updates existing keys and inserts new ones
+            merged
+        };
+
+        if settings.experimental_features.experimental_features == new_experimental_features {
+            return Ok(self.clone());
+        }
+
+        let mut new_profile = self.with_incremented_version();
+        new_profile.settings = {
+            let mut settings = new_profile.settings.unwrap_or_default();
+            settings.experimental_features.experimental_features = new_experimental_features;
+            Some(settings)
+        };
+        new_profile.updated_timestamp = now;
         Ok(new_profile)
     }
 }

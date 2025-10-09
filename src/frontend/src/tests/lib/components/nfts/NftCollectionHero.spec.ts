@@ -21,7 +21,8 @@ describe('NftCollectionHero', () => {
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
-		network: POLYGON_MAINNET_NETWORK
+		network: POLYGON_MAINNET_NETWORK,
+		description: 'Some descriptive text'
 	};
 
 	beforeAll(() => {
@@ -29,7 +30,7 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should render the collection data', async () => {
-		const { container, getByText } = render(NftCollectionHero, {
+		const { container, getByText, getAllByText } = render(NftCollectionHero, {
 			props: {
 				nfts: mockNftollectionUi.nfts,
 				token: mockToken
@@ -38,9 +39,15 @@ describe('NftCollectionHero', () => {
 
 		assertNonNullish(mockNftollectionUi.collection.name);
 
-		const name: HTMLElement | null = getByText(mockToken.name);
+		const names: HTMLElement[] | null = getAllByText(mockToken.name);
 
-		expect(name).toBeInTheDocument();
+		names.forEach((n) => {
+			expect(n).toBeInTheDocument();
+		});
+
+		const description: HTMLElement | null = getByText(mockToken.description as string);
+
+		expect(description).toBeInTheDocument();
 
 		const standard: HTMLElement | null = getByText(mockToken.standard);
 

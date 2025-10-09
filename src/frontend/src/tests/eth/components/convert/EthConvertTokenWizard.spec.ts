@@ -45,10 +45,6 @@ import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()
 }));
@@ -87,6 +83,9 @@ describe('EthConvertTokenWizard', () => {
 		maxFeePerGas: 100n,
 		maxPriorityFeePerGas: 100n
 	};
+	const onBack = vi.fn();
+	const onClose = vi.fn();
+	const onNext = vi.fn();
 	const props = {
 		currentStep: {
 			name: WizardStepsConvert.REVIEW,
@@ -94,7 +93,10 @@ describe('EthConvertTokenWizard', () => {
 		},
 		convertProgressStep: ProgressStepsConvert.INITIALIZATION,
 		sendAmount,
-		receiveAmount: sendAmount
+		receiveAmount: sendAmount,
+		onBack,
+		onClose,
+		onNext
 	};
 
 	let sendSpy: MockInstance;
@@ -134,7 +136,9 @@ describe('EthConvertTokenWizard', () => {
 			.mockImplementation(() => readable(address));
 
 	const mockEthereumToken = (token = ETHEREUM_TOKEN) =>
-		vi.spyOn(tokensDerived, 'ethereumToken', 'get').mockImplementation(() => readable(token));
+		vi
+			.spyOn(tokensDerived, 'nativeEthereumTokenWithFallback', 'get')
+			.mockImplementation(() => readable(token));
 
 	const clickConvertButton = async (container: HTMLElement) => {
 		const convertButtonSelector = '[data-tid="convert-review-button-next"]';

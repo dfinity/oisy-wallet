@@ -3,6 +3,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
@@ -95,13 +96,13 @@
 	);
 
 	const isEmptyList = $derived.by(() => {
-		const hasNoCollections = nftCollections.length === 0;
+		const hasOnlyEmptyCollections = nftCollections.filter((c) => c.nfts.length > 0).length === 0;
 		const hasCommonCollections = commonCollections.length > 0;
 		const hasVisibleSpamCollections = $showSpam && spamCollections.length > 0;
 		const hasVisibleHiddenCollections = $showHidden && hiddenCollections.length > 0;
 
 		return (
-			hasNoCollections ||
+			hasOnlyEmptyCollections ||
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});
@@ -113,6 +114,7 @@
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList
+				asMainSection
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -145,20 +147,35 @@
 	{:else if isEmptyList}
 		<EmptyNftsList />
 	{:else}
-		<NftList nfts={commonNfts} testId={NFT_LIST_COMMON} title={$i18n.nfts.text.all_assets} />
+		<NftList
+			asMainSection
+			nfts={commonNfts}
+			testId={NFT_LIST_COMMON}
+			title={$i18n.nfts.text.all_assets}
+		>
+			{#snippet nftListItem({ nft })}
+				<NftCard {nft} type="card-link" />
+			{/snippet}
+		</NftList>
 
 		{#if $showHidden}
-			<NftList hidden nfts={hiddenNfts} testId={NFT_LIST_HIDDEN} title={$i18n.nfts.text.hidden}>
+			<NftList nfts={hiddenNfts} testId={NFT_LIST_HIDDEN} title={$i18n.nfts.text.hidden}>
 				{#snippet icon()}
 					<IconEyeOff size="24" />
+				{/snippet}
+				{#snippet nftListItem({ nft })}
+					<NftCard isHidden {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
 
 		{#if $showSpam}
-			<NftList nfts={spamNfts} spam testId={NFT_LIST_SPAM} title={$i18n.nfts.text.spam}>
+			<NftList nfts={spamNfts} testId={NFT_LIST_SPAM} title={$i18n.nfts.text.spam}>
 				{#snippet icon()}
 					<IconAlertOctagon size="24" />
+				{/snippet}
+				{#snippet nftListItem({ nft })}
+					<NftCard isSpam {nft} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}

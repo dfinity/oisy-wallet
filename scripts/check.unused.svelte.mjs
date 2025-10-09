@@ -13,7 +13,8 @@ const DATA_DIR_PATH = resolve(process.cwd(), DATA_DIR);
 
 const REMOVE_FILES = process.argv.includes('--remove-files');
 
-const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'] });
+// TODO: Check if the svelte files in the tests are actually used, and used ONLY in the tests
+const findSvelteFiles = (dir) => findFiles({ dir, extensions: ['.svelte'], ignoreDirs: ['tests'] });
 
 const findSearchFiles = (dir) => findFiles({ dir, extensions: ['.svelte', '.ts'] });
 
@@ -39,7 +40,7 @@ const main = async () => {
 			const fileBasename = basename(potentialUnusedFile);
 
 			if (content.includes(`./${fileBasename}`)) {
-				console.log(`${RED}Relative import of '${fileBasename}' found in '${file}${NC}'`);
+				console.log(`${RED}Relative import of '${fileBasename}' found in ${file}${NC}`);
 				return false;
 			}
 
@@ -69,6 +70,8 @@ const main = async () => {
 			);
 			await main();
 		}
+
+		console.log();
 
 		process.exit(1);
 	}

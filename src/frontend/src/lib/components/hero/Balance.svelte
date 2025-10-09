@@ -12,7 +12,7 @@
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { OptionTokenUi } from '$lib/types/token';
+	import type { OptionTokenUi } from '$lib/types/token-ui';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -28,7 +28,7 @@
 
 <span class="flex flex-col gap-1">
 	<output
-		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold lg:text-5xl"
+		class="inline-flex w-full flex-row justify-center gap-3 break-words text-4xl font-bold md:text-5xl"
 		data-tid={AMOUNT_DATA}
 	>
 		{#if nonNullish(token?.balance) && nonNullish(token?.symbol)}

@@ -1,6 +1,7 @@
 import { agreementsData } from '$env/agreements.env';
+import type { EnvAgreements } from '$env/types/env-agreements';
 import { userAgreementsData } from '$lib/derived/user-profile.derived';
-import type { AgreementData, UserAgreements } from '$lib/types/user-agreements';
+import type { AgreementData, AgreementsToAccept, UserAgreements } from '$lib/types/user-agreements';
 import { mapUserAgreement } from '$lib/utils/agreements.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
@@ -12,22 +13,23 @@ export const userAgreements: Readable<UserAgreements> = derived(
 
 		if (nonNullish(agreements)) {
 			return {
-				licenseAgreement: mapUserAgreement(agreements.license_agreement),
+				termsOfUse: mapUserAgreement(agreements.terms_of_use),
 				privacyPolicy: mapUserAgreement(agreements.privacy_policy),
-				termsOfUse: mapUserAgreement(agreements.terms_of_use)
+				licenseAgreement: mapUserAgreement(agreements.license_agreement)
 			};
 		}
 
 		const nullishAgreement: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		return {
-			licenseAgreement: nullishAgreement,
+			termsOfUse: nullishAgreement,
 			privacyPolicy: nullishAgreement,
-			termsOfUse: nullishAgreement
+			licenseAgreement: nullishAgreement
 		};
 	}
 );
@@ -38,6 +40,11 @@ export const noAgreementVisionedYet: Readable<boolean> = derived(
 		isNullish($userAgreements.licenseAgreement.accepted) &&
 		isNullish($userAgreements.privacyPolicy.accepted) &&
 		isNullish($userAgreements.termsOfUse.accepted)
+);
+
+export const atLeastOneAgreementVisioned: Readable<boolean> = derived(
+	[noAgreementVisionedYet],
+	([$noAgreementVisionedYet]) => !$noAgreementVisionedYet
 );
 
 export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
@@ -54,7 +61,8 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 						[key]: {
 							accepted: undefined,
 							lastAcceptedTimestamp: undefined,
-							lastUpdatedTimestamp: undefined
+							lastUpdatedTimestamp: undefined,
+							textSha256: undefined
 						}
 					};
 				}
@@ -71,6 +79,18 @@ export const outdatedAgreements: Readable<Partial<UserAgreements>> = derived(
 
 				return outdatedAcc;
 			},
+			{}
+		)
+);
+
+export const agreementsToAccept: Readable<AgreementsToAccept> = derived(
+	[outdatedAgreements],
+	([$outdatedAgreements]) =>
+		Object.keys($outdatedAgreements).reduce<AgreementsToAccept>(
+			(acc, agreementType) => ({
+				...acc,
+				[agreementType as keyof EnvAgreements]: true
+			}),
 			{}
 		)
 );

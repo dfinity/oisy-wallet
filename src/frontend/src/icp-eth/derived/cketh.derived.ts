@@ -2,7 +2,7 @@ import { ERC20_TWIN_TOKENS_IDS } from '$env/tokens/tokens.erc20.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
-import { ethereumTokenId } from '$eth/derived/token.derived';
+import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -75,7 +75,7 @@ export const ckEthereumNativeTokenEnabledNetwork: Readable<EthereumNetwork | und
  * The contract helper used to convert ETH -> ckETH.
  */
 export const ckEthHelperContractAddress: Readable<OptionEthAddress> = derived(
-	[ckEthMinterInfoStore, ethereumTokenId],
+	[ckEthMinterInfoStore, nativeEthereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkEthHelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
 );
@@ -84,7 +84,7 @@ export const ckEthHelperContractAddress: Readable<OptionEthAddress> = derived(
  * The contract helper used to convert Erc20 -> ckErc20.
  */
 export const ckErc20HelperContractAddress: Readable<OptionEthAddress> = derived(
-	[ckEthMinterInfoStore, ethereumTokenId],
+	[ckEthMinterInfoStore, nativeEthereumTokenId],
 	([$ckEthMinterInfoStore, $ethereumTokenId]) =>
 		toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[$ethereumTokenId])
 );

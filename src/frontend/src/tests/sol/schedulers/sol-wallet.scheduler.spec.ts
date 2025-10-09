@@ -1,7 +1,7 @@
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
+import * as authClientApi from '$lib/api/auth-client.api';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import type { PostMessageDataRequestSol } from '$lib/types/post-message';
-import * as authUtils from '$lib/utils/auth.utils';
 import * as solanaApi from '$sol/api/solana.api';
 import { SolWalletScheduler } from '$sol/schedulers/sol-wallet.scheduler';
 import * as solSignaturesServices from '$sol/services/sol-signatures.services';
@@ -99,7 +99,7 @@ describe('sol-wallet.scheduler', () => {
 			.spyOn(solSignaturesServices, 'getSolTransactions')
 			.mockResolvedValue(mockSolTransactions);
 
-		vi.spyOn(authUtils, 'loadIdentity').mockResolvedValue(mockIdentity);
+		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
 	});
 
 	afterEach(() => {

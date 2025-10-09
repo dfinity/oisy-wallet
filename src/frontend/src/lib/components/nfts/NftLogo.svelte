@@ -3,7 +3,10 @@
 	import type { Component } from 'svelte';
 	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
+	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
+	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
+	import { logoSizes } from '$lib/constants/components.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { LogoSize } from '$lib/types/components';
 	import type { Nft } from '$lib/types/nft';
@@ -36,16 +39,20 @@
 	} = $derived(nft);
 </script>
 
-<div class="relative">
-	<Logo
-		alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
-		circle={false}
-		{color}
-		{ring}
-		size={logoSize}
-		src={imageUrl ?? noNftImage}
-		{testId}
-	/>
+<div class="bg-primary/80 relative rounded-xl">
+	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
+		<NftImageConsent {nft} type="nft-logo">
+			<Logo
+				alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
+				circle={false}
+				{color}
+				{ring}
+				size={logoSize}
+				src={imageUrl ?? noNftImage}
+				{testId}
+			/>
+		</NftImageConsent>
+	</div>
 
 	{#if nonNullish(badge) && badge?.type === 'network'}
 		<div
@@ -57,12 +64,14 @@
 			<NetworkLogo {color} {network} testId={`network-${badgeTestId}`} />
 		</div>
 	{:else if nonNullish(badge) && badge?.type === 'icon'}
-		<div
-			class="absolute -bottom-1 -right-1 h-6 w-6 items-center justify-center rounded-full bg-brand-tertiary p-1 text-primary-inverted"
-			aria-label={badge.ariaLabel}
-			data-tid={`icon-${badgeTestId}`}
-		>
-			<badge.icon size="16" />
-		</div>
+		<RoundedIcon
+			ariaLabel={badge.ariaLabel}
+			icon={badge.icon}
+			paddingClass="p-1"
+			positionClass="absolute"
+			size="12"
+			styleClass="-bottom-1 -right-1"
+			testId={`icon-${badgeTestId}`}
+		/>
 	{/if}
 </div>

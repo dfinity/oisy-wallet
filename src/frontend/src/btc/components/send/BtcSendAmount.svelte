@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcAmountAssertionError } from '$btc/types/btc-send';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
@@ -16,14 +16,17 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let amount: OptionAmount = undefined;
-	export let amountError: BtcAmountAssertionError | undefined;
+	interface Props {
+		amount: OptionAmount;
+		amountError?: BtcAmountAssertionError;
+		onTokensList: () => void;
+	}
 
-	const dispatch = createEventDispatcher();
+	let { amount = $bindable(), amountError = $bindable(), onTokensList }: Props = $props();
 
-	let exchangeValueUnit: DisplayUnit = 'usd';
-	let inputUnit: DisplayUnit;
-	$: inputUnit = exchangeValueUnit === 'token' ? 'usd' : 'token';
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
+
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 
 	const { sendBalance, sendToken, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -53,19 +56,17 @@
 <div class="mb-4">
 	<TokenInput
 		autofocus={nonNullish($sendToken)}
-		customErrorValidate={customValidate}
 		displayUnit={inputUnit}
 		exchangeRate={$sendTokenExchangeRate}
+		onClick={onTokensList}
+		onCustomErrorValidate={customValidate}
 		token={$sendToken}
 		bind:amount
 		bind:error={amountError}
-		on:click={() => {
-			dispatch('icTokensList');
-		}}
 	>
-		<span slot="title">{$i18n.core.text.amount}</span>
+		{#snippet title()}{$i18n.core.text.amount}{/snippet}
 
-		<svelte:fragment slot="amount-info">
+		{#snippet amountInfo()}
 			{#if nonNullish($sendToken)}
 				<div class="text-tertiary">
 					<TokenInputAmountExchange
@@ -76,9 +77,9 @@
 					/>
 				</div>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 
-		<svelte:fragment slot="balance">
+		{#snippet balance()}
 			{#if nonNullish($sendToken)}
 				<MaxBalanceButton
 					balance={$sendBalance}
@@ -87,6 +88,6 @@
 					bind:amount
 				/>
 			{/if}
-		</svelte:fragment>
+		{/snippet}
 	</TokenInput>
 </div>

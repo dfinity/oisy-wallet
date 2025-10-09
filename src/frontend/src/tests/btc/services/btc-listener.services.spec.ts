@@ -1,11 +1,12 @@
 import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services';
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
-import type { BtcTransactionUi } from '$btc/types/btc';
+import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { ZERO } from '$lib/constants/app.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockBtcTransactionUi } from '$tests/mocks/btc-transactions.mock';
+import { mockBtcTransactionUi } from '$tests/mocks/blockchain-transactions.mock';
 import { jsonReplacer } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -35,7 +36,12 @@ vi.mock('$lib/derived/auth.derived', () => ({
 describe('btc-listener', () => {
 	const tokenId: TokenId = parseTokenId('testTokenId');
 
-	const mockBalance = 1000n;
+	const mockBalance: BtcWalletBalance = {
+		confirmed: 1000n,
+		unconfirmed: ZERO,
+		locked: ZERO,
+		total: 1000n
+	};
 
 	const mockTransactions = [mockBtcTransactionUi, mockBtcTransactionUi];
 
@@ -50,7 +56,7 @@ describe('btc-listener', () => {
 		transactions = mockTransactions,
 		certified = false
 	}: {
-		balance?: bigint | null;
+		balance?: BtcWalletBalance | null;
 		transactions?: BtcTransactionUi[];
 		certified?: boolean;
 	}): BtcPostMessageDataResponseWallet => ({
@@ -71,27 +77,27 @@ describe('btc-listener', () => {
 	});
 
 	describe('syncWallet', () => {
-		it('should set the balance in balancesStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should set the balance in balancesStore', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
 
 			const balance = get(balancesStore);
 
 			expect(balance?.[tokenId]).toEqual({
-				data: mockBalance,
+				data: mockBalance.confirmed,
 				certified: false
 			});
 		});
 
-		it('should set the transactions in btcTransactionsStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should set the transactions in btcTransactionsStore', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
 
 			const transactions = get(btcTransactionsStore);
 
 			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(mockTransactions));
 		});
 
-		it('should prepend the transactions in btcTransactionsStore', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should prepend the transactions in btcTransactionsStore', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
 
 			const transactionsToPrepend = [...mockTransactions, ...mockTransactions];
 
@@ -100,15 +106,15 @@ describe('btc-listener', () => {
 				certified: false
 			});
 
-			await syncWallet({ data: mockMorePostMessage, tokenId });
+			syncWallet({ data: mockMorePostMessage, tokenId });
 
 			const transactions = get(btcTransactionsStore);
 
 			expect(transactions?.[tokenId]).toEqual(mockCertifiedTransactions(transactionsToPrepend));
 		});
 
-		it('should reset balanceStore if balance is empty', async () => {
-			await syncWallet({
+		it('should reset balanceStore if balance is empty', () => {
+			syncWallet({
 				data: mockPostMessage({ balance: null, certified: false }),
 				tokenId
 			});
@@ -120,8 +126,8 @@ describe('btc-listener', () => {
 	});
 
 	describe('syncWalletError', () => {
-		it('should reset balanceStore and btcTransactionsStore on error', async () => {
-			await syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
+		it('should reset balanceStore and btcTransactionsStore on error', () => {
+			syncWallet({ data: mockPostMessage({ certified: false }), tokenId });
 
 			syncWalletError({ error: 'test', tokenId, hideToast: true });
 

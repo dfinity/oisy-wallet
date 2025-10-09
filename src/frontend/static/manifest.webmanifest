@@ -2,7 +2,7 @@
 	"name": "{{OISY_NAME}}",
 	"short_name": "{{OISY_NAME}}",
 	"start_url": ".",
-	"display": "standalone",
+	"display": "browser",
 	"theme_color": "#FFFFFF",
 	"background_color": "#FFFFFF",
 	"description": "{{OISY_ONELINER}}",
@@ -36,7 +36,7 @@
 	"shortcuts": [
 		{
 			"name": "Ethereum",
-			"url": "/",
+			"url": "/?network=ETH",
 			"icons": [{ "src": "/icons/eth.png", "type": "image/png", "sizes": "192x192" }]
 		},
 		{

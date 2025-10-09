@@ -1,23 +1,29 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
-import type { AlchemyProviderContracts } from '$eth/types/alchemy-contract';
+import type {
+	AlchemyProviderContract,
+	AlchemyProviderContracts
+} from '$eth/types/alchemy-contract';
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
-import type { Erc1155ContractAddress } from '$eth/types/erc1155';
-import type { Erc721ContractAddress } from '$eth/types/erc721';
+import type { Erc1155Metadata } from '$eth/types/erc1155';
+import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { OwnedContract, OwnedNft } from '$lib/types/nft';
+import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	Alchemy,
 	AlchemySubscription,
+	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
 	type Network
@@ -31,11 +37,11 @@ const configs: Record<NetworkId, AlchemyConfig> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyConfig>>(
-	(acc, { id, providers: { alchemy } }) => ({
+	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
 		...acc,
 		[id]: {
 			apiKey: ALCHEMY_API_KEY,
-			network: alchemy
+			network: alchemyDeprecated
 		}
 	}),
 	{}
@@ -117,17 +123,21 @@ export const initPendingTransactionsListener = ({
 };
 
 export class AlchemyProvider {
-	private readonly provider: Alchemy;
+	/**
+	 * TODO: Remove this class in favor of the new provider when we remove completely alchemy-sdk
+	 * @deprecated This approach works for now but does not align with the new architectural requirements.
+	 */
+	private readonly deprecatedProvider: Alchemy;
 
 	constructor(private readonly network: Network) {
-		this.provider = new Alchemy({
+		this.deprecatedProvider = new Alchemy({
 			apiKey: ALCHEMY_API_KEY,
 			network: this.network
 		});
 	}
 
 	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
-		const transaction = await this.provider.core.getTransaction(hash);
+		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
 
 		if (isNullish(transaction)) {
 			return transaction;
@@ -145,27 +155,76 @@ export class AlchemyProvider {
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-nf-ts-for-owner-v-3
-	getNftIdsForOwner = async ({
+	getNftsByOwner = async ({
 		address,
-		contractAddress
+		tokens
 	}: {
 		address: EthAddress;
-		contractAddress: Erc721ContractAddress['address'] | Erc1155ContractAddress['address'];
-	}): Promise<OwnedNft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.provider.nft.getNftsForOwner(address, {
-			contractAddresses: [contractAddress],
-			omitMetadata: true
-		});
+		tokens: NonFungibleToken[];
+	}): Promise<Nft[]> => {
+		const result: AlchemyProviderOwnedNfts = await this.deprecatedProvider.nft.getNftsForOwner(
+			address,
+			{
+				contractAddresses: tokens.map((token) => token.address),
+				omitMetadata: false,
+				orderBy: NftOrdering.TRANSFERTIME
+			}
+		);
 
-		return result.ownedNfts.map((ownedNft) => ({
-			id: parseNftId(parseInt(ownedNft.tokenId)),
-			balance: Number(ownedNft.balance)
-		}));
+		return result.ownedNfts.reduce<Nft[]>((acc, ownedNft) => {
+			const {
+				raw: {
+					metadata: { attributes }
+				}
+			} = ownedNft;
+
+			const token = tokens.find(({ address, network: { id: networkId } }) =>
+				areAddressesEqual({
+					address1: address,
+					address2: ownedNft.contract.address,
+					networkId
+				})
+			);
+			if (isNullish(token)) {
+				return acc;
+			}
+
+			const mappedAttributes = nonNullish(attributes)
+				? attributes.map(({ trait_type: traitType, value }) => ({
+						traitType,
+						value: value.toString()
+					}))
+				: [];
+
+			const nft: Nft = {
+				id: parseNftId(parseInt(ownedNft.tokenId)),
+				...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
+				...(nonNullish(ownedNft.image?.originalUrl) && { imageUrl: ownedNft.image?.originalUrl }),
+				...(nonNullish(ownedNft.description) && { description: ownedNft.description }),
+				...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
+				...(nonNullish(ownedNft.balance) && { balance: Number(ownedNft.balance) }),
+				...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
+					acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
+				}),
+				collection: {
+					...mapTokenToCollection(token),
+					...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
+						bannerImageUrl: ownedNft.contract.openSeaMetadata?.bannerImageUrl
+					}),
+					...(nonNullish(ownedNft.contract.openSeaMetadata?.description) && {
+						description: ownedNft.contract.openSeaMetadata?.description
+					})
+				}
+			};
+
+			return [...acc, nft];
+		}, []);
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
 	getTokensForOwner = async (address: EthAddress): Promise<OwnedContract[]> => {
-		const result: AlchemyProviderContracts = await this.provider.nft.getContractsForOwner(address);
+		const result: AlchemyProviderContracts =
+			await this.deprecatedProvider.nft.getContractsForOwner(address);
 
 		return result.contracts.reduce<OwnedContract[]>((acc, ownedContract) => {
 			const tokenStandard =
@@ -188,13 +247,50 @@ export class AlchemyProvider {
 			return acc;
 		}, []);
 	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-contract-metadata-v-3
+	getContractMetadata = async (address: EthAddress): Promise<Erc1155Metadata | Erc721Metadata> => {
+		const result: AlchemyProviderContract =
+			await this.deprecatedProvider.nft.getContractMetadata(address);
+
+		const tokenStandard =
+			result.tokenType === 'ERC721'
+				? 'erc721'
+				: result.tokenType === 'ERC1155'
+					? 'erc1155'
+					: undefined;
+
+		if (isNullish(tokenStandard)) {
+			throw new Error('Invalid token standard');
+		}
+
+		const maybeName =
+			nonNullish(result.openSeaMetadata?.collectionName) &&
+			!result.openSeaMetadata?.collectionName.toLowerCase().includes('unidentified')
+				? result.openSeaMetadata?.collectionName
+				: nonNullish(result.name)
+					? result.name
+					: undefined;
+
+		return {
+			...(nonNullish(maybeName) && { name: maybeName }),
+			...(nonNullish(result.symbol) && { symbol: result.symbol }),
+			...(nonNullish(result.openSeaMetadata?.description) && {
+				description: result.openSeaMetadata.description
+			}),
+			decimals: 0
+		};
+	};
 }
 
 const providers: Record<NetworkId, AlchemyProvider> = [
 	...SUPPORTED_ETHEREUM_NETWORKS,
 	...SUPPORTED_EVM_NETWORKS
 ].reduce<Record<NetworkId, AlchemyProvider>>(
-	(acc, { id, providers: { alchemy } }) => ({ ...acc, [id]: new AlchemyProvider(alchemy) }),
+	(acc, { id, providers: { alchemy: _, alchemyDeprecated } }) => ({
+		...acc,
+		[id]: new AlchemyProvider(alchemyDeprecated)
+	}),
 	{}
 );
 

@@ -1,4 +1,4 @@
-import { ethereumTokenId } from '$eth/derived/token.derived';
+import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { ethTransactionsStore, type EthTransactionsData } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
@@ -7,7 +7,7 @@ import { ethAddress } from '$lib/derived/address.derived';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { tokens } from '$lib/derived/tokens.derived';
 import type { TokenId } from '$lib/types/token';
-import type { AnyTransactionUiWithToken } from '$lib/types/transaction';
+import type { AnyTransactionUiWithToken } from '$lib/types/transaction-ui';
 import type { KnownDestinations } from '$lib/types/transactions';
 import { getKnownDestinations } from '$lib/utils/transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -56,7 +56,7 @@ export const ethKnownDestinations: Readable<KnownDestinations> = derived(
 	[
 		ethTransactionsStore,
 		ckEthMinterInfoStore,
-		ethereumTokenId,
+		nativeEthereumTokenId,
 		ethAddress,
 		tokens,
 		tokenWithFallback

@@ -1,3 +1,4 @@
+import type { BitcoinNetwork as BackendBitcoinNetwork } from '$declarations/backend/backend.did';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
 import { SUPPORTED_ARBITRUM_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.arbitrum.env';
 import { SUPPORTED_BASE_NETWORK_IDS } from '$env/networks/networks-evm/networks.evm.base.env';
@@ -98,6 +99,22 @@ export const mapBitcoinNetworkToNetworkId = (network: BitcoinNetwork): NetworkId
 		regtest: BTC_REGTEST_NETWORK_ID
 	};
 	return reverseMapper[network];
+};
+
+/**
+ * Convert ckBTC BitcoinNetwork type to backend BitcoinNetwork variant type
+ */
+export const mapCkBtcBitcoinNetworkToBackendBitcoinNetwork = (
+	network: BitcoinNetwork
+): BackendBitcoinNetwork => {
+	switch (network) {
+		case 'mainnet':
+			return { mainnet: null };
+		case 'testnet':
+			return { testnet: null };
+		case 'regtest':
+			return { regtest: null };
+	}
 };
 
 export const showTokenFilteredBySelectedNetwork = ({

@@ -1,18 +1,19 @@
 <script lang="ts">
 	import { IconClose } from '@dfinity/gix-components';
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import AiAssistantActionButton from '$lib/components/ai-assistant/AiAssistantActionButton.svelte';
 	import AiAssistantForm from '$lib/components/ai-assistant/AiAssistantForm.svelte';
 	import AiAssistantMessages from '$lib/components/ai-assistant/AiAssistantMessages.svelte';
-	import IconOisy from '$lib/components/icons/IconOisy.svelte';
+	import IconAiAssistant from '$lib/components/icons/IconAiAssistant.svelte';
 	import IconRepeat from '$lib/components/icons/IconRepeat.svelte';
-	import IconSend from '$lib/components/icons/IconSend.svelte';
-	import IconlySend from '$lib/components/icons/iconly/IconlySend.svelte';
+	import IconSend from '$lib/components/icons/lucide/IconSend.svelte';
+	import IconUserSquare from '$lib/components/icons/lucide/IconUserSquare.svelte';
+	import IconWallet from '$lib/components/icons/lucide/IconWallet.svelte';
 	import {
 		AI_ASSISTANT_MESSAGE_FAILED_TO_BE_PARSED,
 		AI_ASSISTANT_MESSAGE_SENT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		aiAssistantLlmMessages,
 		aiAssistantChatMessages
@@ -20,7 +21,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { askLlm } from '$lib/services/ai-assistant.services';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ChatMessage } from '$lib/types/ai-assistant';
@@ -69,18 +69,19 @@
 		messageText,
 		context
 	}: {
-		messageText: string;
+		messageText?: string;
 		context?: string;
 	}) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
-		aiAssistantStore.appendMessage({
-			role: 'user',
-			data: { text: messageText, context }
-		});
+		if (notEmptyString(messageText)) {
+			aiAssistantStore.appendMessage({
+				role: 'user',
+				data: { text: messageText, context }
+			});
+		}
 
 		const requestStartTimestamp = Date.now();
 
@@ -103,7 +104,8 @@
 								tool
 							}
 						: {
-								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text
+								text: isNullishOrEmpty(text) ? $i18n.ai_assistant.errors.no_response : text,
+								...(isNullishOrEmpty(text) && { retryable: true })
 							}
 			});
 		} catch (err: unknown) {
@@ -112,7 +114,8 @@
 			aiAssistantStore.appendMessage({
 				role: 'assistant',
 				data: {
-					text: $i18n.ai_assistant.errors.unknown
+					text: $i18n.ai_assistant.errors.unknown,
+					retryable: true
 				}
 			});
 
@@ -123,6 +126,12 @@
 		}
 
 		loading = false;
+	};
+
+	const onRetry = async () => {
+		aiAssistantStore.removeLastMessage();
+
+		await onMessageSubmit();
 	};
 
 	const onMessageSubmit = async () => {
@@ -142,7 +151,7 @@
 	transition:fade
 >
 	<div class="border-b-1 flex items-center justify-between border-brand-subtle-10 px-4 py-2">
-		<IconOisy size="36" />
+		<IconAiAssistant />
 
 		<h5 class="mx-2 w-full">{replaceOisyPlaceholders($i18n.ai_assistant.text.title)}</h5>
 
@@ -186,7 +195,7 @@
 						title={$i18n.ai_assistant.text.action_button_contacts_title}
 					>
 						{#snippet icon()}
-							<IconSend />
+							<IconUserSquare />
 						{/snippet}
 					</AiAssistantActionButton>
 					<AiAssistantActionButton
@@ -199,14 +208,32 @@
 						title={$i18n.ai_assistant.text.action_button_send_tokens_title}
 					>
 						{#snippet icon()}
-							<IconlySend />
+							<IconSend size="24" />
+						{/snippet}
+					</AiAssistantActionButton>
+					<AiAssistantActionButton
+						onClick={() => {
+							sendMessage({
+								messageText: $i18n.ai_assistant.text.action_button_show_balance_prompt
+							});
+						}}
+						subtitle={$i18n.ai_assistant.text.action_button_show_balance_subtitle}
+						title={$i18n.ai_assistant.text.action_button_show_balance_title}
+					>
+						{#snippet icon()}
+							<IconWallet size="24" />
 						{/snippet}
 					</AiAssistantActionButton>
 				</div>
 			</div>
 		{:else}
 			<div in:fade>
-				<AiAssistantMessages {loading} messages={messagesToDisplay} onSendMessage={sendMessage} />
+				<AiAssistantMessages
+					{loading}
+					messages={messagesToDisplay}
+					{onRetry}
+					onSendMessage={sendMessage}
+				/>
 			</div>
 		{/if}
 	</div>

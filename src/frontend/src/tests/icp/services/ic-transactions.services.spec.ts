@@ -13,7 +13,7 @@ import {
 import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
-import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
 import * as analytics from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -178,7 +178,8 @@ describe('ic-transactions.services', () => {
 			incoming: true,
 			fromExplorerUrl: `${ICP_EXPLORER_URL}/account/${transaction.from}`,
 			toExplorerUrl: `${ICP_EXPLORER_URL}/account/${mockIdentity.getPrincipal().toString()}`,
-			txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${transaction.id}`
+			txExplorerUrl: `${ICP_EXPLORER_URL}/transaction/${transaction.id}`,
+			fee: 456n
 		}));
 
 		const mockCertifiedTransactions = mockTransactions.map((transaction) => ({

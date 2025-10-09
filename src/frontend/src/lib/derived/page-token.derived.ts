@@ -8,8 +8,12 @@ import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 import { icTokenIcrcCustomToken } from '$icp/utils/icrc.utils';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
+import { pageNft } from '$lib/derived/page-nft.derived';
 import { defaultFallbackToken } from '$lib/derived/token.derived';
+import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionToken, OptionTokenStandard, Token } from '$lib/types/token';
+import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 import { isIcrcTokenToggleEnabled } from '$lib/utils/token-toggle.utils';
 import { enabledSplTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -96,3 +100,15 @@ export const pageTokenToggleable: Readable<boolean> = derived([pageToken], ([$pa
 
 	return false;
 });
+
+export const pageNonFungibleToken: Readable<NonFungibleToken | undefined> = derived(
+	[pageNft, nonFungibleTokens],
+	([$pageNft, $nonFungibleTokens]) =>
+		nonNullish($pageNft) && nonNullish($pageNft.collection)
+			? findNonFungibleToken({
+					tokens: $nonFungibleTokens,
+					address: $pageNft.collection.address,
+					networkId: $pageNft.collection.network.id
+				})
+			: undefined
+);
