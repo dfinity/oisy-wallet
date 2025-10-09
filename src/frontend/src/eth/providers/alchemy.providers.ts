@@ -229,10 +229,7 @@ export class AlchemyProvider {
 			return nft;
 		});
 
-		const nfts = await Promise.all(nftPromises);
-
-		// Remove entries that are null because the token could not be found
-		return nfts.filter((nft): nft is Nft => nft !== null);
+		return (await Promise.all(nftPromises)).filter((nft): nft is Nft => nft !== null);
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
