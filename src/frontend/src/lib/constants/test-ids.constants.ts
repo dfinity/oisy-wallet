@@ -304,3 +304,6 @@ export const DATE_BADGE_ICON = 'date-badge-icon';
 
 // Confirmation modal
 export const CONFIRMATION_MODAL = 'confirmation-modal';
+
+// Stake
+export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
