@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
 			"zero_fee": "Miễn phí",
 			"total_fee": "Tổng phí",
-			"ata_fee": "Phí ATA"
+			"ata_fee": "Phí ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
@@ -1697,6 +1700,17 @@
 			"stablecoins_description": "Sắp ra mắt",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Phần thưởng OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

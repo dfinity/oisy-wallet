@@ -5,7 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NftNetworkSchema } from '$lib/schema/nft.schema';
+import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
@@ -18,6 +18,7 @@ import {
 	findRemovedNfts,
 	getAllowMediaForNft,
 	getEnabledNfts,
+	getMediaStatus,
 	getNftCollectionUi,
 	getUpdatedNfts,
 	mapTokenToCollection,
@@ -820,6 +821,79 @@ describe('nfts.utils', () => {
 			const result = getAllowMediaForNft(params);
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('getMediaStatus', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('returns OK for valid image under 1MB', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? '500000' : null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns INVALID_DATA for invalid URL', async () => {
+			const result = await getMediaStatus('not-a-url');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns INVALID_DATA when fetch throws', async () => {
+			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns INVALID_DATA when headers are missing', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: { get: () => null }
+			});
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? '100' : null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/video.mp4');
+
+			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+		});
+
+		it('returns FILESIZE_LIMIT_EXCEEDED when file size > 1MB', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/jpeg'
+							: h === 'Content-Length'
+								? (1024 * 1024 + 1).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/large.jpg');
+
+			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 		});
 	});
 });

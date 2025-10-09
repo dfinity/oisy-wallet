@@ -320,7 +320,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		const size = response.headers.get('Content-Length');
 
 		if (isNullish(type) || isNullish(size)) {
-			throw new Error('Invalid response headers');
+			return NftMediaStatusEnum.INVALID_DATA;
 		}
 
 		if (nonNullish(type) && !type.startsWith('image/')) {
@@ -331,7 +331,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			// 1MB
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
-	} catch (e: unknown) {
+	} catch (_: unknown) {
 		return NftMediaStatusEnum.INVALID_DATA;
 	}
 

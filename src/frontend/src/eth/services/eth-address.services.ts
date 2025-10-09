@@ -6,6 +6,7 @@ import {
 	updateIdbEthAddressLastUsage
 } from '$lib/api/idb-addresses.api';
 import { getEthAddress as getSignerEthAddress } from '$lib/api/signer.api';
+import { SIGNER_MASTER_PUB_KEY } from '$lib/constants/signer.constants';
 import { deriveEthAddress } from '$lib/ic-pub-key/src/cli';
 import {
 	certifyAddress,
@@ -19,16 +20,19 @@ import type { EthAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
-	if (FRONTEND_DERIVATION_ENABLED) {
+export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
+	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
 		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
-		return await deriveEthAddress(identity.getPrincipal().toString());
+		return await deriveEthAddress(
+			identity.getPrincipal().toString(),
+			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
+		);
 	}
 
 	return await getSignerEthAddress({
