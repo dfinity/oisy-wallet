@@ -10,4 +10,4 @@ type CreateAssetArguments = record {
 	headers : opt vec HeaderField;
 	enable_aliasing : opt bool;
 	allow_raw_access : opt bool
-};
+}
