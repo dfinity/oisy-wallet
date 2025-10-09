@@ -192,7 +192,6 @@
 		<EthConvertForm
 			{destination}
 			on:icNext={onNext}
-			on:icClose={onClose}
 			bind:sendAmount
 			bind:receiveAmount
 		>
