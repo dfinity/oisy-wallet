@@ -67,6 +67,7 @@ import {
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -286,9 +287,14 @@ const fetchSwapAmountsICP = async ({
 			})
 	]);
 
+	console.log({ settledResults });
+
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
-	const sourceTokenToDecimals = formatUnits(amount, sourceToken.decimals);
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
 
 	const trackEventBaseParams = {
 		sourceToken: sourceToken.symbol,
@@ -334,10 +340,10 @@ const fetchSwapAmountsICP = async ({
 			if (mapped && Number(mapped.receiveAmount) > 0) {
 				acc.push(mapped);
 
-				const destinationTokenToDecimals = formatUnits(
-					mapped.receiveAmount,
-					destinationToken.decimals
-				);
+				const destinationTokenToDecimals = formatToken({
+					value: mapped.receiveAmount,
+					unitName: destinationToken.decimals
+				});
 
 				trackEvent({
 					name: TRACK_SWAP_OFFER,
