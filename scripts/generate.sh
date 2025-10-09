@@ -45,9 +45,10 @@ function install_did_files() {
 #
 # It first copy the candid file in the local .dfx directory (where dfx expects it), then calls the rust.sh script to generate the bindings.
 function generate_rust_bindings() {
-  filename="cycles_ledger.did"
-  origin="$declarations_base/cycles_ledger/${filename}"
-  destination=".dfx/local/canisters/cycles_ledger/${filename}"
+  canister="cycles_ledger"
+  filename="${canister}.did"
+  origin="$declarations_base/${canister}/${filename}"
+  destination=".dfx/local/canisters/${canister}/${filename}"
   mkdir -p "$(dirname "$destination")"
   cp "$origin" "$destination"
   scripts/bind/rust.sh cycles_ledger
