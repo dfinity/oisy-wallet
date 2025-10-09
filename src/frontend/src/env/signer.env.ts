@@ -12,5 +12,5 @@ export const SIGNER_CANISTER_DERIVATION_PATH: Iterable<number> | undefined =
 			[0, 0, 0, 0, 2, 48, 0, 113, 1, 1]
 		: STAGING
 			? // As bytes '\00\00\00\00\00\60\00\d1\01\01'
-				[0, 0, 0, 0, 2, 48, 0, 113, 1, 1]
+				[0, 0, 0, 0, 0, 96, 0, 209, 1, 1]
 			: undefined;

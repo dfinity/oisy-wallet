@@ -158,7 +158,6 @@
 		<BtcConvertForm
 			source={sourceAddress}
 			on:icNext={onNext}
-			on:icClose={onClose}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:amountError
