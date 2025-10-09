@@ -1149,6 +1149,7 @@
 			"media_disabled": "Medien deaktiviert",
 			"enable_media": "Medien aktivieren",
 			"disable_media": "Medien deaktivieren",
+			"keep_media_disabled": "",
 			"open_in_new_tab": "In neuem Tab öffnen",
 			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
 			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",

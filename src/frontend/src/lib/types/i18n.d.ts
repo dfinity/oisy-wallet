@@ -955,6 +955,7 @@ interface I18nNfts {
 		media_disabled: string;
 		enable_media: string;
 		disable_media: string;
+		keep_media_disabled: string;
 		open_in_new_tab: string;
 		review_title: string;
 		review_description: string;
