@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "Poplatek za síť Bitcoin",
 			"zero_fee": "Zdarma",
 			"total_fee": "Celkový poplatek",
-			"ata_fee": "Poplatek ATA"
+			"ata_fee": "Poplatek ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."
@@ -1697,6 +1700,17 @@
 			"stablecoins_description": "Již brzy",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Odměny OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

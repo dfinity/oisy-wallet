@@ -2,18 +2,19 @@ import { SIGNER_ROOT_KEY_NAME } from '$env/signer.env';
 import type { SignerMasterPubKeys } from '$lib/types/signer';
 
 /**
- * Signer master public keys for different environments.
+ * Signer master public keys for different root keys and algorithm.
  *
- * Refer to:
- * - https://github.com/dfinity/portal/blob/master/docs/building-apps/network-features/signatures/t-ecdsa.mdx
- * - https://github.com/dfinity/portal/blob/master/docs/building-apps/network-features/signatures/t-schnorr.mdx
+ * These keys are used for the frontend derivation of the network addresses.
+ *
+ * {@link https://github.com/dfinity/portal/blob/master/docs/building-apps/network-features/signatures/t-ecdsa.mdx}
+ * {@link https://github.com/dfinity/portal/blob/master/docs/building-apps/network-features/signatures/t-schnorr.mdx}
  *
  */
 const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 	key_1: {
 		ecdsa: {
 			secp256k1: {
-				pubkey: '0259761672ec7ee3bdc5eca95ba5f6a493d1133b86a76163b68af30c06fe3b75c0'
+				pubkey: '02121bc3a5c38f38ca76487c72007ebbfd34bc6c4cb80a671655aa94585bbd0a02'
 			}
 		},
 		schnorr: {
@@ -37,5 +38,3 @@ const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 };
 
 export const SIGNER_MASTER_PUB_KEY = SIGNER_MASTER_PUB_KEYS[SIGNER_ROOT_KEY_NAME];
-
-console.log('Using SIGNER_MASTER_PUB_KEY:', SIGNER_MASTER_PUB_KEY);

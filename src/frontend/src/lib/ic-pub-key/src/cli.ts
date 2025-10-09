@@ -58,8 +58,8 @@ function mapBitcoinNetworkToBitcoinJS(network: BitcoinNetwork): Network {
 /* istanbul ignore next */
 export const deriveBtcAddress = async (
 	user: string,
-	pubkey: string,
-	network: BitcoinNetwork
+	network: BitcoinNetwork,
+	pubkey: string
 ): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
   
@@ -96,8 +96,8 @@ export const deriveBtcAddress = async (
 /* istanbul ignore next */
 export const deriveSolAddress = async (
 	user: string,
-	pubkey: string,
-	derivationPath: string[]
+	derivationPath: string[],
+	pubkey: string
 ): Promise<string> => {
 	const chaincode = '0000000000000000000000000000000000000000000000000000000000000000';
 

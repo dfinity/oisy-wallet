@@ -70,8 +70,8 @@ export const getBtcAddress = async ({
 		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
 		return await deriveBtcAddress(
 			identity.getPrincipal().toString(),
-			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey,
-			network
+			network,
+			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey
 		);
 	}
 

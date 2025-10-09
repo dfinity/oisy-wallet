@@ -46,27 +46,15 @@ const getSolanaPublicKey = async ({
 	identity,
 	...rest
 }: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> => {
-	const foo = await getSchnorrPublicKey({
-		...rest,
-		identity,
-		keyId: SOLANA_KEY_ID,
-		derivationPath: []
-	});
-
-	const decoder = getAddressDecoder();
-	const bar = decoder.decode(Uint8Array.from(foo));
-
-	console.log('foo', bar);
-
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
-		// HACK: This is working right now ONLY in Staging, Beta, and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
+		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
 		const publicKey = await deriveSolAddress(
 			identity.getPrincipal().toString(),
-			SIGNER_MASTER_PUB_KEY.schnorr.ed25519.pubkey,
-			[SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath]
+			[SOLANA_DERIVATION_PATH_PREFIX, ...derivationPath],
+			SIGNER_MASTER_PUB_KEY.schnorr.ed25519.pubkey
 		);
 
 		return Buffer.from(publicKey, 'hex');

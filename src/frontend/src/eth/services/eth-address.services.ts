@@ -23,7 +23,7 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
-const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
+export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddress> => {
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
