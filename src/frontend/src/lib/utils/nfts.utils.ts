@@ -206,6 +206,29 @@ const cmpByCollectionName =
 		return collator.compare(an, bn) * dir;
 	};
 
+const cmpByAcquiredDate =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
+		const getNewestAcquiredAt = (item: Nft | NftCollectionUi): number => {
+			if (isNft(item)) {
+				return item.acquiredAt?.getTime() ?? 0;
+			}
+			if (isCollectionUi(item)) {
+				// take the max acquiredAt among nfts in the collection
+				return item.nfts.reduce((max, nft) => {
+					const ts = nft.acquiredAt?.getTime() ?? 0;
+					return ts > max ? ts : max;
+				}, 0);
+			}
+			return 0;
+		};
+
+		const an = getNewestAcquiredAt(a);
+		const bn = getNewestAcquiredAt(b);
+
+		return (an - bn) * dir;
+	};
+
 // Overloads (so TS keeps the exact array element type on return)
 interface NftBaseFilterAndSortParams<T> {
 	items: T[];
@@ -283,6 +306,8 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 		if (sort.type === 'collection-name') {
 			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
+		} else if (sort.type === 'date') {
+			result = [...result].sort((a, b) => cmpByAcquiredDate(dir)({ a, b }));
 		} else {
 			// extendable, for now we return a copy of the list
 			result = [...result];
