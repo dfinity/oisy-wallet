@@ -31,12 +31,11 @@ describe('btc-address.services integration', () => {
 		{ env: 'staging', checkEnv: (c) => c.STAGING },
 		{ env: 'audit', checkEnv: (c) => c.STAGING && c.AUDIT },
 		{ env: 'test_fe_any', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_1', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_2', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_3', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_4', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_5', checkEnv: (c) => c.STAGING && c.TEST_FE },
-		{ env: 'test_fe_6', checkEnv: (c) => c.STAGING && c.TEST_FE }
+		// Generate test_fe_1 to test_fe_6 programmatically to avoid duplication
+		...Array.from({ length: 6 }, (_, i) => ({
+			env: `test_fe_${i + 1}` as EnvName,
+			checkEnv: (c) => c.STAGING && c.TEST_FE
+		}))
 	];
 
 	beforeEach(() => {
