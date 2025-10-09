@@ -66,7 +66,7 @@ mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
   declaration_path="src/declarations/$canister"
   candid_file="$declaration_path/${canister}.did"
-  echo "Generating bindings for $canister in $declaration_path using $candid_file"
+  echo "Generating bindings for $canister"
   icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
 done
 # Clean up..
