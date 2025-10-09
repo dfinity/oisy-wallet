@@ -58,6 +58,7 @@ describe('sol-address.services integration', () => {
 					await expect(getSolAddressMainnet(identity)).resolves.toBe(expected);
 
 					vi.unstubAllGlobals();
+					vi.unstubAllEnvs();
 				}
 			);
 		});
@@ -102,6 +103,7 @@ describe('sol-address.services integration', () => {
 					await expect(getSolAddressDevnet(identity)).resolves.toBe(expected);
 
 					vi.unstubAllGlobals();
+					vi.unstubAllEnvs();
 				}
 			);
 		});
