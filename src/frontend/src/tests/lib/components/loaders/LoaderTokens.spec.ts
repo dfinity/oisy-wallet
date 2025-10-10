@@ -1,3 +1,4 @@
+import * as nftEnv from '$env/nft.env';
 import * as erc1155Derived from '$eth/derived/erc1155.derived';
 import * as erc20Derived from '$eth/derived/erc20.derived';
 import * as erc721Derived from '$eth/derived/erc721.derived';
@@ -70,6 +71,8 @@ describe('LoaderTokens', () => {
 
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementationOnce(() => false);
 
 		mockAuthStore();
 
