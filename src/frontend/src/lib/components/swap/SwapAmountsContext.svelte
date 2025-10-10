@@ -134,7 +134,7 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken];
+		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
 		untrack(() => {
 			clearDebounceTimer();
