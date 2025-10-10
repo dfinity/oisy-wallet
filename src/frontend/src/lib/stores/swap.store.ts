@@ -23,7 +23,7 @@ type IsTokensIcrc2Map = Record<string, boolean>;
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
-	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>(undefined);
+	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const { update } = data;
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
