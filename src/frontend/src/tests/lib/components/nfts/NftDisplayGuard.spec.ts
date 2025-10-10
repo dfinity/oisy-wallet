@@ -1,6 +1,12 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+import {
+	NFT_PLACEHOLDER_FILESIZE,
+	NFT_PLACEHOLDER_INVALID,
+	NFT_PLACEHOLDER_UNSUPPORTED
+} from '$lib/constants/test-ids.constants';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { i18n } from '$lib/stores/i18n.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -122,5 +128,50 @@ describe('NftDisplayGuard', () => {
 		expect(queryByText(get(i18n).nfts.text.img_consent_disabled)).not.toBeInTheDocument();
 
 		expect(queryAllByRole('button')).toHaveLength(0);
+	});
+
+	it('should render the different placeholders if mediaStatus of nft is INVALID_DATA', () => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+
+		const { getByTestId } = render(NftDisplayGuard, {
+			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.INVALID_DATA },
+			children: mockSnippet,
+			showMessage: false,
+			type: 'card'
+		});
+
+		const placeholder = getByTestId(NFT_PLACEHOLDER_INVALID);
+
+		expect(placeholder).toBeInTheDocument();
+	});
+
+	it('should render the different placeholders if mediaStatus of nft is FILESIZE_LIMIT_EXCEEDED', () => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+
+		const { getByTestId } = render(NftDisplayGuard, {
+			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED },
+			children: mockSnippet,
+			showMessage: false,
+			type: 'card'
+		});
+
+		const placeholder = getByTestId(NFT_PLACEHOLDER_FILESIZE);
+
+		expect(placeholder).toBeInTheDocument();
+	});
+
+	it('should render the different placeholders if mediaStatus of nft is NON_SUPPORTED_MEDIA_TYPE', () => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+
+		const { getByTestId } = render(NftDisplayGuard, {
+			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE },
+			children: mockSnippet,
+			showMessage: false,
+			type: 'card'
+		});
+
+		const placeholder = getByTestId(NFT_PLACEHOLDER_UNSUPPORTED);
+
+		expect(placeholder).toBeInTheDocument();
 	});
 });

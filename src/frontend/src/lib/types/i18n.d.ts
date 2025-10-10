@@ -1382,6 +1382,8 @@ interface I18nEarning {
 interface I18nStake {
 	text: {
 		stake: string;
+		enable_token_text: string;
+		enable_token_button: string;
 		review: string;
 		executing_transaction: string;
 		unsupported_token_staking: string;

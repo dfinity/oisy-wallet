@@ -1705,6 +1705,8 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
