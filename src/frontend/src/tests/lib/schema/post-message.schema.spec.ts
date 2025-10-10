@@ -1,4 +1,4 @@
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/declarations/signer.did';
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
