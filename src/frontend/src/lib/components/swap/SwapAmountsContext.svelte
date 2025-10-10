@@ -74,19 +74,17 @@
 			return;
 		}
 
-		if (
-			isNullish(amount) ||
-			isNullish(sourceToken) ||
-			isNullish(destinationToken) ||
-			isNullish(isSourceTokenIcrc2)
-		) {
+		if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
 			store.reset();
 			return;
 		}
 
 		const parsedAmount = Number(amount);
 
-		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
+		if (
+			(!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) ||
+			isNullish(isSourceTokenIcrc2)
+		) {
 			return;
 		}
 
