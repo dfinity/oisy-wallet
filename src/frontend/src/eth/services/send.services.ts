@@ -271,9 +271,11 @@ export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
+	customNonce,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
-	SendParams &
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
+	customNonce?: number;
+} & SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
@@ -285,7 +287,7 @@ export const send = async ({
 	});
 
 	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
-	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
+	const nonceTransaction = customNonce ?? (transactionNeededApproval ? nonce + 1 : nonce);
 
 	const transactionSent = await sendTransaction({
 		progress,
@@ -372,6 +374,12 @@ const sendTransaction = async ({
 		maxPriorityFeePerGas,
 		chainId
 	};
+
+	console.log('params', {
+		...rest,
+		...signParams,
+		to
+	});
 
 	const transaction = await (transferStandard === 'ethereum'
 		? // Case Ethereum or Sepolia
@@ -532,9 +540,14 @@ export const approve = async ({
 
 	const { id: networkId } = sourceNetwork;
 
-	const { getTransactionCount } = infuraProviders(networkId);
+	const { getTransactionCount, getTransactionCount2 } = infuraProviders(networkId);
 
-	const nonce = await getTransactionCount(from);
+	const nonce2 = await getTransactionCount(from);
+	const nonce3 = await getTransactionCount2(from);
+
+	console.log('nonce old', nonce2, nonce3, from);
+
+	const nonce = 66;
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
