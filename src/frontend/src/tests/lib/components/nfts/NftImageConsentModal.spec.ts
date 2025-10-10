@@ -7,6 +7,7 @@ import {
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -17,7 +18,7 @@ import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
-import { fireEvent, render, screen, within } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
 const nftAzuki1 = {
@@ -157,6 +158,29 @@ describe('NftImageConsentModal', () => {
 			}
 		}
 	);
+
+	it('should disable the primary button if collection is spam', async () => {
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'net-icp' } },
+			allowExternalContentSource: true,
+			standard: 'erc721',
+			section: CustomTokenSection.SPAM
+		} as Erc721Token;
+
+		findTokenSpy.mockReturnValue(token);
+		getAllowMediaSpy.mockReturnValue(undefined);
+
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const btnPrimary = screen.getByTestId(`${TEST_ID}-enableButton`);
+
+		await waitFor(() => {
+			expect(btnPrimary).toBeDisabled();
+		});
+	});
 
 	it('renders collection info, display preference, and NFT media list', () => {
 		getAllowMediaSpy.mockReturnValue(false);

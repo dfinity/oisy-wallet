@@ -12,7 +12,6 @@
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
