@@ -28,7 +28,7 @@ export const getEthAddress = async (identity: OptionIdentity): Promise<EthAddres
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);
 
-		// HACK: This is working right now ONLY in Beta and Prod because the library is aware of the production Chain Fusion Signer's public key (used by both envs), but not for the staging Chain Fusion Signer (used by all other envs).
+		// HACK: This is not working for Local environment for now, because the library is not aware of the `dfx_test_1` public key (used by Local deployment).
 		return await deriveEthAddress(
 			identity.getPrincipal().toString(),
 			SIGNER_MASTER_PUB_KEY.ecdsa.secp256k1.pubkey

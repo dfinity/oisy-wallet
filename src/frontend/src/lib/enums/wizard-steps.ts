@@ -75,3 +75,9 @@ export enum WizardStepsManageTokens {
 	REVIEW = 'Review',
 	SAVING = 'Saving'
 }
+
+export enum WizardStepsStake {
+	STAKE = 'Stake',
+	REVIEW = 'Review',
+	STAKING = 'Staking'
+}
