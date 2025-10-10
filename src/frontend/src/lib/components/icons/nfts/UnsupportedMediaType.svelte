@@ -1,3 +1,4 @@
+<!-- source: DFINITY foundation -->
 <script lang="ts">
 	import { NFT_PLACEHOLDER_UNSUPPORTED } from '$lib/constants/test-ids.constants';
 
