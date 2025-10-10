@@ -74,7 +74,12 @@
 			return;
 		}
 
-		if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
+		if (
+			isNullish(amount) ||
+			isNullish(sourceToken) ||
+			isNullish(destinationToken) ||
+			isNullish(isSourceTokenIcrc2)
+		) {
 			store.reset();
 			return;
 		}
