@@ -40,7 +40,7 @@
 
 	let totalFee = $derived(
 		nonNullish($isSourceTokenIcrc2)
-			? (sourceTokenFee ?? ZERO) * (isSourceTokenIcrc2 ? 2n : 1n)
+			? (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
 			: undefined
 	);
 
