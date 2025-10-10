@@ -1,3 +1,4 @@
+import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { Identity } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
@@ -23,3 +24,5 @@ export const mockIdentity = {
 // This is not linked/related to the mock above.
 export const mockAccountIdentifierText =
 	'217966d936e84b04ac69615cd5cf8c526667daf5ae88deb3bc2cdc44238712d5';
+
+export const mockIcrcAccount = getIcrcAccount(mockIdentity.getPrincipal());

@@ -1,3 +1,4 @@
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
@@ -356,7 +357,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
-		if (nonNullish(size) && Number(size) > 1024 * 1024) {
+		if (nonNullish(size) && Number(size) > NFT_MAX_FILESIZE_LIMIT) {
 			// 1MB
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}

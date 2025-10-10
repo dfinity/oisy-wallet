@@ -218,7 +218,7 @@ export const getAccountInfo = async ({
 
 	const cachedInfo = addressMap.get(address);
 
-	if (nonNullish(cachedInfo)) {
+	if (nonNullish(cachedInfo?.value)) {
 		return cachedInfo;
 	}
 
