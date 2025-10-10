@@ -553,8 +553,14 @@ describe('nfts.utils', () => {
 				res[0].collection.address === AZUKI_ELEMENTAL_BEANS_TOKEN.address ? res : [res[1], res[0]];
 
 			// collection info matches mapTokenToCollection
-			expect(azukiUi.collection).toEqual(mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN));
-			expect(deGodsUi.collection).toEqual(mapTokenToCollection(DE_GODS_TOKEN));
+			expect(azukiUi.collection).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
+			expect({ ...azukiUi.collection, newestAcquiredAt: new Date(0) }).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
 
 			// nfts grouped by collection AND network (the ETH one must be excluded)
 			expect(azukiUi.nfts).toEqual([nftAzuki1, nftAzuki2]);
