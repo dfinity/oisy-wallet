@@ -11,17 +11,6 @@ export interface AddHiddenDappIdRequest {
 	current_user_version: [] | [bigint];
 	dapp_id: string;
 }
-export type AddUserCredentialError =
-	| { InvalidCredential: null }
-	| { VersionMismatch: null }
-	| { ConfigurationError: null }
-	| { UserNotFound: null };
-export interface AddUserCredentialRequest {
-	credential_jwt: string;
-	issuer_canister_id: Principal;
-	current_user_version: [] | [bigint];
-	credential_spec: CredentialSpec;
-}
 export type AddUserCredentialResult = { Ok: null } | { Err: AddUserCredentialError };
 export type AddUserHiddenDappIdResult = { Ok: null } | { Err: AddDappSettingsError };
 export interface Agreements {
