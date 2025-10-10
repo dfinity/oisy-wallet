@@ -81,10 +81,7 @@
 
 		const parsedAmount = Number(amount);
 
-		if (
-			(!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) ||
-			isNullish(isSourceTokenIcrc2)
-		) {
+		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
 		}
 
