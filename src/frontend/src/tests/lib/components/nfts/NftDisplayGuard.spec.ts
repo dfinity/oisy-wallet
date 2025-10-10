@@ -26,8 +26,7 @@ const nftAzuki = {
 		name: 'Azuki Elemental Beans',
 		address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 		network: POLYGON_AMOY_NETWORK
-	},
-	mediaStatus: NftMediaStatusEnum.OK
+	}
 };
 
 describe('NftDisplayGuard', () => {
