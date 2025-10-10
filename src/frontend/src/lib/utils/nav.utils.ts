@@ -14,6 +14,8 @@ import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 
+export const pathToHref = (path: AppPath) => (path.endsWith('/') ? path.slice(0, -1) : path);
+
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
 
