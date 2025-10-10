@@ -29,8 +29,8 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	bannerImageUrl: z.url().optional(),
 	description: z.string().optional(),
-	acquiredAt: z.date().optional(),
-	network: NftNetworkSchema
+	network: NftNetworkSchema,
+	newestAcquiredAt: z.date().optional()
 });
 
 export enum NftMediaStatusEnum {
@@ -44,6 +44,7 @@ export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema,
+	acquiredAt: z.date().optional(),
 	mediaStatus: z.enum(NftMediaStatusEnum).optional()
 });
 
