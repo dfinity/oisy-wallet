@@ -256,7 +256,7 @@
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
 						<Button
-							colorStyle="primary"
+							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => save(true)}
@@ -274,7 +274,7 @@
 							{$i18n.nfts.text.disable_media}
 						</Button>
 						<Button
-							colorStyle="primary"
+							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => modalStore.close()}
@@ -292,7 +292,7 @@
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
 						<Button
-							colorStyle="primary"
+							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => save(true)}
