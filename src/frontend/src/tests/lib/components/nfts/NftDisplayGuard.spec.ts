@@ -26,7 +26,8 @@ const nftAzuki = {
 		name: 'Azuki Elemental Beans',
 		address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 		network: POLYGON_AMOY_NETWORK
-	}
+	},
+	mediaStatus: NftMediaStatusEnum.OK
 };
 
 describe('NftDisplayGuard', () => {
@@ -98,7 +99,7 @@ describe('NftDisplayGuard', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
 
 		const { queryAllByRole, queryByText, getByTestId } = render(NftDisplayGuard, {
-			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.OK },
+			nft: nftAzuki,
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
