@@ -886,7 +886,7 @@ describe('nfts.utils', () => {
 						h === 'Content-Type'
 							? 'image/jpeg'
 							: h === 'Content-Length'
-								? (1024 * 1024 + 1).toString()
+								? (5 * 1024 * 1024 + 1).toString()
 								: null
 				}
 			});

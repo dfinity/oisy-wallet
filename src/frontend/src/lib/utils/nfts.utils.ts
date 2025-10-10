@@ -327,7 +327,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
-		if (nonNullish(size) && Number(size) > 1024 * 1024) {
+		if (nonNullish(size) && Number(size) > 5 * 1024 * 1024) {
 			// 1MB
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
