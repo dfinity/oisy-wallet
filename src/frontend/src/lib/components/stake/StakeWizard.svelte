@@ -2,11 +2,11 @@
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
 	import GldtStakeWizard from '$icp/components/stake/gldt/GldtStakeWizard.svelte';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 
 	interface Props {
 		amount: OptionAmount;
