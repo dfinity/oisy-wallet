@@ -1,9 +1,9 @@
+import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
@@ -21,6 +21,7 @@ export interface SwapData {
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
+	const icrc2Cache = writable<Record<string, boolean>>({});
 	const { update } = data;
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
@@ -46,14 +47,12 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			nonNullish($destinationToken) ? $exchanges?.[$destinationToken.id]?.usd : undefined
 	);
 
-	const isSourceTokenIcrc2 = derived(
-		[kongSwapTokensStore, sourceToken],
-		([$kongSwapTokensStore, $sourceToken]) =>
-			nonNullish($sourceToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-			$kongSwapTokensStore[$sourceToken.symbol].icrc2
-	);
+	const isSourceTokenIcrc2 = derived([icrc2Cache, sourceToken], ([$icrc2Cache, $sourceToken]) => {
+		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
+			return undefined;
+		}
+		return $icrc2Cache[$sourceToken.ledgerCanisterId];
+	});
 
 	return {
 		sourceToken,
@@ -78,6 +77,17 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			update((state) => ({
 				sourceToken: state.destinationToken,
 				destinationToken: state.sourceToken
+			})),
+		setIcrc2Cache: ({
+			ledgerCanisterId,
+			isSupported
+		}: {
+			ledgerCanisterId: string;
+			isSupported: boolean;
+		}) =>
+			icrc2Cache.update((cache) => ({
+				...cache,
+				[ledgerCanisterId]: isSupported
 			}))
 	};
 };
@@ -89,8 +99,9 @@ export interface SwapContext {
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	isSourceTokenIcrc2: Readable<boolean>;
+	isSourceTokenIcrc2: Readable<boolean | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
+	setIcrc2Cache: (args: { ledgerCanisterId: string; isSupported: boolean }) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;
