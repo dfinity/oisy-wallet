@@ -1,6 +1,7 @@
 import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { DEVNET_EURC_TOKEN } from '$env/tokens/tokens-spl/tokens.eurc.env';
 import { GMEX_TOKEN } from '$env/tokens/tokens-spl/tokens.gmex.env';
+import { GOOGLX_TOKEN } from '$env/tokens/tokens-spl/tokens.googlx.env';
 import { PENGU_TOKEN } from '$env/tokens/tokens-spl/tokens.pengu.env';
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { WALLET_PAGINATION, ZERO } from '$lib/constants/app.constants';
@@ -510,6 +511,7 @@ describe('solana.api', () => {
 		const mockAddress2 = TRUMP_TOKEN.address;
 		const mockAddress3 = PENGU_TOKEN.address;
 		const mockAddress4 = GMEX_TOKEN.address;
+		const mockAddress5 = GOOGLX_TOKEN.address;
 
 		beforeEach(() => {
 			mockAccountInfo = mockTokenAccountInfo;
@@ -583,6 +585,52 @@ describe('solana.api', () => {
 
 			expect(secondCall).toEqual(firstCall);
 			expect(mockGetAccountInfo).toHaveBeenCalledOnce();
+		});
+
+		it('should re-cache account if the cache is nullish', async () => {
+			vi.clearAllMocks();
+
+			mockAccountInfo = { value: null };
+
+			const firstCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(firstCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledExactlyOnceWith(mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+
+			mockAccountInfo = mockTokenAccountInfo;
+
+			const secondCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(secondCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+
+			const thirdCall = await getAccountInfo({
+				address: mockAddress5,
+				network: SolanaNetworks.mainnet
+			});
+
+			expect(thirdCall).toEqual(mockAccountInfo);
+			expect(mockGetAccountInfo).toHaveBeenCalledTimes(2);
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(1, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
+			expect(mockGetAccountInfo).toHaveBeenNthCalledWith(2, mockAddress5, {
+				encoding: 'jsonParsed'
+			});
 		});
 	});
 
