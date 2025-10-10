@@ -4,13 +4,13 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 
 	interface Props {
 		collection: NftCollectionUi;
