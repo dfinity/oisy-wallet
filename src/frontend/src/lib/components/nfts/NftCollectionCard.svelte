@@ -10,6 +10,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -26,6 +27,10 @@
 			sort: $nftSortStore
 		})
 	);
+
+	const previewNft = $derived(
+		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
+	);
 </script>
 
 <a
@@ -36,7 +41,7 @@
 	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 >
 	<div class="relative h-full w-full">
-		<NftDisplayGuard nft={collection.nfts[0]} type="card">
+		<NftDisplayGuard nft={previewNft} type="card">
 			<div
 				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}
