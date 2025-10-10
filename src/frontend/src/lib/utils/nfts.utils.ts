@@ -179,7 +179,7 @@ export const getNftCollectionUi = ({
 		if ('collection' in item) {
 			const k = keyOf({ addr: item.collection.address, netId: String(item.collection.network.id) });
 			const entry = index.get(k);
-			if (entry) {
+			if (nonNullish(entry)) {
 				entry.nfts = [...entry.nfts, item];
 				const newTimestamp = item.acquiredAt?.getTime() ?? 0;
 				const currentMax = entry.collection.newestAcquiredAt?.getTime() ?? 0;
