@@ -181,6 +181,12 @@ export const getNftCollectionUi = ({
 			const entry = index.get(k);
 			if (entry) {
 				entry.nfts = [...entry.nfts, item];
+				entry.collection.newestAcquiredAt = new Date(
+					entry.nfts.reduce((max, nft) => {
+						const ts = nft.acquiredAt?.getTime() ?? 0;
+						return ts > max ? ts : max;
+					}, 0)
+				);
 			} // only attach if the token exists
 			return acc;
 		}
@@ -214,11 +220,7 @@ const cmpByAcquiredDate =
 				return item.acquiredAt?.getTime() ?? 0;
 			}
 			if (isCollectionUi(item)) {
-				// take the max acquiredAt among nfts in the collection
-				return item.nfts.reduce((max, nft) => {
-					const ts = nft.acquiredAt?.getTime() ?? 0;
-					return ts > max ? ts : max;
-				}, 0);
+				return item.collection.newestAcquiredAt?.getTime() ?? 0;
 			}
 			return 0;
 		};
