@@ -19,6 +19,7 @@
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -31,7 +32,6 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
 		collection: NftCollection;
@@ -113,7 +113,7 @@
 </script>
 
 <div style="--color-border-secondary: transparent">
-	<Modal {onClose} {testId} disablePointerEvents={saveLoading}>
+	<Modal disablePointerEvents={saveLoading} {onClose} {testId}>
 		{#snippet title()}{/snippet}
 
 		<ContentWithToolbar>
@@ -257,8 +257,8 @@
 						</Button>
 						<Button
 							colorStyle="primary"
-							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
 							onclick={() => save(true)}
 							testId={`${testId}-enableButton`}
 						>
@@ -275,8 +275,8 @@
 						</Button>
 						<Button
 							colorStyle="primary"
-							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
 							onclick={() => modalStore.close()}
 							testId={`${testId}-keepEnabledButton`}
 						>
@@ -293,8 +293,8 @@
 						</Button>
 						<Button
 							colorStyle="primary"
-							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
 							onclick={() => save(true)}
 							testId={`${testId}-enableButton`}
 						>
