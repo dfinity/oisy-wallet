@@ -8,9 +8,9 @@ import type {
 	UserData,
 	UserSnapshot,
 	VipReward
-} from '$declarations/rewards/rewards.did';
-import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
-import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
+} from '$declarations/rewards/declarations/rewards.did';
+import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/declarations/rewards.factory.certified.did';
+import { idlFactory as idlFactoryReward } from '$declarations/rewards/declarations/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { EligibilityError } from '$lib/types/errors';

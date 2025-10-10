@@ -1,6 +1,6 @@
-import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/xtc_ledger.did';
-import { idlFactory as idlCertifiedFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.certified.did';
-import { idlFactory as idlFactoryXtcLedger } from '$declarations/xtc_ledger/xtc_ledger.factory.did';
+import type { _SERVICE as XtcLedgerService } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
+import { idlFactory as idlCertifiedFactoryXtcLedger } from '$declarations/xtc_ledger/declarations/xtc_ledger.factory.certified.did';
+import { idlFactory as idlFactoryXtcLedger } from '$declarations/xtc_ledger/declarations/xtc_ledger.factory.did';
 import { mapXtcLedgerCanisterError } from '$icp/canisters/xtc-ledger.errors';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';

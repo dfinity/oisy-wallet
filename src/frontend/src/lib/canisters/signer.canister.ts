@@ -7,9 +7,9 @@ import type {
 	GetBalanceRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
-} from '$declarations/signer/signer.did';
-import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
-import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
+} from '$declarations/signer/declarations/signer.did';
+import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/declarations/signer.factory.certified.did';
+import { idlFactory as idlFactorySigner } from '$declarations/signer/declarations/signer.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import {

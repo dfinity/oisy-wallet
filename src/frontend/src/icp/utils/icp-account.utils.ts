@@ -1,4 +1,4 @@
-import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
+import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
 import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
 import { decodeIcrcAccount, encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import type { Principal } from '@dfinity/principal';

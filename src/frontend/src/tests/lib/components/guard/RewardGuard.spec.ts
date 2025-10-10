@@ -1,4 +1,4 @@
-import type { RewardInfo, UserData } from '$declarations/rewards/rewards.did';
+import type { RewardInfo, UserData } from '$declarations/rewards/declarations/rewards.did';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import {
 	SPRINKLES_SEASON_1_EPISODE_3_ID,
