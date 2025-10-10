@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -75,14 +73,6 @@
 					<NetworkWithLogo network={targetNetwork} />
 				</WalletConnectModalValue>
 			{/if}
-		{/snippet}
-
-		{#snippet fee()}
-			<EthFeeDisplay>
-				{#snippet label()}
-					<Html text={$i18n.fee.text.max_fee_eth} />
-				{/snippet}
-			</EthFeeDisplay>
 		{/snippet}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
