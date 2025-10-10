@@ -58,8 +58,8 @@
 				($testnetsEnabled && ($networkSepoliaEnabled || $networkEvmTestnetEnabled)))
 	);
 	let loadErc20 = $derived(loadErc && $erc20UserTokensNotInitialized);
-	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized);
-	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized);
+	let loadErc721 = $derived(loadErc && $erc721CustomTokensNotInitialized && NFTS_ENABLED);
+	let loadErc1155 = $derived(loadErc && $erc1155CustomTokensNotInitialized && NFTS_ENABLED);
 
 	let loadSplMainnet = $derived(nonNullish($solAddressMainnet) && $networkSolanaMainnetEnabled);
 	let loadSplDevnet = $derived(
