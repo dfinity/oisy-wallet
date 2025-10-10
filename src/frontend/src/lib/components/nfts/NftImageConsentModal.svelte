@@ -113,7 +113,7 @@
 </script>
 
 <div style="--color-border-secondary: transparent">
-	<Modal {onClose} {testId}>
+	<Modal {onClose} {testId} disablePointerEvents={saveLoading}>
 		{#snippet title()}{/snippet}
 
 		<ContentWithToolbar>
@@ -255,6 +255,15 @@
 						>
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
+						<Button
+							colorStyle="primary"
+							loading={saveLoading}
+							disabled={token?.section === CustomTokenSection.SPAM}
+							onclick={() => save(true)}
+							testId={`${testId}-saveButton`}
+						>
+							{$i18n.nfts.text.enable_media}
+						</Button>
 					{:else if nonNullish(allowMedia) && allowMedia}
 						<Button
 							colorStyle="secondary-light"
@@ -263,6 +272,15 @@
 							testId={`${testId}-disableMediaButton`}
 						>
 							{$i18n.nfts.text.disable_media}
+						</Button>
+						<Button
+							colorStyle="primary"
+							loading={saveLoading}
+							disabled={token?.section === CustomTokenSection.SPAM}
+							onclick={() => modalStore.close()}
+							testId={`${testId}-saveButton`}
+						>
+							{$i18n.nfts.text.keep_media_enabled}
 						</Button>
 					{:else}
 						<Button
@@ -273,16 +291,16 @@
 						>
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
+						<Button
+							colorStyle="primary"
+							loading={saveLoading}
+							disabled={token?.section === CustomTokenSection.SPAM}
+							onclick={() => save(true)}
+							testId={`${testId}-saveButton`}
+						>
+							{$i18n.nfts.text.enable_media}
+						</Button>
 					{/if}
-					<Button
-						colorStyle="primary"
-						loading={saveLoading}
-						disabled={token?.section === CustomTokenSection.SPAM}
-						onclick={() => save(!allowMedia)}
-						testId={`${testId}-saveButton`}
-					>
-						{allowMedia ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}
-					</Button>
 				</div>
 			{/snippet}
 		</ContentWithToolbar>
