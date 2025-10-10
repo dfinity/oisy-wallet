@@ -27,7 +27,11 @@ describe('StakeWizard', () => {
 	it('renders GLDT token wizard', () => {
 		const { getByTestId } = render(StakeWizard, {
 			props,
-			context: mockContext({ ...mockValidIcrcToken, ledgerCanisterId: GLDT_LEDGER_CANISTER_ID })
+			context: mockContext({
+				...mockValidIcrcToken,
+				symbol: 'GLDT',
+				ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
+			})
 		});
 
 		expect(getByTestId(STAKE_FORM_REVIEW_BUTTON)).toBeInTheDocument();
