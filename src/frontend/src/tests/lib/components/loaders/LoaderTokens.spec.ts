@@ -72,7 +72,7 @@ describe('LoaderTokens', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementationOnce(() => false);
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementationOnce(() => true);
 
 		mockAuthStore();
 
