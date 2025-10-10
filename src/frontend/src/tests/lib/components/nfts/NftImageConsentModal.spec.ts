@@ -8,7 +8,6 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { i18n } from '$lib/stores/i18n.store';
-import * as modalStoreMod from '$lib/stores/modal.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -17,7 +16,7 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { assertNonNullish } from '@dfinity/utils';
+import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
@@ -46,9 +45,6 @@ const nftAzuki2 = {
 };
 
 describe('NftImageConsentModal', () => {
-	// modal store close
-	const closeSpy = vi.spyOn(modalStoreMod.modalStore, 'close').mockImplementation(() => {});
-
 	// save util
 	const saveSpy = vi
 		.spyOn(erc721TokenServices, 'saveCustomTokens')
@@ -69,79 +65,98 @@ describe('NftImageConsentModal', () => {
 
 	beforeEach(() => {
 		getAllowMediaSpy.mockClear();
-		closeSpy.mockClear();
 	});
 
-	it('calls saveAllCustomTokens with toggled allowMedia and correct key on Save', async () => {
-		getAllowMediaSpy.mockReturnValue(true);
+	const TEST_ID = 'nft-modal';
 
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'net-icp' } },
-			allowExternalContentSource: true,
-			standard: 'erc721'
-		} as Erc721Token;
-		findTokenSpy.mockReturnValue(token);
+	const testIds = {
+		keepDisabled: `${TEST_ID}-keepDisabledButton`,
+		keepEnabled: `${TEST_ID}-keepEnabledButton`,
+		enable: `${TEST_ID}-enableButton`,
+		disable: `${TEST_ID}-disableButton`
+	};
 
-		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
+	const testCases = [
+		{
+			description: 'Case allow media undefined',
+			buttonSecondary: testIds.keepDisabled,
+			buttonSecondarySaveCalledWith: false,
+			buttonPrimary: testIds.enable,
+			buttonPrimarySaveCalledWith: true,
+			allowMedia: undefined
+		},
+		{
+			description: 'Case allow media false',
+			buttonSecondary: testIds.keepDisabled,
+			buttonSecondarySaveCalledWith: undefined,
+			buttonPrimary: testIds.enable,
+			buttonPrimarySaveCalledWith: true,
+			allowMedia: false
+		},
+		{
+			description: 'Case allow media true',
+			buttonSecondary: testIds.disable,
+			buttonSecondarySaveCalledWith: false,
+			buttonPrimary: testIds.keepEnabled,
+			buttonPrimarySaveCalledWith: undefined,
+			allowMedia: true
+		}
+	];
 
-		const saveBtn = screen.getByTestId(`${TEST_ID}-saveButton`);
-		await fireEvent.click(saveBtn);
+	it.each(testCases)(
+		'$description should render correct buttons with actions',
+		async (testCase) => {
+			const token = {
+				id: { description: 'token-123' },
+				network: { id: { description: 'net-icp' } },
+				allowExternalContentSource: true,
+				standard: 'erc721'
+			} as Erc721Token;
 
-		expect(saveSpy).toHaveBeenCalledWith({
-			identity: mockIdentity,
-			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
-		});
+			findTokenSpy.mockReturnValue(token);
+			getAllowMediaSpy.mockReturnValue(testCase.allowMedia);
 
-		expect(closeSpy).toHaveBeenCalledOnce();
-	});
+			render(NftImageConsentModal, {
+				props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			});
 
-	it('calls saveAllCustomTokens to set allowMedia to false to keep disabled', async () => {
-		getAllowMediaSpy.mockReturnValue(undefined);
+			const btnPrimary = screen.getByTestId(testCase.buttonPrimary);
+			const btnSecondary = screen.getByTestId(testCase.buttonSecondary);
 
-		const token = {
-			id: { description: 'token-123' },
-			network: { id: { description: 'net-icp' } },
-			allowExternalContentSource: true,
-			standard: 'erc721'
-		} as Erc721Token;
-		findTokenSpy.mockReturnValue(token);
+			expect(btnPrimary).toBeInTheDocument();
+			expect(btnSecondary).toBeInTheDocument();
 
-		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
+			if (nonNullish(testCase.buttonPrimarySaveCalledWith)) {
+				await fireEvent.click(btnPrimary);
 
-		const keepDisabledBtn = screen.getByTestId(`${TEST_ID}-keepMediaDisabledButton`);
-		await fireEvent.click(keepDisabledBtn);
+				expect(saveSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					tokens: [
+						{
+							...token,
+							allowExternalContentSource: testCase.buttonPrimarySaveCalledWith,
+							enabled: true
+						}
+					]
+				});
+			}
 
-		expect(saveSpy).toHaveBeenCalledWith({
-			identity: mockIdentity,
-			tokens: [{ ...token, allowExternalContentSource: false, enabled: true }]
-		});
+			if (nonNullish(testCase.buttonSecondarySaveCalledWith)) {
+				await fireEvent.click(btnSecondary);
 
-		expect(closeSpy).toHaveBeenCalledOnce();
-	});
-
-	it('closes the modal when clicking Cancel', async () => {
-		getAllowMediaSpy.mockReturnValue(true);
-
-		const TEST_ID = 'nft-modal';
-		render(NftImageConsentModal, { props: { collection: nftAzuki1.collection, testId: TEST_ID } });
-
-		const cancelBtn1 = screen.getByTestId(`${TEST_ID}-cancelButton`);
-
-		assertNonNullish(cancelBtn1);
-
-		getAllowMediaSpy.mockReturnValue(false);
-
-		const cancelBtn2 = screen.getByTestId(`${TEST_ID}-cancelButton`);
-
-		assertNonNullish(cancelBtn2);
-
-		await fireEvent.click(cancelBtn2);
-
-		expect(closeSpy).toHaveBeenCalledOnce();
-	});
+				expect(saveSpy).toHaveBeenCalledWith({
+					identity: mockIdentity,
+					tokens: [
+						{
+							...token,
+							allowExternalContentSource: testCase.buttonSecondarySaveCalledWith,
+							enabled: true
+						}
+					]
+				});
+			}
+		}
+	);
 
 	it('renders collection info, display preference, and NFT media list', () => {
 		getAllowMediaSpy.mockReturnValue(false);

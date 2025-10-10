@@ -251,7 +251,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => modalStore.close()}
-							testId={`${testId}-cancelButton`}
+							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
@@ -260,7 +260,7 @@
 							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
 							onclick={() => save(true)}
-							testId={`${testId}-saveButton`}
+							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
 						</Button>
@@ -269,7 +269,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => save(false)}
-							testId={`${testId}-disableMediaButton`}
+							testId={`${testId}-disableButton`}
 						>
 							{$i18n.nfts.text.disable_media}
 						</Button>
@@ -278,7 +278,7 @@
 							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
 							onclick={() => modalStore.close()}
-							testId={`${testId}-saveButton`}
+							testId={`${testId}-keepEnabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_enabled}
 						</Button>
@@ -287,7 +287,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => save(false)}
-							testId={`${testId}-keepMediaDisabledButton`}
+							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
@@ -296,7 +296,7 @@
 							loading={saveLoading}
 							disabled={token?.section === CustomTokenSection.SPAM}
 							onclick={() => save(true)}
-							testId={`${testId}-saveButton`}
+							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
 						</Button>
