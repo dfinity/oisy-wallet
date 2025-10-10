@@ -15,6 +15,6 @@ const SignerMasterPubKeySchema = z.object({
 
 export const SignerMasterPubKeysSchema = z.object({
 	key_1: SignerMasterPubKeySchema,
-	test_key_1: SignerMasterPubKeySchema.optional(),
+	test_key_1: SignerMasterPubKeySchema,
 	dfx_test_key: SignerMasterPubKeySchema.optional()
 });

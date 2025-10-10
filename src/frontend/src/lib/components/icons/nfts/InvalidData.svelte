@@ -9,10 +9,10 @@
 </script>
 
 <svg
-	width={size}
+	fill="none"
 	height={size}
 	viewBox="0 0 200 200"
-	fill="none"
+	width={size}
 	xmlns="http://www.w3.org/2000/svg"
 	data-tid={NFT_PLACEHOLDER_INVALID}
 >
@@ -46,8 +46,8 @@
 		fill="var(--color-background-brand-light-alt)"
 	/>
 	<path
-		opacity="0.2"
 		d="M0 28.1831C24.9872 6.42244 66.2417 8.15151 111.185 16.2251C148.077 23.9121 181.031 34.5737 200 54.4819V66.7417C181.551 44.9344 147.219 33.6113 108.56 25.5562C65.1622 17.7612 25.2006 15.8751 0 35.3364V28.1831Z"
 		fill="var(--color-background-brand-subtle-20)"
+		opacity="0.2"
 	/>
 </svg>

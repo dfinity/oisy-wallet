@@ -22,6 +22,18 @@ const SIGNER_MASTER_PUB_KEYS: SignerMasterPubKeys = {
 				pubkey: '476374d9df3a8af28d3164dc2422cff894482eadd1295290b6d9ad92b2eeaa5c'
 			}
 		}
+	},
+	test_key_1: {
+		ecdsa: {
+			secp256k1: {
+				pubkey: '02f9ac345f6be6db51e1c5612cddb59e72c3d0d493c994d12035cf13257e3b1fa7'
+			}
+		},
+		schnorr: {
+			ed25519: {
+				pubkey: '6c0824beb37621bcca6eecc237ed1bc4e64c9c59dcb85344aa7f9cc8278ee31f'
+			}
+		}
 	}
 };
 

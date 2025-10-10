@@ -3,10 +3,37 @@ import { Principal } from '@dfinity/principal';
 
 // These tests are done with real addresses from our test wallets
 describe('sol-address.services integration', () => {
-	type EnvCheck = (c: { PROD: boolean; BETA: boolean }) => boolean;
-	const prodEnvs: ReadonlyArray<{ env: 'ic' | 'beta'; checkEnv: EnvCheck }> = [
+	type EnvCheck = (c: {
+		PROD: boolean;
+		BETA: boolean;
+		STAGING: boolean;
+		TEST_FE: boolean;
+		AUDIT: boolean;
+	}) => boolean;
+	type EnvName =
+		| 'ic'
+		| 'beta'
+		| 'staging'
+		| 'audit'
+		| 'test_fe_any'
+		| 'test_fe_1'
+		| 'test_fe_2'
+		| 'test_fe_3'
+		| 'test_fe_4'
+		| 'test_fe_5'
+		| 'test_fe_6';
+	const prodEnvs: ReadonlyArray<{ env: EnvName; checkEnv: EnvCheck }> = [
 		{ env: 'ic', checkEnv: (c) => c.PROD },
 		{ env: 'beta', checkEnv: (c) => c.BETA }
+	];
+	const stagingEnvs: ReadonlyArray<{ env: EnvName; checkEnv: EnvCheck }> = [
+		{ env: 'staging', checkEnv: (c) => c.STAGING },
+		{ env: 'audit', checkEnv: (c) => c.STAGING && c.AUDIT },
+		{ env: 'test_fe_any', checkEnv: (c) => c.STAGING && c.TEST_FE },
+		...Array.from({ length: 6 }, (_, i) => ({
+			env: `test_fe_${i + 1}` as EnvName,
+			checkEnv: ((c) => c.STAGING && c.TEST_FE) as EnvCheck
+		}))
 	];
 
 	beforeEach(() => {
@@ -27,11 +54,22 @@ describe('sol-address.services integration', () => {
 				expected: 'EAQ6MUJMEEd42u9xHZ8XHrwabG5NNVhndKnTgBzZcMtt',
 				envs: prodEnvs
 			},
+			{
+				principal: '4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe',
+				expected: '5Dqoon9MdWRgwmJ839FJ2ZTpTAcc1MMprZeNyaxpaV1Q',
+				envs: stagingEnvs
+			},
+
 			// Test wallet 2663584
 			{
 				principal: 'v2smi-hhewl-kr7al-mrhkv-ubkqe-px4w7-c5qj7-vosjk-iwjkj-b55qg-5ae',
 				expected: '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1',
 				envs: prodEnvs
+			},
+			{
+				principal: 'ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe',
+				expected: 'GZvi7ndzTYkTrbvfiwfz9ZequdCMacHCzCtadruT3e5f',
+				envs: stagingEnvs
 			}
 		];
 
@@ -72,11 +110,21 @@ describe('sol-address.services integration', () => {
 				expected: 'DB4V37NFELrskG2f2EHBHknr5H7wyhG8jaEkQoX3J2ou',
 				envs: prodEnvs
 			},
+			{
+				principal: '4c4gf-nxcvu-igyqf-fquho-y3jeg-3b7ka-izqgr-6aczp-hgt5c-jmdti-oqe',
+				expected: '62YzGX3LnBfMvwvHyJyWGUtMu5mKgpEUpFLsyjEPAWqH',
+				envs: stagingEnvs
+			},
 			// Test wallet 2663584
 			{
 				principal: 'v2smi-hhewl-kr7al-mrhkv-ubkqe-px4w7-c5qj7-vosjk-iwjkj-b55qg-5ae',
 				expected: 'Eu5eKbpDLECKyMQNhp9vnKXQVCJ7g6TGcConL5tHBggv',
 				envs: prodEnvs
+			},
+			{
+				principal: 'ejrt7-mhyue-6oq2j-63k56-qvvae-3uep4-dh34y-zbtzw-7ulf6-2ohv7-dqe',
+				expected: '2JXM15J4bQWs3D1XYpNyozB3GS87cgxXDFPrYpLsozGd',
+				envs: stagingEnvs
 			}
 		];
 
