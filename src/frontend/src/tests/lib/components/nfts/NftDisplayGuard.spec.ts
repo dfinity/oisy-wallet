@@ -98,7 +98,7 @@ describe('NftDisplayGuard', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
 
 		const { queryAllByRole, queryByText, getByTestId } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.OK },
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
