@@ -879,7 +879,7 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
 		});
 
-		it('returns FILESIZE_LIMIT_EXCEEDED when file size > 1MB', async () => {
+		it('returns FILESIZE_LIMIT_EXCEEDED when file size > 5MB', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
