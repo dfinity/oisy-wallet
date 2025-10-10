@@ -66,15 +66,6 @@
 			return;
 		}
 
-		busy.start({ msg: $i18n.init.info.hold_loading });
-
-		// 1. If loadKongSwapTokens succeeds within 10s - show modal.
-		// 2. If loadKongSwapTokens does not succeed within 10s - show toast, do not show modal.
-		// 3. If loadKongSwapTokens throws - show toast, do not show modal.
-		await Promise.any([waitReady({ retries: 10, isDisabled }), loadKongSwapTokens()]);
-
-		busy.stop();
-
 		modalStore.openSwap(tokenId);
 
 		await loadDisabledIcrcTokensBalances({
