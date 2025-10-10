@@ -553,8 +553,14 @@ describe('nfts.utils', () => {
 				res[0].collection.address === AZUKI_ELEMENTAL_BEANS_TOKEN.address ? res : [res[1], res[0]];
 
 			// collection info matches mapTokenToCollection
-			expect(azukiUi.collection).toEqual(mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN));
-			expect(deGodsUi.collection).toEqual(mapTokenToCollection(DE_GODS_TOKEN));
+			expect(azukiUi.collection).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
+			expect({ ...azukiUi.collection, newestAcquiredAt: new Date(0) }).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
 
 			// nfts grouped by collection AND network (the ETH one must be excluded)
 			expect(azukiUi.nfts).toEqual([nftAzuki1, nftAzuki2]);
@@ -768,6 +774,74 @@ describe('nfts.utils', () => {
 			});
 
 			expect(res).not.toBe(input);
+		});
+	});
+
+	describe('filterSortByCollection - date sorting', () => {
+		it('sorts NFTs by acquiredAt ascending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftNew, nftNewest, nftOld];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res).toEqual([nftOld, nftNew, nftNewest]);
+		});
+
+		it('sorts NFTs by acquiredAt descending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftOld, nftNewest, nftNew];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'desc' }
+			});
+
+			expect(res).toEqual([nftNewest, nftNew, nftOld]);
+		});
+
+		it('handles NFTs with missing acquiredAt gracefully', () => {
+			const nftWithDate = {
+				...nftAzuki1,
+				acquiredAt: new Date('2021-01-01')
+			};
+			const nftWithoutDate = {
+				...nftAzuki2,
+				acquiredAt: undefined
+			};
+
+			const input = [nftWithoutDate, nftWithDate];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res[0]).toBe(nftWithoutDate);
+			expect(res[1]).toBe(nftWithDate);
 		});
 	});
 
