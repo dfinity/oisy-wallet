@@ -1,14 +1,12 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { getContext } from 'svelte';
-	import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 	import GldtStakeWizard from '$icp/components/stake/gldt/GldtStakeWizard.svelte';
-	import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-	import { isTokenIcrc } from '$icp/utils/icrc.utils';
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 
 	interface Props {
 		amount: OptionAmount;
@@ -30,10 +28,7 @@
 
 	const { sendToken } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	let isGldtToken = $derived(
-		isTokenIcrc($sendToken) &&
-			($sendToken as IcrcCustomToken).ledgerCanisterId === GLDT_LEDGER_CANISTER_ID
-	);
+	let isGldtToken = $derived(isGLDTToken($sendToken));
 </script>
 
 {#if isGldtToken}
