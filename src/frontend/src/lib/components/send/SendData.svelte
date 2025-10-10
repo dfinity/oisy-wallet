@@ -54,6 +54,4 @@
 	<SendDataDestination {destination} />
 {/if}
 
-{@render fee?.()}
-
 {@render children?.()}
