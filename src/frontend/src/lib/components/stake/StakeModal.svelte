@@ -6,6 +6,7 @@
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -19,7 +20,7 @@
 	let modal: WizardModal<WizardStepsStake> | undefined = $state();
 	let currentStep: WizardStep<WizardStepsStake> | undefined = $state();
 	let stakeProgressStep: string = $state(ProgressStepsStake.INITIALIZATION);
-	let amount: number | undefined = $state();
+	let amount: OptionAmount = $state();
 
 	const steps: WizardSteps<WizardStepsStake> = $derived(
 		stakeWizardSteps({
