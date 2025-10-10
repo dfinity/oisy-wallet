@@ -1,4 +1,4 @@
-import type { TokenSection } from '$declarations/backend/backend.did';
+import type { TokenSection } from '$declarations/backend/declarations/backend.did';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 export const mapTokenSection = (section: TokenSection): CustomTokenSection | undefined => {

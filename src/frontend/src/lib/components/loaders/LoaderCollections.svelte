@@ -3,7 +3,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
-	import type { CustomToken } from '$declarations/backend/backend.did';
+	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
