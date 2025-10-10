@@ -1150,6 +1150,7 @@
 			"enable_media": "Bật media",
 			"disable_media": "Tắt media",
 			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Mở trong tab mới",
 			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
