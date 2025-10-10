@@ -31,6 +31,7 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
 		collection: NftCollection;
@@ -245,8 +246,24 @@
 
 			{#snippet toolbar()}
 				<div class="flex w-full gap-3">
-					{#if nonNullish(allowMedia)}
-						<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
+					{#if nonNullish(allowMedia) && !allowMedia}
+						<Button
+							colorStyle="secondary-light"
+							loading={saveLoading}
+							onclick={() => modalStore.close()}
+							testId={`${testId}-cancelButton`}
+						>
+							{$i18n.nfts.text.keep_media_disabled}
+						</Button>
+					{:else if nonNullish(allowMedia) && allowMedia}
+						<Button
+							colorStyle="secondary-light"
+							loading={saveLoading}
+							onclick={() => save(false)}
+							testId={`${testId}-disableMediaButton`}
+						>
+							{$i18n.nfts.text.disable_media}
+						</Button>
 					{:else}
 						<Button
 							colorStyle="secondary-light"
@@ -260,6 +277,7 @@
 					<Button
 						colorStyle="primary"
 						loading={saveLoading}
+						disabled={token?.section === CustomTokenSection.SPAM}
 						onclick={() => save(!allowMedia)}
 						testId={`${testId}-saveButton`}
 					>
