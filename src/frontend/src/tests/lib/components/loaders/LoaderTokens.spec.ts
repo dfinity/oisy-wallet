@@ -61,6 +61,10 @@ vi.mock('$sol/services/spl.services', () => ({
 	loadSplTokens: vi.fn(() => Promise.resolve())
 }));
 
+vi.mock('$lib/services/nft.services', () => ({
+	loadNfts: vi.fn(() => Promise.resolve())
+}));
+
 describe('LoaderTokens', () => {
 	const erc20NotInitStore = writable(true);
 	const erc721NotInitStore = writable(true);
@@ -72,7 +76,7 @@ describe('LoaderTokens', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 
-		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementationOnce(() => true);
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 
 		mockAuthStore();
 
