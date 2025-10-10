@@ -53,7 +53,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		[isTokensIcrc2, sourceToken],
 		([$isTokensIcrc2, $sourceToken]) => {
 			if (isNullish($sourceToken) || !isIcToken($sourceToken) || isNullish($isTokensIcrc2)) {
-				return undefined;
+				return;
 			}
 			return $isTokensIcrc2[$sourceToken.ledgerCanisterId];
 		}
