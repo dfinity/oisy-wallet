@@ -6,8 +6,8 @@ import type {
 	_SERVICE as SwapPoolService,
 	WithdrawArgs
 } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
-import { idlFactory as certifiedPoolIdlFactory } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.factory.certified.did';
-import { idlFactory as poolIdlFactory } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.factory.did';
+import { idlFactory as certifiedPoolIdlFactory } from '$declarations/icp_swap_pool/icp_swap_pool.factory.certified.did';
+import { idlFactory as poolIdlFactory } from '$declarations/icp_swap_pool/icp_swap_pool.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapIcpSwapFactoryError } from '$lib/canisters/icp-swap.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
