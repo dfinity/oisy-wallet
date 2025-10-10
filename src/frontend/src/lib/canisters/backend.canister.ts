@@ -12,7 +12,7 @@ import type {
 	UserProfile,
 	UserToken,
 	UserTokenId
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
 import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';

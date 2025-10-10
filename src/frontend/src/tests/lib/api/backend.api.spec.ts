@@ -4,7 +4,7 @@ import type {
 	PendingTransaction,
 	UserToken,
 	UserTokenId
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import {
 	addPendingBtcTransaction,
 	addUserCredential,

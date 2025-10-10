@@ -1,7 +1,7 @@
 import type {
 	UserAgreement as BackendUserAgreement,
 	UserAgreements as BackendUserAgreements
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { MILLISECONDS_IN_SECOND } from '$lib/constants/app.constants';
