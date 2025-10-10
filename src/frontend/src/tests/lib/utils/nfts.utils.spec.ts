@@ -5,6 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
@@ -886,7 +887,7 @@ describe('nfts.utils', () => {
 						h === 'Content-Type'
 							? 'image/jpeg'
 							: h === 'Content-Length'
-								? (5 * 1024 * 1024 + 1).toString()
+								? (NFT_MAX_FILESIZE_LIMIT + 1).toString()
 								: null
 				}
 			});
