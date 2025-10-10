@@ -181,18 +181,20 @@ export const getNftCollectionUi = ({
 			const entry = index.get(k);
 			if (entry) {
 				entry.nfts = [...entry.nfts, item];
-				entry.collection.newestAcquiredAt = new Date(
-					entry.nfts.reduce((max, nft) => {
-						const ts = nft.acquiredAt?.getTime() ?? 0;
-						return ts > max ? ts : max;
-					}, 0)
-				);
+				const newTimestamp = item.acquiredAt?.getTime() ?? 0;
+				const currentMax = entry.collection.newestAcquiredAt?.getTime() ?? 0;
+				if (newTimestamp > currentMax) {
+					entry.collection.newestAcquiredAt = new Date(newTimestamp);
+				}
 			} // only attach if the token exists
 			return acc;
 		}
 		const coll = mapTokenToCollection(item);
 		const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
-		const entry: NftCollectionUi = { collection: coll, nfts: [] };
+		const entry: NftCollectionUi = {
+			collection: { ...coll, newestAcquiredAt: new Date(0) },
+			nfts: []
+		};
 		index.set(k, entry);
 		acc = [...acc, entry];
 		return acc;
