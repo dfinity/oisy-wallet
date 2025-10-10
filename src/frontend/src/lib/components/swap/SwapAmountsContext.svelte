@@ -15,6 +15,7 @@
 	} from '$lib/stores/swap-amounts.store';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { Token } from '$lib/types/token';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 
 	interface Props {
 		amount: OptionAmount;
@@ -80,6 +81,10 @@
 		}
 
 		const parsedAmount = Number(amount);
+
+		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
+			return;
+		}
 
 		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
