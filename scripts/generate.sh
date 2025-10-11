@@ -5,10 +5,8 @@ set -exuo pipefail
   cat <<-EOF
 	Gets .did files and generates canister bindings from them.
 
-	Note: This does so WITHOUT deploying any canisters.  Typically "dfx generate"
-	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
-	This code just downloads the candid files and puts them where they would normally
-	be found for a local deployment.  Much faster!
+	Note: This does so WITHOUT deploying any canisters. This code just downloads the candid files
+	and puts them where they would normally be found for a local deployment.
 
 	Dependencies:
 	- Please install jq before running this script.
@@ -22,24 +20,38 @@ command -v jq &>/dev/null || {
   exit 1
 } >&2
 
+declarations_base="src/declarations"
+
 # Gets all .did files listed in dfx.json.
 #
-# .did files are placed in the local .dfx directory, where the .did files are expected by `dfx generate` and other commands.
+# .did files are placed in the `declarations` directory, where the .did files are expected by `icp-bindgen` and other commands.
 function install_did_files() {
   jq -r '.canisters | to_entries | .[] | select(.value.candid != null) | "\(.key) \(.value.candid)"' dfx.json |
     while read -r line; do
       IFS=', ' read -r -a array <<<"$line"
       canister_name="${array[0]}"
       source="${array[1]}"
-      filename="${source##*/}"
-      filename="${filename//-/_}" # dfx uses underscores rather than hyphens
-      destination=".dfx/local/canisters/${array[0]}/${filename}"
+      filename="${canister_name}.did"
+      destination="$declarations_base/${canister_name}/${filename}"
       mkdir -p "$(dirname "$destination")"
       case "$source" in
       http*) scripts/download-immutable.sh "$source" "$destination" ;;
       *) if test -e "$source"; then cp "$source" "$destination"; else echo "WARNING: $canister_name did file not found at $source"; fi ;;
       esac
     done
+}
+
+# Generate Rust bindings for cycles_ledger canister
+#
+# It first copy the candid file in the local .dfx directory (where dfx expects it), then calls the rust.sh script to generate the bindings.
+function generate_rust_bindings() {
+  canister="cycles_ledger"
+  filename="${canister}.did"
+  origin="$declarations_base/${canister}/${filename}"
+  destination=".dfx/local/canisters/${canister}/${filename}"
+  mkdir -p "$(dirname "$destination")"
+  cp "$origin" "$destination"
+  scripts/bind/rust.sh cycles_ledger
 }
 
 # Create local .did files
@@ -62,16 +74,20 @@ DFX_NETWORK=ic ./scripts/build.llm.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
-scripts/bind/rust.sh cycles_ledger
+generate_rust_bindings
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
-mapfile -t canisters < <(ls src/declarations/)
+mapfile -t canisters < <(ls "$declarations_base")
 for canister in "${canisters[@]}"; do
-  echo "Generating bindings for $canister"
-  dfx generate "$canister"
-  # Copy the generated files to subdirectories in src/declarations/$canister/declarations to adapt to the use of icp-bindgen
-  mkdir -p "src/declarations/${canister}/declarations"
-  cp -f "src/declarations/${canister}/${canister}.did.d.ts" "src/declarations/${canister}/declarations/${canister}.did.d.ts"
+  declaration_path="$declarations_base/$canister"
+  candid_file="$declaration_path/${canister}.did"
+  if [[ -f "$candid_file" ]]; then
+    echo "Generating bindings for $canister"
+    icp-bindgen --did-file "$candid_file" --out-dir "$declaration_path"
+  else
+    echo "WARNING: Candid file not found for $canister at $candid_file"
+  fi
 done
+
 # Clean up..
 node scripts/did.update.types.mjs
 node scripts/did.delete.types.mjs
