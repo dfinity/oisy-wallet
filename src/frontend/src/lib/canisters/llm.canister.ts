@@ -2,7 +2,7 @@ import type {
 	_SERVICE as LlmService,
 	chat_request_v1,
 	chat_response_v1
-} from '$declarations/llm/llm.did';
+} from '$declarations/llm/declarations/llm.did';
 import { idlFactory as idlCertifiedFactoryLlm } from '$declarations/llm/llm.factory.certified.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
