@@ -15,6 +15,7 @@ import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { CanisterIdText } from '$lib/types/canister';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
@@ -267,6 +268,7 @@ describe('icrc.services', () => {
 		});
 
 		describe('error', () => {
+			let spyToastsShow: MockInstance;
 			let spyToastsError: MockInstance;
 
 			beforeEach(() => {
@@ -285,6 +287,7 @@ describe('icrc.services', () => {
 				]);
 
 				spyToastsError = vi.spyOn(toastsStore, 'toastsError');
+				spyToastsShow = vi.spyOn(toastsStore, 'toastsShow');
 			});
 
 			it('should reset all and toasts on list custom tokens error', async () => {
@@ -350,6 +353,37 @@ describe('icrc.services', () => {
 				expect(console.error).toHaveBeenCalledTimes(2);
 				expect(console.error).toHaveBeenNthCalledWith(1, err);
 				expect(console.error).toHaveBeenNthCalledWith(2, err);
+			});
+
+			it('should show a toast on metadata error if the token was enabled', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{ ...mockCustomToken, enabled: true }
+				]);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).toHaveBeenCalledExactlyOnceWith({
+					text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+						$ledgerCanisterId: mockLedgerCanisterId
+					}),
+					level: 'warn'
+				});
+			});
+
+			it('should not show a toast on metadata error if the token was not enabled', async () => {
+				backendCanisterMock.listCustomTokens.mockResolvedValue([
+					{ ...mockCustomToken, enabled: false }
+				]);
+
+				const err = new Error('test');
+				ledgerCanisterMock.metadata.mockRejectedValue(err);
+
+				await loadCustomTokens({ identity: mockIdentity });
+
+				expect(spyToastsShow).not.toHaveBeenCalled();
 			});
 
 			it('should reset tokens on metadata error', async () => {

@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
 			"zero_fee": "مجاني",
 			"total_fee": "إجمالي الرسوم",
-			"ata_fee": "رسوم ATA"
+			"ata_fee": "رسوم ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1697,6 +1700,19 @@
 			"stablecoins_description": "قريبًا",
 			"sprinkles_title": "رشات",
 			"sprinkles_description": "مكافآت OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

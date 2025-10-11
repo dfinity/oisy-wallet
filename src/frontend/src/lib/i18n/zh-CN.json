@@ -1179,7 +1179,10 @@
 			"convert_btc_network_fee": "比特币网络手续费",
 			"zero_fee": "免费",
 			"total_fee": "总手续费",
-			"ata_fee": "ATA 手续费"
+			"ata_fee": "ATA 手续费",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1697,6 +1700,19 @@
 			"stablecoins_description": "即将推出",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 奖励"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

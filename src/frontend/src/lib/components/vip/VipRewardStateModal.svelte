@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { Modal } from '@dfinity/gix-components';
 	import { isNullish } from '@dfinity/utils';
-	import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import failedVipReward from '$lib/assets/failed-vip-reward.svg';
 	import successfulBinanceReward from '$lib/assets/successful-binance-reward.svg';
 	import successfulClickBeeReward from '$lib/assets/successful-clickbee-reward.svg';
@@ -29,18 +29,14 @@
 
 	let { isSuccessful, codeType = QrCodeType.VIP }: Props = $props();
 
-	const goldToken = $derived(
-		$enabledIcTokens.find((token) => token.ledgerCanisterId === GLDT_LEDGER_CANISTER_ID)
-	);
+	const goldToken = $derived($enabledIcTokens.find((token) => isGLDTToken(token)));
 
 	const enableGldtToken = async () => {
 		if (isNullish($authIdentity)) {
 			return;
 		}
 
-		const token = $icrcTokens.find(
-			({ ledgerCanisterId }) => ledgerCanisterId === GLDT_LEDGER_CANISTER_ID
-		);
+		const token = $icrcTokens.find((token) => isGLDTToken(token));
 
 		await autoLoadSingleToken({
 			token,

@@ -4,9 +4,9 @@ import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
-import type { IcrcAccount } from '@dfinity/ledger-icrc';
+import { toCandidAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable } from '@dfinity/utils';
+import { assertNonNullish } from '@dfinity/utils';
 
 export const transfer = async ({
 	identity,
@@ -47,10 +47,7 @@ export const icrc1Transfer = async ({
 	const { icrc1Transfer } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return icrc1Transfer({
-		to: {
-			owner: to.owner,
-			subaccount: toNullable(to.subaccount)
-		},
+		to: toCandidAccount(to),
 		amount,
 		createdAt: createdAt ?? nowInBigIntNanoSeconds()
 	});

@@ -20,7 +20,6 @@
 		showNullishAmountLabel?: boolean;
 		sourceNetwork: Snippet;
 		destinationNetwork?: Snippet;
-		fee?: Snippet;
 		children?: Snippet;
 	}
 
@@ -35,7 +34,6 @@
 		showNullishAmountLabel = false,
 		sourceNetwork,
 		destinationNetwork,
-		fee,
 		children
 	}: Props = $props();
 </script>
@@ -53,7 +51,5 @@
 {#if nonNullish(destination)}
 	<SendDataDestination {destination} />
 {/if}
-
-{@render fee?.()}
 
 {@render children?.()}
