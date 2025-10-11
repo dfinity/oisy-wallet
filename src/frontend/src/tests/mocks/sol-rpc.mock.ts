@@ -1,4 +1,4 @@
-import type { AccountInfo } from '$declarations/sol_rpc/sol_rpc.did';
+import type { AccountInfo } from '$declarations/sol_rpc/declarations/sol_rpc.did';
 import { SYSTEM_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 
