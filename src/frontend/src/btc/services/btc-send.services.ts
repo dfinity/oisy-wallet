@@ -4,7 +4,7 @@ import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
-import type { SendBtcResponse } from '$declarations/signer/signer.did';
+import type { SendBtcResponse } from '$declarations/signer/declarations/signer.did';
 import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
