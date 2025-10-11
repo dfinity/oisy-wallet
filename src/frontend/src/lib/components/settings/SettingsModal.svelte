@@ -10,12 +10,11 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 
-	let settingsType: SettingsModalType;
-	$: settingsType = $modalSettingsData;
+	let settingsType: SettingsModalType = $derived($modalSettingsData);
 
-	let modalTitle: string;
-	$: modalTitle =
-		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : '';
+	let modalTitle: string = $derived(
+		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : ''
+	);
 </script>
 
 <Modal onClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>

@@ -34,10 +34,10 @@
 	import { emit } from '$lib/utils/events.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
-	const enabledNetworks = { ...$userNetworks };
+	const enabledNetworks = $state({ ...$userNetworks });
 	const enabledNetworksInitial = { ...enabledNetworks };
 
-	let enabledTestnet = $testnetsEnabled;
+	let enabledTestnet = $state($testnetsEnabled);
 	const enabledTestnetInitial = enabledTestnet;
 
 	const checkModified = ({
@@ -58,8 +58,7 @@
 
 		return testnetModified || networkModified;
 	};
-	let isModified: boolean;
-	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
+	let isModified: boolean = $derived(checkModified({ enabledTestnet, enabledNetworks }));
 
 	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
@@ -72,7 +71,7 @@
 		};
 	};
 
-	let saveLoading = false;
+	let saveLoading = $state(false);
 
 	const save = async () => {
 		if (isNullish($authIdentity)) {

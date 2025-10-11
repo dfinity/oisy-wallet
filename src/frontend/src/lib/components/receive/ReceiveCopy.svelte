@@ -3,9 +3,13 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard.utils';
 
-	export let address: string;
-	export let copyAriaLabel: string;
-	export let testId: string | undefined = undefined;
+	interface Props {
+		address: string;
+		copyAriaLabel: string;
+		testId?: string;
+	}
+
+	let { address, copyAriaLabel, testId = undefined }: Props = $props();
 </script>
 
 <ButtonIcon

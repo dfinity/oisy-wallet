@@ -1,3 +1,6 @@
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (amount-info to amount_info) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (amount-info to amount_info) making the component unusable -->
+<!-- @migration-task Error while migrating Svelte code: This migration would change the name of a slot (amount-info to amount_info) making the component unusable -->
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';

@@ -190,7 +190,7 @@
 {/if}
 
 <style lang="scss">
-	:root:has(.insufficient-cycles-modal) {
+	:root:has(:global(.insufficient-cycles-modal)) {
 		--alert-max-width: 90vw;
 		--alert-max-height: initial;
 		--dialog-border-radius: calc(var(--border-radius-sm) * 3);

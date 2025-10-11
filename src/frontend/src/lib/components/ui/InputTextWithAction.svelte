@@ -46,5 +46,8 @@
 	on:focus
 	bind:inputElement
 >
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
+	<!-- @migration-task: migrate this slot by hand, `inner-end` is an invalid identifier -->
 	<svelte:fragment slot="inner-end">{@render innerEnd?.()}</svelte:fragment>
 </Input>
