@@ -1149,6 +1149,8 @@
 			"media_disabled": "Media disabled",
 			"enable_media": "Enable media",
 			"disable_media": "Disable media",
+			"keep_media_disabled": "Keep media disabled",
+			"keep_media_enabled": "Keep media enabled",
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
@@ -1178,7 +1180,10 @@
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee",
-			"ata_fee": "ATA fee"
+			"ata_fee": "ATA fee",
+			"transaction_fees": "Transaction fees",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1696,6 +1701,19 @@
 			"stablecoins_description": "Coming soon",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "Stake $token_symbol",
+			"enable_token_text": "You need to enable $token_symbol",
+			"enable_token_button": "Enable $token_symbol",
+			"review": "Review transaction",
+			"executing_transaction": "Executing transaction...",
+			"unsupported_token_staking": "Staking for the selected token is not supported.",
+			"provider": "Staking provider",
+			"current_apy": "Current APY",
+			"stake_review_subtitle": "You stake"
 		}
 	},
 	"temporal": {

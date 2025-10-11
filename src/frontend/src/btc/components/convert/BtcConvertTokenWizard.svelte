@@ -156,9 +156,8 @@
 <UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
 		<BtcConvertForm
+			{onNext}
 			source={sourceAddress}
-			on:icNext={onNext}
-			on:icClose={onClose}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:amountError

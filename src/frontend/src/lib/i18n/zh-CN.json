@@ -1149,6 +1149,8 @@
 			"media_disabled": "媒体已禁用",
 			"enable_media": "启用媒体",
 			"disable_media": "禁用媒体",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "在新标签页中打开",
 			"review_title": "为 \"$collectionName\" 审核媒体来源",
 			"review_description": "注意！这些图片来自未验证的来源。启用它们可能会将你的 IP 地址共享给第三方，并带来潜在的安全风险。",
@@ -1178,7 +1180,10 @@
 			"convert_btc_network_fee": "比特币网络手续费",
 			"zero_fee": "免费",
 			"total_fee": "总手续费",
-			"ata_fee": "ATA 手续费"
+			"ata_fee": "ATA 手续费",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1696,6 +1701,19 @@
 			"stablecoins_description": "即将推出",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 奖励"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

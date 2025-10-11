@@ -2,12 +2,13 @@
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
+	import GldtStakeContentCard from '$icp/components/stake/gldt/GldtStakeContentCard.svelte';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { networkUrl } from '$lib/utils/nav.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
@@ -43,4 +44,4 @@
 	<PageTitle>{$i18n.earning.cards.gold_description}</PageTitle>
 </div>
 
-<h3>Coming soon</h3>
+<GldtStakeContentCard />

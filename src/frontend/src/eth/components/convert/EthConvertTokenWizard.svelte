@@ -189,13 +189,7 @@
 	targetNetwork={ICP_NETWORK}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm
-			{destination}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			bind:sendAmount
-			bind:receiveAmount
-		>
+		<EthConvertForm {destination} {onNext} bind:sendAmount bind:receiveAmount>
 			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />

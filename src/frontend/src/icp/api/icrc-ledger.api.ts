@@ -6,18 +6,18 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import {
 	IcrcLedgerCanister,
+	toCandidAccount,
 	type GetBlocksParams,
 	type IcrcAccount,
 	type IcrcAllowance,
 	type IcrcBlockIndex,
 	type IcrcGetBlocksResult,
 	type IcrcStandardRecord,
-	type IcrcSubaccount,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, toNullable, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 /**
  * Retrieves metadata for the ICRC token.
@@ -126,7 +126,7 @@ export const transfer = async ({
 	const { transfer } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return transfer({
-		to: toAccount(to),
+		to: toCandidAccount(to),
 		amount,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
@@ -165,7 +165,7 @@ export const approve = async ({
 
 	return approve({
 		amount,
-		spender: toAccount(spender),
+		spender: toCandidAccount(spender),
 		expires_at,
 		created_at_time: createdAt ?? nowInBigIntNanoSeconds()
 	});
@@ -200,18 +200,10 @@ export const allowance = async ({
 
 	return allowance({
 		certified,
-		account: toAccount(owner),
-		spender: toAccount(spender)
+		account: toCandidAccount(owner),
+		spender: toCandidAccount(spender)
 	});
 };
-
-const toAccount = ({
-	owner,
-	subaccount
-}: IcrcAccount): { owner: Principal; subaccount: [] | [IcrcSubaccount] } => ({
-	owner,
-	subaccount: toNullable(subaccount)
-});
 
 export const getBlocks = async ({
 	certified = true,

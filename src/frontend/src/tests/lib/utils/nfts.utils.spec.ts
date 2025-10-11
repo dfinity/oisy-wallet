@@ -5,7 +5,8 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NftNetworkSchema } from '$lib/schema/nft.schema';
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import {
@@ -18,6 +19,7 @@ import {
 	findRemovedNfts,
 	getAllowMediaForNft,
 	getEnabledNfts,
+	getMediaStatus,
 	getNftCollectionUi,
 	getUpdatedNfts,
 	mapTokenToCollection,
@@ -552,8 +554,14 @@ describe('nfts.utils', () => {
 				res[0].collection.address === AZUKI_ELEMENTAL_BEANS_TOKEN.address ? res : [res[1], res[0]];
 
 			// collection info matches mapTokenToCollection
-			expect(azukiUi.collection).toEqual(mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN));
-			expect(deGodsUi.collection).toEqual(mapTokenToCollection(DE_GODS_TOKEN));
+			expect(azukiUi.collection).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
+			expect({ ...azukiUi.collection, newestAcquiredAt: new Date(0) }).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
 
 			// nfts grouped by collection AND network (the ETH one must be excluded)
 			expect(azukiUi.nfts).toEqual([nftAzuki1, nftAzuki2]);
@@ -770,6 +778,74 @@ describe('nfts.utils', () => {
 		});
 	});
 
+	describe('filterSortByCollection - date sorting', () => {
+		it('sorts NFTs by acquiredAt ascending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftNew, nftNewest, nftOld];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res).toEqual([nftOld, nftNew, nftNewest]);
+		});
+
+		it('sorts NFTs by acquiredAt descending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftOld, nftNewest, nftNew];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'desc' }
+			});
+
+			expect(res).toEqual([nftNewest, nftNew, nftOld]);
+		});
+
+		it('handles NFTs with missing acquiredAt gracefully', () => {
+			const nftWithDate = {
+				...nftAzuki1,
+				acquiredAt: new Date('2021-01-01')
+			};
+			const nftWithoutDate = {
+				...nftAzuki2,
+				acquiredAt: undefined
+			};
+
+			const input = [nftWithoutDate, nftWithDate];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res[0]).toBe(nftWithoutDate);
+			expect(res[1]).toBe(nftWithDate);
+		});
+	});
+
 	describe('findNonFungibleToken', () => {
 		const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN];
 
@@ -820,6 +896,79 @@ describe('nfts.utils', () => {
 			const result = getAllowMediaForNft(params);
 
 			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('getMediaStatus', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
+		});
+
+		it('returns OK for valid image under 1MB', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? '500000' : null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns INVALID_DATA for invalid URL', async () => {
+			const result = await getMediaStatus('not-a-url');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns INVALID_DATA when fetch throws', async () => {
+			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns INVALID_DATA when headers are missing', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: { get: () => null }
+			});
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+		});
+
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? '100' : null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/video.mp4');
+
+			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+		});
+
+		it('returns FILESIZE_LIMIT_EXCEEDED when file size > 5MB', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/jpeg'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT + 1).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/large.jpg');
+
+			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 		});
 	});
 });

@@ -1149,6 +1149,8 @@
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
@@ -1178,7 +1180,10 @@
 			"convert_btc_network_fee": "Fee di rete Bitcoin",
 			"zero_fee": "Gratis",
 			"total_fee": "Fee totale",
-			"ata_fee": "Fee ATA"
+			"ata_fee": "Fee ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Saldo insufficiente per coprire le fee."
@@ -1696,6 +1701,19 @@
 			"stablecoins_description": "Prossimamente",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Ricompense OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

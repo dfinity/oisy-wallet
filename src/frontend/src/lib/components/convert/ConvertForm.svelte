@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { type Snippet, createEventDispatcher } from 'svelte';
+	import type { Snippet } from 'svelte';
 	import ConvertAmount from '$lib/components/convert/ConvertAmount.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -10,37 +10,37 @@
 
 	interface Props {
 		sendAmount: OptionAmount;
-		receiveAmount: number | undefined;
-		totalFee: bigint | undefined;
+		receiveAmount?: number;
+		totalFee?: bigint;
 		destinationTokenFee?: bigint;
 		minFee?: bigint;
 		ethereumEstimateFee?: bigint;
 		disabled: boolean;
 		testId?: string;
-		message?: Snippet;
+		onNext: () => void;
+		message: Snippet;
 		destination?: Snippet;
-		fee?: Snippet;
-		cancel?: Snippet;
+		fee: Snippet;
+		cancel: Snippet;
 	}
 
 	let {
 		sendAmount = $bindable(),
 		receiveAmount = $bindable(),
 		totalFee,
-		destinationTokenFee = undefined,
-		minFee = undefined,
-		ethereumEstimateFee = undefined,
+		destinationTokenFee,
+		minFee,
+		ethereumEstimateFee,
 		disabled,
-		testId = undefined,
+		testId,
+		onNext,
 		message,
 		destination,
 		fee,
 		cancel
 	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
-
-	let exchangeValueUnit: DisplayUnit = $state('usd');
+	let exchangeValueUnit = $state<DisplayUnit>('usd');
 </script>
 
 <ContentWithToolbar {testId}>
@@ -55,18 +55,18 @@
 	/>
 
 	<div class="mt-6">
-		{@render message?.()}
+		{@render message()}
 
 		{@render destination?.()}
 
-		{@render fee?.()}
+		{@render fee()}
 	</div>
 
 	{#snippet toolbar()}
 		<ButtonGroup>
-			{@render cancel?.()}
+			{@render cancel()}
 
-			<Button {disabled} onclick={() => dispatch('icNext')} testId="convert-form-button-next">
+			<Button {disabled} onclick={onNext} testId="convert-form-button-next">
 				{$i18n.convert.text.review_button}
 			</Button>
 		</ButtonGroup>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { type Snippet, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -19,15 +19,17 @@
 
 	interface Props {
 		sendAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		destination?: string;
-		cancel?: Snippet;
+		onNext: () => void;
+		cancel: Snippet;
 	}
 
 	let {
 		sendAmount = $bindable(),
 		receiveAmount = $bindable(),
 		destination = '',
+		onNext,
 		cancel
 	}: Props = $props();
 
@@ -38,22 +40,21 @@
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	let invalid: boolean = $derived(
+	let invalid = $derived(
 		$insufficientFunds ||
 			$insufficientFundsForFee ||
 			invalidAmount(sendAmount) ||
 			isNullishOrEmpty(destination)
 	);
-
-	const cancel_render = $derived(cancel);
 </script>
 
 <ConvertForm
+	{cancel}
 	disabled={invalid}
 	minFee={$minGasFee}
+	{onNext}
 	testId={ETH_CONVERT_FORM_TEST_ID}
 	totalFee={$maxGasFee}
-	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
 >
@@ -73,9 +74,5 @@
 				<Html text={$i18n.fee.text.convert_fee} />
 			{/snippet}
 		</EthFeeDisplay>
-	{/snippet}
-
-	{#snippet cancel()}
-		{@render cancel_render?.()}
 	{/snippet}
 </ConvertForm>

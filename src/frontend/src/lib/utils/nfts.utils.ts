@@ -1,4 +1,5 @@
-import { NftCollectionSchema } from '$lib/schema/nft.schema';
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { EthAddress } from '$lib/types/address';
 import type { NftError } from '$lib/types/errors';
@@ -179,14 +180,22 @@ export const getNftCollectionUi = ({
 		if ('collection' in item) {
 			const k = keyOf({ addr: item.collection.address, netId: String(item.collection.network.id) });
 			const entry = index.get(k);
-			if (entry) {
+			if (nonNullish(entry)) {
 				entry.nfts = [...entry.nfts, item];
+				const newTimestamp = item.acquiredAt?.getTime() ?? 0;
+				const currentMax = entry.collection.newestAcquiredAt?.getTime() ?? 0;
+				if (newTimestamp > currentMax) {
+					entry.collection.newestAcquiredAt = new Date(newTimestamp);
+				}
 			} // only attach if the token exists
 			return acc;
 		}
 		const coll = mapTokenToCollection(item);
 		const k = keyOf({ addr: coll.address, netId: String(coll.network.id) });
-		const entry: NftCollectionUi = { collection: coll, nfts: [] };
+		const entry: NftCollectionUi = {
+			collection: { ...coll, newestAcquiredAt: new Date(0) },
+			nfts: []
+		};
 		index.set(k, entry);
 		acc = [...acc, entry];
 		return acc;
@@ -204,6 +213,25 @@ const cmpByCollectionName =
 		const an = a.collection?.name ?? '';
 		const bn = b.collection?.name ?? '';
 		return collator.compare(an, bn) * dir;
+	};
+
+const cmpByAcquiredDate =
+	(dir: number) =>
+	({ a, b }: { a: Nft | NftCollectionUi; b: Nft | NftCollectionUi }): number => {
+		const getNewestAcquiredAt = (item: Nft | NftCollectionUi): number => {
+			if (isNft(item)) {
+				return item.acquiredAt?.getTime() ?? 0;
+			}
+			if (isCollectionUi(item)) {
+				return item.collection.newestAcquiredAt?.getTime() ?? 0;
+			}
+			return 0;
+		};
+
+		const an = getNewestAcquiredAt(a);
+		const bn = getNewestAcquiredAt(b);
+
+		return (an - bn) * dir;
 	};
 
 // Overloads (so TS keeps the exact array element type on return)
@@ -283,6 +311,8 @@ export const filterSortByCollection: FilterSortByCollection = <T extends Nft | N
 
 		if (sort.type === 'collection-name') {
 			result = [...result].sort((a, b) => cmpByCollectionName(dir)({ a, b }));
+		} else if (sort.type === 'date') {
+			result = [...result].sort((a, b) => cmpByAcquiredDate(dir)({ a, b }));
 		} else {
 			// extendable, for now we return a copy of the list
 			result = [...result];
@@ -310,3 +340,30 @@ export const getAllowMediaForNft = (params: {
 	address: EthAddress;
 	networkId: NetworkId;
 }): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
+
+export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	try {
+		const url = new URL(mediaUrl ?? '');
+		const response = await fetch(url.href, { method: 'HEAD' });
+
+		const type = response.headers.get('Content-Type');
+		const size = response.headers.get('Content-Length');
+
+		if (isNullish(type) || isNullish(size)) {
+			return NftMediaStatusEnum.INVALID_DATA;
+		}
+
+		if (nonNullish(type) && !type.startsWith('image/')) {
+			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
+		}
+
+		if (nonNullish(size) && Number(size) > NFT_MAX_FILESIZE_LIMIT) {
+			// 1MB
+			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
+		}
+	} catch (_: unknown) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	return NftMediaStatusEnum.OK;
+};

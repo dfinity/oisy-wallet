@@ -206,9 +206,8 @@
 			<IcConvertForm
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
-				on:icNext={onNext}
-				on:icClose={onClose}
-				on:icDestination={onDestination}
+				{onDestination}
+				{onNext}
 				bind:sendAmount
 				bind:receiveAmount
 			>

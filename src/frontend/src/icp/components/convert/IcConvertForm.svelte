@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { fromNullable, nonNullish } from '@dfinity/utils';
-	import { type Snippet, createEventDispatcher, getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import IcTokenFees from '$icp/components/fee/IcTokenFees.svelte';
 	import { ethereumFeeTokenCkEth } from '$icp/derived/ethereum-fee.derived';
@@ -20,24 +20,27 @@
 		type TokenActionValidationErrorsContext
 	} from '$lib/stores/token-action-validation-errors.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import type { Token } from '$lib/types/token';
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
 	interface Props {
 		sendAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 		destination?: string;
 		isDestinationCustom?: boolean;
-		cancel?: Snippet;
+		onNext: () => void;
+		onDestination: () => void;
+		cancel: Snippet;
 	}
 
 	let {
 		sendAmount = $bindable(),
 		receiveAmount = $bindable(),
-		destination = '',
+		destination: destinationProp = '',
 		isDestinationCustom = false,
+		onNext,
+		onDestination,
 		cancel
 	}: Props = $props();
 
@@ -53,9 +56,7 @@
 		minterInfoNotCertified
 	} = getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
-	let invalid: boolean = $derived(
+	let invalid = $derived(
 		$insufficientFunds ||
 			$insufficientFundsForFee ||
 			$amountLessThanLedgerFee ||
@@ -63,12 +64,12 @@
 			$unknownMinimumAmount ||
 			$minterInfoNotCertified ||
 			invalidAmount(sendAmount) ||
-			isNullishOrEmpty(destination)
+			isNullishOrEmpty(destinationProp)
 	);
 
-	let isCkBtc: boolean = $derived(isTokenCkBtcLedger($sourceToken));
+	let isCkBtc = $derived(isTokenCkBtcLedger($sourceToken));
 
-	let formattedMinterMinimumAmount: string | undefined = $derived(
+	let formattedMinterMinimumAmount = $derived(
 		formatToken({
 			value: isCkBtc
 				? ($ckBtcMinterInfoStore?.[$sourceToken.id]?.data.retrieve_btc_min_amount ?? ZERO)
@@ -80,15 +81,15 @@
 		})
 	);
 
-	let totalSourceTokenFee: bigint | undefined = $state();
-	let totalDestinationTokenFee: bigint | undefined = $state();
-	let ethereumEstimateFee: bigint | undefined = $state();
+	let totalSourceTokenFee = $state<bigint | undefined>();
+	let totalDestinationTokenFee = $state<bigint | undefined>();
+	let ethereumEstimateFee = $state<bigint | undefined>();
 
-	let tokenForFee: Token = $derived(
+	let tokenForFee = $derived(
 		isCkBtc ? $sourceToken : ($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken)
 	);
 
-	let errorMessage: string | undefined = $derived(
+	let errorMessage = $derived(
 		$insufficientFundsForFee
 			? replacePlaceholders($i18n.send.assertion.not_enough_tokens_for_gas, {
 					$symbol: tokenForFee.symbol,
@@ -115,24 +116,23 @@
 						: undefined
 	);
 
-	let infoMessage: string | undefined = $derived(
+	let infoMessage = $derived(
 		$minterInfoNotCertified
 			? isCkBtc
 				? $i18n.send.info.ckbtc_certified
 				: $i18n.send.info.cketh_certified
 			: undefined
 	);
-
-	const cancel_render = $derived(cancel);
 </script>
 
 <ConvertForm
+	{cancel}
 	destinationTokenFee={totalDestinationTokenFee}
 	disabled={invalid}
 	{ethereumEstimateFee}
+	{onNext}
 	testId={IC_CONVERT_FORM_TEST_ID}
 	totalFee={totalSourceTokenFee}
-	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
 >
@@ -147,11 +147,11 @@
 	{/snippet}
 
 	{#snippet destination()}
-		<DestinationValue {destination} {isDestinationCustom} token={$destinationToken}>
+		<DestinationValue destination={destinationProp} {isDestinationCustom} token={$destinationToken}>
 			<button
 				class="text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 				aria-label={$i18n.core.text.change}
-				onclick={() => dispatch('icDestination')}
+				onclick={onDestination}
 			>
 				{$i18n.core.text.change} >
 			</button>
@@ -167,9 +167,5 @@
 			bind:totalDestinationTokenFee
 			bind:ethereumEstimateFee
 		/>
-	{/snippet}
-
-	{#snippet cancel()}
-		{@render cancel_render?.()}
 	{/snippet}
 </ConvertForm>

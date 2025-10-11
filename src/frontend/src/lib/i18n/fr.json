@@ -1149,6 +1149,8 @@
 			"media_disabled": "Média désactivé",
 			"enable_media": "Activer le média",
 			"disable_media": "Désactiver le média",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Ouvrir dans un nouvel onglet",
 			"review_title": "Examiner les sources de médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
@@ -1178,7 +1180,10 @@
 			"convert_btc_network_fee": "Frais de réseau Bitcoin",
 			"zero_fee": "Gratuit",
 			"total_fee": "Frais totaux",
-			"ata_fee": "Frais ATA"
+			"ata_fee": "Frais ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir les frais."
@@ -1696,6 +1701,19 @@
 			"stablecoins_description": "Bientôt disponible",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Récompenses OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

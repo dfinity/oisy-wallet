@@ -29,14 +29,23 @@ export const NftCollectionSchema = z.object({
 	symbol: z.string().optional(),
 	bannerImageUrl: z.url().optional(),
 	description: z.string().optional(),
-	acquiredAt: z.date().optional(),
-	network: NftNetworkSchema
+	network: NftNetworkSchema,
+	newestAcquiredAt: z.date().optional()
 });
+
+export enum NftMediaStatusEnum {
+	OK = 'ok',
+	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
+	NON_SUPPORTED_MEDIA_TYPE = 'non_supported_media_type',
+	INVALID_DATA = 'invalid_data'
+}
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
-	collection: NftCollectionSchema
+	collection: NftCollectionSchema,
+	acquiredAt: z.date().optional(),
+	mediaStatus: z.enum(NftMediaStatusEnum).optional()
 });
 
 export const OwnedContractSchema = z.object({
