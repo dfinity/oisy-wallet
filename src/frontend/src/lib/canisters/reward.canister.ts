@@ -8,7 +8,7 @@ import type {
 	UserData,
 	UserSnapshot,
 	VipReward
-} from '$declarations/rewards/rewards.did';
+} from '$declarations/rewards/declarations/rewards.did';
 import { idlFactory as idlCertifiedFactoryReward } from '$declarations/rewards/rewards.factory.certified.did';
 import { idlFactory as idlFactoryReward } from '$declarations/rewards/rewards.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
