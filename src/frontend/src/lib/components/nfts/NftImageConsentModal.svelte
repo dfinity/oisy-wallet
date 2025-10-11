@@ -12,13 +12,13 @@
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -112,7 +112,7 @@
 </script>
 
 <div style="--color-border-secondary: transparent">
-	<Modal {onClose} {testId}>
+	<Modal disablePointerEvents={saveLoading} {onClose} {testId}>
 		{#snippet title()}{/snippet}
 
 		<ContentWithToolbar>
@@ -245,26 +245,61 @@
 
 			{#snippet toolbar()}
 				<div class="flex w-full gap-3">
-					{#if nonNullish(allowMedia)}
-						<ButtonCancel onclick={() => modalStore.close()} testId={`${testId}-cancelButton`} />
+					{#if nonNullish(allowMedia) && !allowMedia}
+						<Button
+							colorStyle="secondary-light"
+							loading={saveLoading}
+							onclick={() => modalStore.close()}
+							testId={`${testId}-keepDisabledButton`}
+						>
+							{$i18n.nfts.text.keep_media_disabled}
+						</Button>
+						<Button
+							colorStyle="secondary-light"
+							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
+							onclick={() => save(true)}
+							testId={`${testId}-enableButton`}
+						>
+							{$i18n.nfts.text.enable_media}
+						</Button>
+					{:else if nonNullish(allowMedia) && allowMedia}
+						<Button
+							colorStyle="secondary-light"
+							loading={saveLoading}
+							onclick={() => save(false)}
+							testId={`${testId}-disableButton`}
+						>
+							{$i18n.nfts.text.disable_media}
+						</Button>
+						<Button
+							colorStyle="secondary-light"
+							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
+							onclick={() => modalStore.close()}
+							testId={`${testId}-keepEnabledButton`}
+						>
+							{$i18n.nfts.text.keep_media_enabled}
+						</Button>
 					{:else}
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => save(false)}
-							testId={`${testId}-keepMediaDisabledButton`}
+							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
 						</Button>
+						<Button
+							colorStyle="secondary-light"
+							disabled={token?.section === CustomTokenSection.SPAM}
+							loading={saveLoading}
+							onclick={() => save(true)}
+							testId={`${testId}-enableButton`}
+						>
+							{$i18n.nfts.text.enable_media}
+						</Button>
 					{/if}
-					<Button
-						colorStyle="primary"
-						loading={saveLoading}
-						onclick={() => save(!allowMedia)}
-						testId={`${testId}-saveButton`}
-					>
-						{allowMedia ? $i18n.nfts.text.disable_media : $i18n.nfts.text.enable_media}
-					</Button>
 				</div>
 			{/snippet}
 		</ContentWithToolbar>
