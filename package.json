@@ -106,7 +106,7 @@
 		"@dfinity/ic-management": "^7.1.1",
 		"@dfinity/identity-secp256k1": "^3.2.6",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
-		"@playwright/test": "^1.55.1",
+		"@playwright/test": "^1.56.0",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.44.0",
