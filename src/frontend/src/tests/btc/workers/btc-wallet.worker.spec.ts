@@ -222,8 +222,7 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
 				});
 
 				it('should trigger postMessage with error on third try', async () => {

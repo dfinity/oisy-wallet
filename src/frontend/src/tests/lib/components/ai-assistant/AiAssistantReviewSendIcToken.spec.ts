@@ -66,9 +66,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith(
-			expect.objectContaining({
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 				to: mockPrincipalText,
 				amount: parseToken({
 					value: `${sendAmount}`,
@@ -76,8 +74,7 @@ describe('AiAssistantReviewSendIcToken', () => {
 				}),
 				identity: mockIdentity,
 				token: ckBtcToken
-			})
-		);
+			}));
 	});
 
 	it('should not call send if authIdentity is not defined', async () => {

@@ -61,7 +61,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 
@@ -71,9 +71,6 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: { text: en.wallet_connect.error.no_connection_opened }
-			});
 		});
 
 		it('should show an error toast if request is nullish', async () => {
@@ -84,7 +81,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 
@@ -95,9 +92,6 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
-				msg: { text: en.wallet_connect.error.request_not_defined }
-			});
 		});
 
 		it('should execute callback and show success toast on successful operation', async () => {

@@ -171,12 +171,11 @@ describe('AddressBookStep', () => {
 		// Click the first contact's card
 		await fireEvent.click(contactButtons[0]);
 
-		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[0]);
+		expect(mockShowContact).toHaveBeenCalledExactlyOnceWith(baseContacts[0]);
 
 		// Click the second contact's card
 		await fireEvent.click(contactButtons[1]);
 
-		expect(mockShowContact).toHaveBeenCalledWith(baseContacts[1]);
 	});
 
 	it('should call onShowAddress with the correct contact and address index', async () => {

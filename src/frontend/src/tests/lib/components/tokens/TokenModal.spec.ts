@@ -111,8 +111,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				indexCanisterId: MOCK_CANISTER_ID_1,
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
@@ -150,8 +149,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
 				enabled: true,

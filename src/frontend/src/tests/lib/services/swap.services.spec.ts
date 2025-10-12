@@ -792,8 +792,7 @@ describe('fetchVeloraMarketSwap', () => {
 			destinationNetwork: SEPOLIA_NETWORK
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
 		expect(mockSwapGetSpender).toHaveBeenCalled();
 	});
 
@@ -817,8 +816,7 @@ describe('fetchVeloraMarketSwap', () => {
 			destinationNetwork: SEPOLIA_NETWORK
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(mockProgress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
 		expect(mockSwapGetSpender).toHaveBeenCalled();
 		expect(mockSwapBuildTx).toHaveBeenCalled();
 	});

@@ -265,8 +265,7 @@ describe('sol-signatures.services', () => {
 				tokenOwnerAddress: TOKEN_PROGRAM_ADDRESS
 			});
 
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledOnce();
-			expect(spyFindAssociatedTokenPda).toHaveBeenCalledWith({
+			expect(spyFindAssociatedTokenPda).toHaveBeenCalledExactlyOnceWith({
 				owner: mockSolAddress,
 				tokenProgram: address(TOKEN_PROGRAM_ADDRESS),
 				mint: mockSplAddress

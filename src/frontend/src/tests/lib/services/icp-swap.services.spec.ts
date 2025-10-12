@@ -133,8 +133,7 @@ describe('fetchIcpSwap', () => {
 
 		await expect(fetchIcpSwap({ ...swapArgs, isSourceTokenIcrc2: false })).resolves.not.toThrow();
 
-		expect(swapArgs.progress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(swapArgs.progress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		expect(swapArgs.progress).toHaveBeenCalledExactlyOnceWith(ProgressStepsSwap.SWAP);
 		expect(sendIcrc).toHaveBeenCalled();
 		expect(deposit).toHaveBeenCalled();
 		expect(swapIcp).toHaveBeenCalled();

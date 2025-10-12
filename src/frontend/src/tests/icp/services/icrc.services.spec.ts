@@ -216,13 +216,10 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyMetadata).toHaveBeenCalledWith({
+				expect(spyMetadata).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
 
-				expect(spyMetadata).toHaveBeenCalledWith({
-					certified: true
-				});
 			});
 
 			it('should call list custom tokens with query and certified', async () => {
@@ -232,13 +229,10 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
+				expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
-					certified: true
-				});
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {

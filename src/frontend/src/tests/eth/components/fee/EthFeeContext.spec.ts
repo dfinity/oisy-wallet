@@ -149,15 +149,12 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
-
-		expect(feeStore.setFee).toHaveBeenCalledWith(
-			expect.objectContaining({
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 				gas: 25n,
 				maxFeePerGas: 12n,
 				maxPriorityFeePerGas: 7n
-			})
-		);
+			}));
+
 	});
 
 	it('sets fee for ckERC20 twin using getCkErc20FeeData', async () => {
@@ -168,13 +165,10 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
-
-		expect(feeStore.setFee).toHaveBeenCalledWith(
-			expect.objectContaining({
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 				gas: 123n
-			})
-		);
+			}));
+
 	});
 
 	it('sets fee for NFT (ERC-721) by encoding and estimating gas', async () => {
@@ -197,30 +191,25 @@ describe('EthFeeContext', () => {
 
 		await vi.runAllTimersAsync();
 
-		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledOnce();
-
-		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledWith({
+		expect(nftSend.encodeErc721SafeTransfer).toHaveBeenCalledExactlyOnceWith({
 			contractAddress: nft.collection.address,
 			from: fromAddr,
 			to: destination,
 			tokenId: nft.id
 		});
 
-		expect(provider.estimateGas).toHaveBeenCalledOnce();
 
-		expect(provider.estimateGas).toHaveBeenCalledWith({
+		expect(provider.estimateGas).toHaveBeenCalledExactlyOnceWith({
 			from: fromAddr,
 			to: '0x2222222222222222222222222222222222222222',
 			data: '0xdeadbeef'
 		});
 
-		expect(feeStore.setFee).toHaveBeenCalledOnce();
 
-		expect(feeStore.setFee).toHaveBeenCalledWith(
-			expect.objectContaining({
+		expect(feeStore.setFee).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 				gas: 90n
-			})
-		);
+			}));
+
 	});
 
 	it('does nothing when no eth address is available', async () => {

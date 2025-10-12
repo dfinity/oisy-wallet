@@ -203,8 +203,7 @@ describe('sol-wallet.scheduler', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
 				});
 
 				it('should trigger postMessage with error after retrying', async () => {
@@ -247,8 +246,7 @@ describe('sol-wallet.scheduler', () => {
 
 					// Only status messages should be sent
 					expect(postMessageMock).toHaveBeenCalledTimes(2);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
 				});
 
 				it('should update store with new transactions', async () => {

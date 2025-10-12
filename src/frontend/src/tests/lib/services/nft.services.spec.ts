@@ -173,10 +173,7 @@ describe('nft.services', () => {
 				progress
 			});
 
-			expect(transfer721Spy).toHaveBeenCalledOnce();
-			expect(transfer1155Spy).not.toHaveBeenCalled();
-
-			expect(transfer721Spy).toHaveBeenCalledWith({
+			expect(transfer721Spy).toHaveBeenCalledExactlyOnceWith({
 				contractAddress: token721.address,
 				tokenId,
 				sourceNetwork: token721.network,
@@ -188,6 +185,8 @@ describe('nft.services', () => {
 				maxPriorityFeePerGas,
 				progress
 			});
+			expect(transfer1155Spy).not.toHaveBeenCalled();
+
 		});
 
 		it('calls transferErc1155 for an ERC-1155 token with id=tokenId and amount=1n', async () => {
@@ -206,11 +205,7 @@ describe('nft.services', () => {
 				progress
 			});
 
-			expect(transfer1155Spy).toHaveBeenCalledOnce();
-			expect(transfer721Spy).not.toHaveBeenCalled();
-
-			expect(transfer1155Spy).toHaveBeenCalledWith(
-				expect.objectContaining({
+			expect(transfer1155Spy).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
 					contractAddress: token1155.address,
 					id: tokenId,
 					amount: 1n, // fixed amount
@@ -222,8 +217,9 @@ describe('nft.services', () => {
 					maxFeePerGas,
 					maxPriorityFeePerGas,
 					progress: expect.any(Function)
-				})
-			);
+				}));
+			expect(transfer721Spy).not.toHaveBeenCalled();
+
 		});
 
 		it('returns early and does not call transfer functions when identity is nullish', async () => {
