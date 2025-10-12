@@ -54,6 +54,5 @@ describe('Tabs', () => {
 		expect(goto).toHaveBeenCalledExactlyOnceWith('test1');
 
 		await fireEvent.click(tab1);
-
 	});
 });

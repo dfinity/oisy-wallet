@@ -596,7 +596,6 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				await awaitJobExecution();
 
 				expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageNotCertified);
-
 			});
 
 			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {

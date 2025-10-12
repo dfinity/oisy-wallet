@@ -125,7 +125,6 @@ describe('LoaderNfts', () => {
 					tokens: [mockedEnabledAzukiToken, mockedEnabledGodsToken]
 				});
 
-
 				expect(get(nftStore)).toEqual([mockErc721Nft1, mockErc721Nft2, mockErc721Nft3]);
 			});
 		});
@@ -152,7 +151,6 @@ describe('LoaderNfts', () => {
 					address: mockEthAddress,
 					tokens: [mockedEnabledNyanToken]
 				});
-
 
 				expect(get(nftStore)).toEqual([mockErc1155Nft1, mockErc1155Nft2, mockErc1155Nft3]);
 			});

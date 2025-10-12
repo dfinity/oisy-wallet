@@ -124,7 +124,9 @@ describe('address.services', () => {
 			expect(result).toEqual({ success: true });
 			expect(mockGetIdbAddress).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
 			expect(mockAddressStore.set).toHaveBeenCalledWith({ data: mockAddress, certified: false });
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should handle errors gracefully and return a failure result', async () => {
@@ -137,7 +139,9 @@ describe('address.services', () => {
 			expect(mockUpdateIdbAddressLastUsage).not.toHaveBeenCalled();
 			expect(mockAddressStore.set).not.toHaveBeenCalled();
 
-			expect(console.error).toHaveBeenCalledExactlyOnceWith(`Error encountered while searching for locally stored ${mockNetworkId.description} public address in the browser.`);
+			expect(console.error).toHaveBeenCalledExactlyOnceWith(
+				`Error encountered while searching for locally stored ${mockNetworkId.description} public address in the browser.`
+			);
 		});
 	});
 
@@ -163,7 +167,9 @@ describe('address.services', () => {
 				data: mockAddress,
 				certified: true
 			});
-			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(mockIdentity.getPrincipal());
+			expect(mockUpdateIdbAddressLastUsage).toHaveBeenCalledExactlyOnceWith(
+				mockIdentity.getPrincipal()
+			);
 		});
 
 		it('should return error when address does not match certified address', async () => {

@@ -169,7 +169,6 @@ describe('ic-wallet-balance.worker', () => {
 					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageStatusInProgress);
-
 				});
 
 				it('should postMessage with balance', async () => {
@@ -178,7 +177,6 @@ describe('ic-wallet-balance.worker', () => {
 					await awaitJobExecution();
 
 					expect(postMessageMock).toHaveBeenCalledExactlyOnceWith(mockPostMessageNotCertified);
-
 				});
 			}
 		};

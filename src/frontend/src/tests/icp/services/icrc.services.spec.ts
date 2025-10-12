@@ -219,7 +219,6 @@ describe('icrc.services', () => {
 				expect(spyMetadata).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
-
 			});
 
 			it('should call list custom tokens with query and certified', async () => {
@@ -232,7 +231,6 @@ describe('icrc.services', () => {
 				expect(spyListCustomTokens).toHaveBeenCalledExactlyOnceWith({
 					certified: false
 				});
-
 			});
 
 			it('should cache the custom tokens in IDB on update call', async () => {

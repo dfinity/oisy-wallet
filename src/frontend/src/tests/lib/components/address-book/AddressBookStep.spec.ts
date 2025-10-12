@@ -175,7 +175,6 @@ describe('AddressBookStep', () => {
 
 		// Click the second contact's card
 		await fireEvent.click(contactButtons[1]);
-
 	});
 
 	it('should call onShowAddress with the correct contact and address index', async () => {

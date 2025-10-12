@@ -151,7 +151,8 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+		expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
 				from: fromAddr,
 				to: destination,
 				token: ETHEREUM_TOKEN,
@@ -159,8 +160,8 @@ describe('EthSendTokenWizard.spec', () => {
 				gas: 100n,
 				maxFeePerGas: 2_000_000n,
 				maxPriorityFeePerGas: 1_000_000n
-			}));
-
+			})
+		);
 
 		expect(nftServices.sendNft).not.toHaveBeenCalled();
 	});
@@ -184,7 +185,8 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(nftServices.sendNft).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+		expect(nftServices.sendNft).toHaveBeenCalledExactlyOnceWith(
+			expect.objectContaining({
 				token: collectionToken,
 				tokenId: nft.id,
 				toAddress: destination,
@@ -192,8 +194,8 @@ describe('EthSendTokenWizard.spec', () => {
 				gas: 100n,
 				maxFeePerGas: 2_000_000n,
 				maxPriorityFeePerGas: 1_000_000n
-			}));
-
+			})
+		);
 
 		expect(sendServices.send).not.toHaveBeenCalled();
 	});

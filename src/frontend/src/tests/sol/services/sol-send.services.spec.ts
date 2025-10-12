@@ -195,7 +195,10 @@ describe('sol-send.services', () => {
 			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(['mock-transfer-sol-instruction'], mockTx);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-sol-instruction'],
+				mockTx
+			);
 			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
@@ -314,7 +317,10 @@ describe('sol-send.services', () => {
 			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith([{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'], mockTx);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
+				mockTx
+			);
 			expect(getTransferInstruction).toHaveBeenCalledWith(
 				{
 					source: mockAtaAddress,
@@ -358,8 +364,12 @@ describe('sol-send.services', () => {
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(['mock-transfer-instruction'], mockTx);
-			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith({
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-instruction'],
+				mockTx
+			);
+			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
+				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress3,
 					authority: expect.objectContaining({
@@ -367,7 +377,9 @@ describe('sol-send.services', () => {
 						signTransactions: expect.any(Function)
 					}),
 					amount: mockAmount
-				}, { programAddress: DEVNET_USDC_TOKEN.owner });
+				},
+				{ programAddress: DEVNET_USDC_TOKEN.owner }
+			);
 		});
 
 		it('should throw an error if network is invalid', async () => {
