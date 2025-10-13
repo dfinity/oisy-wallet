@@ -46,7 +46,6 @@
 	});
 </script>
 
-
 <div bind:this={rootElement} style={`height: ${originalHeight ?? 0}px`} class="relative">
 	<!-- to avoid lower sticky headers to peek in front when using multiple, we add px-1 and add one SPACING_UNIT to the width below -->
 	<!-- and whitespace-nowrap is needed to ensure when we first calc the height its the correct size which is given if no linebreaks -->
