@@ -1,8 +1,8 @@
 export abstract class AppWorker {
-	protected _worker: Worker;
+	readonly #worker: Worker;
 
 	protected constructor(worker: Worker) {
-		this._worker = worker;
+		this.#worker = worker;
 	}
 
 	static async getInstance(): Promise<Worker> {
@@ -10,7 +10,11 @@ export abstract class AppWorker {
 		return new Workers.default();
 	}
 
+	postMessage = <T>(data: T) => {
+		this.#worker.postMessage(data);
+	};
+
 	terminate = () => {
-		this._worker.terminate();
+		this.#worker.terminate();
 	};
 }

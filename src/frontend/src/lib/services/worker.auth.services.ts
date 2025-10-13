@@ -33,10 +33,10 @@ export class AuthWorker extends AppWorker {
 
 	syncAuthIdle = ({ auth, locked = false }: { auth: AuthStoreData; locked?: boolean }) => {
 		if (locked || isNullish(auth.identity)) {
-			this._worker.postMessage({ msg: 'stopIdleTimer' });
+			this.postMessage({ msg: 'stopIdleTimer' });
 			return;
 		}
 
-		this._worker.postMessage({ msg: 'startIdleTimer' });
+		this.postMessage({ msg: 'startIdleTimer' });
 	};
 }
