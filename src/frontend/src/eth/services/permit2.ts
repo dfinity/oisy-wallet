@@ -1,37 +1,50 @@
-import type { Erc20Token } from '$eth/types/erc20';
-import { permit2Address, SignatureTransfer, type PermitTransferFrom } from '@uniswap/permit2-sdk';
-
-const PERMIT2_ABI = ['function nonceBitmap(address owner, uint256 wordPos) view returns (uint256)'];
+import { permit2Address } from '@uniswap/permit2-sdk';
 
 export const buildPermit2Digest = ({
-	owner,
 	chainId,
 	token,
 	amount,
 	spender,
-	deadline,
-	now
+	now,
+	deadline
 }: {
-	owner: string;
 	chainId: number;
-	token: Erc20Token;
+	token: { address: string };
 	amount: bigint;
 	spender: string;
-	deadline: string;
 	now: string;
+	deadline: string;
 }) => {
 	const permit2Add = permit2Address(chainId);
-	// const now = Math.floor(Date.now() / 1000);
-	// const deadline = BigInt(now + 5 * 60);
 
-	const permit: PermitTransferFrom = {
-		permitted: { token: token.address, amount: amount.toString() },
+	const domain = {
+		name: 'Permit2',
+		chainId,
+		verifyingContract: permit2Add
+	};
+
+	const types = {
+		PermitTransferFrom: [
+			{ name: 'permitted', type: 'TokenPermissions' },
+			{ name: 'spender', type: 'address' },
+			{ name: 'nonce', type: 'uint256' },
+			{ name: 'deadline', type: 'uint256' }
+		],
+		TokenPermissions: [
+			{ name: 'token', type: 'address' },
+			{ name: 'amount', type: 'uint256' }
+		]
+	};
+
+	const values = {
+		permitted: {
+			token: token.address,
+			amount: amount.toString()
+		},
 		spender,
 		nonce: now,
 		deadline
 	};
-
-	const { domain, types, values } = SignatureTransfer.getPermitData(permit, permit2Add, chainId);
 
 	return { domain, types, values };
 };

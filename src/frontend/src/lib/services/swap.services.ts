@@ -775,7 +775,6 @@ export const fetchVeloraDeltaSwap = async ({
 	const deadline = BigInt(now + 5 * 60);
 
 	const { domain, types, values } = buildPermit2Digest({
-		owner: userAddress,
 		chainId: Number(sourceNetwork.chainId),
 		token: sourceToken,
 		amount: parsedSwapAmount,
@@ -784,16 +783,15 @@ export const fetchVeloraDeltaSwap = async ({
 		deadline: deadline.toString()
 	});
 
-	const domainV6 = {
-		name: domain.name,
-		version: domain.version,
-		chainId: Number(domain.chainId),
-		verifyingContract: domain.verifyingContract
-	};
+	// const domainV6 = {
+	// 	name: domain.name,
+	// 	chainId: Number(domain.chainId),
+	// 	verifyingContract: domain.verifyingContract
+	// };
 
 	console.log({ domain, types, values });
 
-	const permit2Hash = TypedDataEncoder.hash(domainV6, types, values);
+	const permit2Hash = TypedDataEncoder.hash(domain, types, values);
 
 	console.log({ permit2Hash });
 
@@ -835,6 +833,7 @@ export const fetchVeloraDeltaSwap = async ({
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME,
 		deadline: Number(deadline),
+		nonce: now,
 		permit: permit2Signature
 	});
 
