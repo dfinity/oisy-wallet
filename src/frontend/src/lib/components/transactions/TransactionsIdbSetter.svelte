@@ -13,6 +13,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
+    import {WALLET_TIMER_INTERVAL_MILLIS} from "$lib/constants/app.constants";
 
 	interface Props {
 		children?: Snippet;
@@ -30,7 +31,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $btcTransactionsStore
 		});
-	}, 10_000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$btcTransactionsStore];
@@ -44,7 +45,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $ethTransactionsStore
 		});
-	}, 10_000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$ethTransactionsStore];
@@ -58,7 +59,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $icTransactionsStore
 		});
-	}, 10_000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$icTransactionsStore];
@@ -72,7 +73,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $solTransactionsStore
 		});
-	}, 10_000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$solTransactionsStore];
