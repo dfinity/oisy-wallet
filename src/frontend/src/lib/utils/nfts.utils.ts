@@ -333,7 +333,7 @@ export const findNonFungibleToken = ({
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
 
-// We offer this util so we dont mistakingly take the value from the nfts collection prop,
+// We offer this util so we don't mistakenly take the value from the nfts collection prop,
 // as it is not updated after updating the consent. Going through this function ensures no stale data
 export const getAllowMediaForNft = (params: {
 	tokens: NonFungibleToken[];
@@ -342,8 +342,17 @@ export const getAllowMediaForNft = (params: {
 }): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
 
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
 	try {
-		const url = new URL(mediaUrl ?? '');
+		const url = adaptMetadataResourceUrl(new URL(mediaUrl));
+
+		if (isNullish(url)) {
+			return NftMediaStatusEnum.INVALID_DATA;
+		}
+
 		const response = await fetch(url.href, { method: 'HEAD' });
 
 		const type = response.headers.get('Content-Type');
@@ -353,12 +362,11 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.INVALID_DATA;
 		}
 
-		if (nonNullish(type) && !type.startsWith('image/')) {
+		if (!type.startsWith('image/')) {
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
-		if (nonNullish(size) && Number(size) > NFT_MAX_FILESIZE_LIMIT) {
-			// 1MB
+		if (Number(size) > NFT_MAX_FILESIZE_LIMIT) {
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
 	} catch (_: unknown) {

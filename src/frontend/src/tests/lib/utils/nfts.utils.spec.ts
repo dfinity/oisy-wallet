@@ -904,11 +904,15 @@ describe('nfts.utils', () => {
 			vi.restoreAllMocks();
 		});
 
-		it('returns OK for valid image under 1MB', async () => {
+		it('returns OK for valid image under the size limit', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
-						h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? '500000' : null
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
 				}
 			});
 
@@ -969,6 +973,27 @@ describe('nfts.utils', () => {
 			const result = await getMediaStatus('https://example.com/large.jpg');
 
 			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
+		});
+
+		it('fetch the data for IPFS URLs', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('ipfs://ipfs-image-url');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith('https://ipfs.io/ipfs/ipfs-image-url', {
+				method: 'HEAD'
+			});
 		});
 	});
 });
