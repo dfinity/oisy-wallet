@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken, UserToken } from '$declarations/backend/declarations/backend.did';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import type { DeleteIdbTokenParams, SetIdbTokensParams } from '$lib/types/idb-tokens';
 import { Principal } from '@dfinity/principal';

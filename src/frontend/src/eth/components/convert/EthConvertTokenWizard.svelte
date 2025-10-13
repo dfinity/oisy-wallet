@@ -189,14 +189,14 @@
 	targetNetwork={ICP_NETWORK}
 >
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm {destination} on:icNext={onNext} bind:sendAmount bind:receiveAmount>
-			<svelte:fragment slot="cancel">
+		<EthConvertForm {destination} {onNext} bind:sendAmount bind:receiveAmount>
+			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
 				{:else}
 					<ButtonCancel onclick={close} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</EthConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 		<EthConvertReview onConvert={convert} {receiveAmount} {sendAmount}>

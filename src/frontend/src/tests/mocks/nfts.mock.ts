@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import type { TokenId } from '$lib/types/token';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -35,7 +36,8 @@ export const mockValidErc721Nft: Nft = {
 		standard: 'erc721',
 		symbol: 'MC',
 		name: 'MyContract'
-	}
+	},
+	mediaStatus: NftMediaStatusEnum.OK
 };
 
 export const mockValidErc1155Nft: Nft = {
@@ -54,7 +56,8 @@ export const mockValidErc1155Nft: Nft = {
 		standard: 'erc1155',
 		symbol: 'NYAN',
 		name: 'MyContract'
-	}
+	},
+	mediaStatus: NftMediaStatusEnum.OK
 };
 
 export const mockNftollectionUi: NftCollectionUi = {

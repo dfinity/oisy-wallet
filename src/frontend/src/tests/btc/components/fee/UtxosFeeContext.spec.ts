@@ -55,15 +55,13 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
-			expect(prepareBtcSendSpy).toHaveBeenCalledWith({
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				network: 'mainnet',
 				identity: mockIdentity,
 				source
 			});
-			expect(setUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(setUtxosFeeSpy).toHaveBeenCalledWith({
+			expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				utxosFee: {
 					feeSatoshis: mockBtcReviewResult.feeSatoshis,
 					utxos: mockBtcReviewResult.utxos

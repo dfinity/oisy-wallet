@@ -1150,6 +1150,7 @@
 			"enable_media": "",
 			"disable_media": "",
 			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
@@ -1179,7 +1180,10 @@
 			"convert_btc_network_fee": "बिटकॉइन नेटवर्क शुल्क",
 			"zero_fee": "मुफ़्त",
 			"total_fee": "कुल शुल्क",
-			"ata_fee": "ATA शुल्क"
+			"ata_fee": "ATA शुल्क",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -1697,6 +1701,19 @@
 			"stablecoins_description": "जल्द आ रहा है",
 			"sprinkles_title": "स्प्रिंकल्स",
 			"sprinkles_description": "OISY पुरस्कार"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

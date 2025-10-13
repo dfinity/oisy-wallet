@@ -956,6 +956,7 @@ interface I18nNfts {
 		enable_media: string;
 		disable_media: string;
 		keep_media_disabled: string;
+		keep_media_enabled: string;
 		open_in_new_tab: string;
 		review_title: string;
 		review_description: string;
@@ -985,6 +986,9 @@ interface I18nFee {
 		zero_fee: string;
 		total_fee: string;
 		ata_fee: string;
+		transaction_fees: string;
+		network_fee: string;
+		approval_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1376,6 +1380,20 @@ interface I18nEarning {
 	};
 }
 
+interface I18nStake {
+	text: {
+		stake: string;
+		enable_token_text: string;
+		enable_token_button: string;
+		review: string;
+		executing_transaction: string;
+		unsupported_token_staking: string;
+		provider: string;
+		current_apy: string;
+		stake_review_subtitle: string;
+	};
+}
+
 interface I18nTemporal {
 	seconds_to_duration: {
 		year: string;
@@ -1465,6 +1483,7 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	stake: I18nStake;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

@@ -1150,6 +1150,7 @@
 			"enable_media": "Medien aktivieren",
 			"disable_media": "Medien deaktivieren",
 			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "In neuem Tab öffnen",
 			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
 			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
@@ -1179,7 +1180,10 @@
 			"convert_btc_network_fee": "Bitcoin-Netzwerkgebühr",
 			"zero_fee": "Kostenlos",
 			"total_fee": "Gesamtgebühr",
-			"ata_fee": "ATA-Gebühr"
+			"ata_fee": "ATA-Gebühr",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Unzureichendes Guthaben, um die Gebühren zu decken."
@@ -1697,6 +1701,19 @@
 			"stablecoins_description": "Kommt bald",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

@@ -1,5 +1,5 @@
 import { parseBtcAddress } from '$btc/utils/btc-address.utils';
-import type { BtcAddress, Icrcv2AccountId } from '$declarations/backend/backend.did';
+import type { BtcAddress, Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
 import { parseIcrcv2AccountId } from '$icp/utils/icp-account.utils';
 import { isEthAddress } from '$lib/utils/account.utils';
 import { isBtcAddress } from '$lib/utils/address.utils';

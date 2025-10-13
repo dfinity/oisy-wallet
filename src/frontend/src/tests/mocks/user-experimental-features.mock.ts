@@ -1,7 +1,7 @@
 import type {
 	ExperimentalFeatureSettings,
 	ExperimentalFeatureSettingsFor
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';
 
 export const mockUserExperimentalFeatures: UserExperimentalFeatures = {
