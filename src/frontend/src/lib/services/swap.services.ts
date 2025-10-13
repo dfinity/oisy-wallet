@@ -777,7 +777,7 @@ export const fetchVeloraDeltaSwap = async ({
 		owner: ethAddress,
 		chainId: Number(sourceNetwork.chainId),
 		token: sourceToken,
-		amountWei: parsedSwapAmount,
+		amount: parsedSwapAmount,
 		spender: deltaContract
 	});
 
