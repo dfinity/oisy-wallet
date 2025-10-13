@@ -98,7 +98,7 @@ export const getRpcTransaction = async ({
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}) => {
+}): Promise<SolRpcTransactionRaw | null> => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {
