@@ -1,4 +1,6 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import { getEthAddress } from '$eth/services/eth-address.services';
+import { buildPermit2Digest } from '$eth/services/permit2';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';
@@ -766,6 +768,20 @@ export const fetchVeloraDeltaSwap = async ({
 	if (isNullish(deltaContract)) {
 		return;
 	}
+
+	const ethAddress = await getEthAddress(identity);
+
+	const permitDigest = await buildPermit2Digest({
+		owner: ethAddress,
+		chainId: Number(sourceNetwork.chainId),
+		token: sourceToken,
+		amountWei: parsedSwapAmount,
+		spender: deltaContract
+	});
+
+	console.log({ permitDigest });
+
+	return;
 
 	await approveToken({
 		token: sourceToken,
