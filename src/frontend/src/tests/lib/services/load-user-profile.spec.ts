@@ -75,9 +75,15 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(getUserProfileSpy).toHaveBeenCalledExactlyOnceWith({
+			expect(getUserProfileSpy).toHaveBeenCalledTimes(2);
+			expect(getUserProfileSpy).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				certified: false,
+				nullishIdentityErrorMessage
+			});
+			expect(getUserProfileSpy).toHaveBeenNthCalledWith(2, {
+				identity: mockIdentity,
+				certified: true,
 				nullishIdentityErrorMessage
 			});
 
