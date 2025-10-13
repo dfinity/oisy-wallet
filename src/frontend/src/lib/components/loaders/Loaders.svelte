@@ -40,7 +40,6 @@
 								<RewardGuard>
 									<LoaderEthBalances>
 										<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-											<LoaderMultipleEthTransactions>
 												<LoaderWallets>
 													<ExchangeWorker>
 														<LoaderMetamask>
@@ -56,7 +55,6 @@
 														</LoaderMetamask>
 													</ExchangeWorker>
 												</LoaderWallets>
-											</LoaderMultipleEthTransactions>
 										</MultipleListeners>
 									</LoaderEthBalances>
 								</RewardGuard>
