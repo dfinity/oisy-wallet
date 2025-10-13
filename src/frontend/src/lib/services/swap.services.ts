@@ -85,7 +85,9 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
+import { Signature } from 'ethers';
 import { TypedDataEncoder } from 'ethers/hash';
+import { concat, getBytes, toBeHex } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 export const fetchKongSwap = async ({
@@ -802,24 +804,32 @@ export const fetchVeloraDeltaSwap = async ({
 
 	console.log({ permit2Signature });
 
-	if (TEST_MODE) {
-		return;
-	}
+	const sig = Signature.from(permit2Signature);
+	const compactSig = sig.compactSerialized;
 
-	await approveToken({
-		token: sourceToken,
-		from: userAddress,
-		to: deltaContract,
-		amount: parsedSwapAmount,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		shouldSwapWithApproval: true,
-		maxPriorityFeePerGas,
-		progress,
-		progressSteps: ProgressStepsSwap
-	});
+	const nonceBigInt = BigInt(now.toString());
+	const nonceHex = toBeHex(nonceBigInt, 32);
+	const permit2Data = concat([nonceHex, compactSig]);
+
+	console.log('Nonce (32 bytes):', nonceHex);
+	console.log('Compact signature (64 bytes):', compactSig);
+	console.log('Total Permit2 data (96 bytes):', permit2Data);
+	console.log('Length check:', getBytes(permit2Data).length);
+
+	// await approveToken({
+	// 	token: sourceToken,
+	// 	from: userAddress,
+	// 	to: deltaContract,
+	// 	amount: parsedSwapAmount,
+	// 	sourceNetwork,
+	// 	identity,
+	// 	gas,
+	// 	maxFeePerGas,
+	// 	shouldSwapWithApproval: true,
+	// 	maxPriorityFeePerGas,
+	// 	progress,
+	// 	progressSteps: ProgressStepsSwap
+	// });
 
 	progress(ProgressStepsSwap.SWAP);
 
@@ -834,7 +844,7 @@ export const fetchVeloraDeltaSwap = async ({
 		partner: OISY_URL_HOSTNAME,
 		deadline: Number(deadline),
 		nonce: now,
-		permit: permit2Signature
+		permit: permit2Data
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
