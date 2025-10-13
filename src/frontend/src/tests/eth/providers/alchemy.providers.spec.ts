@@ -110,7 +110,7 @@ describe('alchemy.providers', () => {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.INVALID_DATA
+				mediaStatus: NftMediaStatusEnum.OK
 			},
 			{
 				id: parseNftId(3),
