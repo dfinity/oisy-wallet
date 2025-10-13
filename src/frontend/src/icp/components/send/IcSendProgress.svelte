@@ -5,7 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		sendProgressStep?: ProgressStepsSendIc;
+		sendProgressStep?: string;
 	}
 
 	let { sendProgressStep = $bindable(ProgressStepsSendIc.INITIALIZATION) }: Props = $props();
