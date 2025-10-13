@@ -192,17 +192,14 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledOnce();
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-sol-instruction'],
 				mockTx
 			);
-			expect(getTransferSolInstruction).toHaveBeenCalledOnce();
-			expect(getTransferSolInstruction).toHaveBeenCalledWith({
+			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
 				amount: mockAmount
@@ -320,8 +317,7 @@ describe('sol-send.services', () => {
 			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
 				mockTx
 			);
@@ -368,13 +364,11 @@ describe('sol-send.services', () => {
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
-			expect(getTransferInstruction).toHaveBeenCalledOnce();
-			expect(getTransferInstruction).toHaveBeenCalledWith(
+			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
 				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress3,

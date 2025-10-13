@@ -7,13 +7,13 @@ import type {
 	UserProfile,
 	Utxo
 } from '$declarations/backend/declarations/backend.did';
-import type { TxId } from '$declarations/kong_backend/kong_backend.did';
+import type { TxId } from '$declarations/kong_backend/declarations/kong_backend.did';
 import type {
 	BtcTxOutput,
 	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
-} from '$declarations/signer/signer.did';
+} from '$declarations/signer/declarations/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address, BtcAddress } from '$lib/types/address';
 import type { Token } from '$lib/types/token';

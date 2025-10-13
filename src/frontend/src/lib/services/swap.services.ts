@@ -1,4 +1,4 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { Erc20Token } from '$eth/types/erc20';

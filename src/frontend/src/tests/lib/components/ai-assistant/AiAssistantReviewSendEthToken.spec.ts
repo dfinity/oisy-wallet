@@ -113,8 +113,7 @@ describe('AiAssistantReviewSendEthToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith({
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			from: mockEthAddress,
 			to: mockEthAddress3,
 			token: SEPOLIA_TOKEN,
