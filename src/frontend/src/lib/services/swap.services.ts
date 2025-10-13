@@ -732,6 +732,8 @@ export const withdrawUserUnusedBalance = async ({
 	}
 };
 
+const TEST_MODE = true;
+
 export const fetchVeloraDeltaSwap = async ({
 	identity,
 	progress,
@@ -781,7 +783,9 @@ export const fetchVeloraDeltaSwap = async ({
 
 	console.log({ permitDigest });
 
-	return;
+	if (TEST_MODE) {
+		return;
+	}
 
 	await approveToken({
 		token: sourceToken,
