@@ -1,6 +1,4 @@
 // Hoisted holder for values used/assigned inside the vi.mock factory
-import type { BtcAddress } from '$btc/types/address';
-
 interface TxEntry {
 	txid: unknown;
 	utxos?: Array<{ value: bigint; outpoint: { txid: unknown; vout: number } }>;
@@ -62,6 +60,7 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 }));
 
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
+import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
