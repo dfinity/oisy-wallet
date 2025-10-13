@@ -18,10 +18,10 @@
 		modalWelcomeData
 	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { loadRewardResult } from '$lib/services/reward.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
 	import { isOngoingCampaign } from '$lib/utils/rewards.utils';
-	import { loadRewardResult } from '$lib/services/reward.services';
 
 	interface Props {
 		children?: Snippet;
