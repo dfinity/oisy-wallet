@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import VirtualList from '@sveltejs/svelte-virtual-list';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
@@ -121,27 +120,28 @@
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			<VirtualList items={filteredTokens} let:item>
+			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
-					class="overflow-hidden rounded-xl"
+					class="overflow-hidden rounded-xl content-auto"
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
+					animate:flip={{ duration: 250 }}
 				>
-					{#if isTokenUiGroup(item)}
-						{@const { group: tokenGroup } = item}
+					{#if isTokenUiGroup(tokenOrGroup)}
+						{@const { group: tokenGroup } = tokenOrGroup}
 
 						<TokenGroupCard {tokenGroup} />
 					{:else}
-						{@const { token } = item}
+						{@const { token } = tokenOrGroup}
 
 						<div class="transition duration-300 hover:bg-primary">
 							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>
-			</VirtualList>
+			{/each}
 		</div>
 
 		{#if filteredTokens?.length === 0}
@@ -193,3 +193,12 @@
 		{/if}
 	</TokensSkeletons>
 </TokensDisplayHandler>
+
+
+<style lang="scss">
+  .content-auto {
+    content-visibility: auto;
+  }
+
+
+</style>
