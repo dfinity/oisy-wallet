@@ -359,7 +359,11 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		const size = response.headers.get('Content-Length');
 
 		if (isNullish(type) || isNullish(size)) {
-			return NftMediaStatusEnum.INVALID_DATA;
+			// Not all servers return the Content-Type and Content-Length headers,
+			// so we can't be sure that the media is valid or not.
+			// For now, we assume that it is valid.
+			// TODO: this is not safe for the size limit, we should check the size of the file.
+			return NftMediaStatusEnum.OK;
 		}
 
 		if (!type.startsWith('image/')) {

@@ -942,7 +942,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.png');
 
-			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
 		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
