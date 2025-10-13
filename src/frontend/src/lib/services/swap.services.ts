@@ -87,6 +87,7 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
+import axios from 'axios';
 import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -238,10 +239,6 @@ export const fetchSwapAmounts = async ({
 		unitName: sourceToken.decimals
 	});
 
-
-	console.log('here is in fetchSwapAmount');
-	
-
 	return isNetworkIdICP(sourceToken.network.id)
 		? await fetchSwapAmountsICP({
 				identity,
@@ -271,10 +268,6 @@ const fetchSwapAmountsICP = async ({
 }: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
 	amount: bigint;
 }): Promise<SwapMappedResult[]> => {
-
-
-	console.log('here is hello');
-	
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
@@ -287,8 +280,6 @@ const fetchSwapAmountsICP = async ({
 			})
 		)
 	);
-
-	console.log({ settledResults });
 
 	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
 	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
@@ -338,9 +329,7 @@ const fetchSwapAmountsICP = async ({
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
 
-			if (mapped && Number(mapped.receiveAmount) > 0) {
-				acc.push(mapped);
-
+			if (nonNullish(mapped)) {
 				const destinationTokenToDecimals = formatToken({
 					value: mapped.receiveAmount,
 					unitName: destinationToken.decimals
@@ -358,6 +347,10 @@ const fetchSwapAmountsICP = async ({
 						...trackEventBaseParams
 					}
 				});
+			}
+
+			if (mapped && Number(mapped.receiveAmount) > 0) {
+				acc.push(mapped);
 			}
 
 			return acc;
@@ -727,19 +720,101 @@ const fetchVeloraSwapAmount = async ({
 		partner: OISY_URL_HOSTNAME
 	};
 
-	const data = await sdk.quote.getQuote(
-		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
-	);
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
 
-	if ('delta' in data) {
-		return mapVeloraSwapResult(data.delta);
+	const trackEventBaseParams = {
+		provider: SwapProvider.VELORA,
+		sourceToken: sourceToken.symbol,
+		sourceTokenNetwork: sourceToken.network.name,
+		sourceTokenCanister: sourceToken.address,
+		sourceAmount: amount.toString(),
+		sourceUSDValue: nonNullish(sourceTokenUsdValue)
+			? `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+			: '',
+		destinationToken: destinationToken.symbol,
+		destinationTokenNetwork: destinationToken.network.name,
+		destinationTokenCanister: destinationToken.address,
+		amount: sourceTokenToDecimals
+	};
+
+	try {
+		const data = await sdk.quote.getQuote(
+			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+		);
+
+		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+
+		if ('delta' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.delta.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: TRACK_SWAP_OFFER,
+				metadata: {
+					resultStatus: 'success',
+					swapType: 'delta',
+					receiveAmount: formatUnits(BigInt(data.delta.destAmount), destinationToken.decimals),
+					receiveAmountUSDValue: nonNullish(destinationUsdValue)
+						? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						: '',
+					...trackEventBaseParams
+				}
+			});
+			return mapVeloraSwapResult(data.delta);
+		}
+
+		if ('market' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.market.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: TRACK_SWAP_OFFER,
+				metadata: {
+					resultStatus: 'success',
+					swapType: 'market',
+					receiveAmount: formatUnits(BigInt(data.market.destAmount), destinationToken.decimals),
+					receiveAmountUSDValue: nonNullish(destinationUsdValue)
+						? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						: '',
+					...trackEventBaseParams
+				}
+			});
+			return mapVeloraMarketSwapResult(data.market);
+		}
+
+		trackEvent({
+			name: TRACK_SWAP_OFFER,
+			metadata: {
+				resultStatus: 'error',
+				errorReason: 'No delta or market data in response',
+				...trackEventBaseParams
+			}
+		});
+
+		return null;
+	} catch (error: unknown) {
+		const err = axios.isAxiosError(error) ? error : error;
+
+		console.log(err, typeof err);
+
+		trackEvent({
+			name: TRACK_SWAP_OFFER,
+			metadata: {
+				resultStatus: 'error',
+				...trackEventBaseParams
+			}
+		});
+
+		return null;
 	}
-
-	if ('market' in data) {
-		return mapVeloraMarketSwapResult(data.market);
-	}
-
-	return null;
 };
 
 export const withdrawUserUnusedBalance = async ({
