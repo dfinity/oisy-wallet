@@ -774,15 +774,16 @@ export const fetchVeloraDeltaSwap = async ({
 	}
 
 	const now = Math.floor(Date.now() / 1000);
-	const deadline = BigInt(now + 5 * 60);
+	const deadline = now + 5 * 60;
+	const nonce = Date.now();
 
 	const { domain, types, values } = buildPermit2Digest({
 		chainId: Number(sourceNetwork.chainId),
 		token: sourceToken,
 		amount: parsedSwapAmount,
 		spender: deltaContract,
-		now: now.toString(),
-		deadline: deadline.toString()
+		deadline,
+		nonce
 	});
 
 	// const domainV6 = {
@@ -806,8 +807,7 @@ export const fetchVeloraDeltaSwap = async ({
 
 	const sig = Signature.from(permit2Signature);
 	const compactSig = sig.compactSerialized;
-
-	const nonceBigInt = BigInt(now.toString());
+	const nonceBigInt = BigInt(values.nonce);
 	const nonceHex = toBeHex(nonceBigInt, 32);
 	const permit2Data = concat([nonceHex, compactSig]);
 
@@ -842,8 +842,8 @@ export const fetchVeloraDeltaSwap = async ({
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME,
-		deadline: Number(deadline),
-		nonce: now,
+		deadline: Number(values.deadline),
+		nonce: Number(values.nonce),
 		permit: permit2Data
 	});
 

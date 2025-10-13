@@ -5,15 +5,15 @@ export const buildPermit2Digest = ({
 	token,
 	amount,
 	spender,
-	now,
+	nonce,
 	deadline
 }: {
 	chainId: number;
 	token: { address: string };
 	amount: bigint;
 	spender: string;
-	now: string;
-	deadline: string;
+	nonce: number;
+	deadline: number;
 }) => {
 	const domain = {
 		name: 'Permit2',
@@ -40,8 +40,8 @@ export const buildPermit2Digest = ({
 			amount: amount.toString()
 		},
 		spender,
-		nonce: now,
-		deadline
+		nonce: nonce.toString(),
+		deadline: deadline.toString()
 	};
 
 	return { domain, types, values };
