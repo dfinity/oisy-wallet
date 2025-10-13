@@ -197,5 +197,6 @@
 <style lang="scss">
 	.content-auto {
 		content-visibility: auto;
+		contain-intrinsic-size: 0 150px;
 	}
 </style>
