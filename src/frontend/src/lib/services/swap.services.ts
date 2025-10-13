@@ -3,6 +3,7 @@ import { getEthAddress } from '$eth/services/eth-address.services';
 import { buildPermit2Digest } from '$eth/services/permit2';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -50,7 +51,6 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
-import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
 	SwapProvider,

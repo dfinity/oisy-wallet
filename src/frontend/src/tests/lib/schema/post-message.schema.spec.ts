@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/declarations/signer.did';
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
@@ -34,7 +35,6 @@ import {
 	PostMessageWalletDataSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-import type { BtcAddress } from '$lib/types/address';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';

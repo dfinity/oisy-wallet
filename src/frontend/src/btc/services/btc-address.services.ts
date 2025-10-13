@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import {
 	BTC_MAINNET_NETWORK_ID,
@@ -27,7 +28,6 @@ import {
 	type AddressStoreData
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { BtcAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
