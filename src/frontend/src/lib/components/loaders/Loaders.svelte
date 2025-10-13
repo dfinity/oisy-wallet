@@ -40,21 +40,21 @@
 								<RewardGuard>
 									<LoaderEthBalances>
 										<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-												<LoaderWallets>
-													<ExchangeWorker>
-														<LoaderMetamask>
-															<UserSnapshotWorker>
-																<LoaderContacts>
-																	<TransactionsIdbSetter>
-																		<BalancesIdbSetter>
-																			{@render children()}
-																		</BalancesIdbSetter>
-																	</TransactionsIdbSetter>
-																</LoaderContacts>
-															</UserSnapshotWorker>
-														</LoaderMetamask>
-													</ExchangeWorker>
-												</LoaderWallets>
+											<LoaderWallets>
+												<ExchangeWorker>
+													<LoaderMetamask>
+														<UserSnapshotWorker>
+															<LoaderContacts>
+																<TransactionsIdbSetter>
+																	<BalancesIdbSetter>
+																		{@render children()}
+																	</BalancesIdbSetter>
+																</TransactionsIdbSetter>
+															</LoaderContacts>
+														</UserSnapshotWorker>
+													</LoaderMetamask>
+												</ExchangeWorker>
+											</LoaderWallets>
 										</MultipleListeners>
 									</LoaderEthBalances>
 								</RewardGuard>
