@@ -1,5 +1,4 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
-import { getEthAddress } from '$eth/services/eth-address.services';
 import { buildPermit2Digest } from '$eth/services/permit2';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
@@ -86,6 +85,7 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
+import { TypedDataEncoder } from 'ethers/hash';
 import { get } from 'svelte/store';
 
 export const fetchKongSwap = async ({
@@ -771,17 +771,38 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	const ethAddress = await getEthAddress(identity);
+	const now = Math.floor(Date.now() / 1000);
+	const deadline = BigInt(now + 5 * 60);
 
-	const permitDigest = await buildPermit2Digest({
-		owner: ethAddress,
+	const { domain, types, values } = buildPermit2Digest({
+		owner: userAddress,
 		chainId: Number(sourceNetwork.chainId),
 		token: sourceToken,
 		amount: parsedSwapAmount,
-		spender: deltaContract
+		spender: deltaContract,
+		now: now.toString(),
+		deadline: deadline.toString()
 	});
 
-	console.log({ permitDigest });
+	const domainV6 = {
+		name: domain.name,
+		version: domain.version,
+		chainId: Number(domain.chainId),
+		verifyingContract: domain.verifyingContract
+	};
+
+	console.log({ domain, types, values });
+
+	const permit2Hash = TypedDataEncoder.hash(domainV6, types, values);
+
+	console.log({ permit2Hash });
+
+	const permit2Signature = await signPrehash({
+		hash: permit2Hash,
+		identity
+	});
+
+	console.log({ permit2Signature });
 
 	if (TEST_MODE) {
 		return;
@@ -812,7 +833,9 @@ export const fetchVeloraDeltaSwap = async ({
 		srcAmount: `${parsedSwapAmount}`,
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
-		partner: OISY_URL_HOSTNAME
+		partner: OISY_URL_HOSTNAME,
+		deadline: Number(deadline),
+		permit: permit2Signature
 	});
 
 	const hash = getSignParamsEIP712(signableOrderData);
