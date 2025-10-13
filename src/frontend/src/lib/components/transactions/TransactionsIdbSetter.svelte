@@ -10,10 +10,10 @@
 		setIdbIcTransactions,
 		setIdbSolTransactions
 	} from '$lib/api/idb-transactions.api';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
-    import {WALLET_TIMER_INTERVAL_MILLIS} from "$lib/constants/app.constants";
 
 	interface Props {
 		children?: Snippet;
