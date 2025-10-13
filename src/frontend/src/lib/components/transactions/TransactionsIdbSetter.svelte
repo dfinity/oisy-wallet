@@ -30,7 +30,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $btcTransactionsStore
 		});
-	}, 1000);
+	}, 10_000);
 
 	$effect(() => {
 		[$btcTransactionsStore];
@@ -44,7 +44,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $ethTransactionsStore
 		});
-	}, 1000);
+	}, 10_000);
 
 	$effect(() => {
 		[$ethTransactionsStore];
@@ -58,7 +58,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $icTransactionsStore
 		});
-	}, 1000);
+	}, 10_000);
 
 	$effect(() => {
 		[$icTransactionsStore];
@@ -72,7 +72,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $solTransactionsStore
 		});
-	}, 1000);
+	}, 10_000);
 
 	$effect(() => {
 		[$solTransactionsStore];
