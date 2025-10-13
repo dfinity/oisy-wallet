@@ -25,8 +25,6 @@ import * as z from 'zod';
 export const POST_MESSAGE_REQUESTS = [
 	'startIdleTimer',
 	'stopIdleTimer',
-	'startCodeTimer',
-	'stopCodeTimer',
 	'startExchangeTimer',
 	'stopExchangeTimer',
 	'startPowProtectionTimer',
