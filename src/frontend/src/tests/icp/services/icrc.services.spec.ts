@@ -216,11 +216,11 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyMetadata).toHaveBeenCalledWith({
+				expect(spyMetadata).toHaveBeenCalledTimes(2);
+				expect(spyMetadata).toHaveBeenNthCalledWith(1, {
 					certified: false
 				});
-
-				expect(spyMetadata).toHaveBeenCalledWith({
+				expect(spyMetadata).toHaveBeenNthCalledWith(2, {
 					certified: true
 				});
 			});
@@ -232,11 +232,11 @@ describe('icrc.services', () => {
 
 				await testLoadCustomTokens({ mockCustomToken, ledgerCanisterId: mockLedgerCanisterId });
 
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
+				expect(spyListCustomTokens).toHaveBeenCalledTimes(2);
+				expect(spyListCustomTokens).toHaveBeenNthCalledWith(1, {
 					certified: false
 				});
-
-				expect(spyListCustomTokens).toHaveBeenCalledWith({
+				expect(spyListCustomTokens).toHaveBeenNthCalledWith(2, {
 					certified: true
 				});
 			});
