@@ -1,11 +1,12 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthSignTransactionRequest,
 	SendBtcResponse
 } from '$declarations/signer/declarations/signer.did';
+import type { EthAddress } from '$eth/types/address';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { SIGNER_CANISTER_ID } from '$lib/constants/app.constants';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,

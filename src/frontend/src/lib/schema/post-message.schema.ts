@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type { Erc20ContractAddressWithNetwork } from '$icp-eth/types/icrc-erc20';
 import {
 	IcCanistersSchema,
@@ -9,13 +10,13 @@ import type { JsonText } from '$icp/types/btc.post-message';
 import { CurrencyExchangeDataSchema, CurrencySchema } from '$lib/schema/currency.schema';
 import { NetworkSchema } from '$lib/schema/network.schema';
 import { SyncStateSchema } from '$lib/schema/sync.schema';
-import type { BtcAddress, SolAddress } from '$lib/types/address';
 import { CanisterIdTextSchema, type OptionCanisterIdText } from '$lib/types/canister';
 import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';

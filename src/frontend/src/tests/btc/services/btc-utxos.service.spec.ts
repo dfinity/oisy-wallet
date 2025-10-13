@@ -1,4 +1,6 @@
 // Hoisted holder for values used/assigned inside the vi.mock factory
+import type { BtcAddress } from '$btc/types/address';
+
 interface TxEntry {
 	txid: unknown;
 	utxos?: Array<{ value: bigint; outpoint: { txid: unknown; vout: number } }>;
@@ -64,7 +66,6 @@ import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';

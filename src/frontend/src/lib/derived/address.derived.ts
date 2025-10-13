@@ -1,3 +1,5 @@
+import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -7,15 +9,8 @@ import {
 	solAddressLocalnetStore,
 	solAddressMainnetStore
 } from '$lib/stores/address.store';
-import type {
-	BtcAddress,
-	EthAddress,
-	OptionBtcAddress,
-	OptionEthAddress,
-	OptionSolAddress,
-	SolAddress
-} from '$lib/types/address';
 import { mapAddress } from '$lib/utils/address.utils';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
