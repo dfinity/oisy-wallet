@@ -1,4 +1,4 @@
-import { permit2Address } from '@uniswap/permit2-sdk';
+const PERMIT2_ADDRESS = '0x000000000022D473030F116dDEE9F6B43aC78BA3';
 
 export const buildPermit2Digest = ({
 	chainId,
@@ -15,12 +15,10 @@ export const buildPermit2Digest = ({
 	now: string;
 	deadline: string;
 }) => {
-	const permit2Add = permit2Address(chainId);
-
 	const domain = {
 		name: 'Permit2',
 		chainId,
-		verifyingContract: permit2Add
+		verifyingContract: PERMIT2_ADDRESS
 	};
 
 	const types = {
