@@ -122,7 +122,7 @@
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
 				<div
-					class="overflow-hidden rounded-xl content-auto"
+					class="content-auto overflow-hidden rounded-xl"
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
@@ -194,11 +194,8 @@
 	</TokensSkeletons>
 </TokensDisplayHandler>
 
-
 <style lang="scss">
-  .content-auto {
-    content-visibility: auto;
-  }
-
-
+	.content-auto {
+		content-visibility: auto;
+	}
 </style>
