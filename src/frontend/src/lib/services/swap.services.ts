@@ -845,7 +845,7 @@ export const fetchVeloraDeltaSwap = async ({
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
-		srcAmount: `${parsedSwapAmount}`,
+		srcAmount: values.permitted.amount,
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME,
@@ -853,6 +853,26 @@ export const fetchVeloraDeltaSwap = async ({
 		nonce: Number(values.nonce),
 		permit: permit2Data
 	});
+
+	console.log('=== ORDER VALIDATION ===');
+	console.log('Order srcToken:', signableOrderData.data.srcToken);
+	console.log('Permit2 token:', values.permitted.token);
+	console.log(
+		'Tokens match:',
+		signableOrderData.data.srcToken.toLowerCase() === values.permitted.token.toLowerCase()
+	);
+
+	console.log('Order srcAmount:', signableOrderData.data.srcAmount);
+	console.log('Permit2 amount:', values.permitted.amount);
+	console.log('Amounts match:', signableOrderData.data.srcAmount === values.permitted.amount);
+
+	console.log('Order deadline:', signableOrderData.data.deadline);
+	console.log('Permit2 deadline:', values.deadline);
+	console.log('Deadlines match:', signableOrderData.data.deadline.toString() === values.deadline);
+
+	console.log('Order nonce:', signableOrderData.data.nonce);
+	console.log('Permit2 nonce:', values.nonce);
+	console.log('Nonces match:', signableOrderData.data.nonce.toString() === values.nonce);
 
 	const hash = getSignParamsEIP712(signableOrderData);
 
