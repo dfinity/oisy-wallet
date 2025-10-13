@@ -29,13 +29,13 @@ import {
 	type AddressStoreData
 } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { SolAddress } from '$lib/types/address';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { SOLANA_DERIVATION_PATH_PREFIX } from '$sol/constants/sol.constants';
+import type { SolAddress } from '$sol/types/address';
 import { SolanaNetworks, type SolanaNetworkType } from '$sol/types/network';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { getAddressDecoder } from '@solana/kit';
