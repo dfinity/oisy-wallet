@@ -874,6 +874,9 @@ export const fetchVeloraDeltaSwap = async ({
 	console.log('Permit2 nonce:', values.nonce);
 	console.log('Nonces match:', signableOrderData.data.nonce.toString() === values.nonce);
 
+	console.log('=== FULL ORDER ===');
+	console.log(JSON.stringify(signableOrderData, null, 2));
+
 	const hash = getSignParamsEIP712(signableOrderData);
 
 	const signature = await signPrehash({
@@ -882,6 +885,11 @@ export const fetchVeloraDeltaSwap = async ({
 	});
 
 	const compactSignature = getCompactSignature(signature);
+
+	console.log('=== SENDING TO API ===');
+	console.log('Order:', JSON.stringify(signableOrderData.data, null, 2));
+	console.log('Order signature:', compactSignature);
+	console.log('Order signature length:', compactSignature.length);
 
 	const deltaAuction = await sdk.delta.postDeltaOrder({
 		order: signableOrderData.data,
