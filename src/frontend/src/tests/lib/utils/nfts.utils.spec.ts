@@ -975,7 +975,7 @@ describe('nfts.utils', () => {
 			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
 		});
 
-		it('fetch the data for IPFS URLs', async () => {
+		it('fetches the data for IPFS URLs', async () => {
 			global.fetch = vi.fn().mockResolvedValueOnce({
 				headers: {
 					get: (h: string) =>
