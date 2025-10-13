@@ -86,7 +86,7 @@ import {
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { Signature } from 'ethers';
-import { TypedDataEncoder } from 'ethers/hash';
+import { TypedDataEncoder, verifyTypedData } from 'ethers/hash';
 import { concat, getBytes, toBeHex } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -804,6 +804,13 @@ export const fetchVeloraDeltaSwap = async ({
 	});
 
 	console.log({ permit2Signature });
+
+	const recoveredAddress = verifyTypedData(domain, types, values, permit2Signature);
+
+	console.log('=== SIGNATURE VALIDATION ===');
+	console.log('Expected signer (userAddress):', userAddress);
+	console.log('Recovered from signature:', recoveredAddress);
+	console.log('Signature valid:', recoveredAddress.toLowerCase() === userAddress.toLowerCase());
 
 	const sig = Signature.from(permit2Signature);
 	const compactSig = sig.compactSerialized;
