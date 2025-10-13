@@ -151,9 +151,7 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(sendServices.send).toHaveBeenCalledOnce();
-
-		expect(sendServices.send).toHaveBeenCalledWith(
+		expect(sendServices.send).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				from: fromAddr,
 				to: destination,
@@ -187,9 +185,7 @@ describe('EthSendTokenWizard.spec', () => {
 		await fireEvent.click(getByTestId(REVIEW_FORM_SEND_BUTTON));
 		await vi.runOnlyPendingTimersAsync();
 
-		expect(nftServices.sendNft).toHaveBeenCalledOnce();
-
-		expect(nftServices.sendNft).toHaveBeenCalledWith(
+		expect(nftServices.sendNft).toHaveBeenCalledExactlyOnceWith(
 			expect.objectContaining({
 				token: collectionToken,
 				tokenId: nft.id,

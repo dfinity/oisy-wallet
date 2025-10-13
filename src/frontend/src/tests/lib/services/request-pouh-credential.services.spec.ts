@@ -65,8 +65,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -90,8 +89,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {

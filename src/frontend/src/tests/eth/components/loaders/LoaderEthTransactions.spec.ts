@@ -237,8 +237,7 @@ describe('LoaderEthTransactions', () => {
 		token.set(SEPOLIA_TOKEN);
 
 		await waitFor(() => {
-			expect(loadEthereumTransactions).toHaveBeenCalledOnce();
-			expect(loadEthereumTransactions).toHaveBeenCalledWith({
+			expect(loadEthereumTransactions).toHaveBeenCalledExactlyOnceWith({
 				tokenId: SEPOLIA_TOKEN_ID,
 				networkId: SEPOLIA_NETWORK_ID,
 				standard: SEPOLIA_TOKEN.standard

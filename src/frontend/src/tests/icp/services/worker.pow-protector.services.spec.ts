@@ -91,8 +91,7 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowProgress).toHaveBeenCalledOnce();
-				expect(syncPowProgress).toHaveBeenCalledWith({
+				expect(syncPowProgress).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});
@@ -104,8 +103,7 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowNextAllowance).toHaveBeenCalledOnce();
-				expect(syncPowNextAllowance).toHaveBeenCalledWith({
+				expect(syncPowNextAllowance).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});
