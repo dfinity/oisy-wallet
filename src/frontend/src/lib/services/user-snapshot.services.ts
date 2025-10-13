@@ -246,7 +246,7 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 			return acc;
 		}
 
-		// We want to send the snapshots even for tokens that do now have an exchange rate.
+		// We want to send the snapshots even for tokens that do not have an exchange rate.
 		// However, the Rewards Canister does not accept a nullish value as input.
 		// For now, we send them with an exchange rate of 0, even if theoretically wrong.
 		// TODO: Remove the nullish check and the zero-fallback once the Rewards Canister accepts nullish values.
