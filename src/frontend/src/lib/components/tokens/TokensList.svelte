@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import VirtualList from '@sveltejs/svelte-virtual-list';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { fade } from 'svelte/transition';
@@ -120,28 +121,27 @@
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			<VirtualList items={filteredTokens} let:item>
 				<div
 					class="overflow-hidden rounded-xl"
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={{ duration: 250 }}
 				>
-					{#if isTokenUiGroup(tokenOrGroup)}
-						{@const { group: tokenGroup } = tokenOrGroup}
+					{#if isTokenUiGroup(item)}
+						{@const { group: tokenGroup } = item}
 
 						<TokenGroupCard {tokenGroup} />
 					{:else}
-						{@const { token } = tokenOrGroup}
+						{@const { token } = item}
 
 						<div class="transition duration-300 hover:bg-primary">
 							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>
-			{/each}
+			</VirtualList>
 		</div>
 
 		{#if filteredTokens?.length === 0}
