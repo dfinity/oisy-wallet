@@ -77,6 +77,13 @@
 				: $btcAddressMainnet) ?? ''
 	);
 
+	$effect(() => {
+		[amount];
+
+		// if amount changes, we want to re-fetch the utxos
+		utxosFee = undefined;
+	});
+
 	const close = () => onClose();
 	const back = () => onSendBack();
 
