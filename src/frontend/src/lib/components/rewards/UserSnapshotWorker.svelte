@@ -4,7 +4,7 @@
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.contants';
+	import { TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.constants';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,

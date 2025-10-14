@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
@@ -11,14 +11,14 @@
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
-	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
+	import { AuthWorker } from '$lib/services/worker.auth.services';
+	import { authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -77,14 +77,10 @@
 	 * Workers
 	 */
 
-	let worker = $state<
-		| {
-				syncAuthIdle: (args: { auth: AuthStoreData; locked?: boolean }) => void;
-		  }
-		| undefined
-	>();
+	let worker = $state<AuthWorker | undefined>();
 
-	onMount(async () => (worker = await initAuthWorker()));
+	onMount(async () => (worker = await AuthWorker.init()));
+	onDestroy(() => worker?.terminate());
 
 	$effect(() => {
 		[worker, $authStore, $isLocked];

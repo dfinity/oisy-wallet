@@ -36,13 +36,12 @@
 		TRACK_COUNT_CONVERT_CKERC20_TO_ERC20_SUCCESS,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_ERROR,
 		TRACK_COUNT_CONVERT_CKETH_TO_ETH_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { btcAddressMainnet, ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert, WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -114,7 +113,6 @@
 			: customDestination;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -208,30 +206,30 @@
 			<IcConvertForm
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
-				on:icNext={onNext}
-				on:icClose={onClose}
-				on:icDestination={onDestination}
+				{onDestination}
+				{onNext}
 				bind:sendAmount
 				bind:receiveAmount
 			>
-				<svelte:fragment slot="cancel">
+				{#snippet cancel()}
 					{#if formCancelAction === 'back'}
 						<ButtonBack onclick={back} />
 					{:else}
 						<ButtonCancel onclick={close} />
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</IcConvertForm>
 		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
 			<IcConvertReview
 				destination={isDestinationCustom ? customDestination : defaultDestination}
 				{isDestinationCustom}
+				onConvert={convert}
 				{receiveAmount}
 				{sendAmount}
-				on:icConvert={convert}
-				on:icBack={onBack}
 			>
-				<ButtonBack slot="cancel" onclick={back} />
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 			<IcConvertProgress bind:convertProgressStep />

@@ -2,7 +2,7 @@
 	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { ContactImage } from '$declarations/backend/declarations/backend.did';
 	import AddressBookInfoPage from '$lib/components/address-book/AddressBookInfoPage.svelte';
 	import AddressBookQrCodeStep from '$lib/components/address-book/AddressBookQrCodeStep.svelte';
 	import AddressBookStep from '$lib/components/address-book/AddressBookStep.svelte';
@@ -30,7 +30,7 @@
 		TRACK_AVATAR_UPDATE_ERROR,
 		TRACK_AVATAR_DELETE_SUCCESS,
 		TRACK_AVATAR_DELETE_ERROR
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ADDRESS_BOOK_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { sortedContacts } from '$lib/derived/contacts.derived';

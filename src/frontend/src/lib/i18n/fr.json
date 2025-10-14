@@ -36,7 +36,10 @@
 			"select": "Sélectionner",
 			"language": "Langue",
 			"currency": "Devise",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "À des fins de test uniquement !",
@@ -49,7 +52,9 @@
 			"open_details": "Ouvrir les détails",
 			"close_details": "Fermer les détails",
 			"switch_language": "Changer de langue",
-			"switch_currency": "Changer de devise"
+			"switch_currency": "Changer de devise",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Ne fermez pas cet onglet tant que la transaction n'est pas terminée",
@@ -117,7 +122,8 @@
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Vous n'êtes pas connecté. Veuillez vous connecter pour continuer.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "Adresse $address copiée",
 			"spam": "Spam",
 			"not_spam": "Pas de spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Masquer",
 			"unhide": "Afficher",
 			"hidden": "Masqué",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Ouvrir ce contrat dans l'explorateur blockchain",
 			"img_consent_disabled": "Vous avez désactivé les images de cette collection",
 			"img_consent_none": "Image désactivée pour des raisons de sécurité",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "Média désactivé",
 			"enable_media": "Activer le média",
 			"disable_media": "Désactiver le média",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Ouvrir dans un nouvel onglet",
 			"review_title": "Examiner les sources de médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
 			"learn_more": "En savoir plus",
-			"token_id": "ID du token"
+			"token_id": "ID du token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
@@ -1151,7 +1164,8 @@
 				"image": "Image du NFT avec l'ID de token : $tokenId"
 			},
 			"copy_address": "Copier cette adresse dans le presse-papiers",
-			"review_preference": "Modifier la préférence d'affichage"
+			"review_preference": "Modifier la préférence d'affichage",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Frais de réseau Bitcoin",
 			"zero_fee": "Gratuit",
 			"total_fee": "Frais totaux",
-			"ata_fee": "Frais ATA"
+			"ata_fee": "Frais ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Solde insuffisant pour couvrir les frais."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "Bientôt disponible",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Récompenses OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

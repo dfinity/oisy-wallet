@@ -1,4 +1,4 @@
-import type { chat_message_v1 } from '$declarations/llm/llm.did';
+import type { chat_message_v1 } from '$declarations/llm/declarations/llm.did';
 import {
 	getAiAssistantSystemPrompt,
 	MAX_SUPPORTED_AI_ASSISTANT_CHAT_LENGTH

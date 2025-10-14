@@ -36,7 +36,10 @@
 			"select": "選択",
 			"language": "言語",
 			"currency": "通貨",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "テスト目的のみ！",
@@ -49,7 +52,9 @@
 			"open_details": "詳細を開く",
 			"close_details": "詳細を閉じる",
 			"switch_language": "言語を切り替え",
-			"switch_currency": "通貨を切り替え"
+			"switch_currency": "通貨を切り替え",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "取引完了までタブを閉じないでください",
@@ -117,7 +122,8 @@
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "サインインしていません。続行するにはサインインしてください。",
@@ -1124,9 +1130,13 @@
 			"address_copied": "アドレス $address をコピーしました",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "このコントラクトをブロックチェーンエクスプローラーで開く",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",
@@ -1151,7 +1164,8 @@
 				"image": "トークンIDが$tokenIdのNFTの画像"
 			},
 			"copy_address": "このアドレスをクリップボードにコピー",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Bitcoinネットワーク手数料",
 			"zero_fee": "無料",
 			"total_fee": "合計手数料",
-			"ata_fee": "ATA手数料"
+			"ata_fee": "ATA手数料",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "手数料をカバーするのに十分な資金がありません。"
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "近日公開",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 報酬"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

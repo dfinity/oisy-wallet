@@ -36,7 +36,10 @@
 			"select": "Wybierz",
 			"language": "Język",
 			"currency": "Waluta",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Tylko do celów testowych!",
@@ -49,7 +52,9 @@
 			"open_details": "Otwórz szczegóły",
 			"close_details": "Zamknij szczegóły",
 			"switch_language": "Zmień język",
-			"switch_currency": "Zmień walutę"
+			"switch_currency": "Zmień walutę",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Nie zamykaj tej karty, dopóki transakcja nie zostanie zakończona",
@@ -117,7 +122,8 @@
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Nie jesteś zalogowany. Zaloguj się, aby kontynuować.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "Adres $address skopiowany",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Otwórz ten kontrakt w eksploratorze blockchain",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Jeszcze brak NFT",
@@ -1151,7 +1164,8 @@
 				"image": "Obraz NFT z identyfikatorem tokena: $tokenId"
 			},
 			"copy_address": "Skopiuj ten adres do schowka",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Opłata sieciowa Bitcoin",
 			"zero_fee": "Bezpłatnie",
 			"total_fee": "Całkowita opłata",
-			"ata_fee": "Opłata ATA"
+			"ata_fee": "Opłata ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Niewystarczające saldo na pokrycie opłat."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "Wkrótce",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Nagrody OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

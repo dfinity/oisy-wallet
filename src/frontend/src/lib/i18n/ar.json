@@ -36,7 +36,10 @@
 			"select": "تحديد",
 			"language": "اللغة",
 			"currency": "العملة",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "لأغراض الاختبار فقط!",
@@ -49,7 +52,9 @@
 			"open_details": "فتح التفاصيل",
 			"close_details": "إغلاق التفاصيل",
 			"switch_language": "تبديل اللغة",
-			"switch_currency": "تبديل العملة"
+			"switch_currency": "تبديل العملة",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "لا تغلق هذه النافذة حتى تكتمل المعاملة",
@@ -117,7 +122,8 @@
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "أنت غير مسجل الدخول. يرجى تسجيل الدخول للمتابعة.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
@@ -1151,7 +1164,8 @@
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
 			"zero_fee": "مجاني",
 			"total_fee": "إجمالي الرسوم",
-			"ata_fee": "رسوم ATA"
+			"ata_fee": "رسوم ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "قريبًا",
 			"sprinkles_title": "رشات",
 			"sprinkles_description": "مكافآت OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

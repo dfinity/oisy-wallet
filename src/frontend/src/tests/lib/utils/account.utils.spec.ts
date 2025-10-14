@@ -29,8 +29,7 @@ describe('account.utils', () => {
 		it('should return true if checkAccountId does not throw', () => {
 			expect(isIcpAccountIdentifier('aaaaa-aa')).toBeTruthy();
 
-			expect(mockCheckAccountId).toHaveBeenCalledOnce();
-			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
+			expect(mockCheckAccountId).toHaveBeenCalledExactlyOnceWith('aaaaa-aa');
 		});
 
 		it('should return false if checkAccountId throws', () => {
@@ -40,8 +39,7 @@ describe('account.utils', () => {
 
 			expect(isIcpAccountIdentifier('aaaaa-aa')).toBeFalsy();
 
-			expect(mockCheckAccountId).toHaveBeenCalledOnce();
-			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
+			expect(mockCheckAccountId).toHaveBeenCalledExactlyOnceWith('aaaaa-aa');
 		});
 	});
 
@@ -63,8 +61,7 @@ describe('account.utils', () => {
 		it('should return true if isAddress returns true', () => {
 			expect(isEthAddress('0xaaaaa')).toBeTruthy();
 
-			expect(mockIsAddress).toHaveBeenCalledOnce();
-			expect(mockIsAddress).toHaveBeenCalledWith('0xaaaaa');
+			expect(mockIsAddress).toHaveBeenCalledExactlyOnceWith('0xaaaaa');
 		});
 
 		it('should return false if isAddress returns false', () => {
@@ -72,8 +69,7 @@ describe('account.utils', () => {
 
 			expect(isEthAddress('0xaaaaa')).toBeFalsy();
 
-			expect(mockIsAddress).toHaveBeenCalledOnce();
-			expect(mockIsAddress).toHaveBeenCalledWith('0xaaaaa');
+			expect(mockIsAddress).toHaveBeenCalledExactlyOnceWith('0xaaaaa');
 		});
 	});
 
@@ -95,8 +91,7 @@ describe('account.utils', () => {
 		it('should return false if checkAccountId does not throw', () => {
 			expect(invalidIcpAddress('aaaaa-aa')).toBeFalsy();
 
-			expect(mockCheckAccountId).toHaveBeenCalledOnce();
-			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
+			expect(mockCheckAccountId).toHaveBeenCalledExactlyOnceWith('aaaaa-aa');
 		});
 
 		it('should return true if checkAccountId throws', () => {
@@ -106,8 +101,7 @@ describe('account.utils', () => {
 
 			expect(invalidIcpAddress('aaaaa-aa')).toBeTruthy();
 
-			expect(mockCheckAccountId).toHaveBeenCalledOnce();
-			expect(mockCheckAccountId).toHaveBeenCalledWith('aaaaa-aa');
+			expect(mockCheckAccountId).toHaveBeenCalledExactlyOnceWith('aaaaa-aa');
 		});
 	});
 });

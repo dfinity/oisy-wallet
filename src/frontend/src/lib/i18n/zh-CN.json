@@ -36,7 +36,10 @@
 			"select": "选择",
 			"language": "语言",
 			"currency": "货币",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "仅供测试使用！",
@@ -49,7 +52,9 @@
 			"open_details": "打开详情",
 			"close_details": "关闭详情",
 			"switch_language": "切换语言",
-			"switch_currency": "切换货币"
+			"switch_currency": "切换货币",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "交易完成前请勿关闭此标签页",
@@ -117,7 +122,8 @@
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "您尚未登录。请登录以继续。",
@@ -1124,9 +1130,13 @@
 			"address_copied": "地址 $address 已复制",
 			"spam": "垃圾信息",
 			"not_spam": "非垃圾信息",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "隐藏",
 			"unhide": "取消隐藏",
 			"hidden": "已隐藏",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "在区块链浏览器中打开此合约",
 			"img_consent_disabled": "你已禁用该合集的图片",
 			"img_consent_none": "出于安全原因图片已禁用",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "媒体已禁用",
 			"enable_media": "启用媒体",
 			"disable_media": "禁用媒体",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "在新标签页中打开",
 			"review_title": "为 \"$collectionName\" 审核媒体来源",
 			"review_description": "注意！这些图片来自未验证的来源。启用它们可能会将你的 IP 地址共享给第三方，并带来潜在的安全风险。",
 			"learn_more": "了解更多",
-			"token_id": "代币 ID"
+			"token_id": "代币 ID",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "还没有 NFT",
@@ -1151,7 +1164,8 @@
 				"image": "代币 ID 为 $tokenId 的 NFT 图片"
 			},
 			"copy_address": "复制此地址到剪贴板",
-			"review_preference": "更改显示偏好"
+			"review_preference": "更改显示偏好",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "比特币网络手续费",
 			"zero_fee": "免费",
 			"total_fee": "总手续费",
-			"ata_fee": "ATA 手续费"
+			"ata_fee": "ATA 手续费",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "余额不足以支付手续费。"
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "即将推出",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY 奖励"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

@@ -38,7 +38,11 @@
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
+	let totalFee = $derived(
+		nonNullish($isSourceTokenIcrc2)
+			? (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
+			: undefined
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)

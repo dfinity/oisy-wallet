@@ -1,7 +1,7 @@
 import {
 	TRACK_COUNT_WC_SOL_SEND_ERROR,
 	TRACK_COUNT_WC_SOL_SEND_SUCCESS
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { UNEXPECTED_ERROR } from '$lib/constants/wallet-connect.constants';
 import { ProgressStepsSendSol, ProgressStepsSign } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -12,7 +12,6 @@ import {
 } from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -29,6 +28,7 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';

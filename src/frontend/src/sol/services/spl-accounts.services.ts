@@ -1,6 +1,6 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { SolAddress } from '$lib/types/address';
 import { checkIfAccountExists, loadTokenBalance } from '$sol/api/solana.api';
+import type { SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplTokenAddress } from '$sol/types/spl';
@@ -74,7 +74,7 @@ export const loadSplTokenBalance = async ({
 	const accountExists = await checkIfAccountExists({ address: ataAddress, network });
 
 	if (!accountExists) {
-		return 0n;
+		return ZERO;
 	}
 
 	const balance = await loadTokenBalance({

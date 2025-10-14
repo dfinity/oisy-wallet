@@ -38,8 +38,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionId);
 
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transfer).toHaveBeenCalledWith({
+			expect(ledgerCanisterMock.transfer).toHaveBeenCalledExactlyOnceWith({
 				to: params.to,
 				amount: params.amount,
 				...account
@@ -68,8 +67,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(balanceE8s);
 
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.balance).toHaveBeenCalledWith(mockPrincipal);
+			expect(ledgerCanisterMock.balance).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
 		});
 
 		it('throws an error if identity is undefined', async () => {
@@ -121,8 +119,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: true });
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledExactlyOnceWith({ certified: true });
 		});
 
 		it('successfully calls transactions endpoint as query', async () => {
@@ -133,8 +130,7 @@ describe('xtc-ledger.api', () => {
 
 			expect(result).toEqual(transactionsResponse);
 
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledOnce();
-			expect(ledgerCanisterMock.transactions).toHaveBeenCalledWith({ certified: false });
+			expect(ledgerCanisterMock.transactions).toHaveBeenCalledExactlyOnceWith({ certified: false });
 		});
 
 		it('throws an error if identity is undefined', async () => {

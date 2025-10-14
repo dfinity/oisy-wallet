@@ -36,7 +36,10 @@
 			"select": "चुनें",
 			"language": "भाषा",
 			"currency": "मुद्रा",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "केवल परीक्षण उद्देश्यों के लिए!",
@@ -49,7 +52,9 @@
 			"open_details": "विवरण खोलें",
 			"close_details": "विवरण बंद करें",
 			"switch_language": "भाषा बदलें",
-			"switch_currency": "मुद्रा बदलें"
+			"switch_currency": "मुद्रा बदलें",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "जब तक लेनदेन पूरा न हो जाए, इस टैब को बंद न करें",
@@ -117,7 +122,8 @@
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "आपने साइन इन नहीं किया है। कृपया जारी रखने के लिए साइन इन करें।",
@@ -1124,9 +1130,13 @@
 			"address_copied": "पता $address कॉपी किया गया",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "इस अनुबंध को ब्लॉकचेन एक्सप्लोरर में खोलें",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "अभी तक कोई NFTs नहीं",
@@ -1151,7 +1164,8 @@
 				"image": "टोकन आईडी के साथ NFT की छवि: $tokenId"
 			},
 			"copy_address": "इस पते को क्लिपबोर्ड पर कॉपी करें",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "बिटकॉइन नेटवर्क शुल्क",
 			"zero_fee": "मुफ़्त",
 			"total_fee": "कुल शुल्क",
-			"ata_fee": "ATA शुल्क"
+			"ata_fee": "ATA शुल्क",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "शुल्क को कवर करने के लिए अपर्याप्त बैलेंस।"
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "जल्द आ रहा है",
 			"sprinkles_title": "स्प्रिंकल्स",
 			"sprinkles_description": "OISY पुरस्कार"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

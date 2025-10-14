@@ -5,7 +5,10 @@
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import RewardStateModal from '$lib/components/rewards/RewardStateModal.svelte';
 	import WelcomeModal from '$lib/components/welcome/WelcomeModal.svelte';
-	import { TRACK_REWARD_CAMPAIGN_WIN, TRACK_WELCOME_OPEN } from '$lib/constants/analytics.contants';
+	import {
+		TRACK_REWARD_CAMPAIGN_WIN,
+		TRACK_WELCOME_OPEN
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -15,9 +18,10 @@
 		modalWelcomeData
 	} from '$lib/derived/modal.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { loadRewardResult } from '$lib/services/reward.services';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
-	import { isOngoingCampaign, loadRewardResult } from '$lib/utils/rewards.utils';
+	import { isOngoingCampaign } from '$lib/utils/rewards.utils';
 
 	interface Props {
 		children?: Snippet;

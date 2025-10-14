@@ -27,7 +27,7 @@
 		AI_ASSISTANT_SEND_TOKEN_SOURCE,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
@@ -38,7 +38,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -174,7 +173,6 @@
 		};
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

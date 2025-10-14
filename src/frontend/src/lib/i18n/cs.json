@@ -36,7 +36,10 @@
 			"select": "Vybrat",
 			"language": "Jazyk",
 			"currency": "Měna",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Pouze pro testovací účely!",
@@ -49,7 +52,9 @@
 			"open_details": "Otevřít podrobnosti",
 			"close_details": "Zavřít podrobnosti",
 			"switch_language": "Přepnout jazyk",
-			"switch_currency": "Přepnout měnu"
+			"switch_currency": "Přepnout měnu",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Nezavírejte tuto kartu, dokud není transakce dokončena",
@@ -117,7 +122,8 @@
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Nejste přihlášeni. Pro pokračování se prosím přihlaste.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "Adresa $address zkopírována",
 			"spam": "Spam",
 			"not_spam": "Ne spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Skrýt",
 			"unhide": "Zobrazit",
 			"hidden": "Skryté",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Otevřete tento kontrakt v blockchain exploreru",
 			"img_consent_disabled": "Zakázali jste obrázky z této kolekce",
 			"img_consent_none": "Obrázek je z bezpečnostních důvodů zakázán.",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "Média zakázána",
 			"enable_media": "Povolit média",
 			"disable_media": "Zakázat média",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Otevřít v nové záložce",
 			"review_title": "Prohlédnout mediální zdroje pro \"$collectionName\"",
 			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",
 			"learn_more": "Zjistěte více",
-			"token_id": "Token ID"
+			"token_id": "Token ID",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
@@ -1151,7 +1164,8 @@
 				"image": "Obrázek NFT s ID tokenu: $tokenId"
 			},
 			"copy_address": "Zkopírovat tuto adresu do schránky",
-			"review_preference": "Změnit předvolbu zobrazení"
+			"review_preference": "Změnit předvolbu zobrazení",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Poplatek za síť Bitcoin",
 			"zero_fee": "Zdarma",
 			"total_fee": "Celkový poplatek",
-			"ata_fee": "Poplatek ATA"
+			"ata_fee": "Poplatek ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Nedostatečný zůstatek k pokrytí poplatků."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "Již brzy",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Odměny OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

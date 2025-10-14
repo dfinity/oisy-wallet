@@ -40,6 +40,9 @@ interface I18nCore {
 		language: string;
 		currency: string;
 		confirm: string;
+		more: string;
+		less: string;
+		ellipsis: string;
 	};
 	info: { test_banner: string; test_banner_beta: string };
 	alt: {
@@ -50,6 +53,8 @@ interface I18nCore {
 		close_details: string;
 		switch_language: string;
 		switch_currency: string;
+		more: string;
+		less: string;
 	};
 	warning: { do_not_close: string; standalone_mode: string };
 }
@@ -111,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string };
+	message: { refreshed_authentication: string; session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -931,9 +936,13 @@ interface I18nNfts {
 		address_copied: string;
 		spam: string;
 		not_spam: string;
+		spam_warning: string;
+		spam_warning_text: string;
 		hide: string;
 		unhide: string;
 		hidden: string;
+		hide_warning: string;
+		hide_warning_text: string;
 		open_explorer: string;
 		img_consent_disabled: string;
 		img_consent_none: string;
@@ -946,17 +955,21 @@ interface I18nNfts {
 		media_disabled: string;
 		enable_media: string;
 		disable_media: string;
+		keep_media_disabled: string;
+		keep_media_enabled: string;
 		open_in_new_tab: string;
 		review_title: string;
 		review_description: string;
 		learn_more: string;
 		token_id: string;
+		go_to_collection: string;
 	};
 	alt: {
 		placeholder_image: string;
 		card: { image: string };
 		copy_address: string;
 		review_preference: string;
+		go_to_collection: string;
 	};
 }
 
@@ -973,6 +986,9 @@ interface I18nFee {
 		zero_fee: string;
 		total_fee: string;
 		ata_fee: string;
+		transaction_fees: string;
+		network_fee: string;
+		approval_fee: string;
 	};
 	assertion: { insufficient_funds_for_fee: string };
 	error: { cannot_fetch_gas_fee: string };
@@ -1364,6 +1380,20 @@ interface I18nEarning {
 	};
 }
 
+interface I18nStake {
+	text: {
+		stake: string;
+		enable_token_text: string;
+		enable_token_button: string;
+		review: string;
+		executing_transaction: string;
+		unsupported_token_staking: string;
+		provider: string;
+		current_apy: string;
+		stake_review_subtitle: string;
+	};
+}
+
 interface I18nTemporal {
 	seconds_to_duration: {
 		year: string;
@@ -1453,6 +1483,7 @@ interface I18n {
 	privacy_policy: I18nPrivacy_policy;
 	activity: I18nActivity;
 	earning: I18nEarning;
+	stake: I18nStake;
 	temporal: I18nTemporal;
 	ai_assistant: I18nAi_assistant;
 }

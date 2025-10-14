@@ -36,7 +36,10 @@
 			"select": "Select",
 			"language": "Language",
 			"currency": "Currency",
-			"confirm": "Confirm"
+			"confirm": "Confirm",
+			"more": "More",
+			"less": "Less",
+			"ellipsis": "…"
 		},
 		"info": {
 			"test_banner": "For testing purposes only!",
@@ -49,11 +52,13 @@
 			"open_details": "Open details",
 			"close_details": "Close details",
 			"switch_language": "Switch language",
-			"switch_currency": "Switch currency"
+			"switch_currency": "Switch currency",
+			"more": "Show full text",
+			"less": "Show less text"
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "Your $oisy_short Wallet is currently installed as standalone app on your mobile phone, which prevents it from connecting to other ICP dapps. You can delete $oisy_short from your homescreen, and do the installation again. This will install $oisy_short in a different way, which will then allow to connect to other dapps and sign transactions."
+			"standalone_mode": "We've updated how $oisy_short works as a Web App, please remove it from your home screen and reinstall it (on iPhone, make sure to deselect “Open as Web App”).<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>"
 		}
 	},
 	"navigation": {
@@ -117,7 +122,8 @@
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"message": {
-			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab."
+			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab.",
+			"session_locked": "Your session was locked in another tab."
 		},
 		"warning": {
 			"not_signed_in": "You are not signed in. Please sign in to continue.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "Address $address copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
+			"spam_warning": "Move '$collection' to spam?",
+			"spam_warning_text": "This will move all NFTs in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
 			"hide": "Hide",
 			"unhide": "Unhide",
 			"hidden": "Hidden",
+			"hide_warning": "Hide '$collection'?",
+			"hide_warning_text": "This will hide <b>$collection</b> and all associated NFTs from your main view, but you can always find and restore them later.",
 			"open_explorer": "Open this contract in blockchain explorer",
 			"img_consent_disabled": "You disabled images from this collection",
 			"img_consent_none": "Image disabled for security reasons",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "Media disabled",
 			"enable_media": "Enable media",
 			"disable_media": "Disable media",
+			"keep_media_disabled": "Keep media disabled",
+			"keep_media_enabled": "Keep media enabled",
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
 			"learn_more": "Learn more",
-			"token_id": "Token ID"
+			"token_id": "Token ID",
+			"go_to_collection": "Go to collection"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
@@ -1151,7 +1164,8 @@
 				"image": "Image of NFT with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
-			"review_preference": "Change display preference"
+			"review_preference": "Change display preference",
+			"go_to_collection": "Open the collection page"
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee",
-			"ata_fee": "ATA fee"
+			"ata_fee": "ATA fee",
+			"transaction_fees": "Transaction fees",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "Coming soon",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "Stake $token_symbol",
+			"enable_token_text": "You need to enable $token_symbol",
+			"enable_token_button": "Enable $token_symbol",
+			"review": "Review transaction",
+			"executing_transaction": "Executing transaction...",
+			"unsupported_token_staking": "Staking for the selected token is not supported.",
+			"provider": "Staking provider",
+			"current_apy": "Current APY",
+			"stake_review_subtitle": "You stake"
 		}
 	},
 	"temporal": {

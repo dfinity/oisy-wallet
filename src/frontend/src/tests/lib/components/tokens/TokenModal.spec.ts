@@ -11,7 +11,6 @@ import {
 	TOKEN_MODAL_INDEX_CANISTER_ID_INPUT,
 	TOKEN_MODAL_SAVE_BUTTON
 } from '$lib/constants/test-ids.constants';
-import * as authServices from '$lib/services/auth.services';
 import { modalStore } from '$lib/stores/modal.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { Token } from '$lib/types/token';
@@ -28,10 +27,6 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 vi.mock('$icp/services/icrc.services', () => ({
 	loadCustomTokens: vi.fn()
-}));
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
 }));
 
 describe('TokenModal', () => {
@@ -116,8 +111,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				indexCanisterId: MOCK_CANISTER_ID_1,
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
@@ -155,8 +149,7 @@ describe('TokenModal', () => {
 
 		await fireEvent.click(getByTestId(TOKEN_MODAL_SAVE_BUTTON));
 
-		expect(setCustomTokenMock).toHaveBeenCalledOnce();
-		expect(setCustomTokenMock).toHaveBeenCalledWith({
+		expect(setCustomTokenMock).toHaveBeenCalledExactlyOnceWith({
 			token: toCustomToken({
 				ledgerCanisterId: mockIcToken.ledgerCanisterId,
 				enabled: true,
@@ -226,7 +219,6 @@ describe('TokenModal', () => {
 	});
 
 	it('does not delete token if authIdentity is not available', async () => {
-		const signOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
 		const { getByTestId, getByText, getAllByText } = render(TokenModal, {
 			props: {
 				token: {
@@ -254,7 +246,6 @@ describe('TokenModal', () => {
 		expect(toasts).not.toHaveBeenCalledOnce();
 		expect(gotoReplaceRoot).not.toHaveBeenCalledOnce();
 		expect(idbTokensApi).not.toHaveBeenCalledOnce();
-		expect(signOutSpy).toHaveBeenCalledOnce();
 	});
 
 	it('does not find delete button if token is not deletable', () => {

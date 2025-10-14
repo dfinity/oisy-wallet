@@ -36,7 +36,10 @@
 			"select": "Chọn",
 			"language": "Ngôn ngữ",
 			"currency": "Tiền tệ",
-			"confirm": ""
+			"confirm": "",
+			"more": "",
+			"less": "",
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "Chỉ dành cho mục đích thử nghiệm!",
@@ -49,7 +52,9 @@
 			"open_details": "Mở chi tiết",
 			"close_details": "Đóng chi tiết",
 			"switch_language": "Chuyển đổi ngôn ngữ",
-			"switch_currency": "Chuyển đổi tiền tệ"
+			"switch_currency": "Chuyển đổi tiền tệ",
+			"more": "",
+			"less": ""
 		},
 		"warning": {
 			"do_not_close": "Đừng đóng tab này cho đến khi giao dịch hoàn tất",
@@ -117,7 +122,8 @@
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
 		},
 		"message": {
-			"refreshed_authentication": ""
+			"refreshed_authentication": "",
+			"session_locked": ""
 		},
 		"warning": {
 			"not_signed_in": "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.",
@@ -1124,9 +1130,13 @@
 			"address_copied": "Đã sao chép địa chỉ $address",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "Ẩn",
 			"unhide": "Bỏ ẩn",
 			"hidden": "Đã ẩn",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "Mở hợp đồng này trong trình khám phá blockchain",
 			"img_consent_disabled": "Bạn đã tắt hình ảnh từ bộ sưu tập này",
 			"img_consent_none": "Hình ảnh bị tắt vì lý do bảo mật",
@@ -1139,11 +1149,14 @@
 			"media_disabled": "Media đã tắt",
 			"enable_media": "Bật media",
 			"disable_media": "Tắt media",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Mở trong tab mới",
 			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
 			"learn_more": "Tìm hiểu thêm",
-			"token_id": "ID token"
+			"token_id": "ID token",
+			"go_to_collection": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",
@@ -1151,7 +1164,8 @@
 				"image": "Hình ảnh NFT với ID token: $tokenId"
 			},
 			"copy_address": "Sao chép địa chỉ này vào clipboard",
-			"review_preference": "Thay đổi tùy chọn hiển thị"
+			"review_preference": "Thay đổi tùy chọn hiển thị",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1166,7 +1180,10 @@
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
 			"zero_fee": "Miễn phí",
 			"total_fee": "Tổng phí",
-			"ata_fee": "Phí ATA"
+			"ata_fee": "Phí ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
@@ -1684,6 +1701,19 @@
 			"stablecoins_description": "Sắp ra mắt",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Phần thưởng OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"current_apy": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

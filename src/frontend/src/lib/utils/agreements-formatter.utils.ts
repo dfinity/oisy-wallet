@@ -5,7 +5,7 @@
  * TODO: investigate the circular reference issue and move these functions to `agreements.utils.ts`
  **/
 
-import type { UserAgreements as BackendUserAgreements } from '$declarations/backend/backend.did';
+import type { UserAgreements as BackendUserAgreements } from '$declarations/backend/declarations/backend.did';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import LicenseAgreementLink from '$lib/components/license-agreement/LicenseAgreementLink.svelte';
 import PrivacyPolicyLink from '$lib/components/privacy-policy/PrivacyPolicyLink.svelte';
@@ -69,7 +69,8 @@ export const formatUpdatedAgreementsHtml = ({
 		renderAgreementItemHtml({
 			agreementType: camelToSnake(agreementType as keyof EnvAgreements),
 			i18n,
-			Component: mapAgreementToComponent(agreementType as keyof EnvAgreements)
+			Component: mapAgreementToComponent(agreementType as keyof EnvAgreements),
+			props: { color: 'blue' }
 		})
 	);
 

@@ -32,17 +32,19 @@ import {
 	TRACK_SIGN_OUT_ERROR,
 	TRACK_SIGN_OUT_SUCCESS,
 	TRACK_SIGN_OUT_WITH_WARNING
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
+import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
 import { toastsClean, toastsError, toastsShow } from '$lib/stores/toasts.store';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import type { ToastMsg } from '$lib/types/toast';
 import { emit } from '$lib/utils/events.utils';
 import { gotoReplaceRoot } from '$lib/utils/nav.utils';
 import { replaceHistory } from '$lib/utils/route.utils';
+import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
 import type { Principal } from '@dfinity/principal';
@@ -148,15 +150,25 @@ export const nullishSignOut = (): Promise<void> =>
 	warnSignOut(get(i18n).auth.warning.not_signed_in);
 
 export const idleSignOut = (): Promise<void> => {
-	const text = get(i18n).auth.warning.session_expired;
+	const locked = getStorage({ key: AUTH_LOCK_KEY });
+
+	const level: ToastLevel = locked ? 'info' : 'warn';
+
+	const text = locked
+		? get(i18n).auth.message.session_locked
+		: get(i18n).auth.warning.session_expired;
+
+	const reason = locked ? 'session_locked' : 'session_expired';
+
 	trackEvent({
 		name: TRACK_SIGN_OUT_WITH_WARNING,
-		metadata: { level: 'warn', text, reason: 'session_expired', clearStorages: 'false' }
+		metadata: { level, text, reason, clearStorages: 'false' }
 	});
+
 	return logout({
 		msg: {
-			text: get(i18n).auth.warning.session_expired,
-			level: 'warn'
+			text,
+			level
 		},
 		clearCurrentPrincipalStorages: false
 	});

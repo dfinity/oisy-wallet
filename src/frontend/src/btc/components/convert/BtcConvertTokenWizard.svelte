@@ -15,7 +15,7 @@
 	import {
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_ERROR,
 		TRACK_COUNT_CONVERT_BTC_TO_CKBTC_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -25,7 +25,6 @@
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -93,7 +92,6 @@
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -158,24 +156,25 @@
 <UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
 	{#if currentStep?.name === WizardStepsConvert.CONVERT}
 		<BtcConvertForm
+			{onNext}
 			source={sourceAddress}
-			on:icNext={onNext}
-			on:icClose={onClose}
 			bind:sendAmount
 			bind:receiveAmount
 			bind:amountError
 		>
-			<svelte:fragment slot="cancel">
+			{#snippet cancel()}
 				{#if formCancelAction === 'back'}
 					<ButtonBack onclick={back} />
 				{:else}
 					<ButtonCancel onclick={close} />
 				{/if}
-			</svelte:fragment>
+			{/snippet}
 		</BtcConvertForm>
 	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
-			<ButtonBack slot="cancel" onclick={back} />
+		<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<BtcConvertProgress bind:convertProgressStep />

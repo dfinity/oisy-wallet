@@ -61,9 +61,7 @@ describe('TransactionsDateGroup', () => {
 			}
 		});
 
-		const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-			(el) => el.parentElement?.parentElement === container
-		);
+		const transactionComponents = Array.from(container.querySelectorAll('button.contents'));
 
 		expect(transactionComponents).toHaveLength(btcTransactionsNumber + ethTransactionsNumber);
 	});

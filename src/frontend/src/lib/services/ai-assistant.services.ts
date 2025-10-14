@@ -1,4 +1,4 @@
-import type { chat_message_v1 } from '$declarations/llm/llm.did';
+import type { chat_message_v1 } from '$declarations/llm/declarations/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
@@ -7,7 +7,7 @@ import {
 import {
 	AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED,
 	AI_ASSISTANT_TOOL_EXECUTION_TRIGGERED
-} from '$lib/constants/analytics.contants';
+} from '$lib/constants/analytics.constants';
 import { extendedAddressContacts as extendedAddressContactsStore } from '$lib/derived/contacts.derived';
 import { combinedDerivedSortedFungibleNetworkTokensUi } from '$lib/derived/network-tokens.derived';
 import { networks } from '$lib/derived/networks.derived';
