@@ -159,7 +159,9 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...(section === CustomTokenSection.SPAM && { allowExternalContentSource: false })
+						...((section === CustomTokenSection.SPAM || section === CustomTokenSection.HIDDEN) && {
+							allowExternalContentSource: false
+						})
 					}
 				]
 			});
@@ -175,7 +177,9 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...(section === CustomTokenSection.SPAM && { allowExternalContentSource: false })
+						...((section === CustomTokenSection.SPAM || section === CustomTokenSection.HIDDEN) && {
+							allowExternalContentSource: false
+						})
 					}
 				]
 			});
