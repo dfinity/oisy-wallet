@@ -12,13 +12,14 @@ import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { tick } from 'svelte';
+import { get } from 'svelte/store';
 
 const mockToken = { ...mockValidErc1155Token };
 const mockNft = { ...mockValidErc1155Nft };
 
 describe('NftHideButton', () => {
 	beforeEach(() => {
-		nftStore.addAll([]);
+		nftStore.resetAll();
 	});
 
 	it('renders Unhide button when token.section is HIDDEN', () => {
@@ -69,7 +70,6 @@ describe('NftHideButton', () => {
 	});
 
 	it('should display a loading indicator on the button during the action', async () => {
-		vi.useRealTimers();
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
 			new Promise((r) => setTimeout(r, 500))
@@ -84,6 +84,8 @@ describe('NftHideButton', () => {
 		await fireEvent.click(hideBtn);
 
 		await tick();
+
+		console.log('nftStore', get(nftStore));
 
 		const svg = getByTestId('spinner');
 
