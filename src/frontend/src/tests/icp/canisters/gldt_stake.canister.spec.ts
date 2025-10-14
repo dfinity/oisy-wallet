@@ -1,5 +1,5 @@
 import type { _SERVICE as GldtStakeService } from '$declarations/gldt_stake/declarations/gldt_stake.did';
-import { GldtStakeCanister } from '$lib/canisters/gldt_stake.canister';
+import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@dfinity/agent';
