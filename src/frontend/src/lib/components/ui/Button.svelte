@@ -2,6 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
 	import type { ButtonColorStyle } from '$lib/types/style';
+	import Spinner from '$lib/components/ui/Spinner.svelte';
 
 	interface Props {
 		colorStyle?: ButtonColorStyle;
@@ -79,7 +80,9 @@
 		aria-hidden={loading}
 	>
 		{#if loading}
-			<span class="absolute flex h-full w-full items-center justify-center"> </span>
+			<span class="absolute flex h-full w-full items-center justify-center">
+				<Spinner />
+			</span>
 
 			<span class="invisible">
 				{@render children()}
