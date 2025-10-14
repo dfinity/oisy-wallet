@@ -40,14 +40,14 @@
 		network={ICP_NETWORK}
 		qrCodeAction={{
 			enabled: true,
-			ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+			ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+			onClick: () =>
+				displayQRCode({
+					address: $icrcAccountIdentifierText ?? '',
+					addressLabel: $i18n.wallet.text.wallet_address,
+					copyAriaLabel: $i18n.wallet.text.wallet_address_copied
+				})
 		}}
-		on:click={() =>
-			displayQRCode({
-				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.wallet.text.wallet_address,
-				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
-			})}
 	>
 		{#snippet title()}
 			{$i18n.wallet.text.wallet_address}
@@ -67,15 +67,15 @@
 		network={ICP_NETWORK}
 		qrCodeAction={{
 			enabled: true,
-			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
-		}}
-		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		on:click={() =>
+			ariaLabel: $i18n.receive.icp.text.display_account_id_qr,
+			onClick:() =>
 			displayQRCode({
 				address: $icpAccountIdentifierText ?? '',
 				addressLabel: $i18n.receive.icp.text.account_id,
 				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
-			})}
+			})
+		}}
+		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 	>
 		{#snippet title()}
 			{$i18n.receive.icp.text.account_id}

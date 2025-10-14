@@ -90,13 +90,11 @@
 		qrCodeAriaLabel: string;
 		text?: string;
 		condition?: boolean;
-		on: {
-			click: () => void;
-		};
 		qrCodeAction: {
 			enabled: true;
 			testId: typeof RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON;
 			ariaLabel: string;
+			onClick: () => void;
 		};
 	}
 
@@ -242,10 +240,8 @@
 			qrCodeAction: {
 				enabled: true,
 				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: qrCodeAriaLabel
-			},
-			on: {
-				click: () =>
+				ariaLabel: qrCodeAriaLabel,
+				onClick: () =>
 					displayQRCode({
 						address: address ?? '',
 						addressLabel,
@@ -259,7 +255,7 @@
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { title: _title, text: _text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+		{#each receiveAddressList as { title: _title, text: _text, condition, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(_text)}
 					<ReceiveAddress
@@ -269,7 +265,6 @@
 						{network}
 						{qrCodeAction}
 						{testId}
-						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
@@ -286,7 +281,6 @@
 						{network}
 						{qrCodeAction}
 						{testId}
-						on:click={on.click}
 					>
 						{#snippet title()}
 							{_title}
