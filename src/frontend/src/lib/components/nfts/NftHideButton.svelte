@@ -33,16 +33,12 @@
 	let loading = $state(false);
 
 	const updateSection = async (section?: CustomTokenSection) => {
-		console.log('Call updateSection');
 		loading = true;
-		console.log('Loading true');
 		try {
-			console.log('call request');
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
-			console.log('Loading false');
 			loading = false;
 		}
 	};
