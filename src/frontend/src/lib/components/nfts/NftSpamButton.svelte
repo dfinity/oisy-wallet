@@ -34,7 +34,6 @@
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
-		await tick();
 		try {
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
