@@ -1156,7 +1156,8 @@
 			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
 			"learn_more": "Erfahre mehr",
 			"token_id": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",

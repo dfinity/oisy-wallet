@@ -1157,7 +1157,7 @@
 			"learn_more": "Learn more",
 			"token_id": "Token ID",
 			"go_to_collection": "Go to collection",
-            "could_not_update_section": "Could not update collection section. Please try again"
+			"could_not_update_section": "Could not update collection section. Please try again"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
