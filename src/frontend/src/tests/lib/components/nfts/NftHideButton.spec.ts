@@ -76,13 +76,15 @@ describe('NftHideButton', () => {
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
 
-		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		let hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 
 		expect(hideBtn).toBeInTheDocument();
 
 		await fireEvent.click(hideBtn);
 
 		await tick();
+
+		hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 
 		const svg = hideBtn.querySelector('svg.spinner');
 
