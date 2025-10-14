@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
-	import type { ButtonColorStyle } from '$lib/types/style';
 	import Spinner from '$lib/components/ui/Spinner.svelte';
+	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
 		colorStyle?: ButtonColorStyle;
