@@ -17,7 +17,7 @@ const mockNft = { ...mockValidErc1155Nft };
 
 describe('NftSpamButton', () => {
 	beforeEach(() => {
-		nftStore.addAll([]);
+		nftStore.resetAll();
 	});
 
 	it('renders Not Spam button when token.section is SPAM', () => {
@@ -68,7 +68,6 @@ describe('NftSpamButton', () => {
 	});
 
 	it('should display a loading indicator on the button during the action', async () => {
-		vi.useRealTimers();
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
 			new Promise((r) => setTimeout(r, 5000))
