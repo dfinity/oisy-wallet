@@ -71,7 +71,7 @@ describe('NftHideButton', () => {
 	it('should display a loading indicator on the button during the action', async () => {
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
-			new Promise((r) => setTimeout(r, 100))
+			new Promise((r) => setTimeout(r, 5000))
 		);
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
