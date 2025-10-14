@@ -10,7 +10,7 @@ export abstract class AppWorker {
 		return new Workers.default();
 	}
 
-	postMessage = <T>(data: T) => {
+	protected postMessage = <T>(data: T) => {
 		this.#worker.postMessage(data);
 	};
 
