@@ -4,7 +4,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, OptionAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
-	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
 	export let address: OptionAddress<Address>;
@@ -15,7 +14,6 @@
 	export let copyButtonTestId: string | undefined = undefined;
 
 	export let network: Network;
-	export let qrCodeAction: ReceiveQRCodeAction;
 	export let copyAriaLabel: string;
 
 	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
@@ -29,7 +27,7 @@
 	{copyButtonTestId}
 	labelRef="address"
 	{network}
-	{qrCodeAction}
+	qrCodeAction={{ enabled: false }}
 	{testId}
 >
 	{#snippet title()}

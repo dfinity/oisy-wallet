@@ -8,7 +8,7 @@
 		stakeProgressStep: string;
 	}
 
-	let { stakeProgressStep = $bindable() }: Props = $props();
+	let { stakeProgressStep }: Props = $props();
 
 	let steps = $state<ProgressSteps>([
 		{

@@ -112,7 +112,6 @@
 					addressToken={ICP_TOKEN}
 					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
 					network={ICP_NETWORK}
-					qrCodeAction={{ enabled: false }}
 					on:icBack={modal?.back}
 				/>
 			{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
