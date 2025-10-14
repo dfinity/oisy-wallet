@@ -28,10 +28,23 @@
 	const hasMultipleNfts = $derived(
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
 	);
+
+	let loading = $state(false);
+
+	const updateSection = async (section?: CustomTokenSection) => {
+		loading = true;
+		await updateNftSection({ section, token, $authIdentity });
+		loading = false;
+	};
 </script>
 
 {#snippet hideButton(onclick: () => void)}
-	<NftActionButton label={$i18n.nfts.text.hide} {onclick} testId={NFT_COLLECTION_ACTION_HIDE}>
+	<NftActionButton
+		label={$i18n.nfts.text.hide}
+		{loading}
+		{onclick}
+		testId={NFT_COLLECTION_ACTION_HIDE}
+	>
 		{#snippet icon()}
 			<IconEyeOff size="18" />
 		{/snippet}
@@ -43,7 +56,8 @@
 		<NftActionButton
 			colorStyle="primary"
 			label={$i18n.nfts.text.unhide}
-			onclick={() => updateNftSection({ section: undefined, token, $authIdentity })}
+			{loading}
+			onclick={() => updateSection()}
 			testId={NFT_COLLECTION_ACTION_UNHIDE}
 		>
 			{#snippet icon()}
@@ -53,8 +67,7 @@
 	{:else if hasMultipleNfts}
 		<ConfirmButtonWithModal
 			button={hideButton}
-			onConfirm={() =>
-				updateNftSection({ section: CustomTokenSection.HIDDEN, token, $authIdentity })}
+			onConfirm={() => updateSection(CustomTokenSection.HIDDEN)}
 			testId={CONFIRMATION_MODAL}
 		>
 			<div class="flex w-full flex-col items-center text-center">
@@ -76,8 +89,6 @@
 			</div>
 		</ConfirmButtonWithModal>
 	{:else}
-		{@render hideButton(() =>
-			updateNftSection({ section: CustomTokenSection.HIDDEN, token, $authIdentity })
-		)}
+		{@render hideButton(() => updateSection(CustomTokenSection.HIDDEN))}
 	{/if}
 {/if}

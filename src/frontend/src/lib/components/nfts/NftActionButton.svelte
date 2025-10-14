@@ -8,11 +8,12 @@
 		icon: Snippet;
 		onclick: MouseEventHandler<HTMLButtonElement>;
 		label: string;
+		loading?: boolean;
 		colorStyle?: Extract<ButtonColorStyle, 'primary' | 'tertiary-alt'>;
 		testId?: string;
 	}
 
-	let { icon, onclick, label, colorStyle = 'tertiary-alt', testId }: Props = $props();
+	let { icon, onclick, label, loading, colorStyle = 'tertiary-alt', testId }: Props = $props();
 </script>
 
 <Button
@@ -21,6 +22,7 @@
 	{onclick}
 	paddingSmall
 	styleClass="rounded-lg border-brand-subtle-30 p-2"
+	{loading}
 	{testId}
 >
 	<span class="flex items-center gap-1">
