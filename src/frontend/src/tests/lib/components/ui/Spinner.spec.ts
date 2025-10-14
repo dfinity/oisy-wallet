@@ -8,9 +8,11 @@ describe('Spinner.svelte', () => {
 
 		const svg = container.querySelector('svg');
 		assertNonNullish(svg);
+
 		expect(svg).toBeInTheDocument();
 
 		const circle = svg.querySelector('circle');
+
 		expect(circle).not.toBeNull();
 		expect(circle?.getAttribute('cx')).toBe('50%');
 		expect(circle?.getAttribute('cy')).toBe('50%');
@@ -21,7 +23,6 @@ describe('Spinner.svelte', () => {
 		const wrapper = screen.getByTestId('spinner').closest('span');
 
 		expect(wrapper).not.toBeNull();
-		// style attribute should contain our custom CSS variable
 		expect(wrapper?.getAttribute('style')).toContain('--spinner-size: 16px');
 	});
 
@@ -36,6 +37,7 @@ describe('Spinner.svelte', () => {
 		render(Spinner);
 
 		const svg = screen.getByTestId('spinner');
+
 		expect(svg).toHaveAttribute('aria-hidden', 'true');
 		expect(svg).toHaveAttribute('focusable', 'false');
 		expect(svg).toHaveAttribute('preserveAspectRatio', 'xMidYMid meet');
