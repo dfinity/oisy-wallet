@@ -36,7 +36,7 @@
 		try {
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
-			toastsError({ msg: $i18n.nfts.text.could_not_update_section });
+			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
 			loading = false;
 		}
