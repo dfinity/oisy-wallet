@@ -1,7 +1,6 @@
 import type { solTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType, TransactionUiCommon } from '$lib/types/transaction';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
-import type { getRpcTransaction } from '$sol/api/solana.api';
 import type { SolAddress } from '$sol/types/address';
 import type { SplTokenAddress } from '$sol/types/spl';
 import {
