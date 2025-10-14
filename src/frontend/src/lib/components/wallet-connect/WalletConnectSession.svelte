@@ -482,10 +482,12 @@
 			</WalletConnectModalTitle>
 		{/snippet}
 
-		{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
-			<WalletConnectReview onApprove={approve} onCancel={reject} onReject={reject} {proposal} />
-		{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
-			<WalletConnectForm onConnect={userConnect} />
-		{/if}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsWalletConnect.REVIEW}
+				<WalletConnectReview onApprove={approve} onCancel={reject} onReject={reject} {proposal} />
+			{:else if currentStep?.name === WizardStepsWalletConnect.CONNECT}
+				<WalletConnectForm onConnect={userConnect} />
+			{/if}
+		{/key}
 	</WizardModal>
 {/if}

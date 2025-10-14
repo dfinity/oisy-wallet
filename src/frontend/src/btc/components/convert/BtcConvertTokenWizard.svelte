@@ -154,29 +154,31 @@
 </script>
 
 <UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
-	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<BtcConvertForm
-			{onNext}
-			source={sourceAddress}
-			bind:sendAmount
-			bind:receiveAmount
-			bind:amountError
-		>
-			{#snippet cancel()}
-				{#if formCancelAction === 'back'}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsConvert.CONVERT}
+			<BtcConvertForm
+				{onNext}
+				source={sourceAddress}
+				bind:sendAmount
+				bind:receiveAmount
+				bind:amountError
+			>
+				{#snippet cancel()}
+					{#if formCancelAction === 'back'}
+						<ButtonBack onclick={back} />
+					{:else}
+						<ButtonCancel onclick={close} />
+					{/if}
+				{/snippet}
+			</BtcConvertForm>
+		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+			<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
+				{#snippet cancel()}
 					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			{/snippet}
-		</BtcConvertForm>
-	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</BtcConvertReview>
-	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-		<BtcConvertProgress {convertProgressStep} />
-	{/if}
+				{/snippet}
+			</BtcConvertReview>
+		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+			<BtcConvertProgress {convertProgressStep} />
+		{/if}
+	{/key}
 </UtxosFeeContext>

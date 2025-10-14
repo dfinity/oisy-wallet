@@ -93,33 +93,35 @@
 			bind:receiveAmount
 			bind:convertProgressStep
 		>
-			{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
-				<HowToConvertEthereumWizardSteps
-					{currentStep}
-					formCancelAction="back"
-					on:icBack={() =>
-						goToStep(
-							currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
-								? WizardStepsHowToConvert.INFO
-								: WizardStepsReceive.RECEIVE
-						)}
-					on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
-					on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
-				/>
-			{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
-				<ReceiveAddressQrCode
-					address={$icrcAccountIdentifierText ?? ''}
-					addressToken={ICP_TOKEN}
-					copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
-					network={ICP_NETWORK}
-					on:icBack={modal?.back}
-				/>
-			{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-				<IcReceiveInfoCkEthereum
-					on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
-					on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
-				/>
-			{/if}
+			{#key currentStep?.name}
+				{#if currentStep?.name === WizardStepsHowToConvert.INFO || currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
+					<HowToConvertEthereumWizardSteps
+						{currentStep}
+						formCancelAction="back"
+						on:icBack={() =>
+							goToStep(
+								currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE
+									? WizardStepsHowToConvert.INFO
+									: WizardStepsReceive.RECEIVE
+							)}
+						on:icQRCode={() => goToStep(WizardStepsHowToConvert.ETH_QR_CODE)}
+						on:icConvert={() => goToStep(WizardStepsConvert.CONVERT)}
+					/>
+				{:else if currentStep?.name === WizardStepsReceive.QR_CODE}
+					<ReceiveAddressQrCode
+						address={$icrcAccountIdentifierText ?? ''}
+						addressToken={ICP_TOKEN}
+						copyAriaLabel={$i18n.receive.icp.text.internet_computer_principal_copied}
+						network={ICP_NETWORK}
+						on:icBack={modal?.back}
+					/>
+				{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+					<IcReceiveInfoCkEthereum
+						on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
+						on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+					/>
+				{/if}
+			{/key}
 		</EthConvertTokenWizard>
 	</WizardModal>
 </ConvertContexts>
