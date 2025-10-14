@@ -16,13 +16,13 @@
 	}
 
 	let {
-		convertProgressStep = ProgressStepsSend.INITIALIZATION,
+		convertProgressStep = $bindable(ProgressStepsSend.INITIALIZATION),
 		destination = '',
 		nativeEthereumToken,
 		sourceTokenId
 	}: Props = $props();
 
-	let sendWithApproval: boolean = $derived(
+	let sendWithApproval = $derived(
 		shouldSendWithApproval({
 			to: destination,
 			tokenId: sourceTokenId,

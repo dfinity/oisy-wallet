@@ -8,7 +8,7 @@
 		sendProgressStep?: string;
 	}
 
-	let { sendProgressStep = ProgressStepsSendIc.INITIALIZATION }: Props = $props();
+	let { sendProgressStep = $bindable(ProgressStepsSendIc.INITIALIZATION) }: Props = $props();
 </script>
 
 <InProgressWizard progressStep={sendProgressStep} steps={sendSteps({ i18n: $i18n })} />

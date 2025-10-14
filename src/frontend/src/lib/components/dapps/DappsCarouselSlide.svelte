@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -17,10 +16,11 @@
 
 	interface Props {
 		dappsCarouselSlide: CarouselSlideOisyDappDescription;
-		airdrop?: RewardCampaignDescription | undefined;
+		airdrop?: RewardCampaignDescription;
+		onCloseCarouselSlide: (dappId: CarouselSlideOisyDappDescription['id']) => void;
 	}
 
-	let { dappsCarouselSlide, airdrop = undefined }: Props = $props();
+	let { dappsCarouselSlide, airdrop, onCloseCarouselSlide }: Props = $props();
 
 	let {
 		id: dappId,
@@ -47,8 +47,6 @@
 		}
 	};
 
-	const dispatch = createEventDispatcher();
-
 	const close = () => {
 		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
@@ -57,7 +55,7 @@
 			}
 		});
 
-		dispatch('icCloseCarouselSlide', dappId);
+		onCloseCarouselSlide(dappId);
 	};
 </script>
 

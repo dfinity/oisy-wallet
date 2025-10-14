@@ -1,3 +1,5 @@
+import type { BtcAddress } from '$btc/types/address';
+import type { EthAddress } from '$eth/types/address';
 import {
 	btcAddressMainnetNotLoaded,
 	btcAddressRegtestNotLoaded,
@@ -17,7 +19,7 @@ import {
 	solAddressMainnetStore,
 	type AddressStore
 } from '$lib/stores/address.store';
-import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
+import type { SolAddress } from '$sol/types/address';
 import { get, type Readable } from 'svelte/store';
 
 describe('address.derived', () => {

@@ -1,4 +1,4 @@
-import type { SolAddress } from '$lib/types/address';
+import type { SolAddress } from '$sol/types/address';
 
 export const mockSolAddress: SolAddress = '7q6RDbnn2SWnvews2qYCCAMCZzntDLM8scJfUEBmEMf1';
 

@@ -8,9 +8,9 @@
 		sendProgressStep?: string;
 	}
 
-	let { sendProgressStep = ProgressStepsSendBtc.INITIALIZATION }: Props = $props();
+	let { sendProgressStep = $bindable(ProgressStepsSendBtc.INITIALIZATION) }: Props = $props();
 
-	let steps: ProgressSteps = $derived([
+	let steps = $derived<ProgressSteps>([
 		{
 			step: ProgressStepsSendBtc.INITIALIZATION,
 			text: $i18n.send.text.initializing_transaction,

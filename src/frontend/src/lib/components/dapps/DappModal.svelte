@@ -16,7 +16,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
-	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -24,6 +23,7 @@
 	}
 
 	let { dAppDescription }: Props = $props();
+
 	let {
 		id: dappId,
 		website,
@@ -39,13 +39,12 @@
 		openChat
 	} = $derived(dAppDescription);
 
-	let websiteURL: Option<URL> = $state();
-	run(() => {
+	let websiteURL = $derived.by(() => {
 		try {
 			// TODO: use URL.parse
-			websiteURL = new URL(website);
+			return new URL(website);
 		} catch (_err: unknown) {
-			websiteURL = null;
+			return null;
 		}
 	});
 </script>

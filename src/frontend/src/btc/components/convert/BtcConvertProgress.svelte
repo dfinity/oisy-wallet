@@ -8,9 +8,9 @@
 		convertProgressStep?: string;
 	}
 
-	let { convertProgressStep = ProgressStepsConvert.INITIALIZATION }: Props = $props();
+	let { convertProgressStep = $bindable(ProgressStepsConvert.INITIALIZATION) }: Props = $props();
 
-	let steps: ProgressSteps = $derived([
+	let steps = $derived<ProgressSteps>([
 		{
 			step: ProgressStepsConvert.INITIALIZATION,
 			text: $i18n.convert.text.initializing,

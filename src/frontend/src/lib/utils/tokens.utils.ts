@@ -1,3 +1,4 @@
+import { NFTS_ENABLED } from '$env/nft.env';
 import {
 	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
@@ -394,7 +395,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0
+		...(erc721.length > 0 && NFTS_ENABLED
 			? [
 					saveErc721CustomTokens({
 						...commonParams,
@@ -402,7 +403,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0
+		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
 					saveErc1155CustomTokens({
 						...commonParams,

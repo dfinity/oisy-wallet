@@ -1,13 +1,12 @@
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { CKETH_ABI } from '$eth/constants/cketh.constants';
-import type { ContractAddress } from '$eth/types/address';
+import type { ContractAddress, EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress } from '$eth/types/erc20';
 import { TRACK_INFURA_GET_LOGS_CALL } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';

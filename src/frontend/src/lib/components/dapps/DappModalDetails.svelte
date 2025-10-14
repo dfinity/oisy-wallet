@@ -6,12 +6,9 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
 
-	let selectedDapp: OisyDappDescription | undefined = $state(undefined);
-	run(() => {
-		selectedDapp = $modalDAppDetails
-			? ($modalStore?.data as OisyDappDescription | undefined)
-			: undefined;
-	});
+	let selectedDapp = $derived(
+		$modalDAppDetails ? ($modalStore?.data as OisyDappDescription | undefined) : undefined
+	);
 </script>
 
 {#if nonNullish(selectedDapp)}

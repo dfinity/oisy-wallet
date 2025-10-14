@@ -12,15 +12,11 @@ import { default as en } from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
-vi.mock(import('$lib/services/worker.auth.services'), async (importOriginal) => {
-	const actual = await importOriginal();
-	return {
-		...actual,
-		initAuthWorker: vi.fn().mockResolvedValue({
-			syncAuthIdle: vi.fn()
-		})
-	};
-});
+vi.mock('$lib/services/worker.auth.services', () => ({
+	AuthWorker: {
+		init: vi.fn()
+	}
+}));
 
 describe('App Layout', () => {
 	beforeAll(() => {
