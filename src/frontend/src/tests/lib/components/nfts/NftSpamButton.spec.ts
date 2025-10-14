@@ -69,6 +69,7 @@ describe('NftSpamButton', () => {
 	});
 
 	it('should display a loading indicator on the button during the action', async () => {
+		vi.useRealTimers();
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
 			new Promise((r) => setTimeout(r, 5000))

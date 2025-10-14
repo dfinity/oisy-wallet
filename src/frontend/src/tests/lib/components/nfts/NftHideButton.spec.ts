@@ -69,9 +69,10 @@ describe('NftHideButton', () => {
 	});
 
 	it('should display a loading indicator on the button during the action', async () => {
+		vi.useRealTimers();
 		nftStore.addAll([mockNft]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
-			new Promise((r) => setTimeout(r, 5000))
+			new Promise((r) => setTimeout(r, 500))
 		);
 
 		const { container, getByTestId } = render(NftHideButton, { props: { token: mockToken } });
@@ -83,8 +84,6 @@ describe('NftHideButton', () => {
 		await fireEvent.click(hideBtn);
 
 		await tick();
-
-		console.log(container.innerHTML);
 
 		const svg = hideBtn.querySelector('svg.spinner');
 
