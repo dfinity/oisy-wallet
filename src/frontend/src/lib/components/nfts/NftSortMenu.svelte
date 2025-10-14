@@ -19,7 +19,7 @@
 		nftSortStore.set({ key: 'nft-sort', value: sort });
 	};
 
-	const trackSortingEvent = (type: string, order: string) => {
+	const trackSortingEvent = ({ type, order }: { type: string; order: string }) => {
 		trackEvent({ name: TRACK_NFT_SORT_CHANGE, metadata: { type, order } });
 	};
 </script>
@@ -45,7 +45,7 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent('date', 'asc');
+						trackSortingEvent({ order: 'asc', type: 'date' });
 						setSorting({ order: 'asc', type: 'date' });
 					}}
 					selectable
@@ -57,7 +57,7 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent('date', 'desc');
+						trackSortingEvent({ order: 'desc', type: 'date' });
 						setSorting({ order: 'desc', type: 'date' });
 					}}
 					selectable
@@ -69,7 +69,7 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent('collection-name', 'asc');
+						trackSortingEvent({ order: 'asc', type: 'collection-name' });
 						setSorting({ order: 'asc', type: 'collection-name' });
 					}}
 					selectable
@@ -81,7 +81,7 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent('collection-name', 'desc');
+						trackSortingEvent({ order: 'desc', type: 'collection-name' });
 						setSorting({ order: 'desc', type: 'collection-name' });
 					}}
 					selectable
