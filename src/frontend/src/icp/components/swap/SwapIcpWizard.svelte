@@ -260,8 +260,8 @@
 		</SwapReview>
 	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 		<SwapProgress
-			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
 			{swapProgressStep}
+			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
 			bind:failedSteps={swapFailedProgressSteps}
 		/>
 	{/if}
