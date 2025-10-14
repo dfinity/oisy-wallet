@@ -68,5 +68,5 @@
 {:else if currentStep?.name === WizardStepsStake.REVIEW}
 	<GldtStakeReview {amount} {onBack} onStake={stake} />
 {:else if currentStep?.name === WizardStepsStake.STAKING}
-	<StakeProgress bind:stakeProgressStep />
+	<StakeProgress {stakeProgressStep} />
 {/if}
