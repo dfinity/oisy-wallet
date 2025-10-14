@@ -80,7 +80,7 @@
 	let worker = $state<AuthWorker | undefined>();
 
 	onMount(async () => (worker = await AuthWorker.init()));
-	onDestroy(() => worker?.terminate());
+	onDestroy(() => worker?.destroy());
 
 	$effect(() => {
 		[worker, $authStore, $isLocked];
