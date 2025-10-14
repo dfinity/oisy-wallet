@@ -18,6 +18,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -33,8 +34,13 @@
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
-		await updateNftSection({ section, token, $authIdentity });
-		loading = false;
+		try {
+			await updateNftSection({ section, token, $authIdentity });
+		} catch (_: unknown) {
+			toastsError({ msg: $i18n.nfts.text.could_not_update_section });
+		} finally {
+			loading = false;
+		}
 	};
 </script>
 
