@@ -5,7 +5,7 @@ import type { PostMessage, PostMessageDataResponseAuth } from '$lib/types/post-m
 import { isNullish } from '@dfinity/utils';
 
 export class AuthWorker extends AppWorker {
-	constructor(worker: Worker) {
+	private constructor(worker: Worker) {
 		super(worker);
 
 		worker.onmessage = async ({

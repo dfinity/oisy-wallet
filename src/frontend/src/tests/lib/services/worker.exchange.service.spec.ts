@@ -1,6 +1,7 @@
 import { Currency } from '$lib/enums/currency';
+import { AppWorker } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
-import { initExchangeWorker, type ExchangeWorker } from '$lib/services/worker.exchange.services';
+import { ExchangeWorker } from '$lib/services/worker.exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
 	PostMessageDataRequestExchangeTimer,
@@ -39,7 +40,7 @@ vi.mock('$lib/workers/workers?worker', () => ({
 }));
 
 describe('worker.exchange.services', () => {
-	describe('initExchangeWorker', () => {
+	describe('ExchangeWorker', () => {
 		let worker: ExchangeWorker;
 
 		const mockData: PostMessageDataRequestExchangeTimer = {
@@ -52,7 +53,11 @@ describe('worker.exchange.services', () => {
 		beforeEach(async () => {
 			vi.clearAllMocks();
 
-			worker = await initExchangeWorker();
+			worker = await ExchangeWorker.init();
+		});
+
+		it('should initialize a worker instance', () => {
+			expect(worker).toBeInstanceOf(AppWorker);
 		});
 
 		it('should start the worker and send the correct start message', () => {

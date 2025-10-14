@@ -265,38 +265,40 @@
 		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network as EthereumNetwork}
 	>
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
-			<SwapEthForm
-				{isApproveNeeded}
-				{isSwapAmountsLoading}
-				{nativeEthereumToken}
-				{onClose}
-				{onNext}
-				{onShowTokensList}
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview
-				isSwapAmountsLoading={isSwapAmountsLoading &&
-					receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
-				{onBack}
-				onSwap={swap}
-				{receiveAmount}
-				{slippageValue}
-				{swapAmount}
-			>
-				{#snippet swapFees()}
-					<EthFeeDisplay>
-						{#snippet label()}
-							<Html text={$i18n.fee.text.total_fee} />
-						{/snippet}
-					</EthFeeDisplay>
-				{/snippet}
-			</SwapReview>
-		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress sendWithApproval={true} {swapProgressStep} />
-		{/if}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsSwap.SWAP}
+				<SwapEthForm
+					{isApproveNeeded}
+					{isSwapAmountsLoading}
+					{nativeEthereumToken}
+					{onClose}
+					{onNext}
+					{onShowTokensList}
+					bind:swapAmount
+					bind:receiveAmount
+					bind:slippageValue
+				/>
+			{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+				<SwapReview
+					isSwapAmountsLoading={isSwapAmountsLoading &&
+						receiveAmount !== $swapAmountsStore?.selectedProvider?.receiveAmount}
+					{onBack}
+					onSwap={swap}
+					{receiveAmount}
+					{slippageValue}
+					{swapAmount}
+				>
+					{#snippet swapFees()}
+						<EthFeeDisplay>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</EthFeeDisplay>
+					{/snippet}
+				</SwapReview>
+			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+				<SwapProgress sendWithApproval={true} {swapProgressStep} />
+			{/if}
+		{/key}
 	</EthFeeContext>
 {/if}
