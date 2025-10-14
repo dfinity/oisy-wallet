@@ -18,6 +18,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { tick } from 'svelte';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -33,6 +34,7 @@
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
+		await tick();
 		try {
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
