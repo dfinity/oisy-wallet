@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { MouseEventHandler } from 'svelte/elements';
+	import Spinner from '$lib/components/ui/Spinner.svelte';
 	import type { ButtonColorStyle } from '$lib/types/style';
 
 	interface Props {
@@ -8,7 +9,6 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
-		loadingAsSkeleton?: boolean;
 		fullWidth?: boolean;
 		contentFullWidth?: boolean;
 		alignLeft?: boolean;
@@ -30,7 +30,6 @@
 		type = 'submit',
 		disabled,
 		loading = false,
-		loadingAsSkeleton = true,
 		fullWidth = false,
 		contentFullWidth = false,
 		alignLeft = false,
@@ -78,10 +77,12 @@
 		class:ease-in-out={loading}
 		class:transition={loading}
 		class:w-full={contentFullWidth}
-		aria-hidden={loading && loadingAsSkeleton}
+		aria-hidden={loading}
 	>
 		{#if loading}
-			<span class="absolute flex h-full w-full items-center justify-center"> </span>
+			<span class="absolute flex h-full w-full items-center justify-center">
+				<Spinner />
+			</span>
 
 			<span class="invisible">
 				{@render children()}
