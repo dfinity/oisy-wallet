@@ -12,7 +12,7 @@ import { isNullish } from '@dfinity/utils';
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export class ExchangeWorker extends AppWorker {
-	constructor(worker: Worker) {
+	private constructor(worker: Worker) {
 		super(worker);
 
 		worker.onmessage = ({
