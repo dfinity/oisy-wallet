@@ -2,9 +2,9 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
-	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
