@@ -38,7 +38,6 @@
 			{copyAriaLabel}
 			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{network}
-			qrCodeAction={{ enabled: false }}
 		/>
 
 		{@render content?.()}
