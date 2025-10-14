@@ -78,6 +78,7 @@
 			{addressToken}
 			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 			network={addressToken.network}
+			qrCodeAction={{ enabled: false }}
 			on:icBack={displayAddresses}
 		/>
 	{:else}
