@@ -27,10 +27,23 @@
 	const hasMultipleNfts = $derived(
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
 	);
+
+	let loading = $state(false);
+
+	const updateSection = async (section?: CustomTokenSection) => {
+		loading = true;
+		await updateNftSection({ section, token, $authIdentity });
+		loading = false;
+	};
 </script>
 
 {#snippet spamButton(onclick: () => void)}
-	<NftActionButton label={$i18n.nfts.text.spam} {onclick} testId={NFT_COLLECTION_ACTION_SPAM}>
+	<NftActionButton
+		label={$i18n.nfts.text.spam}
+		{loading}
+		{onclick}
+		testId={NFT_COLLECTION_ACTION_SPAM}
+	>
 		{#snippet icon()}
 			<IconAlertOctagon size="18" />
 		{/snippet}
@@ -40,7 +53,8 @@
 {#if nonNullish(token.section) && token.section === CustomTokenSection.SPAM}
 	<NftActionButton
 		label={$i18n.nfts.text.not_spam}
-		onclick={() => updateNftSection({ section: undefined, token, $authIdentity })}
+		{loading}
+		onclick={() => updateSection()}
 		testId={NFT_COLLECTION_ACTION_NOT_SPAM}
 	>
 		{#snippet icon()}
@@ -50,7 +64,7 @@
 {:else if hasMultipleNfts}
 	<ConfirmButtonWithModal
 		button={spamButton}
-		onConfirm={() => updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })}
+		onConfirm={() => updateSection(CustomTokenSection.SPAM)}
 		testId={CONFIRMATION_MODAL}
 	>
 		<div class="flex w-full flex-col items-center text-center">
@@ -70,7 +84,5 @@
 		</div>
 	</ConfirmButtonWithModal>
 {:else}
-	{@render spamButton(() =>
-		updateNftSection({ section: CustomTokenSection.SPAM, token, $authIdentity })
-	)}
+	{@render spamButton(() => updateSection(CustomTokenSection.SPAM))}
 {/if}
