@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
+	import { getApyOverall } from '$icp/api/gldt_stake.api';
 	import {
 		GLDT_STAKE_APY_CONTEXT_KEY,
 		type GldtStakeApyContext
 	} from '$icp/stores/gldt-stake-apy.store';
-	import { getApyOverall } from '$lib/api/gldt_stake.api';
 	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {

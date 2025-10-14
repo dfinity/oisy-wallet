@@ -1,4 +1,4 @@
-import { GldtStakeCanister } from '$lib/canisters/gldt_stake.canister';
+import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
 import { Principal } from '@dfinity/principal';
