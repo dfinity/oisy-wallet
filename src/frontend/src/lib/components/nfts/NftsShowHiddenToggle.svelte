@@ -2,16 +2,8 @@
 	import { Toggle } from '@dfinity/gix-components';
 	import { showHidden } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { showHiddenStore } from '$lib/stores/settings.store';
 
 	const checked = $derived($showHidden);
-
-	const toggleHidden = () =>
-		showHiddenStore.set({ key: 'show-hidden', value: { enabled: !checked } });
 </script>
 
-<svelte:window onoisyToggleShowHidden={toggleHidden} />
-
-<span class="pointer-events-none">
-	<Toggle ariaLabel={$i18n.nfts.text.show_hidden} {checked} />
-</span>
+<Toggle ariaLabel={$i18n.nfts.text.show_hidden} {checked} />

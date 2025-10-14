@@ -4,6 +4,7 @@
 	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
 
 	interface Props {
 		selectable?: boolean;
@@ -21,7 +22,7 @@
 		description?: Snippet;
 		descriptionEnd?: Snippet;
 		action?: Snippet;
-		onClick?: () => void;
+		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
 	}
 

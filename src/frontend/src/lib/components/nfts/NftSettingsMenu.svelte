@@ -10,10 +10,14 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftGroupByCollection } from '$lib/derived/settings.derived';
+	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftGroupByCollectionStore } from '$lib/stores/settings.store';
-	import { emit } from '$lib/utils/events.utils';
+	import {
+		nftGroupByCollectionStore,
+		showHiddenStore,
+		showSpamStore
+	} from '$lib/stores/settings.store';
+	import { preventDefault } from '@dfinity/gix-components';
 
 	let visible = $state(false);
 
@@ -24,11 +28,11 @@
 	};
 
 	const toggleShowHidden = () => {
-		emit({ message: 'oisyToggleShowHidden' });
+		showHiddenStore.set({ key: 'show-hidden', value: { enabled: !$showHidden } });
 	};
 
 	const toggleShowSpam = () => {
-		emit({ message: 'oisyToggleShowSpam' });
+		showSpamStore.set({ key: 'show-spam', value: { enabled: !$showSpam } });
 	};
 </script>
 
@@ -74,7 +78,7 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleShowHidden}>
+				<LogoButton fullWidth onClick={preventDefault(toggleShowHidden)}>
 					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
@@ -87,7 +91,7 @@
 				</LogoButton>
 			</ListItem>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleShowSpam}>
+				<LogoButton fullWidth onClick={preventDefault(toggleShowSpam)}>
 					{#snippet logo()}
 						<IconWarning />
 					{/snippet}
