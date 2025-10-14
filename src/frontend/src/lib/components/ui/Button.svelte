@@ -82,16 +82,7 @@
 	>
 		{#if loading}
 			<span class="absolute flex h-full w-full items-center justify-center">
-				<svg
-					class="spinner relative flex"
-					aria-hidden="true"
-					data-tid="spinner"
-					focusable="false"
-					preserveAspectRatio="xMidYMid meet"
-					viewBox="0 0 100 100"
-				>
-					<circle cx="50%" cy="50%" r="45" />
-				</svg>
+
 			</span>
 
 			<span class="invisible">
