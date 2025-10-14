@@ -11,15 +11,15 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { TRACK_NFT_SETTINGS_CHANGE } from '$lib/constants/analytics.constants';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		nftGroupByCollectionStore,
 		showHiddenStore,
 		showSpamStore
 	} from '$lib/stores/settings.store';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_NFT_SETTINGS_CHANGE } from '$lib/constants/analytics.constants';
 
 	let visible = $state(false);
 
