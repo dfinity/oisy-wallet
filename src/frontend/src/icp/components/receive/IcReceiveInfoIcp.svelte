@@ -68,12 +68,12 @@
 		qrCodeAction={{
 			enabled: true,
 			ariaLabel: $i18n.receive.icp.text.display_account_id_qr,
-			onClick:() =>
-			displayQRCode({
-				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.account_id,
-				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
-			})
+			onClick: () =>
+				displayQRCode({
+					address: $icpAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.account_id,
+					copyAriaLabel: $i18n.receive.icp.text.account_id_copied
+				})
 		}}
 		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
 	>

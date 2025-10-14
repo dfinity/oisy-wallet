@@ -258,14 +258,7 @@
 		{#each receiveAddressList as { title: _title, text: _text, condition, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
 			{#if condition !== false}
 				{#if nonNullish(_text)}
-					<ReceiveAddress
-						{address}
-						{copyAriaLabel}
-						{labelRef}
-						{network}
-						{qrCodeAction}
-						{testId}
-					>
+					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 						{#snippet title()}
 							{_title}
 						{/snippet}
@@ -274,14 +267,7 @@
 						{/snippet}
 					</ReceiveAddress>
 				{:else}
-					<ReceiveAddress
-						{address}
-						{copyAriaLabel}
-						{labelRef}
-						{network}
-						{qrCodeAction}
-						{testId}
-					>
+					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 						{#snippet title()}
 							{_title}
 						{/snippet}
