@@ -11,4 +11,6 @@
 
 <svelte:window onoisyToggleShowSpam={toggleShow} />
 
-<Toggle ariaLabel={$i18n.nfts.text.show_spam} {checked} on:nnsToggle={toggleShow} />
+<span class="pointer-events-none">
+	<Toggle ariaLabel={$i18n.nfts.text.show_spam} {checked} />
+</span>

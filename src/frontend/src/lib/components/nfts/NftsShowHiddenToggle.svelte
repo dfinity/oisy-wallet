@@ -12,4 +12,6 @@
 
 <svelte:window onoisyToggleShowHidden={toggleHidden} />
 
-<Toggle ariaLabel={$i18n.nfts.text.show_hidden} {checked} on:nnsToggle={toggleHidden} />
+<span class="pointer-events-none">
+	<Toggle ariaLabel={$i18n.nfts.text.show_hidden} {checked} />
+</span>
