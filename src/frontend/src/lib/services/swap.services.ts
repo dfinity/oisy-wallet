@@ -85,7 +85,7 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
-import { Contract, Signature, concat, getBytes, toBeHex, zeroPadValue } from 'ethers';
+import { AbiCoder, Contract, Signature, getBytes, toBeHex, zeroPadValue } from 'ethers';
 import { TypedDataEncoder, verifyTypedData } from 'ethers/hash';
 import { InfuraProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
@@ -851,18 +851,21 @@ export const fetchVeloraDeltaSwap = async ({
 	// Native permit format: case 0x01 в контракті
 	const sig = Signature.from(permitSignature);
 
-	// Формат: deadline (32 bytes) + signature (65 bytes) = 97 bytes
-	const deadlineHex = toBeHex(deadline, 32);
-	const permitData = concat([
-		zeroPadValue(userAddress, 32), // 32 bytes: owner
-		zeroPadValue(deltaContract, 32), // 32 bytes: spender
-		toBeHex(parsedSwapAmount, 32), // 32 bytes: value
-		toBeHex(deadline, 32), // 32 bytes: deadline
-		toBeHex(sig.v, 32), // 32 bytes: v (uint8 padded to 32)
-		sig.r, // 32 bytes: r
-		sig.s // 32 bytes: s
-	]);
-	
+	const abiCoder = AbiCoder.defaultAbiCoder();
+
+	const permitData = abiCoder.encode(
+		['address', 'address', 'uint256', 'uint256', 'uint8', 'bytes32', 'bytes32'],
+		[
+			userAddress, // owner
+			deltaContract, // spender
+			parsedSwapAmount, // value
+			deadline, // deadline
+			sig.v, // v
+			sig.r, // r
+			sig.s // s
+		]
+	);
+
 	console.log('=== NATIVE PERMIT DATA ===');
 	console.log('Owner:', zeroPadValue(userAddress, 32));
 	console.log('Spender:', zeroPadValue(deltaContract, 32));
