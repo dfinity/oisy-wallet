@@ -95,19 +95,25 @@
 		<!-- ROUTE_STYLE -->
 
 		<style>
-			#app-spinner {
-				--spinner-size: 30px;
+        #app-spinner {
+            color: rgb(0, 102, 255);
+            --spinner-size: 30px;
 
-				color: rgb(0, 102, 255);
+            position: absolute;
+            top: calc(50% - (var(--spinner-size) / 2));
+            left: calc(50% - (var(--spinner-size) / 2));
+        }
+        .spinner {
+            color: inherit;
+            --spinner-size: 16px;
+        }
+
+			#app-spinner, .spinner {
 
 				width: var(--spinner-size);
 				height: var(--spinner-size);
 
 				animation: app-spinner-linear-rotate 2000ms linear infinite;
-
-				position: absolute;
-				top: calc(50% - (var(--spinner-size) / 2));
-				left: calc(50% - (var(--spinner-size) / 2));
 
 				--radius: 45px;
 				--circumference: calc(3.14159265359 * var(--radius) * 2);
@@ -116,7 +122,7 @@
 				--end: calc((1 - 0.8) * var(--circumference));
 			}
 
-			#app-spinner circle {
+			#app-spinner circle, .spinner circle {
 				stroke-dasharray: var(--circumference);
 				stroke-width: 10%;
 				transform-origin: 50% 50% 0;

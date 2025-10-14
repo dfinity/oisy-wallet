@@ -73,14 +73,32 @@
 	{type}
 >
 	<span
-		class={`flex min-w-0 gap-2 ${innerStyleClass}`}
+		class={`relative flex min-w-0 gap-2 ${innerStyleClass}`}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
-		class:invisible={loading && loadingAsSkeleton}
 		class:transition={loading}
 		class:w-full={contentFullWidth}
 		aria-hidden={loading && loadingAsSkeleton}
 	>
-		{@render children()}
+		{#if loading}
+			<span class="absolute flex h-full w-full items-center justify-center">
+				<svg
+					class="spinner relative flex"
+					preserveAspectRatio="xMidYMid meet"
+					focusable="false"
+					aria-hidden="true"
+					data-tid="spinner"
+					viewBox="0 0 100 100"
+				>
+					<circle cx="50%" cy="50%" r="45" />
+				</svg>
+			</span>
+
+			<span class="invisible">
+				{@render children()}
+			</span>
+		{:else}
+			{@render children()}
+		{/if}
 	</span>
 </button>

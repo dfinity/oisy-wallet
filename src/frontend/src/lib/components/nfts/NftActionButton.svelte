@@ -26,11 +26,7 @@
 	{testId}
 >
 	<span class="flex items-center gap-1">
-		{#if loading}
-			<span class="loading loading-spinner loading-xs"></span>
-		{:else}
-			{@render icon()}
-			<span class="flex px-[2px] font-semibold">{label}</span>
-		{/if}
+		{@render icon()}
+		<span class="flex px-[2px] font-semibold">{label}</span>
 	</span>
 </Button>
