@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import DappModal from '$lib/components/dapps/DappModal.svelte';
 	import { modalDAppDetails } from '$lib/derived/modal.derived';
 	import { modalStore } from '$lib/stores/modal.store';

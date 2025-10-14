@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createBubbler } from 'svelte/legacy';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { i18n } from '$lib/stores/i18n.store';

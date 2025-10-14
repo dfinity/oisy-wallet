@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Html, Modal } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import DappTags from '$lib/components/dapps/DappTags.svelte';
 	import IconGitHub from '$lib/components/icons/IconGitHub.svelte';
 	import IconOpenChat from '$lib/components/icons/IconOpenChat.svelte';
