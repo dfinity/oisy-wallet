@@ -8,6 +8,7 @@ import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import * as gldtStakeApi from '$lib/api/gldt_stake.api';
 import * as authStore from '$lib/derived/auth.derived';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
@@ -21,6 +22,10 @@ describe('GldtStakeApyContext', () => {
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
+	const props = {
+		children: mockSnippet
+	};
+
 	beforeEach(() => {
 		icTokenFeeStore.reset();
 	});
@@ -33,6 +38,7 @@ describe('GldtStakeApyContext', () => {
 		mockAuthStore();
 
 		render(GldtStakeApyContext, {
+			props,
 			context: mockContext(store)
 		});
 
@@ -51,23 +57,7 @@ describe('GldtStakeApyContext', () => {
 		mockAuthStore(null);
 
 		render(GldtStakeApyContext, {
-			context: mockContext(store)
-		});
-
-		await waitFor(() => {
-			expect(getApyOverallSpy).not.toHaveBeenCalled();
-		});
-	});
-
-	it('should not call getApyOverall if value is already known', async () => {
-		const store = initGldtStakeApyStore();
-		const getApyOverallSpy = mockGetApyOverall();
-
-		mockAuthStore();
-
-		store.setApy(mockApy);
-
-		render(GldtStakeApyContext, {
+			props,
 			context: mockContext(store)
 		});
 

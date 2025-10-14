@@ -9,7 +9,7 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -34,4 +34,4 @@
 	});
 </script>
 
-{@render children?.()}
+{@render children()}
