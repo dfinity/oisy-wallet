@@ -11,7 +11,6 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { tick } from 'svelte';
 
 const mockToken = { ...mockValidErc1155Token };
 const mockNft = { ...mockValidErc1155Nft };
@@ -76,15 +75,11 @@ describe('NftHideButton', () => {
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
 
-		let hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 
 		expect(hideBtn).toBeInTheDocument();
 
 		await fireEvent.click(hideBtn);
-
-		await tick();
-
-		hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
 
 		const svg = hideBtn.querySelector('svg.spinner');
 
