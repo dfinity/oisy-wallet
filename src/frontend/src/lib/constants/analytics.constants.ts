@@ -170,3 +170,6 @@ export const AI_ASSISTANT_TEXTUAL_RESPONSE_RECEIVED = 'ai_assistant_textual_resp
 
 // Buy
 export const TRACK_BUY_TOKEN = 'buy_token';
+
+// NFTs
+export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
