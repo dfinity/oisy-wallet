@@ -215,5 +215,5 @@ export const CONTACT_MAX_NAME_LENGTH = 100;
 // Network bonus multiplier
 export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
-// NFT max filesize limit (5MB)
-export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 5;
+// NFT max filesize limit (10MB)
+export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
