@@ -1,7 +1,8 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import type { EthAddress } from '$eth/types/address';
 import type {
 	PreparedContractCall,
 	TransferErc1155Params,
@@ -10,7 +11,6 @@ import type {
 import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend as ProgressStepsSendEnum } from '$lib/enums/progress-steps';
-import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { Interface } from 'ethers/abi';

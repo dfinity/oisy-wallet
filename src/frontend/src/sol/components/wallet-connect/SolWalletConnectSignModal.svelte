@@ -21,7 +21,6 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionSolAddress } from '$lib/types/address';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
@@ -31,6 +30,7 @@
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
+	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	interface Props {

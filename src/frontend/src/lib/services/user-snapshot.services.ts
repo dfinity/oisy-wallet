@@ -7,7 +7,7 @@ import type {
 	AccountSnapshotFor as RcAccountSnapshotFor,
 	TransactionType as RcTransactionType,
 	Transaction_Any
-} from '$declarations/rewards/rewards.did';
+} from '$declarations/rewards/declarations/rewards.did';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { mapEthTransactionUi } from '$eth/utils/transactions.utils';
@@ -246,7 +246,11 @@ const takeAccountSnapshots = (timestamp: bigint): AccountSnapshotFor[] => {
 			return acc;
 		}
 
-		const exchangeRate = exchangeRates[token.id]?.usd;
+		// We want to send the snapshots even for tokens that do not have an exchange rate.
+		// However, the Rewards Canister does not accept a nullish value as input.
+		// For now, we send them with an exchange rate of 0, even if theoretically wrong.
+		// TODO: Remove the nullish check and the zero-fallback once the Rewards Canister accepts nullish values.
+		const exchangeRate = exchangeRates[token.id]?.usd ?? 0;
 
 		if (isNullish(exchangeRate)) {
 			return acc;

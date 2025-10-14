@@ -9,6 +9,7 @@ import type {
 import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { EthereumNetwork } from '$eth/types/network';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, OwnedContract } from '$lib/types/nft';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -66,6 +67,24 @@ describe('alchemy.providers', () => {
 					raw: { metadata: {} },
 					balance: '4',
 					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+				},
+				{
+					tokenId: '3',
+					name: 'Name3',
+					image: { originalUrl: 'https://download3.com' },
+					description: 'lorem ipsum',
+					raw: { metadata: {} },
+					balance: '4',
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+				},
+				{
+					tokenId: '4',
+					name: 'Name4',
+					image: { originalUrl: 'https://download4.com' },
+					description: 'lorem ipsum',
+					raw: { metadata: {} },
+					balance: '4',
+					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
 				}
 			]
 		};
@@ -79,7 +98,8 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
-				description: 'lorem ipsum'
+				description: 'lorem ipsum',
+				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
 			},
 			{
 				id: parseNftId(2),
@@ -89,12 +109,60 @@ describe('alchemy.providers', () => {
 				collection: {
 					...mapTokenToCollection(mockValidErc1155Token)
 				},
-				description: 'lorem ipsum'
+				description: 'lorem ipsum',
+				mediaStatus: NftMediaStatusEnum.OK
+			},
+			{
+				id: parseNftId(3),
+				name: 'Name3',
+				imageUrl: 'https://download3.com',
+				balance: 4,
+				collection: {
+					...mapTokenToCollection(mockValidErc1155Token)
+				},
+				description: 'lorem ipsum',
+				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+			},
+			{
+				id: parseNftId(4),
+				name: 'Name4',
+				imageUrl: 'https://download4.com',
+				balance: 4,
+				collection: {
+					...mapTokenToCollection(mockValidErc1155Token)
+				},
+				description: 'lorem ipsum',
+				mediaStatus: NftMediaStatusEnum.OK
 			}
 		];
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+			global.fetch = vi
+				.fn()
+				.mockResolvedValueOnce({
+					headers: {
+						get: (h: string) =>
+							h === 'Content-Type' ? 'something' : h === 'Content-Length' ? '5000' : null
+					}
+				})
+				.mockResolvedValueOnce({
+					headers: {
+						get: () => null
+					}
+				})
+				.mockResolvedValueOnce({
+					headers: {
+						get: (h: string) =>
+							h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? '1000000000' : null
+					}
+				})
+				.mockResolvedValueOnce({
+					headers: {
+						get: (h: string) =>
+							h === 'Content-Type' ? 'image/png' : h === 'Content-Length' ? '5000' : null
+					}
+				});
 		});
 
 		it('should fetch and map nfts correctly', async () => {
@@ -151,13 +219,15 @@ describe('alchemy.providers', () => {
 					id: parseNftId(1),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
-					}
+					},
+					mediaStatus: NftMediaStatusEnum.INVALID_DATA
 				},
 				{
 					id: parseNftId(2),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
-					}
+					},
+					mediaStatus: NftMediaStatusEnum.INVALID_DATA
 				}
 			]);
 		});

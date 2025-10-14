@@ -8,7 +8,7 @@ import type {
 	Settings,
 	UserAgreement,
 	UserProfile
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import { toNullable } from '@dfinity/utils';
 
 export const mockUserNetworksMap: Array<[NetworkSettingsFor, NetworkSettings]> = [

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
@@ -81,6 +82,10 @@
 
 		const parsedAmount = Number(amount);
 
+		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
+			return;
+		}
+
 		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
 		}
@@ -134,7 +139,7 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken];
+		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
 		untrack(() => {
 			clearDebounceTimer();

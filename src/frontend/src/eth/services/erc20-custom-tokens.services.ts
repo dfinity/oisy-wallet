@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
+import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 import { loadCustomTokens } from '$eth/services/erc20.services';
 import { erc20CustomTokensStore } from '$eth/stores/erc20-custom-tokens.store';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';

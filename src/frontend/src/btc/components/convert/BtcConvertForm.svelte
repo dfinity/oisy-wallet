@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import type { Readable } from 'svelte/store';
+	import { getContext, type Snippet } from 'svelte';
 	import BtcConvertFees from '$btc/components/convert/BtcConvertFees.svelte';
 	import BtcSendWarnings from '$btc/components/send/BtcSendWarnings.svelte';
 	import {
@@ -9,7 +8,6 @@
 		initPendingSentTransactionsStatus
 	} from '$btc/derived/btc-pending-sent-transactions-status.derived';
 	import { UTXOS_FEE_CONTEXT_KEY, type UtxosFeeContext } from '$btc/stores/utxos-fee.store';
-	import type { UtxosFee } from '$btc/types/btc-send';
 	import ConvertForm from '$lib/components/convert/ConvertForm.svelte';
 	import { BTC_CONVERT_FORM_TEST_ID } from '$lib/constants/test-ids.constants';
 	import {
@@ -19,53 +17,67 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
-	export let source: string;
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let amountError = false;
+	interface Props {
+		source: string;
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		amountError?: boolean;
+		onNext: () => void;
+		cancel: Snippet;
+	}
+
+	let {
+		source,
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		amountError = $bindable(),
+		onNext,
+		cancel
+	}: Props = $props();
 
 	const { store: storeUtxosFeeData } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	$: amountError = $insufficientFunds || $insufficientFundsForFee;
+	$effect(() => {
+		amountError = $insufficientFunds || $insufficientFundsForFee;
+	});
 
-	let hasPendingTransactionsStore: Readable<BtcPendingSentTransactionsStatus>;
-	$: hasPendingTransactionsStore = initPendingSentTransactionsStatus(source);
+	let hasPendingTransactionsStore = $derived(initPendingSentTransactionsStatus(source));
 
-	let utxosFee: UtxosFee | undefined;
-	$: utxosFee = nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined;
+	let utxosFee = $derived(nonNullish(sendAmount) ? $storeUtxosFeeData?.utxosFee : undefined);
 
-	let invalid: boolean;
-	$: invalid =
+	let invalid = $derived(
 		$insufficientFunds ||
-		$insufficientFundsForFee ||
-		invalidAmount(sendAmount) ||
-		$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
-		isNullish($storeUtxosFeeData?.utxosFee?.utxos) ||
-		$storeUtxosFeeData.utxosFee.utxos.length === 0;
+			$insufficientFundsForFee ||
+			invalidAmount(sendAmount) ||
+			$hasPendingTransactionsStore !== BtcPendingSentTransactionsStatus.NONE ||
+			isNullish($storeUtxosFeeData?.utxosFee?.utxos) ||
+			$storeUtxosFeeData.utxosFee.utxos.length === 0
+	);
 
-	let totalFee: bigint | undefined;
+	let totalFee = $state<bigint | undefined>();
 </script>
 
 <ConvertForm
+	{cancel}
 	disabled={invalid}
+	{onNext}
 	testId={BTC_CONVERT_FORM_TEST_ID}
 	{totalFee}
-	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
 >
-	<svelte:fragment slot="message">
+	{#snippet message()}
 		{#if nonNullish($hasPendingTransactionsStore)}
 			<div class="mb-4" data-tid="btc-convert-form-send-warnings">
 				<BtcSendWarnings pendingTransactionsStatus={$hasPendingTransactionsStore} {utxosFee} />
 			</div>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<BtcConvertFees slot="fee" bind:totalFee />
-
-	<slot name="cancel" slot="cancel" />
+	{#snippet fee()}
+		<BtcConvertFees bind:totalFee />
+	{/snippet}
 </ConvertForm>

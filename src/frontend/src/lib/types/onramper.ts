@@ -1,6 +1,7 @@
+import type { BtcAddress } from '$btc/types/address';
+import type { EthAddress } from '$eth/types/address';
 import type { Currency } from '$lib/enums/currency';
 import type { OnramperIdSchema, OnramperNetworkIdSchema } from '$lib/schema/onramper.schema';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type * as z from 'zod';
 
 export type OnramperNetworkId = z.infer<typeof OnramperNetworkIdSchema>;

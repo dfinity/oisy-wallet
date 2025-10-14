@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -26,6 +27,10 @@
 			sort: $nftSortStore
 		})
 	);
+
+	const previewNft = $derived(
+		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
+	);
 </script>
 
 <a
@@ -36,7 +41,7 @@
 	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
 >
 	<div class="relative h-full w-full">
-		<NftImageConsent nft={collection.nfts[0]} type="card">
+		<NftDisplayGuard nft={previewNft} type="card">
 			<div
 				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}
@@ -63,7 +68,7 @@
 					{/if}
 				{/each}
 			</div>
-		</NftImageConsent>
+		</NftDisplayGuard>
 
 		<span class="absolute bottom-0 right-0 m-2.5">
 			<NetworkLogo

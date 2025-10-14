@@ -1,4 +1,4 @@
-import type { TxError } from '$declarations/xtc_ledger/xtc_ledger.did';
+import type { TxError } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
 export const mapXtcLedgerCanisterError = (err: TxError): CanisterInternalError => {

@@ -22,7 +22,6 @@
 	import { tokenWithFallback } from '$lib/derived/token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 
 	let ckMinterInfoAddresses = $derived(
@@ -39,15 +38,12 @@
 		)
 	);
 
-	let selectedTransaction = $state<EthTransactionUi | undefined>();
-	let selectedToken = $state<OptionToken>();
-	$effect(() => {
-		({ transaction: selectedTransaction, token: selectedToken } =
-			mapTransactionModalData<EthTransactionUi>({
-				$modalOpen: $modalEthTransaction,
-				$modalStore
-			}));
-	});
+	let { transaction: selectedTransaction, token: selectedToken } = $derived(
+		mapTransactionModalData<EthTransactionUi>({
+			$modalOpen: $modalEthTransaction,
+			$modalStore
+		})
+	);
 
 	let token = $derived($tokenWithFallback);
 

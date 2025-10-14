@@ -5,7 +5,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -48,7 +48,7 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
+		<NftDisplayGuard {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -58,7 +58,7 @@
 					testId={`${testId}-image`}
 				/>
 			</div>
-		</NftImageConsent>
+		</NftDisplayGuard>
 
 		{#if isHidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">

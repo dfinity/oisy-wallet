@@ -12,6 +12,7 @@ import { TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY } from '$lib/stores/token-ac
 import { mockBtcAddress, mockUtxosFee } from '$tests/mocks/btc.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -44,7 +45,9 @@ describe('BtcConvertForm', () => {
 	const props = {
 		source: mockBtcAddress,
 		sendAmount: 0.001,
-		receiveAmount: 0.001
+		receiveAmount: 0.001,
+		onNext: vi.fn(),
+		cancel: mockSnippet
 	};
 	const mockBtcPendingSendTransactionsStatusStore = (
 		status:

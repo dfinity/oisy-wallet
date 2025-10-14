@@ -1,4 +1,4 @@
-import type { TokenAccountId } from '$declarations/backend/backend.did';
+import type { TokenAccountId } from '$declarations/backend/declarations/backend.did';
 import { TOKEN_ACCOUNT_ID_TO_NETWORKS } from '$lib/constants/token-account-id.constants';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';

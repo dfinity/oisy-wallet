@@ -119,8 +119,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});
@@ -250,8 +249,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});
