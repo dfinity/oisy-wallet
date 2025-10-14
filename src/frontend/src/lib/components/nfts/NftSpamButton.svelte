@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { tick } from 'svelte';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
