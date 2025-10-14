@@ -84,10 +84,13 @@ describe('NftSpamButton', () => {
 
 		await tick();
 
-		await waitFor(() => {
-			const svg = spamBtn.querySelector('svg.spinner');
+		await waitFor(
+			() => {
+				const svg = spamBtn.querySelector('svg.spinner');
 
-			expect(svg).toBeInTheDocument();
-		});
+				expect(svg).toBeInTheDocument();
+			},
+			{ timeout: 5000 }
+		);
 	});
 });

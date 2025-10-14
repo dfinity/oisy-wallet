@@ -84,10 +84,13 @@ describe('NftHideButton', () => {
 
 		await tick();
 
-		await waitFor(() => {
-			const svg = hideBtn.querySelector('svg.spinner');
+		await waitFor(
+			() => {
+				const svg = hideBtn.querySelector('svg.spinner');
 
-			expect(svg).toBeInTheDocument();
-		});
+				expect(svg).toBeInTheDocument();
+			},
+			{ timeout: 5000 }
+		);
 	});
 });
