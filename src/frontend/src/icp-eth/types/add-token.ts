@@ -1,5 +1,5 @@
-import type { SolAddress } from '$lib/types/address';
 import type { OneOf } from '$lib/utils/ts.utils';
+import type { SolAddress } from '$sol/types/address';
 
 interface EthAddTokenData {
 	ethContractAddress: string;

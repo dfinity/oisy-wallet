@@ -287,7 +287,7 @@ describe('nft.services', () => {
 			expect(erc1155Spy).not.toHaveBeenCalled();
 		});
 
-		it('updates ERC721 token with section=HIDDEN', async () => {
+		it('updates ERC721 token with section=HIDDEN (should disable allowExternalContentSource)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
@@ -300,7 +300,8 @@ describe('nft.services', () => {
 					{
 						...base721,
 						enabled: true,
-						section: CustomTokenSection.HIDDEN
+						section: CustomTokenSection.HIDDEN,
+						allowExternalContentSource: false
 					}
 				]
 			});
@@ -326,7 +327,7 @@ describe('nft.services', () => {
 			});
 		});
 
-		it('updates ERC1155 token with section=HIDDEN', async () => {
+		it('updates ERC1155 token with section=HIDDEN (should disable allowExternalContentSource)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base1155,
@@ -339,7 +340,8 @@ describe('nft.services', () => {
 					{
 						...base1155,
 						enabled: true,
-						section: CustomTokenSection.HIDDEN
+						section: CustomTokenSection.HIDDEN,
+						allowExternalContentSource: false
 					}
 				]
 			});

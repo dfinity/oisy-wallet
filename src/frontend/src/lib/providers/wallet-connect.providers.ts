@@ -13,8 +13,8 @@ import {
 	SESSION_REQUEST_ETH_SIGN_V4,
 	SESSION_REQUEST_PERSONAL_SIGN
 } from '$eth/constants/wallet-connect.constants';
+import type { OptionEthAddress } from '$eth/types/address';
 import { WALLET_CONNECT_METADATA } from '$lib/constants/wallet-connect.constants';
-import type { OptionEthAddress, OptionSolAddress } from '$lib/types/address';
 import type {
 	WalletConnectApproveRequestMessage,
 	WalletConnectListener
@@ -24,6 +24,7 @@ import {
 	SESSION_REQUEST_SOL_SIGN_MESSAGE,
 	SESSION_REQUEST_SOL_SIGN_TRANSACTION
 } from '$sol/constants/wallet-connect.constants';
+import type { OptionSolAddress } from '$sol/types/address';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { WalletKit, type WalletKitTypes } from '@reown/walletkit';
 import { Core } from '@walletconnect/core';
