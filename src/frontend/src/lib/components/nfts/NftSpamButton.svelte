@@ -14,10 +14,10 @@
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
-	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
 		token: NonFungibleToken;
