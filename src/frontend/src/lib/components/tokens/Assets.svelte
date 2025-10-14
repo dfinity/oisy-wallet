@@ -18,6 +18,7 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { TRACK_OPEN_ASSETS_TAB } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -48,6 +49,7 @@
 									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
 									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
 								]}
+								trackEventName={TRACK_OPEN_ASSETS_TAB}
 								bind:activeTab
 							/>
 						{:else}
