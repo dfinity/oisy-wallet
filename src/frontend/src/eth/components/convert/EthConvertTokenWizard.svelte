@@ -206,10 +206,10 @@
 		</EthConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
 		<EthConvertProgress
+			{convertProgressStep}
 			{destination}
 			nativeEthereumToken={$nativeEthereumTokenWithFallback}
 			sourceTokenId={$sourceToken.id}
-			bind:convertProgressStep
 		/>
 	{:else}
 		{@render children?.()}
