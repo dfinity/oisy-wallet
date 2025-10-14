@@ -30,9 +30,7 @@
 	};
 
 	$effect(() => {
-		if (isNullish($gldtStakeApyStore?.apy)) {
-			loadGldStakeApy();
-		}
+		loadGldStakeApy();
 	});
 </script>
 
