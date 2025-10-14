@@ -232,7 +232,7 @@
 				{/snippet}
 			</IcConvertReview>
 		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-			<IcConvertProgress bind:convertProgressStep />
+			<IcConvertProgress {convertProgressStep} />
 		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
 			<DestinationWizardStep
 				{networkId}

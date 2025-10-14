@@ -9,8 +9,7 @@
 		receiveProgressStep?: string;
 	}
 
-	let { receiveProgressStep = $bindable(ProgressStepsUpdateBalanceCkBtc.INITIALIZATION) }: Props =
-		$props();
+	let { receiveProgressStep = ProgressStepsUpdateBalanceCkBtc.INITIALIZATION }: Props = $props();
 
 	let steps = $derived<ProgressSteps>([
 		{
