@@ -60,7 +60,7 @@
 	<NftActionButton
 		label={$i18n.nfts.text.not_spam}
 		{loading}
-		onclick={updateSection}
+		onclick={() => updateSection()}
 		testId={NFT_COLLECTION_ACTION_NOT_SPAM}
 	>
 		{#snippet icon()}

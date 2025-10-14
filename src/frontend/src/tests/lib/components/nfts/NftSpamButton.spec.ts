@@ -5,6 +5,7 @@ import {
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
@@ -63,6 +64,27 @@ describe('NftSpamButton', () => {
 
 		await waitFor(() => {
 			expect(queryByTestId(CONFIRMATION_MODAL)).toBeNull();
+		});
+	});
+
+	it('should display a loading indicator on the button during the action', async () => {
+		nftStore.addAll([mockNft]);
+		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
+			new Promise((r) => setTimeout(r, 10))
+		);
+
+		const { getByTestId } = render(NftSpamButton, { props: { token: mockToken } });
+
+		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
+
+		expect(spamBtn).toBeInTheDocument();
+
+		await fireEvent.click(spamBtn);
+
+		await waitFor(() => {
+			const svg = spamBtn.querySelector('svg.spinner');
+
+			expect(svg).toBeInTheDocument();
 		});
 	});
 });
