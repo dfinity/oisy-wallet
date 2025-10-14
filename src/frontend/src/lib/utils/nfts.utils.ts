@@ -378,7 +378,7 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 		// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
 		// For now, we assume that it is valid to avoid blocking the user.
 		// Ideally, we should load this data in a backend service to avoid CORS issues.
-		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar soultions).
+		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
 		return NftMediaStatusEnum.OK;
 	}
 
