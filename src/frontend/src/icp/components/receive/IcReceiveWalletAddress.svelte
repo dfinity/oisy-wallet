@@ -31,9 +31,9 @@
 	network={ICP_NETWORK}
 	qrCodeAction={{
 		enabled: true,
-		ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+		ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+		onClick: () => displayQRCode($icrcAccountIdentifierText ?? '')
 	}}
-	on:click={() => displayQRCode($icrcAccountIdentifierText ?? '')}
 >
 	{#snippet title()}
 		{$i18n.wallet.text.wallet_address}

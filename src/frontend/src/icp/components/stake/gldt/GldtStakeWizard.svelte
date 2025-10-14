@@ -63,10 +63,12 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsStake.STAKE}
-	<GldtStakeForm {onClose} {onNext} bind:amount />
-{:else if currentStep?.name === WizardStepsStake.REVIEW}
-	<GldtStakeReview {amount} {onBack} onStake={stake} />
-{:else if currentStep?.name === WizardStepsStake.STAKING}
-	<StakeProgress {stakeProgressStep} />
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsStake.STAKE}
+		<GldtStakeForm {onClose} {onNext} bind:amount />
+	{:else if currentStep?.name === WizardStepsStake.REVIEW}
+		<GldtStakeReview {amount} {onBack} onStake={stake} />
+	{:else if currentStep?.name === WizardStepsStake.STAKING}
+		<StakeProgress {stakeProgressStep} />
+	{/if}
+{/key}
