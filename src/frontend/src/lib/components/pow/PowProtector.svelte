@@ -3,7 +3,7 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import { POW_FEATURE_ENABLED } from '$env/pow.env';
-	import {PowProtectorWorker} from '$icp/services/worker.pow-protection.services';
+	import { PowProtectorWorker } from '$icp/services/worker.pow-protection.services';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import InProgress from '$lib/components/ui/InProgress.svelte';
 	import { powProtectorSteps } from '$lib/config/pow.config';
