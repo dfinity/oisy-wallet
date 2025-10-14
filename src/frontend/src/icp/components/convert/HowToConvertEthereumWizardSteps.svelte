@@ -25,10 +25,6 @@
 		addressToken={ETHEREUM_TOKEN}
 		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
 		network={ETHEREUM_NETWORK}
-		qrCodeAction={{
-			enabled: true,
-			ariaLabel: $i18n.receive.ethereum.text.display_ethereum_address_qr
-		}}
 		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
 		on:icBack
 	/>

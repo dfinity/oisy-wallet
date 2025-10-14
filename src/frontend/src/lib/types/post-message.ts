@@ -1,4 +1,5 @@
 import type {
+	POST_MESSAGE_REQUESTS,
 	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestDip20Schema,
@@ -96,4 +97,11 @@ export type PostMessageDataResponsePowProtectorNextAllowance = z.infer<
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponseLoose> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
+>;
+
+export type PostMessageRequest = (typeof POST_MESSAGE_REQUESTS)[number];
+
+export type PostMessageRequestMap = Record<
+	PostMessageRequest,
+	(data: MessageEvent<PostMessage<PostMessageDataRequest>>) => Promise<void>
 >;
