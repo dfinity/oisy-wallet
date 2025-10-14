@@ -1,3 +1,4 @@
+import * as gldtStakeApi from '$icp/api/gldt_stake.api';
 import GldtStakeApyContext from '$icp/components/stake/gldt/GldtStakeApyContext.svelte';
 import {
 	GLDT_STAKE_APY_CONTEXT_KEY,
@@ -5,7 +6,6 @@ import {
 	type GldtStakeApyStore
 } from '$icp/stores/gldt-stake-apy.store';
 import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
-import * as gldtStakeApi from '$lib/api/gldt_stake.api';
 import * as authStore from '$lib/derived/auth.derived';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';

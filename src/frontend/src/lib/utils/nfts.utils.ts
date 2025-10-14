@@ -374,7 +374,12 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
 	} catch (_: unknown) {
-		return NftMediaStatusEnum.INVALID_DATA;
+		// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
+		// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
+		// For now, we assume that it is valid to avoid blocking the user.
+		// Ideally, we should load this data in a backend service to avoid CORS issues.
+		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
+		return NftMediaStatusEnum.OK;
 	}
 
 	return NftMediaStatusEnum.OK;
