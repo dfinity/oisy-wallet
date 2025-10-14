@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
@@ -17,7 +18,6 @@
 		showHiddenStore,
 		showSpamStore
 	} from '$lib/stores/settings.store';
-	import { preventDefault } from '@dfinity/gix-components';
 
 	let visible = $state(false);
 
