@@ -81,9 +81,7 @@
 		aria-hidden={loading && loadingAsSkeleton}
 	>
 		{#if loading}
-			<span class="absolute flex h-full w-full items-center justify-center">
-
-			</span>
+			<span class="absolute flex h-full w-full items-center justify-center"> </span>
 
 			<span class="invisible">
 				{@render children()}
