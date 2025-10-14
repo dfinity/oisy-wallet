@@ -204,22 +204,24 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview
-		{amount}
-		{destination}
-		{onBack}
-		onSend={send}
-		{selectedContact}
-		{source}
-		bind:utxosFee
-	/>
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<BtcSendProgress {sendProgressStep} />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</BtcSendForm>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<BtcSendReview
+			{amount}
+			{destination}
+			{onBack}
+			onSend={send}
+			{selectedContact}
+			{source}
+			bind:utxosFee
+		/>
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<BtcSendProgress {sendProgressStep} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
+		</BtcSendForm>
+	{/if}
+{/key}

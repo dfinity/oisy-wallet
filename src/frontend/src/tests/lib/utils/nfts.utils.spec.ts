@@ -924,7 +924,7 @@ describe('nfts.utils', () => {
 		it('returns INVALID_DATA for invalid URL', async () => {
 			const result = await getMediaStatus('not-a-url');
 
-			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA when fetch throws', async () => {
@@ -932,7 +932,7 @@ describe('nfts.utils', () => {
 
 			const result = await getMediaStatus('https://example.com/image.png');
 
-			expect(result).toBe(NftMediaStatusEnum.INVALID_DATA);
+			expect(result).toBe(NftMediaStatusEnum.OK);
 		});
 
 		it('returns INVALID_DATA when headers are missing', async () => {

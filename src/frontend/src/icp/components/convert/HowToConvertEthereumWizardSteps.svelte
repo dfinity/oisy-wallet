@@ -17,15 +17,17 @@
 	let { currentStep, formCancelAction = 'close' }: Props = $props();
 </script>
 
-{#if currentStep?.name === WizardStepsHowToConvert.INFO}
-	<HowToConvertEthereumInfo {formCancelAction} on:icQRCode on:icConvert on:icBack />
-{:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
-	<ReceiveAddressQrCode
-		address={$ethAddress ?? ''}
-		addressToken={ETHEREUM_TOKEN}
-		copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
-		network={ETHEREUM_NETWORK}
-		testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
-		on:icBack
-	/>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsHowToConvert.INFO}
+		<HowToConvertEthereumInfo {formCancelAction} on:icQRCode on:icConvert on:icBack />
+	{:else if currentStep?.name === WizardStepsHowToConvert.ETH_QR_CODE}
+		<ReceiveAddressQrCode
+			address={$ethAddress ?? ''}
+			addressToken={ETHEREUM_TOKEN}
+			copyAriaLabel={$i18n.receive.ethereum.text.ethereum_address_copied}
+			network={ETHEREUM_NETWORK}
+			testId={HOW_TO_CONVERT_ETHEREUM_QR_CODE}
+			on:icBack
+		/>
+	{/if}
+{/key}
