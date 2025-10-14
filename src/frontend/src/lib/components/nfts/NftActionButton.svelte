@@ -19,10 +19,10 @@
 <Button
 	{colorStyle}
 	innerStyleClass="h-5"
+	{loading}
 	{onclick}
 	paddingSmall
 	styleClass="rounded-lg border-brand-subtle-30 p-2"
-	{loading}
 	{testId}
 >
 	<span class="flex items-center gap-1">
