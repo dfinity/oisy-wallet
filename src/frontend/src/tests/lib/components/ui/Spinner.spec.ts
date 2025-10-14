@@ -47,6 +47,6 @@ describe('Spinner.svelte', () => {
 		render(Spinner);
 		const svg = screen.getByTestId('spinner');
 
-		expect(svg.classList.contains('spinner')).toBe(true);
+		expect(svg.classList.contains('spinner')).toBeTruthy();
 	});
 });

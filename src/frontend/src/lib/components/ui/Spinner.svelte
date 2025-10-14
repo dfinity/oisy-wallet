@@ -6,7 +6,7 @@
 	const { size = '16px' }: Props = $props();
 </script>
 
-<span class="relative flex" style="--spinner-size: {size}">
+<span style="--spinner-size: {size}" class="relative flex">
 	<svg
 		class="spinner"
 		aria-hidden="true"
