@@ -1,5 +1,5 @@
-import { getApyOverall } from '$lib/api/gldt_stake.api';
-import { GldtStakeCanister } from '$lib/canisters/gldt_stake.canister';
+import { getApyOverall } from '$icp/api/gldt_stake.api';
+import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import * as appContants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
