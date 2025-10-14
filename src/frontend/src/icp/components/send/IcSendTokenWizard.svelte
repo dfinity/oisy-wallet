@@ -143,7 +143,7 @@
 {#if currentStep?.name === WizardStepsSend.REVIEW}
 	<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
 {:else if currentStep?.name === WizardStepsSend.SENDING}
-	<IcSendProgress bind:sendProgressStep />
+	<IcSendProgress {sendProgressStep} />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
 		{#snippet cancel()}

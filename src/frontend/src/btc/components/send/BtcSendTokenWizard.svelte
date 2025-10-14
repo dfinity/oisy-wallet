@@ -208,7 +208,7 @@
 		bind:utxosFee
 	/>
 {:else if currentStep?.name === WizardStepsSend.SENDING}
-	<BtcSendProgress bind:sendProgressStep />
+	<BtcSendProgress {sendProgressStep} />
 {:else if currentStep?.name === WizardStepsSend.SEND}
 	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
 		{#snippet cancel()}

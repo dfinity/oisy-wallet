@@ -177,6 +177,6 @@
 			{/snippet}
 		</BtcConvertReview>
 	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-		<BtcConvertProgress bind:convertProgressStep />
+		<BtcConvertProgress {convertProgressStep} />
 	{/if}
 </UtxosFeeContext>
