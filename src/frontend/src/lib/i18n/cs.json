@@ -1128,6 +1128,8 @@
 			"collections": "Kolekce",
 			"all_assets": "Všechna aktiva",
 			"address_copied": "Adresa $address zkopírována",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Ne spam",
 			"spam_warning": "",
@@ -1143,6 +1145,7 @@
 			"review_button": "Rekapitulace",
 			"collection_name": "Název kolekce",
 			"media_urls": "URL adresy médií",
+			"media_url": "",
 			"display_preference": "Preference zobrazení",
 			"review_preference": "Preference rekapitulace",
 			"media_enabled": "Média povolena",
@@ -1157,7 +1160,8 @@
 			"learn_more": "Zjistěte více",
 			"token_id": "Token ID",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"received_at": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
