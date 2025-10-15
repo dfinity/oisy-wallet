@@ -9,6 +9,7 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
+		loadingAsSkeleton?: boolean;
 		fullWidth?: boolean;
 		contentFullWidth?: boolean;
 		alignLeft?: boolean;
@@ -30,6 +31,7 @@
 		type = 'submit',
 		disabled,
 		loading = false,
+		loadingAsSkeleton = false,
 		fullWidth = false,
 		contentFullWidth = false,
 		alignLeft = false,
@@ -77,7 +79,8 @@
 		class:ease-in-out={loading}
 		class:transition={loading}
 		class:w-full={contentFullWidth}
-		aria-hidden={loading}
+		class:invisible={loading && loadingAsSkeleton}
+		aria-hidden={loading && loadingAsSkeleton}
 	>
 		{#if loading}
 			<span class="absolute flex h-full w-full items-center justify-center">

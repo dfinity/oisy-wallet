@@ -22,6 +22,7 @@
 	colorStyle="tertiary-main-card"
 	{disabled}
 	loading={$loading}
+	loadingAsSkeleton
 	{onclick}
 	paddingSmall
 	styleClass="py-1 min-w-0"
