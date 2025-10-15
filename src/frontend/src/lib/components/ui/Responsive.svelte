@@ -6,7 +6,7 @@
 	*/
 
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy } from 'svelte';
+	import { onDestroy, type Snippet, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
 		AVAILABLE_SCREENS,
@@ -18,33 +18,47 @@
 		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
 
-	export let up: ScreensKeyType = MIN_SCREEN;
-	export let down: ScreensKeyType = MAX_SCREEN;
+	interface Props {
+		up?: ScreensKeyType;
+		down?: ScreensKeyType;
+		children: Snippet;
+	}
 
-	let innerWidth = 0;
+	let { up = MIN_SCREEN, down = MAX_SCREEN, children }: Props = $props();
+
+	let innerWidth = $state(0);
 	const debouncedWidth = writable(0);
-	let timeoutHandle: NodeJS.Timeout | undefined;
+	let timeoutHandle = $state<NodeJS.Timeout | undefined>();
 
-	$: {
+	const updateWidth = () => {
 		if (nonNullish(timeoutHandle)) {
 			clearTimeout(timeoutHandle);
 		}
+
 		timeoutHandle = setTimeout(() => {
 			debouncedWidth.set(innerWidth);
 		}, 50); // debounce width on screen size change so we don't calculate all the time
-	}
+	};
 
-	let activeScreen: ScreensKeyType;
-	$: activeScreen = getActiveScreen({
-		screenWidth: $debouncedWidth,
-		availableScreensSortedByWidth: AVAILABLE_SCREENS
+	$effect(() => {
+		[innerWidth];
+
+		untrack(() => updateWidth());
 	});
 
-	let display = false;
-	$: display = shouldDisplayForScreen({
-		filteredScreens: filterScreens({ availableScreens: AVAILABLE_SCREENS, up, down }),
-		activeScreen
-	});
+	let activeScreen = $derived(
+		getActiveScreen({
+			screenWidth: $debouncedWidth,
+			availableScreensSortedByWidth: AVAILABLE_SCREENS
+		})
+	);
+
+	let display = $derived(
+		shouldDisplayForScreen({
+			filteredScreens: filterScreens({ availableScreens: AVAILABLE_SCREENS, up, down }),
+			activeScreen
+		})
+	);
 
 	onDestroy(() => {
 		if (isNullish(timeoutHandle)) {
@@ -59,5 +73,5 @@
 <svelte:window bind:innerWidth />
 
 {#if display}
-	<slot />
+	{@render children()}
 {/if}

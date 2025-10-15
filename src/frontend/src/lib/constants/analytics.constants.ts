@@ -134,6 +134,11 @@ export const USER_MENU_ROUTE = 'user-menu';
 export const HIDE_TOKEN_MODAL_ROUTE = 'hide-token-modal';
 export const MANAGE_TOKENS_MODAL_ROUTE = 'manage-tokens-modal';
 export const TOKEN_VIEW_ROUTE = 'token-view';
+export const NFT_COLLECTION_ROUTE = 'nft-collection-page';
+export const NFT_LIST_ROUTE = 'nft-list-page';
+export const NFT_COLLECTION_HERO = 'nft-collection-hero';
+export const NFT_CONSENT_MODAL = 'nft-consent-modal';
+export const NFT_COLLECTION_DESCRIPTION = 'nft-collection-description';
 
 // Privacymode change
 export const TRACK_PRIVACY_MODE_CHANGE = 'privacy_mode_change';
@@ -174,4 +179,7 @@ export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
 export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
 export const TRACK_NFT_SEND = 'nft_send';
+export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
+export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
+export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';

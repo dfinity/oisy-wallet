@@ -6,15 +6,25 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
-	export let address: OptionAddress<Address>;
-	export let addressLabel: string | undefined = undefined;
-	export let addressToken: Token | undefined;
+	interface Props {
+		address: OptionAddress<Address>;
+		addressLabel?: string;
+		addressToken?: Token;
+		testId?: string;
+		copyButtonTestId?: string;
+		network: Network;
+		copyAriaLabel: string;
+	}
 
-	export let testId: string | undefined = undefined;
-	export let copyButtonTestId: string | undefined = undefined;
-
-	export let network: Network;
-	export let copyAriaLabel: string;
+	let {
+		address,
+		addressLabel,
+		addressToken,
+		testId,
+		copyButtonTestId,
+		network,
+		copyAriaLabel
+	}: Props = $props();
 
 	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
 </script>

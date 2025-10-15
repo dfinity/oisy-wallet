@@ -5,7 +5,7 @@ import {
 } from '$btc/services/btc-address.services';
 import { loadEthAddress } from '$eth/services/eth-address.services';
 import Loader from '$lib/components/loaders/Loader.svelte';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { LOADER_MODAL } from '$lib/constants/test-ids.constants';
 import { initLoader } from '$lib/services/loader.services';
 import {
@@ -161,7 +161,7 @@ describe('Loader', () => {
 			setupTestnetsStore('enabled');
 			setupUserNetworksStore('allEnabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			render(Loader, { children: mockSnippet });
 
@@ -185,7 +185,7 @@ describe('Loader', () => {
 
 			setupTestnetsStore('enabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
 			ethAddressStore.reset();
 
@@ -344,7 +344,7 @@ describe('Loader', () => {
 			});
 
 			it('should call local addresses loaders when in local env', async () => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 				render(Loader, { children: mockSnippet });
 
