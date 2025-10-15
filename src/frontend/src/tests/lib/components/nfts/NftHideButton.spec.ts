@@ -5,18 +5,20 @@ import {
 	NFT_COLLECTION_ACTION_UNHIDE
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
+import { tick } from 'svelte';
 
 const mockToken = { ...mockValidErc1155Token };
 const mockNft = { ...mockValidErc1155Nft };
 
 describe('NftHideButton', () => {
 	beforeEach(() => {
-		nftStore.addAll([]);
+		nftStore.resetAll();
 	});
 
 	it('renders Unhide button when token.section is HIDDEN', () => {
@@ -64,5 +66,26 @@ describe('NftHideButton', () => {
 		await waitFor(() => {
 			expect(queryByTestId(CONFIRMATION_MODAL)).toBeNull();
 		});
+	});
+
+	it('should display a loading indicator on the button during the action', async () => {
+		nftStore.addAll([mockNft]);
+		vi.spyOn(nftsServices, 'updateNftSection').mockReturnValue(
+			new Promise((r) => setTimeout(r, 500))
+		);
+
+		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
+
+		const hideBtn = getByTestId(NFT_COLLECTION_ACTION_HIDE);
+
+		expect(hideBtn).toBeInTheDocument();
+
+		await fireEvent.click(hideBtn);
+
+		await tick();
+
+		const svg = getByTestId('spinner');
+
+		expect(svg).toBeInTheDocument();
 	});
 });
