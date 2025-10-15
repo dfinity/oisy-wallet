@@ -273,7 +273,7 @@ export const defineEnabledTokens = <T extends Token>({
 	);
 
 export const groupTogglableTokens = (
-	tokens: Record<string, Token>
+	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
@@ -281,7 +281,7 @@ export const groupTogglableTokens = (
 	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
-	Object.values(tokens ?? {}).reduce<{
+	tokens.reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
@@ -310,7 +310,7 @@ export const saveAllCustomTokens = async ({
 	$authIdentity,
 	$i18n
 }: {
-	tokens: Record<string, Token>;
+	tokens: Token[];
 	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
 	modalNext?: () => void;
 	onSuccess?: () => void;

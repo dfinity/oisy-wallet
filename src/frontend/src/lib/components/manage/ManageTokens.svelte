@@ -27,7 +27,7 @@
 		initialSearch?: string;
 		infoElement?: Snippet;
 		isNftsPage?: boolean;
-		onSave: (tokens: Record<string, Token>) => void;
+		onSave: (tokens: Token[]) => void;
 		onAddToken: () => void;
 	}
 
@@ -108,7 +108,7 @@
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => onSave(modifiedTokens);
+	const save = () => onSave(Object.values(modifiedTokens));
 </script>
 
 {#if nonNullish(infoElement)}
