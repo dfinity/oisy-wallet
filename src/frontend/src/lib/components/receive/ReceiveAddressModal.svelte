@@ -40,7 +40,7 @@
 	let addressToken: Token | undefined;
 	let copyAriaLabel: string | undefined;
 
-	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+	const displayQRCode = (detail: ReceiveQRCode) => {
 		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};
@@ -82,7 +82,7 @@
 				on:icBack={displayAddresses}
 			/>
 		{:else}
-			<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
+			<svelte:component this={infoCmp} onQRCode={displayQRCode} />
 		{/if}
 	{/key}
 </WizardModal>

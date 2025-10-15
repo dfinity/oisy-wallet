@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -20,12 +20,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+	}
+
+	let { onQRCode }: Props = $props();
+
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
 	const displayQRCode = (details: Omit<ReceiveQRCode, 'addressToken'>) =>
-		dispatch('icQRCode', {
+		onQRCode({
 			...details,
 			addressToken: ICP_TOKEN
 		});
