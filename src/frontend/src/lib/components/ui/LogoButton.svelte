@@ -2,6 +2,7 @@
 	import { IconCheck } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
+	import type { MouseEventHandler } from 'svelte/elements';
 	import { fade } from 'svelte/transition';
 	import Divider from '$lib/components/common/Divider.svelte';
 
@@ -21,7 +22,7 @@
 		description?: Snippet;
 		descriptionEnd?: Snippet;
 		action?: Snippet;
-		onClick?: () => void;
+		onClick?: MouseEventHandler<HTMLButtonElement>;
 		fullWidth?: boolean;
 	}
 

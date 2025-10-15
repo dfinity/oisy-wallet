@@ -1,6 +1,6 @@
+import type { EthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
-import type { EthAddress } from '$lib/types/address';
 import type { Identity } from '@dfinity/agent';
 
 interface CommonNftTransferParams {

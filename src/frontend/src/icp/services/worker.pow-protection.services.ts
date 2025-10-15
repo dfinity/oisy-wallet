@@ -2,10 +2,7 @@ import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
-import type {
-	PowProtectorWorker,
-	PowProtectorWorkerInitResult
-} from '$icp/types/pow-protector-listener';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -15,10 +12,9 @@ import type {
 } from '$lib/types/post-message';
 
 // TODO: add tests for POW worker/scheduler
-export const initPowProtectorWorker: PowProtectorWorker =
-	async (): Promise<PowProtectorWorkerInitResult> => {
-		const PowWorker = await import('$lib/workers/workers?worker');
-		let worker: Worker | null = new PowWorker.default();
+export class PowProtectorWorker extends AppWorker {
+	private constructor(worker: Worker) {
+		super(worker);
 
 		worker.onmessage = ({
 			data: dataMsg
@@ -47,36 +43,28 @@ export const initPowProtectorWorker: PowProtectorWorker =
 				}
 			}
 		};
+	}
 
-		const stop = () => {
-			worker?.postMessage({
-				msg: 'stopPowProtectionTimer'
-			});
-		};
+	static async init(): Promise<PowProtectorWorker> {
+		const worker = await AppWorker.getInstance();
+		return new PowProtectorWorker(worker);
+	}
 
-		let isDestroying = false;
-
-		return {
-			start: () => {
-				worker?.postMessage({
-					msg: 'startPowProtectionTimer'
-				} as PostMessage<PostMessageDataRequest>);
-			},
-			stop,
-			trigger: () => {
-				worker?.postMessage({
-					msg: 'triggerPowProtectionTimer'
-				} as PostMessage<PostMessageDataRequest>);
-			},
-			destroy: () => {
-				if (isDestroying) {
-					return;
-				}
-				isDestroying = true;
-				stop();
-				worker?.terminate();
-				worker = null;
-				isDestroying = false;
-			}
-		};
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopPowProtectionTimer'
+		});
 	};
+
+	start = () => {
+		this.postMessage({
+			msg: 'startPowProtectionTimer'
+		} as PostMessage<PostMessageDataRequest>);
+	};
+
+	trigger = () => {
+		this.postMessage({
+			msg: 'triggerPowProtectionTimer'
+		} as PostMessage<PostMessageDataRequest>);
+	};
+}

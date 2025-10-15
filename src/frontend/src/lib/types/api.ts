@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
 	AllowSigningRequest,
 	BitcoinNetwork,
@@ -15,7 +16,7 @@ import type {
 	Utxo as SignerUtxo
 } from '$declarations/signer/declarations/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
-import type { Address, BtcAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
 import type { UserAgreements } from '$lib/types/user-agreements';
 import type { UserExperimentalFeatures } from '$lib/types/user-experimental-features';

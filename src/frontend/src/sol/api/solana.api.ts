@@ -1,7 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
 import type {
@@ -98,7 +98,7 @@ export const getRpcTransaction = async ({
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}) => {
+}): Promise<SolRpcTransactionRaw | null> => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {

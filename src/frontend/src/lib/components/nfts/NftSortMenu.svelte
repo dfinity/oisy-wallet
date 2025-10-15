@@ -5,7 +5,9 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { TRACK_NFT_SORT_CHANGE } from '$lib/constants/analytics.constants';
 	import { nftSortType, nftSortOrder } from '$lib/derived/settings.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { type NftSortingType, nftSortStore } from '$lib/stores/settings.store';
 
@@ -15,6 +17,10 @@
 
 	const setSorting = (sort: NftSortingType) => {
 		nftSortStore.set({ key: 'nft-sort', value: sort });
+	};
+
+	const trackSortingEvent = ({ type, order }: { type: string; order: string }) => {
+		trackEvent({ name: TRACK_NFT_SORT_CHANGE, metadata: { type, order } });
 	};
 </script>
 
@@ -38,7 +44,10 @@
 		<List noPadding>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setSorting({ order: 'asc', type: 'date' })}
+					onclick={() => {
+						trackSortingEvent({ order: 'asc', type: 'date' });
+						setSorting({ order: 'asc', type: 'date' });
+					}}
 					selectable
 					selected={$nftSortType === 'date' && $nftSortOrder === 'asc'}
 				>
@@ -47,7 +56,10 @@
 			</ListItem>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setSorting({ order: 'desc', type: 'date' })}
+					onclick={() => {
+						trackSortingEvent({ order: 'desc', type: 'date' });
+						setSorting({ order: 'desc', type: 'date' });
+					}}
 					selectable
 					selected={$nftSortType === 'date' && $nftSortOrder === 'desc'}
 				>
@@ -56,7 +68,10 @@
 			</ListItem>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setSorting({ order: 'asc', type: 'collection-name' })}
+					onclick={() => {
+						trackSortingEvent({ order: 'asc', type: 'collection-name' });
+						setSorting({ order: 'asc', type: 'collection-name' });
+					}}
 					selectable
 					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'asc'}
 				>
@@ -65,7 +80,10 @@
 			</ListItem>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setSorting({ order: 'desc', type: 'collection-name' })}
+					onclick={() => {
+						trackSortingEvent({ order: 'desc', type: 'collection-name' });
+						setSorting({ order: 'desc', type: 'collection-name' });
+					}}
 					selectable
 					selected={$nftSortType === 'collection-name' && $nftSortOrder === 'desc'}
 				>

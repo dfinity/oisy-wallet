@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { preventDefault } from '@dfinity/gix-components';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import ListItemButton from '$lib/components/common/ListItemButton.svelte';
@@ -10,10 +11,15 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { nftGroupByCollection } from '$lib/derived/settings.derived';
+	import { TRACK_NFT_SETTINGS_CHANGE } from '$lib/constants/analytics.constants';
+	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { nftGroupByCollectionStore } from '$lib/stores/settings.store';
-	import { emit } from '$lib/utils/events.utils';
+	import {
+		nftGroupByCollectionStore,
+		showHiddenStore,
+		showSpamStore
+	} from '$lib/stores/settings.store';
 
 	let visible = $state(false);
 
@@ -24,11 +30,18 @@
 	};
 
 	const toggleShowHidden = () => {
-		emit({ message: 'oisyToggleShowHidden' });
+		trackNftSettingsEvent({ show_hidden: !$showHidden ? 'enabled' : 'disabled' });
+		showHiddenStore.set({ key: 'show-hidden', value: { enabled: !$showHidden } });
 	};
 
 	const toggleShowSpam = () => {
-		emit({ message: 'oisyToggleShowSpam' });
+		trackNftSettingsEvent({ show_spam: !$showSpam ? 'enabled' : 'disabled' });
+		showSpamStore.set({ key: 'show-spam', value: { enabled: !$showSpam } });
+	};
+
+	// Added a separate method to extend metadata for different settings in the future
+	const trackNftSettingsEvent = (metadata: Record<string, string>) => {
+		trackEvent({ name: TRACK_NFT_SETTINGS_CHANGE, metadata });
 	};
 </script>
 
@@ -52,7 +65,10 @@
 		<List noPadding>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setGrouping(false)}
+					onclick={() => {
+						trackNftSettingsEvent({ grouping: 'plain_list' });
+						setGrouping(false);
+					}}
 					selectable
 					selected={!$nftGroupByCollection}
 				>
@@ -61,7 +77,10 @@
 			</ListItem>
 			<ListItem>
 				<ListItemButton
-					onclick={() => setGrouping(true)}
+					onclick={() => {
+						trackNftSettingsEvent({ grouping: 'collection' });
+						setGrouping(true);
+					}}
 					selectable
 					selected={$nftGroupByCollection}
 				>
@@ -74,7 +93,7 @@
 
 		<List condensed noPadding>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleShowHidden}>
+				<LogoButton fullWidth onClick={preventDefault(toggleShowHidden)}>
 					{#snippet logo()}
 						<IconEyeOff />
 					{/snippet}
@@ -87,7 +106,7 @@
 				</LogoButton>
 			</ListItem>
 			<ListItem>
-				<LogoButton fullWidth onClick={toggleShowSpam}>
+				<LogoButton fullWidth onClick={preventDefault(toggleShowSpam)}>
 					{#snippet logo()}
 						<IconWarning />
 					{/snippet}

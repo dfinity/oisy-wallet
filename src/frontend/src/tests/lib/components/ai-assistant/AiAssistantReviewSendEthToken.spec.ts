@@ -2,6 +2,7 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { ETHEREUM_TOKEN, ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN } from '$env/tokens/tokens.eth.env';
 import * as sendServices from '$eth/services/send.services';
 import * as ethFeeStore from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import AiAssistantReviewSendEthToken from '$lib/components/ai-assistant/AiAssistantReviewSendEthToken.svelte';
 import {
@@ -11,7 +12,6 @@ import {
 import { ethAddressStore } from '$lib/stores/address.store';
 import { balancesStore } from '$lib/stores/balances.store';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockCkMinterInfo } from '$tests/mocks/ck-minter.mock';

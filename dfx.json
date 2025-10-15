@@ -582,6 +582,31 @@
 					"audit": "w36hm-eqaaa-aaaal-qr76a-cai"
 				}
 			}
+		},
+		"gldt_stake": {
+			"type": "custom",
+			"build": "scripts/build.gldt_stake.sh",
+			"candid": "target/gldt_stake.did",
+			"wasm": "target/gdlt_stake.wasm.gz",
+			"init_arg_file": "target/gldt_stake.arg.did",
+			"specified_id": "sqpxs-piaaa-aaaaj-qneva-cai",
+			"shrink": false,
+			"remote": {
+				"id": {
+					"ic": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"beta": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"staging": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_be_1": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_1": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_2": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_3": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_4": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_5": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"test_fe_6": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"e2e": "sqpxs-piaaa-aaaaj-qneva-cai",
+					"audit": "sqpxs-piaaa-aaaaj-qneva-cai"
+				}
+			}
 		}
 	},
 	"defaults": {

@@ -1156,7 +1156,8 @@
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
 			"learn_more": "Tìm hiểu thêm",
 			"token_id": "ID token",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",

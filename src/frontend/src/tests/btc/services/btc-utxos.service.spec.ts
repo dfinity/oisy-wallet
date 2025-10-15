@@ -60,11 +60,11 @@ vi.mock('$btc/services/btc-pending-sent-transactions.services', () => ({
 }));
 
 import { getFeeRateFromPercentiles, prepareBtcSend } from '$btc/services/btc-utxos.service';
+import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError } from '$btc/types/btc-send';
 import * as bitcoinApi from '$icp/api/bitcoin.api';
 import * as backendApi from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { BitcoinNetwork, Utxo } from '@dfinity/ckbtc';

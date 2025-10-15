@@ -40,7 +40,7 @@
 	let addressToken: Token | undefined;
 	let copyAriaLabel: string | undefined;
 
-	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+	const displayQRCode = (detail: ReceiveQRCode) => {
 		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};
@@ -71,17 +71,18 @@
 		{/if}
 	{/snippet}
 
-	{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
-		<ReceiveAddressQrCode
-			{address}
-			{addressLabel}
-			{addressToken}
-			copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
-			network={addressToken.network}
-			qrCodeAction={{ enabled: false }}
-			on:icBack={displayAddresses}
-		/>
-	{:else}
-		<svelte:component this={infoCmp} on:icQRCode={displayQRCode} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === steps[1].name && nonNullish(addressToken)}
+			<ReceiveAddressQrCode
+				{address}
+				{addressLabel}
+				{addressToken}
+				copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
+				network={addressToken.network}
+				onBack={displayAddresses}
+			/>
+		{:else}
+			<svelte:component this={infoCmp} onQRCode={displayQRCode} />
+		{/if}
+	{/key}
 </WizardModal>
