@@ -134,13 +134,15 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === WizardStepsHideToken.HIDING}
-		<InProgressWizard
-			progressStep={hideProgressStep}
-			steps={HIDE_TOKEN_STEPS}
-			warningType="manage"
-		/>
-	{:else if currentStep?.name === WizardStepsHideToken.HIDE}
-		<HideTokenReview onCancel={close} onHide={hide} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsHideToken.HIDING}
+			<InProgressWizard
+				progressStep={hideProgressStep}
+				steps={HIDE_TOKEN_STEPS}
+				warningType="manage"
+			/>
+		{:else if currentStep?.name === WizardStepsHideToken.HIDE}
+			<HideTokenReview onCancel={close} onHide={hide} />
+		{/if}
+	{/key}
 </WizardModal>

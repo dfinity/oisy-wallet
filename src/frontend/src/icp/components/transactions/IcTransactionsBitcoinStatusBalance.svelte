@@ -99,7 +99,7 @@
 		{#snippet title()}{$i18n.receive.bitcoin.text.refresh_status}{/snippet}
 
 		<div class="stretch">
-			<IcTransactionsBitcoinStatus bind:receiveProgressStep />
+			<IcTransactionsBitcoinStatus {receiveProgressStep} />
 		</div>
 	</Modal>
 {/if}

@@ -4,7 +4,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Address, OptionAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
-	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
@@ -38,7 +37,7 @@
 	{copyButtonTestId}
 	labelRef="address"
 	{network}
-	{qrCodeAction}
+	qrCodeAction={{ enabled: false }}
 	{testId}
 >
 	{#snippet title()}

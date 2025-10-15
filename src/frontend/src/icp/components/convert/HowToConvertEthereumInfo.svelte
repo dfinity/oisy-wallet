@@ -92,9 +92,9 @@
 			network={ETHEREUM_NETWORK}
 			qrCodeAction={{
 				enabled: true,
-				ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+				ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+				onClick: () => dispatch('icQRCode')
 			}}
-			on:click={() => dispatch('icQRCode')}
 		>
 			{#snippet title()}
 				{replacePlaceholders(replaceOisyPlaceholders($i18n.convert.text.send_eth), {

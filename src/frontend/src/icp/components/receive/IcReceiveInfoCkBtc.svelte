@@ -59,9 +59,9 @@
 			network={twinToken.network}
 			qrCodeAction={{
 				enabled: true,
-				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr
+				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
+				onClick: () => displayQRCode(btcAddress ?? '')
 			}}
-			on:click={() => displayQRCode(btcAddress ?? '')}
 		>
 			{#snippet title()}
 				{$i18n.receive.bitcoin.text.bitcoin_address}
