@@ -14,7 +14,7 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
@@ -121,7 +121,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll(mockErc20CertifiedUserTokens);
