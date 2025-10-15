@@ -13,6 +13,8 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
 	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		nft?: Nft;
@@ -37,6 +39,16 @@
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
+			trackEvent({
+				name: TRACK_NFT_OPEN_CONSENT_MODAL,
+				metadata: {
+					collection_name: nft.collection.name ?? '',
+					collection_address: nft.collection.address,
+					network: nft.collection.network.name,
+					standard: nft.collection.standard
+				}
+			});
+
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft.collection });
 		}
 	};
