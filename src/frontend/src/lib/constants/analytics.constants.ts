@@ -174,3 +174,4 @@ export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
 export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
 export const TRACK_NFT_SEND = 'nft_send';
+export const TRACK_NFT_OPEN = 'nft_open';
