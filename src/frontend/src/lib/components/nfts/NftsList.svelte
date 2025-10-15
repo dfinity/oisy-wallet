@@ -7,6 +7,7 @@
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
 	import {
 		NFT_COLLECTION_LIST_COMMON,
 		NFT_COLLECTION_LIST_HIDDEN,
@@ -21,7 +22,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -155,7 +155,7 @@
 			title={$i18n.nfts.text.all_assets}
 		>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} type="card-link" source={NFT_LIST_ROUTE} />
+				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -165,7 +165,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} type="card-link" source={NFT_LIST_ROUTE} />
+					<NftCard isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -176,7 +176,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} type="card-link" source={NFT_LIST_ROUTE} />
+					<NftCard isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}

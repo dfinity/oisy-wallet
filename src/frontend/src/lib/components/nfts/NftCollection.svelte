@@ -6,6 +6,7 @@
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
@@ -15,7 +16,6 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
-	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
@@ -57,8 +57,8 @@
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
-				type="card-link"
 				source={NFT_COLLECTION_ROUTE}
+				type="card-link"
 			/>
 		{/each}
 	{:else}
