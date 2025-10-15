@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
+            "collection_name_copied": "Collection name copied",
+            "id_copied": "Token ID name copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"spam_warning": "Move '$collection' to spam?",
@@ -1142,7 +1144,8 @@
 			"img_consent_none": "Image disabled for security reasons",
 			"review_button": "Review",
 			"collection_name": "Collection name",
-			"media_urls": "Media URLs",
+            "media_urls": "Media URLs",
+            "media_url": "Media URL",
 			"display_preference": "Display preference",
 			"review_preference": "Review preference",
 			"media_enabled": "Media enabled",
@@ -1157,7 +1160,8 @@
 			"learn_more": "Learn more",
 			"token_id": "Token ID",
 			"go_to_collection": "Go to collection",
-			"could_not_update_section": "Could not update collection section. Please try again"
+			"could_not_update_section": "Could not update collection section. Please try again",
+            "received_at": "Received At"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
