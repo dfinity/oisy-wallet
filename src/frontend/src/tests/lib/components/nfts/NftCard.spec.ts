@@ -1,8 +1,18 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
+import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
+vi.mock('$app/navigation', () => ({
+	goto: vi.fn()
+}));
 
 describe('NftCard', () => {
 	const testId = 'nft-card';
@@ -13,6 +23,10 @@ describe('NftCard', () => {
 
 	beforeAll(() => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	});
+
+	beforeEach(() => {
+		vi.clearAllMocks();
 	});
 
 	it('should render nft with metadata', () => {
@@ -101,5 +115,93 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' bg-primary')).toBeFalsy();
 		expect(cardElement.getAttribute('class')?.includes(' group')).toBeTruthy();
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
+	});
+
+	it('should track event with spam status on click when isSpam is true', async () => {
+		const { container } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link',
+				isSpam: true,
+				source: 'gallery'
+			}
+		});
+
+		const button = container.querySelector('button');
+		assertNonNullish(button);
+
+		button.click();
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_OPEN,
+			metadata: {
+				collection_name: mockValidErc721Nft.collection.name,
+				collection_address: mockValidErc721Nft.collection.address,
+				network: mockValidErc721Nft.collection.network.name,
+				standard: mockValidErc721Nft.collection.standard,
+				nft_id: mockValidErc721Nft.id.toString(),
+				source: 'gallery',
+				nftStatus: 'spam'
+			}
+		});
+	});
+
+	it('should track event with hidden status on click when isHidden is true and isSpam is false', async () => {
+		const { container } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link',
+				isHidden: true,
+				source: 'collection-view'
+			}
+		});
+
+		const button = container.querySelector('button');
+		assertNonNullish(button);
+
+		await button.click();
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_OPEN,
+			metadata: {
+				collection_name: mockValidErc721Nft.collection.name,
+				collection_address: mockValidErc721Nft.collection.address,
+				network: mockValidErc721Nft.collection.network.name,
+				standard: mockValidErc721Nft.collection.standard,
+				nft_id: mockValidErc721Nft.id.toString(),
+				source: 'collection-view',
+				nftStatus: 'hidden'
+			}
+		});
+	});
+
+	it('should track event without nftStatus when neither isSpam nor isHidden', async () => {
+		const { container } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link',
+				source: 'home'
+			}
+		});
+
+		const button = container.querySelector('button');
+		assertNonNullish(button);
+
+		await button.click();
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_OPEN,
+			metadata: {
+				collection_name: mockValidErc721Nft.collection.name,
+				collection_address: mockValidErc721Nft.collection.address,
+				network: mockValidErc721Nft.collection.network.name,
+				standard: mockValidErc721Nft.collection.standard,
+				nft_id: mockValidErc721Nft.id.toString(),
+				source: 'home'
+			}
+		});
 	});
 });

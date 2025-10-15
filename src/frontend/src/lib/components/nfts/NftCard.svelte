@@ -10,6 +10,8 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import type { Nft } from '$lib/types/nft';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		nft: Nft;
@@ -19,15 +21,39 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
+		source?: string;
 	}
 
-	let { nft, testId, disabled, isHidden, isSpam, type = 'default', onSelect }: Props = $props();
+	let {
+		nft,
+		testId,
+		disabled,
+		isHidden,
+		isSpam,
+		type = 'default',
+		onSelect,
+		source
+	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
 		if (type === 'card-link' && !disabled) {
+			trackEvent({
+				name: TRACK_NFT_OPEN,
+				metadata: {
+					collection_name: nft.collection.name ?? '',
+					collection_address: nft.collection.address ?? '',
+					network: nft.collection.network.name ?? '',
+					standard: nft.collection.standard,
+					nft_id: nft.id.toString(),
+					...(source && { source }),
+					...(isSpam && { nftStatus: 'spam' }),
+					...(isHidden && !isSpam && { nftStatus: 'hidden' })
+				}
+			});
+
 			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};

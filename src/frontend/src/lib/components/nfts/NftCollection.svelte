@@ -57,6 +57,7 @@
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
 				type="card-link"
+				source="nft-collection-page"
 			/>
 		{/each}
 	{:else}
