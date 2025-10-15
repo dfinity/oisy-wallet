@@ -10,10 +10,10 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 
 	interface Props {
 		collection?: NftCollection;
