@@ -13,6 +13,7 @@ import { defineViteReplacements, readCanisterIds } from './vite.utils';
 const network = process.env.DFX_NETWORK ?? 'local';
 
 const config: UserConfig = {
+	base: '/',
 	plugins: [sveltekit()],
 	resolve: {
 		alias: {

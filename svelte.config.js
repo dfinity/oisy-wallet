@@ -18,6 +18,9 @@ const config = {
 			fallback: 'index.html',
 			precompress: false
 		}),
+		paths: {
+			relative: false
+		},
 		files: {
 			assets: filesPath('static'),
 			lib: filesPath('src/lib'),
