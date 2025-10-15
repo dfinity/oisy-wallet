@@ -12,7 +12,7 @@ import { get } from 'svelte/store';
 
 const nftAzuki = {
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	collection: {
 		...mockValidErc721Nft.collection,
 		name: 'Azuki Elemental Beans',
