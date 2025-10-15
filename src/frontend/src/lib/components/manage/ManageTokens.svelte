@@ -27,13 +27,13 @@
 		initialSearch?: string;
 		infoElement?: Snippet;
 		isNftsPage?: boolean;
-		onSave: (tokens: Record<string, Token>) => void;
+		onSave: (tokens: Token[]) => void;
 		onAddToken: () => void;
 	}
 
 	let { initialSearch, infoElement, isNftsPage, onSave, onAddToken }: Props = $props();
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
 	let exchangesStaticData: ExchangesData | undefined = $state();
@@ -108,7 +108,7 @@
 
 	// TODO: Technically, there could be a race condition where modifiedTokens and the derived group are not updated with the last change when the user clicks "Save." For example, if the user clicks on a radio button and then a few milliseconds later on the save button.
 	// We might want to improve this in the future.
-	const save = () => onSave(modifiedTokens);
+	const save = () => onSave(Object.values(modifiedTokens));
 </script>
 
 {#if nonNullish(infoElement)}

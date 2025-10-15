@@ -1,5 +1,5 @@
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import type { Token } from '$lib/types/token';
 import { defineSupportedTokens } from '$lib/utils/env.tokens.utils';
 
@@ -17,7 +17,7 @@ describe('env.tokens.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		const mockParams = { ...mockBaseParams, $testnetsEnabled: true };
@@ -38,7 +38,7 @@ describe('env.tokens.utils', () => {
 
 		describe('when local networks are enabled', () => {
 			beforeEach(() => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 			});
 
 			it('should return all tokens', () => {

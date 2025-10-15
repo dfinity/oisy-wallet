@@ -1,8 +1,12 @@
+import { WorkerQueue } from '$lib/services/worker-queue.services';
+
 export abstract class AppWorker {
 	readonly #worker: Worker;
+	readonly #queue: WorkerQueue;
 
 	protected constructor(worker: Worker) {
 		this.#worker = worker;
+		this.#queue = new WorkerQueue(worker);
 	}
 
 	static async getInstance(): Promise<Worker> {
@@ -11,7 +15,8 @@ export abstract class AppWorker {
 	}
 
 	protected postMessage = <T>(data: T) => {
-		this.#worker.postMessage(data);
+		// Route via queue to enforce back-pressure
+		this.#queue.send(data);
 	};
 
 	terminate = () => {
