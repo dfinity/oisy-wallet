@@ -1156,7 +1156,8 @@
 			"review_description": "",
 			"learn_more": "",
 			"token_id": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Nessun NFT per adesso",

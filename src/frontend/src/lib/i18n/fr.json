@@ -1156,7 +1156,8 @@
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
 			"learn_more": "En savoir plus",
 			"token_id": "ID du token",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
