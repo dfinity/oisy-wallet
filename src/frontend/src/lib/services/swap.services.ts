@@ -87,7 +87,6 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
-import axios from 'axios';
 import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
 
@@ -293,13 +292,13 @@ const fetchSwapAmountsICP = async ({
 		sourceTokenNetwork: sourceToken.network.name,
 		sourceTokenCanister: (sourceToken as IcToken).ledgerCanisterId,
 		sourceAmount: amount.toString(),
-		sourceUSDValue: nonNullish(sourceTokenUsdValue)
-			? `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
-			: '',
 		destinationToken: destinationToken.symbol,
 		destinationTokenNetwork: destinationToken.network.name,
 		destinationTokenCanister: (destinationToken as IcToken).ledgerCanisterId,
-		amount: sourceTokenToDecimals
+		amount: sourceTokenToDecimals,
+		...(nonNullish(sourceTokenUsdValue) && {
+			sourceUSDValue: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
 	};
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
@@ -341,9 +340,9 @@ const fetchSwapAmountsICP = async ({
 						resultStatus: 'success',
 						provider: provider.key,
 						receiveAmount: formatUnits(mapped.receiveAmount, destinationToken.decimals),
-						receiveAmountUSDValue: nonNullish(destinationUsdValue)
-							? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-							: '',
+						...(nonNullish(destinationUsdValue) && {
+							sourceUSDValue: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						}),
 						...trackEventBaseParams
 					}
 				});
@@ -730,15 +729,15 @@ const fetchVeloraSwapAmount = async ({
 		provider: SwapProvider.VELORA,
 		sourceToken: sourceToken.symbol,
 		sourceTokenNetwork: sourceToken.network.name,
-		sourceTokenCanister: sourceToken.address,
+		sourceTokenAddress: sourceToken.address,
 		sourceAmount: amount.toString(),
-		sourceUSDValue: nonNullish(sourceTokenUsdValue)
-			? `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
-			: '',
 		destinationToken: destinationToken.symbol,
 		destinationTokenNetwork: destinationToken.network.name,
 		destinationTokenCanister: destinationToken.address,
-		amount: sourceTokenToDecimals
+		amount: sourceTokenToDecimals,
+		...(nonNullish(sourceTokenUsdValue) && {
+			sourceUSDValue: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
 	};
 
 	try {
@@ -801,9 +800,7 @@ const fetchVeloraSwapAmount = async ({
 
 		return null;
 	} catch (error: unknown) {
-		const err = axios.isAxiosError(error) ? error : error;
-
-		console.log(err, typeof err);
+		console.log({error});
 
 		trackEvent({
 			name: TRACK_SWAP_OFFER,
