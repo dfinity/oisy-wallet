@@ -114,7 +114,7 @@ describe('infura-erc721.providers', () => {
 
 			const mockParams = {
 				contractAddress,
-				tokenId: parseNftId(123456)
+				tokenId: parseNftId('123456')
 			};
 
 			const mockMetadata = {
