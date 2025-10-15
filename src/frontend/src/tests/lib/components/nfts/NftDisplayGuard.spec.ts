@@ -1,5 +1,6 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 import {
 	NFT_PLACEHOLDER_FILESIZE,
 	NFT_PLACEHOLDER_INVALID,
@@ -7,6 +8,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -16,6 +18,10 @@ import { mockSnippet, mockSnippetTestId } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
+
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
 
 const nftAzuki = {
 	...mockValidErc721Nft,
@@ -30,6 +36,10 @@ const nftAzuki = {
 };
 
 describe('NftDisplayGuard', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	it('should render the review consent when hasConsent is undefined', () => {
 		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
 
@@ -92,6 +102,33 @@ describe('NftDisplayGuard', () => {
 		fireEvent.click(btn);
 
 		expect(get(modalNftImageConsent)).toBeTruthy();
+	});
+
+	it('should track event when consent modal is opened', () => {
+		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
+
+		const { getByRole } = render(NftDisplayGuard, {
+			nft: nftAzuki,
+			children: mockSnippet,
+			showMessage: true,
+			type: 'card'
+		});
+
+		const btn = getByRole('button');
+
+		assertNonNullish(btn);
+
+		fireEvent.click(btn);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_OPEN_CONSENT_MODAL,
+			metadata: {
+				collection_name: nftAzuki.collection.name,
+				collection_address: nftAzuki.collection.address,
+				network: nftAzuki.collection.network.name,
+				standard: nftAzuki.collection.standard
+			}
+		});
 	});
 
 	it('should render the children if hasConsent is true', () => {
