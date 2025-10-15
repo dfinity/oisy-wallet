@@ -6,7 +6,7 @@
 	*/
 
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy, type Snippet, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import {
 		AVAILABLE_SCREENS,
@@ -30,13 +30,20 @@
 	const debouncedWidth = writable(0);
 	let timeoutHandle = $state<NodeJS.Timeout | undefined>();
 
-	$effect(() => {
+	const updateWidth = () => {
 		if (nonNullish(timeoutHandle)) {
 			clearTimeout(timeoutHandle);
 		}
+
 		timeoutHandle = setTimeout(() => {
 			debouncedWidth.set(innerWidth);
 		}, 50); // debounce width on screen size change so we don't calculate all the time
+	};
+
+	$effect(() => {
+		[innerWidth];
+
+		untrack(() => updateWidth());
 	});
 
 	let activeScreen = $derived(
