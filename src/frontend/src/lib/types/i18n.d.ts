@@ -963,6 +963,7 @@ interface I18nNfts {
 		learn_more: string;
 		token_id: string;
 		go_to_collection: string;
+		could_not_update_section: string;
 	};
 	alt: {
 		placeholder_image: string;
