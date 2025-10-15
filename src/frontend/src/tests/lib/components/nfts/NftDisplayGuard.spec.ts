@@ -25,7 +25,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 const nftAzuki = {
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
 	collection: {
 		...mockValidErc721Nft.collection,

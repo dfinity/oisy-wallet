@@ -38,7 +38,7 @@ describe('NftHideButton', () => {
 	});
 
 	it('renders ConfirmButtonWithModal when collection has multiple NFTs', async () => {
-		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
 
 		const { getByTestId } = render(NftHideButton, {
 			props: { token: mockToken, source: 'gallery' }
@@ -151,7 +151,7 @@ describe('NftHideButton', () => {
 	});
 
 	it('should track event when confirm button is clicked in modal for multiple NFTs', async () => {
-		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
 
 		const { getByTestId } = render(NftHideButton, {

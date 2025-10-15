@@ -23,7 +23,7 @@ export const getMockNonFungibleToken = (params: {
 
 export const mockValidErc721Nft: Nft = {
 	name: 'Beanz 123',
-	id: parseNftId(173563),
+	id: parseNftId('173563'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/27.png',
 	attributes: [
 		{ traitType: 'Background', value: 'Crimson Red' },
@@ -42,7 +42,7 @@ export const mockValidErc721Nft: Nft = {
 
 export const mockValidErc1155Nft: Nft = {
 	name: 'Nyan',
-	id: parseNftId(725432),
+	id: parseNftId('725432'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/27.png',
 	attributes: [
 		{ traitType: 'Background', value: 'Crimson Red' },

@@ -56,7 +56,7 @@ describe('infura-erc1155.providers', () => {
 			const mockSupportsInterface = vi.fn();
 			const mockUri = vi.fn();
 
-			const tokenId = parseNftId(12345);
+			const tokenId = parseNftId('12345');
 
 			const mockParams = {
 				contractAddress,
@@ -237,7 +237,7 @@ describe('infura-erc1155.providers', () => {
 		describe('balanceOf', () => {
 			const mockBalanceOf = vi.fn();
 
-			const tokenId = parseNftId(12345);
+			const tokenId = parseNftId('12345');
 
 			const mockParams = {
 				contractAddress,
