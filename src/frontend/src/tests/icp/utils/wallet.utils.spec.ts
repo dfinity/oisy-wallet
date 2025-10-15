@@ -4,10 +4,10 @@ import { IcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import { initWalletWorker } from '$icp/utils/wallet.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-
-vi.mock('$icp/services/worker.icrc-wallet.services', () => ({
-	initIcrcWalletWorker: vi.fn()
-}));
+import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
+import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
+import { initWalletWorker } from '$icp/utils/wallet.utils';
+import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
 describe('wallet.utils', () => {
 	describe('initWalletWorker', () => {
@@ -16,6 +16,7 @@ describe('wallet.utils', () => {
 
 			vi.spyOn(Dip20WalletWorker, 'init');
 			vi.spyOn(IcpWalletWorker, 'init');
+			vi.spyOn(IcrcWalletWorker, 'init');
 		});
 
 		it('should initialize the worker for ICRC tokens', () => {
@@ -26,7 +27,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcrcWalletWorker).toHaveBeenCalledExactlyOnceWith(token);
+			expect(IcrcWalletWorker.init).toHaveBeenCalledExactlyOnceWith(token);
 		});
 
 		it('should initialize the worker for DIP-20 tokens', () => {
