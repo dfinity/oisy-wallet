@@ -117,7 +117,7 @@ describe('NftCard', () => {
 		expect(cardElement.getAttribute('class')?.includes(' hover:bg-primary')).toBeTruthy();
 	});
 
-	it('should track event with spam status on click when isSpam is true', async () => {
+	it('should track event with spam status on click when isSpam is true', () => {
 		const { container } = render(NftCard, {
 			props: {
 				nft: mockValidErc721Nft,
@@ -147,7 +147,7 @@ describe('NftCard', () => {
 		});
 	});
 
-	it('should track event with hidden status on click when isHidden is true and isSpam is false', async () => {
+	it('should track event with hidden status on click when isHidden is true and isSpam is false', () => {
 		const { container } = render(NftCard, {
 			props: {
 				nft: mockValidErc721Nft,
@@ -161,7 +161,7 @@ describe('NftCard', () => {
 		const button = container.querySelector('button');
 		assertNonNullish(button);
 
-		await button.click();
+		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: TRACK_NFT_OPEN,
@@ -177,7 +177,7 @@ describe('NftCard', () => {
 		});
 	});
 
-	it('should track event without nftStatus when neither isSpam nor isHidden', async () => {
+	it('should track event without nftStatus when neither isSpam nor isHidden', () => {
 		const { container } = render(NftCard, {
 			props: {
 				nft: mockValidErc721Nft,
@@ -190,7 +190,7 @@ describe('NftCard', () => {
 		const button = container.querySelector('button');
 		assertNonNullish(button);
 
-		await button.click();
+		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: TRACK_NFT_OPEN,

@@ -15,6 +15,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
@@ -57,7 +58,7 @@
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
 				type="card-link"
-				source="nft-collection-page"
+				source={NFT_COLLECTION_ROUTE}
 			/>
 		{/each}
 	{:else}

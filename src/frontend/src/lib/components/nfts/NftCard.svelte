@@ -44,8 +44,8 @@
 				name: TRACK_NFT_OPEN,
 				metadata: {
 					collection_name: nft.collection.name ?? '',
-					collection_address: nft.collection.address ?? '',
-					network: nft.collection.network.name ?? '',
+					collection_address: nft.collection.address,
+					network: nft.collection.network.name,
 					standard: nft.collection.standard,
 					nft_id: nft.id.toString(),
 					...(source && { source }),
