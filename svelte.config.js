@@ -21,6 +21,10 @@ const config = {
 		paths: {
 			relative: false
 		},
+		ssr: false,
+		prerender: {
+			entries: []
+		},
 		files: {
 			assets: filesPath('static'),
 			lib: filesPath('src/lib'),
