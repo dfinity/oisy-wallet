@@ -31,7 +31,7 @@ describe('NftHideButton', () => {
 	});
 
 	it('renders ConfirmButtonWithModal when collection has multiple NFTs', async () => {
-		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
 
 		const { getByTestId } = render(NftHideButton, { props: { token: mockToken } });
 
