@@ -128,6 +128,8 @@
 						displayDecimals: $destinationToken.decimals
 					})
 				: undefined;
+
+		console.log({ receiveAmount }, 'in SwapForm');
 	});
 
 	const onTokensSwitch = () => {
