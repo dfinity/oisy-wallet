@@ -26,7 +26,7 @@ export class WorkerQueue {
 			setTimeout(() => {
 				this.#inflight--;
 				if (this.#inflight < 0) {
-					throw new Error("WorkerQueue: #inflight became negative, logic error detected.");
+					throw new Error('WorkerQueue: #inflight became negative, logic error detected.');
 				}
 				this.#flush();
 			}, this.#releaseDelay);
