@@ -90,7 +90,7 @@
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async (tokens: Record<string, Token>) => {
+	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
