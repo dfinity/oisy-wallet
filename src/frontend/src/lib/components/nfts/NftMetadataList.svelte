@@ -7,7 +7,6 @@
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
