@@ -1,3 +1,7 @@
+import type {
+	ManageStakePositionArgs,
+	StakePositionResponse
+} from '$declarations/gldt_stake/declarations/gldt_stake.did';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
@@ -10,6 +14,17 @@ export const getApyOverall = async ({ identity }: CanisterApiFunctionParams): Pr
 	const { getApyOverall } = await gldtStakeCanister({ identity });
 
 	return getApyOverall();
+};
+
+export const manageStakePosition = async ({
+	positionParams,
+	identity
+}: CanisterApiFunctionParams<{ positionParams: ManageStakePositionArgs }>): Promise<
+	StakePositionResponse | undefined
+> => {
+	const { manageStakePosition } = await gldtStakeCanister({ identity });
+
+	return manageStakePosition(positionParams);
 };
 
 const gldtStakeCanister = async ({
