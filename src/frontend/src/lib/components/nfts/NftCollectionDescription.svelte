@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { NFT_COLLECTION_DESCRIPTION } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		collection?: NftCollection;
@@ -74,8 +75,8 @@
 
 		{#if nonNullish(token)}
 			<div class="mt-6 flex w-full gap-2">
-				<span><NftSpamButton {token} /></span>
-				<span><NftHideButton {token} /></span>
+				<span><NftSpamButton {token} source={NFT_COLLECTION_DESCRIPTION} /></span>
+				<span><NftHideButton {token} source={NFT_COLLECTION_DESCRIPTION} /></span>
 			</div>
 		{/if}
 	</div>

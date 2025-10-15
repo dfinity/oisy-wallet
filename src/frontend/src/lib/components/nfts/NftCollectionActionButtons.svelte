@@ -1,6 +1,7 @@
 <script lang="ts">
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
+	import { NFT_COLLECTION_HERO } from '$lib/constants/analytics.constants';
 	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
@@ -11,6 +12,6 @@
 </script>
 
 <div class="flex gap-2">
-	<NftSpamButton {token} />
-	<NftHideButton {token} />
+	<NftSpamButton {token} source={NFT_COLLECTION_HERO} />
+	<NftHideButton {token} source={NFT_COLLECTION_HERO} />
 </div>

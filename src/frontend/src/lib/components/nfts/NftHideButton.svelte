@@ -19,12 +19,15 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		token: NonFungibleToken;
+		source: string;
 	}
 
-	let { token }: Props = $props();
+	let { token, source }: Props = $props();
 
 	const hasMultipleNfts = $derived(
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
@@ -35,6 +38,17 @@
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
 		try {
+			trackEvent({
+				name: TRACK_NFT_SPAM_HIDE_ACTION,
+				metadata: {
+					source: source ?? '',
+					collection_name: token.name,
+					collection_address: token.address,
+					network: token.network.name,
+					standard: token.standard,
+					action: nonNullish(section) ? 'hide' : 'unhide'
+				}
+			});
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
