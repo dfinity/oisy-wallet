@@ -148,7 +148,7 @@ describe('NftSpamButton', () => {
 	});
 
 	it('should track event when confirm button is clicked in modal for multiple NFTs', async () => {
-		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
 
 		const { getByTestId } = render(NftSpamButton, {
