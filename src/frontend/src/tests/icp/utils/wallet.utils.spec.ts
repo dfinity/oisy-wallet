@@ -15,7 +15,7 @@ describe('wallet.utils', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(Dip20WalletWorker, 'init');
-      			vi.spyOn(IcrcWalletWorker, 'init');
+			vi.spyOn(IcrcWalletWorker, 'init');
 		});
 
 		it('should initialize the worker for ICRC tokens', () => {
