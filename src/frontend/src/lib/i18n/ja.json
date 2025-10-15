@@ -1128,6 +1128,8 @@
 			"collections": "コレクション",
 			"all_assets": "すべての資産",
 			"address_copied": "アドレス $address をコピーしました",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
 			"spam_warning": "",
@@ -1143,6 +1145,7 @@
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
+			"media_url": "",
 			"display_preference": "",
 			"review_preference": "",
 			"media_enabled": "",
@@ -1157,7 +1160,8 @@
 			"learn_more": "",
 			"token_id": "",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"received_at": ""
 		},
 		"alt": {
 			"placeholder_image": "まだNFTがありません",

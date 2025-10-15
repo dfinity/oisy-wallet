@@ -1128,6 +1128,8 @@
 			"collections": "Коллекции",
 			"all_assets": "Все активы",
 			"address_copied": "Адрес скопирован",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Спам",
 			"not_spam": "Не спам",
 			"spam_warning": "",
@@ -1143,6 +1145,7 @@
 			"review_button": "Просмотр",
 			"collection_name": "Название коллекции",
 			"media_urls": "URL-адреса медиафайлов",
+			"media_url": "",
 			"display_preference": "Настройки отображения",
 			"review_preference": "Настройки просмотра",
 			"media_enabled": "Медиафайлы включены",
@@ -1157,7 +1160,8 @@
 			"learn_more": "Подробнее",
 			"token_id": "ТокенID",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"received_at": ""
 		},
 		"alt": {
 			"placeholder_image": "Пока нет NFT",

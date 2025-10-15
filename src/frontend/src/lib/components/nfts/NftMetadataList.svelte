@@ -7,16 +7,16 @@
 	import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
-	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { getAllowMediaForNft, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import DelayedTooltip from '$lib/components/ui/DelayedTooltip.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 
 	interface Props {
 		nft?: Nft;

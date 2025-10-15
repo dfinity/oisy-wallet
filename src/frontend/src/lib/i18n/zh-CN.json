@@ -1128,6 +1128,8 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "垃圾信息",
 			"not_spam": "非垃圾信息",
 			"spam_warning": "",
@@ -1143,6 +1145,7 @@
 			"review_button": "审核",
 			"collection_name": "合集名称",
 			"media_urls": "媒体链接",
+			"media_url": "",
 			"display_preference": "显示偏好",
 			"review_preference": "审核偏好",
 			"media_enabled": "媒体已启用",
@@ -1157,7 +1160,8 @@
 			"learn_more": "了解更多",
 			"token_id": "代币 ID",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"received_at": ""
 		},
 		"alt": {
 			"placeholder_image": "还没有 NFT",

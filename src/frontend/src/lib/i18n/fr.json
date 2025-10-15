@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "Tous les actifs",
 			"address_copied": "Adresse $address copiée",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Pas de spam",
 			"spam_warning": "",
@@ -1143,6 +1145,7 @@
 			"review_button": "Examiner",
 			"collection_name": "Nom de la collection",
 			"media_urls": "URLs des médias",
+			"media_url": "",
 			"display_preference": "Préférence d'affichage",
 			"review_preference": "Préférence d'examen",
 			"media_enabled": "Média activé",
@@ -1157,7 +1160,8 @@
 			"learn_more": "En savoir plus",
 			"token_id": "ID du token",
 			"go_to_collection": "",
-			"could_not_update_section": ""
+			"could_not_update_section": "",
+			"received_at": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
