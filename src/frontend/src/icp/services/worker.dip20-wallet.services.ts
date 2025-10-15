@@ -3,7 +3,6 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
-import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
@@ -20,7 +19,7 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
 		worker: Worker,
 		tokenId: TokenId,
-		private readonly canisterId: LedgerCanisterIdText
+		private readonly canisterId: IcToken['ledgerCanisterId']
 	) {
 		super(worker);
 
