@@ -6,7 +6,7 @@
 
 	interface Props {
 		data: CardData;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { data, children }: Props = $props();
@@ -15,5 +15,5 @@
 {#if data.balance === undefined || $exchangeNotInitialized}
 	<span class="mt-1 block w-full max-w-[50px]"><SkeletonText /></span>
 {:else}
-	{@render children?.()}
+	{@render children()}
 {/if}

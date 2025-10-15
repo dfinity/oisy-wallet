@@ -1,17 +1,9 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { Dip20WalletWorker } from '$icp/services/worker.dip20-wallet.services';
-import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
-import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
+import { IcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
+import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import { initWalletWorker } from '$icp/utils/wallet.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-
-vi.mock('$icp/services/worker.icp-wallet.services', () => ({
-	initIcpWalletWorker: vi.fn()
-}));
-
-vi.mock('$icp/services/worker.icrc-wallet.services', () => ({
-	initIcrcWalletWorker: vi.fn()
-}));
 
 describe('wallet.utils', () => {
 	describe('initWalletWorker', () => {
@@ -19,6 +11,8 @@ describe('wallet.utils', () => {
 			vi.clearAllMocks();
 
 			vi.spyOn(Dip20WalletWorker, 'init');
+			vi.spyOn(IcpWalletWorker, 'init');
+			vi.spyOn(IcrcWalletWorker, 'init');
 		});
 
 		it('should initialize the worker for ICRC tokens', () => {
@@ -29,7 +23,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcrcWalletWorker).toHaveBeenCalledExactlyOnceWith(token);
+			expect(IcrcWalletWorker.init).toHaveBeenCalledExactlyOnceWith(token);
 		});
 
 		it('should initialize the worker for DIP-20 tokens', () => {
@@ -51,12 +45,12 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcpWalletWorker).toHaveBeenCalledExactlyOnceWith(token);
+			expect(IcpWalletWorker.init).toHaveBeenCalledExactlyOnceWith(token);
 
 			initWalletWorker({ token: ICP_TOKEN });
 
-			expect(initIcpWalletWorker).toHaveBeenCalledTimes(2);
-			expect(initIcpWalletWorker).toHaveBeenNthCalledWith(2, ICP_TOKEN);
+			expect(IcpWalletWorker.init).toHaveBeenCalledTimes(2);
+			expect(IcpWalletWorker.init).toHaveBeenNthCalledWith(2, ICP_TOKEN);
 		});
 
 		it('should call initIcpWalletWorker for all other cases', () => {
@@ -67,7 +61,7 @@ describe('wallet.utils', () => {
 
 			initWalletWorker({ token });
 
-			expect(initIcpWalletWorker).toHaveBeenCalledOnce();
+			expect(IcpWalletWorker.init).toHaveBeenCalledOnce();
 		});
 	});
 });

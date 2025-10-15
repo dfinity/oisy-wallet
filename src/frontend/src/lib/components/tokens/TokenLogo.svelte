@@ -16,8 +16,7 @@
 		badge?:
 			| { type: 'network' }
 			| { type: 'tokenCount'; count: number }
-			| { type: 'icon'; icon: Component; ariaLabel: string }
-			| undefined;
+			| { type: 'icon'; icon: Component; ariaLabel: string };
 		logoSize?: LogoSize;
 		ring?: boolean;
 		testId?: string;
@@ -27,20 +26,14 @@
 	let {
 		data,
 		color = 'off-white',
-		badge = undefined,
+		badge,
 		logoSize = 'lg',
 		ring = false,
-		testId = undefined,
-		badgeTestId = undefined
+		testId,
+		badgeTestId
 	}: Props = $props();
 
-	let icon: CardData['icon'] = $state();
-	let name: CardData['name'] = $state();
-	let network: CardData['network'] = $state();
-
-	run(() => {
-		({ icon, name, network } = data);
-	});
+	let { icon, name, network } = $derived(data);
 </script>
 
 <div class="relative">

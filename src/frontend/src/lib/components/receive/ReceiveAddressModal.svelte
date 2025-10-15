@@ -44,7 +44,7 @@
 	let addressToken: Token | undefined = $state();
 	let copyAriaLabel: string | undefined = $state();
 
-	const displayQRCode = ({ detail }: CustomEvent<ReceiveQRCode>) => {
+	const displayQRCode = (detail: ReceiveQRCode) => {
 		({ address, addressLabel, addressToken, copyAriaLabel } = detail);
 		modal.next();
 	};

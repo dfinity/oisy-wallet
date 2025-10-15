@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { Principal } from '@dfinity/principal';
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
@@ -27,16 +26,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { userProfileStore } from '$lib/stores/user-profile.store';
-	import type { OptionIdentity } from '$lib/types/identity';
-	import type { Option } from '$lib/types/utils';
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-	let remainingTimeMilliseconds: number | undefined = $derived($authRemainingTimeStore);
+	let remainingTimeMilliseconds = $derived($authRemainingTimeStore);
 
-	let identity: OptionIdentity = $derived($authIdentity);
+	let identity = $derived($authIdentity);
 
-	let principal: Option<Principal> = $derived(identity?.getPrincipal());
+	let principal = $derived($authIdentity?.getPrincipal());
 
 	const getPouhCredential = async () => {
 		if (nonNullish(identity)) {
@@ -56,20 +53,20 @@
 </script>
 
 <SettingsCard>
-	{#snippet title()}
-		General
-	{/snippet}
+	{#snippet title()}{$i18n.settings.text.general}{/snippet}
 
 	<SettingsCardItem>
 		{#snippet key()}
 			{$i18n.settings.text.principal}
 		{/snippet}
+
 		{#snippet value()}
 			<output class="break-all" data-tid={SETTINGS_ADDRESS_LABEL}>
 				{shortenWithMiddleEllipsis({ text: principal?.toText() ?? '' })}
 			</output>
 			<Copy inline text={$i18n.settings.text.principal_copied} value={principal?.toText() ?? ''} />
 		{/snippet}
+
 		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.principal_description)}
 		{/snippet}
@@ -95,14 +92,13 @@
 </SettingsCard>
 
 <SettingsCard>
-	{#snippet title()}
-		{$i18n.settings.text.networks}
-	{/snippet}
+	{#snippet title()}{$i18n.settings.text.networks}{/snippet}
 
 	<SettingsCardItem>
 		{#snippet key()}
 			{$i18n.settings.text.active_networks}
 		{/snippet}
+
 		{#snippet value()}
 			<EnabledNetworksPreviewIcons />
 
@@ -114,6 +110,7 @@
 				{$i18n.core.text.edit} >
 			</Button>
 		{/snippet}
+
 		{#snippet info()}
 			{replaceOisyPlaceholders($i18n.settings.text.active_networks_description)}
 		{/snippet}
@@ -126,14 +123,13 @@
 
 {#if POUH_ENABLED && nonNullish($userProfileStore)}
 	<SettingsCard>
-		{#snippet title()}
-			{$i18n.settings.text.credentials_title}
-		{/snippet}
+		{#snippet title()}{$i18n.settings.text.credentials_title}{/snippet}
 
 		<SettingsCardItem>
 			{#snippet key()}
 				{$i18n.settings.text.pouh_credential}
 			{/snippet}
+
 			{#snippet value()}
 				{#if $userHasPouhCredential}
 					<output class="mr-1.5" in:fade>
@@ -145,6 +141,7 @@
 					</Button>
 				{/if}
 			{/snippet}
+
 			{#snippet info()}
 				{$i18n.settings.text.pouh_credential_description}
 			{/snippet}

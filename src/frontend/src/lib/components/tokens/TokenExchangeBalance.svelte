@@ -13,9 +13,9 @@
 		nullishBalanceMessage?: string;
 	}
 
-	let { balance, usdBalance, nullishBalanceMessage = undefined }: Props = $props();
+	let { balance, usdBalance, nullishBalanceMessage }: Props = $props();
 
-	let exchangeBalance: string | undefined = $derived(
+	let exchangeBalance = $derived(
 		nonNullish(usdBalance)
 			? formatCurrency({
 					value: usdBalance,

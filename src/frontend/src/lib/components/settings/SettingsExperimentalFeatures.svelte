@@ -56,9 +56,7 @@
 </script>
 
 <SettingsCard>
-	{#snippet title()}
-		{$i18n.settings.text.beta_features}
-	{/snippet}
+	{#snippet title()}{$i18n.settings.text.beta_features}{/snippet}
 
 	{#each features as feature (feature)}
 		<SettingsCardItem>
@@ -83,6 +81,7 @@
 					}}
 				/>
 			{/snippet}
+
 			{#snippet info()}
 				<span>
 					{labelsByFeatureId[feature].description}

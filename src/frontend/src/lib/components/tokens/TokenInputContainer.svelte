@@ -5,10 +5,10 @@
 		focused?: boolean;
 		error?: boolean;
 		styleClass?: string;
-		children?: Snippet;
+		children: Snippet;
 	}
 
-	let { focused = false, error = false, styleClass = '', children }: Props = $props();
+	let { focused = false, error = false, styleClass, children }: Props = $props();
 </script>
 
 <div
@@ -18,5 +18,5 @@
 	class:border-tertiary={!focused && !error}
 	class:hover:border-brand-primary={!error}
 >
-	{@render children?.()}
+	{@render children()}
 </div>
