@@ -23,8 +23,6 @@ export const TRACK_COUNT_BTC_VALIDATION_ERROR = 'btc_send_error';
 // Ethereum
 export const TRACK_COUNT_ETH_SEND_SUCCESS = 'eth_send_success';
 export const TRACK_COUNT_ETH_SEND_ERROR = 'eth_send_error';
-export const TRACK_COUNT_ETH_NFT_SEND_SUCCESS = 'eth_nft_send_success';
-export const TRACK_COUNT_ETH_NFT_SEND_ERROR = 'eth_nft_send_error';
 export const TRACK_COUNT_WC_ETH_SEND_SUCCESS = 'wc_eth_send_success';
 export const TRACK_COUNT_WC_ETH_SEND_ERROR = 'wc_eth_send_error';
 export const TRACK_COUNT_CONVERT_ETH_TO_CKETH_SUCCESS = 'eth_to_cketh_convert_success';
@@ -175,3 +173,4 @@ export const TRACK_BUY_TOKEN = 'buy_token';
 export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
 export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
+export const TRACK_NFT_SEND = 'nft_send';
