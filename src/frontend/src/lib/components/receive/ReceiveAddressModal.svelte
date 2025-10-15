@@ -79,7 +79,7 @@
 				{addressToken}
 				copyAriaLabel={copyAriaLabel ?? $i18n.wallet.text.wallet_address_copied}
 				network={addressToken.network}
-				on:icBack={displayAddresses}
+				onBack={displayAddresses}
 			/>
 		{:else}
 			<svelte:component this={infoCmp} onQRCode={displayQRCode} />

@@ -15,10 +15,12 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { NFT_CONSENT_MODAL, TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -109,6 +111,19 @@
 			modalStore.close();
 		}
 	};
+
+	const trackEventOnClick = (clickedButton: string) => {
+		trackEvent({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: collection.name ?? '',
+				collection_address: collection.address,
+				network: collection.network.name,
+				standard: collection.standard,
+				clicked_button: clickedButton
+			}
+		});
+	};
 </script>
 
 <div style="--color-border-secondary: transparent">
@@ -156,8 +171,8 @@
 
 				{#if nonNullish(token)}
 					<div class="mb-6 flex w-full gap-2">
-						<span><NftSpamButton {token} /></span>
-						<span><NftHideButton {token} /></span>
+						<span><NftSpamButton source={NFT_CONSENT_MODAL} {token} /></span>
+						<span><NftHideButton source={NFT_CONSENT_MODAL} {token} /></span>
 					</div>
 				{/if}
 
@@ -249,7 +264,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick('keep_media_disabled');
+								modalStore.close();
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -258,7 +276,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick('enable_media');
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
@@ -267,7 +288,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick('disable_media');
+								save(false);
+							}}
 							testId={`${testId}-disableButton`}
 						>
 							{$i18n.nfts.text.disable_media}
@@ -276,7 +300,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick('keep_media_enabled');
+								modalStore.close();
+							}}
 							testId={`${testId}-keepEnabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_enabled}
@@ -285,7 +312,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick('disable_media');
+								save(false);
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -294,7 +324,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick('enable_media');
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}

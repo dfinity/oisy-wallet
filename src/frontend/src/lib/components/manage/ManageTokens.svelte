@@ -34,7 +34,7 @@
 
 	let { initialSearch, infoElement, isNftsPage, onSave, onAddToken }: Props = $props();
 
-	// To avoid strange behavior when the exchange data changes (for example, the tokens may shift
+	// To avoid strange behaviour when the exchange data changes (for example, the tokens may shift
 	// since some of them are sorted by market cap), we store the exchange data in a variable during
 	// the life of the component.
 	let exchangesStaticData: ExchangesData | undefined = $state();
