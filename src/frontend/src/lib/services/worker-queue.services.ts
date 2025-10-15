@@ -24,7 +24,10 @@ export class WorkerQueue {
 
 			// automatically release the slot after a delay
 			setTimeout(() => {
-				this.#inflight = Math.max(0, this.#inflight - 1);
+				this.#inflight--;
+				if (this.#inflight < 0) {
+					throw new Error("WorkerQueue: #inflight became negative, logic error detected.");
+				}
 				this.#flush();
 			}, this.#releaseDelay);
 		}
