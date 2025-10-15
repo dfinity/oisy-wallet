@@ -38,7 +38,7 @@ import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { enabledUniqueTokensSymbols, fungibleTokens, tokens } from '$lib/derived/tokens.derived';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
@@ -121,7 +121,7 @@ describe('tokens.derived', () => {
 		setupTestnetsStore('reset');
 		setupUserNetworksStore('allEnabled');
 
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 	});
 
 	describe('tokens', () => {
@@ -209,7 +209,7 @@ describe('tokens.derived', () => {
 
 		it('should return local tokens too when testnets are enabled and env is LOCAL', () => {
 			setupTestnetsStore('enabled');
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			expect(get(tokens)).toEqual([
 				ICP_TOKEN,

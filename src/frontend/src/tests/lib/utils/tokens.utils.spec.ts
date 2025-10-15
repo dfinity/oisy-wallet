@@ -13,7 +13,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -544,7 +544,7 @@ describe('tokens.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		describe('when testnets are disabled', () => {
@@ -576,7 +576,7 @@ describe('tokens.utils', () => {
 			});
 
 			it('should ignore the local tokens when they are enabled', () => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(false);
 
 				expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
 			});
@@ -623,7 +623,7 @@ describe('tokens.utils', () => {
 
 			describe('when local networks are enabled', () => {
 				beforeEach(() => {
-					vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+					vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 				});
 
 				it('should return all tokens', () => {
