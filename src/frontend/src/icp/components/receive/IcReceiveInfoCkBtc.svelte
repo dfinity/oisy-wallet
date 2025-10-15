@@ -59,7 +59,7 @@
 			qrCodeAction={{
 				enabled: true,
 				ariaLabel: $i18n.receive.bitcoin.text.display_bitcoin_address_qr,
-				onClick: () => displayQRCode({ address: btcAddress ?? '', twinToken })
+				onClick: () => displayQRCode({ address: btcAddress, twinToken })
 			}}
 		>
 			{#snippet title()}
