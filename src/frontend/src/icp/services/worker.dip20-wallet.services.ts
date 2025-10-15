@@ -3,7 +3,9 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -12,86 +14,87 @@ import type {
 	PostMessageDataResponseWallet,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
+import type { TokenId } from '$lib/types/token';
 
-export const initDip20WalletWorker = async ({
-	ledgerCanisterId: canisterId,
-	id: tokenId,
-	network: { id: networkId }
-}: IcToken): Promise<WalletWorker> => {
-	const WalletWorker = await import('$lib/workers/workers?worker');
-	let worker: Worker | null = new WalletWorker.default();
+export class Dip20WalletWorker extends AppWorker implements WalletWorker {
+	private constructor(
+		worker: Worker,
+		tokenId: TokenId,
+		private readonly canisterId: LedgerCanisterIdText
+	) {
+		super(worker);
 
-	await syncWalletFromCache({ tokenId, networkId });
+		worker.onmessage = ({
+			data: dataMsg
+		}: MessageEvent<
+			PostMessage<
+				| PostMessageDataResponseWallet
+				| PostMessageDataResponseError
+				| PostMessageDataResponseWalletCleanUp
+			>
+		>) => {
+			const { msg, data } = dataMsg;
 
-	worker.onmessage = ({
-		data: dataMsg
-	}: MessageEvent<
-		PostMessage<
-			| PostMessageDataResponseWallet
-			| PostMessageDataResponseError
-			| PostMessageDataResponseWalletCleanUp
-		>
-	>) => {
-		const { msg, data } = dataMsg;
+			switch (msg) {
+				case 'syncDip20Wallet':
+					syncWallet({
+						tokenId,
+						data: data as PostMessageDataResponseWallet
+					});
+					return;
+				case 'syncDip20WalletError':
+					onLoadTransactionsError({
+						tokenId,
+						error: data.error
+					});
 
-		switch (msg) {
-			case 'syncDip20Wallet':
-				syncWallet({
-					tokenId,
-					data: data as PostMessageDataResponseWallet
-				});
-				return;
-			case 'syncDip20WalletError':
-				onLoadTransactionsError({
-					tokenId,
-					error: data.error
-				});
+					return;
+				case 'syncDip20WalletCleanUp':
+					onTransactionsCleanUp({
+						tokenId,
+						transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+					});
+					return;
+			}
+		};
+	}
 
-				return;
-			case 'syncDip20WalletCleanUp':
-				onTransactionsCleanUp({
-					tokenId,
-					transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
-				});
-				return;
-		}
-	};
+	static async init({
+		ledgerCanisterId: canisterId,
+		id: tokenId,
+		network: { id: networkId }
+	}: IcToken): Promise<Dip20WalletWorker> {
+		await syncWalletFromCache({ tokenId, networkId });
 
-	const stop = () => {
-		worker?.postMessage({
+		const worker = await AppWorker.getInstance();
+		return new Dip20WalletWorker(worker, tokenId, canisterId);
+	}
+
+	protected override stopTimer = () => {
+		this.postMessage({
 			msg: 'stopDip20WalletTimer'
 		});
 	};
 
-	let isDestroying = false;
-
-	return {
-		start: () => {
-			worker?.postMessage({
-				msg: 'startDip20WalletTimer',
-				data: {
-					canisterId
-				}
-			} as PostMessage<PostMessageDataRequestDip20>);
-		},
-		stop,
-		trigger: () => {
-			worker?.postMessage({
-				msg: 'triggerDip20WalletTimer',
-				data: {
-					canisterId
-				}
-			} as PostMessage<PostMessageDataRequestDip20>);
-		},
-		destroy: () => {
-			if (isDestroying) {
-				return;
+	start = () => {
+		this.postMessage({
+			msg: 'startDip20WalletTimer',
+			data: {
+				canisterId: this.canisterId
 			}
-			isDestroying = true;
-			stop();
-			worker?.terminate();
-			worker = null;
-			isDestroying = false;
-		}
+		} as PostMessage<PostMessageDataRequestDip20>);
 	};
-};
+
+	stop = () => {
+		this.stopTimer();
+	};
+
+	trigger = () => {
+		this.postMessage({
+			msg: 'triggerDip20WalletTimer',
+			data: {
+				canisterId: this.canisterId
+			}
+		} as PostMessage<PostMessageDataRequestDip20>);
+	};
+}
