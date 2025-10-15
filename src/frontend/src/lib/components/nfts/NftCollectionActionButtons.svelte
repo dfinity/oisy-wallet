@@ -12,6 +12,6 @@
 </script>
 
 <div class="flex gap-2">
-	<NftSpamButton {token} source={NFT_COLLECTION_HERO} />
-	<NftHideButton {token} source={NFT_COLLECTION_HERO} />
+	<NftSpamButton source={NFT_COLLECTION_HERO} {token} />
+	<NftHideButton source={NFT_COLLECTION_HERO} {token} />
 </div>

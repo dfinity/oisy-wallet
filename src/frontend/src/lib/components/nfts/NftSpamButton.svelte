@@ -4,6 +4,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
+	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,
@@ -11,6 +12,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -18,8 +20,6 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -40,7 +40,7 @@
 			trackEvent({
 				name: TRACK_NFT_SPAM_HIDE_ACTION,
 				metadata: {
-					source: source,
+					source,
 					collection_name: token.name,
 					collection_address: token.address,
 					network: token.network.name,

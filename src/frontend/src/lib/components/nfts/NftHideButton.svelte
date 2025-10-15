@@ -5,6 +5,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
+	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
@@ -12,6 +13,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -19,8 +21,6 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		token: NonFungibleToken;

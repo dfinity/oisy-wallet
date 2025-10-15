@@ -171,8 +171,8 @@
 
 				{#if nonNullish(token)}
 					<div class="mb-6 flex w-full gap-2">
-						<span><NftSpamButton {token} source={NFT_CONSENT_MODAL} /></span>
-						<span><NftHideButton {token} source={NFT_CONSENT_MODAL} /></span>
+						<span><NftSpamButton source={NFT_CONSENT_MODAL} {token} /></span>
+						<span><NftHideButton source={NFT_CONSENT_MODAL} {token} /></span>
 					</div>
 				{/if}
 
