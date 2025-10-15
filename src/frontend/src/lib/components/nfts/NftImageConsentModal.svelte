@@ -15,10 +15,12 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -31,8 +33,6 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		collection: NftCollection;
