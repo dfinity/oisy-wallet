@@ -1156,7 +1156,8 @@
 			"review_description": "Pozor! Tyto obrázky pocházejí z neověřeného zdroje. Jejich povolení by mohlo sdílet vaši IP adresu s třetí stranou a představovat potenciální bezpečnostní riziko.",
 			"learn_more": "Zjistěte více",
 			"token_id": "Token ID",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Zatím žádné NFT",
