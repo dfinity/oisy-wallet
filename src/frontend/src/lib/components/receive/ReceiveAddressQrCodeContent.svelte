@@ -5,6 +5,7 @@
 	import type { Address, OptionAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 
 	interface Props {
 		address: OptionAddress<Address>;

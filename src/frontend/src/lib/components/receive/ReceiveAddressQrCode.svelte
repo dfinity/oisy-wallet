@@ -7,6 +7,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
+	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 
 	interface Props {
 		address: undefined | string;
