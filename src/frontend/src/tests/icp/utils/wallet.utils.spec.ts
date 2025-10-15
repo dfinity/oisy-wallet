@@ -1,10 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { Dip20WalletWorker } from '$icp/services/worker.dip20-wallet.services';
 import { IcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
-import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
-import { initWalletWorker } from '$icp/utils/wallet.utils';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
-import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import { initWalletWorker } from '$icp/utils/wallet.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
