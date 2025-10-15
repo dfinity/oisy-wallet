@@ -8,6 +8,7 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { NFT_COLLECTION_DESCRIPTION } from '$lib/constants/analytics.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
@@ -74,8 +75,8 @@
 
 		{#if nonNullish(token)}
 			<div class="mt-6 flex w-full gap-2">
-				<span><NftSpamButton {token} /></span>
-				<span><NftHideButton {token} /></span>
+				<span><NftSpamButton source={NFT_COLLECTION_DESCRIPTION} {token} /></span>
+				<span><NftHideButton source={NFT_COLLECTION_DESCRIPTION} {token} /></span>
 			</div>
 		{/if}
 	</div>

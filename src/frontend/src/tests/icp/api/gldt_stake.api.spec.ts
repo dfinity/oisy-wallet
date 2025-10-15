@@ -1,6 +1,6 @@
 import { getApyOverall, manageStakePosition } from '$icp/api/gldt_stake.api';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
@@ -14,7 +14,7 @@ describe('gldt_stake.api', () => {
 		// eslint-disable-next-line require-await
 		vi.spyOn(GldtStakeCanister, 'create').mockImplementation(async () => gldtStakeCanisterMock);
 
-		vi.spyOn(appContants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
+		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
 			() => mockLedgerCanisterId
 		);
 	});

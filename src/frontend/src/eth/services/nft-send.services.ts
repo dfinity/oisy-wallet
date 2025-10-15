@@ -25,7 +25,7 @@ export const encodeErc721SafeTransfer = ({
 	contractAddress: string;
 	from: EthAddress;
 	to: EthAddress;
-	tokenId: number;
+	tokenId: string;
 }): PreparedContractCall => {
 	const encoded = new Interface(ERC721_ABI).encodeFunctionData('safeTransferFrom', [
 		from,
@@ -47,7 +47,7 @@ export const encodeErc1155SafeTransfer = ({
 	contractAddress: string;
 	from: EthAddress;
 	to: EthAddress;
-	tokenId: number;
+	tokenId: string;
 	amount: bigint;
 	data?: `0x${string}` | string;
 }): PreparedContractCall => {

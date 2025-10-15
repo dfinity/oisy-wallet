@@ -34,7 +34,7 @@ describe('nft.services', () => {
 	describe('loadNfts', () => {
 		const mockNft1 = {
 			...mockValidErc721Nft,
-			id: parseNftId(123),
+			id: parseNftId('123'),
 			collection: {
 				...mockValidErc721Nft.collection,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -43,7 +43,7 @@ describe('nft.services', () => {
 		};
 		const mockNft2 = {
 			...mockValidErc721Nft,
-			id: parseNftId(321),
+			id: parseNftId('321'),
 			collection: {
 				...mockValidErc721Nft.collection,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -52,7 +52,7 @@ describe('nft.services', () => {
 		};
 		const mockNft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(876),
+			id: parseNftId('876'),
 			collection: {
 				...mockValidErc1155Nft.collection,
 				address: NYAN_CAT_TOKEN.address,
@@ -157,7 +157,7 @@ describe('nft.services', () => {
 		});
 
 		it('calls transferErc721 for an ERC-721 token with the expected params', async () => {
-			const tokenId = parseNftId(1);
+			const tokenId = parseNftId('1');
 
 			const progress = vi.fn();
 
@@ -189,7 +189,7 @@ describe('nft.services', () => {
 		});
 
 		it('calls transferErc1155 for an ERC-1155 token with id=tokenId and amount=1n', async () => {
-			const tokenId = parseNftId(725432);
+			const tokenId = parseNftId('725432');
 			const progress = vi.fn();
 
 			await sendNft({
@@ -225,7 +225,7 @@ describe('nft.services', () => {
 		it('returns early and does not call transfer functions when identity is nullish', async () => {
 			await sendNft({
 				token: token721,
-				tokenId: parseNftId(42),
+				tokenId: parseNftId('42'),
 				toAddress,
 				fromAddress,
 				identity: undefined, // nullish

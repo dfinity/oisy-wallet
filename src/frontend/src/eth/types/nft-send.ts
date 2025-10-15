@@ -15,13 +15,13 @@ interface CommonNftTransferParams {
 
 export interface TransferErc721Params extends CommonNftTransferParams {
 	contractAddress: string;
-	tokenId: number;
+	tokenId: string;
 	to: EthAddress;
 }
 
 export interface TransferErc1155Params extends CommonNftTransferParams {
 	contractAddress: string;
-	id: number;
+	id: string;
 	amount: bigint;
 	to: EthAddress;
 	data?: `0x${string}` | string;
