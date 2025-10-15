@@ -117,8 +117,8 @@
 					/>
 				{:else if currentStep?.name === WizardStepsReceive.RECEIVE || currentStep?.name === WizardStepsConvert.CONVERT || currentStep?.name === WizardStepsConvert.REVIEW || currentStep?.name === WizardStepsConvert.CONVERTING || currentStep?.name === WizardStepsConvert.DESTINATION || currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
 					<IcReceiveInfoCkEthereum
-						on:icQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
-						on:icHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+						onHowToConvert={() => goToStep(WizardStepsHowToConvert.INFO)}
+						onQRCode={() => goToStep(WizardStepsReceive.QR_CODE)}
 					/>
 				{/if}
 			{/key}
