@@ -146,7 +146,7 @@ describe('infura-erc721.providers', () => {
 
 				expect(metadata).toStrictEqual({
 					name: mockMetadata.name,
-					id: 123456,
+					id: '123456',
 					attributes: [{ traitType: 'Color', value: 'Blue' }],
 					imageUrl: mockMetadata.image,
 					description: mockMetadata.description
