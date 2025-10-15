@@ -18,7 +18,7 @@
 </script>
 
 {#if transactions.length > 0}
-	<div class="mb-5 flex flex-col gap-3" data-tid={testId}>
+	<div class="content-auto mb-5 flex flex-col gap-3" data-tid={testId}>
 		<StickyHeader>
 			<span class="mb-3 flex text-lg font-medium text-tertiary first-letter:capitalize"
 				>{formattedDate}</span
@@ -42,3 +42,11 @@
 		{/each}
 	</div>
 {/if}
+
+
+<style lang="scss">
+  .content-auto {
+    content-visibility: auto;
+    contain-intrinsic-size: 0 150px;
+  }
+</style>
