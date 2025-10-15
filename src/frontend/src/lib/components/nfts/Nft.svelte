@@ -38,4 +38,4 @@
 
 <NftHero {nft} {token} />
 
-<NftCollectionCard collection={nft?.collection} mediaStatus={nft?.mediaStatus} />
+<NftCollectionCard collection={nft?.collection} />

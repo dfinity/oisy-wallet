@@ -13,17 +13,13 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
-	import {
-		type NftMediaStatusEnum as NftMediaStatusEnumType,
-		NftMediaStatusEnum
-	} from '$lib/schema/nft.schema';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 
 	interface Props {
 		collection?: NftCollection;
-		mediaStatus?: NftMediaStatusEnumType;
 	}
 
-	const { collection, mediaStatus }: Props = $props();
+	const { collection }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)
@@ -67,7 +63,7 @@
 				</span>
 			</div>
 
-			{#if nonNullish(collection.bannerImageUrl) && hasConsent && nonNullish(mediaStatus) && mediaStatus === NftMediaStatusEnum.OK}
+			{#if nonNullish(collection.bannerImageUrl) && hasConsent && collection.bannerMediaStatus === NftMediaStatusEnum.OK}
 				<div class="flex h-32 min-w-32 overflow-hidden rounded-lg">
 					<BgImg imageUrl={collection.bannerImageUrl} size="cover" />
 				</div>
