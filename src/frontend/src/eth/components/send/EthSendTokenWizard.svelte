@@ -25,8 +25,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
-		TRACK_COUNT_ETH_NFT_SEND_ERROR,
-		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
@@ -199,24 +198,29 @@
 			});
 
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'success',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name
 				}
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_ERROR,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'error',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name,
+					error: (err as Error).message
 				}
 			});
 
