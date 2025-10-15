@@ -112,7 +112,7 @@
 		}
 	};
 
-	const trackEventOnClick = (props: Record<string, string>) => {
+	const trackEventOnClick = (clickedButton: string) => {
 		trackEvent({
 			name: TRACK_NFT_CONSENT_GIVEN,
 			metadata: {
@@ -120,7 +120,7 @@
 				collection_address: collection.address,
 				network: collection.network.name,
 				standard: collection.standard,
-				...props
+				clicked_button: clickedButton
 			}
 		});
 	};
@@ -265,7 +265,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'keep_media_disabled' });
+								trackEventOnClick('keep_media_disabled');
 								modalStore.close();
 							}}
 							testId={`${testId}-keepDisabledButton`}
@@ -277,7 +277,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'enable_media' });
+								trackEventOnClick('enable_media');
 								save(true);
 							}}
 							testId={`${testId}-enableButton`}
@@ -289,7 +289,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'disable_media' });
+								trackEventOnClick('disable_media');
 								save(false);
 							}}
 							testId={`${testId}-disableButton`}
@@ -301,7 +301,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'keep_media_enabled' });
+								trackEventOnClick('keep_media_enabled');
 								modalStore.close();
 							}}
 							testId={`${testId}-keepEnabledButton`}
@@ -313,7 +313,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'disable_media' });
+								trackEventOnClick('disable_media');
 								save(false);
 							}}
 							testId={`${testId}-keepDisabledButton`}
@@ -325,7 +325,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick({ clicked_button: 'enable_media' });
+								trackEventOnClick('enable_media');
 								save(true);
 							}}
 							testId={`${testId}-enableButton`}
