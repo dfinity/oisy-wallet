@@ -3,7 +3,6 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
-import type { IndexCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
@@ -20,7 +19,7 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
 		worker: Worker,
 		tokenId: TokenId,
-		private readonly indexCanisterId: IndexCanisterIdText
+		private readonly indexCanisterId: IcToken['indexCanisterId']
 	) {
 		super(worker);
 
@@ -59,14 +58,14 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	}
 
 	static async init({
-		ledgerCanisterId: canisterId,
+		indexCanisterId,
 		id: tokenId,
 		network: { id: networkId }
 	}: IcToken): Promise<IcpWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
 		const worker = await AppWorker.getInstance();
-		return new IcpWalletWorker(worker, tokenId, canisterId);
+		return new IcpWalletWorker(worker, tokenId, indexCanisterId);
 	}
 
 	protected override stopTimer = () => {
