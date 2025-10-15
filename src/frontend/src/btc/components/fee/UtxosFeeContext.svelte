@@ -15,7 +15,7 @@
 
 	interface Props {
 		source: string;
-		amount: OptionAmount;
+		amount?: OptionAmount;
 		networkId?: NetworkId;
 		amountError?: boolean;
 		children: Snippet;
