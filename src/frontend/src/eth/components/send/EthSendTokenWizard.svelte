@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { error } from 'console';
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { address } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
