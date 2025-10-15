@@ -22,23 +22,24 @@ export const NftNetworkSchema = z.object({
 	...NetworkAppMetadataSchema.shape
 });
 
-export const NftCollectionSchema = z.object({
-	...TokenSchema.pick({ id: true, standard: true }).shape,
-	address: z.string(),
-	name: z.string().optional(),
-	symbol: z.string().optional(),
-	bannerImageUrl: z.url().optional(),
-	description: z.string().optional(),
-	network: NftNetworkSchema,
-	newestAcquiredAt: z.date().optional()
-});
-
 export enum NftMediaStatusEnum {
 	OK = 'ok',
 	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
 	NON_SUPPORTED_MEDIA_TYPE = 'non_supported_media_type',
 	INVALID_DATA = 'invalid_data'
 }
+
+export const NftCollectionSchema = z.object({
+	...TokenSchema.pick({ id: true, standard: true }).shape,
+	address: z.string(),
+	name: z.string().optional(),
+	symbol: z.string().optional(),
+	bannerImageUrl: z.url().optional(),
+	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
+	description: z.string().optional(),
+	network: NftNetworkSchema,
+	newestAcquiredAt: z.date().optional()
+});
 
 export const NftSchema = z.object({
 	balance: z.number().optional(),

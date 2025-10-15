@@ -57,7 +57,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '1',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '2',
@@ -66,7 +70,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '3',
@@ -75,7 +83,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '4',
@@ -84,7 +96,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				}
 			]
 		};
@@ -96,7 +112,9 @@ describe('alchemy.providers', () => {
 				imageUrl: 'https://download.com',
 				balance: 1,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
@@ -107,7 +125,9 @@ describe('alchemy.providers', () => {
 				imageUrl: 'https://download2.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.OK
@@ -118,7 +138,9 @@ describe('alchemy.providers', () => {
 				imageUrl: 'https://download3.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
@@ -129,7 +151,9 @@ describe('alchemy.providers', () => {
 				imageUrl: 'https://download4.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.OK
