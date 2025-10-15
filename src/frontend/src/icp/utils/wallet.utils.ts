@@ -1,5 +1,5 @@
 import { Dip20WalletWorker } from '$icp/services/worker.dip20-wallet.services';
-import { initIcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
+import { IcpWalletWorker } from '$icp/services/worker.icp-wallet.services';
 import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -10,4 +10,4 @@ export const initWalletWorker: InitWalletWorkerFn<IcToken> = ({ token }) =>
 		? IcrcWalletWorker.init(token)
 		: isTokenDip20(token)
 			? Dip20WalletWorker.init(token)
-			: initIcpWalletWorker(token);
+			: IcpWalletWorker.init(token);
