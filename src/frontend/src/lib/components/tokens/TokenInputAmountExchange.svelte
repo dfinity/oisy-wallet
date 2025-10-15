@@ -1,9 +1,6 @@
-<!-- @migration-task Error while migrating Svelte code: Identifier 'preventDefault' has already been declared
-https://svelte.dev/e/js_parse_error -->
 <script lang="ts">
 	import { preventDefault } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { preventDefault } from 'svelte/legacy';
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import {
 		TOKEN_INPUT_AMOUNT_EXCHANGE,
