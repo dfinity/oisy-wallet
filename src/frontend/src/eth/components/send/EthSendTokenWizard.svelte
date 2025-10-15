@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { error } from 'console';
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { address } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
@@ -44,8 +46,6 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import type { address } from '@solana/kit';
-	import { error } from 'console';
 
 	/**
 	 * Send context store
