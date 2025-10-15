@@ -31,6 +31,8 @@
 		getAllowMediaForNft,
 		getNftCollectionUi
 	} from '$lib/utils/nfts.utils';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		collection: NftCollection;
@@ -108,6 +110,19 @@
 		if (!saveLoading) {
 			modalStore.close();
 		}
+	};
+
+	const trackEventOnClick = (props: Record<string, string>) => {
+		trackEvent({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: collection.name ?? '',
+				collection_address: collection.address,
+				network: collection.network.name,
+				standard: collection.standard,
+				...props
+			}
+		});
 	};
 </script>
 
@@ -249,7 +264,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'keep_media_disabled' });
+								modalStore.close();
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -258,7 +276,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'enable_media' });
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
@@ -267,7 +288,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'disable_media' });
+								save(false);
+							}}
 							testId={`${testId}-disableButton`}
 						>
 							{$i18n.nfts.text.disable_media}
@@ -276,7 +300,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => modalStore.close()}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'keep_media_enabled' });
+								modalStore.close();
+							}}
 							testId={`${testId}-keepEnabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_enabled}
@@ -285,7 +312,10 @@
 						<Button
 							colorStyle="secondary-light"
 							loading={saveLoading}
-							onclick={() => save(false)}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'disable_media' });
+								save(false);
+							}}
 							testId={`${testId}-keepDisabledButton`}
 						>
 							{$i18n.nfts.text.keep_media_disabled}
@@ -294,7 +324,10 @@
 							colorStyle="secondary-light"
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
-							onclick={() => save(true)}
+							onclick={() => {
+								trackEventOnClick({ clicked_button: 'enable_media' });
+								save(true);
+							}}
 							testId={`${testId}-enableButton`}
 						>
 							{$i18n.nfts.text.enable_media}
