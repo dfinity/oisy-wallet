@@ -41,7 +41,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { SaveCustomTokenWithKey } from '$lib/types/custom-token';
 	import type { Network } from '$lib/types/network';
-	import type { Token, TokenId, TokenMetadata } from '$lib/types/token';
+	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
