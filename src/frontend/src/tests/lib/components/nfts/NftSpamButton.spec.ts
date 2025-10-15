@@ -37,7 +37,7 @@ describe('NftSpamButton', () => {
 	});
 
 	it('renders ConfirmButtonWithModal when collection has multiple NFTs', async () => {
-		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId(123) }]);
+		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
 
 		const { getByTestId } = render(NftSpamButton, {
 			props: { token: mockToken, source: 'gallery' }
