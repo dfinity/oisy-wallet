@@ -120,23 +120,26 @@
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
 
 	$effect(() => {
-		receiveAmount =
-			nonNullish($destinationToken) &&
-			nonNullish($sourceToken) &&
-			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-				? formatTokenBigintToNumber({
-						value: normalizeTokenToDecimals({
-							value: $swapAmountsStore?.selectedProvider?.receiveAmount,
-							oldUnitName: $sourceToken.decimals,
-							newUnitName: $destinationToken.decimals
-						}),
-						unitName: $destinationToken.decimals,
-						displayDecimals: $destinationToken.decimals
-					})
-				: undefined;
-				
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = undefined;
+			return;
+		}
 
-		console.log({ receiveAmount }, 'in SwapForm');
+		const normalizedValue = normalizeTokenToDecimals({
+			value: $swapAmountsStore.selectedProvider.receiveAmount,
+			oldUnitName: $sourceToken.decimals,
+			newUnitName: $destinationToken.decimals
+		});
+
+		receiveAmount = formatTokenBigintToNumber({
+			value: normalizedValue,
+			unitName: $destinationToken.decimals,
+			displayDecimals: $destinationToken.decimals
+		});
 	});
 
 	const onTokensSwitch = () => {

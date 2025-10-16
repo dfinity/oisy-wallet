@@ -43,7 +43,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
-	import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
+	import { normalizeTokenToDecimals, parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -112,27 +112,26 @@
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
 	$effect(() => {
-		console.log({
-			destinationToken: $destinationToken,
-			value: $swapAmountsStore?.selectedProvider?.receiveAmount
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = undefined;
+			return;
+		}
+
+		const normalizedValue = normalizeTokenToDecimals({
+			value: $swapAmountsStore.selectedProvider.receiveAmount,
+			oldUnitName: $sourceToken.decimals,
+			newUnitName: $destinationToken.decimals
 		});
 
-		receiveAmount =
-			nonNullish($destinationToken) &&
-			nonNullish($sourceToken) &&
-			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-				? formatTokenBigintToNumber({
-						value: normalizeTokenToDecimals({
-							value: $swapAmountsStore?.selectedProvider?.receiveAmount,
-							oldUnitName: $sourceToken.decimals,
-							newUnitName: $destinationToken.decimals
-						}),
-						unitName: $destinationToken.decimals,
-						displayDecimals: $destinationToken.decimals
-					})
-				: undefined;
-
-		console.log({ receiveAmount });
+		receiveAmount = formatTokenBigintToNumber({
+			value: normalizedValue,
+			unitName: $destinationToken.decimals,
+			displayDecimals: $destinationToken.decimals
+		});
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
