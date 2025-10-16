@@ -319,7 +319,7 @@ export class EtherscanProvider {
 			throw new Error(result);
 		}
 
-		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(parseInt(TokenId)));
+		return result.map(({ TokenId }: EtherscanProviderTokenId) => parseNftId(TokenId));
 	};
 }
 

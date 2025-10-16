@@ -206,7 +206,7 @@ export class AlchemyProvider {
 				);
 
 				return {
-					id: parseNftId(parseInt(ownedNft.tokenId)),
+					id: parseNftId(ownedNft.tokenId),
 					...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
 					...(nonNullish(ownedNft.image?.originalUrl) && {
 						imageUrl: ownedNft.image?.originalUrl
