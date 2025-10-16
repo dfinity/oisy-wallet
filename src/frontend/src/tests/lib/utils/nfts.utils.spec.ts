@@ -4,7 +4,6 @@ import {
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
@@ -870,11 +869,6 @@ describe('nfts.utils', () => {
 	});
 
 	describe('getAllowMediaForNft', () => {
-		const tokens = [
-			{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, allowExternalContentSource: false },
-			{ ...DE_GODS_TOKEN, allowExternalContentSource: false }
-		] as Erc721CustomToken[];
-
 		it('should return the collections allowExternalContentSource prop', () => {
 			const result = getAllowMediaForNft(mockValidErc1155Nft.collection);
 
