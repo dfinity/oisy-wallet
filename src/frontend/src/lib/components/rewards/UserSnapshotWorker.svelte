@@ -70,7 +70,7 @@
 
 		await sync();
 
-		scheduleNext()
+		scheduleNext();
 	};
 
 	const stopTimer = () => {
