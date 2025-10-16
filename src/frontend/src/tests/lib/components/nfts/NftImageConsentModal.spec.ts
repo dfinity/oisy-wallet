@@ -58,7 +58,6 @@ describe('NftImageConsentModal', () => {
 		.mockReturnValue(new Promise((resolve) => resolve()));
 
 	// NFT utils: toggle & collection
-	const getAllowMediaSpy = vi.spyOn(nftsUtils, 'getAllowMediaForNft');
 	const findTokenSpy = vi.spyOn(nftsUtils, 'findNonFungibleToken');
 	const getCollectionUiSpy = vi.spyOn(nftsUtils, 'getNftCollectionUi');
 
@@ -71,7 +70,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	beforeEach(() => {
-		getAllowMediaSpy.mockClear();
 		vi.clearAllMocks();
 	});
 
@@ -122,10 +120,12 @@ describe('NftImageConsentModal', () => {
 			} as Erc721Token;
 
 			findTokenSpy.mockReturnValue(token);
-			getAllowMediaSpy.mockReturnValue(testCase.allowMedia);
 
 			render(NftImageConsentModal, {
-				props: { collection: nftAzuki1.collection, testId: TEST_ID }
+				props: {
+					collection: { ...nftAzuki1.collection, allowExternalContentSource: testCase.allowMedia },
+					testId: TEST_ID
+				}
 			});
 
 			const btnPrimary = screen.getByTestId(testCase.buttonPrimary);
@@ -176,10 +176,12 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(undefined);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: undefined },
+				testId: TEST_ID
+			}
 		});
 
 		const btnPrimary = screen.getByTestId(`${TEST_ID}-enableButton`);
@@ -190,14 +192,17 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('renders collection info, display preference, and NFT media list', () => {
-		getAllowMediaSpy.mockReturnValue(false);
 		findTokenSpy.mockReturnValue({
 			...mockValidErc721Token,
 			description: 'Some valid description'
 		});
 		getCollectionUiSpy.mockReturnValue([
 			{
-				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
+				collection: {
+					...nftAzuki1.collection,
+					description: 'Some valid description',
+					allowExternalContentSource: false
+				},
 				nfts: [nftAzuki1, nftAzuki2]
 			}
 		]);
@@ -205,7 +210,11 @@ describe('NftImageConsentModal', () => {
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, {
 			props: {
-				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
+				collection: {
+					...nftAzuki1.collection,
+					description: 'Some valid description',
+					allowExternalContentSource: false
+				},
 				testId: TEST_ID
 			}
 		});
@@ -256,7 +265,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should not render media link icon if consent has not been given', () => {
-		getAllowMediaSpy.mockReturnValue(false);
 		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
@@ -267,7 +275,10 @@ describe('NftImageConsentModal', () => {
 
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const mediaContainer = screen.getByTestId(`${TEST_ID}-nfts-media`);
@@ -281,7 +292,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should render media link icon if consent has been given', () => {
-		getAllowMediaSpy.mockReturnValue(true);
 		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
@@ -314,10 +324,12 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(false);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const enableButton = screen.getByTestId(testIds.enable);
@@ -344,10 +356,12 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(false);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const keepDisabledButton = screen.getByTestId(testIds.keepDisabled);
@@ -374,7 +388,6 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(true);
 
 		render(NftImageConsentModal, {
 			props: { collection: nftAzuki1.collection, testId: TEST_ID }
@@ -404,7 +417,6 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(true);
 
 		render(NftImageConsentModal, {
 			props: { collection: nftAzuki1.collection, testId: TEST_ID }
