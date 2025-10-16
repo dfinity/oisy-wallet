@@ -33,7 +33,7 @@
 		onBack
 	}: Props = $props();
 
-	let destination = $derived(Principal.fromText(GLDT_STAKE_CANISTER_ID).toString());
+	const destination = Principal.fromText(GLDT_STAKE_CANISTER_ID).toString();
 
 	const stake = async () => {
 		if (isNullish($authIdentity)) {
