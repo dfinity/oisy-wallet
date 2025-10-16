@@ -34,7 +34,7 @@
 	import { emit } from '$lib/utils/events.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
-	const enabledNetworks = { ...$userNetworks };
+	let enabledNetworks =$state( { ...$userNetworks });
 	const enabledNetworksInitial = { ...enabledNetworks };
 
 	let enabledTestnet = $state($testnetsEnabled);
