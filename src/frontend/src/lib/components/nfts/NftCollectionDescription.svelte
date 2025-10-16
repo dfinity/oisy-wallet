@@ -14,7 +14,7 @@
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;

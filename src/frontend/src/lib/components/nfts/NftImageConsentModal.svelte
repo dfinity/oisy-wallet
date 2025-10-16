@@ -28,11 +28,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import {
-		findNonFungibleToken,
-		getAllowMediaForNft,
-		getNftCollectionUi
-	} from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;

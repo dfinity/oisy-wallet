@@ -4,7 +4,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
