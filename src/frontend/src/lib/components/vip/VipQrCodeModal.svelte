@@ -49,8 +49,23 @@
 		}
 	};
 
-	const regenerateCode = async () => {
+	const scheduleNext = (): void => {
+		countdown = setTimeout(async () => {
+			await intervalFunction();
+
+			if (nonNullish(countdown)) {
+				scheduleNext();
+			}
+		}, 1000);
+	};
+
+	const stopCountdown = () => {
 		clearInterval(countdown);
+		countdown = undefined;
+	};
+
+	const regenerateCode = async () => {
+		stopCountdown();
 
 		if (retriesToGetRewardCode >= maxRetriesToGetRewardCode) {
 			return;
@@ -58,32 +73,32 @@
 
 		await generateCode();
 		counter = CODE_REGENERATE_INTERVAL_IN_SECONDS;
-		countdown = setInterval(intervalFunction, 1000);
+		scheduleNext();
 	};
 
 	const intervalFunction = async () => {
 		counter--;
 
-		if (counter === 0) {
+		if (counter <= 0) {
 			await regenerateCode();
 		}
 	};
 
 	const onVisibilityChange = () => {
 		if (document.hidden) {
-			clearInterval(countdown);
+			stopCountdown();
 		} else {
-			countdown = setInterval(intervalFunction, 1000);
+			scheduleNext();
 		}
 	};
 
 	onMount(regenerateCode);
-	onDestroy(() => clearInterval(countdown));
+	onDestroy(stopCountdown);
 
 	const qrCodeUrl = $derived(`${window.location.origin}/?code=${code}`);
 </script>
 
-<svelte:window on:visibilitychange={onVisibilityChange} />
+<svelte:window onvisibilitychange={onVisibilityChange} />
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
