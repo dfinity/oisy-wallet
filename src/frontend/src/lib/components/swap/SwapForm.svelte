@@ -119,43 +119,6 @@
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
 
-	// SwapForm.svelte
-
-	$effect(() => {
-		console.log('🟨 FORM EFFECT TRIGGERED', {
-			timestamp: new Date().toISOString(),
-			hasStore: nonNullish($swapAmountsStore),
-			rawValue: $swapAmountsStore?.selectedProvider?.receiveAmount,
-			currentReceiveAmount: receiveAmount
-		});
-
-		if (
-			isNullish($destinationToken) ||
-			isNullish($sourceToken) ||
-			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-		) {
-			console.log('🔴 FORM: Missing data');
-			receiveAmount = undefined;
-			return;
-		}
-
-		console.log('🟢 FORM: Normalizing...');
-
-		const normalizedValue = normalizeTokenToDecimals({
-			value: $swapAmountsStore.selectedProvider.receiveAmount,
-			oldUnitName: $sourceToken.decimals,
-			newUnitName: $destinationToken.decimals
-		});
-
-		receiveAmount = formatTokenBigintToNumber({
-			value: normalizedValue,
-			unitName: $destinationToken.decimals,
-			displayDecimals: $destinationToken.decimals
-		});
-
-		console.log('✅ FORM: Set receiveAmount to', receiveAmount);
-	});
-
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
 		swapAmountsStore.reset();

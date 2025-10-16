@@ -94,6 +94,46 @@
 	);
 
 	$effect(() => {
+		console.log('🟦 WIZARD EFFECT TRIGGERED', {
+			timestamp: new Date().toISOString(),
+			step: currentStep?.name,
+			hasStore: nonNullish($swapAmountsStore),
+			hasReceiveAmount: nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount),
+			rawValue: $swapAmountsStore?.selectedProvider?.receiveAmount,
+			hasSource: nonNullish($sourceToken),
+			hasDest: nonNullish($destinationToken),
+			sourceSymbol: $sourceToken?.symbol,
+			destSymbol: $destinationToken?.symbol
+		});
+
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			console.log('🔴 WIZARD: Missing data, setting undefined');
+			receiveAmount = undefined;
+			return;
+		}
+
+		console.log('🟢 WIZARD: Normalizing...');
+
+		const normalizedValue = normalizeTokenToDecimals({
+			value: $swapAmountsStore.selectedProvider.receiveAmount,
+			oldUnitName: $sourceToken.decimals,
+			newUnitName: $destinationToken.decimals
+		});
+
+		receiveAmount = formatTokenBigintToNumber({
+			value: normalizedValue,
+			unitName: $destinationToken.decimals,
+			displayDecimals: $destinationToken.decimals
+		});
+
+		console.log('✅ WIZARD: Set receiveAmount to', receiveAmount);
+	});
+
+	$effect(() => {
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
 			return;
 		}
@@ -242,30 +282,29 @@
 </script>
 
 <IcTokenFeeContext token={$sourceToken as IcToken}>
-		{#if currentStep?.name === WizardStepsSwap.SWAP}
-			<SwapIcpForm
-				{isSwapAmountsLoading}
-				{onClose}
-				{onNext}
-				{onShowTokensList}
-				{sourceTokenFee}
-				on:icShowProviderList
-				bind:swapAmount
-				bind:receiveAmount
-				bind:slippageValue
-			/>
-		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-			<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
-				{#snippet swapFees()}
-					<SwapFees />
-				{/snippet}
-			</SwapReview>
-		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-			<SwapProgress
-				{swapProgressStep}
-				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
-					SwapProvider.ICP_SWAP}
-				bind:failedSteps={swapFailedProgressSteps}
-			/>
-		{/if}
+	{#if currentStep?.name === WizardStepsSwap.SWAP}
+		<SwapIcpForm
+			{isSwapAmountsLoading}
+			{onClose}
+			{onNext}
+			{onShowTokensList}
+			{sourceTokenFee}
+			on:icShowProviderList
+			bind:swapAmount
+			bind:receiveAmount
+			bind:slippageValue
+		/>
+	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+		<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+			{#snippet swapFees()}
+				<SwapFees />
+			{/snippet}
+		</SwapReview>
+	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+		<SwapProgress
+			{swapProgressStep}
+			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
+			bind:failedSteps={swapFailedProgressSteps}
+		/>
+	{/if}
 </IcTokenFeeContext>
