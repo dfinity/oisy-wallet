@@ -295,6 +295,7 @@
 		sendTokenId={$sourceToken.id}
 		sourceNetwork={$sourceToken.network as EthereumNetwork}
 	>
+		{#key currentStep?.name}
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapEthForm
 					{isApproveNeeded}
@@ -328,5 +329,6 @@
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
 				<SwapProgress sendWithApproval={true} {swapProgressStep} />
 			{/if}
+		{/key}
 	</EthFeeContext>
 {/if}
