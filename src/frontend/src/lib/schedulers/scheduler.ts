@@ -68,9 +68,11 @@ export class SchedulerTimer {
 
 		const scheduleNext = (): void => {
 			this.timer = setTimeout(async () => {
+				const isTimer = nonNullish(this.timer);
+
 				await execute();
 
-				if (nonNullish(this.timer)) {
+				if (isTimer) {
 					scheduleNext();
 				}
 			}, interval);
