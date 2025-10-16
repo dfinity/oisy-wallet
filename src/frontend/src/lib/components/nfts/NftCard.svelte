@@ -8,7 +8,7 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import { NFT_COLLECTION_ROUTE, TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
@@ -116,10 +116,15 @@
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
-			class:text-primary={!disabled}>{nft.collection.name}</span
+			class:text-primary={!disabled}
 		>
-		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
-			>#{nft.id} &ndash; {nft.name}</span
-		>
+			{source === NFT_COLLECTION_ROUTE ? nft.name : nft.collection.name}
+		</span>
+		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}>
+			#{nft.id}
+			{#if source !== NFT_COLLECTION_ROUTE}
+				&ndash; {nft.name}
+			{/if}
+		</span>
 	</span>
 </button>
