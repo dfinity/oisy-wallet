@@ -1,11 +1,12 @@
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import type { IcToken } from '$icp/types/ic-token';
 import StakeWizard from '$lib/components/stake/StakeWizard.svelte';
+import * as appConstants from '$lib/constants/app.constants';
 import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
 import { WizardStepsStake } from '$lib/enums/wizard-steps';
 import { initSendContext, SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockLedgerCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('StakeWizard', () => {
@@ -23,6 +24,14 @@ describe('StakeWizard', () => {
 		onBack: () => {},
 		onNext: () => {}
 	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
+			() => mockLedgerCanisterId
+		);
+	});
 
 	it('renders GLDT token wizard', () => {
 		const { getByTestId } = render(StakeWizard, {
