@@ -19,9 +19,11 @@
 
 	const startTimer = (): NodeJS.Timeout | undefined =>
 		setTimeout(async () => {
+			const isTimer = nonNullish(timer);
+
 			await scheduledLoad?.();
 
-			if (nonNullish(timer)) {
+			if (isTimer) {
 				timer = startTimer();
 			}
 		}, interval);
