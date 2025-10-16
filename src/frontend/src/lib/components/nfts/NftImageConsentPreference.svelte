@@ -13,15 +13,7 @@
 
 	const { collection }: Props = $props();
 
-	const hasConsent = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
-	);
+	const hasConsent = $derived(nonNullish(collection) ? getAllowMediaForNft(collection) : false);
 
 	const openConsentModal = () => {
 		if (nonNullish(collection)) {

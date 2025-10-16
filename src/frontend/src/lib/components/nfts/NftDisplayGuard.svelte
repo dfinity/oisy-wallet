@@ -8,7 +8,6 @@
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -28,13 +27,7 @@
 	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(nft)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: nft.collection.network.id,
-					address: nft.collection.address
-				})
-			: false
+		nonNullish(nft) ? getAllowMediaForNft(nft.collection) : false
 	);
 
 	const handleConsent = () => {

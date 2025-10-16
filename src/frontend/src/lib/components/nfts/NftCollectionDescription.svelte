@@ -33,13 +33,7 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
+		nonNullish(collection) ? getAllowMediaForNft(collection) : false
 	);
 </script>
 

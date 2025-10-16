@@ -141,7 +141,10 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name }),
-		...(notEmptyString(token.description) && { description: token.description })
+		...(notEmptyString(token.description) && { description: token.description }),
+		...(nonNullish(token.allowExternalContentSource) && {
+			allowExternalContentSource: token.allowExternalContentSource
+		})
 	});
 
 export const getEnabledNfts = ({
@@ -333,13 +336,8 @@ export const findNonFungibleToken = ({
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
 
-// We offer this util so we don't mistakenly take the value from the nfts collection prop,
-// as it is not updated after updating the consent. Going through this function ensures no stale data
-export const getAllowMediaForNft = (params: {
-	tokens: NonFungibleToken[];
-	address: EthAddress;
-	networkId: NetworkId;
-}): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
+export const getAllowMediaForNft = (collection: NftCollection): boolean | undefined =>
+	collection.allowExternalContentSource;
 
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {

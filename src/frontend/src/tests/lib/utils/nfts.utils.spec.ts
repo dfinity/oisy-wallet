@@ -8,7 +8,7 @@ import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftId } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
@@ -30,7 +30,6 @@ import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { assertNonNullish } from '@dfinity/utils';
 
 describe('nfts.utils', () => {
 	const mockNft1: Nft = {
@@ -876,26 +875,17 @@ describe('nfts.utils', () => {
 			{ ...DE_GODS_TOKEN, allowExternalContentSource: false }
 		] as Erc721CustomToken[];
 
-		it('should correctly return the allow media prop for an nft contract address', () => {
-			const params = {
-				tokens,
-				networkId: AZUKI_ELEMENTAL_BEANS_TOKEN.network.id,
-				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address
-			};
-			const expected: NonFungibleToken | undefined = findNonFungibleToken(params);
-
-			assertNonNullish(expected);
-
-			const result = getAllowMediaForNft(params);
-
-			expect(result).toEqual(expected?.allowExternalContentSource);
-		});
-
-		it('should fallback to undefined if the nft cant be found or the consent has never been set', () => {
-			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
-			const result = getAllowMediaForNft(params);
+		it('should return the collections allowExternalContentSource prop', () => {
+			const result = getAllowMediaForNft(mockValidErc1155Nft.collection);
 
 			expect(result).toBeUndefined();
+
+			const result2 = getAllowMediaForNft({
+				...mockValidErc1155Nft.collection,
+				allowExternalContentSource: true
+			});
+
+			expect(result2).toBeTruthy();
 		});
 	});
 

@@ -41,13 +41,7 @@
 
 	const { collection, testId }: Props = $props();
 
-	const allowMedia = $derived(
-		getAllowMediaForNft({
-			tokens: $nonFungibleTokens,
-			networkId: collection.network.id,
-			address: collection.address
-		})
-	);
+	const allowMedia = $derived(getAllowMediaForNft(collection));
 
 	const shortCollectionName = $derived(
 		nonNullish(collection.name)
