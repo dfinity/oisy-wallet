@@ -20,11 +20,11 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { isIos } from '$lib/utils/device.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import {isIos} from "$lib/utils/device.utils";
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -116,7 +116,7 @@
 		};
 	};
 
-	let ios = $derived(isIos())
+	let ios = $derived(isIos());
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
@@ -129,7 +129,7 @@
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={{ duration: ios ? 0 :250 }}
+					animate:flip={{ duration: ios ? 0 : 250 }}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -182,7 +182,7 @@
 						onanimationend={handleAnimationEnd}
 						onanimationstart={handleAnimationStart}
 						transition:fade
-						animate:flip={{ duration: ios ? 0 :250 }}
+						animate:flip={{ duration: ios ? 0 : 250 }}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
