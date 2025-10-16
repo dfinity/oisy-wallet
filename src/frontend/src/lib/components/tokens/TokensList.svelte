@@ -117,6 +117,8 @@
 	};
 
 	let ios = $derived(isIos());
+
+	let flipParams = $derived({ duration: ios ? 0 : 250 })
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
@@ -129,7 +131,7 @@
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={{ duration: ios ? 0 : 250 }}
+					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -182,7 +184,7 @@
 						onanimationend={handleAnimationEnd}
 						onanimationstart={handleAnimationStart}
 						transition:fade
-						animate:flip={{ duration: ios ? 0 : 250 }}
+						animate:flip={flipParams}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
