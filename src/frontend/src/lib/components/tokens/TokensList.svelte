@@ -118,7 +118,7 @@
 
 	let ios = $derived(isIos());
 
-	let flipParams = $derived({ duration: ios ? 0 : 250 })
+	let flipParams = $derived({ duration: ios ? 0 : 250 });
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
