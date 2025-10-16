@@ -24,6 +24,7 @@
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import {isIos} from "$lib/utils/device.utils";
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -114,6 +115,8 @@
 			[id]: { id, ...rest }
 		};
 	};
+
+	let ios = $derived(isIos())
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
@@ -126,7 +129,7 @@
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={{ duration: 250 }}
+					animate:flip={ios ? undefined : { duration: 250 }}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -179,7 +182,7 @@
 						onanimationend={handleAnimationEnd}
 						onanimationstart={handleAnimationStart}
 						transition:fade
-						animate:flip={{ duration: 250 }}
+						animate:flip={ios ? undefined : { duration: 250 }}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
