@@ -35,7 +35,7 @@
 	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
 	let enabledNetworks =$state( { ...$userNetworks });
-	const enabledNetworksInitial = { ...enabledNetworks };
+	const enabledNetworksInitial = { ...$userNetworks };
 
 	let enabledTestnet = $state($testnetsEnabled);
 	const enabledTestnetInitial = $testnetsEnabled;
