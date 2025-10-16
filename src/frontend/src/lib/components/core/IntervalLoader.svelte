@@ -20,7 +20,10 @@
 	const startTimer = (): NodeJS.Timeout | undefined =>
 		setTimeout(async () => {
 			await scheduledLoad?.();
-			timer = startTimer();
+
+			if (nonNullish(timer)) {
+				timer = startTimer();
+			}
 		}, interval);
 
 	const stopTimer = () => {
