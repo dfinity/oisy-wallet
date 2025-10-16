@@ -129,7 +129,7 @@
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={ios ? undefined : { duration: 250 }}
+					animate:flip={{ duration: ios ? 0 :250 }}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -182,7 +182,7 @@
 						onanimationend={handleAnimationEnd}
 						onanimationstart={handleAnimationStart}
 						transition:fade
-						animate:flip={ios ? undefined : { duration: 250 }}
+						animate:flip={{ duration: ios ? 0 :250 }}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
