@@ -23,6 +23,16 @@ export const onAuthMessage = async ({
 
 let timer: NodeJS.Timeout | undefined = undefined;
 
+const scheduleNext = (): void => {
+	timer = setTimeout(async () => {
+		await onIdleSignOut();
+
+		if (nonNullish(timer)) {
+			scheduleNext();
+		}
+	}, AUTH_TIMER_INTERVAL);
+};
+
 /**
  * The timer is executed only if the user has signed in
  */
@@ -31,7 +41,7 @@ const startIdleTimer = () => {
 		return;
 	}
 
-	timer = setInterval(async () => await onIdleSignOut(), AUTH_TIMER_INTERVAL);
+	scheduleNext();
 };
 
 const stopIdleTimer = () => {
@@ -39,7 +49,7 @@ const stopIdleTimer = () => {
 		return;
 	}
 
-	clearInterval(timer);
+	clearTimeout(timer);
 	timer = undefined;
 };
 
