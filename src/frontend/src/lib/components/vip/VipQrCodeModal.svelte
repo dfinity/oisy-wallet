@@ -60,7 +60,7 @@
 	};
 
 	const stopCountdown = () => {
-		clearInterval(countdown);
+		clearTimeout(countdown);
 		countdown = undefined;
 	};
 
