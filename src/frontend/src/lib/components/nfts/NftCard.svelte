@@ -9,10 +9,10 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
-	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 
 	interface Props {
 		nft: Nft;
