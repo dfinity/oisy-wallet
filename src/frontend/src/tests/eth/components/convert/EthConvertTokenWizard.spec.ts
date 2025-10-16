@@ -11,6 +11,7 @@ import {
 	type EthFeeContext,
 	type FeeStoreData
 } from '$eth/stores/eth-fee.store';
+import type { OptionEthAddress } from '$eth/types/address';
 import * as ckEthDerived from '$icp-eth/derived/cketh.derived';
 import type { CkEthMinterInfoData } from '$icp-eth/stores/cketh.store';
 import * as ckEthStores from '$icp-eth/stores/cketh.store';
@@ -29,7 +30,6 @@ import {
 	initTokenActionValidationErrorsContext,
 	type TokenActionValidationErrorsContext
 } from '$lib/stores/token-action-validation-errors.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import { stringifyJson } from '$lib/utils/json.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -44,10 +44,6 @@ import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';
 import { get, readable, writable } from 'svelte/store';
 import type { MockInstance } from 'vitest';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 vi.mock('$eth/services/fee.services', () => ({
 	getErc20FeeData: vi.fn()

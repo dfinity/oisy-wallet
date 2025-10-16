@@ -1,6 +1,6 @@
-import type { Token as BackendToken } from '$declarations/backend/backend.did';
+import type { Token as BackendToken } from '$declarations/backend/declarations/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import type { IcToken } from '$icp/types/ic-token';
 import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Token } from '$lib/types/token';
 import type { TokenToggleable, UserTokenState } from '$lib/types/token-toggleable';
@@ -15,7 +15,7 @@ type CustomTokenNetworkKeys = BackendToken extends infer T
 
 type TokenVariant<K extends CustomTokenNetworkKeys, T> = T & { networkKey: K };
 
-export type IcrcSaveCustomToken = Pick<IcrcCustomToken, 'ledgerCanisterId' | 'indexCanisterId'>;
+export type IcrcSaveCustomToken = Pick<IcToken, 'ledgerCanisterId' | 'indexCanisterId'>;
 
 export type ErcSaveCustomToken = Pick<Erc20Token, 'address'> &
 	Pick<Erc20Token['network'], 'chainId'>;

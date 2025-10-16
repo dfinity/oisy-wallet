@@ -3,7 +3,7 @@ import { authIdentity } from '$lib/derived/auth.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TransactionsStore } from '$lib/stores/transactions.store';
 import type { GetIdbTransactionsParams } from '$lib/types/idb-transactions';
-import type { AnyTransaction } from '$lib/types/transaction';
+import type { AnyTransaction } from '$lib/types/transaction-ui';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

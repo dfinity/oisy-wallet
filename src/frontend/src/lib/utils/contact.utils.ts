@@ -1,4 +1,4 @@
-import type { Contact } from '$declarations/backend/backend.did';
+import type { Contact } from '$declarations/backend/declarations/backend.did';
 import { TokenAccountIdSchema } from '$lib/schema/token-account-id.schema';
 import type { Address, OptionAddress } from '$lib/types/address';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';

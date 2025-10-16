@@ -2,11 +2,11 @@ import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { INFURA_API_KEY } from '$env/rest/infura.env';
 import { ERC20_ABI } from '$eth/constants/erc20.constants';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc20Provider } from '$eth/types/contracts-providers';
 import type { Erc20ContractAddress, Erc20Metadata } from '$eth/types/erc20';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { assertNonNullish } from '@dfinity/utils';

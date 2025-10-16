@@ -1,17 +1,17 @@
-import type { BtcAddress } from '$declarations/backend/backend.did';
+import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
 import {
 	btcAddressMainnet,
 	btcAddressRegtest,
 	btcAddressTestnet
 } from '$lib/derived/address.derived';
 import type { NetworkId } from '$lib/types/network';
-import { assertNever } from '$lib/types/utils';
 import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
 	type BtcAddressInfo
 } from '@dfinity/ckbtc';
+import { assertNever } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {
@@ -58,7 +58,7 @@ export const getBtcAddressString = (address: BtcAddress): string => {
 		return address.P2TR;
 	}
 
-	return assertNever({ variable: address, typeName: 'BtcAddress' });
+	assertNever(address, `Unexpected BtcAddress: ${address}`);
 };
 
 /**

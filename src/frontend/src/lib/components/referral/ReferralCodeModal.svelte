@@ -19,7 +19,6 @@
 		REFERRAL_CODE_SHARE_BUTTON
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getReferrerInfo } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -32,7 +31,6 @@
 
 	onMount(async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

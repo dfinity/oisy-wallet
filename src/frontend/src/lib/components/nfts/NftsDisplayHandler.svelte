@@ -25,6 +25,9 @@
 			filter: $tokenListStore.filter,
 			sort: $nftSortStore
 		});
+	});
+
+	$effect(() => {
 		nftCollections = filterSortByCollection({
 			items: getNftCollectionUi({
 				$nftStore,

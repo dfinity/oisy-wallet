@@ -17,10 +17,6 @@ import en from '$tests/mocks/i18n.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { render } from '@testing-library/svelte';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AllTransactionsList', () => {
 	beforeAll(() => {
 		vi.resetAllMocks();
@@ -155,9 +151,7 @@ describe('AllTransactionsList', () => {
 		it('should render the transactions list with all the transactions', () => {
 			const { container } = render(AllTransactionsList);
 
-			const transactionComponents = Array.from(container.querySelectorAll('div')).filter(
-				(el) => el.parentElement?.parentElement?.parentElement === container
-			);
+			const transactionComponents = Array.from(container.querySelectorAll('button.contents'));
 
 			expect(transactionComponents).toHaveLength(
 				btcTransactionsNumber + ethTransactionsNumber + icTransactionsNumber

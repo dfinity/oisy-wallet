@@ -13,15 +13,16 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { Network } from '$lib/types/network';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { usdValue } from '$lib/utils/exchange.utils';
 import {
@@ -543,7 +544,7 @@ describe('tokens.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		describe('when testnets are disabled', () => {
@@ -575,7 +576,7 @@ describe('tokens.utils', () => {
 			});
 
 			it('should ignore the local tokens when they are enabled', () => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(false);
 
 				expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
 			});
@@ -622,7 +623,7 @@ describe('tokens.utils', () => {
 
 			describe('when local networks are enabled', () => {
 				beforeEach(() => {
-					vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+					vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 				});
 
 				it('should return all tokens', () => {
@@ -682,17 +683,9 @@ describe('tokens.utils', () => {
 
 	describe('groupTogglableTokens', () => {
 		it('should return empty arrays if no tokens passed', () => {
-			const result = groupTogglableTokens({});
+			const result = groupTogglableTokens([]);
 
 			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
-		});
-
-		it('should return empty arrays if invalid data passed', () => {
-			const result1 = groupTogglableTokens({ invalidkey: ICP_TOKEN });
-			const result2 = groupTogglableTokens(null as unknown as Record<string, Token>);
-
-			expect(result1).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
-			expect(result2).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
@@ -703,14 +696,14 @@ describe('tokens.utils', () => {
 			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens({
-				SOL: mockToggleableSplToken,
-				ETH: mockToggleableErc20Token,
-				erc721: mockToggleableErc721Token,
-				erc1155: mockToggleableErc1155Token,
-				'ICP-t1': mockToggleableIcToken1,
-				'ICP-t2': mockToggleableIcToken2
-			});
+			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
+				mockToggleableSplToken,
+				mockToggleableErc20Token,
+				mockToggleableErc721Token,
+				mockToggleableErc1155Token,
+				mockToggleableIcToken1,
+				mockToggleableIcToken2
+			]);
 
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
 			expect(spl).toEqual([mockToggleableSplToken]);
@@ -752,7 +745,7 @@ describe('tokens.utils', () => {
 
 		it('should show info toast and return if no tokens to save', async () => {
 			await saveAllCustomTokens({
-				tokens: {},
+				tokens: [],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -771,7 +764,7 @@ describe('tokens.utils', () => {
 
 		it('should call saveIcrcCustomTokens when ICRC tokens are present', async () => {
 			await saveAllCustomTokens({
-				tokens: { icrc: mockValidIcrcToken },
+				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -790,7 +783,7 @@ describe('tokens.utils', () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { erc20: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -807,7 +800,7 @@ describe('tokens.utils', () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { erc20: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -824,7 +817,7 @@ describe('tokens.utils', () => {
 			const token = { ...BONK_TOKEN, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { spl: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -843,7 +836,7 @@ describe('tokens.utils', () => {
 			const modalNext = vi.fn();
 
 			await saveAllCustomTokens({
-				tokens: { icrcCustom: mockValidIcrcToken },
+				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock,
 				progress,

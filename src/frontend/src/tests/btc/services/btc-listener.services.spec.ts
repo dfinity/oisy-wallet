@@ -2,6 +2,7 @@ import { syncWallet, syncWalletError } from '$btc/services/btc-listener.services
 import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
+import { ZERO } from '$lib/constants/app.constants';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -37,8 +38,8 @@ describe('btc-listener', () => {
 
 	const mockBalance: BtcWalletBalance = {
 		confirmed: 1000n,
-		unconfirmed: 0n,
-		locked: 0n,
+		unconfirmed: ZERO,
+		locked: ZERO,
 		total: 1000n
 	};
 

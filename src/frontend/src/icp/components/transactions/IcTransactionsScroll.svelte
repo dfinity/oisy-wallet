@@ -6,7 +6,6 @@
 	import { loadNextIcTransactions } from '$icp/services/ic-transactions.services';
 	import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import type { Token } from '$lib/types/token';
 	import { last } from '$lib/utils/array.utils';
 
@@ -21,7 +20,6 @@
 
 	const onIntersect = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

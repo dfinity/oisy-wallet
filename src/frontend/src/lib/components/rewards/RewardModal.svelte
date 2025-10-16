@@ -14,11 +14,10 @@
 	import {
 		TRACK_REWARD_CAMPAIGN_LEARN_MORE,
 		TRACK_REWARD_CAMPAIGN_SHARE
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
 	import { REWARDS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getCampaignEligibilities } from '$lib/services/reward.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -45,7 +44,6 @@
 
 	const loadEligibilityReport = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

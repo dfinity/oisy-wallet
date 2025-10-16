@@ -43,6 +43,12 @@ export enum ProgressStepsLoader {
 	DONE = 'done'
 }
 
+export enum ProgressStepsPowProtectorLoader {
+	REQUEST_CHALLENGE = 'request_challenge',
+	SOLVE_CHALLENGE = 'solve_challenge',
+	GRANT_CYCLES = 'done'
+}
+
 export enum ProgressStepsAddToken {
 	INITIALIZATION = 'initialization',
 	SAVE = 'save',
@@ -102,4 +108,14 @@ export enum AddressBookSteps {
 	SHOW_ADDRESS = 'show_address',
 	SAVE_ADDRESS = 'save_address',
 	CREATE_CONTACT = 'create_contact'
+}
+
+export enum ProgressStepsStake {
+	INITIALIZATION = 'initialization',
+	SIGN_APPROVE = 'sign_approve',
+	APPROVE = 'approve',
+	SIGN_TRANSFER = 'sign_transfer',
+	STAKE = 'stake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
 }

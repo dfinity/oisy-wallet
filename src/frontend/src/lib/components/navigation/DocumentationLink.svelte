@@ -1,7 +1,7 @@
 <script lang="ts">
 	import IconBook from '$lib/components/icons/IconBook.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { TRACK_COUNT_OPEN_DOCUMENTATION } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_OPEN_DOCUMENTATION } from '$lib/constants/analytics.constants';
 	import { OISY_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
@@ -28,6 +28,7 @@
 	ariaLabel={replaceOisyPlaceholders($i18n.navigation.alt.documentation)}
 	{asMenuItem}
 	{asMenuItemCondensed}
+	color={asMenuItem ? 'inherit' : 'blue'}
 	href={OISY_DOCS_URL}
 	iconVisible={false}
 	styleClass={asMenuItem ? '' : 'font-bold'}

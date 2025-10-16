@@ -4,7 +4,7 @@ import type {
 	IcrcToken,
 	SplToken,
 	Token
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {
@@ -19,7 +19,7 @@ import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
 import { Principal } from '@dfinity/principal';
-import { nonNullish, toNullable } from '@dfinity/utils';
+import { assertNever, nonNullish, toNullable } from '@dfinity/utils';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,
@@ -83,10 +83,7 @@ export const toCustomToken = ({
 			return { SplDevnet: toSplCustomToken(rest) };
 		}
 
-		// Force compiler error on unhandled cases based on leftover types
-		const _: never = networkKey;
-
-		throw new Error(`Unsupported network key: ${networkKey}`);
+		assertNever(networkKey, `Unsupported network key: ${networkKey}`);
 	};
 
 	return {

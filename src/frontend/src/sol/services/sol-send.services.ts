@@ -1,15 +1,16 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { loadTokenAccount } from '$sol/api/solana.api';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { signTransaction } from '$sol/services/sol-sign.services';
 import {
 	calculateAssociatedTokenAddress,
 	createAtaInstruction
 } from '$sol/services/spl-accounts.services';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';
@@ -76,15 +77,10 @@ export const setLifetimeAndFeePayerToTransaction = async ({
 	const { getLatestBlockhash } = rpc;
 	const { value: latestBlockhash } = await getLatestBlockhash({ commitment: 'confirmed' }).send();
 
-	const correctedLatestBlockhash = {
-		...latestBlockhash,
-		lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
-	};
-
 	return pipe(
 		transactionMessage,
 		(tx) => setFeePayerToTransaction({ transactionMessage: tx, feePayer }),
-		(tx) => setTransactionMessageLifetimeUsingBlockhash(correctedLatestBlockhash, tx)
+		(tx) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, tx)
 	);
 };
 
@@ -213,7 +209,15 @@ const createSplTokenTransactionMessage = async ({
 
 	const config = { programAddress: solAddress(tokenOwnerAddress) };
 
-	const transferInstruction = nonNullish(tokenMintAuthority)
+	// Theoretically, `transferChecked` is available for Token program address too, not only Token 2022 program address.
+	// It is indeed safer, and we should use it whenever possible.
+	// However, some wallets do not support it yet and the transaction will be rejected.
+	// So we use it only when we are sure the token is a Token 2022 one,
+	// or if it has a mint authority (which is not the case of locked tokens).
+	const useCheckedTransfer =
+		tokenOwnerAddress === TOKEN_2022_PROGRAM_ADDRESS || nonNullish(tokenMintAuthority);
+
+	const transferInstruction = useCheckedTransfer
 		? getTransferCheckedInstruction(
 				{
 					...transferParams,
@@ -222,7 +226,7 @@ const createSplTokenTransactionMessage = async ({
 				},
 				config
 			)
-		: getTransferInstruction(transferParams, { programAddress: solAddress(tokenOwnerAddress) });
+		: getTransferInstruction(transferParams, config);
 
 	return pipe(await createDefaultTransaction({ rpc, feePayer: signer }), (tx) =>
 		appendTransactionMessageInstructions(

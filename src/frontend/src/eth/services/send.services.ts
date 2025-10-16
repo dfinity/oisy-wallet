@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
@@ -6,6 +6,7 @@ import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.provide
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
+import type { EthAddress } from '$eth/types/address';
 import type {
 	CkEthPopulateTransaction,
 	Erc20PopulateTransaction
@@ -25,7 +26,6 @@ import { signTransaction } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';

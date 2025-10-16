@@ -18,8 +18,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-group';
+	import type { Token, TokenId } from '$lib/types/token';
+	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -32,7 +32,7 @@
 	const handleAnimationStart = () => {
 		animating = true;
 
-		// The following is to guarantee that the function is triggered, even if 'animationend' event is not triggered.
+		// The following is to guarantee that the function is triggered, even if the 'animationend' event is not triggered.
 		// It may happen if the animation aborts before reaching completion.
 		debouncedHandleAnimationEnd();
 	};
@@ -74,7 +74,7 @@
 		modifiedTokens = {};
 	};
 
-	// we debounce the filter input for updating the enable tokens list
+	// we debounce the filter input for updating the enabled tokens list
 	const debouncedFilterList = debounce(
 		(params: { filter: string; selectedNetwork?: Network }) => updateFilterList(params),
 		300
@@ -89,21 +89,20 @@
 
 	const onSave = async () => {
 		saveLoading = true;
-		await saveAllCustomTokens({ tokens: modifiedTokens, $authIdentity, $i18n });
+		await saveAllCustomTokens({ tokens: Object.values(modifiedTokens), $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
 		saveLoading = false;
 	};
 
-	let modifiedTokens: Record<string, Token> = $state({});
+	let modifiedTokens: Record<TokenId, Token> = $state({});
 	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	const onToggle = ({ detail: { id, network, ...rest } }: CustomEvent<Token>) => {
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+	const onToggle = ({ id, ...rest }: Token) => {
+		const { [id]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
@@ -111,8 +110,8 @@
 		}
 
 		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
+			...tokens,
+			[id]: { id, ...rest }
 		};
 	};
 </script>

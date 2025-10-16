@@ -1,5 +1,6 @@
 import { TRUMP_TOKEN } from '$env/tokens/tokens-spl/tokens.trump.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import {
 	SEND_DESTINATION_SECTION,
 	TOKEN_INPUT_CURRENCY_TOKEN
@@ -39,7 +40,7 @@ describe('SolSendForm', () => {
 		vi.clearAllMocks();
 		vi.resetAllMocks();
 
-		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(0n);
+		vi.spyOn(solanaApi, 'estimatePriorityFee').mockResolvedValue(ZERO);
 
 		mockFeeStore.setFee(123n);
 		mockPrioritizationFeeStore.setFee(3n);
@@ -53,7 +54,8 @@ describe('SolSendForm', () => {
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
-				feeTokenIdStore: writable(SOLANA_TOKEN.id)
+				feeTokenIdStore: writable(SOLANA_TOKEN.id),
+				feeExchangeRateStore: writable(9.87)
 			})
 		);
 	});

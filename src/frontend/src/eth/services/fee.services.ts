@@ -4,10 +4,10 @@ import { ERC20_FALLBACK_FEE } from '$eth/constants/erc20.constants';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.providers';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import { isDestinationContractAddress } from '$eth/utils/send.utils';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 

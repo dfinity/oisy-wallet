@@ -14,13 +14,15 @@
 		amount?: bigint;
 		destination: string;
 		source: string;
+		application: string;
 		data?: string;
 		token: Token;
 		onApprove: () => void;
 		onReject: () => void;
 	}
 
-	let { amount, destination, source, data, token, onApprove, onReject }: Props = $props();
+	let { amount, destination, source, application, data, token, onApprove, onReject }: Props =
+		$props();
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
@@ -30,12 +32,14 @@
 </script>
 
 <ContentWithToolbar>
-	<SendData amount={amountDisplay} {balance} {destination} {source} {token}>
+	<SendData amount={amountDisplay} {application} {balance} {destination} {source} {token}>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->
 
-		<ReviewNetwork slot="network" sourceNetwork={token.network} />
+		{#snippet sourceNetwork()}
+			<ReviewNetwork sourceNetwork={token.network} />
+		{/snippet}
 	</SendData>
 
 	{#snippet toolbar()}

@@ -12,7 +12,7 @@
 	import {
 		TRACK_COUNT_IC_SEND_ERROR,
 		TRACK_COUNT_IC_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
@@ -140,14 +140,16 @@
 	const close = () => onClose();
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<IcSendProgress bind:sendProgressStep />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</IcSendForm>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<IcSendProgress {sendProgressStep} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
+		</IcSendForm>
+	{/if}
+{/key}

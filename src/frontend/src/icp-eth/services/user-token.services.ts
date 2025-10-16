@@ -1,4 +1,4 @@
-import type { UserToken } from '$declarations/backend/backend.did';
+import type { UserToken } from '$declarations/backend/declarations/backend.did';
 import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';

@@ -53,7 +53,7 @@
 				{/snippet}
 
 				{#snippet mainValue()}
-					{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol])}
+					{#if isNullish($icTokenFeeStore?.[$sourceToken.symbol]) || isNullish($isSourceTokenIcrc2)}
 						<div class="w-14 sm:w-16">
 							<SkeletonText />
 						</div>

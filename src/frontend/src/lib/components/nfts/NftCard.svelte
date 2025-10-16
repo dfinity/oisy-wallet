@@ -5,10 +5,12 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
@@ -19,15 +21,39 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
+		source?: string;
 	}
 
-	let { nft, testId, disabled, isHidden, isSpam, type = 'default', onSelect }: Props = $props();
+	let {
+		nft,
+		testId,
+		disabled,
+		isHidden,
+		isSpam,
+		type = 'default',
+		onSelect,
+		source
+	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
 		if (type === 'card-link' && !disabled) {
+			trackEvent({
+				name: TRACK_NFT_OPEN,
+				metadata: {
+					collection_name: nft.collection.name ?? '',
+					collection_address: nft.collection.address,
+					network: nft.collection.network.name,
+					standard: nft.collection.standard,
+					nft_id: nft.id.toString(),
+					...(source && { source }),
+					...(isSpam && { nftStatus: 'spam' }),
+					...(isHidden && !isSpam && { nftStatus: 'hidden' })
+				}
+			});
+
 			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};
@@ -48,7 +74,7 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
+		<NftDisplayGuard {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -58,7 +84,7 @@
 					testId={`${testId}-image`}
 				/>
 			</div>
-		</NftImageConsent>
+		</NftDisplayGuard>
 
 		{#if isHidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">

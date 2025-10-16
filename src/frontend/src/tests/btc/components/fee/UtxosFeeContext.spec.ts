@@ -11,10 +11,10 @@ import {
 } from '$btc/stores/utxos-fee.store';
 import { BTC_MAINNET_NETWORK_ID } from '$env/networks/networks.btc.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
-import * as authServices from '$lib/services/auth.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
 
 describe('UtxosFeeContext', () => {
@@ -35,7 +35,8 @@ describe('UtxosFeeContext', () => {
 	const props = {
 		source,
 		amount,
-		networkId
+		networkId,
+		children: mockSnippet
 	};
 
 	beforeEach(() => {
@@ -56,15 +57,13 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(prepareBtcSendSpy).toHaveBeenCalledOnce();
-			expect(prepareBtcSendSpy).toHaveBeenCalledWith({
+			expect(prepareBtcSendSpy).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				network: 'mainnet',
 				identity: mockIdentity,
 				source
 			});
-			expect(setUtxosFeeSpy).toHaveBeenCalledOnce();
-			expect(setUtxosFeeSpy).toHaveBeenCalledWith({
+			expect(setUtxosFeeSpy).toHaveBeenCalledExactlyOnceWith({
 				utxosFee: {
 					feeSatoshis: mockBtcReviewResult.feeSatoshis,
 					utxos: mockBtcReviewResult.utxos
@@ -75,7 +74,7 @@ describe('UtxosFeeContext', () => {
 	});
 
 	it('should not call prepareBtcSend if no authIdentity available', async () => {
-		const nullishSignOutSpy = vi.spyOn(authServices, 'nullishSignOut').mockResolvedValue();
+		const prepareBtcSendSpy = mockBtcUtxosService();
 
 		mockAuthStore(null);
 
@@ -85,7 +84,7 @@ describe('UtxosFeeContext', () => {
 		});
 
 		await waitFor(() => {
-			expect(nullishSignOutSpy).toHaveBeenCalledOnce();
+			expect(prepareBtcSendSpy).not.toHaveBeenCalled();
 		});
 	});
 

@@ -21,6 +21,18 @@ export default [
 	},
 
 	{
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: "Literal[raw='0n']",
+					message: 'Use the shared constant `ZERO` instead of `0n`.'
+				}
+			]
+		}
+	},
+
+	{
 		ignores: [
 			'**/.DS_Store',
 			'**/node_modules',

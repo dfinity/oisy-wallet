@@ -1,7 +1,7 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/kong_backend.did';
+} from '$declarations/kong_backend/declarations/kong_backend.did';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -259,7 +259,7 @@ describe('swap utils', () => {
 		});
 
 		it('returns 0 for full slippage (100%)', () => {
-			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
+			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(ZERO);
 		});
 	});
 

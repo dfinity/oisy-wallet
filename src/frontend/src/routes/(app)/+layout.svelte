@@ -94,7 +94,7 @@
 				</SplitPane>
 
 				<Responsive down="md">
-					<div class="z-2 fixed bottom-16 right-2 block md:hidden">
+					<div class="z-3 fixed bottom-16 right-2 block md:hidden">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				</Responsive>

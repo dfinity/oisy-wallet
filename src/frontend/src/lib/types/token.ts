@@ -1,6 +1,5 @@
 import type {
 	TokenAppearanceSchema,
-	TokenBuySchema,
 	TokenBuyableSchema,
 	TokenCategorySchema,
 	TokenIdSchema,
@@ -26,8 +25,6 @@ export type TokenMetadata = z.infer<typeof TokenMetadataSchema>;
 export type TokenAppearance = z.infer<typeof TokenAppearanceSchema>;
 
 export type TokenBuyable = z.infer<typeof TokenBuyableSchema>;
-
-export type TokenBuy = z.infer<typeof TokenBuySchema>;
 
 export interface TokenLinkedData {
 	twinTokenSymbol?: string;
@@ -58,10 +55,3 @@ export interface TokenFinancialData {
 	balance?: Exclude<OptionBalance, undefined>;
 	usdBalance?: number;
 }
-
-export type TokenUi<T extends Token = Token> = T & TokenFinancialData;
-
-export type TokenUiGroupable<T extends Token = Token> = Omit<TokenUi<T>, 'groupData'> &
-	Required<Pick<TokenUi<T>, 'groupData'>>;
-
-export type OptionTokenUi = Option<TokenUi>;

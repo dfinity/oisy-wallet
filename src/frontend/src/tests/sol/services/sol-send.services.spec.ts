@@ -2,11 +2,13 @@ import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { DEVNET_USDC_TOKEN } from '$env/tokens/tokens-spl/tokens.usdc.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { signWithSchnorr } from '$lib/api/signer.api';
-import type { SolAddress } from '$lib/types/address';
+import { ZERO } from '$lib/constants/app.constants';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { TOKEN_2022_PROGRAM_ADDRESS } from '$sol/constants/sol.constants';
 import { solanaHttpRpc, solanaWebSocketRpc } from '$sol/providers/sol-rpc.providers';
 import { sendSol } from '$sol/services/sol-send.services';
 import * as accountServices from '$sol/services/spl-accounts.services';
+import type { SolAddress } from '$sol/types/address';
 import type { SolInstruction } from '$sol/types/sol-instructions';
 import type { SplToken } from '$sol/types/spl';
 import * as networkUtils from '$sol/utils/safe-network.utils';
@@ -103,7 +105,7 @@ describe('sol-send.services', () => {
 			signTransactions: expect.any(Function)
 		});
 		const mockDestination = mockSolAddress2;
-		const mockPrioritizationFee = 0n;
+		const mockPrioritizationFee = ZERO;
 		const mockParams = {
 			identity: mockIdentity,
 			amount: mockAmount,
@@ -190,17 +192,14 @@ describe('sol-send.services', () => {
 				})
 			).resolves.not.toThrow();
 
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledOnce();
-			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(SOLANA_TOKEN.network.id);
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledExactlyOnceWith(SOLANA_TOKEN.network.id);
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-sol-instruction'],
 				mockTx
 			);
-			expect(getTransferSolInstruction).toHaveBeenCalledOnce();
-			expect(getTransferSolInstruction).toHaveBeenCalledWith({
+			expect(getTransferSolInstruction).toHaveBeenCalledExactlyOnceWith({
 				source: mockSigner,
 				destination: mockDestination,
 				amount: mockAmount
@@ -261,6 +260,34 @@ describe('sol-send.services', () => {
 			);
 		});
 
+		it('should send Token-2022 SPL tokens successfully', async () => {
+			await expect(
+				sendSol({
+					...mockParams,
+					token: { ...DEVNET_USDC_TOKEN, owner: TOKEN_2022_PROGRAM_ADDRESS } as SplToken
+				})
+			).resolves.not.toThrow();
+
+			expect(spyMapNetworkIdToNetwork).toHaveBeenCalledWith(DEVNET_USDC_TOKEN.network.id);
+
+			expect(pipe).toHaveBeenCalledTimes(4);
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
+				['mock-transfer-checked-instruction'],
+				mockTx
+			);
+			expect(getTransferCheckedInstruction).toHaveBeenCalledWith(
+				{
+					source: mockAtaAddress,
+					destination: mockAtaAddress2,
+					mint: DEVNET_USDC_TOKEN.address,
+					decimals: DEVNET_USDC_TOKEN.decimals,
+					authority: mockSigner,
+					amount: mockAmount
+				},
+				{ programAddress: TOKEN_2022_PROGRAM_ADDRESS }
+			);
+		});
+
 		it('should send add ATA creation instructions if needed', async () => {
 			// Removing the mocked ATA address for the destination address
 			vi.mocked(solanaHttpRpc).mockReturnValue({
@@ -290,8 +317,7 @@ describe('sol-send.services', () => {
 			});
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				[{ keys: 'mock-ata-creation-instruction' }, 'mock-transfer-instruction'],
 				mockTx
 			);
@@ -338,13 +364,11 @@ describe('sol-send.services', () => {
 			expect(spyCreateAtaInstruction).toHaveBeenCalledOnce();
 
 			expect(pipe).toHaveBeenCalledTimes(4);
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledOnce();
-			expect(appendTransactionMessageInstructions).toHaveBeenCalledWith(
+			expect(appendTransactionMessageInstructions).toHaveBeenCalledExactlyOnceWith(
 				['mock-transfer-instruction'],
 				mockTx
 			);
-			expect(getTransferInstruction).toHaveBeenCalledOnce();
-			expect(getTransferInstruction).toHaveBeenCalledWith(
+			expect(getTransferInstruction).toHaveBeenCalledExactlyOnceWith(
 				{
 					source: mockAtaAddress,
 					destination: mockAtaAddress3,
