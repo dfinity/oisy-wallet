@@ -1,9 +1,11 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
+	import { Principal } from '@dfinity/principal';
 	import { isNullish } from '@dfinity/utils';
 	import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';
 	import GldtStakeReview from '$icp/components/stake/gldt/GldtStakeReview.svelte';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
+	import { GLDT_STAKE_CANISTER_ID } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
@@ -30,6 +32,8 @@
 		onNext,
 		onBack
 	}: Props = $props();
+
+	const destination = Principal.fromText(GLDT_STAKE_CANISTER_ID).toString();
 
 	const stake = async () => {
 		if (isNullish($authIdentity)) {
@@ -65,9 +69,9 @@
 
 {#key currentStep?.name}
 	{#if currentStep?.name === WizardStepsStake.STAKE}
-		<GldtStakeForm {onClose} {onNext} bind:amount />
+		<GldtStakeForm {destination} {onClose} {onNext} bind:amount />
 	{:else if currentStep?.name === WizardStepsStake.REVIEW}
-		<GldtStakeReview {amount} {onBack} onStake={stake} />
+		<GldtStakeReview {amount} {destination} {onBack} onStake={stake} />
 	{:else if currentStep?.name === WizardStepsStake.STAKING}
 		<StakeProgress {stakeProgressStep} />
 	{/if}
