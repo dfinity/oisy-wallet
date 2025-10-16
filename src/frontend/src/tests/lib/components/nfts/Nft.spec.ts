@@ -8,7 +8,7 @@ import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 
 describe('Nft', () => {
-	const mockNft = { ...mockValidErc1155Nft, name: 'Test NFT', id: parseNftId(1) };
+	const mockNft = { ...mockValidErc1155Nft, name: 'Test NFT', id: parseNftId('1') };
 
 	beforeAll(() => {
 		nftStore.addAll([mockNft]);

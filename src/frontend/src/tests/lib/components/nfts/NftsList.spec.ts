@@ -26,9 +26,9 @@ import { get, writable } from 'svelte/store';
 
 describe('NftsList', () => {
 	const mockNfts = [
-		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
-		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
-		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
+		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId('0') },
+		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId('1') },
+		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId('2') }
 	];
 
 	beforeAll(() => {

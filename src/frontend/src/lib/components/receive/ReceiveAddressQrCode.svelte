@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createEventDispatcher } from 'svelte';
 	import ReceiveAddressQrCodeContent from '$lib/components/receive/ReceiveAddressQrCodeContent.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -8,15 +7,18 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token } from '$lib/types/token';
 
-	export let address: undefined | string;
-	export let addressLabel: string | undefined = undefined;
-	export let addressToken: Token | undefined;
+	interface Props {
+		address?: string;
+		addressLabel?: string;
+		addressToken?: Token;
+		network: Network;
+		copyAriaLabel: string;
+		testId?: string;
+		onBack: () => void;
+	}
 
-	export let network: Network;
-	export let copyAriaLabel: string;
-	export let testId: string | undefined = undefined;
-
-	const dispatch = createEventDispatcher();
+	let { address, addressLabel, addressToken, network, copyAriaLabel, testId, onBack }: Props =
+		$props();
 </script>
 
 <ContentWithToolbar styleClass="min-h-50vh" {testId}>
@@ -27,11 +29,10 @@
 		{copyAriaLabel}
 		{network}
 		testId={RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT}
-		on:click
 	/>
 
 	{#snippet toolbar()}
-		<Button colorStyle="secondary-light" fullWidth onclick={() => dispatch('icBack')}>
+		<Button colorStyle="secondary-light" fullWidth onclick={onBack}>
 			{$i18n.core.text.back}
 		</Button>
 	{/snippet}

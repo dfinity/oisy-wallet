@@ -23,12 +23,7 @@
 		source: string;
 	}
 
-	let {
-		utxosFee = $bindable(undefined),
-		amount = undefined,
-		networkId = undefined,
-		source
-	}: Props = $props();
+	let { utxosFee = $bindable(), amount, networkId, source }: Props = $props();
 
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);

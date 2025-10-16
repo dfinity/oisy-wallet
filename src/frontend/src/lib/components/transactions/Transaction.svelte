@@ -85,7 +85,7 @@
 
 	const nft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
-			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(tokenId) })
+			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(tokenId)) })
 			: undefined
 	);
 </script>
