@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import {
 		IC_CKETH_MINTER_CANISTER_ID,
 		LOCAL_CKETH_MINTER_CANISTER_ID,
@@ -21,7 +20,7 @@
 	interface Props {
 		nativeTokenId: TokenId;
 		isSendFlow?: boolean;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { nativeTokenId, isSendFlow = false, children }: Props = $props();
@@ -66,16 +65,19 @@
 		});
 	};
 
-	run(() => {
-		($networkEthereumDisabled,
+	$effect(() => {
+		[
+			$networkEthereumDisabled,
 			$networkSepoliaDisabled,
 			$ethToCkETHEnabled,
 			$erc20ToCkErc20Enabled,
 			$icrcDefaultTokensStore,
 			nativeTokenId,
-			isSendFlow,
-			(async () => await load())());
+			isSendFlow
+		];
+
+		(async () => await load())();
 	});
 </script>
 
-{@render children?.()}
+{@render children()}

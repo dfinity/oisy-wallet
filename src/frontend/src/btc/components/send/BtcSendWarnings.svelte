@@ -7,10 +7,10 @@
 
 	interface Props {
 		pendingTransactionsStatus: BtcPendingSentTransactionsStatus;
-		utxosFee?: UtxosFee | undefined;
+		utxosFee?: UtxosFee;
 	}
 
-	let { pendingTransactionsStatus, utxosFee = undefined }: Props = $props();
+	let { pendingTransactionsStatus, utxosFee }: Props = $props();
 </script>
 
 <!-- TODO remove this as soon as parallel BTC transactions are also enabled for BTC convert -->

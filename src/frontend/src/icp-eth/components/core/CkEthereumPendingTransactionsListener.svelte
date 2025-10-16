@@ -33,27 +33,21 @@
 	interface Props {
 		token: OptionToken;
 		ckEthereumNativeToken: Token;
-		children?: Snippet;
 	}
 
-	let { token, ckEthereumNativeToken, children }: Props = $props();
+	let { token, ckEthereumNativeToken }: Props = $props();
 
 	let listener: WebSocketListener | undefined = undefined;
 
 	let loadBalance: OptionBalance = undefined;
 
-	let twinToken: Token | undefined = $state();
-	run(() => {
-		twinToken = nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined;
-	});
+	let twinToken = $derived(nonNullish(token) && isIcCkToken(token) ? token.twinToken : undefined);
 
-	let toContractAddress = $state('');
-	run(() => {
-		toContractAddress =
-			nonNullish(twinToken) && twinToken.standard === 'erc20'
-				? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
-				: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '');
-	});
+	let toContractAddress = $derived(
+		nonNullish(twinToken) && twinToken.standard === 'erc20'
+			? (toCkErc20HelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
+			: (toCkEthHelperContractAddress($ckEthMinterInfoStore?.[ckEthereumNativeToken.id]) ?? '')
+	);
 
 	// TODO: this is way too much work for a component and for the UI. Defer all that mumbo jumbo to a worker.
 	const loadPendingTransactions = async () => {
@@ -145,7 +139,7 @@
 		});
 	};
 
-	run(() => {
+	$effect(() => {
 		(async () => await init({ toAddress: toContractAddress, twinToken }))();
 	});
 
@@ -154,8 +148,11 @@
 	// Update pending transactions:
 	// - When the balance updates, i.e., when new transactions are detected, it's possible that the pending ETH -> ckETH transactions have been minted.
 	// - The scheduled minter info updates are important because we use the information it provides to query the Ethereum network starting from a specific block index.
-	run(() => {
-		($balance, toContractAddress, debounceLoadPendingTransactions());
+
+	$effect(() => {
+		[$balance, toContractAddress];
+
+		debounceLoadPendingTransactions();
 	});
 
 	onDestroy(async () => {
@@ -164,5 +161,3 @@
 		listener = undefined;
 	});
 </script>
-
-{@render children?.()}
