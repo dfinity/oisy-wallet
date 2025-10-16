@@ -12,6 +12,7 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 
 	interface Props {
 		nft: Nft;
@@ -32,7 +33,7 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source
+		source = 'default'
 	}: Props = $props();
 
 	const onClick = () => {
@@ -118,11 +119,11 @@
 			class:text-disabled={disabled}
 			class:text-primary={!disabled}
 		>
-			{source === NFT_COLLECTION_ROUTE ? nft.name : nft.collection.name}
+			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
 		</span>
 		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}>
 			#{nft.id}
-			{#if source !== NFT_COLLECTION_ROUTE}
+			{#if source === NFT_LIST_ROUTE}
 				&ndash; {nft.name}
 			{/if}
 		</span>
