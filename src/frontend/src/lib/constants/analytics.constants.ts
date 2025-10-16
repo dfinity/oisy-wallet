@@ -178,6 +178,10 @@ export const TRACK_BUY_TOKEN = 'buy_token';
 export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
 export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
+
+// Stake
+export const TRACK_COUNT_STAKE_SUCCESS = 'stake_success';
+export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
 export const TRACK_NFT_SEND = 'nft_send';
 export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
