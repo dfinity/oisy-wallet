@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import IcTokenFeeContext from '$icp/components/fee/IcTokenFeeContext.svelte';
 	import SwapIcpForm from '$icp/components/swap/SwapIcpForm.svelte';
 	import {
@@ -133,16 +133,20 @@
 			return;
 		}
 
-		const normalizedValue = normalizeTokenToDecimals({
-			value: $swapAmountsStore.selectedProvider.receiveAmount,
-			oldUnitName: $sourceToken.decimals,
-			newUnitName: $destinationToken.decimals
-		});
+		untrack(() => {
+			if (nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)) {
+				const normalizedValue = normalizeTokenToDecimals({
+					value: $swapAmountsStore.selectedProvider.receiveAmount,
+					oldUnitName: $sourceToken.decimals,
+					newUnitName: $destinationToken.decimals
+				});
 
-		receiveAmount = formatTokenBigintToNumber({
-			value: normalizedValue,
-			unitName: $destinationToken.decimals,
-			displayDecimals: $destinationToken.decimals
+				receiveAmount = formatTokenBigintToNumber({
+					value: normalizedValue,
+					unitName: $destinationToken.decimals,
+					displayDecimals: $destinationToken.decimals
+				});
+			}
 		});
 	});
 

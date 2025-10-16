@@ -111,27 +111,29 @@
 	});
 
 	$effect(() => {
-		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken, 'swapEthW');
-		untrack(() => {
-			if (
-				isNullish($destinationToken) ||
-				isNullish($sourceToken) ||
-				isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-			) {
-				receiveAmount = undefined;
-				return;
-			}
-			const normalizedValue = normalizeTokenToDecimals({
-				value: $swapAmountsStore.selectedProvider.receiveAmount,
-				oldUnitName: $sourceToken.decimals,
-				newUnitName: $destinationToken.decimals
-			});
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = undefined;
+			return;
+		}
 
-			receiveAmount = formatTokenBigintToNumber({
-				value: normalizedValue,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			});
+		untrack(() => {
+			if (nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)) {
+				const normalizedValue = normalizeTokenToDecimals({
+					value: $swapAmountsStore.selectedProvider.receiveAmount,
+					oldUnitName: $sourceToken.decimals,
+					newUnitName: $destinationToken.decimals
+				});
+
+				receiveAmount = formatTokenBigintToNumber({
+					value: normalizedValue,
+					unitName: $destinationToken.decimals,
+					displayDecimals: $destinationToken.decimals
+				});
+			}
 		});
 	});
 
