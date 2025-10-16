@@ -27,7 +27,7 @@ const scheduleNext = (): void => {
 	timer = setTimeout(async () => {
 		await onIdleSignOut();
 
-		if (timer !== undefined) {
+		if (nonNullish(timer)) {
 			scheduleNext();
 		}
 	}, AUTH_TIMER_INTERVAL);
