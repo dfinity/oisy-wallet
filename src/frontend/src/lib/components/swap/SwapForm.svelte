@@ -33,6 +33,7 @@
 	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
+	import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -121,9 +122,14 @@
 	$effect(() => {
 		receiveAmount =
 			nonNullish($destinationToken) &&
+			nonNullish($sourceToken) &&
 			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 				? formatTokenBigintToNumber({
-						value: $swapAmountsStore.selectedProvider.receiveAmount,
+						value: normalizeTokenToDecimals({
+							value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+							oldUnitName: $sourceToken.decimals,
+							newUnitName: $destinationToken.decimals
+						}),
 						unitName: $destinationToken.decimals,
 						displayDecimals: $destinationToken.decimals
 					})

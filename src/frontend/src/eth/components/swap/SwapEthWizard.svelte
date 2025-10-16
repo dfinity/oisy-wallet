@@ -43,6 +43,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -133,11 +134,11 @@
 			nonNullish($sourceToken) &&
 			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
 				? formatTokenBigintToNumber({
-						value: convertDecimals(
-							$swapAmountsStore.selectedProvider.receiveAmount,
-							$sourceToken.decimals,
-							$destinationToken.decimals
-						),
+						value: normalizeTokenToDecimals({
+							value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+							oldUnitName: $sourceToken.decimals,
+							newUnitName: $destinationToken.decimals
+						}),
 						unitName: $destinationToken.decimals,
 						displayDecimals: $destinationToken.decimals
 					})
