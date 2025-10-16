@@ -110,32 +110,6 @@
 		}
 	});
 
-	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
-	$effect(() => {
-		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken, 'swapEthWizard');
-
-		if (
-			isNullish($destinationToken) ||
-			isNullish($sourceToken) ||
-			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-		) {
-			receiveAmount = undefined;
-			return;
-		}
-
-		const normalizedValue = normalizeTokenToDecimals({
-			value: $swapAmountsStore.selectedProvider.receiveAmount,
-			oldUnitName: $sourceToken.decimals,
-			newUnitName: $destinationToken.decimals
-		});
-
-		receiveAmount = formatTokenBigintToNumber({
-			value: normalizedValue,
-			unitName: $destinationToken.decimals,
-			displayDecimals: $destinationToken.decimals
-		});
-	});
-
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
 	let feeContext = $state<EthFeeContext | undefined>();
 	const evaluateFee = () => feeContext?.triggerUpdateFee();
