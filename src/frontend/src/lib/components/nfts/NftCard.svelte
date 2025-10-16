@@ -116,10 +116,10 @@
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
-			class:text-primary={!disabled}>{nft.name}</span
+			class:text-primary={!disabled}>{nft.collection.name}</span
 		>
 		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
-			>#{nft.id}</span
+			>#{nft.id} &ndash; {nft.name}</span
 		>
 	</span>
 </button>
