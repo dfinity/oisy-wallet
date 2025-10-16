@@ -71,7 +71,7 @@
 	{#if currentStep?.name === WizardStepsStake.STAKE}
 		<GldtStakeForm {destination} {onClose} {onNext} bind:amount />
 	{:else if currentStep?.name === WizardStepsStake.REVIEW}
-		<GldtStakeReview {amount} {onBack} onStake={stake} />
+		<GldtStakeReview {amount} {destination} {onBack} onStake={stake} />
 	{:else if currentStep?.name === WizardStepsStake.STAKING}
 		<StakeProgress {stakeProgressStep} />
 	{/if}
