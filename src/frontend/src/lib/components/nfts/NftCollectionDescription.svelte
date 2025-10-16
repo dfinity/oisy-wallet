@@ -33,7 +33,7 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection) ? getAllowMediaForNft(collection) : false
+		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
 </script>
 

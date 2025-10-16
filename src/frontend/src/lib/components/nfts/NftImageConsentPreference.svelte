@@ -12,7 +12,9 @@
 
 	const { collection }: Props = $props();
 
-	const hasConsent = $derived(nonNullish(collection) ? getAllowMediaForNft(collection) : false);
+	const hasConsent = $derived(
+		nonNullish(collection) ? collection.allowExternalContentSource : false
+	);
 
 	const openConsentModal = () => {
 		if (nonNullish(collection)) {

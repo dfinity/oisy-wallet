@@ -16,7 +16,6 @@ import {
 	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
-	getAllowMediaForNft,
 	getEnabledNfts,
 	getMediaStatus,
 	getNftCollectionUi,
@@ -865,21 +864,6 @@ describe('nfts.utils', () => {
 			});
 
 			expect(result).toBeUndefined();
-		});
-	});
-
-	describe('getAllowMediaForNft', () => {
-		it('should return the collections allowExternalContentSource prop', () => {
-			const result = getAllowMediaForNft(mockValidErc1155Nft.collection);
-
-			expect(result).toBeUndefined();
-
-			const result2 = getAllowMediaForNft({
-				...mockValidErc1155Nft.collection,
-				allowExternalContentSource: true
-			});
-
-			expect(result2).toBeTruthy();
 		});
 	});
 

@@ -41,7 +41,7 @@
 
 	const { collection, testId }: Props = $props();
 
-	const allowMedia = $derived(getAllowMediaForNft(collection));
+	const allowMedia = $derived(collection.allowExternalContentSource);
 
 	const shortCollectionName = $derived(
 		nonNullish(collection.name)

@@ -27,7 +27,7 @@
 	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(nft) ? getAllowMediaForNft(nft.collection) : false
+		nonNullish(nft) ? nft.collection.allowExternalContentSource : false
 	);
 
 	const handleConsent = () => {
