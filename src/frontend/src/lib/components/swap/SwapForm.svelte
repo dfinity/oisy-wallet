@@ -120,6 +120,8 @@
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
 
 	$effect(() => {
+		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken);
+
 		if (
 			isNullish($destinationToken) ||
 			isNullish($sourceToken) ||

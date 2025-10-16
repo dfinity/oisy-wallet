@@ -112,6 +112,8 @@
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
 	$effect(() => {
+		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken, 'swapEthWizard');
+
 		if (
 			isNullish($destinationToken) ||
 			isNullish($sourceToken) ||
