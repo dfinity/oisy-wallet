@@ -242,7 +242,6 @@
 </script>
 
 <IcTokenFeeContext token={$sourceToken as IcToken}>
-	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsSwap.SWAP}
 			<SwapIcpForm
 				{isSwapAmountsLoading}
@@ -269,5 +268,4 @@
 				bind:failedSteps={swapFailedProgressSteps}
 			/>
 		{/if}
-	{/key}
 </IcTokenFeeContext>
