@@ -66,7 +66,17 @@ export class SchedulerTimer {
 			return;
 		}
 
-		this.timer = setInterval(execute, interval);
+		const scheduleNext = (): void => {
+			this.timer = setTimeout(async () => {
+				await execute();
+
+				if (nonNullish(this.timer)) {
+					scheduleNext();
+				}
+			}, interval);
+		};
+
+		scheduleNext();
 	}
 
 	async trigger<T>(params: SchedulerParams<T>) {
@@ -126,7 +136,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		clearInterval(this.timer);
+		clearTimeout(this.timer);
 		this.timer = undefined;
 	}
 
