@@ -9,7 +9,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
-	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
+	import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
@@ -22,7 +22,7 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
-		source?: 'default' | NFT_COLLECTION_ROUTE | NFT_LIST_ROUTE;
+		source?: 'default' | typeof NFT_COLLECTION_ROUTE | typeof NFT_LIST_ROUTE;
 	}
 
 	let {
