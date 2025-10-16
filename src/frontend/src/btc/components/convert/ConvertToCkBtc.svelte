@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext, setContext } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import {
 		initUtxosFeeStore,
 		UTXOS_FEE_CONTEXT_KEY,
