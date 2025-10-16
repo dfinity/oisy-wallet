@@ -119,6 +119,31 @@
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
 
+	$effect(() => {
+		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken);
+
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = undefined;
+			return;
+		}
+
+		const normalizedValue = normalizeTokenToDecimals({
+			value: $swapAmountsStore.selectedProvider.receiveAmount,
+			oldUnitName: $sourceToken.decimals,
+			newUnitName: $destinationToken.decimals
+		});
+
+		receiveAmount = formatTokenBigintToNumber({
+			value: normalizedValue,
+			unitName: $destinationToken.decimals,
+			displayDecimals: $destinationToken.decimals
+		});
+	});
+
 	const onTokensSwitch = () => {
 		const tempAmount = receiveAmount;
 		swapAmountsStore.reset();
