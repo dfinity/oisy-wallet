@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import {onMount, type Snippet, untrack} from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
@@ -49,7 +49,7 @@
 	$effect(() => {
 		[tokens];
 
-		debounceLoad();
+		untrack(() => debounceLoad());
 	});
 
 	onMount(async () => {
