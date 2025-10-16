@@ -1,5 +1,9 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { NFT_LIST_ROUTE, TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+import {
+	NFT_COLLECTION_ROUTE,
+	NFT_LIST_ROUTE,
+	TRACK_NFT_OPEN
+} from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -34,7 +38,8 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc1155Nft,
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_COLLECTION_ROUTE
 			}
 		});
 
