@@ -38,7 +38,7 @@
 	const enabledNetworksInitial = { ...enabledNetworks };
 
 	let enabledTestnet = $state($testnetsEnabled);
-	const enabledTestnetInitial = enabledTestnet;
+	const enabledTestnetInitial = $testnetsEnabled;
 
 	const checkModified = ({
 		enabledTestnet,
