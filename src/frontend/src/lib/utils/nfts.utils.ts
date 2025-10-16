@@ -336,9 +336,6 @@ export const findNonFungibleToken = ({
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
 
-export const getAllowMediaForNft = (collection: NftCollection): boolean | undefined =>
-	collection.allowExternalContentSource;
-
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
 	if (isNullish(mediaUrl)) {
 		return NftMediaStatusEnum.INVALID_DATA;
