@@ -52,7 +52,7 @@
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
 	class:animate-pulse={loading}
-	class:cursor-not-allowed={disabled || loading}
+	class:cursor-not-allowed={loading || disabled}
 	class:duration-500={loading}
 	class:ease-in-out={loading}
 	class:flex-1={!inlineLink}
