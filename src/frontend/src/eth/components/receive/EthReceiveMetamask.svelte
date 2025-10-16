@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { assertNonNullish } from '@dfinity/utils';
-	import { run } from 'svelte/legacy';
 	import { metamaskAvailable } from '$eth/derived/metamask.derived';
 	import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 	import { openMetamaskTransaction } from '$eth/services/metamask.services';
