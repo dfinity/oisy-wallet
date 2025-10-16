@@ -1,10 +1,13 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';
+import * as appConstants from '$lib/constants/app.constants';
 import {
 	STAKE_FORM_REVIEW_BUTTON,
 	TOKEN_INPUT_CURRENCY_TOKEN
 } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
+import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
+import { mockPrincipalText } from '$tests/mocks/identity.mock';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('GldtStakeForm', () => {
@@ -13,9 +16,18 @@ describe('GldtStakeForm', () => {
 
 	const props = {
 		amount: 0.01,
+		destination: mockPrincipalText,
 		onClose: () => {},
 		onNext: () => {}
 	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
+			() => mockLedgerCanisterId
+		);
+	});
 
 	it('should keep the next button clickable if all requirements are met', () => {
 		const { getByTestId } = render(GldtStakeForm, {
