@@ -94,43 +94,44 @@
 	);
 
 	$effect(() => {
-		console.log('🟦 WIZARD EFFECT TRIGGERED', {
-			timestamp: new Date().toISOString(),
-			step: currentStep?.name,
-			hasStore: nonNullish($swapAmountsStore),
-			hasReceiveAmount: nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount),
-			rawValue: $swapAmountsStore?.selectedProvider?.receiveAmount,
-			hasSource: nonNullish($sourceToken),
-			hasDest: nonNullish($destinationToken),
-			sourceSymbol: $sourceToken?.symbol,
-			destSymbol: $destinationToken?.symbol
+		console.log('🟦 WIZARD EFFECT TRIGGERED');
+
+		const storeValue = $swapAmountsStore?.selectedProvider?.receiveAmount;
+
+		console.log('📊 Values:', {
+			storeValue
 		});
 
-		if (
-			isNullish($destinationToken) ||
-			isNullish($sourceToken) ||
-			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
-		) {
-			console.log('🔴 WIZARD: Missing data, setting undefined');
+		if (isNullish($destinationToken) || isNullish($sourceToken) || isNullish(storeValue)) {
+			console.log('🔴 Missing data');
 			receiveAmount = undefined;
 			return;
 		}
 
-		console.log('🟢 WIZARD: Normalizing...');
+		console.log('🟢 Normalizing...');
 
-		const normalizedValue = normalizeTokenToDecimals({
-			value: $swapAmountsStore.selectedProvider.receiveAmount,
-			oldUnitName: $sourceToken.decimals,
-			newUnitName: $destinationToken.decimals
+		// Всі обчислення всередині untrack - ніяких реактивних залежностей
+		untrack(() => {
+			const normalizedValue = normalizeTokenToDecimals({
+				value: storeValue,
+				oldUnitName: $sourceToken.decimals,
+				newUnitName: $destinationToken.decimals
+			});
+
+			console.log('📈 Normalized:', normalizedValue);
+
+			const formatted = formatTokenBigintToNumber({
+				value: normalizedValue,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+
+			console.log('🔢 Formatted:', formatted);
+
+			receiveAmount = formatted;
+
+			console.log('✅ WIZARD: Set receiveAmount to', receiveAmount);
 		});
-
-		receiveAmount = formatTokenBigintToNumber({
-			value: normalizedValue,
-			unitName: $destinationToken.decimals,
-			displayDecimals: $destinationToken.decimals
-		});
-
-		console.log('✅ WIZARD: Set receiveAmount to', receiveAmount);
 	});
 
 	$effect(() => {
