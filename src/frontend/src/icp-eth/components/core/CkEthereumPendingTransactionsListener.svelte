@@ -7,7 +7,7 @@
 		debounce
 	} from '@dfinity/utils';
 	import type { TransactionResponse } from 'ethers/providers';
-	import { onDestroy, type Snippet } from 'svelte';
+	import { onDestroy } from 'svelte';
 	import { initPendingTransactionsListener as initEthPendingTransactionsListenerProvider } from '$eth/providers/alchemy.providers';
 	import type { OptionEthAddress } from '$eth/types/address';
 	import { icPendingTransactionsStore } from '$icp/stores/ic-pending-transactions.store';
