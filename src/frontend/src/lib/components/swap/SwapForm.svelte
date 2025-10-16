@@ -31,9 +31,7 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import type { DisplayUnit } from '$lib/types/swap';
 	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils';
-	import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;

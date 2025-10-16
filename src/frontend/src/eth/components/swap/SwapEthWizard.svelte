@@ -39,10 +39,10 @@
 	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { OptionAmount } from '$lib/types/send';
-	import { VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
+	import { SwapProvider, VeloraSwapTypes, type VeloraSwapDetails } from '$lib/types/swap';
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
-	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { formatToken, formatTokenBigintToNumber } from '$lib/utils/format.utils';
 	import { normalizeTokenToDecimals, parseToken } from '$lib/utils/parse.utils';
 
 	interface Props {
@@ -137,45 +137,25 @@
 			: undefined
 	);
 
+	let formattedValue = $derived(
+		nonNullish($destinationToken) &&
+			nonNullish($sourceToken) &&
+			nonNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+			? formatTokenBigintToNumber({
+					value: $swapAmountsStore?.selectedProvider?.receiveAmount,
+					unitName: $sourceToken.decimals,
+					displayDecimals: $destinationToken.decimals
+				})
+			: undefined
+	);
+
 	$effect(() => {
-		console.log('🟦 WIZARD EFFECT TRIGGERED');
-
-		const storeValue = $swapAmountsStore?.selectedProvider?.receiveAmount;
-
-		console.log('📊 Values:', {
-			storeValue
-		});
-
-		if (isNullish($destinationToken) || isNullish($sourceToken) || isNullish(storeValue)) {
-			console.log('🔴 Missing data');
+		if (isNullish(formattedValue)) {
 			receiveAmount = undefined;
 			return;
 		}
 
-		console.log('🟢 Normalizing...');
-
-		// Всі обчислення всередині untrack - ніяких реактивних залежностей
-		untrack(() => {
-			const normalizedValue = normalizeTokenToDecimals({
-				value: storeValue,
-				oldUnitName: $sourceToken.decimals,
-				newUnitName: $destinationToken.decimals
-			});
-
-			console.log('📈 Normalized:', normalizedValue);
-
-			const formatted = formatTokenBigintToNumber({
-				value: normalizedValue,
-				unitName: $destinationToken.decimals,
-				displayDecimals: $destinationToken.decimals
-			});
-
-			console.log('🔢 Formatted:', formatted);
-
-			receiveAmount = formatted;
-
-			console.log('✅ WIZARD: Set receiveAmount to', receiveAmount);
-		});
+		receiveAmount = formattedValue;
 	});
 
 	const swap = async () => {
