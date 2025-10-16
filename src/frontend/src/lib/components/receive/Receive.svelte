@@ -10,6 +10,6 @@
 
 <ReceiveButtonWithModal isOpen={$modalReceive} {modalId} open={modalStore.openReceive}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={ReceiveAddresses} on:nnsClose={modalStore.close} />
+		<ReceiveAddressModal infoCmp={ReceiveAddresses} onClose={modalStore.close} />
 	{/snippet}
 </ReceiveButtonWithModal>

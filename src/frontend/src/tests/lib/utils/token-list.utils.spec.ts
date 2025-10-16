@@ -15,6 +15,8 @@ import {
 	getFilteredTokenGroup,
 	getFilteredTokenList
 } from '$lib/utils/token-list.utils';
+import { parseNetworkId } from '$lib/validation/network.validation';
+import { parseTokenId } from '$lib/validation/token.validation';
 
 // Mock data for tokens
 const token1: TokenUi = BTC_MAINNET_TOKEN;
@@ -101,7 +103,7 @@ describe('token-list.utils', () => {
 		}));
 
 		const dummyNetwork: Network = {
-			id: { description: 'net-1' }
+			id: parseNetworkId('net-1')
 		} as Network;
 
 		beforeEach(() => {
@@ -122,7 +124,7 @@ describe('token-list.utils', () => {
 			const token = {
 				...ICP_TOKEN,
 				enabled: false
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
@@ -139,7 +141,7 @@ describe('token-list.utils', () => {
 			const token = {
 				...ICP_TOKEN,
 				enabled: false
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(false);
 
@@ -155,16 +157,16 @@ describe('token-list.utils', () => {
 		it('returns enabled but modified tokens that pass the network filter', () => {
 			const token = {
 				...ICP_TOKEN,
-				id: { description: '2' },
+				id: parseTokenId('2'),
 				network: dummyNetwork,
 				enabled: true
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [token],
-				modifiedTokens: { 'net-1-2': token as Token },
+				modifiedTokens: { [token.id]: token as Token },
 				selectedNetwork: dummyNetwork
 			});
 
@@ -175,7 +177,7 @@ describe('token-list.utils', () => {
 			const token = {
 				...ICP_TOKEN,
 				enabled: true
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
@@ -192,7 +194,7 @@ describe('token-list.utils', () => {
 			const token = {
 				...ICP_TOKEN,
 				enabled: false
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
@@ -209,28 +211,28 @@ describe('token-list.utils', () => {
 			const tokens = [
 				{
 					...ICP_TOKEN,
-					id: { description: 'a' },
+					id: parseTokenId('a'),
 					network: dummyNetwork,
 					enabled: false
-				} as unknown as TokenToggleable<Token>,
+				} as TokenToggleable<Token>,
 				{
 					...ICP_TOKEN,
-					id: { description: 'b' },
+					id: parseTokenId('b'),
 					network: dummyNetwork,
 					enabled: true
-				} as unknown as TokenToggleable<Token>,
+				} as TokenToggleable<Token>,
 				{
 					...ICP_TOKEN,
-					id: { description: 'c' },
+					id: parseTokenId('c'),
 					network: dummyNetwork,
 					enabled: true
-				} as unknown as TokenToggleable<Token>
+				} as TokenToggleable<Token>
 			];
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const modifiedTokens = {
-				'net-1-b': tokens[1] as Token
+				[tokens[1].id]: tokens[1] as Token
 			};
 
 			const result = getDisabledOrModifiedTokens({

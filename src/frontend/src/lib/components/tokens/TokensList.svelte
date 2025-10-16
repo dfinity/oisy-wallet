@@ -18,7 +18,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
-	import type { Token } from '$lib/types/token';
+	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
@@ -96,14 +96,13 @@
 		saveLoading = false;
 	};
 
-	let modifiedTokens: Record<string, Token> = $state({});
+	let modifiedTokens: Record<TokenId, Token> = $state({});
 	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
 	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
 
-	const onToggle = ({ id, network, ...rest }: Token) => {
-		const { id: networkId } = network;
-		const { [`${networkId.description}-${id.description}`]: current, ...tokens } = modifiedTokens;
+	const onToggle = ({ id, ...rest }: Token) => {
+		const { [id]: current, ...tokens } = modifiedTokens;
 
 		if (nonNullish(current)) {
 			modifiedTokens = { ...tokens };
@@ -111,8 +110,8 @@
 		}
 
 		modifiedTokens = {
-			[`${networkId.description}-${id.description}`]: { id, network, ...rest },
-			...tokens
+			...tokens,
+			[id]: { id, ...rest }
 		};
 	};
 </script>
