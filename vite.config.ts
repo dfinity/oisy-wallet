@@ -1,6 +1,6 @@
 import inject from '@rollup/plugin-inject';
 import { sveltekit } from '@sveltejs/kit/vite';
-import { basename, dirname, resolve } from 'node:path';
+import { basename, resolve } from 'node:path';
 import { defineConfig, loadEnv, type UserConfig } from 'vite';
 import { defineViteReplacements, readCanisterIds } from './vite.utils';
 
