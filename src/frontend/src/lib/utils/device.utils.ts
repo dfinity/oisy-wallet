@@ -23,3 +23,7 @@ export const isPWAStandalone = () => {
 
 	return window.matchMedia('(display-mode: standalone)').matches;
 };
+
+export const isIos = () =>
+	/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+	(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);

@@ -38,7 +38,8 @@ export const NftCollectionSchema = z.object({
 	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
 	description: z.string().optional(),
 	network: NftNetworkSchema,
-	newestAcquiredAt: z.date().optional()
+	newestAcquiredAt: z.date().optional(),
+	allowExternalContentSource: z.boolean().optional()
 });
 
 export const NftSchema = z.object({
