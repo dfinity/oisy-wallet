@@ -22,7 +22,7 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
-		source?: string;
+		source?: 'default' | NFT_COLLECTION_ROUTE | NFT_LIST_ROUTE;
 	}
 
 	let {
