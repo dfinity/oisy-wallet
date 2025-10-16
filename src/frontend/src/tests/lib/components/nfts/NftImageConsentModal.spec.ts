@@ -2,12 +2,14 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
 import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
+import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
 import type { OptionIdentity } from '$lib/types/identity';
@@ -21,9 +23,13 @@ import { assertNonNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/svelte';
 import { get, readable } from 'svelte/store';
 
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
 const nftAzuki1 = {
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
 	collection: {
 		...mockValidErc721Nft.collection,
@@ -35,7 +41,7 @@ const nftAzuki1 = {
 
 const nftAzuki2 = {
 	...mockValidErc721Nft,
-	id: parseNftId(2),
+	id: parseNftId('2'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/2.png',
 	collection: {
 		...mockValidErc721Nft.collection,
@@ -66,6 +72,7 @@ describe('NftImageConsentModal', () => {
 
 	beforeEach(() => {
 		getAllowMediaSpy.mockClear();
+		vi.clearAllMocks();
 	});
 
 	const TEST_ID = 'nft-modal';
@@ -295,6 +302,126 @@ describe('NftImageConsentModal', () => {
 			expect(icons.querySelector('button')).toBeInTheDocument();
 			// open in explorer link
 			expect(icons.querySelector('a')).toBeInTheDocument();
+		});
+	});
+
+	it('should track event with "enable_media" when enable button is clicked', async () => {
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'base' } },
+			allowExternalContentSource: false,
+			standard: 'erc721'
+		} as Erc721Token;
+
+		findTokenSpy.mockReturnValue(token);
+		getAllowMediaSpy.mockReturnValue(false);
+
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const enableButton = screen.getByTestId(testIds.enable);
+		await fireEvent.click(enableButton);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: nftAzuki1.collection.name,
+				collection_address: nftAzuki1.collection.address,
+				network: nftAzuki1.collection.network.name,
+				standard: nftAzuki1.collection.standard,
+				clicked_button: 'enable_media'
+			}
+		});
+	});
+
+	it('should track event with "keep_media_disabled" when keep disabled button is clicked', async () => {
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'base' } },
+			allowExternalContentSource: false,
+			standard: 'erc721'
+		} as Erc721Token;
+
+		findTokenSpy.mockReturnValue(token);
+		getAllowMediaSpy.mockReturnValue(false);
+
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const keepDisabledButton = screen.getByTestId(testIds.keepDisabled);
+		await fireEvent.click(keepDisabledButton);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: nftAzuki1.collection.name,
+				collection_address: nftAzuki1.collection.address,
+				network: nftAzuki1.collection.network.name,
+				standard: nftAzuki1.collection.standard,
+				clicked_button: 'keep_media_disabled'
+			}
+		});
+	});
+
+	it('should track event with "disable_media" when disable button is clicked', async () => {
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'base' } },
+			allowExternalContentSource: true,
+			standard: 'erc721'
+		} as Erc721Token;
+
+		findTokenSpy.mockReturnValue(token);
+		getAllowMediaSpy.mockReturnValue(true);
+
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const disableButton = screen.getByTestId(testIds.disable);
+		await fireEvent.click(disableButton);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: nftAzuki1.collection.name,
+				collection_address: nftAzuki1.collection.address,
+				network: nftAzuki1.collection.network.name,
+				standard: nftAzuki1.collection.standard,
+				clicked_button: 'disable_media'
+			}
+		});
+	});
+
+	it('should track event with "keep_media_enabled" when keep enabled button is clicked', async () => {
+		const token = {
+			id: { description: 'token-123' },
+			network: { id: { description: 'base' } },
+			allowExternalContentSource: true,
+			standard: 'erc721'
+		} as Erc721Token;
+
+		findTokenSpy.mockReturnValue(token);
+		getAllowMediaSpy.mockReturnValue(true);
+
+		render(NftImageConsentModal, {
+			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+		});
+
+		const keepEnabledButton = screen.getByTestId(testIds.keepEnabled);
+		await fireEvent.click(keepEnabledButton);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_CONSENT_GIVEN,
+			metadata: {
+				collection_name: nftAzuki1.collection.name,
+				collection_address: nftAzuki1.collection.address,
+				network: nftAzuki1.collection.network.name,
+				standard: nftAzuki1.collection.standard,
+				clicked_button: 'keep_media_enabled'
+			}
 		});
 	});
 });

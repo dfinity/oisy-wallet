@@ -44,7 +44,7 @@ describe('nfts.utils', () => {
 
 	const mockNft2: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(12632),
+		id: parseNftId('12632'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -54,7 +54,7 @@ describe('nfts.utils', () => {
 
 	const mockNft3: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(843764),
+		id: parseNftId('843764'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
@@ -64,7 +64,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki1 = {
 		...mockValidErc721Nft,
-		id: parseNftId(1),
+		id: parseNftId('1'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -75,7 +75,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki2 = {
 		...mockValidErc721Nft,
-		id: parseNftId(2),
+		id: parseNftId('2'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -86,7 +86,7 @@ describe('nfts.utils', () => {
 
 	const nftDeGods = {
 		...mockValidErc721Nft,
-		id: parseNftId(3),
+		id: parseNftId('3'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'DeGods',
@@ -97,7 +97,7 @@ describe('nfts.utils', () => {
 
 	const nftOtherNetwork = {
 		...mockValidErc721Nft,
-		id: parseNftId(4),
+		id: parseNftId('4'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -124,7 +124,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(12632)
+				tokenId: parseNftId('12632')
 			});
 
 			expect(result).toEqual(mockNft2);
@@ -136,7 +136,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(837373)
+				tokenId: parseNftId('837373')
 			});
 
 			expect(result).toBeUndefined();
@@ -307,7 +307,7 @@ describe('nfts.utils', () => {
 	describe('getUpdatedNfts', () => {
 		const mockErc1155Nft1 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(983524),
+			id: parseNftId('983524'),
 			balance: 2,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -317,7 +317,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft2 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(37534),
+			id: parseNftId('37534'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -327,7 +327,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(823746),
+			id: parseNftId('823746'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -399,7 +399,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('parseMetadataResourceUrl', () => {
-		const mockError = new NftError(123456, PEPE_TOKEN.address);
+		const mockError = new NftError('123456', PEPE_TOKEN.address);
 
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
@@ -629,7 +629,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('filters NFTs by nft.id', () => {
-			const custom = { ...nftAzuki1, id: parseNftId(987654321) };
+			const custom = { ...nftAzuki1, id: parseNftId('987654321') };
 			const res = filterSortByCollection({
 				items: [custom, nftDeGods],
 				filter: '987654321'
@@ -663,7 +663,7 @@ describe('nfts.utils', () => {
 
 		it('filters collection UIs by inner nft.id', () => {
 			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
-			const custom = { ...nftAzuki1, id: parseNftId(123456789) };
+			const custom = { ...nftAzuki1, id: parseNftId('123456789') };
 			const ui = getNftCollectionUi({
 				$nonFungibleTokens: tokens,
 				$nftStore: [custom]

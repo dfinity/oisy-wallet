@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, type Snippet } from 'svelte';
 	import {
 		BTC_AMOUNT_FOR_UTXOS_FEE_UPDATE_PROPORTION,
 		DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE
@@ -19,16 +18,10 @@
 		amount?: OptionAmount;
 		networkId?: NetworkId;
 		amountError?: boolean;
-		children?: Snippet;
+		children: Snippet;
 	}
 
-	let {
-		source,
-		amount = undefined,
-		networkId = undefined,
-		amountError = false,
-		children
-	}: Props = $props();
+	let { source, amount, networkId, amountError = false, children }: Props = $props();
 
 	const { store } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
 
@@ -42,16 +35,16 @@
 			return;
 		}
 
-		// UTXOs API call is very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
+		// UTXOs API call is a very time-consuming operation, even though the fees do not change often (no matter what amount is provided)
 		// Therefore, to improve UX, we start fetching the fee directly on modal open event
-		// Initially, we fetch fees with default value and then re-fetch it in the background on value change
+		// Initially, we fetch fees with the default value and then re-fetch it in the background on value change
 		const parsedAmount =
 			nonNullish(amount) && Number(amount) !== 0
 				? Number(amount)
 				: DEFAULT_BTC_AMOUNT_FOR_UTXOS_FEE;
 
 		// WizardModal re-renders content on step change (e.g. when switching between Convert to Review steps)
-		// To avoid re-fetching the fees, we need to check if amount hasn't changed since the last request
+		// To avoid re-fetching the fees, we need to check if the amount hasn't changed since the last request
 		if (
 			amountError ||
 			isNullish(networkId) ||
@@ -92,9 +85,11 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	run(() => {
-		(amount, networkId, amountError, source, debounceEstimateFee());
+	$effect(() => {
+		[amount, networkId, amountError, source];
+
+		debounceEstimateFee();
 	});
 </script>
 
-{@render children?.()}
+{@render children()}

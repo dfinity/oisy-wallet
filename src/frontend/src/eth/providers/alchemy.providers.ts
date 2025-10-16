@@ -201,8 +201,12 @@ export class AlchemyProvider {
 
 				const mediaStatus = await getMediaStatus(ownedNft.image?.originalUrl);
 
+				const bannerMediaStatus = await getMediaStatus(
+					ownedNft.contract.openSeaMetadata?.bannerImageUrl
+				);
+
 				return {
-					id: parseNftId(parseInt(ownedNft.tokenId)),
+					id: parseNftId(ownedNft.tokenId),
 					...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
 					...(nonNullish(ownedNft.image?.originalUrl) && {
 						imageUrl: ownedNft.image?.originalUrl
@@ -220,7 +224,8 @@ export class AlchemyProvider {
 					collection: {
 						...mapTokenToCollection(token),
 						...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
-							bannerImageUrl: ownedNft.contract.openSeaMetadata?.bannerImageUrl
+							bannerImageUrl: ownedNft.contract.openSeaMetadata?.bannerImageUrl,
+							bannerMediaStatus
 						}),
 						...(nonNullish(ownedNft.contract.openSeaMetadata?.description) && {
 							description: ownedNft.contract.openSeaMetadata?.description

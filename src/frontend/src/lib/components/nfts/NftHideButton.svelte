@@ -5,6 +5,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
+	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
@@ -12,6 +13,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -22,9 +24,10 @@
 
 	interface Props {
 		token: NonFungibleToken;
+		source: string;
 	}
 
-	let { token }: Props = $props();
+	let { token, source }: Props = $props();
 
 	const hasMultipleNfts = $derived(
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
@@ -35,6 +38,17 @@
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
 		try {
+			trackEvent({
+				name: TRACK_NFT_SPAM_HIDE_ACTION,
+				metadata: {
+					source: source ?? '',
+					collection_name: token.name,
+					collection_address: token.address,
+					network: token.network.name,
+					standard: token.standard,
+					action: nonNullish(section) ? 'hide' : 'unhide'
+				}
+			});
 			await updateNftSection({ section, token, $authIdentity });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });

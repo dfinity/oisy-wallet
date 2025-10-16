@@ -6,6 +6,7 @@
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
@@ -56,6 +57,7 @@
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
+				source={NFT_COLLECTION_ROUTE}
 				type="card-link"
 			/>
 		{/each}

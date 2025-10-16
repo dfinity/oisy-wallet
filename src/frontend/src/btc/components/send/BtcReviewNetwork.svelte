@@ -12,7 +12,7 @@
 		networkId?: NetworkId;
 	}
 
-	let { networkId = undefined }: Props = $props();
+	let { networkId }: Props = $props();
 </script>
 
 <ReviewNetwork

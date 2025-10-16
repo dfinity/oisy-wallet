@@ -4,7 +4,7 @@
 	interface Props {
 		position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 		display?: boolean;
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { position = 'top-left', display = true, children }: Props = $props();
@@ -20,5 +20,5 @@
 		class:opacity-0={!display}
 		class:opacity-100={display}
 	></div>
-	{@render children?.()}
+	{@render children()}
 </div>

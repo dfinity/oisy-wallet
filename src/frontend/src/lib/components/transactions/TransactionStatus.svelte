@@ -9,9 +9,9 @@
 
 	let { status }: Props = $props();
 
-	let pending: boolean = $derived(status === 'pending');
+	let pending = $derived(status === 'pending');
 
-	let unconfirmed: boolean = $derived(status === 'unconfirmed');
+	let unconfirmed = $derived(status === 'unconfirmed');
 </script>
 
 {#if pending || unconfirmed}

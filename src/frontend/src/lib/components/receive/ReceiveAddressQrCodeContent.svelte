@@ -10,24 +10,24 @@
 	interface Props {
 		address: OptionAddress<Address>;
 		addressLabel?: string;
-		addressToken: Token | undefined;
+		addressToken?: Token;
 		testId?: string;
 		copyButtonTestId?: string;
 		network: Network;
-		qrCodeAction: ReceiveQRCodeAction;
-		copyAriaLabel: string; // TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
+		copyAriaLabel: string;
 	}
 
 	let {
 		address,
-		addressLabel = undefined,
+		addressLabel,
 		addressToken,
-		testId = undefined,
-		copyButtonTestId = undefined,
+		testId,
+		copyButtonTestId,
 		network,
-		qrCodeAction,
 		copyAriaLabel
 	}: Props = $props();
+
+	// TODO: replace properties (address, labels etc.) with a mandatory property of type ReceiveQrCode
 </script>
 
 <ReceiveQrCode address={address ?? ''} {addressToken} />
