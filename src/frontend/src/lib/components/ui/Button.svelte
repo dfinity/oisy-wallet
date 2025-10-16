@@ -78,9 +78,9 @@
 		class={`relative flex min-w-0 gap-2 ${innerStyleClass}`}
 		class:duration-500={loading}
 		class:ease-in-out={loading}
+		class:invisible={loading && loadingAsSkeleton}
 		class:transition={loading}
 		class:w-full={contentFullWidth}
-		class:invisible={loading && loadingAsSkeleton}
 		aria-hidden={loading && loadingAsSkeleton}
 	>
 		{#if loading}
