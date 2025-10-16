@@ -1,5 +1,5 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+import { NFT_LIST_ROUTE, TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -61,7 +61,8 @@ describe('NftCard', () => {
 			props: {
 				nft: { ...mockValidErc721Nft, imageUrl: undefined },
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_LIST_ROUTE
 			}
 		});
 
@@ -75,8 +76,8 @@ describe('NftCard', () => {
 
 		assertNonNullish(mockValidErc721Nft.name);
 
-		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 
 	it('should render the correct styles for each type', async () => {
