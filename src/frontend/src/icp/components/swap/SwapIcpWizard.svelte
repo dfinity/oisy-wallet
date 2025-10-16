@@ -36,6 +36,8 @@
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { isSwapError } from '$lib/utils/swap.utils';
+	import { normalizeTokenToDecimals } from '$lib/utils/parse.utils';
+	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -120,6 +122,29 @@
 			? $icTokenFeeStore[$sourceToken.symbol]
 			: undefined
 	);
+
+	$effect(() => {
+		if (
+			isNullish($destinationToken) ||
+			isNullish($sourceToken) ||
+			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+		) {
+			receiveAmount = undefined;
+			return;
+		}
+
+		const normalizedValue = normalizeTokenToDecimals({
+			value: $swapAmountsStore.selectedProvider.receiveAmount,
+			oldUnitName: $sourceToken.decimals,
+			newUnitName: $destinationToken.decimals
+		});
+
+		receiveAmount = formatTokenBigintToNumber({
+			value: normalizedValue,
+			unitName: $destinationToken.decimals,
+			displayDecimals: $destinationToken.decimals
+		});
+	});
 
 	const swap = async () => {
 		if (isNullish($authIdentity)) {

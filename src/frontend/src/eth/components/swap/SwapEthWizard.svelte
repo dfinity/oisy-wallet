@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Html, type WizardStep } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, setContext, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
 	import EthFeeContext from '$eth/components/fee/EthFeeContext.svelte';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
@@ -108,6 +108,31 @@
 		if (nonNullish(nativeEthereumToken)) {
 			feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
 		}
+	});
+
+	$effect(() => {
+		console.log('swapAmountsStore', $swapAmountsStore, $sourceToken, $destinationToken, 'swapEthW');
+		untrack(() => {
+			if (
+				isNullish($destinationToken) ||
+				isNullish($sourceToken) ||
+				isNullish($swapAmountsStore?.selectedProvider?.receiveAmount)
+			) {
+				receiveAmount = undefined;
+				return;
+			}
+			const normalizedValue = normalizeTokenToDecimals({
+				value: $swapAmountsStore.selectedProvider.receiveAmount,
+				oldUnitName: $sourceToken.decimals,
+				newUnitName: $destinationToken.decimals
+			});
+
+			receiveAmount = formatTokenBigintToNumber({
+				value: normalizedValue,
+				unitName: $destinationToken.decimals,
+				displayDecimals: $destinationToken.decimals
+			});
+		});
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
