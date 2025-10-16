@@ -104,6 +104,11 @@
 				userEthAddress: $ethAddress
 			});
 
+			console.log('📦 fetchSwapAmounts result', {
+				swapsCount: swapAmounts.length,
+				firstSwapReceiveAmount: swapAmounts[0]?.receiveAmount
+			});
+
 			if (swapAmounts.length === 0) {
 				store.setSwaps({
 					swaps: [],
@@ -117,6 +122,10 @@
 				swaps: swapAmounts,
 				amountForSwap: parsedAmount,
 				selectedProvider: swapAmounts[0]
+			});
+
+			console.log('✅ Store updated', {
+				receiveAmount: swapAmounts[0]?.receiveAmount
 			});
 		} catch (_err: unknown) {
 			// if swapAmounts fails, it means no pool is currently available for the provided tokens
