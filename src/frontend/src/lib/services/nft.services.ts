@@ -151,6 +151,8 @@ export const updateNftSection = async ({
 	}
 
 	if (nonNullish(token)) {
+		const currentAllowMedia = token.allowExternalContentSource;
+
 		if (isTokenErc721(token)) {
 			await saveCustomErc721Token({
 				identity: $authIdentity,
@@ -159,7 +161,8 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...((section === CustomTokenSection.SPAM || section === CustomTokenSection.HIDDEN) && {
+						...((section === CustomTokenSection.SPAM ||
+							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
 							allowExternalContentSource: false
 						})
 					}
@@ -177,7 +180,8 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...((section === CustomTokenSection.SPAM || section === CustomTokenSection.HIDDEN) && {
+						...((section === CustomTokenSection.SPAM ||
+							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
 							allowExternalContentSource: false
 						})
 					}

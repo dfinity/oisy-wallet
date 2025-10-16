@@ -5,8 +5,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { OptionString } from '$lib/types/string';
-import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import * as nftsUtils from '$lib/utils/nfts.utils';
+import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -20,10 +19,6 @@ describe('NftHero', () => {
 		.mockImplementation(() => {});
 
 	const openSendSpy = vi.spyOn(modalStore, 'openSend');
-
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
 
 	it('should render the nft data', () => {
 		const { getByText } = render(NftHero, {

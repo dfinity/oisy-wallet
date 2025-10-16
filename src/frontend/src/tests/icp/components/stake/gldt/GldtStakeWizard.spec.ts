@@ -1,5 +1,6 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import GldtStakeWizard from '$icp/components/stake/gldt/GldtStakeWizard.svelte';
+import * as appConstants from '$lib/constants/app.constants';
 import {
 	STAKE_FORM_REVIEW_BUTTON,
 	STAKE_REVIEW_FORM_BUTTON
@@ -7,6 +8,7 @@ import {
 import { WizardStepsStake } from '$lib/enums/wizard-steps';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import en from '$tests/mocks/i18n.mock';
+import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { render } from '@testing-library/svelte';
 
 describe('GldtStakeWizard', () => {
@@ -20,6 +22,14 @@ describe('GldtStakeWizard', () => {
 		onBack: () => {},
 		onNext: () => {}
 	};
+
+	beforeEach(() => {
+		vi.resetAllMocks();
+
+		vi.spyOn(appConstants, 'GLDT_STAKE_CANISTER_ID', 'get').mockImplementation(
+			() => mockLedgerCanisterId
+		);
+	});
 
 	it('should render stake form if currentStep is STAKE', () => {
 		const { getByTestId } = render(GldtStakeWizard, {
