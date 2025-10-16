@@ -37,8 +37,8 @@
 	const enabledNetworks = { ...$userNetworks };
 	const enabledNetworksInitial = { ...enabledNetworks };
 
-	let enabledTestnet = $testnetsEnabled;
-	const enabledTestnetInitial = enabledTestnet;
+	let enabledTestnet = $state($testnetsEnabled);
+	const enabledTestnetInitial = $testnetsEnabled;
 
 	const checkModified = ({
 		enabledTestnet,
@@ -58,8 +58,8 @@
 
 		return testnetModified || networkModified;
 	};
-	let isModified: boolean;
-	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
+
+	let isModified = $derived(checkModified({ enabledTestnet, enabledNetworks }));
 
 	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
@@ -72,7 +72,7 @@
 		};
 	};
 
-	let saveLoading = false;
+	let saveLoading = $state(false);
 
 	const save = async () => {
 		if (isNullish($authIdentity)) {
