@@ -9,7 +9,7 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
-		loadingWithSkeleton?: boolean;
+		initialising?: boolean;
 		fullWidth?: boolean;
 		contentFullWidth?: boolean;
 		alignLeft?: boolean;
@@ -30,8 +30,8 @@
 		colorStyle = 'primary',
 		type = 'submit',
 		disabled,
-		loading = false,
-		loadingWithSkeleton = false,
+		loading = false, // renders with spinner
+		initialising = false, // renders as skeleton
 		fullWidth = false,
 		contentFullWidth = false,
 		alignLeft = false,
@@ -51,37 +51,37 @@
 
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
-	class:animate-pulse={loading || loadingWithSkeleton}
-	class:cursor-not-allowed={loading || loadingWithSkeleton || disabled}
-	class:duration-500={loading || loadingWithSkeleton}
-	class:ease-in-out={loading || loadingWithSkeleton}
+	class:animate-pulse={loading || initialising}
+	class:cursor-not-allowed={loading || initialising || disabled}
+	class:duration-500={loading || initialising}
+	class:ease-in-out={loading || initialising}
 	class:flex-1={!inlineLink}
 	class:font-normal={inlineLink}
 	class:hover:text-brand-primary={inlineLink}
 	class:justify-start={alignLeft}
 	class:link
-	class:loading={loading || loadingWithSkeleton}
+	class:loading={loading || initialising}
 	class:padding-sm={paddingSmall}
 	class:text-tertiary={inlineLink}
-	class:transition={loading || loadingWithSkeleton}
+	class:transition={loading || initialising}
 	class:transparent
 	class:underline={inlineLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
 	data-tid={testId}
-	disabled={disabled ?? (loading || loadingWithSkeleton)}
+	disabled={disabled ?? (loading || initialising)}
 	{onclick}
 	{ondblclick}
 	{type}
 >
 	<span
 		class={`relative flex min-w-0 gap-2 ${innerStyleClass}`}
-		class:duration-500={loading || loadingWithSkeleton}
-		class:ease-in-out={loading || loadingWithSkeleton}
-		class:invisible={loadingWithSkeleton}
-		class:transition={loading || loadingWithSkeleton}
+		class:duration-500={loading || initialising}
+		class:ease-in-out={loading || initialising}
+		class:invisible={initialising}
+		class:transition={loading || initialising}
 		class:w-full={contentFullWidth}
-		aria-hidden={loadingWithSkeleton}
+		aria-hidden={initialising}
 	>
 		{#if loading}
 			<span class="absolute flex h-full w-full items-center justify-center">
