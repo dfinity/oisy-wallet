@@ -15,7 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { SyncState } from '$lib/types/sync';
 
-	let receiveProgressStep=$state< string | undefined >();
+	let receiveProgressStep = $state<string | undefined>();
 
 	const modalId = Symbol();
 
@@ -73,7 +73,7 @@
 		}
 	};
 
-	let ckBtcUpdateBalanceSyncState=$state<  SyncState | undefined >();
+	let ckBtcUpdateBalanceSyncState = $state<SyncState | undefined>();
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);

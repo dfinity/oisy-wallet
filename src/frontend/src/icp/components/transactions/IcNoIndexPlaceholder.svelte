@@ -5,7 +5,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 
-
 	interface Props {
 		placeholderType?: 'missing' | 'not-working';
 	}
