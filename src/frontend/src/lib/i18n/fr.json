@@ -1143,6 +1143,8 @@
 			"review_button": "Examiner",
 			"collection_name": "Nom de la collection",
 			"media_urls": "URLs des médias",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Préférence d'affichage",
 			"review_preference": "Préférence d'examen",
 			"media_enabled": "Média activé",

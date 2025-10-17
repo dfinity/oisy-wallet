@@ -1143,6 +1143,8 @@
 			"review_button": "Prüfen",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Anzeigeeinstellung",
 			"review_preference": "Einstellung anpassen",
 			"media_enabled": "Medien aktiviert",
