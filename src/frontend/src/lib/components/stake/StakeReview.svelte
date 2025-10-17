@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getContext, type Snippet } from 'svelte';
+	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
@@ -8,10 +9,12 @@
 	import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
 		amount?: OptionAmount;
+		destination: Address;
 		disabled?: boolean;
 		network?: Snippet;
 		fee?: Snippet;
@@ -20,7 +23,16 @@
 		onStake: () => void;
 	}
 
-	let { amount, disabled = false, network, fee, provider, onBack, onStake }: Props = $props();
+	let {
+		amount,
+		destination,
+		disabled = false,
+		network,
+		fee,
+		provider,
+		onBack,
+		onStake
+	}: Props = $props();
 
 	const { sendToken, sendTokenExchangeRate } = getContext<SendContext>(SEND_CONTEXT_KEY);
 </script>
@@ -31,6 +43,10 @@
 			{$i18n.stake.text.stake_review_subtitle}
 		{/snippet}
 	</SendTokenReview>
+
+	<div class="mb-4">
+		<SendReviewDestination {destination} />
+	</div>
 
 	{@render network?.()}
 

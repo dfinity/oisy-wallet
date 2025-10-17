@@ -9,44 +9,30 @@
 	interface Props {
 		initFn: IcCkWorker;
 		token: Token;
-		twinToken?: Token | undefined;
-		minterCanisterId?: CanisterIdText | undefined;
-		children?: Snippet;
+		twinToken?: Token;
+		minterCanisterId?: CanisterIdText;
 	}
 
-	let {
-		initFn,
-		token,
-		twinToken = undefined,
-		minterCanisterId = undefined,
-		children
-	}: Props = $props();
+	let { initFn, token, twinToken, minterCanisterId }: Props = $props();
 
-	let worker: IcCkWorkerInitResult | undefined = $state();
+	let worker: IcCkWorkerInitResult | undefined;
 
-	onMount(
-		async () =>
-			(worker = await initFn({
-				minterCanisterId: minterCanisterId ?? (token as OptionIcCkToken)?.minterCanisterId,
-				token,
-				twinToken
-			}))
-	);
+	onMount(async () => {
+		worker = await initFn({
+			minterCanisterId: minterCanisterId ?? (token as OptionIcCkToken)?.minterCanisterId,
+			token,
+			twinToken
+		});
+
+		worker?.stop();
+		worker?.start();
+	});
 
 	onDestroy(() => worker?.destroy());
 
-	const syncTimer = () => {
-		worker?.stop();
-		worker?.start();
+	const triggerTimer = () => {
+		worker?.trigger();
 	};
-
-	run(() => {
-		(worker, syncTimer());
-	});
-
-	const triggerTimer = () => worker?.trigger();
 </script>
 
 <svelte:window onoisyTriggerWallet={triggerTimer} />
-
-{@render children?.()}

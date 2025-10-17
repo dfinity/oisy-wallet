@@ -14,7 +14,7 @@
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -33,13 +33,7 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
+		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
 </script>
 

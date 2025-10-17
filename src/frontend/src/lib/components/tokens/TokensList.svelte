@@ -20,6 +20,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import { isIos } from '$lib/utils/device.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
@@ -97,9 +98,10 @@
 	};
 
 	let modifiedTokens: Record<TokenId, Token> = $state({});
-	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
-	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+	let modifiedTokensLen = $derived(Object.getOwnPropertySymbols(modifiedTokens).length);
+
+	let saveDisabled = $derived(modifiedTokensLen === 0);
 
 	const onToggle = ({ id, ...rest }: Token) => {
 		const { [id]: current, ...tokens } = modifiedTokens;
@@ -114,6 +116,10 @@
 			[id]: { id, ...rest }
 		};
 	};
+
+	let ios = $derived(isIos());
+
+	let flipParams = $derived({ duration: ios ? 0 : 250 });
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
@@ -126,7 +132,7 @@
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
 					transition:fade
-					animate:flip={{ duration: 250 }}
+					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -179,7 +185,7 @@
 						onanimationend={handleAnimationEnd}
 						onanimationstart={handleAnimationStart}
 						transition:fade
-						animate:flip={{ duration: 250 }}
+						animate:flip={flipParams}
 					>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}

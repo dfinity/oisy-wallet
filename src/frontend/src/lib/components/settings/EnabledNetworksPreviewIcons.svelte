@@ -22,9 +22,9 @@
 			return enabledList;
 		}, []);
 
-	let enabledList: Network[] = $derived(getEnabledList($userNetworks));
+	let enabledList = $derived(getEnabledList($userNetworks));
 
-	let previewList: Network[] = $derived(enabledList.slice(0, numberOfIcons));
+	let previewList = $derived(enabledList.slice(0, numberOfIcons));
 </script>
 
 <div class="mr-2 mt-1 flex flex-row">
