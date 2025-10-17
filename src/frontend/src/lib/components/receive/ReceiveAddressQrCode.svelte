@@ -5,7 +5,6 @@
 	import { RECEIVE_TOKENS_MODAL_QR_CODE_OUTPUT } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
-	import type { ReceiveQRCodeAction } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
 	interface Props {
