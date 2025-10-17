@@ -28,11 +28,7 @@
 	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import {
-		findNonFungibleToken,
-		getAllowMediaForNft,
-		getNftCollectionUi
-	} from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -41,13 +37,7 @@
 
 	const { collection, testId }: Props = $props();
 
-	const allowMedia = $derived(
-		getAllowMediaForNft({
-			tokens: $nonFungibleTokens,
-			networkId: collection.network.id,
-			address: collection.address
-		})
-	);
+	const allowMedia = $derived(collection.allowExternalContentSource);
 
 	const shortCollectionName = $derived(
 		nonNullish(collection.name)
