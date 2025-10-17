@@ -174,10 +174,12 @@ export const formatReceiveOutMinimum = ({
 export const mapVeloraSwapResult = (swap: QuoteWithDeltaPriceAndBridgePrice): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount:
-		/* We need to use `destAmountAfterBridge` in `bridgeInfo` for delta swaps, if available,
-   since this value is not mentioned in the documentation. However, after discussions
-   with the Velora team, we confirmed that this value is already formatted correctly
-   with the required token amount precision. */
+		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).
+		// For example, if we request a swap from USDC-BSC (18 digits) to USDC-BASE (6 digits), the destination amount is returned as if it has 18 digits instead of 6.
+		// This causes issues in the normal formatting of our code, since we expect each amount to be strictly related to its reference token.
+		// To avoid this issue, we could use the `bridgeInfo` data that Velora adds for this specific cases: it specify the correct amount to look at when the bridge is treating tokens with scaling factor.
+		// This is not documented anywhere in Velora documentation, it was the result of a direct conversations with them.
+		// TODO: remove this disclaimer where Velora fixes this issue on their side.
 		'bridgeInfo' in swap.delta
 			? BigInt(swap.delta.bridgeInfo.destAmountAfterBridge)
 			: BigInt(swap.delta.destAmount),
