@@ -20,26 +20,18 @@ export const routeNetwork: Readable<OptionString> = derived(
 	]) => network
 );
 
-// TODO: replace with routeNetwork when the NFT network ID is in `data` instead of `params`
-// TODO: confirm that is the ID and not the name of the network that is being passed
-export const routeNftNetwork: Readable<OptionString> = derived(
-	[page],
-	([
-		{
-			params: { networkId }
-		}
-	]) => networkId
-);
-
 // TODO: replace with `data` instead of `params`
 export const routeCollection: Readable<OptionString> = derived(
 	[page],
 	([
 		{
 			// TODO: collectionId --> collection
-			params: { collectionId }
+			data: { collection }
 		}
-	]) => collectionId
+	]) => {
+		console.log('collection', collection);
+		return collection;
+	}
 );
 
 // TODO: replace with `data` instead of `params`
@@ -48,7 +40,7 @@ export const routeNft: Readable<OptionString> = derived(
 	([
 		{
 			// TODO: nftId --> nft
-			params: { nftId }
+			data: { nftId }
 		}
 	]) => nftId
 );

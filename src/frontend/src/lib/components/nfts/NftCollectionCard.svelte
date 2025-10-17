@@ -11,6 +11,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import { goto } from '$app/navigation';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -31,14 +32,20 @@
 	const previewNft = $derived(
 		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
 	);
+
+	const onClick = () => {
+		goto(
+			`${AppPath.Nfts}?network=${String(collection.collection.network.id.description)}&collection=${collection.collection.address}`
+		);
+	};
 </script>
 
-<a
+<button
 	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
+	onclick={onClick}
 >
 	<div class="relative h-full w-full">
 		<NftDisplayGuard nft={previewNft} type="card">
@@ -92,4 +99,4 @@
 			})}</span
 		>
 	</div>
-</a>
+</button>

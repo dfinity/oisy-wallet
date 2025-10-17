@@ -19,6 +19,9 @@
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
+	import { page } from '$app/stores';
+	import Nft from '$lib/components/nfts/Nft.svelte';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -33,6 +36,16 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	let { url } = $derived($page);
+
+	const network = $derived(url.searchParams.get('network'));
+	const collection = $derived(url.searchParams.get('collection'));
+	const nft = $derived(url.searchParams.get('nft'));
+
+	$effect(() => {
+		console.log('collectionId', collection);
+	});
 </script>
 
 <div>
@@ -75,6 +88,10 @@
 
 	{#if activeTab === TokenTypes.TOKENS}
 		<TokensList />
+	{:else if nonNullish(collection) && nonNullish(network)}
+		<NftCollection />
+	{:else if nonNullish(nft) && nonNullish(collection) && nonNullish(network)}
+		<Nft />
 	{:else}
 		<NftsList />
 	{/if}
