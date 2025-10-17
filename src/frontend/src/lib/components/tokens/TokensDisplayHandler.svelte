@@ -8,12 +8,11 @@
 
 	interface Props {
 		tokens: TokenUiOrGroupUi[] | undefined;
-		animating: boolean;
 		children: Snippet;
 	}
 
 	// We start `tokens` as undefined to avoid showing an empty list before the first update.
-	let { tokens = $bindable(), animating, children }: Props = $props();
+	let { tokens = $bindable(), children }: Props = $props();
 
 	let groupedTokens: TokenUiOrGroupUi[] = $derived(
 		groupTokensByTwin($combinedDerivedSortedFungibleNetworkTokensUi)
@@ -28,6 +27,8 @@
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 
+	let updating = false
+
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
 			clearTimeout(timer);
@@ -36,11 +37,13 @@
 	};
 
 	const apply = () => {
+		updating = true;
 		tokens = [...sortedTokensOrGroups];
+		updating = false;
 	};
 
 	const updateTokensToDisplay = () => {
-		if (!animating) {
+		if (!updating) {
 			apply();
 
 			clearTimer();
@@ -60,7 +63,7 @@
 	};
 
 	$effect(() => {
-		[sortedTokensOrGroups, animating];
+		[sortedTokensOrGroups];
 
 		untrack(() => updateTokensToDisplay());
 	});
