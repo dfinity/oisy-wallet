@@ -7,6 +7,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -109,6 +110,17 @@ describe('nft.services', () => {
 
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
 			expect(get(nftStore)).toEqual([]);
+		});
+
+		it('should force load NFTs if force is true', async () => {
+			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
+
+			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
+			vi.spyOn(nftsUtils, 'findNftsByToken').mockReturnValueOnce([]);
+
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress, force: true });
+
+			expect(get(nftStore)).toEqual([mockNft3]);
 		});
 	});
 
