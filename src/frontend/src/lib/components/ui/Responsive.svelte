@@ -14,9 +14,9 @@
 		getActiveScreen,
 		MAX_SCREEN,
 		MIN_SCREEN,
-		type ScreensKeyType,
 		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
+    import type {ScreensKeyType} from "$lib/types/screens";
 
 	interface Props {
 		up?: ScreensKeyType;
