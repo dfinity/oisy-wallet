@@ -32,6 +32,16 @@
 
 <List condensed itemStyleClass="flex-col sm:flex-row" styleClass="text-sm text-primary">
 	<ListItem>
+		<span class="text-tertiary">{$i18n.networks.network}</span>
+		{#if nonNullish(collection?.network)}
+			<NetworkWithLogo network={collection.network} />
+		{:else}
+			<span class="min-w-12">
+				<SkeletonText />
+			</span>
+		{/if}
+	</ListItem>
+	<ListItem>
 		<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
 			<span class="flex items-center">
@@ -76,16 +86,6 @@
 		<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
 			<NftImageConsentPreference {collection} />
-		{:else}
-			<span class="min-w-12">
-				<SkeletonText />
-			</span>
-		{/if}
-	</ListItem>
-	<ListItem>
-		<span class="text-tertiary">{$i18n.networks.network}</span>
-		{#if nonNullish(collection?.network)}
-			<NetworkWithLogo network={collection.network} />
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />
