@@ -19,7 +19,8 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { isIos } from '$lib/utils/device.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
@@ -121,10 +122,13 @@
 
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
+	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
+		`token:${tokenId.description}:${networkId.description}`;
+
+	const groupKey = ({ id }: TokenUiGroup): string => `group:${id.description}`;
+
 	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
-		(isTokenUiGroup(tokenOrGroup)
-			? tokenOrGroup.group.id.description
-			: tokenOrGroup.token.id.description) ?? '';
+		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
