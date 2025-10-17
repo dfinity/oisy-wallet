@@ -9,7 +9,7 @@
 		type?: 'submit' | 'reset' | 'button';
 		disabled?: boolean;
 		loading?: boolean;
-		loadingAsSkeleton?: boolean;
+		loadingWithSkeleton?: boolean;
 		fullWidth?: boolean;
 		contentFullWidth?: boolean;
 		alignLeft?: boolean;
@@ -31,7 +31,7 @@
 		type = 'submit',
 		disabled,
 		loading = false,
-		loadingAsSkeleton = false,
+		loadingWithSkeleton = false,
 		fullWidth = false,
 		contentFullWidth = false,
 		alignLeft = false,
@@ -51,37 +51,37 @@
 
 <button
 	class={`${colorStyle} flex text-center ${styleClass}`}
-	class:animate-pulse={loading}
-	class:cursor-not-allowed={loading || disabled}
-	class:duration-500={loading}
-	class:ease-in-out={loading}
+	class:animate-pulse={loading || loadingWithSkeleton}
+	class:cursor-not-allowed={loading || loadingWithSkeleton || disabled}
+	class:duration-500={loading || loadingWithSkeleton}
+	class:ease-in-out={loading || loadingWithSkeleton}
 	class:flex-1={!inlineLink}
 	class:font-normal={inlineLink}
 	class:hover:text-brand-primary={inlineLink}
 	class:justify-start={alignLeft}
 	class:link
-	class:loading
+	class:loading={loading || loadingWithSkeleton}
 	class:padding-sm={paddingSmall}
 	class:text-tertiary={inlineLink}
-	class:transition={loading}
+	class:transition={loading || loadingWithSkeleton}
 	class:transparent
 	class:underline={inlineLink}
 	class:w-full={fullWidth}
 	aria-label={ariaLabel}
 	data-tid={testId}
-	disabled={disabled ?? loading}
+	disabled={disabled ?? (loading || loadingWithSkeleton)}
 	{onclick}
 	{ondblclick}
 	{type}
 >
 	<span
 		class={`relative flex min-w-0 gap-2 ${innerStyleClass}`}
-		class:duration-500={loading}
-		class:ease-in-out={loading}
-		class:invisible={loading && loadingAsSkeleton}
-		class:transition={loading}
+		class:duration-500={loading || loadingWithSkeleton}
+		class:ease-in-out={loading || loadingWithSkeleton}
+		class:invisible={loadingWithSkeleton}
+		class:transition={loading || loadingWithSkeleton}
 		class:w-full={contentFullWidth}
-		aria-hidden={loading && loadingAsSkeleton}
+		aria-hidden={loadingWithSkeleton}
 	>
 		{#if loading}
 			<span class="absolute flex h-full w-full items-center justify-center">

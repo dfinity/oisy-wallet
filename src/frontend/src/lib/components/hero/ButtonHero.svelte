@@ -21,8 +21,7 @@
 	{ariaLabel}
 	colorStyle="tertiary-main-card"
 	{disabled}
-	loading={$loading}
-	loadingAsSkeleton
+	loadingWithSkeleton={$loading}
 	{onclick}
 	paddingSmall
 	styleClass="py-1 min-w-0"
