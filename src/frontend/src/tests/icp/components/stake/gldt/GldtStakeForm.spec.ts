@@ -1,5 +1,10 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';
+import {
+	GLDT_STAKE_APY_CONTEXT_KEY,
+	initGldtStakeApyStore,
+	type GldtStakeApyContext
+} from '$icp/stores/gldt-stake-apy.store';
 import * as appConstants from '$lib/constants/app.constants';
 import {
 	STAKE_FORM_REVIEW_BUTTON,
@@ -12,7 +17,10 @@ import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
 describe('GldtStakeForm', () => {
 	const mockContext = () =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
+		new Map<symbol, SendContext | GldtStakeApyContext>([
+			[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })],
+			[GLDT_STAKE_APY_CONTEXT_KEY, { store: initGldtStakeApyStore() }]
+		]);
 
 	const props = {
 		amount: 0.01,
