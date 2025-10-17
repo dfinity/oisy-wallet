@@ -174,6 +174,10 @@ export const formatReceiveOutMinimum = ({
 export const mapVeloraSwapResult = (swap: QuoteWithDeltaPriceAndBridgePrice): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount:
+		/* We need to use `destAmountAfterBridge` in `bridgeInfo` for delta swaps, if available,
+   since this value is not mentioned in the documentation. However, after discussions
+   with the Velora team, we confirmed that this value is already formatted correctly
+   with the required token amount precision. */
 		'bridgeInfo' in swap.delta
 			? BigInt(swap.delta.bridgeInfo.destAmountAfterBridge)
 			: BigInt(swap.delta.destAmount),
