@@ -17,6 +17,7 @@ import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadNfts = async ({
 	tokens,
@@ -145,14 +146,12 @@ export const updateNftSection = async ({
 	section,
 	$authIdentity,
 	token,
-	$ethAddress,
-	$nftStore = []
+	$ethAddress
 }: {
 	section: CustomTokenSection | undefined;
 	$authIdentity: OptionIdentity;
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
-	$nftStore: Nft[] | undefined;
 }): Promise<void> => {
 	if (isNullish($authIdentity)) {
 		return;
@@ -196,7 +195,7 @@ export const updateNftSection = async ({
 		await loadNfts({
 			tokens: [token],
 			walletAddress: $ethAddress,
-			loadedNfts: $nftStore ?? [],
+			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
 			force: true
 		});
 	}

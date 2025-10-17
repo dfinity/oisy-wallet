@@ -50,7 +50,7 @@
 					action: nonNullish(section) ? 'hide' : 'unhide'
 				}
 			});
-			await updateNftSection({ section, token, $authIdentity, $nftStore, $ethAddress });
+			await updateNftSection({ section, token, $authIdentity, $ethAddress });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
