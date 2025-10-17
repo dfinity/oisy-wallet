@@ -1128,6 +1128,8 @@
 			"collections": "合集",
 			"all_assets": "所有资产",
 			"address_copied": "地址 $address 已复制",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "垃圾信息",
 			"not_spam": "非垃圾信息",
 			"spam_warning": "",

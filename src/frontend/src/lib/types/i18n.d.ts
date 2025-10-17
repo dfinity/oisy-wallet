@@ -934,6 +934,8 @@ interface I18nNfts {
 		collections: string;
 		all_assets: string;
 		address_copied: string;
+		collection_name_copied: string;
+		id_copied: string;
 		spam: string;
 		not_spam: string;
 		spam_warning: string;
