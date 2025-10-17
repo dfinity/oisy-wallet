@@ -29,13 +29,7 @@
 	);
 
 	const allowMedia = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: undefined
+		nonNullish(collection) ? collection.allowExternalContentSource : undefined
 	);
 </script>
 
