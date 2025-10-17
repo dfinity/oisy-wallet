@@ -8,6 +8,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, type Snippet, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
+	import type { ScreensKeyType } from '$lib/types/screens';
 	import {
 		AVAILABLE_SCREENS,
 		filterScreens,
@@ -16,7 +17,6 @@
 		MIN_SCREEN,
 		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
-    import type {ScreensKeyType} from "$lib/types/screens";
 
 	interface Props {
 		up?: ScreensKeyType;
