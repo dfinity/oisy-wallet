@@ -280,7 +280,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: null
+				$authIdentity: null,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();
@@ -291,7 +292,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -311,7 +313,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: { ...base721, allowExternalContentSource: true },
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -331,7 +334,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -351,7 +355,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -371,7 +376,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: { ...base1155, allowExternalContentSource: true },
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -391,7 +397,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -411,7 +418,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: undefined as unknown as NonFungibleToken,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();
