@@ -90,7 +90,8 @@
 			await loadNfts({
 				tokens: [token],
 				walletAddress: $ethAddress,
-				loadedNfts: $nftStore ?? []
+				loadedNfts: $nftStore ?? [],
+				force: true
 			});
 		}
 		saveLoading = false;
