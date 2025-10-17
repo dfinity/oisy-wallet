@@ -934,6 +934,8 @@ interface I18nNfts {
 		collections: string;
 		all_assets: string;
 		address_copied: string;
+		collection_name_copied: string;
+		id_copied: string;
 		spam: string;
 		not_spam: string;
 		spam_warning: string;
@@ -949,6 +951,8 @@ interface I18nNfts {
 		review_button: string;
 		collection_name: string;
 		media_urls: string;
+		media_url: string;
+		received_at: string;
 		display_preference: string;
 		review_preference: string;
 		media_enabled: string;
