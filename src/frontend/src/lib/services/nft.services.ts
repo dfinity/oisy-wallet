@@ -22,23 +22,19 @@ import { get } from 'svelte/store';
 export const loadNfts = async ({
 	tokens,
 	loadedNfts,
-	walletAddress,
-	force = false
+	walletAddress
 }: {
 	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
-	force?: boolean;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		const tokensToLoad = force
-			? tokens
-			: tokens.filter((token) => {
-					const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
-					return nftsByToken.length === 0;
-				});
+		const tokensToLoad = tokens.filter((token) => {
+			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
+			return nftsByToken.length === 0;
+		});
 
 		if (tokensToLoad.length > 0) {
 			const nfts: Nft[] = await loadNftsByNetwork({
@@ -195,8 +191,7 @@ export const updateNftSection = async ({
 		await loadNfts({
 			tokens: [token],
 			walletAddress: $ethAddress,
-			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
-			force: true
+			loadedNfts: get(nftStore) ?? [] // we can fetch the store imperatively as that store is just updated above
 		});
 	}
 };
