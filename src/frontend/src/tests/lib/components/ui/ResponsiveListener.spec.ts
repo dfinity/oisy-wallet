@@ -69,7 +69,7 @@ describe('ResponsiveListener', () => {
 		expect(get(screensStore)).toBe('md');
 	});
 
-	it('should coll the util to get the active screen', () => {
+	it('should call the util to get the active screen', () => {
 		const spy = vi.spyOn(screensUtils, 'getActiveScreen');
 
 		setWindowInnerWidth(1_000); // below `lg` screen
