@@ -23,21 +23,21 @@ const initNftStore = (): NftStore => {
 					return nfts;
 				}
 
-				const newNfts = nfts.filter(
-					(newNft) =>
-						!currentNfts.some(
-							(existingNft) =>
-								existingNft.id === newNft.id &&
+				const oldNfts = currentNfts.filter(
+					(oldNft) =>
+						!nfts.some(
+							(newNft) =>
+								newNft.id === oldNft.id &&
 								areAddressesEqual({
-									address1: existingNft.collection.address,
-									address2: newNft.collection.address,
-									networkId: existingNft.collection.network.id
+									address1: newNft.collection.address,
+									address2: oldNft.collection.address,
+									networkId: newNft.collection.network.id
 								}) &&
-								existingNft.collection.network.id === newNft.collection.network.id
+								newNft.collection.network.id === oldNft.collection.network.id
 						)
 				);
 
-				return [...currentNfts, ...newNfts];
+				return [...oldNfts, ...nfts];
 			});
 		},
 		removeSelectedNfts: (nfts: Nft[]) => {
