@@ -1128,6 +1128,8 @@
 			"collections": "コレクション",
 			"all_assets": "すべての資産",
 			"address_copied": "アドレス $address をコピーしました",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
 			"spam_warning": "",

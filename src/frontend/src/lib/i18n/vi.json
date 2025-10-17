@@ -1128,6 +1128,8 @@
 			"collections": "Các bộ sưu tập",
 			"all_assets": "Tất cả tài sản",
 			"address_copied": "Đã sao chép địa chỉ $address",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
 			"spam_warning": "",

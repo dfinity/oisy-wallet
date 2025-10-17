@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
+			"collection_name_copied": "Collection name copied",
+			"id_copied": "Token ID name copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"spam_warning": "Move '$collection' to spam?",

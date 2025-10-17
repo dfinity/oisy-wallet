@@ -1128,6 +1128,8 @@
 			"collections": "संग्रह",
 			"all_assets": "सभी एसेट्स",
 			"address_copied": "पता $address कॉपी किया गया",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
 			"spam_warning": "",

@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "Tous les actifs",
 			"address_copied": "Adresse $address copiée",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Pas de spam",
 			"spam_warning": "",

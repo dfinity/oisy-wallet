@@ -30,9 +30,13 @@
 	const allowMedia = $derived(collection?.allowExternalContentSource);
 </script>
 
-<List condensed itemStyleClass="flex-col sm:flex-row" styleClass="text-sm text-primary">
+<List
+	condensed
+	itemStyleClass="flex-col sm:flex-row sm:gap-12 sm:items-center"
+	styleClass="text-sm text-primary"
+>
 	<ListItem>
-		<span class="text-tertiary">{$i18n.networks.network}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.networks.network}</span>
 		{#if nonNullish(collection?.network)}
 			<NetworkWithLogo network={collection.network} />
 		{:else}
@@ -42,10 +46,16 @@
 		{/if}
 	</ListItem>
 	<ListItem>
-		<span class="text-tertiary">{$i18n.nfts.text.collection_name}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_name}</span>
 		{#if nonNullish(collection?.name)}
-			<span class="flex items-center">
-				{shortenWithMiddleEllipsis({ text: collection?.name })}
+			<span class="inline-flex min-w-0 items-center">
+				<span class="truncate">
+					{collection?.name}
+				</span>
+				<AddressActions
+					copyAddress={collection?.name}
+					copyAddressText={$i18n.nfts.text.collection_name_copied ?? ''}
+				/>
 			</span>
 		{:else}
 			<span class="min-w-12">
@@ -55,12 +65,17 @@
 	</ListItem>
 	{#if nonNullish(nft)}
 		<ListItem>
-			<span class="text-tertiary">{$i18n.nfts.text.token_id}</span>
-			{nft.id}
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_id}</span>
+			<span class="inline-flex min-w-0 items-center">
+				<span class="truncate">
+					{nft?.id}
+				</span>
+				<AddressActions copyAddress={nft?.id} copyAddressText={$i18n.nfts.text.id_copied ?? ''} />
+			</span>
 		</ListItem>
 	{/if}
 	<ListItem>
-		<span class="text-tertiary">{$i18n.nfts.text.collection_address}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.collection_address}</span>
 		{#if nonNullish(collection?.address) && nonNullish(collection?.network)}
 			<span class="flex items-center">
 				<output>{shortenWithMiddleEllipsis({ text: collection?.address })}</output>
@@ -83,7 +98,7 @@
 		{/if}
 	</ListItem>
 	<ListItem>
-		<span class="text-tertiary">{$i18n.nfts.text.display_preference}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
 			<NftImageConsentPreference {collection} />
 		{:else}
@@ -93,7 +108,7 @@
 		{/if}
 	</ListItem>
 	<ListItem>
-		<span class="text-tertiary">{$i18n.nfts.text.token_standard}</span>
+		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.token_standard}</span>
 		{#if nonNullish(collection?.standard)}
 			<span class="uppercase">{collection.standard}</span>
 		{:else}
@@ -145,8 +160,8 @@
 	{/if}
 	{#if nonNullish(collection) && isCollectionErc1155(collection) && nonNullish(nft?.balance)}
 		<ListItem
-			><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"
-				>{nft.balance}</span
+			><span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.quantity}</span><span
+				class="uppercase">{nft.balance}</span
 			></ListItem
 		>
 	{/if}
