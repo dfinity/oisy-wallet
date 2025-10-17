@@ -10,6 +10,7 @@
 		NFT_COLLECTION_ACTION_NOT_SPAM,
 		NFT_COLLECTION_ACTION_SPAM
 	} from '$lib/constants/test-ids.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -20,7 +21,6 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
-	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		token: NonFungibleToken;
