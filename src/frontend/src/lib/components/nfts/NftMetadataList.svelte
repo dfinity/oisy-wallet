@@ -27,9 +27,7 @@
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
 
-	const allowMedia = $derived(
-		nonNullish(collection) ? collection.allowExternalContentSource : undefined
-	);
+	const allowMedia = $derived(collection?.allowExternalContentSource);
 </script>
 
 <List condensed itemStyleClass="flex-col sm:flex-row" styleClass="text-sm text-primary">
