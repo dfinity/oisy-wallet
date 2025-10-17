@@ -11,6 +11,7 @@
 		NFT_COLLECTION_ACTION_HIDE,
 		NFT_COLLECTION_ACTION_UNHIDE
 	} from '$lib/constants/test-ids.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -49,7 +50,7 @@
 					action: nonNullish(section) ? 'hide' : 'unhide'
 				}
 			});
-			await updateNftSection({ section, token, $authIdentity });
+			await updateNftSection({ section, token, $authIdentity, $ethAddress });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {

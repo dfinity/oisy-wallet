@@ -17,23 +17,28 @@ import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadNfts = async ({
 	tokens,
 	loadedNfts,
-	walletAddress
+	walletAddress,
+	force = false
 }: {
 	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
+	force?: boolean;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		const tokensToLoad = tokens.filter((token) => {
-			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
-			return nftsByToken.length === 0;
-		});
+		const tokensToLoad = force
+			? tokens
+			: tokens.filter((token) => {
+					const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
+					return nftsByToken.length === 0;
+				});
 
 		if (tokensToLoad.length > 0) {
 			const nfts: Nft[] = await loadNftsByNetwork({
@@ -140,11 +145,13 @@ export const sendNft = async ({
 export const updateNftSection = async ({
 	section,
 	$authIdentity,
-	token
+	token,
+	$ethAddress
 }: {
 	section: CustomTokenSection | undefined;
 	$authIdentity: OptionIdentity;
 	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
 }): Promise<void> => {
 	if (isNullish($authIdentity)) {
 		return;
@@ -168,11 +175,7 @@ export const updateNftSection = async ({
 					}
 				]
 			});
-
-			return;
-		}
-
-		if (isTokenErc1155(token)) {
+		} else if (isTokenErc1155(token)) {
 			await saveCustomErc1155Token({
 				identity: $authIdentity,
 				tokens: [
@@ -187,8 +190,13 @@ export const updateNftSection = async ({
 					}
 				]
 			});
-
-			return;
 		}
+
+		await loadNfts({
+			tokens: [token],
+			walletAddress: $ethAddress,
+			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
+			force: true
+		});
 	}
 };
