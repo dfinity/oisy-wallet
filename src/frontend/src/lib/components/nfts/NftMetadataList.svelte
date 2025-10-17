@@ -15,7 +15,7 @@
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
-	import { getAllowMediaForNft, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
