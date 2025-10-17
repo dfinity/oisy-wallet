@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Snippet, getContext, onDestroy } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, onDestroy, type Snippet, untrack } from 'svelte';
 	import { tokenAsIcToken, tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import { loadEip1559TransactionPrice } from '$icp/services/cketh.services';
@@ -10,7 +9,6 @@
 		ETHEREUM_FEE_CONTEXT_KEY,
 		type EthereumFeeContext
 	} from '$icp/stores/ethereum-fee.store';
-	import type { IcToken } from '$icp/types/ic-token';
 	import { isTokenCkEthLedger } from '$icp/utils/ic-send.utils';
 	import { isTokenIcrcTestnet } from '$icp/utils/icrc-ledger.utils';
 	import {
@@ -24,20 +22,18 @@
 
 	interface Props {
 		networkId?: NetworkId;
-		children?: Snippet;
+		children: Snippet;
 	}
 
-	let { networkId = undefined, children }: Props = $props();
+	let { networkId, children }: Props = $props();
 
-	let ckEthConvert = $state(false);
-	run(() => {
-		ckEthConvert = isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId });
-	});
+	let ckEthConvert = $derived(
+		isConvertCkEthToEth({ token: $tokenWithFallbackAsIcToken, networkId })
+	);
 
-	let ckErc20Convert = $state(false);
-	run(() => {
-		ckErc20Convert = isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId });
-	});
+	let ckErc20Convert = $derived(
+		isConvertCkErc20ToErc20({ token: $tokenWithFallbackAsIcToken, networkId })
+	);
 
 	// This is the amount of ckETH to be burned to cover for the fees of the transaction eth_sendRawTransaction(destination_eth_address, amount) described in the withdrawal scheme.
 	// It will be requested to be approved using the transaction icrc2_approve(minter, tx_fee) described in the first step of the withdrawal scheme.
@@ -46,14 +42,13 @@
 	// NOTE: the endpoint gives a timestamp of the last update too, that could come in handy.
 	// For ckETH, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/cketh.adoc#cost-of-a-withdrawal
 	// For ckERC20, see https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
-	let maxTransactionFeeCkEth: bigint | undefined = $state(undefined);
-	run(() => {
-		maxTransactionFeeCkEth = nonNullish($tokenId)
+	let maxTransactionFeeCkEth = $derived(
+		nonNullish($tokenId)
 			? $eip1559TransactionPriceStore?.[$tokenId]?.data.max_transaction_fee
-			: undefined;
-	});
+			: undefined
+	);
 
-	let tokenCkEth: IcToken | undefined = $derived(
+	let tokenCkEth = $derived(
 		$icrcTokens
 			.filter(isTokenCkEthLedger)
 			.find(
@@ -64,24 +59,23 @@
 	// For ckERC20, include the ckETH ledger fee for the transaction icrc2_approve(minter, tx_fee) to the ckETH ledger, described in the first step of the withdrawal scheme.
 	// For ckETH, such fee is already shown in the ckETH ledger fee section, so no need to include it here.
 	// See https://github.com/dfinity/ic/blob/master/rs/ethereum/cketh/docs/ckerc20.adoc#withdrawal-ckerc20-to-erc20
-	let maxTransactionFeePlusLedgerApproveCkEth: bigint | undefined = $state(undefined);
-	run(() => {
-		maxTransactionFeePlusLedgerApproveCkEth = nonNullish(maxTransactionFeeCkEth)
+	let maxTransactionFeePlusLedgerApproveCkEth = $derived(
+		nonNullish(maxTransactionFeeCkEth)
 			? maxTransactionFeeCkEth + (tokenCkEth?.fee ?? ZERO)
-			: undefined;
-	});
+			: undefined
+	);
 
-	let maxTransactionFee: bigint | undefined = $state(undefined);
-	run(() => {
-		maxTransactionFee = ckEthConvert
+	let maxTransactionFee = $derived(
+		ckEthConvert
 			? maxTransactionFeeCkEth
 			: ckErc20Convert
 				? maxTransactionFeePlusLedgerApproveCkEth
-				: undefined;
-	});
+				: undefined
+	);
 
 	const { store } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
-	run(() => {
+
+	$effect(() => {
 		store.setFee({ maxTransactionFee });
 	});
 
@@ -94,8 +88,10 @@
 		store.setFee(null);
 	};
 
-	run(() => {
-		(maxTransactionFee, updateContext());
+	$effect(() => {
+		[maxTransactionFee];
+
+		untrack(() => updateContext());
 	});
 
 	const loadFee = async () => {
@@ -118,8 +114,10 @@
 		timer = setInterval(load, 30000);
 	};
 
-	run(() => {
-		(networkId, (async () => await loadFee())());
+	$effect(() => {
+		[networkId];
+
+		untrack(() => loadFee());
 	});
 
 	let timer: NodeJS.Timeout | undefined;
@@ -129,4 +127,4 @@
 	onDestroy(clearTimer);
 </script>
 
-{@render children?.()}
+{@render children()}

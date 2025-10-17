@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, type Snippet, untrack } from 'svelte';
 	import { queryEstimateFee } from '$icp/services/ckbtc.services';
 	import { BITCOIN_FEE_CONTEXT_KEY, type BitcoinFeeContext } from '$icp/stores/bitcoin-fee.store';
 	import { isTokenCkBtcLedger } from '$icp/utils/ic-send.utils';
@@ -16,15 +15,12 @@
 		token: Token;
 		amount?: OptionAmount;
 		networkId?: NetworkId;
-		children?: Snippet;
+		children: Snippet;
 	}
 
-	let { token, amount = undefined, networkId = undefined, children }: Props = $props();
+	let { token, amount, networkId, children }: Props = $props();
 
-	let ckBTC = $state(false);
-	run(() => {
-		ckBTC = isTokenCkBtcLedger(token);
-	});
+	let ckBTC = $derived(isTokenCkBtcLedger(token));
 
 	const { store } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 
@@ -64,9 +60,11 @@
 
 	const debounceEstimateFee = debounce(loadEstimatedFee);
 
-	run(() => {
-		(amount, networkId, token, (() => debounceEstimateFee())());
+	$effect(() => {
+		[amount, networkId, token];
+
+		untrack(() => debounceEstimateFee());
 	});
 </script>
 
-{@render children?.()}
+{@render children()}
