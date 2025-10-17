@@ -34,7 +34,7 @@
 
 	let slippageValueError = $derived(parsedValue >= maxSlippageInvalidValue || parsedValue <= 0);
 
-	let cmp = $state<Collapsible | undefined>(undefined);
+	let cmp = $state<Collapsible | undefined>();
 	let expanded = $state(false);
 
 	const extendedToggleContent = () => {
