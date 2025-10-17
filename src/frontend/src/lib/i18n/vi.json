@@ -1143,6 +1143,8 @@
 			"review_button": "Xem lại",
 			"collection_name": "Tên bộ sưu tập",
 			"media_urls": "URL media",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Tùy chọn hiển thị",
 			"review_preference": "Tùy chọn xem lại",
 			"media_enabled": "Media đã bật",
