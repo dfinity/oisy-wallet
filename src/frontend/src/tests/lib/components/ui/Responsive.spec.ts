@@ -81,7 +81,7 @@ describe('Responsive', () => {
 		expect(queryByTestId(mockSnippetTestId)).not.toBeInTheDocument();
 	});
 
-	it('should render accept only the lower-bound limit', async () => {
+	it('should render only from the lower-bound limit', async () => {
 		const { getByTestId, queryByTestId } = render(Responsive, {
 			props: { ...baseProps, up: 'xl' }
 		});
