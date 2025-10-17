@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
+			"collection_name_copied": "Collection name copied",
+			"id_copied": "Token ID name copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
 			"spam_warning": "Move '$collection' to spam?",
@@ -1143,6 +1145,8 @@
 			"review_button": "Review",
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",
+			"media_url": "Media URL",
+			"received_at": "Received At",
 			"display_preference": "Display preference",
 			"review_preference": "Review preference",
 			"media_enabled": "Media enabled",
@@ -1712,7 +1716,8 @@
 			"review": "Review transaction",
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
-			"provider": "Staking provider",
+			"provider": "Staking terms provided by $provider",
+			"visit_provider": "Visit website",
 			"current_apy": "Current APY",
 			"stake_review_subtitle": "You stake"
 		}

@@ -5,11 +5,11 @@
 	import type { SyncState } from '$lib/types/sync';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	let ckEthPendingTransactionsSyncState: SyncState | undefined = $state(undefined);
+	let ckEthPendingTransactionsSyncState = $state<SyncState | undefined>();
 	const onSyncPendingState = ({ detail: state }: CustomEvent<SyncState>) =>
 		(ckEthPendingTransactionsSyncState = state);
 
-	let ckEthMinterInfoSyncState: SyncState | undefined = $state(undefined);
+	let ckEthMinterInfoSyncState = $state<SyncState | undefined>();
 	const onSyncMinterInfoState = ({ detail: state }: CustomEvent<SyncState>) =>
 		(ckEthMinterInfoSyncState = state);
 </script>

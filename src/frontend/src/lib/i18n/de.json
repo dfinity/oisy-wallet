@@ -1128,6 +1128,8 @@
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Kein Spam",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "Prüfen",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Anzeigeeinstellung",
 			"review_preference": "Einstellung anpassen",
 			"media_enabled": "Medien aktiviert",
@@ -1713,6 +1717,7 @@
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
 			"stake_review_subtitle": ""
 		}

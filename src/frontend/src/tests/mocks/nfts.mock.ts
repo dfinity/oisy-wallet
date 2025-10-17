@@ -59,7 +59,8 @@ export const mockValidErc1155Nft: Nft = {
 		name: 'MyContract',
 		allowExternalContentSource: true
 	},
-	mediaStatus: NftMediaStatusEnum.OK
+	mediaStatus: NftMediaStatusEnum.OK,
+	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
 };
 
 export const mockNftollectionUi: NftCollectionUi = {

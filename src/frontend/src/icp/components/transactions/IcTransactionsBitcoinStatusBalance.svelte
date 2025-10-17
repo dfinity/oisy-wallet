@@ -15,7 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { SyncState } from '$lib/types/sync';
 
-	let receiveProgressStep: string | undefined = $state(undefined);
+	let receiveProgressStep = $state<string | undefined>();
 
 	const modalId = Symbol();
 
@@ -73,7 +73,7 @@
 		}
 	};
 
-	let ckBtcUpdateBalanceSyncState: SyncState | undefined = $state(undefined);
+	let ckBtcUpdateBalanceSyncState = $state<SyncState | undefined>();
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);
@@ -89,7 +89,7 @@
 		<button
 			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
 			onclick={async () => await receive()}
-			><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
+			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
 {/if}

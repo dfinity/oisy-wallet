@@ -1128,6 +1128,8 @@
 			"collections": "Các bộ sưu tập",
 			"all_assets": "Tất cả tài sản",
 			"address_copied": "Đã sao chép địa chỉ $address",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "Xem lại",
 			"collection_name": "Tên bộ sưu tập",
 			"media_urls": "URL media",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Tùy chọn hiển thị",
 			"review_preference": "Tùy chọn xem lại",
 			"media_enabled": "Media đã bật",
@@ -1713,6 +1717,7 @@
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
 			"stake_review_subtitle": ""
 		}

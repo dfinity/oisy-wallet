@@ -8,7 +8,8 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import { type NFT_COLLECTION_ROUTE, TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
@@ -21,7 +22,7 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
-		source?: string;
+		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
 	}
 
 	let {
@@ -32,7 +33,7 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source
+		source = 'default'
 	}: Props = $props();
 
 	const onClick = () => {
@@ -112,14 +113,15 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 px-2 pb-2">
-		<span
-			class="truncate text-sm font-bold"
-			class:text-disabled={disabled}
-			class:text-primary={!disabled}>{nft.name}</span
-		>
-		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
-			>#{nft.id}</span
-		>
+	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
+		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
+			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
+		</span>
+		<span class="text-xs" class:text-tertiary={!disabled}>
+			#{nft.id}
+			{#if source === NFT_LIST_ROUTE}
+				&ndash; {nft.name}
+			{/if}
+		</span>
 	</span>
 </button>

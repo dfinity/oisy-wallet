@@ -3,11 +3,10 @@
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
 	import { initCkBTCUpdateBalanceWorker } from '$icp/services/worker.ckbtc-update-balance.services';
-	import type { IcCkToken } from '$icp/types/ic-token';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
-	let ckBtcToken: IcCkToken | undefined = $derived(
+	let ckBtcToken = $derived(
 		findTwinToken({
 			tokenToPair: BTC_MAINNET_TOKEN,
 			tokens: $enabledIcTokens
