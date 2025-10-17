@@ -120,12 +120,17 @@
 	let ios = $derived(isIos());
 
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
+
+	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
+		(isTokenUiGroup(tokenOrGroup)
+			? tokenOrGroup.group.id.description
+			: tokenOrGroup.token.id.description) ?? '';
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
 				<div
 					class="overflow-hidden rounded-xl"
 					class:pointer-events-none={animating}
@@ -178,7 +183,7 @@
 					</div>
 				</StickyHeader>
 
-				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+				{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
 					<div
 						class="overflow-hidden rounded-xl"
 						class:pointer-events-none={animating}
