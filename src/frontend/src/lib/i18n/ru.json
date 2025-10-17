@@ -1143,6 +1143,8 @@
 			"review_button": "Просмотр",
 			"collection_name": "Название коллекции",
 			"media_urls": "URL-адреса медиафайлов",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Настройки отображения",
 			"review_preference": "Настройки просмотра",
 			"media_enabled": "Медиафайлы включены",

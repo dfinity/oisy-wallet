@@ -949,6 +949,8 @@ interface I18nNfts {
 		review_button: string;
 		collection_name: string;
 		media_urls: string;
+		media_url: string;
+		received_at: string;
 		display_preference: string;
 		review_preference: string;
 		media_enabled: string;

@@ -1143,6 +1143,8 @@
 			"review_button": "Rekapitulace",
 			"collection_name": "Název kolekce",
 			"media_urls": "URL adresy médií",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Preference zobrazení",
 			"review_preference": "Preference rekapitulace",
 			"media_enabled": "Média povolena",

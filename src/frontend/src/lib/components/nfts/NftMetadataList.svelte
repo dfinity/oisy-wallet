@@ -8,9 +8,10 @@
 	import AddressActions from '$lib/components/ui/AddressActions.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
-	import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -25,6 +26,8 @@
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
+
+	const allowMedia = $derived(collection?.allowExternalContentSource);
 </script>
 
 <List condensed itemStyleClass="flex-col sm:flex-row" styleClass="text-sm text-primary">
@@ -99,6 +102,47 @@
 			</span>
 		{/if}
 	</ListItem>
+	{#if nonNullish(nft)}
+		<ListItem>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.received_at}</span>
+			{#if nonNullish(nft?.acquiredAt)}
+				<output
+					>{formatSecondsToDate({
+						seconds: nft.acquiredAt.getTime() / 1000,
+						language: $currentLanguage
+					})}</output
+				>
+			{:else}
+				<span class="min-w-12">
+					<SkeletonText />
+				</span>
+			{/if}
+		</ListItem>
+		<ListItem>
+			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.media_url}</span>
+			{#if nonNullish(nft?.imageUrl)}
+				<span class="inline-flex min-w-0 items-center">
+					<output class="truncate text-tertiary"
+						>{shortenWithMiddleEllipsis({ text: nft.imageUrl, splitLength: 20 })}</output
+					>
+					<AddressActions
+						copyAddress={nft.imageUrl}
+						copyAddressText={replacePlaceholders($i18n.nfts.text.address_copied, {
+							$address: nft.imageUrl
+						})}
+						{...allowMedia && {
+							externalLink: nft.imageUrl,
+							externalLinkAriaLabel: $i18n.nfts.text.open_in_new_tab
+						}}
+					/>
+				</span>
+			{:else}
+				<span class="min-w-12">
+					<SkeletonText />
+				</span>
+			{/if}
+		</ListItem>
+	{/if}
 	{#if nonNullish(collection) && isCollectionErc1155(collection) && nonNullish(nft?.balance)}
 		<ListItem
 			><span class="text-tertiary">{$i18n.nfts.text.quantity}</span><span class="uppercase"

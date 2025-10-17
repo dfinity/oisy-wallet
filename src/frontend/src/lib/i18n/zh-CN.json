@@ -1143,6 +1143,8 @@
 			"review_button": "审核",
 			"collection_name": "合集名称",
 			"media_urls": "媒体链接",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "显示偏好",
 			"review_preference": "审核偏好",
 			"media_enabled": "媒体已启用",

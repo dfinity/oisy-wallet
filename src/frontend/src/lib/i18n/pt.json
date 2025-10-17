@@ -1143,6 +1143,8 @@
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "",
 			"review_preference": "",
 			"media_enabled": "",
