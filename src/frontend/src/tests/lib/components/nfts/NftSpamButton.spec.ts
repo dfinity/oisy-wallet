@@ -9,6 +9,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
+import { screensStore } from '$lib/stores/screens.store';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
@@ -25,6 +26,8 @@ describe('NftSpamButton', () => {
 	beforeEach(() => {
 		nftStore.resetAll();
 		vi.clearAllMocks();
+
+		screensStore.set('md');
 	});
 
 	it('renders Not Spam button when token.section is SPAM', () => {
