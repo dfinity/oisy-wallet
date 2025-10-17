@@ -17,10 +17,12 @@
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { NFT_CONSENT_MODAL, TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { loadNfts } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -29,8 +31,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
-	import { ethAddress } from '$lib/derived/address.derived';
-	import { loadNfts } from '$lib/services/nft.services';
 
 	interface Props {
 		collection: NftCollection;
