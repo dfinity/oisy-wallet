@@ -21,6 +21,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { ethAddress } from '$lib/derived/address.derived';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -49,7 +50,7 @@
 					action: nonNullish(section) ? 'hide' : 'unhide'
 				}
 			});
-			await updateNftSection({ section, token, $authIdentity });
+			await updateNftSection({ section, token, $authIdentity, $nftStore, $ethAddress });
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
