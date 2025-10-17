@@ -1717,6 +1717,7 @@
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
 			"stake_review_subtitle": ""
 		}

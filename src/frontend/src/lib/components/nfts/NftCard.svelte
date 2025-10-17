@@ -113,15 +113,11 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 px-2 pb-2">
-		<span
-			class="truncate text-sm font-bold"
-			class:text-disabled={disabled}
-			class:text-primary={!disabled}
-		>
+	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
+		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
 			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
 		</span>
-		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}>
+		<span class="text-xs" class:text-tertiary={!disabled}>
 			#{nft.id}
 			{#if source === NFT_LIST_ROUTE}
 				&ndash; {nft.name}

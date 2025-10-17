@@ -669,7 +669,7 @@ const fetchVeloraSwapAmount = async ({
 	);
 
 	if ('delta' in data) {
-		return mapVeloraSwapResult(data.delta);
+		return mapVeloraSwapResult(data);
 	}
 
 	if ('market' in data) {

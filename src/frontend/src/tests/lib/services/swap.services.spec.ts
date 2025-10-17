@@ -28,17 +28,8 @@ import {
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import {
-	SwapErrorCodes,
-	SwapProvider,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
-import {
-	geSwapEthTokenAddress,
-	mapVeloraMarketSwapResult,
-	mapVeloraSwapResult
-} from '$lib/utils/swap.utils';
+import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
+import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -110,27 +101,7 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 
 	return {
 		...(actual as Record<string, unknown>),
-		geSwapEthTokenAddress: vi.fn(),
-
-		mapVeloraSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'delta'
-			})
-		),
-
-		mapVeloraMarketSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'market'
-			})
-		)
+		geSwapEthTokenAddress: vi.fn()
 	};
 });
 
@@ -423,13 +394,16 @@ describe('swap.services', () => {
 				userEthAddress
 			});
 
-			expect(mapVeloraSwapResult).not.toHaveBeenCalled();
-			expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
 			expect(result).toEqual([]);
 		});
 
-		it('calls delta mapper when quote contains delta and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({ delta: { receiveAmount: '123' } });
+		it('calls delta mapper when quote contains delta without bridge and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridge: { scalingFactor: 0 }
+				}
+			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -439,14 +413,19 @@ describe('swap.services', () => {
 			});
 
 			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-			expect(mapVeloraSwapResult).toHaveBeenCalledOnce();
-			expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(123n);
+			expect(result[0].type).toBe('delta');
 		});
 
-		it('calls market mapper when quote contains market and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({ market: { receiveAmount: '456' } });
+		it('calls delta mapper when quote contains delta with bridge and returns correct receiveAmount', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridgeInfo: { destAmountAfterBridge: '949920' }
+				}
+			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -455,10 +434,31 @@ describe('swap.services', () => {
 				userEthAddress
 			});
 
-			expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();
-			expect(mapVeloraSwapResult).not.toHaveBeenCalled();
+			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(949920n);
+			expect(result[0].type).toBe('delta');
+		});
+
+		it('calls market mapper when quote contains market and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				market: {
+					destAmount: '456'
+				}
+			});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(456n);
+			expect(result[0].type).toBe('market');
 		});
 	});
 
