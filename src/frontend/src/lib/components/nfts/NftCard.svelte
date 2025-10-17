@@ -8,7 +8,7 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import { NFT_COLLECTION_ROUTE, TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -22,7 +22,7 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
-		source?: string;
+		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
 	}
 
 	let {
