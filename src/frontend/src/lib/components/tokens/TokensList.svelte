@@ -28,8 +28,6 @@
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
-
-
 	let loading: boolean = $derived(isNullish(tokens));
 
 	// Default token / tokenGroup list
@@ -110,11 +108,7 @@
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
-				<div
-					class="overflow-hidden rounded-xl"
-					transition:fade
-					animate:flip={flipParams}
-				>
+				<div class="overflow-hidden rounded-xl" transition:fade animate:flip={flipParams}>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
 
@@ -160,11 +154,7 @@
 				</StickyHeader>
 
 				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
-					<div
-						class="overflow-hidden rounded-xl"
-						transition:fade
-						animate:flip={flipParams}
-					>
+					<div class="overflow-hidden rounded-xl" transition:fade animate:flip={flipParams}>
 						<div class="transition duration-300 hover:bg-primary">
 							{#if !isTokenUiGroup(tokenOrGroup)}
 								<TokenCard data={tokenOrGroup.token} {onToggle} />

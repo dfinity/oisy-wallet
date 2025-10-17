@@ -27,7 +27,7 @@
 
 	let timer = $state<NodeJS.Timeout | undefined>();
 
-	let updating = false
+	let updating = false;
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
