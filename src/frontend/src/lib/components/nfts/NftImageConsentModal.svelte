@@ -29,6 +29,8 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import { ethAddress } from '$lib/derived/address.derived';
+	import { loadNfts } from '$lib/services/nft.services';
 
 	interface Props {
 		collection: NftCollection;
@@ -84,6 +86,13 @@
 					identity: $authIdentity
 				});
 			}
+
+			await loadNfts({
+				tokens: [token],
+				walletAddress: $ethAddress,
+				loadedNfts: $nftStore ?? [],
+				force: true
+			});
 		}
 		saveLoading = false;
 		modalStore.close();
