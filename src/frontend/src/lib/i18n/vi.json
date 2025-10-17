@@ -1128,8 +1128,6 @@
 			"collections": "Các bộ sưu tập",
 			"all_assets": "Tất cả tài sản",
 			"address_copied": "Đã sao chép địa chỉ $address",
-			"collection_name_copied": "",
-			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
 			"spam_warning": "",
@@ -1146,6 +1144,7 @@
 			"collection_name": "Tên bộ sưu tập",
 			"media_urls": "URL media",
 			"media_url": "",
+			"received_at": "",
 			"display_preference": "Tùy chọn hiển thị",
 			"review_preference": "Tùy chọn xem lại",
 			"media_enabled": "Media đã bật",
@@ -1160,8 +1159,7 @@
 			"learn_more": "Tìm hiểu thêm",
 			"token_id": "ID token",
 			"go_to_collection": "",
-			"could_not_update_section": "",
-			"received_at": ""
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",

@@ -1146,6 +1146,7 @@
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",
 			"media_url": "Media URL",
+			"received_at": "Received At",
 			"display_preference": "Display preference",
 			"review_preference": "Review preference",
 			"media_enabled": "Media enabled",
@@ -1160,8 +1161,7 @@
 			"learn_more": "Learn more",
 			"token_id": "Token ID",
 			"go_to_collection": "Go to collection",
-			"could_not_update_section": "Could not update collection section. Please try again",
-			"received_at": "Received At"
+			"could_not_update_section": "Could not update collection section. Please try again"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",

@@ -9,7 +9,6 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -28,9 +27,7 @@
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
 	);
 
-	const allowMedia = $derived(
-		nonNullish(collection) ? collection.allowExternalContentSource : undefined
-	);
+	const allowMedia = $derived(collection?.allowExternalContentSource);
 </script>
 
 <List
