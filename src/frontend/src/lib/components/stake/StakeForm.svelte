@@ -94,9 +94,9 @@
 		<SendReviewDestination {destination} />
 	</div>
 
-	{@render provider?.()}
-
 	{@render fee?.()}
+
+	{@render provider?.()}
 
 	{#snippet toolbar()}
 		<ButtonGroup testId="toolbar">
