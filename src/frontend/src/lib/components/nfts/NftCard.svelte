@@ -60,7 +60,9 @@
 				}
 			});
 
-			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
+			goto(
+				`${AppPath.Nfts}?network=${String(nft.collection.network.id.description)}&collection=${nft.collection.address}&nft=${nft.id}`
+			);
 		}
 	};
 </script>
