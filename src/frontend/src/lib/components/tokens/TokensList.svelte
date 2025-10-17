@@ -98,9 +98,10 @@
 	};
 
 	let modifiedTokens: Record<TokenId, Token> = $state({});
-	let modifiedTokensLen = $derived(Object.keys(modifiedTokens).length);
 
-	let saveDisabled = $derived(Object.keys(modifiedTokens).length === 0);
+	let modifiedTokensLen = $derived(Object.getOwnPropertySymbols(modifiedTokens).length);
+
+	let saveDisabled = $derived(modifiedTokensLen === 0);
 
 	const onToggle = ({ id, ...rest }: Token) => {
 		const { [id]: current, ...tokens } = modifiedTokens;

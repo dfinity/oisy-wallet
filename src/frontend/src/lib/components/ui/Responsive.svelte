@@ -8,13 +8,13 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, type Snippet, untrack } from 'svelte';
 	import { writable } from 'svelte/store';
+	import type { ScreensKeyType } from '$lib/types/screens';
 	import {
 		AVAILABLE_SCREENS,
 		filterScreens,
 		getActiveScreen,
 		MAX_SCREEN,
 		MIN_SCREEN,
-		type ScreensKeyType,
 		shouldDisplayForScreen
 	} from '$lib/utils/screens.utils';
 
