@@ -42,6 +42,10 @@ const config = {
 
 		version: {
 			name: version
+		},
+
+		output: {
+			bundleStrategy: 'single'
 		}
 	}
 };
