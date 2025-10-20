@@ -37,47 +37,49 @@
 
 <div>
 	<StickyHeader>
-		<div class="flex w-full justify-between">
-			<div class="grow-1 relative flex justify-between">
-				<TokensFilter>
-					{#snippet overflowableContent()}
-						{#if NFTS_ENABLED}
-							<Tabs
-								styleClass="mt-2 mb-8"
-								tabVariant="menu"
-								tabs={[
-									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
-									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
-								]}
-								trackEventName={TRACK_OPEN_ASSETS_TAB}
-								bind:activeTab
-							/>
-						{:else}
-							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-						{/if}
-					{/snippet}
-				</TokensFilter>
+		{#snippet header()}
+			<div class="flex w-full justify-between">
+				<div class="grow-1 relative flex justify-between">
+					<TokensFilter>
+						{#snippet overflowableContent()}
+							{#if NFTS_ENABLED}
+								<Tabs
+									styleClass="mt-2 mb-8"
+									tabVariant="menu"
+									tabs={[
+										{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
+										{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
+									]}
+									trackEventName={TRACK_OPEN_ASSETS_TAB}
+									bind:activeTab
+								/>
+							{:else}
+								<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+							{/if}
+						{/snippet}
+					</TokensFilter>
+				</div>
+				{#if tab === TokenTypes.TOKENS}
+					<div class="flex">
+						<TokensMenu />
+					</div>
+				{:else}
+					<div class="flex">
+						<NftSortMenu />
+					</div>
+					<div class="ml-1 flex">
+						<NftSettingsMenu />
+					</div>
+				{/if}
 			</div>
-			{#if tab === TokenTypes.TOKENS}
-				<div class="flex">
-					<TokensMenu />
-				</div>
-			{:else}
-				<div class="flex">
-					<NftSortMenu />
-				</div>
-				<div class="ml-1 flex">
-					<NftSettingsMenu />
-				</div>
-			{/if}
-		</div>
-	</StickyHeader>
+		{/snippet}
 
-	{#if activeTab === TokenTypes.TOKENS}
-		<TokensList />
-	{:else}
-		<NftsList />
-	{/if}
+		{#if activeTab === TokenTypes.TOKENS}
+			<TokensList />
+		{:else}
+			<NftsList />
+		{/if}
+	</StickyHeader>
 
 	<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
 		<ManageTokensButton />
