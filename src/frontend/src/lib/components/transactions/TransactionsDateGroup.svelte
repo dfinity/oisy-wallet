@@ -26,8 +26,8 @@
 				>
 			{/snippet}
 
-		{#each transactions as transactionUi (`${transactionUi.transaction.id}-${transactionUi.token.id.description}`)}
-			{@const { component, token, transaction } = transactionUi}
+			{#each transactions as transactionUi (`${transactionUi.transaction.id}-${transactionUi.token.id.description}`)}
+				{@const { component, token, transaction } = transactionUi}
 
 				<div in:slide={SLIDE_DURATION}>
 					{#if component === 'bitcoin'}
