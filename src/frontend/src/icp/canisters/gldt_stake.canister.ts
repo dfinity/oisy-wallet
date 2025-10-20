@@ -8,7 +8,8 @@ import { idlFactory as idlFactoryGldtStake } from '$declarations/gldt_stake/gldt
 import { mapGldtStakeCanisterError } from '$icp/canisters/gldt_stake.errors';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { Canister, createServices } from '@dfinity/utils';
+import type { Principal } from '@dfinity/principal';
+import { Canister, createServices, fromNullable } from '@dfinity/utils';
 
 export class GldtStakeCanister extends Canister<GldtStakeService> {
 	static async create({
@@ -47,5 +48,17 @@ export class GldtStakeCanister extends Canister<GldtStakeService> {
 		}
 
 		throw mapGldtStakeCanisterError(response.Err);
+	};
+
+	getPosition = async ({
+		principal
+	}: {
+		principal: Principal;
+	}): Promise<StakePositionResponse | undefined> => {
+		const { get_position } = this.caller({ certified: true });
+
+		const response = await get_position(principal);
+
+		return fromNullable(response);
 	};
 }
