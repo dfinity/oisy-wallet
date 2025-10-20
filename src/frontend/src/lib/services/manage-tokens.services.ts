@@ -1,5 +1,5 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import {
 	MANAGE_TOKENS_MODAL_ROUTE,
