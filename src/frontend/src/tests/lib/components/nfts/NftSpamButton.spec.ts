@@ -5,7 +5,7 @@ import {
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
-import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
