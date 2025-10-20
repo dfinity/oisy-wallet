@@ -187,21 +187,3 @@ export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
 // Stake
 export const TRACK_COUNT_STAKE_SUCCESS = 'stake_success';
 export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
-
-// New Plausible Events
-export enum PLAUSIBLE_EVENTS {
-	VIEW_OPEN = 'view_open',
-	NFT_CATEGORIZE = 'nfft_categorize'
-}
-
-export enum PLAUSIBLE_EVENT_CONTEXTS {
-	NFT = 'nft',
-	ASSETS_TAB = 'assets_tab'
-}
-
-export enum PLAUSIBLE_EVENT_SOURCES {
-	HOME_PAGE = 'home-page',
-	NFT_COLLECTION = 'nft-collection-page',
-	NFT_MEDIA_REVIEW = 'media-review',
-	NFT_PAGE = 'nft-page'
-}
