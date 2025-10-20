@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { Html, IconClose, IconWarning } from '@dfinity/gix-components';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isPWAStandalone } from '$lib/utils/device.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
-	import IconInfo from "$lib/components/icons/lucide/IconInfo.svelte";
 
 	let envBannerVisible = $state(true);
 
@@ -23,7 +23,7 @@
 	// No need to localise this string since we expect it to be fixed shortly.
 	const temporaryBannerString =
 		'Due to an ongoing AWS outage, some Ethereum RPC providers are temporarily unavailable. This may affect how your Ethereum and related tokens display in OISY.<br>' +
-		'OISY itself remains fully operational as it runs on a decentralized infrastructure (Internet Computer).'
+		'OISY itself remains fully operational as it runs on a decentralized infrastructure (Internet Computer).';
 </script>
 
 {#if STAGING && envBannerVisible}
