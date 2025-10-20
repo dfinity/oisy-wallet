@@ -232,7 +232,7 @@ const loadCustomIcrcTokensData = async ({
 
 				icrcCustomTokensStore.reset(ledgerCanisterId);
 
-				// To avoid pollute the screen, we show the toast error only after the update call.
+				// To avoid polluting the screen, we show the toast error only after the update call.
 				if (enabled && certified) {
 					toastsShow({
 						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
