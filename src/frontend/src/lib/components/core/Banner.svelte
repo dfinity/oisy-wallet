@@ -5,6 +5,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isPWAStandalone } from '$lib/utils/device.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
+	import IconInfo from "$lib/components/icons/lucide/IconInfo.svelte";
 
 	let envBannerVisible = $state(true);
 
@@ -21,7 +22,8 @@
 	// We are using a temporary banner as a workaround for the AWS outage.
 	// No need to localise this string since we expect it to be fixed shortly.
 	const temporaryBannerString =
-		'A current AWS outage is preventing OISY from loading tokens on Ethereum and related networks. OISY and the Internet Computer remain fully operational, and ICP tokens can still be traded without restriction.';
+		'Due to an ongoing AWS outage, some Ethereum RPC providers are temporarily unavailable. This may affect how your Ethereum and related tokens display in OISY.<br>' +
+		'OISY itself remains fully operational as it runs on a decentralized infrastructure (Internet Computer).'
 </script>
 
 {#if STAGING && envBannerVisible}
@@ -66,12 +68,16 @@
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
-		<WarningBanner>
-			<span class="w-full px-2">{temporaryBannerString}</span>
+		<div
+			class="border-info-solid bg-info-subtle-10 text-info-primary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-2 text-xs font-bold sm:w-fit md:text-base"
+		>
+			<IconInfo></IconInfo>
+
+			<span class="w-full px-2"><Html text={temporaryBannerString} /></span>
 			<button aria-label={$i18n.core.text.close} onclick={closeAwsTemporaryBanner}>
 				<IconClose />
 			</button>
-		</WarningBanner>
+		</div>
 	</div>
 {/if}
 
