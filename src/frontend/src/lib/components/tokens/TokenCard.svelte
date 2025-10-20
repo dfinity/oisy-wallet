@@ -22,7 +22,7 @@
 		testIdPrefix?: typeof TOKEN_CARD | typeof TOKEN_GROUP;
 		asNetwork?: boolean;
 		hover?: boolean;
-		onClick: () => void;
+		onClick?: () => void;
 		onToggle?: (t: Token) => void;
 	}
 
