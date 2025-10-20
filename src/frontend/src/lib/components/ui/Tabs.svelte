@@ -5,7 +5,7 @@
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES
-	} from '$lib/constants/analytics.constants';
+	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
