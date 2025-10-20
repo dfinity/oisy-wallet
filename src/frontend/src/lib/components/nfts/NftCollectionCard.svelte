@@ -4,15 +4,20 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES, PLAUSIBLE_EVENT_VALUES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		collection: NftCollectionUi;

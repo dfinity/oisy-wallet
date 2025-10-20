@@ -190,7 +190,7 @@ describe('NftCard', () => {
 		assertNonNullish(button);
 
 		button.click();
-		
+
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
