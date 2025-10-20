@@ -37,6 +37,18 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
 		});
 
+		it('should update already existing NFTs to store', () => {
+			const duplicateNft = { ...mockValidErc721Nft, imageUrl: 'newUrl' };
+
+			nftStore.addAll([mockValidErc721Nft]);
+
+			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
+
+			nftStore.addAll([duplicateNft]);
+
+			expect(get(nftStore)).toEqual([duplicateNft]);
+		});
+
 		it('should add NFT with same token id but different collection address', () => {
 			const similarNft: Nft = {
 				...mockValidErc721Nft,
@@ -48,7 +60,7 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockValidErc721Nft, similarNft]);
 		});
 
-		it('should not add NFT with address written in different case', () => {
+		it('should add NFT with address written in different case', () => {
 			nftStore.addAll([mockValidErc721Nft]);
 
 			const similarNft: Nft = {
@@ -61,7 +73,7 @@ describe('nftStore', () => {
 
 			nftStore.addAll([similarNft]);
 
-			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
+			expect(get(nftStore)).toEqual([similarNft]);
 		});
 	});
 

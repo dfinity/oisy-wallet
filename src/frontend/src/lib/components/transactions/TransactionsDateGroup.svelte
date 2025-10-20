@@ -25,7 +25,7 @@
 			>
 		</StickyHeader>
 
-		{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${index}`)}
+		{#each transactions as transactionUi (`${transactionUi.transaction.id}-${transactionUi.token.id.description}`)}
 			{@const { component, token, transaction } = transactionUi}
 
 			<div in:slide={SLIDE_DURATION}>

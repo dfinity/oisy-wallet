@@ -1394,7 +1394,9 @@ interface I18nStake {
 		executing_transaction: string;
 		unsupported_token_staking: string;
 		provider: string;
+		visit_provider: string;
 		current_apy: string;
+		current_apy_info: string;
 		stake_review_subtitle: string;
 	};
 }

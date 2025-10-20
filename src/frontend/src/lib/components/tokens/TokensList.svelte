@@ -19,7 +19,8 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenId } from '$lib/types/token';
-	import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 	import { isIos } from '$lib/utils/device.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
@@ -120,12 +121,20 @@
 	let ios = $derived(isIos());
 
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
+
+	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
+		`token:${tokenId.description}:${networkId.description}`;
+
+	const groupKey = ({ id }: TokenUiGroup): string => `group:${id.description}`;
+
+	const getUiKey = (tokenOrGroup: TokenUiOrGroupUi): string =>
+		isTokenUiGroup(tokenOrGroup) ? groupKey(tokenOrGroup.group) : tokenKey(tokenOrGroup.token);
 </script>
 
 <TokensDisplayHandler {animating} bind:tokens>
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
-			{#each filteredTokens as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
 				<div
 					class="overflow-hidden rounded-xl"
 					class:pointer-events-none={animating}
@@ -142,7 +151,7 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition duration-300 hover:bg-primary">
-							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>
@@ -178,7 +187,7 @@
 					</div>
 				</StickyHeader>
 
-				{#each enableMoreTokensList as tokenOrGroup (isTokenUiGroup(tokenOrGroup) ? tokenOrGroup.group.id : tokenOrGroup.token.id)}
+				{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
 					<div
 						class="overflow-hidden rounded-xl"
 						class:pointer-events-none={animating}

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { setContext } from 'svelte';
+	import { setContext, untrack } from 'svelte';
 	import IcReceiveCkBtc from '$icp/components/receive/IcReceiveCkBtc.svelte';
 	import IcReceiveCkEthereum from '$icp/components/receive/IcReceiveCkEthereum.svelte';
 	import IcReceiveIcp from '$icp/components/receive/IcReceiveIcp.svelte';
@@ -19,19 +19,19 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Token } from '$lib/types/token';
 
-	export let token: Token;
+	interface Props {
+		token: Token;
+	}
 
-	let ckEthereum = false;
-	$: ckEthereum = isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token);
+	let { token }: Props = $props();
 
-	let ckBTC = false;
-	$: ckBTC = isTokenCkBtcLedger(token);
+	let ckEthereum = $derived(isTokenCkEthLedger(token) || isTokenCkErc20Ledger(token));
 
-	let icrc = false;
-	$: icrc = isTokenIcrc(token);
+	let ckBTC = $derived(isTokenCkBtcLedger(token));
 
-	let dip20 = false;
-	$: dip20 = isTokenDip20(token);
+	let icrc = $derived(isTokenIcrc(token));
+
+	let dip20 = $derived(isTokenDip20(token));
 
 	const open = async (callback: () => Promise<void>) => {
 		await callback();
@@ -42,13 +42,17 @@
 	};
 
 	/**
-	 * Context for the IC receive modals: We initialize with a token, ensuring that the information is never undefined.
+	 * Context for the IC receives modals: We initialise with a token, ensuring that the information is never undefined.
 	 */
 	const context = initReceiveTokenContext({ token, open, close });
 	setContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY, context);
 
 	// At boot time, if the context is derived globally, the token might be updated a few times. That's why we also update it with an auto-subscriber.
-	$: (token, (() => context.token.set(token as IcToken))());
+	$effect(() => {
+		[token];
+
+		untrack(() => context.token.set(token as IcToken));
+	});
 </script>
 
 {#if ckEthereum}
