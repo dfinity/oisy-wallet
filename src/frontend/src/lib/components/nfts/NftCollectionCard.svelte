@@ -11,6 +11,8 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -39,6 +41,20 @@
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
 	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
+	onclick={() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_network: previewNft.collection.network.name,
+				token_address: previewNft.collection.address,
+				token_symbol: previewNft.collection.symbol ?? '',
+				token_name: previewNft.collection.name ?? ''
+			}
+		});
+	}}
 >
 	<div class="relative h-full w-full">
 		<NftDisplayGuard nft={previewNft} type="card">

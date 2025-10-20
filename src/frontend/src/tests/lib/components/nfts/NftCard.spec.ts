@@ -1,9 +1,6 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import {
-	NFT_COLLECTION_ROUTE,
-	NFT_LIST_ROUTE,
-	TRACK_NFT_OPEN
-} from '$lib/constants/analytics.constants';
+import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -136,15 +133,15 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'gallery',
-				nftStatus: 'spam'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_name: 'MyContract',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});
@@ -166,15 +163,15 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'collection-view',
-				nftStatus: 'hidden'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_name: 'MyContract',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});
@@ -193,16 +190,17 @@ describe('NftCard', () => {
 		assertNonNullish(button);
 
 		button.click();
-
+		
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'home'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_name: 'MyContract',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});
