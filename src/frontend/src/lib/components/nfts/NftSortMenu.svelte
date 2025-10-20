@@ -9,7 +9,7 @@
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
 		PLAUSIBLE_EVENTS
-	} from '$lib/constants/analytics.constants';
+	} from '$lib/enums/plausible';
 	import { nftSortType, nftSortOrder } from '$lib/derived/settings.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
