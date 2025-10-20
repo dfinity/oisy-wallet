@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, debounce } from '@dfinity/utils';
-	import {  getContext, onMount, onDestroy } from 'svelte';
+	import { getContext, onMount, onDestroy } from 'svelte';
 	import {
 		BTC_UTXOS_FEE_UPDATE_ENABLED,
 		BTC_UTXOS_FEE_UPDATE_INTERVAL
@@ -27,7 +27,6 @@
 
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
-
 
 	let schedulerTimer: NodeJS.Timeout | undefined;
 	let isActive = true;
