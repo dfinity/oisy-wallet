@@ -7,7 +7,6 @@
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENTS,
-		TRACK_NFT_SPAM_HIDE_ACTION
 	} from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
