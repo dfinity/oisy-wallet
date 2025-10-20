@@ -27,6 +27,17 @@ export const manageStakePosition = async ({
 	return manageStakePosition(positionParams);
 };
 
+export const getPosition = async ({
+	identity,
+	nullishIdentityErrorMessage
+}: CanisterApiFunctionParams): Promise<StakePositionResponse | undefined> => {
+	assertNonNullish(identity, nullishIdentityErrorMessage);
+
+	const { getPosition } = await gldtStakeCanister({ identity });
+
+	return getPosition({ principal: identity.getPrincipal() });
+};
+
 const gldtStakeCanister = async ({
 	identity,
 	nullishIdentityErrorMessage,
