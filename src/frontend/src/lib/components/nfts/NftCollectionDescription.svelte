@@ -8,7 +8,7 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/constants/analytics.constants';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';

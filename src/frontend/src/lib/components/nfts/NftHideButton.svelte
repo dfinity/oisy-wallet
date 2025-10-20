@@ -5,7 +5,7 @@
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/constants/analytics.constants';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_HIDE,
@@ -33,39 +33,41 @@
 		nonNullish($nftStore) ? findNftsByToken({ nfts: $nftStore, token }).length > 1 : false
 	);
 
+	const trackNftCategorizeEvent = ({
+		value,
+		metadata
+	}: {
+		value?: CustomTokenSection;
+		metadata: Record<string, string>;
+	}) => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: nonNullish(value) ? 'hide' : 'show',
+				location_source: source,
+				token_name: token.name,
+				token_address: token.address,
+				token_network: token.network.name,
+				token_standard: token.standard,
+				...metadata
+			}
+		});
+	};
+
 	let loading = $state(false);
 
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
 
-		const trackEventParams = {
-			event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-			event_subcontext: 'collection',
-			event_value: nonNullish(section) ? 'hide' : 'show',
-			location_source: source,
-			token_name: token.name,
-			token_address: token.address,
-			token_network: token.network.name,
-			token_standard: token.standard
-		};
-
 		try {
 			await updateNftSection({ section, token, $authIdentity });
-			trackEvent({
-				name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
-				metadata: {
-					...trackEventParams,
-					result_status: 'success'
-				}
-			});
+
+			trackNftCategorizeEvent({ value: section, metadata: { result_status: 'success' } });
 		} catch (_: unknown) {
-			trackEvent({
-				name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
-				metadata: {
-					...trackEventParams,
-					result_status: 'error'
-				}
-			});
+			trackNftCategorizeEvent({ value: section, metadata: { result_status: 'error' } });
+
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
 			loading = false;

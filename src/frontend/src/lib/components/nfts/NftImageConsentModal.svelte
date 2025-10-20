@@ -15,10 +15,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import {
-		PLAUSIBLE_EVENT_SOURCES,
-		TRACK_NFT_CONSENT_GIVEN
-	} from '$lib/constants/analytics.constants';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
@@ -32,6 +29,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { findNonFungibleToken, getNftCollectionUi } from '$lib/utils/nfts.utils';
+	import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 
 	interface Props {
 		collection: NftCollection;
