@@ -20,7 +20,8 @@
 
 	// We are using a temporary banner as a workaround for the AWS outage.
 	// No need to localise this string since we expect it to be fixed shortly.
-	const temporaryBannerString = "A current AWS outage is preventing OISY from loading tokens on Ethereum and related networks. OISY and the Internet Computer remain fully operational, and ICP tokens can still be traded without restriction."
+	const temporaryBannerString =
+		'A current AWS outage is preventing OISY from loading tokens on Ethereum and related networks. OISY and the Internet Computer remain fully operational, and ICP tokens can still be traded without restriction.';
 </script>
 
 {#if STAGING && envBannerVisible}
