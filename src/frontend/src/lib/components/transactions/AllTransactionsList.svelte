@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -97,7 +97,7 @@
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
 		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
-			{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+			{#if Object.values(groupedTransactions).length > 0}
 				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 					<TransactionsDateGroup
 						{formattedDate}
@@ -107,7 +107,7 @@
 				{/each}
 			{/if}
 
-			{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+			{#if Object.values(groupedTransactions).length === 0}
 				<TransactionsPlaceholder />
 			{/if}
 		</AllTransactionsScroll>
