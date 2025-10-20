@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { Input as GixInput } from '@dfinity/gix-components';
 	import { nonNullish, notEmptyString } from '@dfinity/utils';
-	import type { Snippet, ComponentProps } from 'svelte';
+	import type { ComponentProps, Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ButtonPaste from '$lib/components/ui/ButtonPaste.svelte';
 	import ButtonReset from '$lib/components/ui/ButtonReset.svelte';
