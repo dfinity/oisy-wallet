@@ -11,7 +11,7 @@
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
 	interface Props {
-		sendAmount?: OptionAmount;
+		sendAmount: OptionAmount;
 		receiveAmount?: number;
 		destinationTokenFee?: bigint;
 		exchangeValueUnit?: DisplayUnit;
@@ -19,9 +19,9 @@
 	}
 
 	let {
-		sendAmount = undefined,
+		sendAmount,
 		receiveAmount = $bindable(),
-		destinationTokenFee = undefined,
+		destinationTokenFee,
 		exchangeValueUnit = $bindable('usd'),
 		inputUnit = 'token'
 	}: Props = $props();
@@ -29,7 +29,7 @@
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	run(() => {
+	$effect(() => {
 		receiveAmount = nonNullish(sendAmount)
 			? nonNullish(destinationTokenFee)
 				? Math.max(

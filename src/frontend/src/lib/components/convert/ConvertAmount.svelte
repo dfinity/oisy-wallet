@@ -7,8 +7,8 @@
 
 	interface Props {
 		sendAmount: OptionAmount;
-		receiveAmount: number | undefined;
-		totalFee: bigint | undefined;
+		receiveAmount?: number;
+		totalFee?: bigint;
 		destinationTokenFee?: bigint;
 		minFee?: bigint;
 		ethereumEstimateFee?: bigint;
@@ -19,13 +19,13 @@
 		sendAmount = $bindable(),
 		receiveAmount = $bindable(),
 		totalFee,
-		destinationTokenFee = undefined,
-		minFee = undefined,
-		ethereumEstimateFee = undefined,
+		destinationTokenFee,
+		minFee,
+		ethereumEstimateFee,
 		exchangeValueUnit = $bindable('usd')
 	}: Props = $props();
 
-	let inputUnit: DisplayUnit = $derived(exchangeValueUnit === 'token' ? 'usd' : 'token');
+	let inputUnit = $derived<DisplayUnit>(exchangeValueUnit === 'token' ? 'usd' : 'token');
 </script>
 
 <div class="relative">

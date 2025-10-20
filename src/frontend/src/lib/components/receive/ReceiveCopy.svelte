@@ -9,7 +9,7 @@
 		testId?: string;
 	}
 
-	let { address, copyAriaLabel, testId = undefined }: Props = $props();
+	let { address, copyAriaLabel, testId }: Props = $props();
 </script>
 
 <ButtonIcon

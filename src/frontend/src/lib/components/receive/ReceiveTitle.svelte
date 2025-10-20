@@ -4,7 +4,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		title: string | undefined;
+		title?: string;
 	}
 
 	let { title }: Props = $props();

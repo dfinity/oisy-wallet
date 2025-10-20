@@ -1,5 +1,10 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import GldtStakeReview from '$icp/components/stake/gldt/GldtStakeReview.svelte';
+import {
+	GLDT_STAKE_APY_CONTEXT_KEY,
+	initGldtStakeApyStore,
+	type GldtStakeApyContext
+} from '$icp/stores/gldt-stake-apy.store';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { mockPrincipalText } from '$tests/mocks/identity.mock';
@@ -8,7 +13,10 @@ import { render } from '@testing-library/svelte';
 
 describe('GldtStakeReview', () => {
 	const mockContext = () =>
-		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
+		new Map<symbol, SendContext | GldtStakeApyContext>([
+			[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })],
+			[GLDT_STAKE_APY_CONTEXT_KEY, { store: initGldtStakeApyStore() }]
+		]);
 
 	const props = {
 		amount: 0.01,

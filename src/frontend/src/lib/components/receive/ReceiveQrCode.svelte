@@ -9,12 +9,12 @@
 
 	interface Props {
 		address: string;
-		addressToken?: Token | undefined;
+		addressToken?: Token;
 	}
 
-	let { address, addressToken = undefined }: Props = $props();
+	let { address, addressToken }: Props = $props();
 
-	let symbol: string | undefined = $derived(addressToken?.symbol);
+	let symbol = $derived(addressToken?.symbol);
 
 	let render = $state(true);
 

@@ -34,9 +34,9 @@
 	}
 
 	let {
-		networkId = undefined,
+		networkId,
 		sourceToken,
-		sourceTokenExchangeRate = undefined,
+		sourceTokenExchangeRate,
 		totalSourceTokenFee = $bindable(),
 		totalDestinationTokenFee = $bindable(),
 		ethereumEstimateFee = $bindable()
@@ -45,50 +45,37 @@
 	const { store: bitcoinStoreFeeData } = getContext<BitcoinFeeContext>(BITCOIN_FEE_CONTEXT_KEY);
 	const { store: ethereumStoreFeeData } = getContext<EthereumFeeContext>(ETHEREUM_FEE_CONTEXT_KEY);
 
-	let icTokenFee: bigint | undefined = $derived((sourceToken as IcToken).fee);
+	let icTokenFee = $derived((sourceToken as IcToken).fee);
 
-	let ckBTC = $state(false);
-	run(() => {
-		ckBTC = isTokenCkBtcLedger(sourceToken);
-	});
+	let ckBTC = $derived(isTokenCkBtcLedger(sourceToken));
 
-	let btcNetwork = $state(false);
-	run(() => {
-		btcNetwork = isNetworkIdBitcoin(networkId);
-	});
+	let btcNetwork = $derived(isNetworkIdBitcoin(networkId));
 
-	let bitcoinEstimatedFee: bigint | undefined = $state(undefined);
-	run(() => {
-		bitcoinEstimatedFee =
-			nonNullish($bitcoinStoreFeeData) && nonNullish($bitcoinStoreFeeData.bitcoinFee)
-				? $bitcoinStoreFeeData.bitcoinFee.bitcoin_fee + $bitcoinStoreFeeData.bitcoinFee.minter_fee
-				: undefined;
-	});
+	let bitcoinEstimatedFee = $derived(
+		nonNullish($bitcoinStoreFeeData) && nonNullish($bitcoinStoreFeeData.bitcoinFee)
+			? $bitcoinStoreFeeData.bitcoinFee.bitcoin_fee + $bitcoinStoreFeeData.bitcoinFee.minter_fee
+			: undefined
+	);
 
-	let kytFee: bigint | undefined = $state(undefined);
-	run(() => {
-		kytFee =
-			ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined;
-	});
+	let kytFee = $derived(
+		ckBTC && btcNetwork ? $ckBtcMinterInfoStore?.[sourceToken.id]?.data.kyt_fee : undefined
+	);
 
-	let ethereumFeeToken: Token = $derived($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
+	let ethereumFeeToken = $derived($ethereumFeeTokenCkEth ?? $ckEthereumNativeToken);
 
-	run(() => {
+	$effect(() => {
 		ethereumEstimateFee = $ethereumStoreFeeData?.maxTransactionFee;
 	});
 
-	let ethereumFeeExchangeRate: number | undefined = $derived(
-		$exchanges?.[ethereumFeeToken.id]?.usd
-	);
+	let ethereumFeeExchangeRate = $derived($exchanges?.[ethereumFeeToken.id]?.usd);
 
-	let bitcoinFeeExchangeRate: number | undefined = $derived(
-		$exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd
-	);
+	let bitcoinFeeExchangeRate = $derived($exchanges?.[BTC_MAINNET_TOKEN_ID]?.usd);
 
-	run(() => {
+	$effect(() => {
 		totalSourceTokenFee = icTokenFee;
 	});
-	run(() => {
+
+	$effect(() => {
 		totalDestinationTokenFee = bitcoinEstimatedFee;
 	});
 </script>

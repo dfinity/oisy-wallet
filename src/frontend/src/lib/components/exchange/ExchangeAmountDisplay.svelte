@@ -12,12 +12,12 @@
 		amount: bigint;
 		decimals: number;
 		symbol: string;
-		exchangeRate: number | undefined;
+		exchangeRate?: number;
 	}
 
 	let { amount, decimals, symbol, exchangeRate }: Props = $props();
 
-	let usdAmount: number | undefined = $derived(
+	let usdAmount = $derived(
 		nonNullish(exchangeRate)
 			? usdValue({
 					decimals,
@@ -27,7 +27,7 @@
 			: undefined
 	);
 
-	let displayAmount: string = $derived(
+	let displayAmount = $derived(
 		`${formatToken({
 			value: amount,
 			unitName: decimals,
