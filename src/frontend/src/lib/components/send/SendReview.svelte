@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
+	import { getContext,type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendNftReview from '$lib/components/tokens/SendNftReview.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
