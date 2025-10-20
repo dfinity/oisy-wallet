@@ -9,9 +9,14 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 	ASSETS_TAB = 'assets_tab'
 }
 
+export enum PLAUSIBLE_EVENT_VALUES {
+	NFT = 'nft'
+}
+
 export enum PLAUSIBLE_EVENT_SOURCES {
 	HOMEPAGE = 'homepage',
 	NFT_COLLECTION = 'nft-collection-page',
 	NFT_MEDIA_REVIEW = 'media-review',
-	NFT_PAGE = 'nft-page'
+	NFT_PAGE = 'nft-page',
+	NAVIGATION = 'navigation'
 }
