@@ -4,10 +4,7 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
-	import {
-		PLAUSIBLE_EVENT_CONTEXTS,
-		PLAUSIBLE_EVENTS,
-	} from '$lib/constants/analytics.constants';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,
