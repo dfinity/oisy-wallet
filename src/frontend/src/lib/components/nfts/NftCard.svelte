@@ -10,7 +10,12 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { type NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
@@ -46,8 +51,8 @@
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
 					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-					event_value: 'nft',
-					location_source: 'navigation',
+					event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+					location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
 					token_network: nft.collection.network.name,
 					token_address: nft.collection.address,
 					token_symbol: nft.collection.symbol ?? '',

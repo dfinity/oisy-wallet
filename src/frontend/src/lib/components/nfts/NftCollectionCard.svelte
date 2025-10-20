@@ -11,7 +11,7 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENT_SOURCES, PLAUSIBLE_EVENT_VALUES, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
@@ -46,8 +46,8 @@
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_value: 'nft',
-				location_source: 'navigation',
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
 				token_network: previewNft.collection.network.name,
 				token_address: previewNft.collection.address,
 				token_symbol: previewNft.collection.symbol ?? '',
