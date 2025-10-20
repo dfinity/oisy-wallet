@@ -1,7 +1,7 @@
 <script lang="ts">
 	import NftHideButton from '$lib/components/nfts/NftHideButton.svelte';
 	import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-	import { NFT_COLLECTION_HERO, PLAUSIBLE_EVENT_SOURCES } from '$lib/constants/analytics.constants';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/constants/analytics.constants';
 	import type { NonFungibleToken } from '$lib/types/nft';
 
 	interface Props {
