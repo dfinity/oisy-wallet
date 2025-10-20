@@ -15,11 +15,12 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { NFT_CONSENT_MODAL, TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
+	import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -161,8 +162,8 @@
 
 				{#if nonNullish(token)}
 					<div class="mb-6 flex w-full gap-2">
-						<span><NftSpamButton source={NFT_CONSENT_MODAL} {token} /></span>
-						<span><NftHideButton source={NFT_CONSENT_MODAL} {token} /></span>
+						<span><NftSpamButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
+						<span><NftHideButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
 					</div>
 				{/if}
 
