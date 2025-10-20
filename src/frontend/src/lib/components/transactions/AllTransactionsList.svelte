@@ -15,6 +15,7 @@
 	import type { IcTransactionUi } from '$icp/types/ic-transaction';
 	import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 	import AllTransactionsLoader from '$lib/components/transactions/AllTransactionsLoader.svelte';
+	import AllTransactionsScroll from '$lib/components/transactions/AllTransactionsScroll.svelte';
 	import AllTransactionsSkeletons from '$lib/components/transactions/AllTransactionsSkeletons.svelte';
 	import TransactionsDateGroup from '$lib/components/transactions/TransactionsDateGroup.svelte';
 	import TransactionsPlaceholder from '$lib/components/transactions/TransactionsPlaceholder.svelte';
@@ -31,6 +32,7 @@
 		enabledNonFungibleNetworkTokens
 	} from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
+	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import { mapAllTransactionsUi, sortTransactions } from '$lib/utils/transactions.utils';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
@@ -59,7 +61,9 @@
 		)
 	);
 
-	let groupedTransactions = $derived(groupTransactionsByDate(sortedTransactions));
+	let transactionsToDisplay = $state<AllTransactionUiWithCmp[]>([]);
+
+	let groupedTransactions = $derived(groupTransactionsByDate(transactionsToDisplay));
 
 	let { transaction: selectedBtcTransaction, token: selectedBtcToken } = $derived(
 		mapTransactionModalData<BtcTransactionUi>({
@@ -92,19 +96,21 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
-		{#if Object.values(groupedTransactions).length > 0}
-			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
-				<TransactionsDateGroup
-					{formattedDate}
-					testId={`all-transactions-date-group-${index}`}
-					{transactions}
-				/>
-			{/each}
-		{/if}
+		<AllTransactionsScroll {sortedTransactions} bind:transactionsToDisplay>
+			{#if Object.values(groupedTransactions).length > 0}
+				{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
+					<TransactionsDateGroup
+						{formattedDate}
+						testId={`all-transactions-date-group-${index}`}
+						{transactions}
+					/>
+				{/each}
+			{/if}
 
-		{#if Object.values(groupedTransactions).length === 0}
-			<TransactionsPlaceholder />
-		{/if}
+			{#if Object.values(groupedTransactions).length === 0}
+				<TransactionsPlaceholder />
+			{/if}
+		</AllTransactionsScroll>
 	</AllTransactionsLoader>
 </AllTransactionsSkeletons>
 
