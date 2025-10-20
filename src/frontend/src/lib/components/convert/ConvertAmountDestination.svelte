@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import TokenInput from '$lib/components/tokens/TokenInput.svelte';
 	import TokenInputAmountExchange from '$lib/components/tokens/TokenInputAmountExchange.svelte';
 	import TokenInputBalance from '$lib/components/tokens/TokenInputBalance.svelte';
