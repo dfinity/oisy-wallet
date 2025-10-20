@@ -15,15 +15,15 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
+	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { authIdentity } from '$lib/derived/auth.derived';
+	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
-	import { authIdentity } from '$lib/derived/auth.derived';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
