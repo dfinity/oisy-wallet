@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
 	import {
 		BTC_DECIMALS,
 		BTC_MAINNET_SYMBOL,
