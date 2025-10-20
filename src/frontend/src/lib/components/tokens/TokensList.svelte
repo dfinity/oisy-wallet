@@ -151,7 +151,7 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition duration-300 hover:bg-primary">
-							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>

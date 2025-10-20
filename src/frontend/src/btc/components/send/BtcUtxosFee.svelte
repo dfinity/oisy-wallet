@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish, debounce } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, onMount, onDestroy } from 'svelte';
+	import { getContext, onMount, onDestroy } from 'svelte';
 	import {
 		BTC_UTXOS_FEE_UPDATE_ENABLED,
 		BTC_UTXOS_FEE_UPDATE_INTERVAL
@@ -28,8 +28,6 @@
 	const { sendTokenDecimals, sendTokenSymbol, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
 	let schedulerTimer: NodeJS.Timeout | undefined;
 	let isActive = true;
 
@@ -54,8 +52,6 @@
 				msg: { text: $i18n.send.error.unexpected_utxos_fee },
 				err
 			});
-
-			dispatch('icBack');
 		}
 	};
 
