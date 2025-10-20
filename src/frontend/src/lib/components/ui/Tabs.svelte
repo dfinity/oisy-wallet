@@ -5,6 +5,10 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { TabVariant } from '$lib/types/style';
 	import type { NonEmptyArray } from '$lib/types/utils';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES
+	} from '$lib/constants/analytics.constants';
 
 	interface Props {
 		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
@@ -32,7 +36,9 @@
 				trackEvent({
 					name: trackEventName,
 					metadata: {
-						tab: id
+						event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
+						event_value: id,
+						location_source: PLAUSIBLE_EVENT_SOURCES.HOME_PAGE
 					}
 				});
 			}

@@ -179,11 +179,25 @@ export const TRACK_OPEN_ASSETS_TAB = 'open_assets_tab';
 export const TRACK_NFT_SETTINGS_CHANGE = 'nft_settings_change';
 export const TRACK_NFT_SORT_CHANGE = 'nft_sort_change';
 export const TRACK_NFT_SEND = 'nft_send';
-export const TRACK_NFT_CONSENT_GIVEN = 'nft_consent_given';
 export const TRACK_NFT_OPEN = 'nft_open';
 export const TRACK_NFT_OPEN_CONSENT_MODAL = 'nft_open_consent_modal';
 export const TRACK_NFT_SPAM_HIDE_ACTION = 'nft_spam_hide_action';
 
+export const NFT_MEDIA_CONSENT = 'nft_media_consent';
+
 // Stake
 export const TRACK_COUNT_STAKE_SUCCESS = 'stake_success';
 export const TRACK_COUNT_STAKE_ERROR = 'stake_error';
+
+// New Plausible Events
+export enum PLAUSIBLE_EVENTS {
+	VIEW_OPEN = 'view_open'
+}
+
+export enum PLAUSIBLE_EVENT_CONTEXTS {
+	ASSETS_TAB = 'assets_tab'
+}
+
+export enum PLAUSIBLE_EVENT_SOURCES {
+	HOME_PAGE = 'home-page'
+}
