@@ -1,6 +1,7 @@
 export enum PLAUSIBLE_EVENTS {
 	VIEW_OPEN = 'view_open',
-	NFT_CATEGORIZE = 'nfft_categorize'
+	NFT_CATEGORIZE = 'nfft_categorize',
+	NFT_MEDIA_CONSENT = 'nft_media_consent'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
