@@ -1,5 +1,5 @@
 import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import {
 	CONFIRMATION_MODAL,
 	NFT_COLLECTION_ACTION_NOT_SPAM,
