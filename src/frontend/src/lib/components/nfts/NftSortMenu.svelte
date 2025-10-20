@@ -5,7 +5,11 @@
 	import IconArrowUpDown from '$lib/components/icons/lucide/IconArrowUpDown.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { TRACK_NFT_SORT_CHANGE } from '$lib/constants/analytics.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENTS
+	} from '$lib/constants/analytics.constants';
 	import { nftSortType, nftSortOrder } from '$lib/derived/settings.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -20,7 +24,17 @@
 	};
 
 	const trackSortingEvent = ({ type, order }: { type: string; order: string }) => {
-		trackEvent({ name: TRACK_NFT_SORT_CHANGE, metadata: { type, order } });
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key:
+					order === 'asc'
+						? PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_ASC
+						: PLAUSIBLE_EVENT_EVENTS_KEYS.SORT_DESC,
+				event_value: type
+			}
+		});
 	};
 </script>
 
