@@ -11,12 +11,12 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
+	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
