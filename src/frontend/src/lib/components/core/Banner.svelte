@@ -13,6 +13,14 @@
 	let pwaBannerVisible = $state(true);
 
 	const closePwaBanner = () => (pwaBannerVisible = false);
+
+	let awsTemporaryBannerVisible = $state(true);
+
+	const closeAwsTemporaryBanner = () => (awsTemporaryBannerVisible = false);
+
+	// We are using a temporary banner as a workaround for the AWS outage.
+	// No need to localise this string since we expect it to be fixed shortly.
+	const temporaryBannerString = "A current AWS outage is preventing OISY from loading tokens on Ethereum and related networks. OISY and the Internet Computer remain fully operational, and ICP tokens can still be traded without restriction."
 </script>
 
 {#if STAGING && envBannerVisible}
@@ -46,6 +54,20 @@
 				<Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} />
 			</span>
 			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
+				<IconClose />
+			</button>
+		</WarningBanner>
+	</div>
+{/if}
+
+<!-- TODO: remove this temporary WarningBanner again as soon as AWS fixes the issue -->
+{#if awsTemporaryBannerVisible}
+	<div
+		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+	>
+		<WarningBanner>
+			<span class="w-full px-2">{temporaryBannerString}</span>
+			<button aria-label={$i18n.core.text.close} onclick={closeAwsTemporaryBanner}>
 				<IconClose />
 			</button>
 		</WarningBanner>
