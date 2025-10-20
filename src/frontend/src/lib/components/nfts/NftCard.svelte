@@ -8,15 +8,15 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { type NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
+	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
 		PLAUSIBLE_EVENT_VALUES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 
