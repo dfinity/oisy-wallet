@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import BtcTransactionModal from '$btc/components/transactions/BtcTransactionModal.svelte';
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import type { BtcTransactionUi } from '$btc/types/btc';
@@ -54,16 +54,12 @@
 	);
 
 	let sortedTransactions = $derived(
-		nonNullish(transactions)
-			? transactions.sort(({ transaction: a }, { transaction: b }) =>
-					sortTransactions({ transactionA: a, transactionB: b })
-				)
-			: undefined
+		transactions.sort(({ transaction: a }, { transaction: b }) =>
+			sortTransactions({ transactionA: a, transactionB: b })
+		)
 	);
 
-	let groupedTransactions = $derived(
-		nonNullish(sortedTransactions) ? groupTransactionsByDate(sortedTransactions) : undefined
-	);
+	let groupedTransactions = $derived(groupTransactionsByDate(sortedTransactions));
 
 	let { transaction: selectedBtcTransaction, token: selectedBtcToken } = $derived(
 		mapTransactionModalData<BtcTransactionUi>({
@@ -96,7 +92,7 @@
 
 <AllTransactionsSkeletons testIdPrefix={ACTIVITY_TRANSACTION_SKELETON_PREFIX}>
 	<AllTransactionsLoader {transactions}>
-		{#if nonNullish(groupedTransactions) && Object.values(groupedTransactions).length > 0}
+		{#if Object.values(groupedTransactions).length > 0}
 			{#each Object.entries(groupedTransactions) as [formattedDate, transactions], index (formattedDate)}
 				<TransactionsDateGroup
 					{formattedDate}
@@ -106,7 +102,7 @@
 			{/each}
 		{/if}
 
-		{#if isNullish(groupedTransactions) || Object.values(groupedTransactions).length === 0}
+		{#if Object.values(groupedTransactions).length === 0}
 			<TransactionsPlaceholder />
 		{/if}
 	</AllTransactionsLoader>
