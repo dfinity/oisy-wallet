@@ -38,7 +38,7 @@
 					metadata: {
 						event_context: PLAUSIBLE_EVENT_CONTEXTS.ASSETS_TAB,
 						event_value: id,
-						location_source: PLAUSIBLE_EVENT_SOURCES.HOME_PAGE
+						location_source: PLAUSIBLE_EVENT_SOURCES.HOMEPAGE
 					}
 				});
 			}
