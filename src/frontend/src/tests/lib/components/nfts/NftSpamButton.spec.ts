@@ -1,11 +1,11 @@
 import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import {
 	CONFIRMATION_MODAL,
 	NFT_COLLECTION_ACTION_NOT_SPAM,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as nftsServices from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
