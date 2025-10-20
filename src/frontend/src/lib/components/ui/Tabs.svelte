@@ -2,13 +2,13 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { trackEvent } from '$lib/services/analytics.services';
-	import type { TabVariant } from '$lib/types/style';
-	import type { NonEmptyArray } from '$lib/types/utils';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES
 	} from '$lib/constants/analytics.constants';
+	import { trackEvent } from '$lib/services/analytics.services';
+	import type { TabVariant } from '$lib/types/style';
+	import type { NonEmptyArray } from '$lib/types/utils';
 
 	interface Props {
 		tabs: NonEmptyArray<{ label: string; id: string; path?: string }>;
