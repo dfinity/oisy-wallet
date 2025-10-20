@@ -35,10 +35,10 @@
 
 	const trackNftCategorizeEvent = ({
 		value,
-		metadata
+		status
 	}: {
 		value?: CustomTokenSection;
-		metadata: Record<string, string>;
+		status: string;
 	}) => {
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
@@ -51,7 +51,7 @@
 				token_address: token.address,
 				token_network: token.network.name,
 				token_standard: token.standard,
-				...metadata
+				result_status: status
 			}
 		});
 	};
@@ -64,9 +64,9 @@
 		try {
 			await updateNftSection({ section, token, $authIdentity });
 
-			trackNftCategorizeEvent({ value: section, metadata: { result_status: 'success' } });
+			trackNftCategorizeEvent({ value: section, status: 'success' });
 		} catch (_: unknown) {
-			trackNftCategorizeEvent({ value: section, metadata: { result_status: 'error' } });
+			trackNftCategorizeEvent({ value: section, status: 'error' });
 
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
