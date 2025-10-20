@@ -198,5 +198,5 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
-	HOME_PAGE = 'home-page'
+	HOMEPAGE = 'homepage'
 }
