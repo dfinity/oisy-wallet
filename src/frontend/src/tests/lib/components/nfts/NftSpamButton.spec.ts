@@ -1,5 +1,5 @@
 import NftSpamButton from '$lib/components/nfts/NftSpamButton.svelte';
-import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/constants/analytics.constants';
 import {
 	CONFIRMATION_MODAL,
 	NFT_COLLECTION_ACTION_NOT_SPAM,
@@ -107,21 +107,24 @@ describe('NftSpamButton', () => {
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
 
 		const { getByTestId } = render(NftSpamButton, {
-			props: { token: mockToken, source: 'collection-view' }
+			props: { token: mockToken, source: 'collection' }
 		});
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
 		await fireEvent.click(spamBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'collection-view',
-				collection_name: mockToken.name,
-				collection_address: mockToken.address,
-				network: mockToken.network.name,
-				standard: mockToken.standard,
-				action: 'spam'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'spam',
+				location_source: 'collection',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard,
+				result_status: 'success'
 			}
 		});
 	});
@@ -131,21 +134,24 @@ describe('NftSpamButton', () => {
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
 
 		const { getByTestId } = render(NftSpamButton, {
-			props: { token: spamToken, source: 'spam-tab' }
+			props: { token: spamToken, source: 'collection' }
 		});
 
 		const notSpamBtn = getByTestId(NFT_COLLECTION_ACTION_NOT_SPAM);
 		await fireEvent.click(notSpamBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'spam-tab',
-				collection_name: spamToken.name,
-				collection_address: spamToken.address,
-				network: spamToken.network.name,
-				standard: spamToken.standard,
-				action: 'unspam'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'unspam',
+				location_source: 'collection',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard,
+				result_status: 'success'
 			}
 		});
 	});
@@ -155,7 +161,7 @@ describe('NftSpamButton', () => {
 		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
 
 		const { getByTestId } = render(NftSpamButton, {
-			props: { token: mockToken, source: 'gallery' }
+			props: { token: mockToken, source: 'collection_page' }
 		});
 
 		const spamBtn = getByTestId(NFT_COLLECTION_ACTION_SPAM);
@@ -171,14 +177,17 @@ describe('NftSpamButton', () => {
 		await fireEvent.click(confirmBtn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_SPAM_HIDE_ACTION,
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
 			metadata: {
-				source: 'gallery',
-				collection_name: mockToken.name,
-				collection_address: mockToken.address,
-				network: mockToken.network.name,
-				standard: mockToken.standard,
-				action: 'spam'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: 'spam',
+				location_source: 'collection_page',
+				token_name: mockToken.name,
+				token_address: mockToken.address,
+				token_network: mockToken.network.name,
+				token_standard: mockToken.standard,
+				result_status: 'success'
 			}
 		});
 	});
