@@ -14,7 +14,7 @@
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_EVENTS_KEYS,
-		PLAUSIBLE_EVENTS,
+		PLAUSIBLE_EVENTS
 	} from '$lib/constants/analytics.constants';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
