@@ -7,7 +7,6 @@
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import {
 		saveErc1155CustomTokens,
@@ -55,6 +54,7 @@
 	import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
+    import type {SaveUserToken} from "$eth/types/erc20-user-token";
 
 	interface Props {
 		initialSearch?: string;
