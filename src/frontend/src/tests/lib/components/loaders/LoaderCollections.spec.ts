@@ -16,6 +16,14 @@ import { toNullable } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
 }));

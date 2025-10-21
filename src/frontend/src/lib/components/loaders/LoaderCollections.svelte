@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Identity } from '@dfinity/agent';
-	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { type Snippet, untrack } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -14,8 +14,6 @@
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { listCustomTokens } from '$lib/api/backend.api';
-	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -182,8 +180,14 @@
 			});
 		}
 	};
+
+	const debounceLoad = debounce(onLoad, 1000);
+
+	$effect(() => {
+		[$enabledEthereumNetworks, $enabledEvmNetworks, NFTS_ENABLED, $authIdentity];
+
+		untrack(() => debounceLoad());
+	});
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+{@render children?.()}

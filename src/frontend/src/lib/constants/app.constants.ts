@@ -170,9 +170,6 @@ export const EIGHT_DECIMALS = 8;
 // eslint-disable-next-line no-restricted-syntax -- This is the definition
 export const ZERO = 0n;
 
-// NFTs
-export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
-
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
 export const WALLET_PAGINATION = 10n;
