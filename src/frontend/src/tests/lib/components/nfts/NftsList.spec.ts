@@ -13,7 +13,6 @@ import * as tokens from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
-import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import {
 	mockNonFungibleToken1,
@@ -26,14 +25,10 @@ import { get, writable } from 'svelte/store';
 
 describe('NftsList', () => {
 	const mockNfts = [
-		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId(0) },
-		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId(1) },
-		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId(2) }
+		{ ...mockValidErc1155Nft, name: 'Null', id: parseNftId('0') },
+		{ ...mockValidErc1155Nft, name: 'Eins', id: parseNftId('1') },
+		{ ...mockValidErc1155Nft, name: 'Zwei', id: parseNftId('2') }
 	];
-
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
 
 	beforeEach(() => {
 		nftStore.resetAll();

@@ -1,5 +1,5 @@
 import type { Network } from '$lib/types/network';
-import type { Token } from '$lib/types/token';
+import type { Token, TokenId } from '$lib/types/token';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
@@ -43,13 +43,11 @@ export const getDisabledOrModifiedTokens = ({
 	selectedNetwork
 }: {
 	$allTokens: TokenToggleable<Token>[];
-	modifiedTokens: Record<string, Token>;
+	modifiedTokens: Record<TokenId, Token>;
 	selectedNetwork?: Network;
 }): TokenUiOrGroupUi[] =>
 	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
-		const isModified = nonNullish(
-			modifiedTokens[`${token.network.id.description}-${token.id.description}`]
-		);
+		const isModified = nonNullish(modifiedTokens[token.id]);
 		if (
 			(!token.enabled || (token.enabled && isModified)) &&
 			showTokenFilteredBySelectedNetwork({

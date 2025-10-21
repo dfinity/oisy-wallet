@@ -1,9 +1,17 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftSortStore } from '$lib/stores/settings.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -26,6 +34,10 @@
 			sort: $nftSortStore
 		})
 	);
+
+	const previewNft = $derived(
+		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
+	);
 </script>
 
 <a
@@ -34,9 +46,23 @@
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
 	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
+	onclick={() => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: previewNft.collection.network.name,
+				token_address: previewNft.collection.address,
+				token_symbol: previewNft.collection.symbol ?? '',
+				token_name: previewNft.collection.name ?? ''
+			}
+		});
+	}}
 >
 	<div class="relative h-full w-full">
-		<NftImageConsent nft={collection.nfts[0]} type="card">
+		<NftDisplayGuard nft={previewNft} type="card">
 			<div
 				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}
@@ -63,7 +89,7 @@
 					{/if}
 				{/each}
 			</div>
-		</NftImageConsent>
+		</NftDisplayGuard>
 
 		<span class="absolute bottom-0 right-0 m-2.5">
 			<NetworkLogo

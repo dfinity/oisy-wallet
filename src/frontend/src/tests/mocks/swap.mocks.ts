@@ -1,4 +1,4 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
 import type { IcToken } from '$icp/types/ic-token';
 import { SwapProvider, type SwapMappedResult } from '$lib/types/swap';
 

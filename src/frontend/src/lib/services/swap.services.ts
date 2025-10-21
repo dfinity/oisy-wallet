@@ -1,6 +1,7 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
@@ -48,7 +49,6 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
-import type { EthAddress } from '$lib/types/address';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -265,23 +265,16 @@ const fetchSwapAmountsICP = async ({
 > => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
-	const [settledResults, isTokenIcrc2] = await Promise.all([
-		Promise.allSettled(
-			enabledProviders.map(({ getQuote }) =>
-				getQuote({
-					identity,
-					sourceToken: sourceToken as IcToken,
-					destinationToken: destinationToken as IcToken,
-					sourceAmount: amount
-				})
-			)
-		),
-		isSourceTokenIcrc2 ??
-			isIcrcTokenSupportIcrc2({
+	const settledResults = await Promise.allSettled(
+		enabledProviders.map(({ getQuote }) =>
+			getQuote({
 				identity,
-				ledgerCanisterId: (sourceToken as IcToken).ledgerCanisterId
+				sourceToken: sourceToken as IcToken,
+				destinationToken: destinationToken as IcToken,
+				sourceAmount: amount
 			})
-	]);
+		)
+	);
 
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
@@ -295,7 +288,7 @@ const fetchSwapAmountsICP = async ({
 			if (provider.key === SwapProvider.KONG_SWAP) {
 				const swap = result.value as SwapAmountsReply;
 				mapped = provider.mapQuoteResult({ swap, tokens });
-			} else if (provider.key === SwapProvider.ICP_SWAP && isTokenIcrc2) {
+			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
 			}
@@ -676,7 +669,7 @@ const fetchVeloraSwapAmount = async ({
 	);
 
 	if ('delta' in data) {
-		return mapVeloraSwapResult(data.delta);
+		return mapVeloraSwapResult(data);
 	}
 
 	if ('market' in data) {

@@ -229,15 +229,17 @@
 </script>
 
 <SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</SolSendForm>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</SolSendForm>
+		{/if}
+	{/key}
 </SolFeeContext>

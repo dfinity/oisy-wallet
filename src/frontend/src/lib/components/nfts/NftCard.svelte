@@ -5,10 +5,19 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
+	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
@@ -19,15 +28,38 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
+		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
 	}
 
-	let { nft, testId, disabled, isHidden, isSpam, type = 'default', onSelect }: Props = $props();
+	let {
+		nft,
+		testId,
+		disabled,
+		isHidden,
+		isSpam,
+		type = 'default',
+		onSelect,
+		source = 'default'
+	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
 		if (type === 'card-link' && !disabled) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+					event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+					location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+					token_network: nft.collection.network.name,
+					token_address: nft.collection.address,
+					token_symbol: nft.collection.symbol ?? '',
+					token_name: nft.collection.name ?? ''
+				}
+			});
+
 			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
 		}
 	};
@@ -48,7 +80,7 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftImageConsent {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
+		<NftDisplayGuard {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
@@ -58,7 +90,7 @@
 					testId={`${testId}-image`}
 				/>
 			</div>
-		</NftImageConsent>
+		</NftDisplayGuard>
 
 		{#if isHidden}
 			<div class="absolute left-2 top-2 invert dark:invert-0">
@@ -86,14 +118,15 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 px-2 pb-2">
-		<span
-			class="truncate text-sm font-bold"
-			class:text-disabled={disabled}
-			class:text-primary={!disabled}>{nft.name}</span
-		>
-		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
-			>#{nft.id}</span
-		>
+	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
+		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
+			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
+		</span>
+		<span class="text-xs" class:text-tertiary={!disabled}>
+			#{nft.id}
+			{#if source === NFT_LIST_ROUTE}
+				&ndash; {nft.name}
+			{/if}
+		</span>
 	</span>
 </button>

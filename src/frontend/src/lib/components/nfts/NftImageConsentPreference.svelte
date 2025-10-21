@@ -1,11 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollection;
@@ -14,13 +12,7 @@
 	const { collection }: Props = $props();
 
 	const hasConsent = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
+		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
 
 	const openConsentModal = () => {

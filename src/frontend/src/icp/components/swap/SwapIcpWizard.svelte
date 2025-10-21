@@ -43,7 +43,6 @@
 		slippageValue: OptionAmount;
 		swapProgressStep: ProgressStepsSwap;
 		swapFailedProgressSteps?: ProgressStepsSwap[];
-		isSourceTokenIcrc2?: boolean;
 		currentStep?: WizardStep;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
@@ -57,7 +56,6 @@
 		slippageValue = $bindable(),
 		swapProgressStep = $bindable(),
 		swapFailedProgressSteps = $bindable([]),
-		isSourceTokenIcrc2 = $bindable(),
 		currentStep,
 		isSwapAmountsLoading,
 		onShowTokensList,
@@ -66,8 +64,14 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		isSourceTokenIcrc2,
+		setIsTokensIcrc2
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -91,12 +95,20 @@
 		if (isNullish($sourceToken) || !isIcToken($sourceToken)) {
 			return;
 		}
-		(async () => {
-			isSourceTokenIcrc2 = await isIcrcTokenSupportIcrc2({
-				identity: $authIdentity,
-				ledgerCanisterId: $sourceToken.ledgerCanisterId
-			});
-		})();
+
+		if (isNullish($isSourceTokenIcrc2)) {
+			(async () => {
+				const isIcrc2Supported = await isIcrcTokenSupportIcrc2({
+					identity: $authIdentity,
+					ledgerCanisterId: $sourceToken.ledgerCanisterId
+				});
+
+				setIsTokensIcrc2({
+					ledgerCanisterId: $sourceToken.ledgerCanisterId,
+					isIcrc2Supported
+				});
+			})();
+		}
 	});
 
 	const clearFailedProgressStep = () => {
@@ -122,7 +134,7 @@
 			isNullish(sourceTokenFee) ||
 			isNullish($swapAmountsStore?.selectedProvider?.receiveAmount) ||
 			isNullish($swapAmountsStore?.selectedProvider?.provider) ||
-			isNullish(isSourceTokenIcrc2)
+			isNullish($isSourceTokenIcrc2)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -144,7 +156,7 @@
 				receiveAmount: $swapAmountsStore.selectedProvider.receiveAmount,
 				slippageValue,
 				sourceTokenFee,
-				isSourceTokenIcrc2,
+				isSourceTokenIcrc2: $isSourceTokenIcrc2,
 				setFailedProgressStep,
 				tryToWithdraw:
 					nonNullish($failedSwapError?.errorType) &&
@@ -228,30 +240,32 @@
 </script>
 
 <IcTokenFeeContext token={$sourceToken as IcToken}>
-	{#if currentStep?.name === WizardStepsSwap.SWAP}
-		<SwapIcpForm
-			{isSourceTokenIcrc2}
-			{isSwapAmountsLoading}
-			{onClose}
-			{onNext}
-			{onShowTokensList}
-			{sourceTokenFee}
-			on:icShowProviderList
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.REVIEW}
-		<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
-			{#snippet swapFees()}
-				<SwapFees {isSourceTokenIcrc2} />
-			{/snippet}
-		</SwapReview>
-	{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapProgress
-			swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider === SwapProvider.ICP_SWAP}
-			bind:swapProgressStep
-			bind:failedSteps={swapFailedProgressSteps}
-		/>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSwap.SWAP}
+			<SwapIcpForm
+				{isSwapAmountsLoading}
+				{onClose}
+				{onNext}
+				{onShowTokensList}
+				{sourceTokenFee}
+				on:icShowProviderList
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.REVIEW}
+			<SwapReview {onBack} onSwap={swap} {receiveAmount} {slippageValue} {swapAmount}>
+				{#snippet swapFees()}
+					<SwapFees />
+				{/snippet}
+			</SwapReview>
+		{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
+			<SwapProgress
+				{swapProgressStep}
+				swapWithWithdrawing={$swapAmountsStore?.selectedProvider?.provider ===
+					SwapProvider.ICP_SWAP}
+				bind:failedSteps={swapFailedProgressSteps}
+			/>
+		{/if}
+	{/key}
 </IcTokenFeeContext>

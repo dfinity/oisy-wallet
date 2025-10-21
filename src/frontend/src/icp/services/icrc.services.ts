@@ -1,4 +1,4 @@
-import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/declarations/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
@@ -97,13 +97,6 @@ const loadDefaultIcrc = ({
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-
-			toastsShow({
-				text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-					$ledgerCanisterId: ledgerCanisterId
-				}),
-				level: 'warn'
 			});
 		},
 		strategy,
@@ -228,14 +221,26 @@ const loadCustomIcrcTokensData = async ({
 			// For development purposes, we want to see the error in the console.
 			console.error(result.reason);
 
-			const { token } = tokens[index];
+			const { enabled, token } = tokens[index];
 
 			if ('Icrc' in token) {
 				const {
 					Icrc: { ledger_id }
 				} = token;
 
-				icrcCustomTokensStore.reset(ledger_id.toString());
+				const ledgerCanisterId = ledger_id.toText();
+
+				icrcCustomTokensStore.reset(ledgerCanisterId);
+
+				// To avoid polluting the screen, we show the toast error only after the update call.
+				if (enabled && certified) {
+					toastsShow({
+						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+							$ledgerCanisterId: ledgerCanisterId
+						}),
+						level: 'warn'
+					});
+				}
 			}
 
 			return acc;

@@ -58,6 +58,8 @@
 		const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
 			const nfts = await loadNftsByNetwork({ networkId, tokens, walletAddress: $ethAddress });
 
+			nftStore.addAll(nfts);
+
 			tokens.forEach((token) => {
 				const nftsByToken = findNftsByToken({ nfts, token });
 
@@ -66,8 +68,6 @@
 				if (isTokenErc1155(token)) {
 					handleUpdatedNfts({ token, inventory: nfts });
 				}
-
-				nftStore.addAll(nftsByToken);
 			});
 		});
 

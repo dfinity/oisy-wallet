@@ -13,10 +13,10 @@
 			"refresh": "Обновить",
 			"name": "Имя",
 			"symbol": "Символ",
-			"decimals": "Десятичные знаки",
+			"decimals": "Количество знаков после запятой",
 			"amount": "Сумма",
-			"tokenId": "ТокенID",
-			"max": "Макс",
+			"tokenId": "ID токена",
+			"max": "Максимум",
 			"destination": "Адрес кошелька",
 			"reject": "Отклонить",
 			"approve": "Одобрить",
@@ -68,7 +68,7 @@
 			"dapp_explorer": "Обзор приложения",
 			"activity": "Активность",
 			"airdrops": "Награды",
-			"earning": "Заработок и Награды",
+			"earning": "Награды и заработок",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -113,10 +113,10 @@
 			"title_part_2": "100% Децентрализованный",
 			"logout": "Выйти",
 			"lock": "Закрыть",
-			"authenticate": "Открыть или Создать",
+			"authenticate": "Открыть или создать",
 			"asset_types": "Биткойн, Солана, Эфириум, ICP и другие",
 			"instant_and_private": "Мгновенный и приватный доступ в любом месте",
-			"advanced_cryptography": "100% ончейн: душевное спокойствие благодаря продвинутой криптографии"
+			"advanced_cryptography": "100% ончейн: спокойствие благодаря передовой криптографии"
 		},
 		"alt": {
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
@@ -179,7 +179,7 @@
 	"lock": {
 		"text": {
 			"title_part_1": "Разблокируйте, чтобы продолжить",
-			"title_part_2": "Вы ранее заблокировали свой кошелёк для безопасности. Продолжите с того места где остановились или выйдите из него.",
+			"title_part_2": "Вы ранее заблокировали свой кошелёк для безопасности. Продолжите работу с того места, где остановились или выйдите из него.",
 			"unlock": "Разблокировать",
 			"logout": "Выйти из системы",
 			"logout_clear_cash_message": "Выйти и очистить сообщение об активах",
@@ -193,7 +193,7 @@
 			"sign_in": "Войдите, чтобы исследовать экосистему.",
 			"title": "Исследовать приложения",
 			"open_dapp": "Открыть $dAppName",
-			"submit_your_dapp": "Подать заявку"
+			"submit_your_dapp": "Добавить своё приложение"
 		},
 		"alt": {
 			"learn_more": "Узнайте больше о $dAppName",
@@ -222,7 +222,7 @@
 		"descriptions": {
 			"kongswap": {
 				"name": "KongSwap",
-				"one_liner": "Единый магазин токенов - торгуйте токенами на всех блокчейнах с легкостью, используя KongSwap.",
+				"one_liner": "Мульти-DEX: обмен токенов между сетями",
 				"description": "KongSwap - это полностью децентрализованная биржа (DEX), предлагающая торговлю между блокчейнами без мостов на ICP, Bitcoin, Ethereum и Solana. <br/><br/>Используя технологию Chain Fusion и протокол Internet Computer, она снижает комиссии, упрощает пользовательский опыт и избегает фрагментации ликвидности. Как фронтенд, так и бэкенд работают на блокчейне через смарт-контракты, обеспечивая бесшовный опыт DeFi.",
 				"carousel": {
 					"text": "Обменивайте токены на DEX",
@@ -430,9 +430,9 @@
 				"description": "Выполняйте простые еженедельные требования: войдите в систему, совершите две транзакции и держите не менее $20 в токенах, чтобы иметь право на раздачи BTC до $50 каждый день.<br>Теперь с реферальными вознаграждениями: пригласите друга настроить кошелек, и вы оба получите гарантированные Sprinkles. Попадите в топ-4 рефереров и выиграйте джекпот.",
 				"campaign_href": "",
 				"welcome": {
-					"title": "Добро пожаловать в $oisy_short!",
-					"subtitle": "Готовы зарабатывать?",
-					"description": "Вы в 2 шагах от своей первой награды: войдите в систему, держите $20+ и выполните 2 действия. Это все что нужно чтобы начать зарабатывать Sprinkles.<br><br>Хотите больше? Пригласите 4 друзей и получите гарантированный бонус."
+					"title": "",
+					"subtitle": "",
+					"description": ""
 				},
 				"win": {
 					"default": {
@@ -468,7 +468,7 @@
 				"one_liner": "Зарабатывайте BTC за активность.<br/>Входите в систему, совершайте транзакции и храните токены, чтобы участвовать в ежедневных розыгрышах. Приглашайте друзей и получайте бонус за каждый их выигрыш. Лучшие рефералы выигрывают ещё больше.",
 				"participate_title": "Зарабатывайте BTC оставаясь активным и получайте бонус каждый раз когда выигрывает ваш друг.",
 				"description": "Выполняйте простые еженедельные требования: войдите в систему, совершите две транзакции и держите не менее 20 долларов в токенах, чтобы оставаться в праве на получение до 50 долларов в BTC каждый день.<br>Попадите в тройку лучших рефералов и выиграйте джекпот.",
-				"campaign_href": "https://x.com/intent/post?text=I%E2%80%99m%20earning%20%24BTC%20with%20%40OISY%20Sprinkles%20and%20it%E2%80%99s%20never%20been%20easier.%0A%0A%20-Login%0A-%20Hold%20tokens%0A-%20Take%202%20actions%0A%0A...and%20I%E2%80%99m%20eligible%20for%20up%20to%20%2450%20in%20tokens%0A%0APlus%20if%20I%20refer%204%20friends%2C%20we%20both%20get%20guaranteed%20%23airdrop%20rewards%20%F0%9F%A4%91%0A%0AOISY.com",
+				"campaign_href": "",
 				"welcome": {
 					"title": "",
 					"subtitle": "",
@@ -518,8 +518,8 @@
 			"your_addresses": "Ваши адреса",
 			"address_copied": "Адрес скопирован в буфер обмена.",
 			"wallet_address_copied": "Адрес кошелька скопирован в буфер обмена.",
-			"display_wallet_address_qr": "Показать адрес кошелька в виде QR-кода",
-			"icp_deposits": "Примечание: Для депозитов ICP используйте кнопку «Получить» в своем аккаунте ICP, чтобы получить правильный адрес.",
+			"display_wallet_address_qr": "Показать QR-код кошелька",
+			"icp_deposits": "Важно: для пополнения ICP используйте кнопку «Получить» в аккаунте ICP — это гарантирует корректный адрес.",
 			"use_address_from_to": "Используйте этот адрес для перевода $token в ваш кошелек и из него."
 		},
 		"alt": {
@@ -590,7 +590,7 @@
 			"available_balance": "Ваш баланс",
 			"unavailable_balance": "Стоимость в $currencySymbol недоступна",
 			"hidden_balance": "Ваш баланс скрыт",
-			"top_up": "Пополните свой кошелек, чтобы начать его использовать!",
+			"top_up": "Пополните баланс, чтобы начать работу!",
 			"learn_more_about_erc20_icp": "Узнайте больше об ERC20 ICP на Ethereum.",
 			"tooltip_toggle_balance": "Дважды щелкните, чтобы скрыть/показать баланс"
 		},
@@ -731,7 +731,7 @@
 	"send": {
 		"text": {
 			"send": "Отправить",
-			"destination": "Назначение",
+			"destination": "Получатель",
 			"source": "Источник",
 			"balance": "Баланс",
 			"review": "Проверить",
@@ -749,14 +749,14 @@
 			"confirming": "Подтверждение...",
 			"network": "Сеть",
 			"source_network": "Исходная сеть",
-			"destination_network": "Сеть назначения",
+			"destination_network": "Сеть получателя",
 			"initializing_transaction": "Инициализация транзакции",
 			"convert_to_native_icp": "Конвертировать в нативный ICP",
 			"open_qr_modal": "Начать сканирование QR-кода для получения информации о транзакции",
 			"scan_qr": "Сканировать QR-код",
 			"select_token": "Выбрать токен для отправки",
 			"select_network_filter": "Выбрать сетевой фильтр",
-			"send_again": "Отправить еще раз",
+			"send_again": "Отправить снова",
 			"recently_used_tab": "Недавно использованные",
 			"contacts_tab": "Контакты",
 			"recently_used_empty_state_title": "Недавно использованные адреса появятся здесь",
@@ -784,7 +784,7 @@
 			"fee_info": "Комиссия будет оплачена в $feeSymbol. Доступно: <strong>$feeBalance $feeSymbol</strong>"
 		},
 		"assertion": {
-			"invalid_destination_address": "Недействительный адрес назначения",
+			"invalid_destination_address": "Недействительный адрес получателя",
 			"insufficient_funds": "Недостаточно средств.",
 			"unknown_minimum_ckbtc_amount": "Минимальное количество ckBTC, необходимое для конвертации в BTC, неизвестно.",
 			"unknown_minimum_cketh_amount": "Минимальное количество ckETH, необходимое для конвертации в ETH, неизвестно.",
@@ -794,10 +794,10 @@
 			"minimum_ledger_fees": "Сумма ниже комиссий реестра $symbol.",
 			"minimum_cketh_balance": "Баланс $symbol ниже оценочной комиссии в $amount.",
 			"unknown_cketh": "Токен ckETH не может быть получен.",
-			"destination_address_invalid": "Адрес назначения недействителен.",
+			"destination_address_invalid": "Адрес получателя недействителен.",
 			"amount_invalid": "Сумма недействительна.",
 			"insufficient_funds_for_gas": "Недостаточно средств для газа",
-			"insufficient_funds_for_amount": "Недостаточно средств для суммы",
+			"insufficient_funds_for_amount": "Недостаточно средств для этой суммы",
 			"insufficient_ethereum_funds_to_cover_the_fees": "Недостаточно средств Ethereum для покрытия комиссий",
 			"insufficient_solana_funds_to_cover_the_fees": "Недостаточно средств Solana для покрытия комиссий",
 			"not_enough_tokens_for_gas": "Недостаточно $symbol для газа. Баланс: $balance $symbol",
@@ -819,14 +819,14 @@
 		},
 		"error": {
 			"unexpected": "Что-то пошло не так при отправке транзакции.",
-			"destination_address_unknown": "Адрес назначения ETH неизвестен",
+			"destination_address_unknown": "Адрес получателя ETH неизвестен",
 			"metamask_connected": "Не удается получить ваши аккаунты. Ваш Metamask открыт и уже подключен?",
 			"metamask_no_accounts": "Аккаунты Metamask не найдены.",
 			"metamask_switch_network": "Не удается запросить Metamask переключиться на Chain ID $chain_id. Ваш Metamask использует $network_name?",
 			"erc20_data_undefined": "Данные транзакции Erc20 не могут быть неопределенными или нулевыми.",
 			"data_undefined": "Данные транзакции не могут быть неопределенными или нулевыми.",
 			"no_identity_calculate_fee": "Не предоставлена личность для расчета комиссии для ее принципала.",
-			"invalid_destination": "Пункт назначения недействителен. Пожалуйста, попробуйте еще раз с действительным адресом кошелька или пунктом назначения.",
+			"invalid_destination": "Недействительный получатель. Пожалуйста, укажите корректный адрес кошелька или получателя и попробуйте снова.",
 			"incompatible_token": "Токен несовместим. Пожалуйста, попробуйте еще раз с совместимым токеном.",
 			"no_btc_network_id": "Текущая сеть ($networkId) не является сетью Bitcoin.",
 			"no_solana_network_id": "Текущая сеть ($networkId) не является сетью Solana.",
@@ -840,8 +840,8 @@
 	},
 	"convert": {
 		"text": {
-			"converting": "Обмен...",
-			"conversion_destination": "Назначение обмена",
+			"converting": "Идет обмен...",
+			"conversion_destination": "Адрес назначения",
 			"default_destination": "Ваш кошелек OISY",
 			"convert_to_btc": "Обменять на BTC",
 			"convert_to_ckbtc": "Обменять на ckBTC",
@@ -850,7 +850,7 @@
 			"convert_to_ckerc20": "Обменять на $ckErc20",
 			"convert_eth_to_cketh": "Обменять $token на $ckToken",
 			"cketh_conversions_may_take": "Обмен ckETH может занять до 20 минут",
-			"ckerc20_conversions_may_take": "Обмен $ckErc20 могет занять до 20 минут",
+			"ckerc20_conversions_may_take": "Обмен $ckErc20 может занять до 20 минут",
 			"how_to_convert_eth_to_cketh": "Вот как вы можете обменять $token на $ckToken на $oisy_name",
 			"send_eth": "Отправить $token на ваш адрес $oisy_name",
 			"wait_eth_current_balance": "Дождитесь поступления $token. Текущий баланс",
@@ -976,7 +976,7 @@
 			"exchange_is_not_available_short": "Стоимость в USD недоступна",
 			"source_token_title": "Отдаете",
 			"destination_token_title": "Получаете",
-			"chain_key": "Ключ цепи",
+			"chain_key": "Цепной ключ",
 			"show_more_networks": "Показать еще $number сетей",
 			"hide_more_networks": "Скрыть больше сетей",
 			"on_network": " в сети $network",
@@ -1128,6 +1128,8 @@
 			"collections": "Коллекции",
 			"all_assets": "Все активы",
 			"address_copied": "Адрес скопирован",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Спам",
 			"not_spam": "Не спам",
 			"spam_warning": "",
@@ -1143,18 +1145,23 @@
 			"review_button": "Просмотр",
 			"collection_name": "Название коллекции",
 			"media_urls": "URL-адреса медиафайлов",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Настройки отображения",
 			"review_preference": "Настройки просмотра",
 			"media_enabled": "Медиафайлы включены",
 			"media_disabled": "Медиафайлы отключены",
 			"enable_media": "Включить медиафайлы",
 			"disable_media": "Отключить медиафайлы",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Открыть в новой вкладке",
 			"review_title": "Проверьте источники медиафайлов для \"$collectionName\"",
 			"review_description": "Внимание! Эти изображения получены из непроверенного источника. Их включение может привести к раскрытию вашего IP-адреса третьим лицам и представляет потенциальную угрозу безопасности.",
 			"learn_more": "Подробнее",
 			"token_id": "ТокенID",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Пока нет NFT",
@@ -1178,7 +1185,10 @@
 			"convert_btc_network_fee": "Комиссия сети Bitcoin",
 			"zero_fee": "Бесплатно",
 			"total_fee": "Общая комиссия",
-			"ata_fee": "Комиссия ATA"
+			"ata_fee": "Комиссия ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Недостаточный баланс для покрытия комиссий."
@@ -1264,7 +1274,7 @@
 			"unknown_parameter": "Неизвестный параметр.",
 			"wallet_not_initialized": "Непредвиденная ошибка. Ваш адрес кошелька не инициализирован.",
 			"from_address_not_wallet": "Адрес отправителя, запрошенный для транзакции, не является адресом этого кошелька.",
-			"unknown_destination": "Неизвестный адрес назначения.",
+			"unknown_destination": "Неизвестный адрес получателя.",
 			"request_not_defined": "Непредвиденная ошибка: Запрос не определен, поэтому не может быть обработан.",
 			"unexpected_processing_request": "Непредвиденная ошибка при обработке запроса с помощью WalletConnect."
 		}
@@ -1344,7 +1354,7 @@
 	"transactions": {
 		"text": {
 			"title": "Транзакции",
-			"buy_or_receive": "Совершите свою первую транзакцию, и купите или получите токены прямо сейчас!",
+			"buy_or_receive": "Совершите первую транзакцию - купите или получите токены прямо сейчас!",
 			"transaction_history": "Ваша история транзакций появится здесь",
 			"mainnet_btc_transactions_info": "Информация о транзакциях BTC получена от централизованных третьих сторон и должна быть независимо проверена.",
 			"transaction_history_unavailable": "История транзакций недоступна",
@@ -1696,6 +1706,21 @@
 			"stablecoins_description": "Скоро",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Награды OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"visit_provider": "",
+			"current_apy": "",
+			"current_apy_info": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

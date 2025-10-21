@@ -1128,6 +1128,8 @@
 			"collections": "Các bộ sưu tập",
 			"all_assets": "Tất cả tài sản",
 			"address_copied": "Đã sao chép địa chỉ $address",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Không phải spam",
 			"spam_warning": "",
@@ -1143,18 +1145,23 @@
 			"review_button": "Xem lại",
 			"collection_name": "Tên bộ sưu tập",
 			"media_urls": "URL media",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Tùy chọn hiển thị",
 			"review_preference": "Tùy chọn xem lại",
 			"media_enabled": "Media đã bật",
 			"media_disabled": "Media đã tắt",
 			"enable_media": "Bật media",
 			"disable_media": "Tắt media",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Mở trong tab mới",
 			"review_title": "Xem lại nguồn phương tiện cho \"$collectionName\"",
 			"review_description": "Lưu ý! Những hình ảnh này đến từ một nguồn không được xác minh. Việc bật chúng có thể chia sẻ địa chỉ IP của bạn với bên thứ ba và tiềm ẩn rủi ro bảo mật.",
 			"learn_more": "Tìm hiểu thêm",
 			"token_id": "ID token",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Chưa có NFT nào",
@@ -1178,7 +1185,10 @@
 			"convert_btc_network_fee": "Phí mạng Bitcoin",
 			"zero_fee": "Miễn phí",
 			"total_fee": "Tổng phí",
-			"ata_fee": "Phí ATA"
+			"ata_fee": "Phí ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Số dư không đủ để trả phí."
@@ -1696,6 +1706,21 @@
 			"stablecoins_description": "Sắp ra mắt",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "Phần thưởng OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"visit_provider": "",
+			"current_apy": "",
+			"current_apy_info": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {

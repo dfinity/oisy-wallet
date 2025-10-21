@@ -109,3 +109,11 @@ export enum AddressBookSteps {
 	SAVE_ADDRESS = 'save_address',
 	CREATE_CONTACT = 'create_contact'
 }
+
+export enum ProgressStepsStake {
+	INITIALIZATION = 'initialization',
+	APPROVE = 'approve',
+	STAKE = 'stake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
