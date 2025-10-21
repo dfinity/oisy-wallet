@@ -17,6 +17,14 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 describe('LoaderNfts', () => {
 	let alchemyProvidersSpy: MockInstance;
 
@@ -113,11 +121,7 @@ describe('LoaderNfts', () => {
 
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1, mockErc721Nft2, mockErc721Nft3]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith({
@@ -138,11 +142,7 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft1, mockErc1155Nft2]);
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft3]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -171,11 +171,7 @@ describe('LoaderNfts', () => {
 
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledOnce();
@@ -195,11 +191,7 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft1]);
 			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -226,11 +218,7 @@ describe('LoaderNfts', () => {
 			]);
 			mockGetNftsForOwner.mockResolvedValueOnce([{ ...mockErc1155Nft3, balance: 3 }]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);

@@ -1,10 +1,10 @@
 import * as gldtStakeApi from '$icp/api/gldt_stake.api';
-import GldtStakeApyContext from '$icp/components/stake/gldt/GldtStakeApyContext.svelte';
+import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
 import {
-	GLDT_STAKE_APY_CONTEXT_KEY,
-	initGldtStakeApyStore,
-	type GldtStakeApyStore
-} from '$icp/stores/gldt-stake-apy.store';
+	GLDT_STAKE_CONTEXT_KEY,
+	initGldtStakeStore,
+	type GldtStakeStore
+} from '$icp/stores/gldt-stake.store';
 import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -13,12 +13,11 @@ import type { Identity } from '@dfinity/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-describe('GldtStakeApyContext', () => {
+describe('GldtStakeContext', () => {
 	const mockApy = 10.1232131232121;
 	const parsedMockApy = Math.round(mockApy * 100) / 100;
 
-	const mockContext = (store: GldtStakeApyStore) =>
-		new Map([[GLDT_STAKE_APY_CONTEXT_KEY, { store }]]);
+	const mockContext = (store: GldtStakeStore) => new Map([[GLDT_STAKE_CONTEXT_KEY, { store }]]);
 	const mockGetApyOverall = () =>
 		vi.spyOn(gldtStakeApi, 'getApyOverall').mockResolvedValue(mockApy);
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
@@ -33,13 +32,13 @@ describe('GldtStakeApyContext', () => {
 	});
 
 	it('should call getApyOverall with proper params', async () => {
-		const store = initGldtStakeApyStore();
+		const store = initGldtStakeStore();
 		const setApySpy = vi.spyOn(store, 'setApy');
 		const getApyOverallSpy = mockGetApyOverall();
 
 		mockAuthStore();
 
-		render(GldtStakeApyContext, {
+		render(GldtStakeContext, {
 			props,
 			context: mockContext(store)
 		});
@@ -53,12 +52,12 @@ describe('GldtStakeApyContext', () => {
 	});
 
 	it('should not call getApyOverall if no authIdentity available', async () => {
-		const store = initGldtStakeApyStore();
+		const store = initGldtStakeStore();
 		const getApyOverallSpy = mockGetApyOverall();
 
 		mockAuthStore(null);
 
-		render(GldtStakeApyContext, {
+		render(GldtStakeContext, {
 			props,
 			context: mockContext(store)
 		});
