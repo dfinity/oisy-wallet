@@ -13,17 +13,12 @@
 		icon?: Snippet;
 		nftCollections: NftCollectionUi[];
 		testId?: string;
+		fromRoute: NavigationTarget | null;
 	}
 
-	let { title, asMainSection = false, icon, nftCollections, testId }: Props = $props();
+	let { title, asMainSection = false, icon, nftCollections, testId, fromRoute }: Props = $props();
 
 	const notEmptyCollections = $derived(nftCollections.filter((c) => c.nfts.length > 0));
-
-	let fromRoute = $state<NavigationTarget | null>(null);
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
-	});
 </script>
 
 <div data-tid={testId}>
