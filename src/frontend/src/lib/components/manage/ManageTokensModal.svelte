@@ -7,7 +7,6 @@
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import {
 		saveErc1155CustomTokens,
@@ -18,6 +17,7 @@
 	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -90,7 +90,7 @@
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async (tokens: Record<string, Token>) => {
+	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,

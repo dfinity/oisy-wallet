@@ -1,9 +1,12 @@
 import type { _SERVICE as GldtStakeService } from '$declarations/gldt_stake/declarations/gldt_stake.did';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
+import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
 describe('gldt_stake.canister', () => {
@@ -49,6 +52,82 @@ describe('gldt_stake.canister', () => {
 			});
 
 			const res = getApyOverall();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('manageStakePosition', () => {
+		const params = { AddStake: { amount: 1n } };
+
+		it('manages stake position successfully', async () => {
+			service.manage_stake_position.mockResolvedValue({ Ok: stakePositionMockResponse });
+
+			const { manageStakePosition } = await createGldtStakeCanister({ serviceOverride: service });
+
+			const result = await manageStakePosition(params);
+
+			expect(result).toEqual(stakePositionMockResponse);
+			expect(service.manage_stake_position).toHaveBeenCalledWith(params);
+		});
+
+		it('throws an error if manage_stake_position method fails', async () => {
+			service.manage_stake_position.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { manageStakePosition } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = manageStakePosition(params);
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+
+		it('should throw an error if manage_stake_position returns an AddStakeError error', async () => {
+			service.manage_stake_position.mockResolvedValue({
+				Err: { AddStakeError: { TransferError: 'error' } }
+			});
+
+			const { manageStakePosition } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = manageStakePosition(params);
+
+			await expect(res).rejects.toThrow(new CanisterInternalError('Failed to add stake'));
+		});
+	});
+
+	describe('getPosition', () => {
+		const params = { principal: mockPrincipal };
+
+		it('returns a position successfully', async () => {
+			const response = toNullable(stakePositionMockResponse);
+
+			service.get_position.mockResolvedValue(response);
+
+			const { getPosition } = await createGldtStakeCanister({ serviceOverride: service });
+
+			const result = await getPosition({ principal: mockPrincipal });
+
+			expect(result).toEqual(stakePositionMockResponse);
+			expect(service.get_position).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
+		});
+
+		it('throws an error if get_position method fails', async () => {
+			service.get_position.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getPosition } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = getPosition(params);
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});

@@ -2,16 +2,21 @@
 	import { getContext } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
+	import {
+		GLDT_STAKE_APY_CONTEXT_KEY,
+		type GldtStakeApyContext
+	} from '$icp/stores/gldt-stake-apy.store';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
+	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
 	import { StakeProvider as StakeProviderType } from '$lib/types/stake';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	interface Props {
-		destination?: string;
+		destination: Address;
 		amount?: OptionAmount;
 		onBack: () => void;
 		onStake: () => void;
@@ -20,6 +25,8 @@
 	let { destination = '', amount, onBack, onStake }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
+
+	const { store: gldtStakeApyStore } = getContext<GldtStakeApyContext>(GLDT_STAKE_APY_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
@@ -30,9 +37,9 @@
 	);
 </script>
 
-<StakeReview {amount} disabled={invalid} {onBack} {onStake}>
+<StakeReview {amount} {destination} disabled={invalid} {onBack} {onStake}>
 	{#snippet provider()}
-		<StakeProvider provider={StakeProviderType.GLDT} />
+		<StakeProvider currentApy={$gldtStakeApyStore?.apy} provider={StakeProviderType.GLDT} />
 	{/snippet}
 
 	{#snippet network()}

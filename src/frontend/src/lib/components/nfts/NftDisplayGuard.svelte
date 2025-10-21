@@ -7,12 +7,12 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
-	import { getAllowMediaForNft } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		nft?: Nft;
@@ -26,17 +26,21 @@
 	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(nft)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: nft.collection.network.id,
-					address: nft.collection.address
-				})
-			: false
+		nonNullish(nft) ? nft.collection.allowExternalContentSource : false
 	);
 
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
+			trackEvent({
+				name: TRACK_NFT_OPEN_CONSENT_MODAL,
+				metadata: {
+					collection_name: nft.collection.name ?? '',
+					collection_address: nft.collection.address,
+					network: nft.collection.network.name,
+					standard: nft.collection.standard
+				}
+			});
+
 			modalStore.openNftImageConsent({ id: Symbol('NftImageConsentModal'), data: nft.collection });
 		}
 	};

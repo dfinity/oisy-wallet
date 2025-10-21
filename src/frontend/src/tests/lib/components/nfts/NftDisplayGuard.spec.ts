@@ -1,5 +1,6 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
+import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 import {
 	NFT_PLACEHOLDER_FILESIZE,
 	NFT_PLACEHOLDER_INVALID,
@@ -7,8 +8,8 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
-import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -17,24 +18,31 @@ import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-const nftAzuki = {
+vi.mock('$lib/services/analytics.services', () => ({
+	trackEvent: vi.fn()
+}));
+
+const getNftAzuki = (allowMedia?: boolean) => ({
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
 	collection: {
 		...mockValidErc721Nft.collection,
 		name: 'Azuki Elemental Beans',
 		address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
-		network: POLYGON_AMOY_NETWORK
+		network: POLYGON_AMOY_NETWORK,
+		allowExternalContentSource: allowMedia
 	}
-};
+});
 
 describe('NftDisplayGuard', () => {
-	it('should render the review consent when hasConsent is undefined', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
 
+	it('should render the review consent when hasConsent is undefined', () => {
 		const { getByRole, getByText } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: getNftAzuki(),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
@@ -53,10 +61,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should render the review consent with a different text when hasConsent is false', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(false);
-
 		const { getByRole, getByText } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: getNftAzuki(false),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
@@ -75,10 +81,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should open the review consent modal when review is clicked', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(undefined);
-
 		const { getByRole } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: getNftAzuki(),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
@@ -94,11 +98,34 @@ describe('NftDisplayGuard', () => {
 		expect(get(modalNftImageConsent)).toBeTruthy();
 	});
 
-	it('should render the children if hasConsent is true', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
+	it('should track event when consent modal is opened', () => {
+		const { getByRole } = render(NftDisplayGuard, {
+			nft: getNftAzuki(),
+			children: mockSnippet,
+			showMessage: true,
+			type: 'card'
+		});
 
+		const btn = getByRole('button');
+
+		assertNonNullish(btn);
+
+		fireEvent.click(btn);
+
+		expect(trackEvent).toHaveBeenCalledWith({
+			name: TRACK_NFT_OPEN_CONSENT_MODAL,
+			metadata: {
+				collection_name: getNftAzuki().collection.name,
+				collection_address: getNftAzuki().collection.address,
+				network: getNftAzuki().collection.network.name,
+				standard: getNftAzuki().collection.standard
+			}
+		});
+	});
+
+	it('should render the children if hasConsent is true', () => {
 		const { queryAllByRole, queryByText, getByTestId } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: getNftAzuki(true),
 			children: mockSnippet,
 			showMessage: true,
 			type: 'card'
@@ -115,10 +142,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should not show the text and button if showMessage is false', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(false);
-
 		const { queryAllByRole, queryByText } = render(NftDisplayGuard, {
-			nft: nftAzuki,
+			nft: getNftAzuki(false),
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card'
@@ -131,10 +156,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should render the different placeholders if mediaStatus of nft is INVALID_DATA', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.INVALID_DATA },
+			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.INVALID_DATA },
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card'
@@ -146,10 +169,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should render the different placeholders if mediaStatus of nft is FILESIZE_LIMIT_EXCEEDED', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED },
+			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED },
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card'
@@ -161,10 +182,8 @@ describe('NftDisplayGuard', () => {
 	});
 
 	it('should render the different placeholders if mediaStatus of nft is NON_SUPPORTED_MEDIA_TYPE', () => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-
 		const { getByTestId } = render(NftDisplayGuard, {
-			nft: { ...nftAzuki, mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE },
+			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE },
 			children: mockSnippet,
 			showMessage: false,
 			type: 'card'

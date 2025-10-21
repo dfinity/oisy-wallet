@@ -4,11 +4,10 @@ import {
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftId } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
@@ -17,7 +16,6 @@ import {
 	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
-	getAllowMediaForNft,
 	getEnabledNfts,
 	getMediaStatus,
 	getNftCollectionUi,
@@ -30,7 +28,6 @@ import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { assertNonNullish } from '@dfinity/utils';
 
 describe('nfts.utils', () => {
 	const mockNft1: Nft = {
@@ -44,7 +41,7 @@ describe('nfts.utils', () => {
 
 	const mockNft2: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(12632),
+		id: parseNftId('12632'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -54,7 +51,7 @@ describe('nfts.utils', () => {
 
 	const mockNft3: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(843764),
+		id: parseNftId('843764'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
@@ -64,7 +61,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki1 = {
 		...mockValidErc721Nft,
-		id: parseNftId(1),
+		id: parseNftId('1'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -75,7 +72,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki2 = {
 		...mockValidErc721Nft,
-		id: parseNftId(2),
+		id: parseNftId('2'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -86,7 +83,7 @@ describe('nfts.utils', () => {
 
 	const nftDeGods = {
 		...mockValidErc721Nft,
-		id: parseNftId(3),
+		id: parseNftId('3'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'DeGods',
@@ -97,7 +94,7 @@ describe('nfts.utils', () => {
 
 	const nftOtherNetwork = {
 		...mockValidErc721Nft,
-		id: parseNftId(4),
+		id: parseNftId('4'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -124,7 +121,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(12632)
+				tokenId: parseNftId('12632')
 			});
 
 			expect(result).toEqual(mockNft2);
@@ -136,7 +133,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(837373)
+				tokenId: parseNftId('837373')
 			});
 
 			expect(result).toBeUndefined();
@@ -307,7 +304,7 @@ describe('nfts.utils', () => {
 	describe('getUpdatedNfts', () => {
 		const mockErc1155Nft1 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(983524),
+			id: parseNftId('983524'),
 			balance: 2,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -317,7 +314,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft2 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(37534),
+			id: parseNftId('37534'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -327,7 +324,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(823746),
+			id: parseNftId('823746'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -399,7 +396,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('parseMetadataResourceUrl', () => {
-		const mockError = new NftError(123456, PEPE_TOKEN.address);
+		const mockError = new NftError('123456', PEPE_TOKEN.address);
 
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
@@ -629,7 +626,7 @@ describe('nfts.utils', () => {
 		});
 
 		it('filters NFTs by nft.id', () => {
-			const custom = { ...nftAzuki1, id: parseNftId(987654321) };
+			const custom = { ...nftAzuki1, id: parseNftId('987654321') };
 			const res = filterSortByCollection({
 				items: [custom, nftDeGods],
 				filter: '987654321'
@@ -663,7 +660,7 @@ describe('nfts.utils', () => {
 
 		it('filters collection UIs by inner nft.id', () => {
 			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
-			const custom = { ...nftAzuki1, id: parseNftId(123456789) };
+			const custom = { ...nftAzuki1, id: parseNftId('123456789') };
 			const ui = getNftCollectionUi({
 				$nonFungibleTokens: tokens,
 				$nftStore: [custom]
@@ -865,35 +862,6 @@ describe('nfts.utils', () => {
 				address: mockEthAddress,
 				networkId: ETHEREUM_NETWORK.id
 			});
-
-			expect(result).toBeUndefined();
-		});
-	});
-
-	describe('getAllowMediaForNft', () => {
-		const tokens = [
-			{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, allowExternalContentSource: false },
-			{ ...DE_GODS_TOKEN, allowExternalContentSource: false }
-		] as Erc721CustomToken[];
-
-		it('should correctly return the allow media prop for an nft contract address', () => {
-			const params = {
-				tokens,
-				networkId: AZUKI_ELEMENTAL_BEANS_TOKEN.network.id,
-				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address
-			};
-			const expected: NonFungibleToken | undefined = findNonFungibleToken(params);
-
-			assertNonNullish(expected);
-
-			const result = getAllowMediaForNft(params);
-
-			expect(result).toEqual(expected?.allowExternalContentSource);
-		});
-
-		it('should fallback to undefined if the nft cant be found or the consent has never been set', () => {
-			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
-			const result = getAllowMediaForNft(params);
 
 			expect(result).toBeUndefined();
 		});

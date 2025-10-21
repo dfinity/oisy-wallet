@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
 		BTC_MAINNET_NETWORK,
@@ -73,10 +72,13 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+	}
 
-	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
-		dispatch('icQRCode', details);
+	let { onQRCode }: Props = $props();
+
+	const displayQRCode = (details: ReceiveQRCode) => onQRCode(details);
 
 	interface ReceiveAddressProps {
 		labelRef: string;
@@ -98,8 +100,7 @@
 		};
 	}
 
-	let receiveAddressCoreList: Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[];
-	$: receiveAddressCoreList = [
+	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
 			labelRef: 'btcAddressMainnet',
 			address: $btcAddressMainnet,
@@ -212,44 +213,47 @@
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
 		}
-	];
+	]);
 
-	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
-	$: receiveAddressList = receiveAddressCoreList.map(
-		({
-			address,
-			token: addressToken,
-			qrCodeAriaLabel,
-			label: addressLabel,
-			copyAriaLabel,
-			labelRef,
-			network,
-			testId,
-			title,
-			text,
-			condition
-		}) => ({
-			labelRef,
-			address,
-			network,
-			testId,
-			copyAriaLabel,
-			title,
-			text,
-			condition,
-			qrCodeAction: {
-				enabled: true,
-				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: qrCodeAriaLabel,
-				onClick: () =>
-					displayQRCode({
-						address: address ?? '',
-						addressLabel,
-						addressToken,
-						copyAriaLabel
-					})
-			}
-		})
+	let receiveAddressList = $derived<
+		Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[]
+	>(
+		receiveAddressCoreList.map(
+			({
+				address,
+				token: addressToken,
+				qrCodeAriaLabel,
+				label: addressLabel,
+				copyAriaLabel,
+				labelRef,
+				network,
+				testId,
+				title,
+				text,
+				condition
+			}) => ({
+				labelRef,
+				address,
+				network,
+				testId,
+				copyAriaLabel,
+				title,
+				text,
+				condition,
+				qrCodeAction: {
+					enabled: true,
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: qrCodeAriaLabel,
+					onClick: () =>
+						displayQRCode({
+							address: address ?? '',
+							addressLabel,
+							addressToken,
+							copyAriaLabel
+						})
+				}
+			})
+		)
 	);
 </script>
 

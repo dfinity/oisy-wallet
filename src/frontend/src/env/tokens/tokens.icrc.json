@@ -139,31 +139,12 @@
 			"__bigint__": "10"
 		}
 	},
-	"ODINDOG": {
-		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai",
-		"decimals": 8,
-		"name": "ODINDOG•ID•YTTL•ODIN",
-		"symbol": "ODINDOG•ID•YTTL•ODIN",
-		"fee": {
-			"__bigint__": "10"
-		}
-	},
 	"TICRC1": {
 		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
 		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
 		"decimals": 8,
 		"name": "TEST ICRC1",
 		"symbol": "TICRC1",
-		"fee": {
-			"__bigint__": "10000"
-		}
-	},
-	"DYA": {
-		"ledgerCanisterId": "vrsv6-3qaaa-aaaau-abytq-cai",
-		"indexCanisterId": "u44rq-uyaaa-aaaau-abyua-cai",
-		"decimals": 8,
-		"name": "Dyah AI",
-		"symbol": "DYA",
 		"fee": {
 			"__bigint__": "10000"
 		}

@@ -23,7 +23,9 @@
 		}
 
 		try {
-			gldtStakeApyStore.setApy(await getApyOverall({ identity: $authIdentity }));
+			const apy = await getApyOverall({ identity: $authIdentity });
+
+			gldtStakeApyStore.setApy(Math.round(apy * 100) / 100);
 		} catch (_err: unknown) {
 			gldtStakeApyStore.reset();
 		}
