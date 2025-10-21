@@ -1,5 +1,9 @@
 import NftsSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
-import { TRACK_NFT_SETTINGS_CHANGE } from '$lib/constants/analytics.constants';
+import {
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_EVENTS_KEYS,
+	PLAUSIBLE_EVENTS
+} from '$lib/enums/plausible';
 import * as analyticsServices from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import {
@@ -99,8 +103,12 @@ describe('NftsSettingsMenu', () => {
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SETTINGS_CHANGE,
-			metadata: { grouping: 'plain_list' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
+				event_value: 'plain_list'
+			}
 		});
 	});
 
@@ -128,8 +136,12 @@ describe('NftsSettingsMenu', () => {
 		});
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SETTINGS_CHANGE,
-			metadata: { grouping: 'collection' }
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
+				event_value: 'collection'
+			}
 		});
 	});
 
@@ -154,10 +166,13 @@ describe('NftsSettingsMenu', () => {
 		expect(showHiddenStoreSpy).toHaveBeenCalled();
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SETTINGS_CHANGE,
-			metadata: expect.objectContaining({
-				show_hidden: expect.stringMatching(/enabled|disabled/)
-			})
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'hidden',
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.VISIBILITY,
+				event_value: 'show'
+			}
 		});
 	});
 
@@ -182,10 +197,13 @@ describe('NftsSettingsMenu', () => {
 		expect(showSpamStoreSpy).toHaveBeenCalled();
 
 		expect(trackEventSpy).toHaveBeenCalledWith({
-			name: TRACK_NFT_SETTINGS_CHANGE,
-			metadata: expect.objectContaining({
-				show_spam: expect.stringMatching(/enabled|disabled/)
-			})
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'spam',
+				event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.VISIBILITY,
+				event_value: 'show'
+			}
 		});
 	});
 

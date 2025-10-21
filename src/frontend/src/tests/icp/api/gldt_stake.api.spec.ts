@@ -1,4 +1,4 @@
-import { getApyOverall, manageStakePosition } from '$icp/api/gldt_stake.api';
+import { getApyOverall, getPosition, manageStakePosition } from '$icp/api/gldt_stake.api';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import * as appConstants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -60,6 +60,28 @@ describe('gldt_stake.api', () => {
 		it('throws an error if the gldt_stake canister manageStakePosition method called without identity', async () => {
 			const res = manageStakePosition({
 				positionParams: { AddStake: { amount: 1n } },
+				identity: null
+			});
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getPosition', () => {
+		it('correctly calls the gldt_stake canister getPosition method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getPosition.mockResolvedValue(stakePositionMockResponse);
+
+			const result = await getPosition({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getPosition).toHaveBeenCalledOnce();
+			expect(result).toBe(stakePositionMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getPosition method called without identity', async () => {
+			const res = getPosition({
 				identity: null
 			});
 

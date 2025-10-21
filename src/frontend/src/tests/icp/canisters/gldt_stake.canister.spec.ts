@@ -3,9 +3,10 @@ import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
-import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
+import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 
 describe('gldt_stake.canister', () => {
@@ -97,6 +98,38 @@ describe('gldt_stake.canister', () => {
 			const res = manageStakePosition(params);
 
 			await expect(res).rejects.toThrow(new CanisterInternalError('Failed to add stake'));
+		});
+	});
+
+	describe('getPosition', () => {
+		const params = { principal: mockPrincipal };
+
+		it('returns a position successfully', async () => {
+			const response = toNullable(stakePositionMockResponse);
+
+			service.get_position.mockResolvedValue(response);
+
+			const { getPosition } = await createGldtStakeCanister({ serviceOverride: service });
+
+			const result = await getPosition({ principal: mockPrincipal });
+
+			expect(result).toEqual(stakePositionMockResponse);
+			expect(service.get_position).toHaveBeenCalledExactlyOnceWith(mockPrincipal);
+		});
+
+		it('throws an error if get_position method fails', async () => {
+			service.get_position.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getPosition } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = getPosition(params);
+
+			await expect(res).rejects.toThrow(mockResponseError);
 		});
 	});
 });
