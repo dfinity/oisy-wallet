@@ -7,7 +7,6 @@
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
-		PLAUSIBLE_EVENT_VALUES,
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
