@@ -15,11 +15,15 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
-	import { NFT_CONSENT_MODAL, TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -104,13 +108,14 @@
 
 	const trackEventOnClick = (clickedButton: string) => {
 		trackEvent({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: collection.name ?? '',
-				collection_address: collection.address,
-				network: collection.network.name,
-				standard: collection.standard,
-				clicked_button: clickedButton
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: clickedButton,
+				token_name: collection.name ?? '',
+				token_address: collection.address,
+				token_network: collection.network.name,
+				token_standard: collection.standard
 			}
 		});
 	};
@@ -161,8 +166,8 @@
 
 				{#if nonNullish(token)}
 					<div class="mb-6 flex w-full gap-2">
-						<span><NftSpamButton source={NFT_CONSENT_MODAL} {token} /></span>
-						<span><NftHideButton source={NFT_CONSENT_MODAL} {token} /></span>
+						<span><NftSpamButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
+						<span><NftHideButton source={PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW} {token} /></span>
 					</div>
 				{/if}
 
@@ -255,7 +260,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('keep_media_disabled');
+								trackEventOnClick('false');
 								modalStore.close();
 							}}
 							testId={`${testId}-keepDisabledButton`}
@@ -267,7 +272,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('enable_media');
+								trackEventOnClick('true');
 								save(true);
 							}}
 							testId={`${testId}-enableButton`}
@@ -279,7 +284,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('disable_media');
+								trackEventOnClick('false');
 								save(false);
 							}}
 							testId={`${testId}-disableButton`}
@@ -291,7 +296,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('keep_media_enabled');
+								trackEventOnClick('true');
 								modalStore.close();
 							}}
 							testId={`${testId}-keepEnabledButton`}
@@ -303,7 +308,7 @@
 							colorStyle="secondary-light"
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('disable_media');
+								trackEventOnClick('false');
 								save(false);
 							}}
 							testId={`${testId}-keepDisabledButton`}
@@ -315,7 +320,7 @@
 							disabled={token?.section === CustomTokenSection.SPAM}
 							loading={saveLoading}
 							onclick={() => {
-								trackEventOnClick('enable_media');
+								trackEventOnClick('true');
 								save(true);
 							}}
 							testId={`${testId}-enableButton`}

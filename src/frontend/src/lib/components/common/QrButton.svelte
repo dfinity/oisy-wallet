@@ -1,16 +1,20 @@
 <script lang="ts">
-	import { createBubbler, preventDefault } from 'svelte/legacy';
+	import { preventDefault } from '@dfinity/gix-components';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	const bubble = createBubbler();
+	interface Props {
+		onClick: () => void;
+	}
+
+	let { onClick }: Props = $props();
 </script>
 
 <button
 	class="text-brand-primary hover:text-inherit active:text-inherit"
 	aria-label={$i18n.send.text.open_qr_modal}
 	data-tid="qr-code-scanner-button"
-	onclick={preventDefault(bubble('click'))}
+	onclick={preventDefault(onClick)}
 	type="button"
 >
 	<IconScanLine />
