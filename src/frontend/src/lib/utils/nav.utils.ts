@@ -180,13 +180,19 @@ export const buildNftSearchUrl = ({
 	  }
 	| {
 			collection: NftCollection;
-	  }) => {
+	  }
+	| {}) => {
 	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
 
 	if (nonNullish(nft?.network?.id?.description)) {
 		url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
 	} else if (nonNullish(collection?.network?.id?.description)) {
 		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+	} else {
+		const currentNetwork = new URL(window.location.href).searchParams.get(NETWORK_PARAM);
+		if (nonNullish(currentNetwork)) {
+			url.searchParams.set(NETWORK_PARAM, currentNetwork);
+		}
 	}
 
 	if (nonNullish(nft?.collection)) {
