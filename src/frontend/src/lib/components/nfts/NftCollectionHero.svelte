@@ -18,10 +18,9 @@
 	interface Props {
 		token?: NonFungibleToken;
 		nfts: Nft[];
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { token, nfts, fromRoute }: Props = $props();
+	const { token, nfts }: Props = $props();
 
 	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 
