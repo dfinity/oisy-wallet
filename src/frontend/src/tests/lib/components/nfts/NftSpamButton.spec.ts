@@ -104,7 +104,7 @@ describe('NftSpamButton', () => {
 
 	it('should track event with "spam" action when spam button is clicked', async () => {
 		nftStore.addAll([mockNft]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftSpamButton, {
 			props: { token: mockToken, source: 'collection' }
@@ -131,7 +131,7 @@ describe('NftSpamButton', () => {
 
 	it('should track event with "unspam" action when not spam button is clicked', async () => {
 		const spamToken = { ...mockToken, section: CustomTokenSection.SPAM };
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftSpamButton, {
 			props: { token: spamToken, source: 'collection' }
@@ -158,7 +158,7 @@ describe('NftSpamButton', () => {
 
 	it('should track event when confirm button is clicked in modal for multiple NFTs', async () => {
 		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftSpamButton, {
 			props: { token: mockToken, source: 'collection_page' }
