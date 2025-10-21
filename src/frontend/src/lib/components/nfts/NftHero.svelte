@@ -17,7 +17,7 @@
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -29,7 +29,7 @@
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
-		const collectionUrl = buildNftSearchUrl({ collection: nft?.collection, fromRoute });
+		const collectionUrl = nftsUrl({ collection: nft?.collection, fromRoute });
 		if (nonNullish(nft) && nonNullish(nft.collection.name) && nonNullish(collectionUrl)) {
 			breadcrumbs = [
 				...breadcrumbs,

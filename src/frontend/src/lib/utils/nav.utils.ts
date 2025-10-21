@@ -171,34 +171,31 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	await goto(url, { replaceState: true, noScroll: true });
 };
 
-export const buildNftSearchUrl = ({
-	nft,
-	collection,
-	fromRoute
-}: {
-	nft?: Nft;
-	collection?: NftCollection;
-	fromRoute: NavigationTarget | null;
-}): string | undefined => {
-	if (nonNullish(nft?.collection?.network?.id?.description)) {
-		fromRoute?.url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
-	} else if (nonNullish(collection?.network?.id?.description)) {
-		fromRoute?.url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
-	} else {
-		const currentNetwork = fromRoute?.url.searchParams.get(NETWORK_PARAM);
-		if (nonNullish(currentNetwork)) {
-			fromRoute?.url.searchParams.set(NETWORK_PARAM, currentNetwork);
+export const nftsUrl = (
+	params: {
+		fromRoute: NavigationTarget | null;
+	} & (
+		| {
+				nft?: Nft;
+		  }
+		| {
+				collection?: NftCollection;
+		  }
+	)
+): string | undefined => {
+	const { fromRoute } = params;
+
+	if ('nft' in params && nonNullish(params.nft)) {
+		fromRoute?.url.searchParams.set(NFT_PARAM, params.nft.id);
+		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
+		if (nonNullish(params.nft.collection.network.id.description)) {
+			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.nft.collection.network.id.description);
 		}
-	}
-
-	if (nonNullish(nft?.collection)) {
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, nft.collection.address);
-	} else if (nonNullish(collection)) {
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, collection.address);
-	}
-
-	if (nonNullish(nft)) {
-		fromRoute?.url.searchParams.set(NFT_PARAM, nft.id);
+	} else if ('collection' in params && nonNullish(params.collection)) {
+		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.collection.address);
+		if (nonNullish(params.collection.network.id.description)) {
+			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.collection.network.id.description);
+		}
 	}
 
 	return fromRoute?.url.toString();

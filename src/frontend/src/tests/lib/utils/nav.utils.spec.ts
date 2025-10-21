@@ -14,7 +14,6 @@ import {
 import type { Network } from '$lib/types/network';
 import {
 	back,
-	buildNftSearchUrl,
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
@@ -35,6 +34,7 @@ import {
 	loadRouteParams,
 	networkParam,
 	networkUrl,
+	nftsUrl,
 	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
@@ -585,7 +585,7 @@ describe('nav.utils', () => {
 		});
 	});
 
-	describe('buildNftSearchUrl', () => {
+	describe('nftsUrl', () => {
 		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
 		const mockNft = mockValidErc1155Nft;
 
@@ -595,7 +595,7 @@ describe('nav.utils', () => {
 			}) as unknown as NavigationTarget;
 
 		it('includes network and collection param when collection is provided', () => {
-			const result = buildNftSearchUrl({
+			const result = nftsUrl({
 				collection: mockCollection,
 				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
 			});
@@ -608,7 +608,7 @@ describe('nav.utils', () => {
 		});
 
 		it('includes all params when nft is passed', () => {
-			const result = buildNftSearchUrl({
+			const result = nftsUrl({
 				nft: mockNft,
 				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
 			});
@@ -621,7 +621,7 @@ describe('nav.utils', () => {
 		});
 
 		it('persists network param if nothing is passed', () => {
-			const result = buildNftSearchUrl({ fromRoute: getMockFromRoute(ETHEREUM_NETWORK) });
+			const result = nftsUrl({ fromRoute: getMockFromRoute(ETHEREUM_NETWORK) });
 			assertNonNullish(result);
 			const url = new URL(result);
 

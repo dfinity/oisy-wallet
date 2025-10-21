@@ -19,7 +19,7 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -57,7 +57,7 @@
 			}
 		});
 
-		const url = buildNftSearchUrl({ collection: collection.collection, fromRoute });
+		const url = nftsUrl({ collection: collection.collection, fromRoute });
 		if (url) {
 			goto(url);
 		}

@@ -20,7 +20,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
-	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		nft: Nft;
@@ -65,7 +65,7 @@
 				}
 			});
 
-			const url = buildNftSearchUrl({ nft, fromRoute });
+			const url = nftsUrl({ nft, fromRoute });
 			if (url) {
 				goto(url);
 			}

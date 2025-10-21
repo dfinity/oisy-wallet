@@ -15,7 +15,7 @@
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -40,7 +40,7 @@
 	);
 
 	const gotoCollection = (): void => {
-		const url = buildNftSearchUrl({ collection, fromRoute });
+		const url = nftsUrl({ collection, fromRoute });
 		if (url) {
 			goto(url);
 		}
