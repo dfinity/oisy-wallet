@@ -43,6 +43,6 @@
 	});
 </script>
 
-<NftHero {nft} {token} {fromRoute} />
+<NftHero {fromRoute} {nft} {token} />
 
 <NftCollectionCard collection={nft?.collection} {fromRoute} />
