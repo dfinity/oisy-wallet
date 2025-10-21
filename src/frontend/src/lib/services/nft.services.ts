@@ -163,44 +163,34 @@ export const updateNftSection = async ({
 	if (nonNullish(token)) {
 		const currentAllowMedia = token.allowExternalContentSource;
 
+		const saveToken = {
+			...token,
+			enabled: true,
+			section,
+			...((section === CustomTokenSection.SPAM ||
+				(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+				allowExternalContentSource: false
+			})
+		};
+
 		if (isTokenErc721(token)) {
 			await saveCustomErc721Token({
 				identity: $authIdentity,
-				tokens: [
-					{
-						...token,
-						enabled: true,
-						section,
-						...((section === CustomTokenSection.SPAM ||
-							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
-							allowExternalContentSource: false
-						})
-					}
-				]
+				tokens: [saveToken]
 			});
 		} else if (isTokenErc1155(token)) {
 			await saveCustomErc1155Token({
 				identity: $authIdentity,
-				tokens: [
-					{
-						...token,
-						enabled: true,
-						section,
-						...((section === CustomTokenSection.SPAM ||
-							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
-							allowExternalContentSource: false
-						})
-					}
-				]
+				tokens: [saveToken]
 			});
 		}
 
-		console.log('Going to refresh tokens:', [token]);
+		console.log('Going to refresh tokens:', [saveToken]);
 		console.log('Going to refresh tokens, $ethAddress', $ethAddress);
 		console.log('Going to refresh tokens, get(nftStore)', get(nftStore));
 
 		await loadNfts({
-			tokens: [token],
+			tokens: [saveToken],
 			walletAddress: $ethAddress,
 			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
 			force: true
