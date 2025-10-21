@@ -23,50 +23,11 @@ const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	};
 };
 
-const csI18n = (): Promise<I18n> => loadLangI18n(Languages.CZECH);
-
-const deI18n = (): Promise<I18n> => loadLangI18n(Languages.GERMAN);
-
-const frI18n = (): Promise<I18n> => loadLangI18n(Languages.FRENCH);
-
-const hiI18n = (): Promise<I18n> => loadLangI18n(Languages.HINDI);
-
-const itI18n = (): Promise<I18n> => loadLangI18n(Languages.ITALIAN);
-
-const jaI18n = (): Promise<I18n> => loadLangI18n(Languages.JAPANESE);
-
-const plI18n = (): Promise<I18n> => loadLangI18n(Languages.POLISH);
-
-const ptI18n = (): Promise<I18n> => loadLangI18n(Languages.PORTUGUESE);
-
-const viI18n = (): Promise<I18n> => loadLangI18n(Languages.VIETNAMESE);
-
-const zhcnI18n = (): Promise<I18n> => loadLangI18n(Languages.CHINESE_SIMPLIFIED);
-
 const loadLang = async (lang: Languages): Promise<I18n> => {
-	switch (lang) {
-		case Languages.CHINESE_SIMPLIFIED:
-			return await zhcnI18n();
-		case Languages.CZECH:
-			return csI18n();
-		case Languages.FRENCH:
-			return frI18n();
-		case Languages.GERMAN:
-			return deI18n();
-		case Languages.HINDI:
-			return hiI18n();
-		case Languages.ITALIAN:
-			return itI18n();
-		case Languages.JAPANESE:
-			return jaI18n();
-		case Languages.POLISH:
-			return plI18n();
-		case Languages.PORTUGUESE:
-			return ptI18n();
-		case Languages.VIETNAMESE:
-			return viI18n();
-		default:
-			return enI18n();
+	try {
+		return await loadLangI18n(lang);
+	} catch (_: unknown) {
+		return enI18n();
 	}
 };
 
