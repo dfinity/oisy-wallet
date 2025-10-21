@@ -15,13 +15,15 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import type { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 
 	interface Props {
 		nft?: Nft;
 		token?: NonFungibleToken;
+		source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE | PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION;
 	}
 
-	const { nft, token }: Props = $props();
+	const { nft, token, source }: Props = $props();
 
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
@@ -100,7 +102,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
-			<NftImageConsentPreference {collection} />
+			<NftImageConsentPreference {collection} {source} />
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />

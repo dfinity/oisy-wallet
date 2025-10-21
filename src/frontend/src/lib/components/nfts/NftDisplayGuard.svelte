@@ -7,21 +7,30 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 
 	interface Props {
 		nft?: Nft;
 		children: Snippet;
 		showMessage?: boolean;
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
+		locationSource?: string;
+		locationSubsource?: string;
 	}
 
-	const { nft, children, showMessage = true, type }: Props = $props();
+	const {
+		nft,
+		children,
+		showMessage = true,
+		type,
+		locationSource,
+		locationSubsource
+	}: Props = $props();
 
 	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
@@ -32,12 +41,16 @@
 	const handleConsent = () => {
 		if (nonNullish(nft)) {
 			trackEvent({
-				name: TRACK_NFT_OPEN_CONSENT_MODAL,
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
 				metadata: {
-					collection_name: nft.collection.name ?? '',
-					collection_address: nft.collection.address,
-					network: nft.collection.network.name,
-					standard: nft.collection.standard
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+					event_subcontext: 'media_review',
+					location_source: locationSource ?? '',
+					location_subsource: locationSubsource ?? '',
+					token_name: nft.collection.name ?? '',
+					token_address: nft.collection.address,
+					token_network: nft.collection.network.name,
+					token_standard: nft.collection.standard
 				}
 			});
 

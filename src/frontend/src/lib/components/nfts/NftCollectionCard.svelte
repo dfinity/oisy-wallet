@@ -62,7 +62,12 @@
 	}}
 >
 	<div class="relative h-full w-full">
-		<NftDisplayGuard nft={previewNft} type="card">
+		<NftDisplayGuard
+			nft={previewNft}
+			type="card"
+			locationSource={PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE}
+			locationSubsource="card"
+		>
 			<div
 				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}

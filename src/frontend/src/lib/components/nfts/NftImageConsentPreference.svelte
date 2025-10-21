@@ -4,12 +4,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NftCollection } from '$lib/types/nft';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		collection: NftCollection;
+		source: string;
 	}
 
-	const { collection }: Props = $props();
+	const { collection, source }: Props = $props();
 
 	const hasConsent = $derived(
 		nonNullish(collection) ? collection.allowExternalContentSource : false
@@ -17,6 +20,19 @@
 
 	const openConsentModal = () => {
 		if (nonNullish(collection)) {
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.OPEN_MODAL,
+				metadata: {
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+					event_subcontext: 'media_review',
+					location_source: source,
+					location_subsource: 'list',
+					token_name: collection.name ?? '',
+					token_address: collection.address,
+					token_network: collection.network.name,
+					token_standard: collection.standard
+				}
+			});
 			modalStore.openNftImageConsent({ id: Symbol(), data: collection });
 		}
 	};

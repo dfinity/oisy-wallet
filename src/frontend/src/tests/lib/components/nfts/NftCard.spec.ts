@@ -123,7 +123,6 @@ describe('NftCard', () => {
 				testId,
 				type: 'card-link',
 				isSpam: true,
-				source: 'gallery'
 			}
 		});
 
@@ -153,7 +152,6 @@ describe('NftCard', () => {
 				testId,
 				type: 'card-link',
 				isHidden: true,
-				source: 'collection-view'
 			}
 		});
 
@@ -182,7 +180,6 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				source: 'home'
 			}
 		});
 

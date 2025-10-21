@@ -80,7 +80,14 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftDisplayGuard {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
+		<NftDisplayGuard
+			{nft}
+			type={type !== 'card-link' ? 'card-selectable' : 'card'}
+			locationSource={source === NFT_LIST_ROUTE
+				? PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE
+				: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION}
+			locationSubsource="card"
+		>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
