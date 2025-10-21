@@ -1,3 +1,4 @@
+import { NFTS_ENABLED } from '$env/nft.env';
 import {
 	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
@@ -101,7 +102,7 @@ export const sortTokens = <T extends Token>({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The sorted list of tokens.
  *
@@ -161,7 +162,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
@@ -272,7 +273,7 @@ export const defineEnabledTokens = <T extends Token>({
 	);
 
 export const groupTogglableTokens = (
-	tokens: Record<string, Token>
+	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
@@ -280,7 +281,7 @@ export const groupTogglableTokens = (
 	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
-	Object.values(tokens ?? {}).reduce<{
+	tokens.reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
@@ -309,7 +310,7 @@ export const saveAllCustomTokens = async ({
 	$authIdentity,
 	$i18n
 }: {
-	tokens: Record<string, Token>;
+	tokens: Token[];
 	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
 	modalNext?: () => void;
 	onSuccess?: () => void;
@@ -394,7 +395,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0
+		...(erc721.length > 0 && NFTS_ENABLED
 			? [
 					saveErc721CustomTokens({
 						...commonParams,
@@ -402,7 +403,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0
+		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
 					saveErc1155CustomTokens({
 						...commonParams,

@@ -57,7 +57,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '1',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '2',
@@ -66,7 +70,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '3',
@@ -75,7 +83,11 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				},
 				{
 					tokenId: '4',
@@ -84,52 +96,64 @@ describe('alchemy.providers', () => {
 					description: 'lorem ipsum',
 					raw: { metadata: {} },
 					balance: '4',
-					contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					contract: {
+						address: mockValidErc1155Token.address,
+						tokenType: 'Erc1155',
+						openSeaMetadata: { bannerImageUrl: 'https://download.com' }
+					}
 				}
 			]
 		};
 
 		const expectedTokenIds: Nft[] = [
 			{
-				id: parseNftId(1),
+				id: parseNftId('1'),
 				name: 'Name1',
 				imageUrl: 'https://download.com',
 				balance: 1,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
 			},
 			{
-				id: parseNftId(2),
+				id: parseNftId('2'),
 				name: 'Name2',
 				imageUrl: 'https://download2.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
-				mediaStatus: NftMediaStatusEnum.INVALID_DATA
+				mediaStatus: NftMediaStatusEnum.OK
 			},
 			{
-				id: parseNftId(3),
+				id: parseNftId('3'),
 				name: 'Name3',
 				imageUrl: 'https://download3.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
 			},
 			{
-				id: parseNftId(4),
+				id: parseNftId('4'),
 				name: 'Name4',
 				imageUrl: 'https://download4.com',
 				balance: 4,
 				collection: {
-					...mapTokenToCollection(mockValidErc1155Token)
+					...mapTokenToCollection(mockValidErc1155Token),
+					bannerImageUrl: 'https://download.com',
+					bannerMediaStatus: NftMediaStatusEnum.OK
 				},
 				description: 'lorem ipsum',
 				mediaStatus: NftMediaStatusEnum.OK
@@ -216,14 +240,14 @@ describe('alchemy.providers', () => {
 
 			expect(nfts).toStrictEqual([
 				{
-					id: parseNftId(1),
+					id: parseNftId('1'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
 					mediaStatus: NftMediaStatusEnum.INVALID_DATA
 				},
 				{
-					id: parseNftId(2),
+					id: parseNftId('2'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},

@@ -5,7 +5,7 @@ import type {
 	IcrcToken,
 	UserProfile,
 	UserToken
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {

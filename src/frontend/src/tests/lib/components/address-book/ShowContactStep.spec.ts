@@ -177,8 +177,7 @@ describe('ShowContactStep', () => {
 		await fireEvent.click(infoButtons[0]);
 
 		// Check that showAddress was called with the correct index
-		expect(mockShowAddress).toHaveBeenCalledOnce();
-		expect(mockShowAddress).toHaveBeenCalledWith(0);
+		expect(mockShowAddress).toHaveBeenCalledExactlyOnceWith(0);
 	});
 
 	it('should call edit function when edit button is clicked', async () => {
@@ -196,8 +195,7 @@ describe('ShowContactStep', () => {
 		const editButton = getByTestId(CONTACT_HEADER_EDIT_BUTTON);
 		await fireEvent.click(editButton);
 
-		expect(mockEdit).toHaveBeenCalledOnce();
-		expect(mockEdit).toHaveBeenCalledWith(mockContact);
+		expect(mockEdit).toHaveBeenCalledExactlyOnceWith(mockContact);
 	});
 
 	it('should call copyToClipboard function when address button is clicked', async () => {

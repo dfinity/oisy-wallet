@@ -1,5 +1,6 @@
 import { CONFIRMED_BTC_TRANSACTION_MIN_CONFIRMATIONS } from '$btc/constants/btc.constants';
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
+import type { BtcAddress } from '$btc/types/address';
 import { BtcPrepareSendError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { calculateUtxoSelection, filterAvailableUtxos } from '$btc/utils/btc-utxos.utils';
@@ -8,7 +9,6 @@ import { getUtxosQuery } from '$icp/api/bitcoin.api';
 import { getPendingTransactionUtxoTxIds } from '$icp/utils/btc.utils';
 import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
-import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import type { Identity } from '@dfinity/agent';

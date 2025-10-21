@@ -130,7 +130,7 @@ describe('BtcConvertTokenWizard', () => {
 
 		await clickConvertButton(container);
 
-		expect(btcSendApiSpy).toHaveBeenCalledWith({
+		expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 			identity: mockIdentity,
 			network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 			utxosToSpend: mockUtxosFee.utxos,
@@ -142,7 +142,6 @@ describe('BtcConvertTokenWizard', () => {
 				}
 			]
 		});
-		expect(btcSendApiSpy).toHaveBeenCalledOnce();
 		expect(addPendingTransactionApiSpy).toHaveResolvedWith(pendingBtcTransactionResponse);
 	});
 

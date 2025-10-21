@@ -1,4 +1,4 @@
-import type { AccountInfo, ParsedAccount } from '$declarations/sol_rpc/sol_rpc.did';
+import type { AccountInfo, ParsedAccount } from '$declarations/sol_rpc/declarations/sol_rpc.did';
 import type { Address, GetAccountInfoApi } from '@solana/kit';
 
 export type ParsedAccountInfo = Omit<AccountInfo, 'data'> & {

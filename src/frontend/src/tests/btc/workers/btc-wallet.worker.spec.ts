@@ -143,7 +143,7 @@ describe('btc-wallet.worker', () => {
 			setup: () => {},
 
 			teardown: () => {
-				// reset internal store with transactions
+				// Reset the internal store with transactions
 				scheduler['store'] = {
 					transactions: {},
 					balance: undefined,
@@ -222,8 +222,11 @@ describe('btc-wallet.worker', () => {
 
 					await awaitJobExecution();
 
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusInProgress);
-					expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageStatusIdle);
+					expect(postMessageMock).toHaveBeenCalledTimes(4);
+					expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+					expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageUncertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+					expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 				});
 
 				it('should trigger postMessage with error on third try', async () => {

@@ -47,7 +47,7 @@
 
 <ReceiveButtonWithModal isOpen={$modalCkBTCReceive} {modalId} open={openModal}>
 	{#snippet modal()}
-		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBtc} on:nnsClose={close} />
+		<ReceiveAddressModal infoCmp={IcReceiveInfoCkBtc} onClose={close} />
 	{/snippet}
 </ReceiveButtonWithModal>
 

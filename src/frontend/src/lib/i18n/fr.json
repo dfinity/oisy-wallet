@@ -1128,6 +1128,8 @@
 			"collections": "Collections",
 			"all_assets": "Tous les actifs",
 			"address_copied": "Adresse $address copiée",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Pas de spam",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "Examiner",
 			"collection_name": "Nom de la collection",
 			"media_urls": "URLs des médias",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Préférence d'affichage",
 			"review_preference": "Préférence d'examen",
 			"media_enabled": "Média activé",
@@ -1150,12 +1154,14 @@
 			"enable_media": "Activer le média",
 			"disable_media": "Désactiver le média",
 			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "Ouvrir dans un nouvel onglet",
 			"review_title": "Examiner les sources de médias pour \"$collectionName\"",
 			"review_description": "Attention ! Ces images proviennent d'une source non vérifiée. Les activer pourrait partager votre adresse IP avec un tiers et présente un risque de sécurité potentiel.",
 			"learn_more": "En savoir plus",
 			"token_id": "ID du token",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Pas encore de NFT",
@@ -1705,11 +1711,15 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_info": "",
 			"stake_review_subtitle": ""
 		}
 	},

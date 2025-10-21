@@ -80,7 +80,7 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
-		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
 		expect(getByText('{ ... }')).toBeInTheDocument();
 	});
@@ -92,7 +92,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.application}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.application)).toBeInTheDocument();
 
 		expect(getByText('https://app.uniswap.org')).toBeInTheDocument();
 	});
@@ -104,7 +104,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.method}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.method)).toBeInTheDocument();
 
 		expect(getByText(SESSION_REQUEST_ETH_SIGN_V4)).toBeInTheDocument();
 	});
@@ -116,13 +116,13 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.token}:`)).toBeInTheDocument();
-		expect(getByText(`${en.wallet_connect.text.network}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.token)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.network)).toBeInTheDocument();
 
 		expect(getByText(USDC_TOKEN.symbol)).toBeInTheDocument();
 		expect(getByText(USDC_TOKEN.network.name)).toBeInTheDocument();
 
-		expect(getByText(`${en.wallet_connect.text.amount}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.amount)).toBeInTheDocument();
 
 		expect(
 			getByText(
@@ -142,7 +142,7 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(getByText(`${en.wallet_connect.text.spender}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.spender)).toBeInTheDocument();
 
 		expect(getByText('0x66a9893cc07d91d95644aedd05d03f95e1dba8af')).toBeInTheDocument();
 	});
@@ -159,7 +159,7 @@ describe('EthWalletConnectMessage', () => {
 			language: Languages.ENGLISH
 		});
 
-		expect(getByText(`${en.wallet_connect.text.expiration}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.expiration)).toBeInTheDocument();
 
 		expect(getByText(expected)).toBeInTheDocument();
 	});
@@ -174,8 +174,8 @@ describe('EthWalletConnectMessage', () => {
 			}
 		});
 
-		expect(queryByText(`${en.wallet_connect.text.token}:`)).not.toBeInTheDocument();
-		expect(queryByText(`${en.wallet_connect.text.network}:`)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.token)).not.toBeInTheDocument();
+		expect(queryByText(en.wallet_connect.text.network)).not.toBeInTheDocument();
 
 		expect(queryByText(USDC_TOKEN.symbol)).not.toBeInTheDocument();
 		expect(queryByText(USDC_TOKEN.network.name)).not.toBeInTheDocument();
@@ -256,7 +256,7 @@ describe('EthWalletConnectMessage', () => {
 			request.params.request.params
 		);
 
-		expect(getByText(`${en.wallet_connect.text.message}:`)).toBeInTheDocument();
+		expect(getByText(en.wallet_connect.text.message)).toBeInTheDocument();
 
 		expect(queryByText('{ ... }')).not.toBeInTheDocument();
 

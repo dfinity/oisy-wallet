@@ -10,6 +10,7 @@
 		setIdbIcTransactions,
 		setIdbSolTransactions
 	} from '$lib/api/idb-transactions.api';
+	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { enabledTokens } from '$lib/derived/tokens.derived';
 	import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
@@ -30,7 +31,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $btcTransactionsStore
 		});
-	}, 1000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$btcTransactionsStore];
@@ -44,7 +45,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $ethTransactionsStore
 		});
-	}, 1000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$ethTransactionsStore];
@@ -58,7 +59,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $icTransactionsStore
 		});
-	}, 1000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$icTransactionsStore];
@@ -72,7 +73,7 @@
 			tokens: untrack(() => $enabledTokens),
 			transactionsStoreData: $solTransactionsStore
 		});
-	}, 1000);
+	}, WALLET_TIMER_INTERVAL_MILLIS);
 
 	$effect(() => {
 		[$solTransactionsStore];

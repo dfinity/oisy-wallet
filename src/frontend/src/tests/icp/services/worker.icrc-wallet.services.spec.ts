@@ -3,7 +3,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
-import { initIcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
+import { IcrcWalletWorker } from '$icp/services/worker.icrc-wallet.services';
 import type { WalletWorker } from '$lib/types/listener';
 import { mockIndexCanisterId, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
@@ -38,7 +38,7 @@ vi.mock('$lib/workers/workers?worker', () => ({
 }));
 
 describe('worker.icrc-wallet.services', () => {
-	describe('initIcrcWalletWorker', () => {
+	describe('IcrcWalletWorker', () => {
 		let worker: WalletWorker;
 
 		describe('with index canister id', () => {
@@ -53,7 +53,7 @@ describe('worker.icrc-wallet.services', () => {
 			beforeEach(async () => {
 				vi.clearAllMocks();
 
-				worker = await initIcrcWalletWorker(mockToken);
+				worker = await IcrcWalletWorker.init(mockToken);
 			});
 
 			it('should start the worker and send the correct start message', () => {
@@ -119,8 +119,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});
@@ -204,7 +203,7 @@ describe('worker.icrc-wallet.services', () => {
 			beforeEach(async () => {
 				vi.clearAllMocks();
 
-				worker = await initIcrcWalletWorker(mockToken);
+				worker = await IcrcWalletWorker.init(mockToken);
 			});
 
 			it('should start the worker and send the correct start message', () => {
@@ -250,8 +249,7 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(syncWallet).toHaveBeenCalledOnce();
-					expect(syncWallet).toHaveBeenCalledWith({
+					expect(syncWallet).toHaveBeenCalledExactlyOnceWith({
 						tokenId: mockToken.id,
 						data: payload.data
 					});

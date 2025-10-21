@@ -10,9 +10,11 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
+	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { findNonFungibleToken, getAllowMediaForNft } from '$lib/utils/nfts.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -31,13 +33,7 @@
 	);
 
 	const hasConsent: boolean | undefined = $derived(
-		nonNullish(collection)
-			? getAllowMediaForNft({
-					tokens: $nonFungibleTokens,
-					networkId: collection.network.id,
-					address: collection.address
-				})
-			: false
+		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
 </script>
 
@@ -62,7 +58,7 @@
 				</span>
 			</div>
 
-			{#if nonNullish(collection.bannerImageUrl) && hasConsent}
+			{#if nonNullish(collection.bannerImageUrl) && hasConsent && collection.bannerMediaStatus === NftMediaStatusEnum.OK}
 				<div class="flex h-32 min-w-32 overflow-hidden rounded-lg">
 					<BgImg imageUrl={collection.bannerImageUrl} size="cover" />
 				</div>
@@ -73,8 +69,8 @@
 
 		{#if nonNullish(token)}
 			<div class="mt-6 flex w-full gap-2">
-				<span><NftSpamButton {token} /></span>
-				<span><NftHideButton {token} /></span>
+				<span><NftSpamButton source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} {token} /></span>
+				<span><NftHideButton source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} {token} /></span>
 			</div>
 		{/if}
 	</div>
