@@ -28,7 +28,7 @@
 <svelte:window onscroll={handleScroll} />
 
 <div bind:this={rootElement}>
-	<div class="sticky top-0 z-10 whitespace-nowrap px-1 pt-6" class:bg-page={scrolledSoon}>
+	<div class="z-3 sticky top-0 whitespace-nowrap px-1 pt-6" class:bg-page={scrolledSoon}>
 		{@render header()}
 	</div>
 
