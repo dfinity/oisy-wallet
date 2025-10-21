@@ -22,7 +22,6 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { getSymbol } from '$lib/utils/modal.utils.js';
 
 	interface Props {
 		token: NonFungibleToken;
