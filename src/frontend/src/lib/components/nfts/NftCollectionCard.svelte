@@ -20,14 +20,16 @@
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 	import { goto } from '$app/navigation';
 	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		collection: NftCollectionUi;
 		disabled?: boolean;
 		testId?: string;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId }: Props = $props();
+	const { collection, disabled, testId, fromRoute }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -55,12 +57,10 @@
 			}
 		});
 
-		goto(
-			buildNftSearchUrl({
-				collection: collection.collection,
-				network: collection.collection.network
-			})
-		);
+		const url = buildNftSearchUrl({ collection: collection.collection, fromRoute });
+		if (url) {
+			goto(url);
+		}
 	};
 </script>
 

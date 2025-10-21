@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
@@ -12,6 +12,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	const nft = $derived($pageNft);
 
@@ -34,8 +35,14 @@
 			}
 		};
 	});
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <NftHero {nft} {token} />
 
-<NftCollectionCard collection={nft?.collection} />
+<NftCollectionCard collection={nft?.collection} {fromRoute} />

@@ -3,6 +3,9 @@
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import type { NftCollectionUi } from '$lib/types/nft';
+	import NftCard from '$lib/components/nfts/NftCard.svelte';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 
 	interface Props {
 		title: string;
@@ -15,6 +18,12 @@
 	let { title, asMainSection = false, icon, nftCollections, testId }: Props = $props();
 
 	const notEmptyCollections = $derived(nftCollections.filter((c) => c.nfts.length > 0));
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <div data-tid={testId}>
@@ -27,7 +36,7 @@
 		{#if notEmptyCollections.length > 0}
 			<div class="grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
 				{#each notEmptyCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
-					<NftCollectionCard {collection} />
+					<NftCollectionCard {collection} {fromRoute} />
 				{/each}
 			</div>
 		{:else}
