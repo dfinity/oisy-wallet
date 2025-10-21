@@ -181,7 +181,7 @@
 		}
 	};
 
-	const debounceLoad = debounce(onLoad, 1000);
+	const debounceLoad = debounce(onLoad);
 
 	$effect(() => {
 		[$enabledEthereumNetworks, $enabledEvmNetworks, NFTS_ENABLED, $authIdentity];
