@@ -1,6 +1,6 @@
 import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
@@ -11,6 +11,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
+import type { Network } from '$lib/types/network';
 import {
 	back,
 	buildNftSearchUrl,
@@ -587,16 +588,16 @@ describe('nav.utils', () => {
 		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
 		const mockNft = mockValidErc1155Nft;
 
-		beforeAll(() => {
-			// Simulate browser environment for URL()
-			Object.defineProperty(window, 'location', {
-				value: { origin: 'https://example.com' },
-				writable: true
-			});
-		});
+		const getMockFromRoute: NavigationTarget = (network: Network) =>
+			({
+				url: new URL(`https://example.com?network=${network.id.description}`)
+			}) as unknown as NavigationTarget;
 
 		it('includes network and collection param when collection is provided', () => {
-			const result = buildNftSearchUrl({ collection: mockCollection });
+			const result = buildNftSearchUrl({
+				collection: mockCollection,
+				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
+			});
 			const url = new URL(result);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockCollection.network.id.description);
@@ -606,13 +607,22 @@ describe('nav.utils', () => {
 		it('includes all params when nft is passed', () => {
 			const result = buildNftSearchUrl({
 				nft: mockNft,
-				collection: mockCollection
+				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
 			});
 			const url = new URL(result);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNft.collection.network.id.description);
 			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockNft.collection.address);
 			expect(url.searchParams.get(NFT_PARAM)).toBe(mockNft.id);
+		});
+
+		it('persists network param if nothing is passed', () => {
+			const result = buildNftSearchUrl({ fromRoute: getMockFromRoute(ETHEREUM_NETWORK) });
+			const url = new URL(result);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(ETHEREUM_NETWORK.id.description);
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();
+			expect(url.searchParams.get(NFT_PARAM)).toBeNull();
 		});
 	});
 });

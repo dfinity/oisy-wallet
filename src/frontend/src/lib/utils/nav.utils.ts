@@ -173,37 +173,40 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 
 export const buildNftSearchUrl = ({
 	nft,
-	collection
+	collection,
+	fromRoute
 }:
 	| {
 			nft: Nft;
+			fromRoute: NavigationTarget;
 	  }
 	| {
 			collection: NftCollection;
+			fromRoute: NavigationTarget;
 	  }
-	| {}) => {
-	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
-
+	| {
+			fromRoute: NavigationTarget;
+	  }): string => {
 	if (nonNullish(nft?.network?.id?.description)) {
-		url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
+		fromRoute.url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
 	} else if (nonNullish(collection?.network?.id?.description)) {
-		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+		fromRoute.url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
 	} else {
-		const currentNetwork = new URL(window.location.href).searchParams.get(NETWORK_PARAM);
+		const currentNetwork = fromRoute.url.searchParams.get(NETWORK_PARAM);
 		if (nonNullish(currentNetwork)) {
-			url.searchParams.set(NETWORK_PARAM, currentNetwork);
+			fromRoute.url.searchParams.set(NETWORK_PARAM, currentNetwork);
 		}
 	}
 
 	if (nonNullish(nft?.collection)) {
-		url.searchParams.set(COLLECTION_PARAM, nft.collection.address);
+		fromRoute.url.searchParams.set(COLLECTION_PARAM, nft.collection.address);
 	} else if (nonNullish(collection)) {
-		url.searchParams.set(COLLECTION_PARAM, collection.address);
+		fromRoute.url.searchParams.set(COLLECTION_PARAM, collection.address);
 	}
 
 	if (nonNullish(nft)) {
-		url.searchParams.set(NFT_PARAM, nft.id);
+		fromRoute.url.searchParams.set(NFT_PARAM, nft.id);
 	}
 
-	return url.toString();
+	return fromRoute.url.toString();
 };
