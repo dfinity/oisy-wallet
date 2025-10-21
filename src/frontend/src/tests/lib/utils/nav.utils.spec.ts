@@ -588,7 +588,7 @@ describe('nav.utils', () => {
 		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
 		const mockNft = mockValidErc1155Nft;
 
-		const getMockFromRoute: NavigationTarget = (network: Network) =>
+		const getMockFromRoute = (network: Network) =>
 			({
 				url: new URL(`https://example.com?network=${network.id.description}`)
 			}) as unknown as NavigationTarget;
