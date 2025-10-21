@@ -67,32 +67,26 @@
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
+			const saveToken = {
+				...token,
+				allowExternalContentSource: allowMedia,
+				enabled: true // must be true otherwise we couldnt see it at this point
+			};
+
 			if (isTokenErc721(token)) {
 				await saveErc721CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
+					tokens: [saveToken],
 					identity: $authIdentity
 				});
 			} else if (isTokenErc1155(token)) {
 				await saveErc1155CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
+					tokens: [saveToken],
 					identity: $authIdentity
 				});
 			}
 
 			await loadNfts({
-				tokens: [token],
+				tokens: [saveToken],
 				walletAddress: $ethAddress,
 				loadedNfts: $nftStore ?? [],
 				force: true
