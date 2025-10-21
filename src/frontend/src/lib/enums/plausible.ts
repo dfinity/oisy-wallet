@@ -3,7 +3,7 @@ export enum PLAUSIBLE_EVENTS {
 	NFT_CATEGORIZE = 'nft_categorize',
 	PAGE_OPEN = 'page_open',
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
-	NFT_MEDIA_CONSENT = 'nft_media_consent',
+	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal'
 }
 

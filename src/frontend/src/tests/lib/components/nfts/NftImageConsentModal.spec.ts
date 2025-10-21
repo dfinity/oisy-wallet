@@ -336,7 +336,7 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(enableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: 'nft',
 				event_value: 'true',
@@ -369,7 +369,7 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(keepDisabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: 'nft',
 				event_value: 'false',
@@ -399,7 +399,7 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(disableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: 'nft',
 				event_value: 'false',
@@ -429,7 +429,7 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(keepEnabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: 'nft',
 				event_value: 'true',
