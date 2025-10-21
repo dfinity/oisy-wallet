@@ -50,8 +50,10 @@
 	<div class="relative h-64 w-full overflow-hidden">
 		<div class="absolute h-full w-full">
 			<NftDisplayGuard
-				locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE}
-				locationSubsource="hero"
+				location={{
+					source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+					subSource: 'hero'
+				}}
 				{nft}
 				showMessage={false}
 				type="hero-banner"
@@ -64,8 +66,10 @@
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftDisplayGuard
-						locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE}
-						locationSubsource="hero"
+						location={{
+							source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+							subSource: 'hero'
+						}}
 						{nft}
 						type="nft-display"
 					>
@@ -116,6 +120,6 @@
 			</div>
 		{/if}
 
-		<NftMetadataList {nft} source="nft_page" />
+		<NftMetadataList {nft} source={PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE} />
 	</div>
 </div>

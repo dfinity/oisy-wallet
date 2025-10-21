@@ -63,8 +63,10 @@
 >
 	<div class="relative h-full w-full">
 		<NftDisplayGuard
-			locationSource={PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE}
-			locationSubsource="card"
+			location={{
+				source: PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE,
+				subSource: 'card'
+			}}
 			nft={previewNft}
 			type="card"
 		>

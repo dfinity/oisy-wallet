@@ -81,10 +81,13 @@
 		class:opacity-50={disabled}
 	>
 		<NftDisplayGuard
-			locationSource={source === NFT_LIST_ROUTE
-				? PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE
-				: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION}
-			locationSubsource="card"
+			location={{
+				source:
+					source === NFT_LIST_ROUTE
+						? PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE
+						: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
+				subSource: 'card'
+			}}
 			{nft}
 			type={type !== 'card-link' ? 'card-selectable' : 'card'}
 		>

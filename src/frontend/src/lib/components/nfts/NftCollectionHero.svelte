@@ -30,8 +30,10 @@
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
 		<NftDisplayGuard
-			locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION}
-			locationSubsource="hero"
+			location={{
+				source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
+				subSource: 'hero'
+			}}
 			nft={nfts?.[0]}
 			type="hero-banner"
 		>
@@ -65,6 +67,6 @@
 			</div>
 		{/if}
 
-		<NftMetadataList source="collection" {token} />
+		<NftMetadataList source={PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION} {token} />
 	</div>
 </div>

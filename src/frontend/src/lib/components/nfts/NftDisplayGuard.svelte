@@ -19,18 +19,10 @@
 		children: Snippet;
 		showMessage?: boolean;
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
-		locationSource?: string;
-		locationSubsource?: string;
+		location: { source: string; subSource: string };
 	}
 
-	const {
-		nft,
-		children,
-		showMessage = true,
-		type,
-		locationSource,
-		locationSubsource
-	}: Props = $props();
+	const { nft, children, showMessage = true, type, location }: Props = $props();
 
 	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
 
@@ -45,8 +37,8 @@
 				metadata: {
 					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
 					event_subcontext: 'media_review',
-					location_source: locationSource ?? '',
-					location_subsource: locationSubsource ?? '',
+					location_source: location.source,
+					location_subsource: location.subSource,
 					token_name: nft.collection.name ?? '',
 					token_address: nft.collection.address,
 					token_network: nft.collection.network.name,
