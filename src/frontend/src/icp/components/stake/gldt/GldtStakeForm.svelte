@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
-	import {
-		GLDT_STAKE_APY_CONTEXT_KEY,
-		type GldtStakeApyContext
-	} from '$icp/stores/gldt-stake-apy.store';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeForm from '$lib/components/stake/StakeForm.svelte';
 	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
@@ -27,7 +24,7 @@
 
 	const { sendToken, sendBalance } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { store: gldtStakeApyStore } = getContext<GldtStakeApyContext>(GLDT_STAKE_APY_CONTEXT_KEY);
+	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	let totalFee = $derived(($sendToken as IcToken).fee * 2n);
 

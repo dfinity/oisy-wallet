@@ -1,9 +1,9 @@
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import {
-	GLDT_STAKE_APY_CONTEXT_KEY,
-	initGldtStakeApyStore,
-	type GldtStakeApyContext
-} from '$icp/stores/gldt-stake-apy.store';
+	GLDT_STAKE_CONTEXT_KEY,
+	initGldtStakeStore,
+	type GldtStakeContext
+} from '$icp/stores/gldt-stake.store';
 import type { IcToken } from '$icp/types/ic-token';
 import StakeWizard from '$lib/components/stake/StakeWizard.svelte';
 import * as appConstants from '$lib/constants/app.constants';
@@ -16,9 +16,9 @@ import { render } from '@testing-library/svelte';
 
 describe('StakeWizard', () => {
 	const mockContext = (token: IcToken) =>
-		new Map<symbol, SendContext | GldtStakeApyContext>([
+		new Map<symbol, SendContext | GldtStakeContext>([
 			[SEND_CONTEXT_KEY, initSendContext({ token })],
-			[GLDT_STAKE_APY_CONTEXT_KEY, { store: initGldtStakeApyStore() }]
+			[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]
 		]);
 
 	const props = {
