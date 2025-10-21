@@ -2,7 +2,9 @@ import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
@@ -166,4 +168,32 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
+};
+
+export const buildNftSearchUrl = ({
+	nft,
+	collection,
+	network
+}: {
+	nft?: Nft;
+	collection?: NftCollection;
+	network?: Network;
+}) => {
+	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
+
+	if (nonNullish(network?.id?.description)) {
+		url.searchParams.set(NETWORK_PARAM, network.id.description);
+	} else if (nonNullish(collection?.network?.id?.description)) {
+		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+	}
+
+	if (nonNullish(collection)) {
+		url.searchParams.set(COLLECTION_PARAM, collection.address);
+	}
+
+	if (nonNullish(nft)) {
+		url.searchParams.set(NFT_PARAM, String(nft.id));
+	}
+
+	return url.toString();
 };

@@ -1,16 +1,20 @@
 import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
 import {
 	back,
+	buildNftSearchUrl,
 	gotoReplaceRoot,
 	isActivityPath,
 	isDappExplorerPath,
@@ -35,6 +39,9 @@ import {
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 import type { MockInstance } from 'vitest';
 
@@ -574,6 +581,76 @@ describe('nav.utils', () => {
 			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
 			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
 			expect(isEarningPath(null)).toBeFalsy();
+		});
+	});
+
+	describe('buildNftSearchUrl', () => {
+		const mockNetwork = ETHEREUM_NETWORK;
+		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
+		const mockNft = mockValidErc1155Nft;
+
+		beforeAll(() => {
+			// Simulate browser environment for URL()
+			Object.defineProperty(window, 'location', {
+				value: { origin: 'https://example.com' },
+				writable: true
+			});
+		});
+
+		it('returns a base URL when no params are provided', () => {
+			const result = buildNftSearchUrl({});
+
+			expect(result).toBe(`https://example.com${AppPath.Nfts}`);
+		});
+
+		it('includes network param when provided directly', () => {
+			const result = buildNftSearchUrl({ network: mockNetwork });
+			const url = new URL(result);
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNetwork.id.description);
+		});
+
+		it('includes collection param when collection is provided', () => {
+			const result = buildNftSearchUrl({ collection: mockCollection });
+			const url = new URL(result);
+
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockCollection.address);
+		});
+
+		it('includes nft param when nft is provided', () => {
+			const result = buildNftSearchUrl({ nft: mockNft });
+			const url = new URL(result);
+
+			expect(url.searchParams.get(NFT_PARAM)).toBe(String(mockNft.id));
+		});
+
+		it('uses collections network as fallback if network is not provided', () => {
+			const result = buildNftSearchUrl({
+				network: POLYGON_MAINNET_NETWORK,
+				collection: mockCollection
+			});
+			const url = new URL(result);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(POLYGON_MAINNET_NETWORK.id.description);
+		});
+
+		it('falls back to collection.network.id.description if network is missing', () => {
+			const result = buildNftSearchUrl({ collection: mockCollection });
+			const url = new URL(result);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockCollection.network.id.description);
+		});
+
+		it('includes all params when nft, collection, and network are given', () => {
+			const result = buildNftSearchUrl({
+				nft: mockNft,
+				collection: mockCollection,
+				network: mockNetwork
+			});
+			const url = new URL(result);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNetwork.id.description);
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockCollection.address);
+			expect(url.searchParams.get(NFT_PARAM)).toBe(String(mockNft.id));
 		});
 	});
 });
