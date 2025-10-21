@@ -7,6 +7,7 @@
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
@@ -161,3 +162,4 @@
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />
+<ResponsiveListener />

@@ -1719,6 +1719,7 @@
 			"provider": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_info": "",
 			"stake_review_subtitle": ""
 		}
 	},

@@ -2,13 +2,13 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
 import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
-import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
@@ -336,13 +336,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(enableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'enable_media'
+				event_context: 'nft',
+				event_value: 'true',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -368,13 +369,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(keepDisabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'keep_media_disabled'
+				event_context: 'nft',
+				event_value: 'false',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -397,13 +399,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(disableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'disable_media'
+				event_context: 'nft',
+				event_value: 'false',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -426,13 +429,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(keepEnabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'keep_media_enabled'
+				event_context: 'nft',
+				event_value: 'true',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});

@@ -1,4 +1,9 @@
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
+import {
+	GLDT_STAKE_CONTEXT_KEY,
+	initGldtStakeStore,
+	type GldtStakeContext
+} from '$icp/stores/gldt-stake.store';
 import StakeModal from '$lib/components/stake/StakeModal.svelte';
 import * as appConstants from '$lib/constants/app.constants';
 import { STAKE_FORM_REVIEW_BUTTON } from '$lib/constants/test-ids.constants';
@@ -24,7 +29,10 @@ describe('StakeModal', () => {
 					symbol: 'GLDT',
 					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 				} as Token
-			}
+			},
+			context: new Map<symbol, GldtStakeContext>([
+				[GLDT_STAKE_CONTEXT_KEY, { store: initGldtStakeStore() }]
+			])
 		});
 
 		const firstStepTitle = 'Stake GLDT';

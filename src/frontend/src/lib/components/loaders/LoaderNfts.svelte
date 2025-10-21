@@ -1,10 +1,8 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { debounce, isNullish } from '@dfinity/utils';
+	import { type Snippet, untrack } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
-	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { loadNftsByNetwork } from '$lib/services/nft.services';
@@ -14,11 +12,10 @@
 	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
 
 	interface Props {
-		skipInitialLoad?: boolean;
 		children?: Snippet;
 	}
 
-	let { skipInitialLoad = true, children }: Props = $props();
+	let { children }: Props = $props();
 
 	const handleRemovedNfts = ({
 		token,
@@ -73,8 +70,14 @@
 
 		await Promise.allSettled(promises);
 	};
+
+	const debounceLoad = debounce(onLoad, 1000);
+
+	$effect(() => {
+		[$enabledNonFungibleTokens, NFTS_ENABLED, $ethAddress];
+
+		untrack(() => debounceLoad());
+	});
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} {skipInitialLoad}>
-	{@render children?.()}
-</IntervalLoader>
+{@render children?.()}

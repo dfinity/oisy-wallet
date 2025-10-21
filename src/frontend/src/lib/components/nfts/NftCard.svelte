@@ -8,8 +8,15 @@
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_SOURCES,
+		PLAUSIBLE_EVENT_VALUES,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 
@@ -21,7 +28,7 @@
 		isSpam?: boolean;
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
-		source?: string;
+		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
 	}
 
 	let {
@@ -32,7 +39,7 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source
+		source = 'default'
 	}: Props = $props();
 
 	const onClick = () => {
@@ -41,16 +48,15 @@
 		}
 		if (type === 'card-link' && !disabled) {
 			trackEvent({
-				name: TRACK_NFT_OPEN,
+				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
-					collection_name: nft.collection.name ?? '',
-					collection_address: nft.collection.address,
-					network: nft.collection.network.name,
-					standard: nft.collection.standard,
-					nft_id: nft.id.toString(),
-					...(source && { source }),
-					...(isSpam && { nftStatus: 'spam' }),
-					...(isHidden && !isSpam && { nftStatus: 'hidden' })
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+					event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+					location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+					token_network: nft.collection.network.name,
+					token_address: nft.collection.address,
+					token_symbol: nft.collection.symbol ?? '',
+					token_name: nft.collection.name ?? ''
 				}
 			});
 
@@ -113,7 +119,14 @@
 	</span>
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
-		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>{nft.name}</span>
-		<span class="text-xs" class:text-tertiary={!disabled}>#{nft.id}</span>
+		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
+			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
+		</span>
+		<span class="text-xs" class:text-tertiary={!disabled}>
+			#{nft.id}
+			{#if source === NFT_LIST_ROUTE}
+				&ndash; {nft.name}
+			{/if}
+		</span>
 	</span>
 </button>
