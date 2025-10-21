@@ -175,18 +175,11 @@ export const buildNftSearchUrl = ({
 	nft,
 	collection,
 	fromRoute
-}:
-	| {
-			nft: Nft;
-			fromRoute: NavigationTarget;
-	  }
-	| {
-			collection: NftCollection;
-			fromRoute: NavigationTarget;
-	  }
-	| {
-			fromRoute: NavigationTarget;
-	  }): string => {
+}: {
+	nft?: Nft;
+	collection?: NftCollection;
+	fromRoute: NavigationTarget;
+}): string => {
 	if (nonNullish(nft?.network?.id?.description)) {
 		fromRoute.url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
 	} else if (nonNullish(collection?.network?.id?.description)) {
