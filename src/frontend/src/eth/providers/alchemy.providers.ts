@@ -138,18 +138,22 @@ export class AlchemyProvider {
 	}
 
 	private mapNftFromRpc = async ({
-		nft,
+		nft: {
+			tokenId,
+			name,
+			description,
+			raw: {
+				metadata: { attributes: untypedAttributes }
+			},
+			image,
+			acquiredAt,
+			contract: { openSeaMetadata }
+		},
 		token
 	}: {
 		nft: AlchemyNft;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
-		const {
-			raw: {
-				metadata: { attributes: untypedAttributes }
-			}
-		} = nft;
-
 		const attributes = untypedAttributes as {
 			trait_type: string;
 			value: string;
@@ -162,31 +166,27 @@ export class AlchemyProvider {
 				}))
 			: [];
 
-		const mediaStatus = await getMediaStatus(nft.image?.originalUrl);
+		const mediaStatus = await getMediaStatus(image?.originalUrl);
 
-		const bannerMediaStatus = await getMediaStatus(nft.contract.openSeaMetadata?.bannerImageUrl);
+		const bannerMediaStatus = await getMediaStatus(openSeaMetadata?.bannerImageUrl);
 
 		return {
-			id: parseNftId(nft.tokenId),
-			...(nonNullish(nft.name) && { name: nft.name }),
-			...(nonNullish(nft.image?.originalUrl) && {
-				imageUrl: nft.image?.originalUrl
-			}),
-			...(nonNullish(nft.description) && {
-				description: nft.description
-			}),
+			id: parseNftId(tokenId),
+			...(nonNullish(name) && { name }),
+			...(nonNullish(image?.originalUrl) && { imageUrl: image?.originalUrl }),
+			...(nonNullish(description) && { description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
-			...(nonNullish(nft.acquiredAt?.blockTimestamp) && {
-				acquiredAt: new Date(nft.acquiredAt?.blockTimestamp)
+			...(nonNullish(acquiredAt?.blockTimestamp) && {
+				acquiredAt: new Date(acquiredAt?.blockTimestamp)
 			}),
 			collection: {
 				...mapTokenToCollection(token),
-				...(nonNullish(nft.contract.openSeaMetadata?.bannerImageUrl) && {
-					bannerImageUrl: nft.contract.openSeaMetadata?.bannerImageUrl,
+				...(nonNullish(openSeaMetadata?.bannerImageUrl) && {
+					bannerImageUrl: openSeaMetadata?.bannerImageUrl,
 					bannerMediaStatus
 				}),
-				...(nonNullish(nft.contract.openSeaMetadata?.description) && {
-					description: nft.contract.openSeaMetadata?.description
+				...(nonNullish(openSeaMetadata?.description) && {
+					description: openSeaMetadata?.description
 				})
 			},
 			mediaStatus
