@@ -27,6 +27,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
+	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -41,17 +42,11 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
-
-	let { url } = $derived($page);
-
-	const network = $derived(url.searchParams.get(NETWORK_PARAM));
-	const collection = $derived(url.searchParams.get(COLLECTION_PARAM));
-	const nft = $derived(url.searchParams.get(NFT_PARAM));
 </script>
 
-{#if nonNullish(nft) && nonNullish(collection) && nonNullish(network)}
+{#if nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<Nft />
-{:else if nonNullish(collection) && nonNullish(network)}
+{:else if nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<NftCollection />
 {:else}
 	<div>
