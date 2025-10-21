@@ -57,7 +57,7 @@
 					token_address: nft.collection.address,
 					token_symbol: nft.collection.symbol ?? '',
 					token_name: nft.name ?? '',
-					token_id: String(nft.id)
+					token_id: nft.id
 				}
 			});
 
