@@ -9,7 +9,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { Network, NetworkId } from '$lib/types/network';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
@@ -117,9 +117,6 @@ export interface RouteParams {
 	[NETWORK_PARAM]: OptionString;
 	// WalletConnect URI parameter
 	[URI_PARAM]: OptionString;
-	// NFT URI parameters
-	[COLLECTION_PARAM]: OptionString;
-	[NFT_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -127,9 +124,7 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			[TOKEN_PARAM]: undefined,
 			[NETWORK_PARAM]: undefined,
-			[URI_PARAM]: undefined,
-			[COLLECTION_PARAM]: undefined,
-			[NFT_PARAM]: undefined
+			[URI_PARAM]: undefined
 		};
 	}
 
@@ -154,18 +149,14 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	return {
 		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
-		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
-		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM),
-		[NFT_PARAM]: searchParams?.get(NFT_PARAM)
+		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null
 	};
 };
 
 export const resetRouteParams = (): RouteParams => ({
 	[TOKEN_PARAM]: null,
 	[NETWORK_PARAM]: null,
-	[URI_PARAM]: null,
-	[COLLECTION_PARAM]: null,
-	[NFT_PARAM]: null
+	[URI_PARAM]: null
 });
 
 export const switchNetwork = async (networkId: Option<NetworkId>) => {
@@ -183,27 +174,32 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 export const buildNftSearchUrl = ({
 	nft,
 	collection,
-	network
+	fromRoute
 }: {
 	nft?: Nft;
 	collection?: NftCollection;
-	network?: Network;
-}) => {
-	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
-
-	if (nonNullish(network?.id?.description)) {
-		url.searchParams.set(NETWORK_PARAM, network.id.description);
+	fromRoute: NavigationTarget;
+}): string => {
+	if (nonNullish(nft?.collection?.network?.id?.description)) {
+		fromRoute.url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
 	} else if (nonNullish(collection?.network?.id?.description)) {
-		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+		fromRoute.url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+	} else {
+		const currentNetwork = fromRoute.url.searchParams.get(NETWORK_PARAM);
+		if (nonNullish(currentNetwork)) {
+			fromRoute.url.searchParams.set(NETWORK_PARAM, currentNetwork);
+		}
 	}
 
-	if (nonNullish(collection)) {
-		url.searchParams.set(COLLECTION_PARAM, collection.address);
+	if (nonNullish(nft?.collection)) {
+		fromRoute.url.searchParams.set(COLLECTION_PARAM, nft.collection.address);
+	} else if (nonNullish(collection)) {
+		fromRoute.url.searchParams.set(COLLECTION_PARAM, collection.address);
 	}
 
 	if (nonNullish(nft)) {
-		url.searchParams.set(NFT_PARAM, String(nft.id));
+		fromRoute.url.searchParams.set(NFT_PARAM, nft.id);
 	}
 
-	return url.toString();
+	return fromRoute.url.toString();
 };
