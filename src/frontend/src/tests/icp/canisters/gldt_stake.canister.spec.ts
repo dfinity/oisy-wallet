@@ -1,8 +1,12 @@
 import type { _SERVICE as GldtStakeService } from '$declarations/gldt_stake/declarations/gldt_stake.did';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import { CanisterInternalError } from '$lib/canisters/errors';
+import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
+import {
+	dailyAnalyticsMockResponse,
+	stakePositionMockResponse
+} from '$tests/mocks/gldt_stake.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
@@ -52,6 +56,37 @@ describe('gldt_stake.canister', () => {
 			});
 
 			const res = getApyOverall();
+
+			await expect(res).rejects.toThrow(mockResponseError);
+		});
+	});
+
+	describe('getDailyAnalytics', () => {
+		it('returns daily statistics successfully', async () => {
+			service.get_daily_analytics.mockResolvedValue([[1000n, dailyAnalyticsMockResponse]]);
+
+			const { getDailyAnalytics } = await createGldtStakeCanister({ serviceOverride: service });
+
+			const result = await getDailyAnalytics();
+
+			expect(result).toEqual(dailyAnalyticsMockResponse);
+			expect(service.get_daily_analytics).toHaveBeenCalledExactlyOnceWith({
+				starting_day: ZERO,
+				limit: toNullable(1n)
+			});
+		});
+
+		it('throws an error if get_daily_analytics method fails', async () => {
+			service.get_daily_analytics.mockImplementation(async () => {
+				await Promise.resolve();
+				throw mockResponseError;
+			});
+
+			const { getDailyAnalytics } = await createGldtStakeCanister({
+				serviceOverride: service
+			});
+
+			const res = getDailyAnalytics();
 
 			await expect(res).rejects.toThrow(mockResponseError);
 		});
