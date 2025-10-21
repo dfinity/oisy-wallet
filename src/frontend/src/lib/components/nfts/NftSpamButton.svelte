@@ -11,6 +11,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { modalNftImageConsent } from '$lib/derived/modal.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
@@ -22,7 +23,6 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import { modalNftImageConsent } from '$lib/derived/modal.derived';
 
 	interface Props {
 		token: NonFungibleToken;
