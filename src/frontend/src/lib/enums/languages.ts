@@ -10,6 +10,7 @@ export enum Languages {
 	POLISH = 'pl',
 	PORTUGUESE = 'pt',
 	RUSSIAN = 'ru',
+	SPANISH = 'es',
 	VIETNAMESE = 'vi',
 	CHINESE_SIMPLIFIED = 'zh-CN'
 }
