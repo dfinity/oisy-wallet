@@ -7,7 +7,7 @@
 	import { filterTokenGroups, groupTokensByTwin } from '$lib/utils/token-group.utils';
 
 	interface Props {
-		tokens: TokenUiOrGroupUi[] | undefined;
+		tokens?: TokenUiOrGroupUi[];
 		animating: boolean;
 		children: Snippet;
 	}
