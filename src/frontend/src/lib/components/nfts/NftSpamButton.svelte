@@ -12,11 +12,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
-	import {
-		PLAUSIBLE_EVENT_CONTEXTS,
-		PLAUSIBLE_EVENT_SOURCES,
-		PLAUSIBLE_EVENTS
-	} from '$lib/enums/plausible';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -26,6 +22,7 @@
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { modalNftImageConsent } from '$lib/derived/modal.derived';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -71,8 +68,8 @@
 
 			trackNftCategorizeEvent({ value: section, status: 'success' });
 
-			if (nonNullish(savedToken) && source === PLAUSIBLE_EVENT_SOURCES.NFT_MEDIA_REVIEW) {
-				modalStore.openNftImageConsent({ id: Symbol(), data: mapTokenToCollection(savedToken) });
+			if (nonNullish(savedToken) && $modalNftImageConsent) {
+				modalStore.openNftImageConsent({ id: Symbol(), data: mapTokenToCollection(savedToken) }); // update token in modalData
 			}
 		} catch (_: unknown) {
 			trackNftCategorizeEvent({ value: section, status: 'error' });
