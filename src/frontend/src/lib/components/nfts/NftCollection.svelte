@@ -17,6 +17,7 @@
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
@@ -55,7 +56,7 @@
 	});
 </script>
 
-<NftCollectionHero nfts={collectionNfts} {token} />
+<NftCollectionHero nfts={collectionNfts} {token} {fromRoute} />
 
 <div class="mt-4 grid grid-cols-2 gap-3 gap-y-4 py-4 md:grid-cols-3">
 	{#if collectionNfts.length > 0}
