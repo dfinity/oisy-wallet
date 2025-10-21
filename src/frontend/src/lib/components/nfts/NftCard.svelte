@@ -31,7 +31,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
-		fromRoute: NavigationTarget | null;
+		fromRoute?: NavigationTarget | null;
 	}
 
 	let {
@@ -50,7 +50,7 @@
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (type === 'card-link' && !disabled) {
+		if (type === 'card-link' && !disabled && nonNullish(fromRoute)) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
