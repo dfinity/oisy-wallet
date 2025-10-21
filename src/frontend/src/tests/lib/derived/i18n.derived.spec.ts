@@ -16,11 +16,11 @@ describe('i18n.derived', () => {
 		it('should return the current language from the i18n store', async () => {
 			expect(get(currentLanguage)).toEqual(Languages.ENGLISH);
 
-			await await i18n.switchLang(Languages.GERMAN);
+			await i18n.switchLang(Languages.GERMAN);
 
 			expect(get(currentLanguage)).toEqual(Languages.GERMAN);
 
-			await await i18n.switchLang(Languages.ITALIAN);
+			await i18n.switchLang(Languages.ITALIAN);
 
 			expect(get(currentLanguage)).toEqual(Languages.ITALIAN);
 		});
