@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -20,7 +21,6 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		nft: Nft;
