@@ -1,4 +1,4 @@
-import type { UserData } from '$declarations/rewards/rewards.did';
+import type { UserData } from '$declarations/rewards/declarations/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import Menu from '$lib/components/core/Menu.svelte';
 import {

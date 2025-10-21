@@ -18,7 +18,7 @@ describe('nftStore', () => {
 	describe('addAll', () => {
 		it('should add NFTs to store', () => {
 			const mockNft1 = mockValidErc721Nft;
-			const mockNft2 = { ...mockValidErc721Nft, id: parseNftId(837364) };
+			const mockNft2 = { ...mockValidErc721Nft, id: parseNftId('837364') };
 
 			nftStore.addAll([mockNft1, mockNft2]);
 
@@ -37,6 +37,18 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
 		});
 
+		it('should update already existing NFTs to store', () => {
+			const duplicateNft = { ...mockValidErc721Nft, imageUrl: 'newUrl' };
+
+			nftStore.addAll([mockValidErc721Nft]);
+
+			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
+
+			nftStore.addAll([duplicateNft]);
+
+			expect(get(nftStore)).toEqual([duplicateNft]);
+		});
+
 		it('should add NFT with same token id but different collection address', () => {
 			const similarNft: Nft = {
 				...mockValidErc721Nft,
@@ -48,7 +60,7 @@ describe('nftStore', () => {
 			expect(get(nftStore)).toEqual([mockValidErc721Nft, similarNft]);
 		});
 
-		it('should not add NFT with address written in different case', () => {
+		it('should add NFT with address written in different case', () => {
 			nftStore.addAll([mockValidErc721Nft]);
 
 			const similarNft: Nft = {
@@ -61,16 +73,16 @@ describe('nftStore', () => {
 
 			nftStore.addAll([similarNft]);
 
-			expect(get(nftStore)).toEqual([mockValidErc721Nft]);
+			expect(get(nftStore)).toEqual([similarNft]);
 		});
 	});
 
 	describe('removeSelectedNfts', () => {
 		const mockNft1 = mockValidErc721Nft;
-		const mockNft2 = { ...mockValidErc721Nft, id: parseNftId(837364) };
+		const mockNft2 = { ...mockValidErc721Nft, id: parseNftId('837364') };
 		const mockNft3 = {
 			...mockValidErc721Nft,
-			id: parseNftId(376428),
+			id: parseNftId('376428'),
 			collection: {
 				...mockValidErc721Nft.collection,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -140,10 +152,10 @@ describe('nftStore', () => {
 
 	describe('updateSelectedNfts', () => {
 		const mockNft1 = mockValidErc1155Nft;
-		const mockNft2 = { ...mockValidErc1155Nft, id: parseNftId(837364) };
+		const mockNft2 = { ...mockValidErc1155Nft, id: parseNftId('837364') };
 		const mockNft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(376428),
+			id: parseNftId('376428'),
 			balance: 5,
 			collection: {
 				...mockValidErc1155Nft.collection,

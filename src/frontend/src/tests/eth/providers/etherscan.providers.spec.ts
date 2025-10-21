@@ -415,7 +415,7 @@ describe('etherscan.providers', () => {
 				}
 			];
 
-			const expectedTokenIds = [1, 2, 3];
+			const expectedTokenIds = ['1', '2', '3'];
 
 			beforeEach(() => {
 				vi.clearAllMocks();

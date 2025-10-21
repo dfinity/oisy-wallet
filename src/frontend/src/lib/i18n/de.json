@@ -1128,6 +1128,8 @@
 			"collections": "Kollektionen",
 			"all_assets": "Alle Assets",
 			"address_copied": "Adresse $address kopiert",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Kein Spam",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "Prüfen",
 			"collection_name": "Kollektionsname",
 			"media_urls": "Medien URLs",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Anzeigeeinstellung",
 			"review_preference": "Einstellung anpassen",
 			"media_enabled": "Medien aktiviert",
@@ -1150,12 +1154,14 @@
 			"enable_media": "Medien aktivieren",
 			"disable_media": "Medien deaktivieren",
 			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "In neuem Tab öffnen",
 			"review_title": "Medienquelle überprüfen für \"$collectionName\"",
 			"review_description": "Aufgepasst! Diese Bilder kommen von einer unverifizierten Quelle. Diese zu aktivieren könnte deine IP-Adresse mit Dritten teilen und potentiell ein Sicherheitsrisiko darstellen.",
 			"learn_more": "Erfahre mehr",
 			"token_id": "",
-			"go_to_collection": ""
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "Noch keine NFTs",
@@ -1705,11 +1711,15 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_info": "",
 			"stake_review_subtitle": ""
 		}
 	},

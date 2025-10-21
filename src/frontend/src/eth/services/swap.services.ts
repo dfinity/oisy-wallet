@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
 import type { SwapParams } from '$eth/types/swap';

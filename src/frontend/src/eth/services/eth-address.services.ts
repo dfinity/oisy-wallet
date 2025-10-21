@@ -1,5 +1,6 @@
 import { FRONTEND_DERIVATION_ENABLED } from '$env/address.env';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import type { EthAddress } from '$eth/types/address';
 import {
 	getIdbEthAddress,
 	setIdbEthAddress,
@@ -16,7 +17,6 @@ import {
 } from '$lib/services/address.services';
 import { ethAddressStore, type AddressStoreData } from '$lib/stores/address.store';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { LoadIdbAddressError } from '$lib/types/errors';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { ResultSuccess } from '$lib/types/utils';

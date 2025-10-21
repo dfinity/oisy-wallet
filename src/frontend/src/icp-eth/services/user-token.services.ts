@@ -1,8 +1,7 @@
-import type { UserToken } from '$declarations/backend/backend.did';
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+import type { UserToken } from '$declarations/backend/declarations/backend.did';
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import type { Erc20Token } from '$eth/types/erc20';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { Erc20UserToken, SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { setUserToken as setUserTokenApi } from '$lib/api/backend.api';
 import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.services';

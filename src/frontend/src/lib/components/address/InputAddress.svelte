@@ -62,7 +62,7 @@
 
 {#snippet qrButton()}
 	{#if nonNullish(onQRCodeScan) && !disabled}
-		<QrButton on:click={onQRCodeScan} />
+		<QrButton onClick={onQRCodeScan} />
 	{/if}
 {/snippet}
 

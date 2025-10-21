@@ -4,8 +4,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { hideZeroBalancesStore } from '$lib/stores/settings.store';
 
-	let checked: boolean;
-	$: checked = $hideZeroBalances;
+	let checked = $derived($hideZeroBalances);
 
 	const toggleHide = () =>
 		hideZeroBalancesStore.set({ key: 'hide-zero-balances', value: { enabled: !checked } });

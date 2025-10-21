@@ -188,30 +188,32 @@
 	{sourceNetwork}
 	targetNetwork={ICP_NETWORK}
 >
-	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<EthConvertForm {destination} {onNext} bind:sendAmount bind:receiveAmount>
-			{#snippet cancel()}
-				{#if formCancelAction === 'back'}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsConvert.CONVERT}
+			<EthConvertForm {destination} {onNext} bind:sendAmount bind:receiveAmount>
+				{#snippet cancel()}
+					{#if formCancelAction === 'back'}
+						<ButtonBack onclick={back} />
+					{:else}
+						<ButtonCancel onclick={close} />
+					{/if}
+				{/snippet}
+			</EthConvertForm>
+		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+			<EthConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
+				{#snippet cancel()}
 					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			{/snippet}
-		</EthConvertForm>
-	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<EthConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</EthConvertReview>
-	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-		<EthConvertProgress
-			{destination}
-			nativeEthereumToken={$nativeEthereumTokenWithFallback}
-			sourceTokenId={$sourceToken.id}
-			bind:convertProgressStep
-		/>
-	{:else}
-		{@render children?.()}
-	{/if}
+				{/snippet}
+			</EthConvertReview>
+		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+			<EthConvertProgress
+				{convertProgressStep}
+				{destination}
+				nativeEthereumToken={$nativeEthereumTokenWithFallback}
+				sourceTokenId={$sourceToken.id}
+			/>
+		{:else}
+			{@render children?.()}
+		{/if}
+	{/key}
 </EthFeeContext>

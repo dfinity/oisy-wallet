@@ -595,9 +595,11 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 				await awaitJobExecution();
 
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageNotCertified);
-
-				expect(postMessageMock).toHaveBeenCalledWith(mockPostMessageCertified);
+				expect(postMessageMock).toHaveBeenCalledTimes(4);
+				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
+				expect(postMessageMock).toHaveBeenNthCalledWith(2, mockPostMessageNotCertified);
+				expect(postMessageMock).toHaveBeenNthCalledWith(3, mockPostMessageCertified);
+				expect(postMessageMock).toHaveBeenNthCalledWith(4, mockPostMessageStatusIdle);
 			});
 
 			it('should check if Index canister is awake when it is out-of-sync with the balance', async () => {

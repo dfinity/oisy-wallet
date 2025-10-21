@@ -2,13 +2,14 @@ import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
 import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
+import type { OptionEthAddress } from '$eth/types/address';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
 import { createBatches } from '$lib/services/batch.services';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Address, OptionEthAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
@@ -150,6 +151,8 @@ export const updateNftSection = async ({
 	}
 
 	if (nonNullish(token)) {
+		const currentAllowMedia = token.allowExternalContentSource;
+
 		if (isTokenErc721(token)) {
 			await saveCustomErc721Token({
 				identity: $authIdentity,
@@ -158,7 +161,10 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...(section === CustomTokenSection.SPAM && { allowExternalContentSource: false })
+						...((section === CustomTokenSection.SPAM ||
+							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+							allowExternalContentSource: false
+						})
 					}
 				]
 			});
@@ -174,7 +180,10 @@ export const updateNftSection = async ({
 						...token,
 						enabled: true,
 						section,
-						...(section === CustomTokenSection.SPAM && { allowExternalContentSource: false })
+						...((section === CustomTokenSection.SPAM ||
+							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+							allowExternalContentSource: false
+						})
 					}
 				]
 			});

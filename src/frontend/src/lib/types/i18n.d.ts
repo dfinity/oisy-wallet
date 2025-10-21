@@ -934,6 +934,8 @@ interface I18nNfts {
 		collections: string;
 		all_assets: string;
 		address_copied: string;
+		collection_name_copied: string;
+		id_copied: string;
 		spam: string;
 		not_spam: string;
 		spam_warning: string;
@@ -949,6 +951,8 @@ interface I18nNfts {
 		review_button: string;
 		collection_name: string;
 		media_urls: string;
+		media_url: string;
+		received_at: string;
 		display_preference: string;
 		review_preference: string;
 		media_enabled: string;
@@ -956,12 +960,14 @@ interface I18nNfts {
 		enable_media: string;
 		disable_media: string;
 		keep_media_disabled: string;
+		keep_media_enabled: string;
 		open_in_new_tab: string;
 		review_title: string;
 		review_description: string;
 		learn_more: string;
 		token_id: string;
 		go_to_collection: string;
+		could_not_update_section: string;
 	};
 	alt: {
 		placeholder_image: string;
@@ -1382,11 +1388,15 @@ interface I18nEarning {
 interface I18nStake {
 	text: {
 		stake: string;
+		enable_token_text: string;
+		enable_token_button: string;
 		review: string;
 		executing_transaction: string;
 		unsupported_token_staking: string;
 		provider: string;
+		visit_provider: string;
 		current_apy: string;
+		current_apy_info: string;
 		stake_review_subtitle: string;
 	};
 }

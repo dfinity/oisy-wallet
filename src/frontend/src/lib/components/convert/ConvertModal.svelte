@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps, type WizardStepsConvertComplete } from '$lib/config/convert.config';
@@ -29,8 +28,6 @@
 		destinationToken: destinationToken.symbol
 	});
 
-	const dispatch = createEventDispatcher();
-
 	const close = () =>
 		closeModal(() => {
 			sendAmount = undefined;
@@ -40,8 +37,6 @@
 			convertProgressStep = ProgressStepsConvert.INITIALIZATION;
 
 			currentStep = undefined;
-
-			dispatch('nnsClose');
 		});
 
 	const goToStep = (stepName: WizardStepsConvert) =>

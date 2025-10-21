@@ -2,7 +2,7 @@ import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.sch
 import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
-export const NftIdSchema = z.number().brand<'NftId'>();
+export const NftIdSchema = z.string().brand<'NftId'>();
 
 export const NftAttributeSchema = z.object({
 	traitType: z.string(),
@@ -22,17 +22,6 @@ export const NftNetworkSchema = z.object({
 	...NetworkAppMetadataSchema.shape
 });
 
-export const NftCollectionSchema = z.object({
-	...TokenSchema.pick({ id: true, standard: true }).shape,
-	address: z.string(),
-	name: z.string().optional(),
-	symbol: z.string().optional(),
-	bannerImageUrl: z.url().optional(),
-	description: z.string().optional(),
-	acquiredAt: z.date().optional(),
-	network: NftNetworkSchema
-});
-
 export enum NftMediaStatusEnum {
 	OK = 'ok',
 	FILESIZE_LIMIT_EXCEEDED = 'filesize_limit_exceeded',
@@ -40,10 +29,24 @@ export enum NftMediaStatusEnum {
 	INVALID_DATA = 'invalid_data'
 }
 
+export const NftCollectionSchema = z.object({
+	...TokenSchema.pick({ id: true, standard: true }).shape,
+	address: z.string(),
+	name: z.string().optional(),
+	symbol: z.string().optional(),
+	bannerImageUrl: z.url().optional(),
+	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
+	description: z.string().optional(),
+	network: NftNetworkSchema,
+	newestAcquiredAt: z.date().optional(),
+	allowExternalContentSource: z.boolean().optional()
+});
+
 export const NftSchema = z.object({
 	balance: z.number().optional(),
 	...NftMetadataSchema.shape,
 	collection: NftCollectionSchema,
+	acquiredAt: z.date().optional(),
 	mediaStatus: z.enum(NftMediaStatusEnum).optional()
 });
 

@@ -1,11 +1,11 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
