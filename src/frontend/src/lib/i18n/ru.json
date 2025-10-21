@@ -1005,8 +1005,8 @@
 		},
 		"import": {
 			"text": {
-				"title": "Импортировать токен",
-				"title_nft": "Импортировать NFT",
+				"title": "Добавить токен",
+				"title_nft": "Добавить NFT",
 				"review": "Проверить",
 				"saving": "Сохранение...",
 				"updating": "Обновление списка токенов",
@@ -1044,8 +1044,8 @@
 				"title_nft": "Управление NFT",
 				"manage_list": "Управление токенами",
 				"list_settings": "Настройки списка",
-				"import_token": "Импортировать токен",
-				"import_nft": "Импортировать NFT",
+				"import_token": "Добавить",
+				"import_nft": "Добавить NFT",
 				"network": "Сеть",
 				"all_tokens_zero_balance": "Все токены имеют нулевой баланс.",
 				"enable_more_assets": "Включить больше активов"
