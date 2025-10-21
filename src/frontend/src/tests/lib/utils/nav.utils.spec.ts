@@ -606,6 +606,7 @@ describe('nav.utils', () => {
 		it('includes network param when provided directly', () => {
 			const result = buildNftSearchUrl({ network: mockNetwork });
 			const url = new URL(result);
+
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNetwork.id.description);
 		});
 
