@@ -7,10 +7,7 @@ import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
 import { get as getStore, writable, type Readable } from 'svelte/store';
 
-export const enI18n = (): I18n => ({
-	...en,
-	lang: Languages.ENGLISH
-});
+const EXCLUDED_LANGS: Languages[] = [];
 
 const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	const langMod = await import(`$lib/i18n/${lang}.json`);
@@ -23,7 +20,10 @@ const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	};
 };
 
-const EXCLUDED_LANGS: Languages[] = [];
+export const enI18n = (): I18n => ({
+	...en,
+	lang: Languages.ENGLISH
+});
 
 const loadLang = async (lang: Languages): Promise<I18n> => {
 	if (EXCLUDED_LANGS.includes(lang)) {
