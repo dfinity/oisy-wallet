@@ -16,7 +16,7 @@
 			"decimals": "Decimales",
 			"amount": "Cantidad",
 			"tokenId": "ID del token",
-			"max": "Máximo,
+			"max": "Máximo",
 			"destination": "Destino",
 			"reject": "Rechazar",
 			"approve": "Aprobar",
@@ -25,7 +25,7 @@
 			"delete": "Eliminar",
 			"create": "Crear",
 			"clear_filter": "Limpiar filtro",
-			"not_available": "no es disponible" o "no esta disponible"",
+			"not_available": "no es disponible",
 			"new": "Nuevo",
 			"edit": "Editar",
 			"no_results": "Sin resultados",
@@ -39,7 +39,7 @@
 			"confirm": "Confirmar",
 			"more": "Más",
 			"less": "Menos",
-			"ellipsis": esta frase no tiene una traducción como tal te voy a dar un ejemplo de cómo se usa el "ellipsis" en la vida cotidiana, ejemplo.  “José está en el mercado, y yo, en la casa 
+			"ellipsis": ""
 		},
 		"info": {
 			"test_banner": "¡Solo para fines de prueba!",
