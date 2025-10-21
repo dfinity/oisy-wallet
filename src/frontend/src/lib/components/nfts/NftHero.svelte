@@ -120,6 +120,6 @@
 			</div>
 		{/if}
 
-		<NftMetadataList {nft} source={PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE} />
+		<NftMetadataList {nft} source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} />
 	</div>
 </div>
