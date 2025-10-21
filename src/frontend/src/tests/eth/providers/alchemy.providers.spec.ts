@@ -107,7 +107,7 @@ describe('alchemy.providers', () => {
 
 		const expectedTokenIds: Nft[] = [
 			{
-				id: parseNftId(1),
+				id: parseNftId('1'),
 				name: 'Name1',
 				imageUrl: 'https://download.com',
 				balance: 1,
@@ -120,7 +120,7 @@ describe('alchemy.providers', () => {
 				mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE
 			},
 			{
-				id: parseNftId(2),
+				id: parseNftId('2'),
 				name: 'Name2',
 				imageUrl: 'https://download2.com',
 				balance: 4,
@@ -133,7 +133,7 @@ describe('alchemy.providers', () => {
 				mediaStatus: NftMediaStatusEnum.OK
 			},
 			{
-				id: parseNftId(3),
+				id: parseNftId('3'),
 				name: 'Name3',
 				imageUrl: 'https://download3.com',
 				balance: 4,
@@ -146,7 +146,7 @@ describe('alchemy.providers', () => {
 				mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
 			},
 			{
-				id: parseNftId(4),
+				id: parseNftId('4'),
 				name: 'Name4',
 				imageUrl: 'https://download4.com',
 				balance: 4,
@@ -240,14 +240,14 @@ describe('alchemy.providers', () => {
 
 			expect(nfts).toStrictEqual([
 				{
-					id: parseNftId(1),
+					id: parseNftId('1'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},
 					mediaStatus: NftMediaStatusEnum.INVALID_DATA
 				},
 				{
-					id: parseNftId(2),
+					id: parseNftId('2'),
 					collection: {
 						...mapTokenToCollection(mockValidErc1155Token)
 					},

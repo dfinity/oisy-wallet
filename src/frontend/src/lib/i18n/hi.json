@@ -1128,6 +1128,8 @@
 			"collections": "संग्रह",
 			"all_assets": "सभी एसेट्स",
 			"address_copied": "पता $address कॉपी किया गया",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "",
 			"review_preference": "",
 			"media_enabled": "",
@@ -1713,7 +1717,9 @@
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_info": "",
 			"stake_review_subtitle": ""
 		}
 	},

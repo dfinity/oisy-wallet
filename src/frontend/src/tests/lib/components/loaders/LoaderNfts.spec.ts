@@ -17,6 +17,14 @@ import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 describe('LoaderNfts', () => {
 	let alchemyProvidersSpy: MockInstance;
 
@@ -29,7 +37,7 @@ describe('LoaderNfts', () => {
 
 	const mockErc721Nft1 = {
 		...mockValidErc721Nft,
-		id: parseNftId(123),
+		id: parseNftId('123'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -38,7 +46,7 @@ describe('LoaderNfts', () => {
 	};
 	const mockErc721Nft2 = {
 		...mockValidErc721Nft,
-		id: parseNftId(321),
+		id: parseNftId('321'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -47,7 +55,7 @@ describe('LoaderNfts', () => {
 	};
 	const mockErc721Nft3 = {
 		...mockValidErc721Nft,
-		id: parseNftId(876),
+		id: parseNftId('876'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
@@ -57,7 +65,7 @@ describe('LoaderNfts', () => {
 
 	const mockErc1155Nft1 = {
 		...mockValidErc1155Nft,
-		id: parseNftId(234),
+		id: parseNftId('234'),
 		collection: {
 			...mockValidErc1155Nft.collection,
 			address: NYAN_CAT_TOKEN.address,
@@ -66,7 +74,7 @@ describe('LoaderNfts', () => {
 	};
 	const mockErc1155Nft2 = {
 		...mockValidErc1155Nft,
-		id: parseNftId(432),
+		id: parseNftId('432'),
 		collection: {
 			...mockValidErc1155Nft.collection,
 			address: NYAN_CAT_TOKEN.address,
@@ -75,7 +83,7 @@ describe('LoaderNfts', () => {
 	};
 	const mockErc1155Nft3 = {
 		...mockValidErc1155Nft,
-		id: parseNftId(657),
+		id: parseNftId('657'),
 		collection: {
 			...mockValidErc1155Nft.collection,
 			address: BUILD_AN_APE_TOKEN.address,
@@ -113,11 +121,7 @@ describe('LoaderNfts', () => {
 
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1, mockErc721Nft2, mockErc721Nft3]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledExactlyOnceWith({
@@ -138,11 +142,7 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft1, mockErc1155Nft2]);
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft3]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -171,11 +171,7 @@ describe('LoaderNfts', () => {
 
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc721Nft1]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledOnce();
@@ -195,11 +191,7 @@ describe('LoaderNfts', () => {
 			mockGetNftsForOwner.mockResolvedValueOnce([mockErc1155Nft1]);
 			mockGetNftsForOwner.mockResolvedValueOnce([]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);
@@ -226,11 +218,7 @@ describe('LoaderNfts', () => {
 			]);
 			mockGetNftsForOwner.mockResolvedValueOnce([{ ...mockErc1155Nft3, balance: 3 }]);
 
-			render(LoaderNfts, {
-				props: {
-					skipInitialLoad: false
-				}
-			});
+			render(LoaderNfts);
 
 			await waitFor(() => {
 				expect(mockGetNftsForOwner).toHaveBeenCalledTimes(2);

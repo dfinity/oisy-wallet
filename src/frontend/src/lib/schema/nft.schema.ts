@@ -2,7 +2,7 @@ import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.sch
 import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
 
-export const NftIdSchema = z.number().brand<'NftId'>();
+export const NftIdSchema = z.string().brand<'NftId'>();
 
 export const NftAttributeSchema = z.object({
 	traitType: z.string(),
@@ -38,7 +38,8 @@ export const NftCollectionSchema = z.object({
 	bannerMediaStatus: z.enum(NftMediaStatusEnum).optional(),
 	description: z.string().optional(),
 	network: NftNetworkSchema,
-	newestAcquiredAt: z.date().optional()
+	newestAcquiredAt: z.date().optional(),
+	allowExternalContentSource: z.boolean().optional()
 });
 
 export const NftSchema = z.object({

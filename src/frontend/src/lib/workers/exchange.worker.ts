@@ -58,7 +58,17 @@ const startExchangeTimer = async (data: PostMessageDataRequestExchangeTimer | un
 	// We sync now but also schedule the update afterward
 	await sync();
 
-	timer = setInterval(sync, SYNC_EXCHANGE_TIMER_INTERVAL);
+	const scheduleNext = (): void => {
+		timer = setTimeout(async () => {
+			await sync();
+
+			if (nonNullish(timer)) {
+				scheduleNext();
+			}
+		}, SYNC_EXCHANGE_TIMER_INTERVAL);
+	};
+
+	scheduleNext();
 };
 
 const stopTimer = () => {
@@ -66,7 +76,7 @@ const stopTimer = () => {
 		return;
 	}
 
-	clearInterval(timer);
+	clearTimeout(timer);
 	timer = undefined;
 };
 

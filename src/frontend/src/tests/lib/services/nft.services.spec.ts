@@ -7,6 +7,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -34,7 +35,7 @@ describe('nft.services', () => {
 	describe('loadNfts', () => {
 		const mockNft1 = {
 			...mockValidErc721Nft,
-			id: parseNftId(123),
+			id: parseNftId('123'),
 			collection: {
 				...mockValidErc721Nft.collection,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -43,7 +44,7 @@ describe('nft.services', () => {
 		};
 		const mockNft2 = {
 			...mockValidErc721Nft,
-			id: parseNftId(321),
+			id: parseNftId('321'),
 			collection: {
 				...mockValidErc721Nft.collection,
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -52,7 +53,7 @@ describe('nft.services', () => {
 		};
 		const mockNft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(876),
+			id: parseNftId('876'),
 			collection: {
 				...mockValidErc1155Nft.collection,
 				address: NYAN_CAT_TOKEN.address,
@@ -110,6 +111,17 @@ describe('nft.services', () => {
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
 			expect(get(nftStore)).toEqual([]);
 		});
+
+		it('should force load NFTs if force is true', async () => {
+			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
+
+			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
+			vi.spyOn(nftsUtils, 'findNftsByToken').mockReturnValueOnce([]);
+
+			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress, force: true });
+
+			expect(get(nftStore)).toEqual([mockNft3]);
+		});
 	});
 
 	describe('sendNft', () => {
@@ -157,7 +169,7 @@ describe('nft.services', () => {
 		});
 
 		it('calls transferErc721 for an ERC-721 token with the expected params', async () => {
-			const tokenId = parseNftId(1);
+			const tokenId = parseNftId('1');
 
 			const progress = vi.fn();
 
@@ -189,7 +201,7 @@ describe('nft.services', () => {
 		});
 
 		it('calls transferErc1155 for an ERC-1155 token with id=tokenId and amount=1n', async () => {
-			const tokenId = parseNftId(725432);
+			const tokenId = parseNftId('725432');
 			const progress = vi.fn();
 
 			await sendNft({
@@ -225,7 +237,7 @@ describe('nft.services', () => {
 		it('returns early and does not call transfer functions when identity is nullish', async () => {
 			await sendNft({
 				token: token721,
-				tokenId: parseNftId(42),
+				tokenId: parseNftId('42'),
 				toAddress,
 				fromAddress,
 				identity: undefined, // nullish
@@ -280,18 +292,20 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: null
+				$authIdentity: null,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();
 			expect(erc1155Spy).not.toHaveBeenCalled();
 		});
 
-		it('updates ERC721 token with section=HIDDEN (should disable allowExternalContentSource)', async () => {
+		it('updates ERC721 token with section=HIDDEN (should disable allowExternalContentSource if allowExternalContentSoure is undefined)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -307,11 +321,33 @@ describe('nft.services', () => {
 			});
 		});
 
+		it('updates ERC721 token with section=HIDDEN (should disable allowExternalContentSource if allowExternalContentSoure is not undefined)', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: { ...base721, allowExternalContentSource: true },
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc721Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base721,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN,
+						allowExternalContentSource: true
+					}
+				]
+			});
+		});
+
 		it('updates ERC721 token with section=SPAM (should disable allowExternalContentSource)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -327,11 +363,12 @@ describe('nft.services', () => {
 			});
 		});
 
-		it('updates ERC1155 token with section=HIDDEN (should disable allowExternalContentSource)', async () => {
+		it('updates ERC1155 token with section=HIDDEN (should disable allowExternalContentSource if allowExternalContentSoure is undefined)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -347,11 +384,33 @@ describe('nft.services', () => {
 			});
 		});
 
+		it('updates ERC1155 token with section=HIDDEN (should not change allowExternalContentSource if allowExternalContentSource is not undefined)', async () => {
+			await updateNftSection({
+				section: CustomTokenSection.HIDDEN,
+				token: { ...base1155, allowExternalContentSource: true },
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
+			});
+
+			expect(erc1155Spy).toHaveBeenCalledWith({
+				identity: mockIdentity,
+				tokens: [
+					{
+						...base1155,
+						enabled: true,
+						section: CustomTokenSection.HIDDEN,
+						allowExternalContentSource: true
+					}
+				]
+			});
+		});
+
 		it('updates ERC1155 token with section=SPAM (should disable allowExternalContentSource)', async () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -371,7 +430,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: undefined as unknown as NonFungibleToken,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();

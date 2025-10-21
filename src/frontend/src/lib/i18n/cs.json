@@ -1128,6 +1128,8 @@
 			"collections": "Kolekce",
 			"all_assets": "Všechna aktiva",
 			"address_copied": "Adresa $address zkopírována",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "Ne spam",
 			"spam_warning": "",
@@ -1143,6 +1145,8 @@
 			"review_button": "Rekapitulace",
 			"collection_name": "Název kolekce",
 			"media_urls": "URL adresy médií",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Preference zobrazení",
 			"review_preference": "Preference rekapitulace",
 			"media_enabled": "Média povolena",
@@ -1713,7 +1717,9 @@
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_info": "",
 			"stake_review_subtitle": ""
 		}
 	},

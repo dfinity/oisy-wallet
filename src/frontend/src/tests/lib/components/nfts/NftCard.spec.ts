@@ -1,7 +1,7 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
-import { TRACK_NFT_OPEN } from '$lib/constants/analytics.constants';
+import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
-import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -21,10 +21,6 @@ describe('NftCard', () => {
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
 
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -34,7 +30,8 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc1155Nft,
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_COLLECTION_ROUTE
 			}
 		});
 
@@ -61,7 +58,8 @@ describe('NftCard', () => {
 			props: {
 				nft: { ...mockValidErc721Nft, imageUrl: undefined },
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				source: NFT_LIST_ROUTE
 			}
 		});
 
@@ -74,9 +72,10 @@ describe('NftCard', () => {
 		expect(networkLogo).toBeInTheDocument();
 
 		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
-		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 
 	it('should render the correct styles for each type', async () => {
@@ -123,8 +122,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isSpam: true,
-				source: 'gallery'
+				isSpam: true
 			}
 		});
 
@@ -134,15 +132,16 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'gallery',
-				nftStatus: 'spam'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_id: '173563',
+				token_name: 'Beanz 123',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});
@@ -153,8 +152,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isHidden: true,
-				source: 'collection-view'
+				isHidden: true
 			}
 		});
 
@@ -164,15 +162,16 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'collection-view',
-				nftStatus: 'hidden'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_id: '173563',
+				token_name: 'Beanz 123',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});
@@ -182,8 +181,7 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc721Nft,
 				testId,
-				type: 'card-link',
-				source: 'home'
+				type: 'card-link'
 			}
 		});
 
@@ -193,14 +191,16 @@ describe('NftCard', () => {
 		button.click();
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN,
+			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				collection_name: mockValidErc721Nft.collection.name,
-				collection_address: mockValidErc721Nft.collection.address,
-				network: mockValidErc721Nft.collection.network.name,
-				standard: mockValidErc721Nft.collection.standard,
-				nft_id: mockValidErc721Nft.id.toString(),
-				source: 'home'
+				event_context: 'nft',
+				event_value: 'nft',
+				location_source: 'navigation',
+				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
+				token_id: '173563',
+				token_name: 'Beanz 123',
+				token_network: 'Ethereum',
+				token_symbol: 'MC'
 			}
 		});
 	});

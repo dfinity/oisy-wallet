@@ -255,12 +255,12 @@ describe('scheduler', () => {
 		});
 
 		describe('stop', () => {
-			let spyClearInterval: MockInstance;
+			let spyClearTimeout: MockInstance;
 
 			beforeEach(async () => {
 				await scheduler.start(mockParams);
 
-				spyClearInterval = vi.spyOn(global, 'clearInterval');
+				spyClearTimeout = vi.spyOn(global, 'clearTimeout');
 			});
 
 			it('should stop the timer', () => {
@@ -268,7 +268,7 @@ describe('scheduler', () => {
 
 				scheduler.stop();
 
-				expect(spyClearInterval).toHaveBeenCalledOnce();
+				expect(spyClearTimeout).toHaveBeenCalledOnce();
 
 				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {
@@ -284,7 +284,7 @@ describe('scheduler', () => {
 
 				scheduler.stop();
 
-				expect(spyClearInterval).not.toHaveBeenCalled();
+				expect(spyClearTimeout).not.toHaveBeenCalled();
 
 				expect(postMessageMock).toHaveBeenCalledOnce();
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, {

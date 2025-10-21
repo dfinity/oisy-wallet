@@ -2,13 +2,13 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import * as erc721TokenServices from '$eth/services/erc721-custom-tokens.services';
 import type { Erc721Token } from '$eth/types/erc721';
 import NftImageConsentModal from '$lib/components/nfts/NftImageConsentModal.svelte';
-import { TRACK_NFT_CONSENT_GIVEN } from '$lib/constants/analytics.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import * as authDerived from '$lib/derived/auth.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { nftStore } from '$lib/stores/nft.store';
@@ -29,7 +29,7 @@ vi.mock('$lib/services/analytics.services', () => ({
 
 const nftAzuki1 = {
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/1.png',
 	collection: {
 		...mockValidErc721Nft.collection,
@@ -41,7 +41,7 @@ const nftAzuki1 = {
 
 const nftAzuki2 = {
 	...mockValidErc721Nft,
-	id: parseNftId(2),
+	id: parseNftId('2'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/2.png',
 	collection: {
 		...mockValidErc721Nft.collection,
@@ -58,7 +58,6 @@ describe('NftImageConsentModal', () => {
 		.mockReturnValue(new Promise((resolve) => resolve()));
 
 	// NFT utils: toggle & collection
-	const getAllowMediaSpy = vi.spyOn(nftsUtils, 'getAllowMediaForNft');
 	const findTokenSpy = vi.spyOn(nftsUtils, 'findNonFungibleToken');
 	const getCollectionUiSpy = vi.spyOn(nftsUtils, 'getNftCollectionUi');
 
@@ -71,7 +70,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	beforeEach(() => {
-		getAllowMediaSpy.mockClear();
 		vi.clearAllMocks();
 	});
 
@@ -122,10 +120,12 @@ describe('NftImageConsentModal', () => {
 			} as Erc721Token;
 
 			findTokenSpy.mockReturnValue(token);
-			getAllowMediaSpy.mockReturnValue(testCase.allowMedia);
 
 			render(NftImageConsentModal, {
-				props: { collection: nftAzuki1.collection, testId: TEST_ID }
+				props: {
+					collection: { ...nftAzuki1.collection, allowExternalContentSource: testCase.allowMedia },
+					testId: TEST_ID
+				}
 			});
 
 			const btnPrimary = screen.getByTestId(testCase.buttonPrimary);
@@ -176,10 +176,12 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(undefined);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: undefined },
+				testId: TEST_ID
+			}
 		});
 
 		const btnPrimary = screen.getByTestId(`${TEST_ID}-enableButton`);
@@ -190,14 +192,17 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('renders collection info, display preference, and NFT media list', () => {
-		getAllowMediaSpy.mockReturnValue(false);
 		findTokenSpy.mockReturnValue({
 			...mockValidErc721Token,
 			description: 'Some valid description'
 		});
 		getCollectionUiSpy.mockReturnValue([
 			{
-				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
+				collection: {
+					...nftAzuki1.collection,
+					description: 'Some valid description',
+					allowExternalContentSource: false
+				},
 				nfts: [nftAzuki1, nftAzuki2]
 			}
 		]);
@@ -205,7 +210,11 @@ describe('NftImageConsentModal', () => {
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, {
 			props: {
-				collection: { ...nftAzuki1.collection, description: 'Some valid description' },
+				collection: {
+					...nftAzuki1.collection,
+					description: 'Some valid description',
+					allowExternalContentSource: false
+				},
 				testId: TEST_ID
 			}
 		});
@@ -256,7 +265,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should not render media link icon if consent has not been given', () => {
-		getAllowMediaSpy.mockReturnValue(false);
 		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
@@ -267,7 +275,10 @@ describe('NftImageConsentModal', () => {
 
 		const TEST_ID = 'nft-modal';
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const mediaContainer = screen.getByTestId(`${TEST_ID}-nfts-media`);
@@ -281,7 +292,6 @@ describe('NftImageConsentModal', () => {
 	});
 
 	it('should render media link icon if consent has been given', () => {
-		getAllowMediaSpy.mockReturnValue(true);
 		findTokenSpy.mockReturnValue(mockValidErc721Token);
 		getCollectionUiSpy.mockReturnValue([
 			{
@@ -314,23 +324,26 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(false);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const enableButton = screen.getByTestId(testIds.enable);
 		await fireEvent.click(enableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'enable_media'
+				event_context: 'nft',
+				event_value: 'true',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -344,23 +357,26 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(false);
 
 		render(NftImageConsentModal, {
-			props: { collection: nftAzuki1.collection, testId: TEST_ID }
+			props: {
+				collection: { ...nftAzuki1.collection, allowExternalContentSource: false },
+				testId: TEST_ID
+			}
 		});
 
 		const keepDisabledButton = screen.getByTestId(testIds.keepDisabled);
 		await fireEvent.click(keepDisabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'keep_media_disabled'
+				event_context: 'nft',
+				event_value: 'false',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -374,7 +390,6 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(true);
 
 		render(NftImageConsentModal, {
 			props: { collection: nftAzuki1.collection, testId: TEST_ID }
@@ -384,13 +399,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(disableButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'disable_media'
+				event_context: 'nft',
+				event_value: 'false',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -404,7 +420,6 @@ describe('NftImageConsentModal', () => {
 		} as Erc721Token;
 
 		findTokenSpy.mockReturnValue(token);
-		getAllowMediaSpy.mockReturnValue(true);
 
 		render(NftImageConsentModal, {
 			props: { collection: nftAzuki1.collection, testId: TEST_ID }
@@ -414,13 +429,14 @@ describe('NftImageConsentModal', () => {
 		await fireEvent.click(keepEnabledButton);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_CONSENT_GIVEN,
+			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
 			metadata: {
-				collection_name: nftAzuki1.collection.name,
-				collection_address: nftAzuki1.collection.address,
-				network: nftAzuki1.collection.network.name,
-				standard: nftAzuki1.collection.standard,
-				clicked_button: 'keep_media_enabled'
+				event_context: 'nft',
+				event_value: 'true',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
