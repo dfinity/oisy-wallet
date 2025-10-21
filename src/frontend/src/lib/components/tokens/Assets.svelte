@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -14,13 +15,17 @@
 	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import Tabs from '$lib/components/ui/Tabs.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import {
+		AppPath,
+		COLLECTION_PARAM,
+		NETWORK_PARAM,
+		NFT_PARAM
+	} from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
-	import { page } from '$app/stores';
 	import Nft from '$lib/components/nfts/Nft.svelte';
 
 	interface Props {
@@ -39,77 +44,80 @@
 
 	let { url } = $derived($page);
 
-	const network = $derived(url.searchParams.get('network'));
-	const collection = $derived(url.searchParams.get('collection'));
-	const nft = $derived(url.searchParams.get('nft'));
-
-	$effect(() => {
-		console.log('collectionId', collection);
-	});
+	const network = $derived(url.searchParams.get(NETWORK_PARAM));
+	const collection = $derived(url.searchParams.get(COLLECTION_PARAM));
+	const nft = $derived(url.searchParams.get(NFT_PARAM));
 </script>
 
-<div>
-	<StickyHeader>
-		{#snippet header()}
-			<div class="flex w-full justify-between">
-				<div class="grow-1 relative flex justify-between">
-					<TokensFilter>
-						{#snippet overflowableContent()}
-							{#if NFTS_ENABLED}
-								<Tabs
-									styleClass="mt-2 mb-8"
-									tabVariant="menu"
-									tabs={[
-										{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
-										{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
-									]}
-									trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
-									bind:activeTab
-								/>
-							{:else}
-								<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-							{/if}
-						{/snippet}
-					</TokensFilter>
+{#if nonNullish(nft) && nonNullish(collection) && nonNullish(network)}
+	<Nft />
+{:else if nonNullish(collection) && nonNullish(network)}
+	<NftCollection />
+{:else}
+	<div>
+		<StickyHeader>
+			{#snippet header()}
+				<div class="flex w-full justify-between">
+					<div class="grow-1 relative flex justify-between">
+						<TokensFilter>
+							{#snippet overflowableContent()}
+								{#if NFTS_ENABLED}
+									<Tabs
+										styleClass="mt-2 mb-8"
+										tabVariant="menu"
+										tabs={[
+											{
+												label: $i18n.tokens.text.title,
+												id: TokenTypes.TOKENS,
+												path: AppPath.Tokens
+											},
+											{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
+										]}
+										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
+										bind:activeTab
+									/>
+								{:else}
+									<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+								{/if}
+							{/snippet}
+						</TokensFilter>
+					</div>
+					{#if tab === TokenTypes.TOKENS}
+						<div class="flex">
+							<TokensMenu />
+						</div>
+					{:else}
+						<div class="flex">
+							<NftSortMenu />
+						</div>
+						<div class="ml-1 flex">
+							<NftSettingsMenu />
+						</div>
+					{/if}
 				</div>
-				{#if tab === TokenTypes.TOKENS}
-					<div class="flex">
-						<TokensMenu />
-					</div>
-				{:else}
-					<div class="flex">
-						<NftSortMenu />
-					</div>
-					<div class="ml-1 flex">
-						<NftSettingsMenu />
-					</div>
-				{/if}
-			</div>
-		{/snippet}
+			{/snippet}
 
-	{#if activeTab === TokenTypes.TOKENS}
-		<TokensList />
-	{:else if nonNullish(collection) && nonNullish(network)}
-		<NftCollection />
-	{:else if nonNullish(nft) && nonNullish(collection) && nonNullish(network)}
-		<Nft />
-	{:else}
-		<NftsList />
-	{/if}
-
-	<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
-		<ManageTokensButton />
-	</div>
-</div>
-
-{#if $modalManageTokens}
-	<ManageTokensModal {initialSearch}>
-		{#snippet infoElement()}
-			{#if nonNullish(message)}
-				<MessageBox level="info">
-					{message}
-				</MessageBox>
+			{#if activeTab === TokenTypes.TOKENS}
+				<TokensList />
+			{:else}
+				<NftsList />
 			{/if}
-		{/snippet}
-	</ManageTokensModal>
+		</StickyHeader>
+
+		<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
+			<ManageTokensButton />
+		</div>
+	</div>
+
+	{#if $modalManageTokens}
+		<ManageTokensModal {initialSearch}>
+			{#snippet infoElement()}
+				{#if nonNullish(message)}
+					<MessageBox level="info">
+						{message}
+					</MessageBox>
+				{/if}
+			{/snippet}
+		</ManageTokensModal>
+	{/if}
 {/if}
