@@ -44,7 +44,11 @@ const config: UserConfig = {
 						return 'lazy';
 					}
 
-					return 'index';
+					if (id.includes(resolve('./src/frontend/src/lib/i18n/')) && id.endsWith('.json')) {
+						return basename(id, '.json');
+					}
+
+					return;
 				}
 			},
 			// Polyfill Buffer for production build
