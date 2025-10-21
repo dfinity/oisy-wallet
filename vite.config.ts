@@ -27,7 +27,7 @@ const config: UserConfig = {
 					const folder = dirname(id);
 
 					if (id.includes(resolve('./src/frontend/src/lib/i18n/')) && id.endsWith('.json')) {
-						return basename(id, '.json');
+						return `i18n-${basename(id, '.json')}`;
 					}
 
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
