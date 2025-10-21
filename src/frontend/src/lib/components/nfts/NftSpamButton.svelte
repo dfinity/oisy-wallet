@@ -62,7 +62,7 @@
 		loading = true;
 
 		try {
-			await updateNftSection({ section, token, $authIdentity });
+			await updateNftSection({ section, token, $authIdentity, $ethAddress });
 
 			trackNftCategorizeEvent({ value: section, status: 'success' });
 		} catch (_: unknown) {
