@@ -19,7 +19,7 @@
 		children: Snippet;
 		showMessage?: boolean;
 		type: 'hero-banner' | 'card' | 'card-selectable' | 'nft-display' | 'nft-logo';
-		location?: { source?: string; subSource?: string };
+		location?: { source: string; subSource: string };
 	}
 
 	const { nft, children, showMessage = true, type, location }: Props = $props();
