@@ -46,7 +46,7 @@
 	{#snippet modal()}
 		{#if nonNullish(sourceToken) && nonNullish(destinationToken)}
 			<EthFeeStoreContext token={$nativeEthereumTokenWithFallback}>
-				<IcReceiveCkEthereumModal {destinationToken} {sourceToken} on:nnsClose={close} />
+				<IcReceiveCkEthereumModal {destinationToken} onClose={close} {sourceToken} />
 			</EthFeeStoreContext>
 		{/if}
 	{/snippet}
