@@ -9,13 +9,13 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import type { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getContractExplorerUrl } from '$lib/utils/networks.utils';
 	import { mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import type { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 
 	interface Props {
 		nft?: Nft;

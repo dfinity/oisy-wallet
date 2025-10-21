@@ -7,12 +7,12 @@
 	import InvalidDataImage from '$lib/components/icons/nfts/InvalidData.svelte';
 	import UnsupportedMediaTypeImage from '$lib/components/icons/nfts/UnsupportedMediaType.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { Nft } from '$lib/types/nft';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 
 	interface Props {
 		nft?: Nft;

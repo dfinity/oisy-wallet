@@ -10,9 +10,9 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -30,10 +30,10 @@
 <div class="relative overflow-hidden rounded-xl" in:slide>
 	<div class="flex h-64 w-full">
 		<NftDisplayGuard
-			nft={nfts?.[0]}
-			type="hero-banner"
 			locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION}
 			locationSubsource="hero"
+			nft={nfts?.[0]}
+			type="hero-banner"
 		>
 			<BgImg imageUrl={bannerUrl ?? nfts?.[0]?.imageUrl} size="cover" />
 		</NftDisplayGuard>
@@ -65,6 +65,6 @@
 			</div>
 		{/if}
 
-		<NftMetadataList {token} source="collection" />
+		<NftMetadataList source="collection" {token} />
 	</div>
 </div>

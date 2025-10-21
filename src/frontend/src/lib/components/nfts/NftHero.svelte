@@ -12,10 +12,10 @@
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -50,11 +50,11 @@
 	<div class="relative h-64 w-full overflow-hidden">
 		<div class="absolute h-full w-full">
 			<NftDisplayGuard
+				locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE}
+				locationSubsource="hero"
 				{nft}
 				showMessage={false}
 				type="hero-banner"
-				locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE}
-				locationSubsource="hero"
 			>
 				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
 			</NftDisplayGuard>
@@ -64,10 +64,10 @@
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
 					<NftDisplayGuard
-						{nft}
-						type="nft-display"
 						locationSource={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE}
 						locationSubsource="hero"
+						{nft}
+						type="nft-display"
 					>
 						<button
 							class="block h-auto w-auto border-0"

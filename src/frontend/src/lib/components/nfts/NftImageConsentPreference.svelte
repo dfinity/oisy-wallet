@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import Button from '$lib/components/ui/Button.svelte';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
-	import { trackEvent } from '$lib/services/analytics.services';
 
 	interface Props {
 		collection: NftCollection;
