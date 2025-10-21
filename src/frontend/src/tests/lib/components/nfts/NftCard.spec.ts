@@ -139,7 +139,8 @@ describe('NftCard', () => {
 				event_value: 'nft',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_name: 'MyContract',
+				token_id: '173563',
+				token_name: 'Beanz 123',
 				token_network: 'Ethereum',
 				token_symbol: 'MC'
 			}
@@ -169,7 +170,8 @@ describe('NftCard', () => {
 				event_value: 'nft',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_name: 'MyContract',
+				token_id: '173563',
+				token_name: 'Beanz 123',
 				token_network: 'Ethereum',
 				token_symbol: 'MC'
 			}
@@ -198,7 +200,8 @@ describe('NftCard', () => {
 				event_value: 'nft',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_name: 'MyContract',
+				token_id: '173563',
+				token_name: 'Beanz 123',
 				token_network: 'Ethereum',
 				token_symbol: 'MC'
 			}
