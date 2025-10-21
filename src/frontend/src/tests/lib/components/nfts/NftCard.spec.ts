@@ -136,7 +136,7 @@ describe('NftCard', () => {
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: 'nft',
-				event_value: 'nft',
+				event_value: 'nft-page',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
 				token_name: 'MyContract',
@@ -166,7 +166,7 @@ describe('NftCard', () => {
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: 'nft',
-				event_value: 'nft',
+				event_value: 'nft-page',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
 				token_name: 'MyContract',
@@ -195,7 +195,7 @@ describe('NftCard', () => {
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: 'nft',
-				event_value: 'nft',
+				event_value: 'nft-page',
 				location_source: 'navigation',
 				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
 				token_name: 'MyContract',
