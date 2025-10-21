@@ -1,9 +1,11 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import Nft from '$lib/components/nfts/Nft.svelte';
+	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
 	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
@@ -22,12 +24,10 @@
 		NFT_PARAM
 	} from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
-	import Nft from '$lib/components/nfts/Nft.svelte';
-	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
 
 	interface Props {
 		tab?: TokenTypes;
