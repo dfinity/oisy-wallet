@@ -40,12 +40,15 @@ export const loadNfts = async ({
 					return nftsByToken.length === 0;
 				});
 
+		console.log('Tokens to load:', tokensToLoad);
+
 		if (tokensToLoad.length > 0) {
 			const nfts: Nft[] = await loadNftsByNetwork({
 				networkId,
 				tokens: tokensToLoad,
 				walletAddress
 			});
+			console.log('Nfts will be added to store:', nfts);
 			nftStore.addAll(nfts);
 		}
 	});
@@ -191,6 +194,10 @@ export const updateNftSection = async ({
 				]
 			});
 		}
+
+		console.log('Going to refresh tokens:', [token]);
+		console.log('Going to refresh tokens, $ethAddress', $ethAddress);
+		console.log('Going to refresh tokens, get(nftStore)', get(nftStore));
 
 		await loadNfts({
 			tokens: [token],
