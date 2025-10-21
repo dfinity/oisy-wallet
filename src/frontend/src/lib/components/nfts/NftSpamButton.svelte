@@ -16,13 +16,13 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
-	import { modalStore } from '$lib/stores/modal.store';
 	import { getSymbol } from '$lib/utils/modal.utils.js';
+	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		token: NonFungibleToken;
