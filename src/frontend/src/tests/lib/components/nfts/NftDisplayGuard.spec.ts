@@ -1,12 +1,12 @@
 import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
-import { TRACK_NFT_OPEN_CONSENT_MODAL } from '$lib/constants/analytics.constants';
 import {
 	NFT_PLACEHOLDER_FILESIZE,
 	NFT_PLACEHOLDER_INVALID,
 	NFT_PLACEHOLDER_UNSUPPORTED
 } from '$lib/constants/test-ids.constants';
 import { modalNftImageConsent } from '$lib/derived/modal.derived';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import { trackEvent } from '$lib/services/analytics.services';
 import { i18n } from '$lib/stores/i18n.store';
@@ -45,7 +45,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(),
 			children: mockSnippet,
 			showMessage: true,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const text = getByText(get(i18n).nfts.text.img_consent_none);
@@ -65,7 +66,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(false),
 			children: mockSnippet,
 			showMessage: true,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const text = getByText(get(i18n).nfts.text.img_consent_disabled);
@@ -85,7 +87,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(),
 			children: mockSnippet,
 			showMessage: true,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const btn = getByRole('button');
@@ -103,7 +106,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(),
 			children: mockSnippet,
 			showMessage: true,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const btn = getByRole('button');
@@ -113,12 +117,16 @@ describe('NftDisplayGuard', () => {
 		fireEvent.click(btn);
 
 		expect(trackEvent).toHaveBeenCalledWith({
-			name: TRACK_NFT_OPEN_CONSENT_MODAL,
+			name: PLAUSIBLE_EVENTS.OPEN_MODAL,
 			metadata: {
-				collection_name: getNftAzuki().collection.name,
-				collection_address: getNftAzuki().collection.address,
-				network: getNftAzuki().collection.network.name,
-				standard: getNftAzuki().collection.standard
+				event_context: 'nft',
+				event_subcontext: 'media_review',
+				location_source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
+				location_subsource: 'card',
+				token_address: '0x41E54Eb019C0762f9Bfcf9Fb1E58725BfB0e7582',
+				token_name: 'Azuki Elemental Beans',
+				token_network: 'Polygon (Amoy Testnet)',
+				token_standard: 'erc721'
 			}
 		});
 	});
@@ -128,7 +136,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(true),
 			children: mockSnippet,
 			showMessage: true,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		expect(queryByText(get(i18n).nfts.text.img_consent_none)).not.toBeInTheDocument();
@@ -146,7 +155,8 @@ describe('NftDisplayGuard', () => {
 			nft: getNftAzuki(false),
 			children: mockSnippet,
 			showMessage: false,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		expect(queryByText(get(i18n).nfts.text.img_consent_none)).not.toBeInTheDocument();
@@ -160,7 +170,8 @@ describe('NftDisplayGuard', () => {
 			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.INVALID_DATA },
 			children: mockSnippet,
 			showMessage: false,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_INVALID);
@@ -173,7 +184,8 @@ describe('NftDisplayGuard', () => {
 			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED },
 			children: mockSnippet,
 			showMessage: false,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_FILESIZE);
@@ -186,7 +198,8 @@ describe('NftDisplayGuard', () => {
 			nft: { ...getNftAzuki(true), mediaStatus: NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE },
 			children: mockSnippet,
 			showMessage: false,
-			type: 'card'
+			type: 'card',
+			location: { source: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION, subSource: 'card' }
 		});
 
 		const placeholder = getByTestId(NFT_PLACEHOLDER_UNSUPPORTED);

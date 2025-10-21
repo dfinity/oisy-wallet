@@ -9,6 +9,7 @@
 	import Badge from '$lib/components/ui/Badge.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import type { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
@@ -19,9 +20,10 @@
 	interface Props {
 		nft?: Nft;
 		token?: NonFungibleToken;
+		source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE | PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION;
 	}
 
-	const { nft, token }: Props = $props();
+	const { nft, token, source }: Props = $props();
 
 	const collection: NftCollection | undefined = $derived(
 		nft?.collection ?? (nonNullish(token) ? mapTokenToCollection(token) : undefined)
@@ -100,7 +102,7 @@
 	<ListItem>
 		<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.display_preference}</span>
 		{#if nonNullish(collection)}
-			<NftImageConsentPreference {collection} />
+			<NftImageConsentPreference {collection} {source} />
 		{:else}
 			<span class="min-w-12">
 				<SkeletonText />
