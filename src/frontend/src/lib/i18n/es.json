@@ -376,7 +376,7 @@
 			"open_wallet": "Llévame a la billetera",
 			"carousel_slide_title": "¡El Episodio 5 de $oisy_short Sprinkles ya está en vivo!",
 			"carousel_slide_cta": "Saber más",
-			"sprinkles_earned": "¡Has ganado $noOfSprinkles sprinkles, por un total de $amount! \uD83C\uDF89",
+			"sprinkles_earned": "¡Has ganado $noOfSprinkles sprinkles, por un total de $amount! 🎉",
 			"youre_eligible": "¡Eres elegible!",
 			"not_eligible": "No elegible",
 			"ongoing": "En curso",
@@ -399,7 +399,7 @@
 		"campaigns": {
 			"sprinkles_s1e3": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episodio 3 en vivo \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episodio 3 en vivo 🎉",
 				"one_liner": "Gana BTC por estar activo—y ahora, por <strong>invitar amigos</strong>.<br/>Inicia sesión, realiza transacciones y mantén tokens para calificar para los drops diarios. Recomienda a un amigo y gana el 10% del valor de sus recompensas durante toda la campaña.",
 				"participate_title": "Gana BTC manteniéndote activo - y ahora invitando a otros.",
 				"description": "Cumple con requisitos semanales simples. Inicia sesión, realiza dos transacciones y mantén al menos $20 en tokens para seguir siendo elegible para uno de los 50 drops de BTC cada día.<br/><strong>Ahora con recompensas por referidos:</strong> invita a un amigo a desplegar una billetera y gana el 10% de sus Sprinkles durante 30 días. Ellos se quedan con el 100% - tú ganas extra.",
@@ -424,7 +424,7 @@
 			},
 			"sprinkles_s1e4": {
 				"title": "OISY Sprinkles",
-				"card_title": "OISY Sprinkles: Episodio 4 en vivo \uD83C\uDF89",
+				"card_title": "OISY Sprinkles: Episodio 4 en vivo 🎉",
 				"one_liner": "Gana BTC por mantenerte activo — y ahora, gana Sprinkles <strong>garantizados</strong> por referidos.<br/>Inicia sesión, realiza transacciones y mantén tokens para calificar para los drops diarios. Recomienda a 4 amigos y obtén una recompensa directa. Los que más recomiendan ganan aún más.",
 				"participate_title": "Gana BTC manteniéndote activo - y ahora invitando a otros.",
 				"description": "Cumple con requisitos semanales simples: inicia sesión, realiza dos transacciones y mantén al menos $20 en tokens para seguir siendo elegible para drops de hasta $50 en BTC cada día.<br>Ahora con recompensas por referidos: invita a un amigo a configurar una billetera y ambos ganarán Sprinkles garantizados. ¡Entra en el top 4 de referidores y gana un premio gordo!",
@@ -1128,6 +1128,8 @@
 			"collections": "Colecciones",
 			"all_assets": "Todos los activos",
 			"address_copied": "Dirección $address copiada",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "Spam",
 			"not_spam": "No es spam",
 			"spam_warning": "¿Mover '$collection' a spam?",
@@ -1143,6 +1145,8 @@
 			"review_button": "Revisar",
 			"collection_name": "Nombre de la colección",
 			"media_urls": "URLs de medios",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "Preferencia de visualización",
 			"review_preference": "Revisar preferencia",
 			"media_enabled": "Medios habilitados",
@@ -1696,20 +1700,75 @@
 			"title": ""
 		},
 		"cards": {
+			"gold_title": "",
+			"gold_description": "",
+			"stablecoins_title": "",
+			"stablecoins_description": "",
+			"sprinkles_title": "",
+			"sprinkles_description": ""
 		}
 	},
 	"stake": {
 		"text": {
+			"stake": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"visit_provider": "",
+			"current_apy": "",
+			"current_apy_info": "",
+			"stake_review_subtitle": ""
 		}
 	},
 	"temporal": {
 		"seconds_to_duration": {
+			"year": "",
+			"year_plural": "",
+			"month": "",
+			"month_plural": "",
+			"day": "",
+			"day_plural": "",
+			"hour": "",
+			"hour_plural": "",
+			"minute": "",
+			"minute_plural": "",
+			"second": "",
+			"second_plural": ""
 		}
 	},
 	"ai_assistant": {
 		"text": {
+			"title": "",
+			"welcome_message": "",
+			"action_button_contacts_title": "",
+			"action_button_contacts_subtitle": "",
+			"action_button_contacts_prompt": "",
+			"action_button_send_tokens_title": "",
+			"action_button_send_tokens_subtitle": "",
+			"action_button_send_tokens_prompt": "",
+			"action_button_show_balance_title": "",
+			"action_button_show_balance_subtitle": "",
+			"action_button_show_balance_prompt": "",
+			"select_contact_message": "",
+			"send_to_message": "",
+			"send_message": "",
+			"send_message_input_placeholder": "",
+			"send_token_on_network_message": "",
+			"send_token_message": "",
+			"send_on_network_message": "",
+			"send_token_succeeded": "",
+			"show_total_balance_tool_card_title": "",
+			"no_contacts_found_message": "",
+			"loading": "",
+			"reset_chat_history": "",
+			"feature_description": ""
 		},
 		"errors": {
+			"unknown": "",
+			"no_response": ""
 		}
 	}
 }
