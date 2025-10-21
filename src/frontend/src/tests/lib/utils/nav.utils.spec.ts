@@ -42,6 +42,7 @@ import {
 import { mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 import type { MockInstance } from 'vitest';
 
@@ -598,6 +599,8 @@ describe('nav.utils', () => {
 				collection: mockCollection,
 				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
 			});
+
+			assertNonNullish(result);
 			const url = new URL(result);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockCollection.network.id.description);
@@ -609,6 +612,7 @@ describe('nav.utils', () => {
 				nft: mockNft,
 				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
 			});
+			assertNonNullish(result);
 			const url = new URL(result);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNft.collection.network.id.description);
@@ -618,6 +622,7 @@ describe('nav.utils', () => {
 
 		it('persists network param if nothing is passed', () => {
 			const result = buildNftSearchUrl({ fromRoute: getMockFromRoute(ETHEREUM_NETWORK) });
+			assertNonNullish(result);
 			const url = new URL(result);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(ETHEREUM_NETWORK.id.description);
