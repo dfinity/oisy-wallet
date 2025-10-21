@@ -23,7 +23,13 @@ const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	};
 };
 
+const EXCLUDED_LANGS: Languages[] = [];
+
 const loadLang = async (lang: Languages): Promise<I18n> => {
+	if (EXCLUDED_LANGS.includes(lang)) {
+		return enI18n();
+	}
+
 	try {
 		return await loadLangI18n(lang);
 	} catch (_: unknown) {
