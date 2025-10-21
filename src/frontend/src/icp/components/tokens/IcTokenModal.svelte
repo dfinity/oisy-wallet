@@ -13,7 +13,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		fromRoute: NavigationTarget | undefined;
+		fromRoute?: NavigationTarget;
 	}
 	let { fromRoute }: Props = $props();
 

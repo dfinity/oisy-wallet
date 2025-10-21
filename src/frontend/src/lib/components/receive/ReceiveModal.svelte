@@ -16,7 +16,7 @@
 	interface Props {
 		content?: Snippet;
 		address?: OptionAddress<Address>;
-		addressToken?: Token | undefined;
+		addressToken?: Token;
 		network: Network;
 		copyAriaLabel: string;
 	}

@@ -4,8 +4,8 @@
 
 	interface Props {
 		children?: Snippet;
-		styleClass?: string | undefined;
-		testId?: string | undefined;
+		styleClass?: string;
+		testId?: string;
 		variant?: BadgeVariant;
 		width?: 'w-full' | 'w-fit';
 	}
