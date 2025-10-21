@@ -20,12 +20,10 @@ export const routeNetwork: Readable<OptionString> = derived(
 	]) => network
 );
 
-// TODO: replace with `data` instead of `params`
 export const routeCollection: Readable<OptionString> = derived(
 	[page],
 	([
 		{
-			// TODO: collectionId --> collection
 			data: { collection }
 		}
 	]) => {
@@ -34,13 +32,11 @@ export const routeCollection: Readable<OptionString> = derived(
 	}
 );
 
-// TODO: replace with `data` instead of `params`
 export const routeNft: Readable<OptionString> = derived(
 	[page],
 	([
 		{
-			// TODO: nftId --> nft
-			data: { nftId }
+			data: { nft }
 		}
-	]) => nftId
+	]) => nft
 );

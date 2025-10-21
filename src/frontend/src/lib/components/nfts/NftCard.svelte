@@ -19,6 +19,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
+	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		nft: Nft;
@@ -60,9 +61,7 @@
 				}
 			});
 
-			goto(
-				`${AppPath.Nfts}?network=${String(nft.collection.network.id.description)}&collection=${nft.collection.address}&nft=${nft.id}`
-			);
+			goto(buildNftSearchUrl({ nft, collection: nft.collection, network: nft.collection.network }));
 		}
 	};
 </script>

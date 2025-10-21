@@ -16,10 +16,11 @@ export const pageCollectionNfts: Readable<Nft[]> = derived(
 			({
 				collection: {
 					address,
-					network: { name: networkName }
+					network: {
+						id: { description: networkId }
+					}
 				}
-				// TODO: Confirm that `$routeNftNetwork` is the network name (not the ID) when comparing to `networkName` here.
-			}) => address === $routeCollection && networkName === $routeNftNetwork
+			}) => address === $routeCollection && networkId === $routeNftNetwork
 		);
 	}
 );

@@ -15,6 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		collection?: NftCollection;
@@ -49,7 +50,7 @@
 					<Button
 						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
-						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+						onclick={() => goto(buildNftSearchUrl({ collection, network: collection.network }))}
 						paddingSmall
 						styleClass="inline-block text-sm"
 					>

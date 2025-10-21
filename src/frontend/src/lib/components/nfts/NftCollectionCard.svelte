@@ -19,6 +19,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 	import { goto } from '$app/navigation';
+	import { buildNftSearchUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -55,7 +56,10 @@
 		});
 
 		goto(
-			`${AppPath.Nfts}?network=${String(collection.collection.network.id.description)}&collection=${collection.collection.address}`
+			buildNftSearchUrl({
+				collection: collection.collection,
+				network: collection.collection.network
+			})
 		);
 	};
 </script>

@@ -2,12 +2,15 @@ import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { NetworkId } from '$lib/types/network';
+import type { Network, NetworkId } from '$lib/types/network';
+import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
@@ -114,6 +117,9 @@ export interface RouteParams {
 	[NETWORK_PARAM]: OptionString;
 	// WalletConnect URI parameter
 	[URI_PARAM]: OptionString;
+	// NFT URI parameters
+	[COLLECTION_PARAM]: OptionString;
+	[NFT_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -121,7 +127,9 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			[TOKEN_PARAM]: undefined,
 			[NETWORK_PARAM]: undefined,
-			[URI_PARAM]: undefined
+			[URI_PARAM]: undefined,
+			[COLLECTION_PARAM]: undefined,
+			[NFT_PARAM]: undefined
 		};
 	}
 
@@ -146,14 +154,18 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	return {
 		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
-		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null
+		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
+		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM),
+		[NFT_PARAM]: searchParams?.get(NFT_PARAM)
 	};
 };
 
 export const resetRouteParams = (): RouteParams => ({
 	[TOKEN_PARAM]: null,
 	[NETWORK_PARAM]: null,
-	[URI_PARAM]: null
+	[URI_PARAM]: null,
+	[COLLECTION_PARAM]: null,
+	[NFT_PARAM]: null
 });
 
 export const switchNetwork = async (networkId: Option<NetworkId>) => {
@@ -166,4 +178,32 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
+};
+
+export const buildNftSearchUrl = ({
+	nft,
+	collection,
+	network
+}: {
+	nft?: Nft;
+	collection?: NftCollection;
+	network?: Network;
+}) => {
+	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
+
+	if (nonNullish(network?.id?.description)) {
+		url.searchParams.set(NETWORK_PARAM, network.id.description);
+	} else if (nonNullish(collection?.network?.id?.description)) {
+		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
+	}
+
+	if (nonNullish(collection)) {
+		url.searchParams.set(COLLECTION_PARAM, collection.address);
+	}
+
+	if (nonNullish(nft)) {
+		url.searchParams.set(NFT_PARAM, String(nft.id));
+	}
+
+	return url.toString();
 };
