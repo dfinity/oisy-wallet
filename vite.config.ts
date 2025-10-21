@@ -26,6 +26,10 @@ const config: UserConfig = {
 				manualChunks: (id) => {
 					const folder = dirname(id);
 
+					if (id.includes(resolve('./src/frontend/src/lib/i18n/')) && id.endsWith('.json')) {
+						return basename(id, '.json');
+					}
+
 					const lazy = ['@dfinity/nns', '@dfinity/nns-proto', 'html5-qrcode', 'qr-creator'];
 
 					if (
@@ -42,10 +46,6 @@ const config: UserConfig = {
 						folder.includes('node_modules')
 					) {
 						return 'lazy';
-					}
-
-					if (id.includes(resolve('./src/frontend/src/lib/i18n/')) && id.endsWith('.json')) {
-						return basename(id, '.json');
 					}
 
 					return;
