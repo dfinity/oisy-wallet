@@ -107,7 +107,7 @@ describe('NftHideButton', () => {
 
 	it('should track event with "hide" action when hide button is clicked', async () => {
 		nftStore.addAll([mockNft]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
 			props: { token: mockToken, source: 'collection' }
@@ -134,7 +134,7 @@ describe('NftHideButton', () => {
 
 	it('should track event with "show" action when unhide button is clicked', async () => {
 		const hiddenToken = { ...mockToken, section: CustomTokenSection.HIDDEN };
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
 			props: { token: hiddenToken, source: 'collection' }
@@ -161,7 +161,7 @@ describe('NftHideButton', () => {
 
 	it('should track event when confirm button is clicked in modal for multiple NFTs', async () => {
 		nftStore.addAll([mockNft, { ...mockNft, id: parseNftId('123') }]);
-		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue();
+		vi.spyOn(nftsServices, 'updateNftSection').mockResolvedValue(undefined);
 
 		const { getByTestId } = render(NftHideButton, {
 			props: { token: mockToken, source: 'collection' }

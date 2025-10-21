@@ -2,10 +2,7 @@
 	import { getContext } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
-	import {
-		GLDT_STAKE_APY_CONTEXT_KEY,
-		type GldtStakeApyContext
-	} from '$icp/stores/gldt-stake-apy.store';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
@@ -26,7 +23,7 @@
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
 
-	const { store: gldtStakeApyStore } = getContext<GldtStakeApyContext>(GLDT_STAKE_APY_CONTEXT_KEY);
+	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
