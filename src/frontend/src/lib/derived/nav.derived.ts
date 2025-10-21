@@ -26,10 +26,7 @@ export const routeCollection: Readable<OptionString> = derived(
 		{
 			data: { collection }
 		}
-	]) => {
-		console.log('collection', collection);
-		return collection;
-	}
+	]) => collection
 );
 
 export const routeNft: Readable<OptionString> = derived(
