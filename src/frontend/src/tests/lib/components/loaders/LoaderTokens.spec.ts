@@ -61,10 +61,6 @@ vi.mock('$sol/services/spl.services', () => ({
 	loadSplTokens: vi.fn()
 }));
 
-vi.mock('$lib/services/nft.services', () => ({
-	loadNfts: vi.fn()
-}));
-
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn().mockResolvedValue([])
 }));

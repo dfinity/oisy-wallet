@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
+	import { isNullish } from '@dfinity/utils';
 	import ConvertContexts from '$lib/components/convert/ConvertContexts.svelte';
 	import ConvertWizard from '$lib/components/convert/ConvertWizard.svelte';
 	import { convertWizardSteps, type WizardStepsConvertComplete } from '$lib/config/convert.config';
@@ -18,14 +19,14 @@
 
 	let { sourceToken, destinationToken }: Props = $props();
 
-	let sendAmount: OptionAmount = $state(undefined);
-	let receiveAmount: number | undefined = $state(undefined);
+	let sendAmount = $state<OptionAmount>();
+	let receiveAmount = $state<number | undefined>();
 	let customDestination = $state('');
-	let convertProgressStep: string = $state(ProgressStepsConvert.INITIALIZATION);
-	let currentStep: WizardStep<WizardStepsConvertComplete> | undefined = $state();
-	let modal: WizardModal<WizardStepsConvertComplete> = $state();
+	let convertProgressStep = $state<ProgressStepsConvert>(ProgressStepsConvert.INITIALIZATION);
+	let currentStep = $state<WizardStep<WizardStepsConvertComplete> | undefined>();
+	let modal = $state<WizardModal<WizardStepsConvertComplete>>();
 
-	let steps: WizardSteps<WizardStepsConvertComplete> = $derived(
+	let steps = $derived(
 		convertWizardSteps({
 			i18n: $i18n,
 			sourceToken: sourceToken.symbol,
@@ -44,12 +45,17 @@
 			currentStep = undefined;
 		});
 
-	const goToStep = (stepName: WizardStepsConvert) =>
+	const goToStep = (stepName: WizardStepsConvert) => {
+		if (isNullish(modal)) {
+			return;
+		}
+
 		goToWizardStep({
 			modal,
 			steps,
 			stepName
 		});
+	};
 </script>
 
 <ConvertContexts {destinationToken} {sourceToken}>

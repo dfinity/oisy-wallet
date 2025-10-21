@@ -52,13 +52,13 @@
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'default'}
 		label={$i18n.convert.text.default_destination}
-		on:click={() => (activeAddressType = 'default')}
+		onClick={() => (activeAddressType = 'default')}
 	/>
 
 	<DestinationWizardStepSection
 		isActive={activeAddressType === 'custom'}
 		label={$i18n.convert.text.custom_destination}
-		on:click={() => (activeAddressType = 'custom')}
+		onClick={() => (activeAddressType = 'custom')}
 	>
 		{#snippet content()}
 			<IcSendDestination

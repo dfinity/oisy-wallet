@@ -8,13 +8,9 @@
 </script>
 
 <ConvertNetwork token={$sourceToken}>
-	{#snippet label()}
-		{$i18n.convert.text.source_network}
-	{/snippet}</ConvertNetwork
->
+	{#snippet label()}{$i18n.convert.text.source_network}{/snippet}
+</ConvertNetwork>
 
 <ConvertNetwork token={$destinationToken}>
-	{#snippet label()}
-		{$i18n.convert.text.destination_network}
-	{/snippet}</ConvertNetwork
->
+	{#snippet label()}{$i18n.convert.text.destination_network}{/snippet}
+</ConvertNetwork>

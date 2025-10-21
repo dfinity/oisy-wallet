@@ -11,9 +11,9 @@
 		exchangeRate?: number;
 	}
 
-	let { feeAmount = undefined, decimals, exchangeRate = undefined }: Props = $props();
+	let { feeAmount, decimals, exchangeRate }: Props = $props();
 
-	let formattedAmount: number | undefined = $derived(
+	let formattedAmount = $derived(
 		nonNullish(feeAmount)
 			? formatTokenBigintToNumber({
 					value: feeAmount,
