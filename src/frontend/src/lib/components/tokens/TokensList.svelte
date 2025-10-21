@@ -151,7 +151,7 @@
 						{@const { token } = tokenOrGroup}
 
 						<div class="transition duration-300 hover:bg-primary">
-							<TokenCard data={token} on:click={() => goto(transactionsUrl({ token }))} />
+							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
 				</div>
@@ -169,40 +169,42 @@
 		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
 			<div class="mb-3 mt-6 flex flex-col gap-3">
 				<StickyHeader>
-					<div class="flex items-center justify-between pb-4">
-						<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
-						<div>
-							<Button
-								disabled={saveDisabled || saveLoading}
-								fullWidth={false}
-								loading={saveLoading}
-								onclick={onSave}
-								paddingSmall
-								styleClass="py-2"
-							>
-								{$i18n.core.text.apply}
-								{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
-							</Button>
+					{#snippet header()}
+						<div class="flex items-center justify-between pb-4">
+							<h2 class="text-base">{$i18n.tokens.manage.text.enable_more_assets}</h2>
+							<div>
+								<Button
+									disabled={saveDisabled || saveLoading}
+									fullWidth={false}
+									loading={saveLoading}
+									onclick={onSave}
+									paddingSmall
+									styleClass="py-2"
+								>
+									{$i18n.core.text.apply}
+									{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
+								</Button>
+							</div>
 						</div>
-					</div>
-				</StickyHeader>
+					{/snippet}
 
-				{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
-					<div
-						class="overflow-hidden rounded-xl"
-						class:pointer-events-none={animating}
-						onanimationend={handleAnimationEnd}
-						onanimationstart={handleAnimationStart}
-						transition:fade
-						animate:flip={flipParams}
-					>
-						<div class="transition duration-300 hover:bg-primary">
-							{#if !isTokenUiGroup(tokenOrGroup)}
-								<TokenCard data={tokenOrGroup.token} {onToggle} />
-							{/if}
+					{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
+						<div
+							class="overflow-hidden rounded-xl"
+							class:pointer-events-none={animating}
+							onanimationend={handleAnimationEnd}
+							onanimationstart={handleAnimationStart}
+							transition:fade
+							animate:flip={flipParams}
+						>
+							<div class="transition duration-300 hover:bg-primary">
+								{#if !isTokenUiGroup(tokenOrGroup)}
+									<TokenCard data={tokenOrGroup.token} {onToggle} />
+								{/if}
+							</div>
 						</div>
-					</div>
-				{/each}
+					{/each}
+				</StickyHeader>
 			</div>
 		{/if}
 	</TokensSkeletons>

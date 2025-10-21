@@ -19,9 +19,10 @@ EOF
 DFX_NETWORK="${DFX_NETWORK:-local}"
 export GLDT_STAKE_BUILDENV="$DFX_NETWORK"
 
-GLDT_STAKE_REPO_URL="https://raw.githubusercontent.com/GoldDAO/gold-dao/refs/heads/develop/"
+# GLDT_STAKE_REPO_URL="https://raw.githubusercontent.com/GoldDAO/gold-dao/refs/heads/develop/"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
-CANDID_URL="${GLDT_STAKE_REPO_URL}/backend/canisters/gldt_stake/api/can.did"
+# TODO: replace with the gldt-stake repo candid URL
+CANDID_URL="https://github.com/dfinity/oisy-wallet/raw/refs/heads/gldt-stake-wasm/wasms/gldt_stake_canister_can.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 # TODO: replace with the gldt-stake repo WASM URL
 WASM_URL="https://github.com/dfinity/oisy-wallet/raw/refs/heads/gldt-stake-wasm/wasms/gldt_stake_canister.wasm.gz"

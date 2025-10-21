@@ -91,8 +91,8 @@
 				tokenCount: filteredTokens.length,
 				networks: filteredTokens.map((t) => t.network)
 			}}
+			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}
-			on:click={() => toggleIsExpanded(!isExpanded)}
 		/>
 	</div>
 
@@ -103,7 +103,7 @@
 					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard asNetwork data={token} on:click={() => goto(transactionsUrl({ token }))} />
+					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 

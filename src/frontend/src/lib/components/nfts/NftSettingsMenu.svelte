@@ -11,8 +11,12 @@
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import LogoButton from '$lib/components/ui/LogoButton.svelte';
 	import ResponsivePopover from '$lib/components/ui/ResponsivePopover.svelte';
-	import { TRACK_NFT_SETTINGS_CHANGE } from '$lib/constants/analytics.constants';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
+	import {
+		PLAUSIBLE_EVENT_CONTEXTS,
+		PLAUSIBLE_EVENT_EVENTS_KEYS,
+		PLAUSIBLE_EVENTS
+	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -26,22 +30,40 @@
 	let button = $state<HTMLButtonElement | undefined>();
 
 	const setGrouping = (grouping: boolean) => {
+		trackNftSettingsEvent({
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.GROUP,
+			event_value: grouping ? 'collection' : 'plain_list'
+		});
 		nftGroupByCollectionStore.set({ key: 'nft-group-by-collection', value: grouping });
 	};
 
 	const toggleShowHidden = () => {
-		trackNftSettingsEvent({ show_hidden: !$showHidden ? 'enabled' : 'disabled' });
+		trackNftSettingsEvent({
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.VISIBILITY,
+			event_subcontext: 'hidden',
+			event_value: !$showHidden ? 'show' : 'hide'
+		});
 		showHiddenStore.set({ key: 'show-hidden', value: { enabled: !$showHidden } });
 	};
 
 	const toggleShowSpam = () => {
-		trackNftSettingsEvent({ show_spam: !$showSpam ? 'enabled' : 'disabled' });
+		trackNftSettingsEvent({
+			event_key: PLAUSIBLE_EVENT_EVENTS_KEYS.VISIBILITY,
+			event_subcontext: 'spam',
+			event_value: !$showSpam ? 'show' : 'hide'
+		});
 		showSpamStore.set({ key: 'show-spam', value: { enabled: !$showSpam } });
 	};
 
 	// Added a separate method to extend metadata for different settings in the future
 	const trackNftSettingsEvent = (metadata: Record<string, string>) => {
-		trackEvent({ name: TRACK_NFT_SETTINGS_CHANGE, metadata });
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.LIST_SETTINGS_CHANGE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				...metadata
+			}
+		});
 	};
 </script>
 
@@ -66,7 +88,6 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackNftSettingsEvent({ grouping: 'plain_list' });
 						setGrouping(false);
 					}}
 					selectable
@@ -78,7 +99,6 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackNftSettingsEvent({ grouping: 'collection' });
 						setGrouping(true);
 					}}
 					selectable

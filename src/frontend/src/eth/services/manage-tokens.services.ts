@@ -1,9 +1,10 @@
 import { saveCustomTokens as saveCustomErc1155Tokens } from '$eth/services/erc1155-custom-tokens.services';
 import { saveCustomTokens as saveCustomErc20Tokens } from '$eth/services/erc20-custom-tokens.services';
-import { saveUserTokens, type SaveUserToken } from '$eth/services/erc20-user-tokens.services';
+import { saveUserTokens } from '$eth/services/erc20-user-tokens.services';
 import { saveCustomTokens as saveCustomErc721Tokens } from '$eth/services/erc721-custom-tokens.services';
 import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
+import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 import { saveTokens, type ManageTokensSaveParams } from '$lib/services/manage-tokens.services';
 

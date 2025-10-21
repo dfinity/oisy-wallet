@@ -4,7 +4,6 @@
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import NftActionButton from '$lib/components/nfts/NftActionButton.svelte';
 	import ConfirmButtonWithModal from '$lib/components/ui/ConfirmButtonWithModal.svelte';
-	import { TRACK_NFT_SPAM_HIDE_ACTION } from '$lib/constants/analytics.constants';
 	import {
 		CONFIRMATION_MODAL,
 		NFT_COLLECTION_ACTION_NOT_SPAM,
@@ -13,6 +12,7 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
+	import { PLAUSIBLE_EVENT_CONTEXTS, PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { updateNftSection } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -35,22 +35,39 @@
 
 	let loading = $state(false);
 
+	const trackNftCategorizeEvent = ({
+		value,
+		status
+	}: {
+		value?: CustomTokenSection;
+		status: string;
+	}) => {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.NFT_CATEGORIZE,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: 'collection',
+				event_value: nonNullish(value) ? 'spam' : 'unspam',
+				location_source: source,
+				token_name: token.name,
+				token_address: token.address,
+				token_network: token.network.name,
+				token_standard: token.standard,
+				result_status: status
+			}
+		});
+	};
+
 	const updateSection = async (section?: CustomTokenSection) => {
 		loading = true;
+
 		try {
-			trackEvent({
-				name: TRACK_NFT_SPAM_HIDE_ACTION,
-				metadata: {
-					source,
-					collection_name: token.name,
-					collection_address: token.address,
-					network: token.network.name,
-					standard: token.standard,
-					action: nonNullish(section) ? 'spam' : 'unspam'
-				}
-			});
-			await updateNftSection({ section, token, $authIdentity, $ethAddress });
+			await updateNftSection({ section, token, $authIdentity });
+
+			trackNftCategorizeEvent({ value: section, status: 'success' });
 		} catch (_: unknown) {
+			trackNftCategorizeEvent({ value: section, status: 'error' });
+
 			toastsError({ msg: { text: $i18n.nfts.text.could_not_update_section } });
 		} finally {
 			loading = false;
