@@ -9,7 +9,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { Network, NetworkId } from '$lib/types/network';
+import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
@@ -173,27 +173,30 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 
 export const buildNftSearchUrl = ({
 	nft,
-	collection,
-	network
-}: {
-	nft?: Nft;
-	collection?: NftCollection;
-	network?: Network;
-}) => {
+	collection
+}:
+	| {
+			nft: Nft;
+	  }
+	| {
+			collection: NftCollection;
+	  }) => {
 	const url = new URL(`${window.location.origin}${AppPath.Nfts}`);
 
-	if (nonNullish(network?.id?.description)) {
-		url.searchParams.set(NETWORK_PARAM, network.id.description);
+	if (nonNullish(nft?.network?.id?.description)) {
+		url.searchParams.set(NETWORK_PARAM, nft.collection.network.id.description);
 	} else if (nonNullish(collection?.network?.id?.description)) {
 		url.searchParams.set(NETWORK_PARAM, collection.network.id.description);
 	}
 
-	if (nonNullish(collection)) {
+	if (nonNullish(nft?.collection)) {
+		url.searchParams.set(COLLECTION_PARAM, nft.collection.address);
+	} else if (nonNullish(collection)) {
 		url.searchParams.set(COLLECTION_PARAM, collection.address);
 	}
 
 	if (nonNullish(nft)) {
-		url.searchParams.set(NFT_PARAM, String(nft.id));
+		url.searchParams.set(NFT_PARAM, nft.id);
 	}
 
 	return url.toString();
