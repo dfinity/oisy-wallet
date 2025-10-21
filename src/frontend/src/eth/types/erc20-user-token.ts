@@ -8,3 +8,9 @@ export type EthereumUserToken = Omit<Erc20UserToken, 'address' | 'exchange'> &
 	Partial<Pick<Erc20Token, 'address' | 'exchange'>>;
 
 export type OptionErc20UserToken = Option<Erc20UserToken>;
+
+export type SaveUserToken = Pick<
+	Erc20UserToken,
+	'enabled' | 'version' | 'symbol' | 'decimals' | 'address' | 'network'
+> &
+	Partial<Pick<Erc20UserToken, 'id'>>;
