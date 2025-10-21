@@ -5,6 +5,7 @@ import ar from '$lib/i18n/ar.json';
 import cs from '$lib/i18n/cs.json';
 import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
+import es from '$lib/i18n/es.json';
 import fr from '$lib/i18n/fr.json';
 import hi from '$lib/i18n/hi.json';
 import it from '$lib/i18n/it.json';
@@ -37,6 +38,11 @@ const csI18n = (): I18n => ({
 const deI18n = (): I18n => ({
 	...mergeWithFallback({ refLang: enI18n(), targetLang: de as I18n }),
 	lang: Languages.GERMAN
+});
+
+const esI18n = (): I18n => ({
+	...mergeWithFallback({ refLang: enI18n(), targetLang: es as I18n }),
+	lang: Languages.SPANISH
 });
 
 const frI18n = (): I18n => ({
@@ -108,6 +114,8 @@ const loadLang = (lang: Languages): I18n => {
 			return ptI18n();
 		case Languages.RUSSIAN:
 			return ruI18n();
+		case Languages.SPANISH:
+			return esI18n();
 		case Languages.VIETNAMESE:
 			return viI18n();
 		default:
