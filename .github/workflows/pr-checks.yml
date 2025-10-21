@@ -79,7 +79,6 @@ jobs:
           BASE_REF: ${{ github.event.pull_request.base.ref }}
 
       - name: 'Check for changed files'
-        if: ${{ github.event_name != 'merge_group' }}
         id: file_check
         run: |
           CHANGED_FILES=$(git diff "origin/$BASE_REF" HEAD --name-only | wc -l)
