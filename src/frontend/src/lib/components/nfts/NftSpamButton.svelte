@@ -20,7 +20,9 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { NonFungibleToken } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { findNftsByToken } from '$lib/utils/nfts.utils';
+	import { findNftsByToken, mapTokenToCollection } from '$lib/utils/nfts.utils';
+	import { modalStore } from '$lib/stores/modal.store';
+	import { getSymbol } from '$lib/utils/modal.utils.js';
 
 	interface Props {
 		token: NonFungibleToken;
@@ -62,9 +64,13 @@
 		loading = true;
 
 		try {
-			await updateNftSection({ section, token, $authIdentity, $ethAddress });
+			const savedToken = await updateNftSection({ section, token, $authIdentity, $ethAddress });
 
 			trackNftCategorizeEvent({ value: section, status: 'success' });
+
+			if (nonNullish(savedToken)) {
+				modalStore.openNftImageConsent({ id: Symbol(), data: mapTokenToCollection(savedToken) });
+			}
 		} catch (_: unknown) {
 			trackNftCategorizeEvent({ value: section, status: 'error' });
 

@@ -153,7 +153,7 @@ export const updateNftSection = async ({
 	$authIdentity: OptionIdentity;
 	token: NonFungibleToken;
 	$ethAddress: OptionEthAddress;
-}): Promise<void> => {
+}): Promise<NonFungibleToken | undefined> => {
 	if (isNullish($authIdentity)) {
 		return;
 	}
@@ -189,5 +189,7 @@ export const updateNftSection = async ({
 			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
 			force: true
 		});
+
+		return saveToken;
 	}
 };
