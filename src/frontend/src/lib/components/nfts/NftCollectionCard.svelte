@@ -63,6 +63,7 @@
 	class:cursor-not-allowed={disabled}
 	class:hover:-translate-y-1={!disabled}
 	class:hover:bg-primary={!disabled}
+	onclick={onClick}
 >
 	<span class="relative block h-full w-full">
 		<NftDisplayGuard
