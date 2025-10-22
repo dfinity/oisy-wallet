@@ -39,7 +39,7 @@ export const stakeGldt = async ({
 
 	const response = await manageStakePosition({
 		identity,
-		positionParams: { AddStake: { amount } }
+		positionParams: { AddStake: { amount: amount + gldtToken.fee } }
 	});
 
 	stakeCompleted();
