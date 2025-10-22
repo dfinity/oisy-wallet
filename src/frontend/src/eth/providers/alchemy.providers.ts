@@ -27,6 +27,7 @@ import {
 	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
+	type OwnedNft,
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
@@ -147,11 +148,12 @@ export class AlchemyProvider {
 			},
 			image,
 			acquiredAt,
-			contract: { openSeaMetadata }
+			contract: { openSeaMetadata },
+			balance
 		},
 		token
 	}: {
-		nft: AlchemyNft;
+		nft: OwnedNft;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
 		const attributes = untypedAttributes as {
@@ -176,6 +178,7 @@ export class AlchemyProvider {
 			...(nonNullish(image?.originalUrl) && { imageUrl: image?.originalUrl }),
 			...(nonNullish(description) && { description }),
 			...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
+			...(nonNullish(balance) && { balance: Number(balance) }),
 			...(nonNullish(acquiredAt?.blockTimestamp) && {
 				acquiredAt: new Date(acquiredAt?.blockTimestamp)
 			}),
