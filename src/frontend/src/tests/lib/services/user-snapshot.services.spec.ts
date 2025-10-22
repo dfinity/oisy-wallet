@@ -44,8 +44,8 @@ import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock'
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, toNullable } from '@dfinity/utils';
 import { readable } from 'svelte/store';
 

@@ -25,7 +25,7 @@ import {
 	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

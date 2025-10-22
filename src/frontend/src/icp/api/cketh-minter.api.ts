@@ -7,7 +7,7 @@ import type {
 	RetrieveErc20Request,
 	RetrieveEthRequest
 } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
 export const withdrawEth = async ({

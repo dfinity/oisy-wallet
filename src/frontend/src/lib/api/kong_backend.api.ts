@@ -6,7 +6,7 @@ import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import { KONG_BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { KongSwapAmountsParams, KongSwapParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 let canister: KongBackendCanister | undefined = undefined;

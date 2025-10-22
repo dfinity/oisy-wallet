@@ -10,7 +10,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

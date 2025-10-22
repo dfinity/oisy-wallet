@@ -9,7 +9,7 @@ import { ProgressStepsStake } from '$lib/enums/progress-steps';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('gldt-stake.services', () => {
 	const mockProgress = vi.fn();

@@ -11,7 +11,7 @@ import { idlFactory as poolIdlFactory } from '$declarations/icp_swap_pool/icp_sw
 import { getAgent } from '$lib/actors/agents.ic';
 import { mapIcpSwapFactoryError } from '$lib/canisters/icp-swap.errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { Canister, createServices } from '@dfinity/utils';
 
 export class ICPSwapPoolCanister extends Canister<SwapPoolService> {

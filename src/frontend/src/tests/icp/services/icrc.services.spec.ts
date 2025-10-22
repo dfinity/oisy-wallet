@@ -22,7 +22,7 @@ import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
 import * as idbKeyval from 'idb-keyval';
 import { get } from 'svelte/store';

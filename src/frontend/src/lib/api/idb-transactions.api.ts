@@ -17,7 +17,7 @@ import type { Transaction } from '$lib/types/transaction';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { isNullish } from '@dfinity/utils';
 import { clear, createStore, get, set as idbSet, type UseStore } from 'idb-keyval';
 

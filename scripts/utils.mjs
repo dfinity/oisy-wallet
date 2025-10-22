@@ -1,6 +1,6 @@
-import { HttpAgent } from '@dfinity/agent';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { Secp256k1KeyIdentity } from '@dfinity/identity-secp256k1';
+import { HttpAgent } from '@icp-sdk/core/agent';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { Secp256k1KeyIdentity } from '@icp-sdk/core/identity-secp256k1';
 import { jsonReviver } from '@dfinity/utils';
 import { readdirSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';

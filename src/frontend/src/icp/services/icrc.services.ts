@@ -29,7 +29,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { AnonymousIdentity, type Identity } from '@dfinity/agent';
+import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
 import {
 	fromNullable,
 	isNullish,

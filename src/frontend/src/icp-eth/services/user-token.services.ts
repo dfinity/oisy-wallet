@@ -8,7 +8,7 @@ import { autoLoadToken, type AutoLoadTokenResult } from '$lib/services/token.ser
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

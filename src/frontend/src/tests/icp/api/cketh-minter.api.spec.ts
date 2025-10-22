@@ -13,7 +13,7 @@ import {
 	type RetrieveErc20Request,
 	type RetrieveEthRequest
 } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 

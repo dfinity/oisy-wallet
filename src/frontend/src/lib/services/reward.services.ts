@@ -38,7 +38,7 @@ import type {
 } from '$lib/types/reward';
 import type { ResultSuccess } from '$lib/types/utils';
 import { INITIAL_REWARD_RESULT, mapEligibilityReport } from '$lib/utils/rewards.utils';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { fromNullable, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

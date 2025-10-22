@@ -16,7 +16,7 @@ import {
 	cleanupCkEthPendingStore,
 	setupCkEthPendingStore
 } from '$tests/mocks/ic-transactions.mock';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

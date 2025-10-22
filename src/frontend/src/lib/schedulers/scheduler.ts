@@ -5,7 +5,7 @@ import type {
 	PostMessageResponseStatus
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
 
 export interface SchedulerParams<T> {

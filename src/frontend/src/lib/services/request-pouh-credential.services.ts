@@ -15,8 +15,8 @@ import type { ResultSuccess } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { replaceOisyPlaceholders, replacePlaceholders } from '$lib/utils/i18n.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { fromNullishNullable, isNullish, nonNullish } from '@dfinity/utils';
 import {
 	requestVerifiablePresentation,

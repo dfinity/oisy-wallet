@@ -47,7 +47,7 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { isNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

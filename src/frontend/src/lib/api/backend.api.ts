@@ -33,7 +33,7 @@ import type {
 	UpdateUserExperimentalFeatureSettings
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: BackendCanister | undefined = undefined;

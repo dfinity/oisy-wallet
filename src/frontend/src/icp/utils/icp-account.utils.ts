@@ -6,7 +6,7 @@ import {
 	fromCandidAccount,
 	toCandidAccount
 } from '@dfinity/ledger-icrc';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { assertNever, nonNullish } from '@dfinity/utils';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>

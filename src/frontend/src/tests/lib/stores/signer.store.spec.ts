@@ -1,6 +1,6 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
 import { initSignerContext } from '$lib/stores/signer.store';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { get } from 'svelte/store';
 

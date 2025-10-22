@@ -1,5 +1,5 @@
 import { Icrcv2AccountIdObjectSchema } from '$lib/schema/address.schema';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { isNullish } from '@dfinity/utils';
 
 describe('address.schema', () => {

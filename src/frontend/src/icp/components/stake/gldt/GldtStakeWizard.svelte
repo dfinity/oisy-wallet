@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { Principal } from '@dfinity/principal';
+	import { Principal } from '@icp-sdk/core/principal';
 	import { isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';

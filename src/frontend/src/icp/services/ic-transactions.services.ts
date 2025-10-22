@@ -19,7 +19,7 @@ import type { Token, TokenId } from '$lib/types/token';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { findOldestTransaction } from '$lib/utils/transactions.utils';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { isNullish, nonNullish, queryAndUpdate } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

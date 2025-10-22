@@ -18,7 +18,7 @@ import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNever, nonNullish, toNullable } from '@dfinity/utils';
 
 const toIcrcCustomToken = ({

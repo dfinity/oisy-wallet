@@ -3,7 +3,7 @@ import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { XTC_LEDGER_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, isNullish, type QueryParams } from '@dfinity/utils';
 
 let canister: XtcLedgerCanister | undefined = undefined;

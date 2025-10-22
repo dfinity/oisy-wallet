@@ -11,7 +11,7 @@ import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-cus
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';

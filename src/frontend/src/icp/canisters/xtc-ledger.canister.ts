@@ -7,7 +7,7 @@ import type { XtcLedgerTransferParams } from '$icp/types/xtc-ledger';
 import { getAgent } from '$lib/actors/agents.ic';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { Canister, createServices, toNullable, type QueryParams } from '@dfinity/utils';
 
 export class XtcLedgerCanister extends Canister<XtcLedgerService> {

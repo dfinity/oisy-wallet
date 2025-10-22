@@ -1,9 +1,9 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { CkETHMinterCanister, type MinterInfo } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 
 export const minterInfo = async ({

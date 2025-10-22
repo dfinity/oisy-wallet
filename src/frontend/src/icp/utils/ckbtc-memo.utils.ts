@@ -1,4 +1,4 @@
-import { Cbor } from '@dfinity/agent';
+import { Cbor } from '@icp-sdk/core/agent';
 import { arrayOfNumberToUint8Array } from '@dfinity/utils';
 import * as z from 'zod';
 

@@ -1,6 +1,6 @@
-import { IDL } from '@dfinity/candid';
+import { IDL } from '@icp-sdk/core/candid';
 import { ICManagementCanister, InstallMode } from '@dfinity/ic-management';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { nonNullish } from '@dfinity/utils';
 import { copyFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';

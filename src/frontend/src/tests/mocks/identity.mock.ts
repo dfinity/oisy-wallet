@@ -1,6 +1,6 @@
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const mockPrincipalText = 'xlmdg-vkosz-ceopx-7wtgu-g3xmd-koiyc-awqaq-7modz-zf6r6-364rh-oqe';
 export const mockPrincipalText2 = 'fnpyv-uis4m-k44er-rkmzg-geafl-jpurz-55cq2-vcdkm-q66js-taqiz-pqe';

@@ -9,7 +9,7 @@ import {
 import * as authStore from '$lib/derived/auth.derived';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 

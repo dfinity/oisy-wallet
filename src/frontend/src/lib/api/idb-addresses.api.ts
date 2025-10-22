@@ -15,7 +15,7 @@ import type {
 	SetIdbAddressParams
 } from '$lib/types/idb-addresses';
 import type { SolAddress } from '$sol/types/address';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { isNullish } from '@dfinity/utils';
 import { clear, createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 

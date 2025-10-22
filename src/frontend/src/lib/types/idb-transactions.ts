@@ -5,7 +5,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
 import type { SolCertifiedTransactionsData } from '$sol/stores/sol-transactions.store';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export type IdbTransactionsStoreData =
 	| BtcCertifiedTransactionsData

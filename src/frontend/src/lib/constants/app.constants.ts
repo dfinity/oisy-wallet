@@ -1,5 +1,5 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { nonNullish } from '@dfinity/utils';
 
 export const APP_VERSION = VITE_APP_VERSION;

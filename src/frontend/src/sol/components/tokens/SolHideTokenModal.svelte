@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { assertNonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';

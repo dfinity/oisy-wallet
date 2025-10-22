@@ -6,8 +6,8 @@ import type {
 	ICPSwapQuoteSwapParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { assertNonNullish } from '@dfinity/utils';
 
 const getPoolCanister = async ({

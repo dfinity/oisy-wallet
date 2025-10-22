@@ -1,6 +1,6 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import {
 	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,

@@ -1,7 +1,7 @@
 import { getStatus } from '$icp/api/icrc-index-ng.api';
 import { getBlocks } from '$icp/api/icrc-ledger.api';
 import type { IndexCanisterIdText, LedgerCanisterIdText } from '$icp/types/canister';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import type { QueryParams } from '@dfinity/utils';
 
 /**

@@ -1,6 +1,6 @@
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { decodeIcrcAccount, type IcrcAccount, type IcrcSubaccount } from '@dfinity/ledger-icrc';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { isNullish } from '@dfinity/utils';
 
 export const getIcrcAccount = (principal: Principal): IcrcAccount => ({ owner: principal });

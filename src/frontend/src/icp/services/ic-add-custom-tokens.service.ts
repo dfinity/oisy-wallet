@@ -7,7 +7,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
