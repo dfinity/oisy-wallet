@@ -43,7 +43,9 @@
 			class="border-info-solid bg-info-subtle-10 text-info-primary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-2 text-xs font-normal sm:w-fit md:text-base"
 		>
 			<IconInfo></IconInfo>
-			<span class="w-full px-2"><Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} /></span>
+			<span class="w-full px-2"
+				><Html text={replaceOisyPlaceholders($i18n.core.warning.standalone_mode)} /></span
+			>
 			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
 				<IconClose />
 			</button>
