@@ -56,7 +56,7 @@ describe('gldt-stake.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsStake.STAKE);
 			expect(gldtStakeApi.manageStakePosition).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
-				positionParams: { AddStake: { amount: mockAmount } }
+				positionParams: { AddStake: { amount: mockAmount + gldtToken.fee } }
 			});
 			expect(response).toBe(stakePositionMockResponse);
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsStake.UPDATE_UI);
