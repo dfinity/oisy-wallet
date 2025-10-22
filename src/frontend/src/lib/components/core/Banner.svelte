@@ -1,17 +1,14 @@
 <script lang="ts">
 	import { Html, IconClose, IconWarning } from '@dfinity/gix-components';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isPWAStandalone } from '$lib/utils/device.utils';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let envBannerVisible = $state(true);
-
-	const closeEnvBanner = () => (envBannerVisible = false);
-
 	let pwaBannerVisible = $state(true);
 
+	const closeEnvBanner = () => (envBannerVisible = false);
 	const closePwaBanner = () => (pwaBannerVisible = false);
 </script>
 
@@ -42,12 +39,11 @@
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<div
-			class="border-info-solid bg-info-subtle-10 text-info-primary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-2 text-xs font-bold sm:w-fit md:text-base"
+			class="border-info-solid bg-info-subtle-10 text-info-primary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-2 text-xs font-normal sm:w-fit md:text-base"
 		>
 			<IconInfo></IconInfo>
-
 			<span class="w-full px-2"><Html text={$i18n.core.warning.standalone_mode} /></span>
-			<button aria-label={$i18n.core.text.close} onclick={closeAwsTemporaryBanner}>
+			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
 				<IconClose />
 			</button>
 		</div>
