@@ -25,13 +25,13 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
 	type IcrcTokenMetadataResponse,
 	type IcrcValue
 } from '@icp-sdk/canisters/ledger/icrc';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;

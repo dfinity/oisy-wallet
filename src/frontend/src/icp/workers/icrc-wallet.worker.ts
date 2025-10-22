@@ -20,12 +20,12 @@ import type {
 	PostMessageDataRequestIcrc,
 	PostMessageDataRequestIcrcStrict
 } from '$lib/types/post-message';
+import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import type {
 	IcrcIndexNgGetTransactions,
 	IcrcTransaction,
 	IcrcTransactionWithId
 } from '@icp-sdk/canisters/ledger/icrc';
-import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 type GetTransactions = IcrcIndexNgGetTransactions;
 

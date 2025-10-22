@@ -5,12 +5,12 @@ import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-tra
 import { mapIcpTransaction, mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessage, PostMessageDataRequestIcp } from '$lib/types/post-message';
+import { assertNonNullish, isNullish } from '@dfinity/utils';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
 	TransactionWithId
 } from '@icp-sdk/canisters/ledger/icp';
-import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 const getBalanceAndTransactions = ({
 	identity,

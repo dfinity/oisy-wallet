@@ -2,6 +2,7 @@ import type { MinterInfoParams } from '$icp/types/ck';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import {
 	CkBTCMinterCanister,
 	type EstimateWithdrawalFee,
@@ -12,7 +13,6 @@ import {
 	type UpdateBalanceOk,
 	type Utxo
 } from '@icp-sdk/canisters/ckbtc';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 

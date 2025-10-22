@@ -5,8 +5,8 @@ import { tokens } from '$lib/derived/tokens.derived';
 import type { DecodedUrn } from '$lib/types/qr-code';
 import { decodeQrCode, decodeQrCodeUrn } from '$lib/utils/qr-code.utils';
 import { generateUrn } from '$tests/mocks/qr-generator.mock';
-import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 import { assertNonNullish } from '@dfinity/utils';
+import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
 
 vi.mock('@icp-sdk/canisters/ledger/icrc', () => ({

@@ -6,9 +6,9 @@ import type { GetTransactions } from '$icp/types/ic.post-message';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
 import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
+import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@icp-sdk/canisters/ledger/icrc';
-import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 

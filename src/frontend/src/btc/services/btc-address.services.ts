@@ -33,8 +33,8 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { ResultSuccess } from '$lib/types/utils';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { assertNonNullish, nonNullish } from '@dfinity/utils';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 const bitcoinMapper: Record<

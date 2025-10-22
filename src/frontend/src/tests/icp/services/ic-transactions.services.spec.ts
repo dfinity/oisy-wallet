@@ -23,9 +23,9 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import type { GetAccountIdentifierTransactionsResponse } from '@icp-sdk/canisters/ledger/icp';
 import type { TransactionWithId } from '@icp-sdk/canisters/ledger/icp/dist/candid';
-import { toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
