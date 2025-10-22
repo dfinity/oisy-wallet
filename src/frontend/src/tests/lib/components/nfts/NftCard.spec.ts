@@ -1,9 +1,11 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
 import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
+import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -20,6 +22,10 @@ describe('NftCard', () => {
 	const imageSelector = `div[data-tid="${testId}-image"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
+
+	const mockFromRoute: NavigationTarget = {
+		url: new URL(`https://example.com/?${NETWORK_PARAM}=test-network`)
+	} as unknown as NavigationTarget;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -122,7 +128,8 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isSpam: true
+				isSpam: true,
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -152,7 +159,8 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isHidden: true
+				isHidden: true,
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -181,7 +189,8 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc721Nft,
 				testId,
-				type: 'card-link'
+				type: 'card-link',
+				fromRoute: mockFromRoute
 			}
 		});
 
