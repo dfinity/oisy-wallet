@@ -16,7 +16,13 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockEthAddress, mockEthAddress2 } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { Alchemy, NftSpamClassification, NftTokenType, type OwnedNftsResponse } from 'alchemy-sdk';
+import {
+	Alchemy,
+	NftSpamClassification,
+	NftTokenType,
+	type Nft as AlchemyNft,
+	type OwnedNftsResponse
+} from 'alchemy-sdk';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -284,6 +290,114 @@ describe('alchemy.providers', () => {
 			).rejects.toThrow('Nfts Error');
 
 			expect(Alchemy.prototype.nft.getNftsForOwner).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('getNftMetadata', () => {
+		const mockApiResponse: AlchemyNft = {
+			tokenId: '1',
+			name: 'Name1',
+			image: { originalUrl: 'https://download1.com' },
+			description: 'lorem ipsum',
+			raw: { metadata: {} },
+			contract: {
+				address: mockValidErc1155Token.address,
+				tokenType: NftTokenType.ERC1155,
+				openSeaMetadata: { bannerImageUrl: 'https://download.com', lastIngestedAt: '123_456' },
+				spamClassifications: [NftSpamClassification.Unknown]
+			},
+			tokenType: NftTokenType.ERC1155,
+			timeLastUpdated: '456_123'
+		};
+
+		const mockTokenId = parseNftId('1');
+
+		const expectedNft: Nft = {
+			id: mockTokenId,
+			name: 'Name1',
+			imageUrl: 'https://download1.com',
+			collection: {
+				...mapTokenToCollection(mockValidErc1155Token),
+				bannerImageUrl: 'https://download.com',
+				bannerMediaStatus: NftMediaStatusEnum.OK
+			},
+			description: 'lorem ipsum',
+			mediaStatus: NftMediaStatusEnum.OK
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			global.fetch = vi.fn().mockResolvedValue({
+				headers: {
+					get: () => null
+				}
+			});
+		});
+
+		it('should fetch and map NFT correctly', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue(mockApiResponse)
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const nft = await provider.getNftMetadata({
+				token: mockValidErc1155Token,
+				tokenId: mockTokenId
+			});
+
+			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
+			expect(nft).toStrictEqual(expectedNft);
+		});
+
+		it('should only map existing data', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockResolvedValue({
+						tokenId: '1',
+						raw: { metadata: {} },
+						contract: { address: mockValidErc1155Token.address, tokenType: 'Erc1155' }
+					})
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			const nft = await provider.getNftMetadata({
+				token: mockValidErc1155Token,
+				tokenId: mockTokenId
+			});
+
+			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
+
+			expect(nft).toStrictEqual({
+				id: parseNftId('1'),
+				collection: {
+					...mapTokenToCollection(mockValidErc1155Token)
+				},
+				mediaStatus: NftMediaStatusEnum.INVALID_DATA
+			});
+		});
+
+		it('should throw an error', async () => {
+			Object.defineProperty(Alchemy.prototype, 'nft', {
+				value: {
+					getNftMetadata: vi.fn().mockRejectedValueOnce(new Error('Nfts Error'))
+				},
+				configurable: true
+			});
+
+			const provider = alchemyProviders(ETHEREUM_NETWORK.id);
+
+			await expect(
+				provider.getNftMetadata({ token: mockValidErc1155Token, tokenId: mockTokenId })
+			).rejects.toThrow('Nfts Error');
+
+			expect(Alchemy.prototype.nft.getNftMetadata).toHaveBeenCalledOnce();
 		});
 	});
 

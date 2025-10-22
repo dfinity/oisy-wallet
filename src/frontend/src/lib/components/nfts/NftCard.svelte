@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -10,7 +11,6 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
@@ -19,6 +19,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		nft: Nft;
@@ -29,6 +30,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
+		fromRoute?: NavigationTarget | null;
 	}
 
 	let {
@@ -39,14 +41,15 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default'
+		source = 'default',
+		fromRoute
 	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (type === 'card-link' && !disabled) {
+		if (type === 'card-link' && !disabled && nonNullish(fromRoute)) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
@@ -61,7 +64,10 @@
 				}
 			});
 
-			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
+			const url = nftsUrl({ nft, fromRoute });
+			if (nonNullish(url)) {
+				goto(url);
+			}
 		}
 	};
 </script>
@@ -129,11 +135,11 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
+	<span class="flex w-full flex-col gap-1 p-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
 			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
 		</span>
-		<span class="text-xs" class:text-tertiary={!disabled}>
+		<span class="truncate text-xs" class:text-tertiary={!disabled}>
 			#{nft.id}
 			{#if source === NFT_LIST_ROUTE}
 				&ndash; {nft.name}
