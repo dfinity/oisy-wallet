@@ -8,7 +8,7 @@ export type GldtStakeStoreData = Option<{
 }>;
 
 export interface GldtStakeStore extends Readable<GldtStakeStoreData> {
-	setApy: (value: number) => void;
+	setApy: (value?: number) => void;
 	setPosition: (value?: StakePositionResponse) => void;
 	reset: () => void;
 }
@@ -21,7 +21,7 @@ export const initGldtStakeStore = (): GldtStakeStore => {
 
 		reset: () => set(undefined),
 
-		setApy: (value: number) => {
+		setApy: (value?: number) => {
 			update((state) => ({ ...state, apy: value }));
 		},
 
