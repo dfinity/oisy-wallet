@@ -7,16 +7,22 @@ updates:
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      - default-days: 7
 
   - package-ecosystem: cargo
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      - default-days: 7
 
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
+    cooldown:
+      - default-days: 7
     allow:
       - dependency-type: all
     ignore:
