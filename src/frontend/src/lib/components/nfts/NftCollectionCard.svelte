@@ -114,7 +114,7 @@
 			class:text-disabled={disabled}
 			class:text-primary={!disabled}>{collection.collection.name}</span
 		>
-		<span class="text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
+		<span class="truncate text-xs" class:text-disabled={disabled} class:text-tertiary={!disabled}
 			>{replacePlaceholders($i18n.nfts.text.collection_items_count, {
 				$count: String(collection.nfts.length)
 			})}</span
