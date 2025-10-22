@@ -1,3 +1,4 @@
+import * as nftEnv from '$env/nft.env';
 import * as erc1155Derived from '$eth/derived/erc1155.derived';
 import * as erc20Derived from '$eth/derived/erc20.derived';
 import * as erc721Derived from '$eth/derived/erc721.derived';
@@ -6,7 +7,7 @@ import { loadErc20Tokens } from '$eth/services/erc20.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -41,23 +42,27 @@ vi.mock('@dfinity/utils', async () => {
 });
 
 vi.mock('$eth/services/erc20.services', () => ({
-	loadErc20Tokens: vi.fn(() => Promise.resolve())
+	loadErc20Tokens: vi.fn()
 }));
 
 vi.mock('$eth/services/erc721.services', () => ({
-	loadErc721Tokens: vi.fn(() => Promise.resolve())
+	loadErc721Tokens: vi.fn()
 }));
 
 vi.mock('$eth/services/erc1155.services', () => ({
-	loadErc1155Tokens: vi.fn(() => Promise.resolve())
+	loadErc1155Tokens: vi.fn()
 }));
 
 vi.mock('$icp/services/icrc.services', () => ({
-	loadIcrcTokens: vi.fn(() => Promise.resolve())
+	loadIcrcTokens: vi.fn()
 }));
 
 vi.mock('$sol/services/spl.services', () => ({
-	loadSplTokens: vi.fn(() => Promise.resolve())
+	loadSplTokens: vi.fn()
+}));
+
+vi.mock('$lib/api/backend.api', () => ({
+	listCustomTokens: vi.fn().mockResolvedValue([])
 }));
 
 describe('LoaderTokens', () => {
@@ -110,6 +115,8 @@ describe('LoaderTokens', () => {
 		);
 
 		vi.spyOn(splDerived, 'splCustomTokensNotInitialized', 'get').mockReturnValue(splNotInitStore);
+
+		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
 	it('should always load ICRC tokens', async () => {
@@ -339,7 +346,7 @@ describe('LoaderTokens', () => {
 
 			setupTestnetsStore('enabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			userProfileStore.set({
 				certified: false,

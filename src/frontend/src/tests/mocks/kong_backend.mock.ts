@@ -1,4 +1,4 @@
-import type { TokenReply } from '$declarations/kong_backend/kong_backend.did';
+import type { TokenReply } from '$declarations/kong_backend/declarations/kong_backend.did';
 
 export const kongIcToken = {
 	canister_id: 'eyhua-2aaaa-aaaam-qcf5a-cai',

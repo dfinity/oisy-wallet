@@ -1,19 +1,31 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { setContext } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
+	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
+	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
+	import {
+		GLDT_STAKE_CONTEXT_KEY,
+		type GldtStakeContext as GldtStakeContextType,
+		initGldtStakeStore
+	} from '$icp/stores/gldt-stake.store';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { networkId } from '$lib/derived/network.derived';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { networkUrl } from '$lib/utils/nav.utils';
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
+	});
+
+	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
+		store: initGldtStakeStore()
 	});
 </script>
 
@@ -43,4 +55,6 @@
 	<PageTitle>{$i18n.earning.cards.gold_description}</PageTitle>
 </div>
 
-<h3>Coming soon</h3>
+<GldtStakeContext>
+	<GldtStakeEarnCard />
+</GldtStakeContext>

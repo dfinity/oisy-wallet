@@ -73,7 +73,7 @@
 
 				{#if nonNullish(address)}
 					<div in:fade>
-						<ReceiveActions {address} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} on:click />
+						<ReceiveActions {address} {copyAriaLabel} {copyButtonTestId} {qrCodeAction} />
 					</div>
 				{:else}
 					<div class="min-w-20">&ZeroWidthSpace;</div>

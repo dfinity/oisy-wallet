@@ -1,4 +1,5 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
+import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import type { TokenId } from '$lib/types/token';
 import { parseNftId } from '$lib/validation/nft.validation';
@@ -22,7 +23,7 @@ export const getMockNonFungibleToken = (params: {
 
 export const mockValidErc721Nft: Nft = {
 	name: 'Beanz 123',
-	id: parseNftId(173563),
+	id: parseNftId('173563'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/27.png',
 	attributes: [
 		{ traitType: 'Background', value: 'Crimson Red' },
@@ -34,13 +35,15 @@ export const mockValidErc721Nft: Nft = {
 		network: ETHEREUM_NETWORK,
 		standard: 'erc721',
 		symbol: 'MC',
-		name: 'MyContract'
-	}
+		name: 'MyContract',
+		allowExternalContentSource: true
+	},
+	mediaStatus: NftMediaStatusEnum.OK
 };
 
 export const mockValidErc1155Nft: Nft = {
 	name: 'Nyan',
-	id: parseNftId(725432),
+	id: parseNftId('725432'),
 	imageUrl: 'https://ipfs.io/ipfs/QmUYeQEm8FquanaaiGKkubmvRwKLnMV8T3c4Ph9Eoup9Gy/27.png',
 	attributes: [
 		{ traitType: 'Background', value: 'Crimson Red' },
@@ -53,8 +56,11 @@ export const mockValidErc1155Nft: Nft = {
 		network: ETHEREUM_NETWORK,
 		standard: 'erc1155',
 		symbol: 'NYAN',
-		name: 'MyContract'
-	}
+		name: 'MyContract',
+		allowExternalContentSource: true
+	},
+	mediaStatus: NftMediaStatusEnum.OK,
+	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
 };
 
 export const mockNftollectionUi: NftCollectionUi = {
@@ -65,7 +71,8 @@ export const mockNftollectionUi: NftCollectionUi = {
 		network: ETHEREUM_NETWORK,
 		standard: 'erc1155',
 		symbol: 'testcollection',
-		id: 'testcollection' as unknown as TokenId
+		id: 'testcollection' as unknown as TokenId,
+		allowExternalContentSource: true
 	}
 };
 

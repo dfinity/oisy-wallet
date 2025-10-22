@@ -16,7 +16,7 @@
 	interface Props {
 		content?: Snippet;
 		address?: OptionAddress<Address>;
-		addressToken?: Token | undefined;
+		addressToken?: Token;
 		network: Network;
 		copyAriaLabel: string;
 	}
@@ -38,7 +38,6 @@
 			{copyAriaLabel}
 			copyButtonTestId={RECEIVE_TOKENS_MODAL_COPY_ADDRESS_BUTTON}
 			{network}
-			qrCodeAction={{ enabled: false }}
 		/>
 
 		{@render content?.()}

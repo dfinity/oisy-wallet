@@ -15,7 +15,7 @@
 	import { token } from '$lib/stores/token.store';
 	import type { SyncState } from '$lib/types/sync';
 
-	let receiveProgressStep: string | undefined = undefined;
+	let receiveProgressStep = $state<string | undefined>();
 
 	const modalId = Symbol();
 
@@ -73,7 +73,7 @@
 		}
 	};
 
-	let ckBtcUpdateBalanceSyncState: SyncState | undefined = undefined;
+	let ckBtcUpdateBalanceSyncState = $state<SyncState | undefined>();
 	const debounceUpdateSyncState = debounce(
 		(state: SyncState) => (ckBtcUpdateBalanceSyncState = state)
 	);
@@ -88,7 +88,7 @@
 		</div>{:else}
 		<button
 			class="text flex gap-2 border-0 text-brand-primary hover:text-brand-secondary active:text-brand-secondary"
-			on:click={async () => await receive()}
+			onclick={async () => await receive()}
 			in:blur><IconReimbursed size="24" /> {$i18n.core.text.refresh}</button
 		>
 	{/if}
@@ -99,7 +99,7 @@
 		{#snippet title()}{$i18n.receive.bitcoin.text.refresh_status}{/snippet}
 
 		<div class="stretch">
-			<IcTransactionsBitcoinStatus bind:receiveProgressStep />
+			<IcTransactionsBitcoinStatus {receiveProgressStep} />
 		</div>
 	</Modal>
 {/if}

@@ -69,8 +69,7 @@ describe('AiAssistantReviewSendSolToken', () => {
 
 		await fireEvent.click(button);
 
-		expect(sendSpy).toHaveBeenCalledOnce();
-		expect(sendSpy).toHaveBeenCalledWith({
+		expect(sendSpy).toHaveBeenCalledExactlyOnceWith({
 			destination: mockSolAddress,
 			prioritizationFee: ZERO,
 			source: mockSolAddress2,

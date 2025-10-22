@@ -25,8 +25,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
-		TRACK_COUNT_ETH_NFT_SEND_ERROR,
-		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
@@ -199,24 +198,29 @@
 			});
 
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'success',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name
 				}
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_ERROR,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'error',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name,
+					error: (err as Error).message
 				}
 			});
 
@@ -341,33 +345,35 @@
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
 >
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview
-			{amount}
-			{destination}
-			{nft}
-			{onBack}
-			onSend={nonNullish(nft) ? nftSend : send}
-			{selectedContact}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard
-			progressStep={sendProgressStep}
-			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<EthSendForm
-			{nativeEthereumToken}
-			{onBack}
-			{onNext}
-			{onTokensList}
-			{selectedContact}
-			bind:destination
-			bind:amount
-		>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</EthSendForm>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<EthSendReview
+				{amount}
+				{destination}
+				{nft}
+				{onBack}
+				onSend={nonNullish(nft) ? nftSend : send}
+				{selectedContact}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard
+				progressStep={sendProgressStep}
+				steps={sendSteps({ i18n: $i18n, sendWithApproval })}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<EthSendForm
+				{nativeEthereumToken}
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				bind:destination
+				bind:amount
+			>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</EthSendForm>
+		{/if}
+	{/key}
 </EthFeeContext>

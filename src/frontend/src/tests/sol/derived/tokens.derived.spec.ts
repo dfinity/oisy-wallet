@@ -1,5 +1,5 @@
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
@@ -21,13 +21,13 @@ describe('tokens.derived', () => {
 		});
 
 		it('should return testnet tokens when they are enabled', () => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementationOnce(() => false);
 
 			expect(get(enabledSolanaTokens)).toEqual([SOLANA_TOKEN, SOLANA_DEVNET_TOKEN]);
 		});
 
 		it('should return localnet token when in local env', () => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementationOnce(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementationOnce(() => true);
 
 			expect(get(enabledSolanaTokens)).toEqual([
 				SOLANA_TOKEN,

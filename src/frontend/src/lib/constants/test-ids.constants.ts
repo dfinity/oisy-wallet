@@ -46,6 +46,9 @@ export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
 export const NFT_ACTION_SEND = 'nft-action-send';
+export const NFT_PLACEHOLDER_INVALID = 'nft-placeholder-invalid';
+export const NFT_PLACEHOLDER_FILESIZE = 'nft-placeholder-filesize';
+export const NFT_PLACEHOLDER_UNSUPPORTED = 'nft-placeholder-unsupported';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';

@@ -202,55 +202,57 @@
 
 <EthereumFeeContext {networkId}>
 	<BitcoinFeeContext amount={sendAmount} {networkId} token={$sourceToken}>
-		{#if currentStep?.name === WizardStepsConvert.CONVERT}
-			<IcConvertForm
-				destination={isDestinationCustom ? customDestination : defaultDestination}
-				{isDestinationCustom}
-				{onDestination}
-				{onNext}
-				bind:sendAmount
-				bind:receiveAmount
-			>
-				{#snippet cancel()}
-					{#if formCancelAction === 'back'}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsConvert.CONVERT}
+				<IcConvertForm
+					destination={isDestinationCustom ? customDestination : defaultDestination}
+					{isDestinationCustom}
+					{onDestination}
+					{onNext}
+					bind:sendAmount
+					bind:receiveAmount
+				>
+					{#snippet cancel()}
+						{#if formCancelAction === 'back'}
+							<ButtonBack onclick={back} />
+						{:else}
+							<ButtonCancel onclick={close} />
+						{/if}
+					{/snippet}
+				</IcConvertForm>
+			{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+				<IcConvertReview
+					destination={isDestinationCustom ? customDestination : defaultDestination}
+					{isDestinationCustom}
+					onConvert={convert}
+					{receiveAmount}
+					{sendAmount}
+				>
+					{#snippet cancel()}
 						<ButtonBack onclick={back} />
-					{:else}
-						<ButtonCancel onclick={close} />
-					{/if}
-				{/snippet}
-			</IcConvertForm>
-		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-			<IcConvertReview
-				destination={isDestinationCustom ? customDestination : defaultDestination}
-				{isDestinationCustom}
-				onConvert={convert}
-				{receiveAmount}
-				{sendAmount}
-			>
-				{#snippet cancel()}
-					<ButtonBack onclick={back} />
-				{/snippet}
-			</IcConvertReview>
-		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-			<IcConvertProgress bind:convertProgressStep />
-		{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
-			<DestinationWizardStep
-				{networkId}
-				{onDestinationBack}
-				{onQRCodeScan}
-				tokenStandard={$destinationToken.standard}
-				bind:customDestination
-			>
-				{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
-			</DestinationWizardStep>
-		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQrCodeScan
-				expectedToken={$destinationToken}
-				onDecodeQrCode={decodeQrCode}
-				{onQRCodeBack}
-				bind:destination={customDestination}
-				bind:amount={sendAmount}
-			/>
-		{/if}
+					{/snippet}
+				</IcConvertReview>
+			{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+				<IcConvertProgress {convertProgressStep} />
+			{:else if currentStep?.name === WizardStepsConvert.DESTINATION}
+				<DestinationWizardStep
+					{networkId}
+					{onDestinationBack}
+					{onQRCodeScan}
+					tokenStandard={$destinationToken.standard}
+					bind:customDestination
+				>
+					{#snippet title()}{$i18n.convert.text.send_to}{/snippet}
+				</DestinationWizardStep>
+			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+				<SendQrCodeScan
+					expectedToken={$destinationToken}
+					onDecodeQrCode={decodeQrCode}
+					{onQRCodeBack}
+					bind:destination={customDestination}
+					bind:amount={sendAmount}
+				/>
+			{/if}
+		{/key}
 	</BitcoinFeeContext>
 </EthereumFeeContext>

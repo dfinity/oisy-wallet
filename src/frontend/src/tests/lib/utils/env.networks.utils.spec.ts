@@ -3,7 +3,7 @@ import {
 	SOLANA_LOCAL_NETWORK,
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import { defineSupportedNetworks } from '$lib/utils/env.networks.utils';
 
@@ -21,7 +21,7 @@ describe('env.networks.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		const mockParams = { ...mockBaseParams, $testnetsEnabled: true };
@@ -44,7 +44,7 @@ describe('env.networks.utils', () => {
 
 		describe('when local networks are enabled', () => {
 			beforeEach(() => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 			});
 
 			it('should return all networks', () => {

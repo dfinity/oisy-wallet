@@ -1,15 +1,14 @@
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
+import type { EthAddress } from '$eth/types/address';
 import type {
 	AlchemyProviderContract,
 	AlchemyProviderContracts
 } from '$eth/types/alchemy-contract';
-import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
-import type { EthAddress } from '$lib/types/address';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
@@ -26,7 +25,9 @@ import {
 	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
-	type Network
+	type Network,
+	type OwnedNft,
+	type OwnedNftsResponse
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
@@ -136,6 +137,64 @@ export class AlchemyProvider {
 		});
 	}
 
+	private mapNftFromRpc = async ({
+		nft: {
+			tokenId,
+			name,
+			description,
+			raw: {
+				metadata: { attributes: untypedAttributes }
+			},
+			image,
+			acquiredAt,
+			contract: { openSeaMetadata },
+			balance
+		},
+		token
+	}: {
+		nft: OwnedNft;
+		token: NonFungibleToken;
+	}): Promise<Nft> => {
+		const attributes = untypedAttributes as {
+			trait_type: string;
+			value: string;
+		}[];
+
+		const mappedAttributes = nonNullish(attributes)
+			? attributes.map(({ trait_type: traitType, value }) => ({
+					traitType,
+					value: value.toString()
+				}))
+			: [];
+
+		const mediaStatus = await getMediaStatus(image?.originalUrl);
+
+		const bannerMediaStatus = await getMediaStatus(openSeaMetadata?.bannerImageUrl);
+
+		return {
+			id: parseNftId(tokenId),
+			...(nonNullish(name) && { name }),
+			...(nonNullish(image?.originalUrl) && { imageUrl: image?.originalUrl }),
+			...(nonNullish(description) && { description }),
+			...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
+			...(nonNullish(balance) && { balance: Number(balance) }),
+			...(nonNullish(acquiredAt?.blockTimestamp) && {
+				acquiredAt: new Date(acquiredAt?.blockTimestamp)
+			}),
+			collection: {
+				...mapTokenToCollection(token),
+				...(nonNullish(openSeaMetadata?.bannerImageUrl) && {
+					bannerImageUrl: openSeaMetadata?.bannerImageUrl,
+					bannerMediaStatus
+				}),
+				...(nonNullish(openSeaMetadata?.description) && {
+					description: openSeaMetadata?.description
+				})
+			},
+			mediaStatus
+		} satisfies Nft;
+	};
+
 	getTransaction = async (hash: string): Promise<TransactionResponseWithBigInt | null> => {
 		const transaction = await this.deprecatedProvider.core.getTransaction(hash);
 
@@ -162,22 +221,13 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.deprecatedProvider.nft.getNftsForOwner(
-			address,
-			{
-				contractAddresses: tokens.map((token) => token.address),
-				omitMetadata: false,
-				orderBy: NftOrdering.TRANSFERTIME
-			}
-		);
+		const result: OwnedNftsResponse = await this.deprecatedProvider.nft.getNftsForOwner(address, {
+			contractAddresses: tokens.map((token) => token.address),
+			omitMetadata: false,
+			orderBy: NftOrdering.TRANSFERTIME
+		});
 
 		const nftPromises = result.ownedNfts.reduce<Promise<Nft>[]>((acc, ownedNft) => {
-			const {
-				raw: {
-					metadata: { attributes }
-				}
-			} = ownedNft;
-
 			const token = tokens.find(({ address, network: { id: networkId } }) =>
 				areAddressesEqual({
 					address1: address,
@@ -191,44 +241,7 @@ export class AlchemyProvider {
 				return acc;
 			}
 
-			const promise = (async () => {
-				const mappedAttributes = nonNullish(attributes)
-					? attributes.map(({ trait_type: traitType, value }) => ({
-							traitType,
-							value: value.toString()
-						}))
-					: [];
-
-				const mediaStatus = await getMediaStatus(ownedNft.image?.originalUrl);
-
-				return {
-					id: parseNftId(parseInt(ownedNft.tokenId)),
-					...(nonNullish(ownedNft.name) && { name: ownedNft.name }),
-					...(nonNullish(ownedNft.image?.originalUrl) && {
-						imageUrl: ownedNft.image?.originalUrl
-					}),
-					...(nonNullish(ownedNft.description) && {
-						description: ownedNft.description
-					}),
-					...(mappedAttributes.length > 0 && { attributes: mappedAttributes }),
-					...(nonNullish(ownedNft.balance) && {
-						balance: Number(ownedNft.balance)
-					}),
-					...(nonNullish(ownedNft.acquiredAt?.blockTimestamp) && {
-						acquiredAt: new Date(ownedNft.acquiredAt?.blockTimestamp)
-					}),
-					collection: {
-						...mapTokenToCollection(token),
-						...(nonNullish(ownedNft.contract.openSeaMetadata?.bannerImageUrl) && {
-							bannerImageUrl: ownedNft.contract.openSeaMetadata?.bannerImageUrl
-						}),
-						...(nonNullish(ownedNft.contract.openSeaMetadata?.description) && {
-							description: ownedNft.contract.openSeaMetadata?.description
-						})
-					},
-					mediaStatus
-				} satisfies Nft;
-			})();
+			const promise = (async () => await this.mapNftFromRpc({ nft: ownedNft, token }))();
 
 			return [...acc, promise];
 		}, []);
