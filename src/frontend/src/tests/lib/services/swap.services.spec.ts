@@ -1441,7 +1441,7 @@ describe('swap.services', () => {
 					token2_address: destinationToken.ledgerCanisterId,
 					token2_name: destinationToken.name,
 					token2_standard: destinationToken.standard,
-					token2_id: String(destinationToken.id),
+					token2_id: String(destinationToken.id)
 				})
 			});
 		});

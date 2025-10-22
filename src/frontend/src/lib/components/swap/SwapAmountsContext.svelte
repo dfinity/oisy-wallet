@@ -78,7 +78,7 @@
 		if (isNullish(amount) || isNullish(sourceToken) || isNullish(destinationToken)) {
 			store.reset();
 			return;
-		}		
+		}
 
 		const parsedAmount = Number(amount);
 
@@ -88,7 +88,7 @@
 
 		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
-		}		
+		}
 
 		isSwapAmountsLoading = true;
 
