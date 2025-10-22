@@ -59,7 +59,7 @@ const initI18n = (): I18nStore => {
 			await switchLang(lang);
 		},
 
-		switchLang: (lang: Languages) => switchLang(lang)
+		switchLang
 	};
 };
 
