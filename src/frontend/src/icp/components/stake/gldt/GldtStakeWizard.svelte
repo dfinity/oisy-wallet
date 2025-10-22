@@ -6,6 +6,7 @@
 	import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';
 	import GldtStakeReview from '$icp/components/stake/gldt/GldtStakeReview.svelte';
 	import { stakeGldt } from '$icp/services/gldt-stake.services';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeProgress from '$lib/components/stake/StakeProgress.svelte';
 	import {
@@ -46,6 +47,8 @@
 	const { sendTokenDecimals, sendTokenSymbol, sendToken } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
+	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
+
 	const destination = Principal.fromText(GLDT_STAKE_CANISTER_ID).toString();
 
 	const stake = async () => {
@@ -73,7 +76,7 @@
 				});
 			};
 
-			await stakeGldt({
+			const result = await stakeGldt({
 				identity: $authIdentity,
 				amount: parseToken({
 					value: `${amount}`,
@@ -83,6 +86,8 @@
 				progress: (step: ProgressStepsStake) => (stakeProgressStep = step),
 				stakeCompleted: trackAnalyticsOnStakeComplete
 			});
+
+			gldtStakeStore.setPosition(result);
 
 			stakeProgressStep = ProgressStepsStake.DONE;
 
