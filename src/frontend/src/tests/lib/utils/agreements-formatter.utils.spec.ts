@@ -131,8 +131,8 @@ describe('agreements-formatter.utils', () => {
 		describe.each([Languages.ENGLISH, Languages.ITALIAN, Languages.GERMAN])(
 			'for language: %s',
 			(language) => {
-				beforeEach(() => {
-					i18n.switchLang(language);
+				beforeEach(async () => {
+					await i18n.switchLang(language);
 				});
 
 				it.each(testCases)(
