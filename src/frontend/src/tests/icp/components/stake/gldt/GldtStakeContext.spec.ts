@@ -7,6 +7,7 @@ import {
 } from '$icp/stores/gldt-stake.store';
 import { icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import * as authStore from '$lib/derived/auth.derived';
+import { dailyAnalyticsMockResponse } from '$tests/mocks/gldt_stake.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import type { Identity } from '@dfinity/agent';
@@ -14,12 +15,11 @@ import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('GldtStakeContext', () => {
-	const mockApy = 10.1232131232121;
-	const parsedMockApy = Math.round(mockApy * 100) / 100;
+	const parsedMockApy = Math.round(dailyAnalyticsMockResponse.apy * 100) / 100;
 
 	const mockContext = (store: GldtStakeStore) => new Map([[GLDT_STAKE_CONTEXT_KEY, { store }]]);
 	const mockGetApyOverall = () =>
-		vi.spyOn(gldtStakeApi, 'getApyOverall').mockResolvedValue(mockApy);
+		vi.spyOn(gldtStakeApi, 'getDailyAnalytics').mockResolvedValue(dailyAnalyticsMockResponse);
 	const mockAuthStore = (value: Identity | null = mockIdentity) =>
 		vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
