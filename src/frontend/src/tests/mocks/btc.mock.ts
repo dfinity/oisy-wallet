@@ -1,5 +1,5 @@
 import type { UtxosFee } from '$btc/types/btc-send';
-import type { Utxo } from '@dfinity/ckbtc/dist/candid/minter';
+import type { Utxo } from '@dfinity/ckbtc';
 
 export const mockBtcAddress = 'bc1qt0nkp96r7p95xfacyp98pww2eu64yzuf78l4a2wy0sttt83hux4q6u2nl7';
 

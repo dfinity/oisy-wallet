@@ -19,7 +19,7 @@ import {
 	setupCkBtcPendingStores
 } from '$tests/mocks/ic-transactions.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { ReimbursedDeposit, ReimbursementRequest } from '@dfinity/ckbtc/dist/candid/minter';
+import type { ReimbursedDeposit, ReimbursementRequest } from '@dfinity/ckbtc';
 import { get } from 'svelte/store';
 
 describe('ckbtc-transactions.utils', () => {
