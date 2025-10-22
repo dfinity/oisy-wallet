@@ -15,10 +15,8 @@ export const enI18n = (): I18n => ({
 const loadLangI18n = async (lang: Languages): Promise<I18n> => {
 	const langMod = await import(`$lib/i18n/${lang}.json`);
 
-	const targetLang = langMod.default as I18n;
-
 	return {
-		...mergeWithFallback({ refLang: enI18n(), targetLang }),
+		...mergeWithFallback({ refLang: enI18n(), targetLang: langMod.default }),
 		lang
 	};
 };
