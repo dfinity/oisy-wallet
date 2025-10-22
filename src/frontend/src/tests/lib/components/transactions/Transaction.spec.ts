@@ -22,7 +22,7 @@ describe('Transaction', () => {
 		contactsStore.reset();
 	});
 
-	it('should render `from` when we RECEIVE address', async () => {
+	it('should render `from` when we RECEIVE address', () => {
 		const fromAddress = '0xfeedface';
 
 		const { container, getByText } = render(Transaction, {
@@ -171,7 +171,7 @@ describe('Transaction', () => {
 		).toBeInTheDocument();
 	});
 
-	it('should render token logo in token icon mode for fungible tokens (amount visible)', async () => {
+	it('should render token logo in token icon mode for fungible tokens (amount visible)', () => {
 		const { getByText, getByAltText } = render(Transaction, {
 			type: 'receive',
 			status: 'confirmed',
