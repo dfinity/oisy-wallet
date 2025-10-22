@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
@@ -12,12 +13,15 @@
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { modalAboutWhyOisy, modalWalletConnect } from '$lib/derived/modal.derived';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { routeCollection } from '$lib/derived/nav.derived';
+	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
 	let helpMenuOpen = $state(false);
 	let menuOpen = $state(false);
+
+	let nftsCollectionRoute = $derived(isRouteNfts(page) && nonNullish($routeCollection));
 </script>
 
 <header
@@ -36,7 +40,7 @@
 	</div>
 
 	<div class="pointer-events-auto flex justify-end gap-2 md:gap-5">
-		{#if $authSignedIn && !isRouteTransactions(page)}
+		{#if $authSignedIn && !isRouteTransactions(page) && !nftsCollectionRoute}
 			<NetworksSwitcher bind:visible={networkSwitcherOpen} />
 		{/if}
 
