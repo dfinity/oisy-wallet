@@ -17,7 +17,7 @@
 
 {#if visible}
 	<div class="z-14 fixed inset-0">
-		<BottomSheet transition on:nnsClose={() => (visible = false)}>
+		<BottomSheet transition>
 			{#snippet header()}
 				<div class="w-full p-4">
 					<ButtonIcon
@@ -31,6 +31,7 @@
 					</ButtonIcon>
 				</div>
 			{/snippet}
+
 			<div class="min-h-[30vh] w-full p-4">
 				{@render content()}
 			</div>

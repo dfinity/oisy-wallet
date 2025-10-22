@@ -38,7 +38,7 @@
 
 	{#if expanded}
 		<div class="z-14 fixed inset-0">
-			<BottomSheet transition on:nnsClose={() => (expanded = false)}>
+			<BottomSheet transition>
 				{#snippet header()}
 					<div class="w-full p-4">
 						<ButtonIcon
@@ -59,6 +59,7 @@
 					{/if}
 					{@render content()}
 				</div>
+
 				{#snippet footer()}
 					<div class="w-full p-4">
 						{#if nonNullish(contentFooter)}
