@@ -190,7 +190,7 @@ There are some important notes related to the BTC development:
 
 ### Local Bitcoin Node (Or Regtest)
 
-To interact with a Bitcoun network, we can set up a local test node.
+To interact with a Bitcoin network, we can set up a local test node.
 
 The script to set it up and start running it is `./scripts/setup.bitcoin-node.sh`.
 
