@@ -1,7 +1,7 @@
 <script lang="ts">
+	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
 	import type { Identity } from '@icp-sdk/core/agent';
 	import { Principal } from '@icp-sdk/core/principal';
-	import { assertNonNullish, nonNullish, toNullable } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
