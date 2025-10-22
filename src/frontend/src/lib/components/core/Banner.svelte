@@ -49,6 +49,19 @@
 			</button>
 		</WarningBanner>
 	</div>
+	<div
+			class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		>
+		<div
+			class="border-info-solid bg-info-subtle-10 text-info-primary inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-2 text-xs font-bold sm:w-fit md:text-base"
+		>
+			<IconInfo></IconInfo>
+			<span class="w-full px-2"><Html text={$i18n.core.warning.standalone_mode} /></span>
+			<button aria-label={$i18n.core.text.close} onclick={closeAwsTemporaryBanner}>
+				<IconClose />
+			</button>
+		</div>
+	</div>
 {/if}
 
 <style lang="scss">
