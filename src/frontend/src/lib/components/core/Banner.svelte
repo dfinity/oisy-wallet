@@ -30,8 +30,6 @@
 	</div>
 {/if}
 
-<!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-
 <style lang="scss">
 	div.test-banner {
 		position: fixed;
