@@ -1,11 +1,8 @@
-import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.constants';
-import { authSignedIn } from '$lib/derived/auth.derived';
 import { Languages } from '$lib/enums/languages';
 import en from '$lib/i18n/en.json';
-import { trackEvent } from '$lib/services/analytics.services';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
-import { get as getStore, writable, type Readable } from 'svelte/store';
+import { writable, type Readable } from 'svelte/store';
 
 export const enI18n = (): I18n => ({
 	...en,
@@ -39,20 +36,10 @@ export interface I18nStore extends Readable<I18n> {
 const initI18n = (): I18nStore => {
 	const { subscribe, set } = writable<I18n>(enI18n());
 
-	const switchLang = async ({ lang, track = true }: { lang: Languages; track?: boolean }) => {
+	const switchLang = async (lang: Languages) => {
 		const language = await loadLang(lang);
 
 		set(language);
-
-		if (track) {
-			trackEvent({
-				name: TRACK_CHANGE_LANGUAGE,
-				metadata: {
-					language: lang,
-					source: getStore(authSignedIn) ? 'app' : 'landing-page'
-				}
-			});
-		}
 
 		saveLang(lang);
 	};
@@ -69,10 +56,10 @@ const initI18n = (): I18nStore => {
 				return;
 			}
 
-			await switchLang({ lang, track: false });
+			await switchLang(lang);
 		},
 
-		switchLang: (lang: Languages) => switchLang({ lang })
+		switchLang: (lang: Languages) => switchLang(lang)
 	};
 };
 
