@@ -13,7 +13,9 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
-	NFT = 'nft'
+	NFT = 'nft',
+	NFT_COLLECTION_PAGE = 'nft-collection-page',
+	NFT_PAGE = 'nft-page'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {

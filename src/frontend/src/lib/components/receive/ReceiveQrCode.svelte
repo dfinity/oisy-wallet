@@ -38,13 +38,13 @@
 			})}
 		>
 			<QRCode value={address}>
-				<svelte:fragment slot="logo">
+				{#snippet logo()}
 					{#if nonNullish(addressToken)}
 						<div class="flex items-center justify-center rounded-lg bg-primary p-2">
 							<TokenLogo data={addressToken} />
 						</div>
 					{/if}
-				</svelte:fragment>
+				{/snippet}
 			</QRCode>
 		</article>
 	{/if}
