@@ -57,7 +57,7 @@
 		});
 
 		const url = nftsUrl({ collection: collection.collection, fromRoute });
-		if (url) {
+		if (nonNullish(url)) {
 			goto(url);
 		}
 	};

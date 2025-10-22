@@ -65,7 +65,7 @@
 			});
 
 			const url = nftsUrl({ nft, fromRoute });
-			if (url) {
+			if (nonNullish(url)) {
 				goto(url);
 			}
 		}

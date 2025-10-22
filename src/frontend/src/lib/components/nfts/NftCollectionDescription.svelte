@@ -40,7 +40,7 @@
 
 	const gotoCollection = (): void => {
 		const url = nftsUrl({ collection, fromRoute });
-		if (url) {
+		if (nonNullish(url)) {
 			goto(url);
 		}
 	};
