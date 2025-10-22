@@ -23,6 +23,7 @@ import {
 	type Nft as AlchemyNft,
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
+import { Alchemy, NftSpamClassification, NftTokenType, type OwnedNftsResponse } from 'alchemy-sdk';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
