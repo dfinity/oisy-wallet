@@ -4,6 +4,7 @@ import {
 	approve,
 	balance,
 	getBlocks,
+	getMintingAccount,
 	icrc1SupportedStandards,
 	metadata,
 	transactionFee,
@@ -559,6 +560,45 @@ describe('icrc-ledger.api', () => {
 
 		it('throws an error if identity is undefined', async () => {
 			await expect(icrc1SupportedStandards({ ...params, identity: undefined })).rejects.toThrow();
+		});
+	});
+
+	describe('getMintingAccount', () => {
+		const params = {
+			certified: true,
+			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
+			identity: mockIdentity
+		};
+
+		const candidAccount = { owner: mockPrincipal, subaccount: toNullable([1, 2, 3]) };
+		const expectedAccount = { owner: mockPrincipal, subaccount: [1, 2, 3] };
+
+		beforeEach(() => {
+			ledgerCanisterMock.getMintingAccount.mockResolvedValue(toNullable(candidAccount));
+		});
+
+		it('successfully calls getMintingAccount endpoint', async () => {
+			const result = await getMintingAccount(params);
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
+		});
+
+		it('successfully calls getMintingAccount endpoint as query', async () => {
+			const result = await getMintingAccount({ ...params, certified: false });
+
+			expect(result).toEqual(expectedAccount);
+
+			expect(ledgerCanisterMock.getMintingAccount).toHaveBeenCalledExactlyOnceWith({
+				certified: false
+			});
+		});
+
+		it('throws an error if identity is undefined', async () => {
+			await expect(getMintingAccount({ ...params, identity: undefined })).rejects.toThrow();
 		});
 	});
 });

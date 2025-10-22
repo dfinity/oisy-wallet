@@ -1,8 +1,16 @@
-import { getApyOverall, getPosition, manageStakePosition } from '$icp/api/gldt_stake.api';
+import {
+	getApyOverall,
+	getDailyAnalytics,
+	getPosition,
+	manageStakePosition
+} from '$icp/api/gldt_stake.api';
 import { GldtStakeCanister } from '$icp/canisters/gldt_stake.canister';
 import * as appConstants from '$lib/constants/app.constants';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
-import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
+import {
+	dailyAnalyticsMockResponse,
+	stakePositionMockResponse
+} from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mock } from 'vitest-mock-extended';
@@ -36,6 +44,28 @@ describe('gldt_stake.api', () => {
 
 		it('throws an error if the gldt_stake canister getApyOverall method called without identity', async () => {
 			const res = getApyOverall({
+				identity: null
+			});
+
+			await expect(res).rejects.toThrow();
+		});
+	});
+
+	describe('getDailyAnalytics', () => {
+		it('correctly calls the gldt_stake canister getDailyAnalytics method', async () => {
+			mockAuthStore();
+			gldtStakeCanisterMock.getDailyAnalytics.mockResolvedValue(dailyAnalyticsMockResponse);
+
+			const result = await getDailyAnalytics({
+				identity: mockIdentity
+			});
+
+			expect(gldtStakeCanisterMock.getDailyAnalytics).toHaveBeenCalledOnce();
+			expect(result).toBe(dailyAnalyticsMockResponse);
+		});
+
+		it('throws an error if the gldt_stake canister getDailyAnalytics method called without identity', async () => {
+			const res = getDailyAnalytics({
 				identity: null
 			});
 

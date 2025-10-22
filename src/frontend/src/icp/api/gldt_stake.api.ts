@@ -1,4 +1,6 @@
 import type {
+	Args_2,
+	DailyAnalytics,
 	ManageStakePositionArgs,
 	StakePositionResponse
 } from '$declarations/gldt_stake/declarations/gldt_stake.did';
@@ -14,6 +16,15 @@ export const getApyOverall = async ({ identity }: CanisterApiFunctionParams): Pr
 	const { getApyOverall } = await gldtStakeCanister({ identity });
 
 	return getApyOverall();
+};
+
+export const getDailyAnalytics = async ({
+	identity,
+	analyticsParams
+}: CanisterApiFunctionParams<{ analyticsParams?: Args_2 }>): Promise<DailyAnalytics> => {
+	const { getDailyAnalytics } = await gldtStakeCanister({ identity });
+
+	return getDailyAnalytics(analyticsParams);
 };
 
 export const manageStakePosition = async ({

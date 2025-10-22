@@ -51,7 +51,7 @@
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_COLLECTION_PAGE,
 				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
 				token_network: previewNft.collection.network.name,
 				token_address: previewNft.collection.address,

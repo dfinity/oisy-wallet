@@ -6,6 +6,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Identity } from '@dfinity/agent';
 import {
 	IcrcLedgerCanister,
+	fromCandidAccount,
 	toCandidAccount,
 	type GetBlocksParams,
 	type IcrcAccount,
@@ -17,7 +18,7 @@ import {
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
 import { Principal } from '@dfinity/principal';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
 
 /**
  * Retrieves metadata for the ICRC token.
@@ -243,6 +244,23 @@ export const icrc1SupportedStandards = async ({
 	const { icrc1SupportedStandards } = await ledgerCanister({ identity, ledgerCanisterId });
 
 	return icrc1SupportedStandards({ certified });
+};
+
+export const getMintingAccount = async ({
+	certified = true,
+	identity,
+	ledgerCanisterId
+}: {
+	identity: OptionIdentity;
+	ledgerCanisterId: CanisterIdText;
+} & QueryParams): Promise<IcrcAccount | undefined> => {
+	assertNonNullish(identity);
+
+	const { getMintingAccount } = await ledgerCanister({ identity, ledgerCanisterId });
+
+	const account = await getMintingAccount({ certified });
+
+	return fromCandidAccount(fromDefinedNullable(account));
 };
 
 const ledgerCanister = async ({
