@@ -7,15 +7,15 @@
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
 	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { Languages } from '$lib/enums/languages';
+	import type { Languages } from '$lib/enums/languages';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let dropdown = $state<Dropdown>();
 
 	const currentLang: string = $derived(LANGUAGES[$currentLanguage]);
 
-	const handleLangChange = (lang: string) => {
-		i18n.switchLang(Languages[lang as keyof typeof Languages]);
+	const handleLangChange = async (lang: Languages) => {
+		await i18n.switchLang(lang);
 		dropdown?.close();
 	};
 </script>
@@ -42,7 +42,7 @@
 							alignLeft
 							colorStyle="tertiary-alt"
 							fullWidth
-							onclick={() => handleLangChange(langKey)}
+							onclick={() => handleLangChange(langVal)}
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
 							transparent

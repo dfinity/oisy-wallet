@@ -3,7 +3,7 @@ export enum PLAUSIBLE_EVENTS {
 	NFT_CATEGORIZE = 'nft_categorize',
 	PAGE_OPEN = 'page_open',
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
-	NFT_MEDIA_CONSENT = 'nft_media_consent',
+	MEDIA_CONSENT = 'media_consent',
 	OPEN_MODAL = 'open_modal'
 }
 
@@ -13,7 +13,9 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
-	NFT = 'nft'
+	NFT = 'nft',
+	NFT_COLLECTION_PAGE = 'nft-collection-page',
+	NFT_PAGE = 'nft-page'
 }
 
 export enum PLAUSIBLE_EVENT_SOURCES {
