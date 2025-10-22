@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -38,15 +39,8 @@
 	const previewNft = $derived(
 		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
 	);
-</script>
 
-<a
-	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
-	class:cursor-not-allowed={disabled}
-	class:hover:-translate-y-1={!disabled}
-	class:hover:bg-primary={!disabled}
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
-	onclick={() => {
+	const onClick = () => {
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
@@ -59,9 +53,19 @@
 				token_name: previewNft.collection.name ?? ''
 			}
 		});
-	}}
+
+		goto(`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`);
+	};
+</script>
+
+<button
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
+	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
+	onclick={onClick}
 >
-	<div class="relative h-full w-full">
+	<span class="relative block h-full w-full">
 		<NftDisplayGuard
 			location={{
 				source: PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE,
@@ -106,9 +110,9 @@
 				testId={`${testId}-network`}
 			/>
 		</span>
-	</div>
+	</span>
 
-	<div class="flex w-full flex-col gap-1 px-2 pb-2">
+	<span class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
@@ -119,5 +123,5 @@
 				$count: String(collection.nfts.length)
 			})}</span
 		>
-	</div>
-</a>
+	</span>
+</button>
