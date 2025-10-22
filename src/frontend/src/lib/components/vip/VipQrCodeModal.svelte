@@ -83,7 +83,7 @@
 	const qrCodeUrl = $derived(`${window.location.origin}/?code=${code}`);
 </script>
 
-<svelte:window on:visibilitychange={onVisibilityChange} />
+<svelte:window onvisibilitychange={onVisibilityChange} />
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
