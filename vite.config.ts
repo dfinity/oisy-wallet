@@ -48,7 +48,7 @@ const config: UserConfig = {
 						return 'lazy';
 					}
 
-					return;
+					return 'index';
 				}
 			},
 			// Polyfill Buffer for production build
