@@ -22,6 +22,20 @@
 			}
 		</script>
 
+		<!-- Init language as fast as possible -->
+		<script language-loader>
+			try {
+				const currentLanguage =
+					localStorage.lang === null || localStorage.lang === undefined || localStorage.lang === ''
+						? undefined
+						: JSON.parse(localStorage.lang);
+
+				document.documentElement.setAttribute('lang', currentLanguage ?? 'en');
+			} catch (error) {
+				console.error('Error initializing language', error);
+			}
+		</script>
+
 		<style>
 			:root {
 				&,
