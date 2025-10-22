@@ -54,12 +54,6 @@ const initI18n = (): I18nStore => {
 		init: async () => {
 			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
 
-			if (lang === getDefaultLang()) {
-				saveLang(lang);
-				// No need to reload the store, store is already initialised with the default
-				return;
-			}
-
 			await switchLang(lang);
 		},
 
