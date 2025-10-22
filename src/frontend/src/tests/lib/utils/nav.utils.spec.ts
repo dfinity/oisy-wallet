@@ -344,6 +344,50 @@ describe('nav.utils', () => {
 
 			vi.unstubAllGlobals();
 		});
+
+		it('should correctly parse collection and nft params when present', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((key) => {
+							switch (key) {
+								case COLLECTION_PARAM:
+									return '0x123abc';
+								case NFT_PARAM:
+									return '42';
+								default:
+									return null;
+							}
+						})
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: '0x123abc',
+				[NFT_PARAM]: '42'
+			});
+		});
+
+		it('should return null for collection and nft when not present', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn(
+							() =>
+								// explicitly return null for all keys
+								null
+						)
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result[COLLECTION_PARAM]).toBeNull();
+			expect(result[NFT_PARAM]).toBeNull();
+		});
 	});
 
 	describe('resetRouteParams', () => {
