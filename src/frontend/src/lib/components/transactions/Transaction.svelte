@@ -102,7 +102,7 @@
 		// In that case, it will not be in the nftStore anymore.
 		// So we cannot find it and render the image in the transaction list.
 		// However, we prefer to always show it, so we try and fetch the metadata anyway.
-		if (isNullish(nft)) {
+		if (isNullish(existingNft)) {
 			const { getNftMetadata } = alchemyProviders(network.id);
 
 			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
