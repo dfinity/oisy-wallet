@@ -41,6 +41,8 @@ const initI18n = (): I18nStore => {
 
 		set(language);
 
+		document.documentElement.setAttribute('lang', lang);
+
 		saveLang(lang);
 	};
 
