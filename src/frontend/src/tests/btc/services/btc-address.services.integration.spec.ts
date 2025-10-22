@@ -1,5 +1,5 @@
-import type { Identity } from '@icp-sdk/core/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 
 // These tests are done with real addresses from our test wallets
