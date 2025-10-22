@@ -219,7 +219,7 @@ describe('i18n-utils', () => {
 		});
 
 		it('returns FRENCH when browser language is fr-CH', () => {
-			mockNavigatorLanguage('fr-FRCH');
+			mockNavigatorLanguage('fr-CH');
 
 			expect(getDefaultLang()).toBe(Languages.FRENCH);
 		});

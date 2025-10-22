@@ -117,6 +117,9 @@ export interface RouteParams {
 	[NETWORK_PARAM]: OptionString;
 	// WalletConnect URI parameter
 	[URI_PARAM]: OptionString;
+	// NFT URI parameters
+	[NFT_PARAM]: OptionString;
+	[COLLECTION_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -124,7 +127,9 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			[TOKEN_PARAM]: undefined,
 			[NETWORK_PARAM]: undefined,
-			[URI_PARAM]: undefined
+			[URI_PARAM]: undefined,
+			[NFT_PARAM]: undefined,
+			[COLLECTION_PARAM]: undefined
 		};
 	}
 
@@ -149,12 +154,16 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	return {
 		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
-		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null
+		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
+		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
+		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM)
 	};
 };
 
 export const resetRouteParams = (): RouteParams => ({
 	[TOKEN_PARAM]: null,
+	[NFT_PARAM]: null,
+	[COLLECTION_PARAM]: null,
 	[NETWORK_PARAM]: null,
 	[URI_PARAM]: null
 });

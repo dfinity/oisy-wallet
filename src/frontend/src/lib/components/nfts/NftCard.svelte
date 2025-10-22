@@ -133,7 +133,7 @@
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
 			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
 		</span>
-		<span class="text-xs" class:text-tertiary={!disabled}>
+		<span class="truncate text-xs" class:text-tertiary={!disabled}>
 			#{nft.id}
 			{#if source === NFT_LIST_ROUTE}
 				&ndash; {nft.name}

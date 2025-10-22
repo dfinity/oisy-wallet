@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
-			"standalone_mode": "Обновите $oisy_short. Пожалуйста, удалите $oisy_short с главного экрана и переустановите (на iPhone убедитесь, что сняли флажок «Открыть как веб-приложение»).<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>"
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
