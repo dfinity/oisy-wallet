@@ -65,13 +65,13 @@
 		"update:oisy-eslint:next": "npm rm @dfinity/eslint-config-oisy-wallet && npm i @dfinity/eslint-config-oisy-wallet@next -D"
 	},
 	"dependencies": {
-		"@dfinity/ckbtc": "^5.0.0-next-2025-10-22",
-		"@dfinity/cketh": "^5.0.0-next-2025-10-22",
+		"@dfinity/ckbtc": "^5.0.0-next-2025-10-22.4",
+		"@dfinity/cketh": "^5.0.0-next-2025-10-22.4",
 		"@dfinity/gix-components": "^9.0.0-next-2025-10-22",
-		"@dfinity/ledger-icp": "^7.0.0-next-2025-10-22",
-		"@dfinity/ledger-icrc": "^5.0.0-next-2025-10-22",
+		"@dfinity/ledger-icp": "^7.0.0-next-2025-10-22.4",
+		"@dfinity/ledger-icrc": "^5.0.0-next-2025-10-22.4",
 		"@dfinity/oisy-wallet-signer": "^1.1.0-next-2025-10-22.1",
-		"@dfinity/utils": "^4.0.0-next-2025-10-22",
+		"@dfinity/utils": "^4.0.0-next-2025-10-22.4",
 		"@dfinity/verifiable-credentials": "^1.1.0-next-2025-09-26",
 		"@dfinity/zod-schemas": "^3.0.0-next-2025-10-22.1",
 		"@icp-sdk/auth": "^4.1.1",
@@ -101,7 +101,7 @@
 	},
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.2.2",
-		"@dfinity/ic-management": "^8.0.0-next-2025-10-22",
+		"@dfinity/ic-management": "^8.0.0-next-2025-10-22.4",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
 		"@playwright/test": "^1.56.0",
 		"@rollup/plugin-inject": "^5.0.5",
