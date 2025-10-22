@@ -153,7 +153,7 @@ export class AlchemyProvider {
 		},
 		token
 	}: {
-		nft: OwnedNft;
+		nft: Omit<OwnedNft, 'balance'> & Partial<Pick<OwnedNft, 'balance'>>;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
 		const attributes = untypedAttributes as {
