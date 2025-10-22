@@ -3,6 +3,7 @@ export enum Languages {
 	ARABIC = 'ar',
 	CZECH = 'cs',
 	GERMAN = 'de',
+	SPANISH = 'es',
 	FRENCH = 'fr',
 	HINDI = 'hi',
 	ITALIAN = 'it',
@@ -10,7 +11,6 @@ export enum Languages {
 	POLISH = 'pl',
 	PORTUGUESE = 'pt',
 	RUSSIAN = 'ru',
-	SPANISH = 'es',
 	VIETNAMESE = 'vi',
 	CHINESE_SIMPLIFIED = 'zh-CN'
 }
