@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
@@ -17,9 +18,8 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
-	import { filterSortByCollection } from '$lib/utils/nfts.utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollectionUi;

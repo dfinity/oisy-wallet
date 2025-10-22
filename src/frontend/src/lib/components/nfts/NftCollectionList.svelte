@@ -1,9 +1,9 @@
 <script lang="ts">
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import type { Snippet } from 'svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import type { NftCollectionUi } from '$lib/types/nft';
-	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		title: string;
