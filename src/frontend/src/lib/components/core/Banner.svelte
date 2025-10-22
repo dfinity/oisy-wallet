@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { IconClose, IconWarning } from '@dfinity/gix-components';
-	import PwaBanner from '$lib/components/core/PwaBanner.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
