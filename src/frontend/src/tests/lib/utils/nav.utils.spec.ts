@@ -377,7 +377,7 @@ describe('nav.utils', () => {
 				url: {
 					searchParams: {
 						get: vi.fn(
-							(key) =>
+							() =>
 								// explicitly return null for all keys
 								null
 						)
