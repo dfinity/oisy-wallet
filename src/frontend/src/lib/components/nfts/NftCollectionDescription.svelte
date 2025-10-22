@@ -15,12 +15,14 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		collection?: NftCollection;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection }: Props = $props();
+	const { collection, fromRoute }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)

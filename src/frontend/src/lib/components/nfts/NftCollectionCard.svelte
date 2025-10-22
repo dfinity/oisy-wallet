@@ -18,14 +18,16 @@
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		collection: NftCollectionUi;
 		disabled?: boolean;
 		testId?: string;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId }: Props = $props();
+	const { collection, disabled, testId, fromRoute }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({

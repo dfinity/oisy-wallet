@@ -16,13 +16,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		token?: NonFungibleToken;
 		nft?: Nft;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { token, nft }: Props = $props();
+	const { token, nft, fromRoute }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];

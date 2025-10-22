@@ -19,6 +19,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
+	import type { NavigationTarget } from '@sveltejs/kit';
 
 	interface Props {
 		nft: Nft;
@@ -29,6 +30,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
+		fromRoute?: NavigationTarget | null;
 	}
 
 	let {
@@ -39,7 +41,8 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default'
+		source = 'default',
+		fromRoute
 	}: Props = $props();
 
 	const onClick = () => {

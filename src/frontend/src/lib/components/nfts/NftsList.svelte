@@ -22,6 +22,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NftCollectionUi } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 
 	interface CollectionBuckets {
 		common: NftCollectionUi[];
@@ -107,6 +109,12 @@
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
@@ -116,6 +124,7 @@
 		{:else}
 			<NftCollectionList
 				asMainSection
+				{fromRoute}
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -123,6 +132,7 @@
 
 			{#if $showHidden}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={hiddenCollections}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
@@ -135,6 +145,7 @@
 
 			{#if $showSpam}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={spamCollections}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
@@ -155,7 +166,7 @@
 			title={$i18n.nfts.text.all_assets}
 		>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" />
+				<NftCard {fromRoute} {nft} source={NFT_LIST_ROUTE} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -165,7 +176,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard {fromRoute} isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -176,7 +187,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard {fromRoute} isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
