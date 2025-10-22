@@ -1,6 +1,6 @@
 <script lang="ts">
+	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Identity } from '@icp-sdk/core/agent';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/declarations/backend.did';

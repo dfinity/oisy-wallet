@@ -52,7 +52,7 @@
 		"e2e:snapshots:dev": "npm run playwright:install && NODE_ENV=development npx playwright test --update-snapshots=changed --reporter=list",
 		"e2e:report": "npx playwright show-report",
 		"erc20:check": "vite-node scripts/check.tokens.erc20.ts",
-        "update:agent": "npm rm @icp-sdk/{core,auth} && npm i @icp-sdk/{core,auth}",
+		"update:agent": "npm rm @dfinity/{agent,auth-client,candid,principal,identity-secp256k1} && npm i @dfinity/{agent,auth-client,candid,principal} && npm i @dfinity/identity-secp256k1 -D",
 		"update:ic-js": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils} && npm i @dfinity/ic-management -D",
 		"update:ic-js:next": "npm rm @dfinity/{ckbtc,cketh,ic-management,ledger-icp,ledger-icrc,utils} && npm i @dfinity/{ckbtc,cketh,ledger-icp,ledger-icrc,utils}@next && npm i @dfinity/ic-management@next -D",
 		"update:signer": "npm rm @dfinity/oisy-wallet-signer && npm i @dfinity/oisy-wallet-signer",

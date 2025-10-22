@@ -1,4 +1,4 @@
-import type { Principal } from '@icp-sdk/core/principal';
+import type { Principal } from '@dfinity/principal';
 
 export interface XtcLedgerTransferParams {
 	to: Principal;

@@ -1,5 +1,6 @@
 import { REPLICA_HOST } from '$lib/constants/app.constants';
 import type { Option } from '$lib/types/utils';
+import type { Identity } from '@dfinity/agent';
 import {
 	ICRC21_CALL_CONSENT_MESSAGE,
 	ICRC25_REQUEST_PERMISSIONS,
@@ -12,7 +13,6 @@ import {
 } from '@dfinity/oisy-wallet-signer';
 import { Signer } from '@dfinity/oisy-wallet-signer/signer';
 import { isNullish } from '@dfinity/utils';
-import type { Identity } from '@icp-sdk/core/agent';
 import { derived, writable, type Readable } from 'svelte/store';
 
 /**

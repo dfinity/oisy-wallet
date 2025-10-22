@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish, secondsToDuration } from '@dfinity/utils';
-	import type { Principal } from '@icp-sdk/core/principal';
 	import { fade } from 'svelte/transition';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import EnabledNetworksPreviewIcons from '$lib/components/settings/EnabledNetworksPreviewIcons.svelte';

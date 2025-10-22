@@ -29,6 +29,7 @@ import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
+import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import {
 	assertNonNullish,
@@ -38,7 +39,6 @@ import {
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
-import type { Identity } from '@icp-sdk/core/agent';
 
 interface LoadBtcWalletParams extends QueryAndUpdateRequestParams {
 	bitcoinNetwork: BitcoinNetwork;

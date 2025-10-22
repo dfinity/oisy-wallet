@@ -1,7 +1,7 @@
+import { IDL } from '@dfinity/candid';
 import { ICManagementCanister, InstallMode } from '@dfinity/ic-management';
+import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
-import { IDL } from '@icp-sdk/core/candid';
-import { Principal } from '@icp-sdk/core/principal';
 import { copyFile, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { loadLocalIdentity, localAgent } from './utils.mjs';

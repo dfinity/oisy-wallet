@@ -1,5 +1,5 @@
-import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
-import type { Identity } from '@icp-sdk/core/agent';
+import type { Identity } from '@dfinity/agent';
+import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@dfinity/auth-client';
 
 // We use a dedicated storage for the auth client to better manage it, e.g. clear it for a new login
 // @see src/lib/utils/auth.utils.ts safeCreateAuthClient
