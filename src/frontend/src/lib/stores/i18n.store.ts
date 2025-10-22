@@ -26,9 +26,9 @@ const loadLang = async (lang: Languages): Promise<I18n> => {
 	}
 };
 
-const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
-
 const updateHtmlLang = (lang: Languages) => document.documentElement.setAttribute('lang', lang);
+
+const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
 
 export interface I18nStore extends Readable<I18n> {
 	init: () => Promise<void>;
