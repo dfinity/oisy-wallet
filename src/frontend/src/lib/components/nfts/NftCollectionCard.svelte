@@ -128,5 +128,5 @@
 				$count: String(collection.nfts.length)
 			})}</span
 		>
-	</div>
+	</span>
 </button>
