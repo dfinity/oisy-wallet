@@ -26,7 +26,7 @@ const config: UserConfig = {
 				manualChunks: (id) => {
 					const folder = dirname(id);
 
-					if (id.includes(resolve('./src/frontend/src/lib/i18n/')) && id.endsWith('.json')) {
+					if (folder.includes('src/frontend/src/lib/i18n') && id.endsWith('.json')) {
 						return `i18n-${basename(id, '.json')}`;
 					}
 
