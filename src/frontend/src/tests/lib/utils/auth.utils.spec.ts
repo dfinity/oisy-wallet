@@ -1,4 +1,4 @@
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 
 describe('auth utils', () => {
@@ -19,10 +19,10 @@ describe('auth utils', () => {
 			beforeEach(() => {
 				vi.resetModules();
 				vi.resetAllMocks();
-				vi.spyOn(appContants, 'AUTH_ALTERNATIVE_ORIGINS', 'get').mockReturnValue(
+				vi.spyOn(appConstants, 'AUTH_ALTERNATIVE_ORIGINS', 'get').mockReturnValue(
 					alternativeOrigins.join(',')
 				);
-				vi.spyOn(appContants, 'AUTH_DERIVATION_ORIGIN', 'get').mockReturnValue(derivationOrigin);
+				vi.spyOn(appConstants, 'AUTH_DERIVATION_ORIGIN', 'get').mockReturnValue(derivationOrigin);
 			});
 
 			afterEach(() => {
@@ -50,8 +50,8 @@ describe('auth utils', () => {
 			beforeEach(() => {
 				vi.resetModules();
 				vi.resetAllMocks();
-				vi.spyOn(appContants, 'AUTH_ALTERNATIVE_ORIGINS', 'get').mockReturnValue('');
-				vi.spyOn(appContants, 'AUTH_DERIVATION_ORIGIN', 'get').mockReturnValue(derivationOrigin);
+				vi.spyOn(appConstants, 'AUTH_ALTERNATIVE_ORIGINS', 'get').mockReturnValue('');
+				vi.spyOn(appConstants, 'AUTH_DERIVATION_ORIGIN', 'get').mockReturnValue(derivationOrigin);
 			});
 
 			afterEach(() => {

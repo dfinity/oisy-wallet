@@ -11,15 +11,19 @@
 	import ExternalLinkIcon from '$lib/components/ui/ExternalLinkIcon.svelte';
 	import ImgBanner from '$lib/components/ui/ImgBanner.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.contants';
+	import { TRACK_COUNT_DAPP_MODAL_OPEN_HYPERLINK } from '$lib/constants/analytics.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OisyDappDescription } from '$lib/types/dapp-description';
-	import type { Option } from '$lib/types/utils';
 	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils';
 
-	export let dAppDescription: OisyDappDescription;
-	$: ({
+	interface Props {
+		dAppDescription: OisyDappDescription;
+	}
+
+	let { dAppDescription }: Props = $props();
+
+	let {
 		id: dappId,
 		website,
 		screenshots,
@@ -32,15 +36,16 @@
 		callToAction,
 		telegram,
 		openChat
-	} = dAppDescription);
+	} = $derived(dAppDescription);
 
-	let websiteURL: Option<URL>;
-	$: try {
-		// TODO: use URL.parse
-		websiteURL = new URL(website);
-	} catch (_err: unknown) {
-		websiteURL = null;
-	}
+	let websiteURL = $derived.by(() => {
+		try {
+			// TODO: use URL.parse
+			return new URL(website);
+		} catch (_err: unknown) {
+			return null;
+		}
+	});
 </script>
 
 <Modal onClose={modalStore.close}>

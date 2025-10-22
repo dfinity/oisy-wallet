@@ -8,10 +8,10 @@ import { get } from 'svelte/store';
 
 describe('page-nft.derived', () => {
 	const mockNft1 = mockValidErc1155Nft;
-	const mockNft2 = { ...mockValidErc1155Nft, id: parseNftId(837364) };
+	const mockNft2 = { ...mockValidErc1155Nft, id: parseNftId('837364') };
 	const mockNft3 = {
 		...mockValidErc1155Nft,
-		id: parseNftId(376428),
+		id: parseNftId('376428'),
 		balance: 5,
 		collection: {
 			...mockValidErc1155Nft.collection,

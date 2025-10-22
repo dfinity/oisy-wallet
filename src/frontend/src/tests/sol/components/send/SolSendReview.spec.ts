@@ -1,5 +1,6 @@
 import { SOLANA_MAINNET_NETWORK } from '$env/networks/networks.sol.env';
 import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
+import { ZERO } from '$lib/constants/app.constants';
 import { REVIEW_FORM_SEND_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext } from '$lib/stores/send.store';
 import SolSendReview from '$sol/components/send/SolSendReview.svelte';
@@ -14,7 +15,9 @@ describe('SolSendReview', () => {
 	const props = {
 		destination: mockAtaAddress,
 		amount: 22_000,
-		network: SOLANA_MAINNET_NETWORK
+		network: SOLANA_MAINNET_NETWORK,
+		onBack: vi.fn(),
+		onSend: vi.fn()
 	};
 	const toolbarSelector = 'div[data-tid="toolbar"]';
 	const mockFeeStore = initFeeStore();
@@ -43,7 +46,8 @@ describe('SolSendReview', () => {
 				ataFeeStore: mockAtaFeeStore,
 				feeSymbolStore: writable(SOLANA_TOKEN.symbol),
 				feeDecimalsStore: writable(SOLANA_TOKEN.decimals),
-				feeTokenIdStore: writable(SOLANA_TOKEN.id)
+				feeTokenIdStore: writable(SOLANA_TOKEN.id),
+				feeExchangeRateStore: writable(9.87)
 			})
 		);
 	});
@@ -90,7 +94,7 @@ describe('SolSendReview', () => {
 		const insufficientFundsForFeeTestId = 'sol-send-form-insufficient-funds-for-fee';
 		const buttonTestId = REVIEW_FORM_SEND_BUTTON;
 
-		mockFeeStore.setFee(0n);
+		mockFeeStore.setFee(ZERO);
 
 		const { getByTestId } = render(SolSendReview, {
 			props: {

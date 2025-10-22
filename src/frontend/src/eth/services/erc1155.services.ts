@@ -1,6 +1,7 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
+import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers';
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
@@ -98,9 +99,8 @@ const loadCustomTokensWithMetadata = async (
 						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 					);
 
-					const metadata = await infuraErc1155Providers(network.id).metadata({
-						address: tokenAddress
-					});
+					const { getContractMetadata } = alchemyProviders(network.id);
+					const metadata = await getContractMetadata(tokenAddress);
 
 					return {
 						...{

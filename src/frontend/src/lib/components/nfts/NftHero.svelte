@@ -4,13 +4,15 @@
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
+	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
@@ -47,15 +49,30 @@
 <div class="relative overflow-hidden rounded-xl" in:fade>
 	<div class="relative h-64 w-full overflow-hidden">
 		<div class="absolute h-full w-full">
-			<NftImageConsent {nft} showMessage={false} type="hero-banner">
+			<NftDisplayGuard
+				location={{
+					source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+					subSource: 'hero'
+				}}
+				{nft}
+				showMessage={false}
+				type="hero-banner"
+			>
 				<BgImg imageUrl={nft?.imageUrl} size="cover" styleClass=" blur" />
-			</NftImageConsent>
+			</NftDisplayGuard>
 		</div>
 
 		{#if nonNullish(nft?.imageUrl)}
 			<div class="absolute flex h-full w-full items-center justify-center text-center">
 				<div class="relative flex h-[90%] overflow-hidden rounded-xl border-2 border-off-white">
-					<NftImageConsent {nft} type="nft-display">
+					<NftDisplayGuard
+						location={{
+							source: PLAUSIBLE_EVENT_SOURCES.NFT_PAGE,
+							subSource: 'hero'
+						}}
+						{nft}
+						type="nft-display"
+					>
 						<button
 							class="block h-auto w-auto border-0"
 							onclick={() =>
@@ -66,7 +83,7 @@
 						>
 							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
 						</button>
-					</NftImageConsent>
+					</NftDisplayGuard>
 					<span class="absolute bottom-0 right-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
@@ -97,6 +114,12 @@
 			</span>
 		{/if}
 
-		<NftMetadataList {nft} />
+		{#if nonNullish(nft?.description)}
+			<div class="mb-5 text-sm">
+				<ExpandText maxWords={20} text={nft.description} />
+			</div>
+		{/if}
+
+		<NftMetadataList {nft} source={PLAUSIBLE_EVENT_SOURCES.NFT_PAGE} />
 	</div>
 </div>

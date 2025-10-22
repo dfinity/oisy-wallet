@@ -8,7 +8,6 @@ import {
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import * as nftsUtils from '$lib/utils/nfts.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
@@ -21,12 +20,9 @@ describe('NftCollectionHero', () => {
 
 	const mockToken: NonFungibleToken = {
 		...AZUKI_ELEMENTAL_BEANS_TOKEN,
-		network: POLYGON_MAINNET_NETWORK
+		network: POLYGON_MAINNET_NETWORK,
+		description: 'Some descriptive text'
 	};
-
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
 
 	it('should render the collection data', async () => {
 		const { container, getByText, getAllByText } = render(NftCollectionHero, {
@@ -43,6 +39,10 @@ describe('NftCollectionHero', () => {
 		names.forEach((n) => {
 			expect(n).toBeInTheDocument();
 		});
+
+		const description: HTMLElement | null = getByText(mockToken.description as string);
+
+		expect(description).toBeInTheDocument();
 
 		const standard: HTMLElement | null = getByText(mockToken.standard);
 

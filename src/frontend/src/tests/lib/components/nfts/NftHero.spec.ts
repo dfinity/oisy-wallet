@@ -1,11 +1,11 @@
 import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
+import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import type { OptionString } from '$lib/types/string';
-import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import * as nftsUtils from '$lib/utils/nfts.utils';
+import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
@@ -20,14 +20,10 @@ describe('NftHero', () => {
 
 	const openSendSpy = vi.spyOn(modalStore, 'openSend');
 
-	beforeAll(() => {
-		vi.spyOn(nftsUtils, 'getAllowMediaForNft').mockReturnValue(true);
-	});
-
 	it('should render the nft data', () => {
 		const { getByText } = render(NftHero, {
 			props: {
-				nft: mockValidErc1155Nft
+				nft: { ...mockValidErc1155Nft, description: 'Test description about the NFT' }
 			}
 		});
 
@@ -38,6 +34,12 @@ describe('NftHero', () => {
 		);
 
 		expect(name).toBeInTheDocument();
+
+		const description: HTMLElement | null = getByText('Test description about the NFT');
+
+		assertNonNullish(description);
+
+		expect(description).toBeInTheDocument();
 
 		const standard: HTMLElement | null = getByText(mockNftollectionUi.collection.standard);
 
@@ -52,6 +54,25 @@ describe('NftHero', () => {
 		const network: HTMLElement | null = getByText(mockNftollectionUi.collection.network.name);
 
 		expect(network).toBeInTheDocument();
+
+		assertNonNullish(mockValidErc1155Nft.imageUrl);
+
+		const imageUrl: HTMLElement | null = getByText(
+			shortenWithMiddleEllipsis({ text: mockValidErc1155Nft.imageUrl, splitLength: 20 })
+		);
+
+		expect(imageUrl).toBeInTheDocument();
+
+		assertNonNullish(mockValidErc1155Nft.acquiredAt);
+
+		const acquired_at: HTMLElement | null = getByText(
+			formatSecondsToDate({
+				seconds: mockValidErc1155Nft.acquiredAt.getTime() / 1000,
+				language: get(currentLanguage)
+			})
+		);
+
+		expect(acquired_at).toBeInTheDocument();
 
 		mockValidErc1155Nft.attributes?.forEach((attr) => {
 			const attrTypeEl: HTMLElement | null = getByText(attr.traitType);

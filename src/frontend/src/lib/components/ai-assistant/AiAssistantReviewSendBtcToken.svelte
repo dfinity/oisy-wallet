@@ -22,7 +22,7 @@
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
 		TRACK_COUNT_BTC_VALIDATION_ERROR
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		AI_ASSISTANT_SEND_TOKENS_BUTTON,
@@ -31,7 +31,6 @@
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -122,7 +121,6 @@
 		};
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -178,7 +176,7 @@
 
 			// Handle BtcValidationError with specific toastsError for each type
 			if (err instanceof BtcValidationError) {
-				await handleBtcValidationError({ err });
+				handleBtcValidationError({ err });
 			}
 
 			trackEvent({

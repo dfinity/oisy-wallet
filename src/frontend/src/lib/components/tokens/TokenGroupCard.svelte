@@ -10,15 +10,19 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenGroupStore } from '$lib/stores/token-group.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
-	import type { TokenUi } from '$lib/types/token';
 	import type { CardData } from '$lib/types/token-card';
-	import type { TokenUiGroup } from '$lib/types/token-group';
+	import type { TokenUi } from '$lib/types/token-ui';
+	import type { TokenUiGroup } from '$lib/types/token-ui-group';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { mapHeaderData } from '$lib/utils/token-card.utils';
 	import { getFilteredTokenGroup } from '$lib/utils/token-list.utils.js';
 
-	let { tokenGroup }: { tokenGroup: TokenUiGroup } = $props();
+	interface Props {
+		tokenGroup: TokenUiGroup;
+	}
+
+	let { tokenGroup }: Props = $props();
 
 	const isExpanded: boolean = $derived(
 		($tokenGroupStore ?? {})[tokenGroup.id]?.isExpanded ?? false
@@ -87,19 +91,19 @@
 				tokenCount: filteredTokens.length,
 				networks: filteredTokens.map((t) => t.network)
 			}}
+			onClick={() => toggleIsExpanded(!isExpanded)}
 			testIdPrefix={TOKEN_GROUP}
-			on:click={() => toggleIsExpanded(!isExpanded)}
 		/>
 	</div>
 
 	{#if isExpanded}
 		<div class="ml-0 flex flex-col gap-1.5 p-2 md:ml-16" transition:slide={SLIDE_PARAMS}>
-			{#each tokensToShow as token (token.id)}
+			{#each tokensToShow as token (token.id.description)}
 				<div
 					class="duration-250 flex overflow-hidden rounded-lg bg-secondary transition hover:bg-brand-subtle-10"
 					transition:slide={SLIDE_PARAMS}
 				>
-					<TokenCard asNetwork data={token} on:click={() => goto(transactionsUrl({ token }))} />
+					<TokenCard asNetwork data={token} onClick={() => goto(transactionsUrl({ token }))} />
 				</div>
 			{/each}
 

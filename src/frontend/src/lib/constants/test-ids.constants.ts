@@ -22,6 +22,7 @@ export const LOCK_BUTTON = 'lock-button';
 export const MAX_BUTTON = 'max-button';
 
 export const LOADER_MODAL = 'loader-modal';
+export const POW_PROTECTOR_MODAL = 'pow-protector-modal';
 export const BUTTON_MODAL_CLOSE = 'close-modal';
 
 export const MODAL_TITLE = 'modal-title';
@@ -45,6 +46,9 @@ export const NFT_LIST_COMMON = 'nft-list-common';
 export const NFT_LIST_HIDDEN = 'nft-list-hidden';
 export const NFT_LIST_SPAM = 'nft-list-spam';
 export const NFT_ACTION_SEND = 'nft-action-send';
+export const NFT_PLACEHOLDER_INVALID = 'nft-placeholder-invalid';
+export const NFT_PLACEHOLDER_FILESIZE = 'nft-placeholder-filesize';
+export const NFT_PLACEHOLDER_UNSUPPORTED = 'nft-placeholder-unsupported';
 
 export const ABOUT_WHY_OISY_BUTTON = 'about-why-oisy-modal-open-button';
 export const ABOUT_WHY_OISY_MODAL = 'about-why-oisy-modal';
@@ -183,6 +187,7 @@ export const REFERRAL_STATE_MODAL_SHARE_ANCHOR = 'referral-state-modal-share-anc
 export const NO_TRANSACTIONS_PLACEHOLDER = 'no-transactions-placeholder';
 
 export const ACTIVITY_TRANSACTION_SKELETON_PREFIX = 'all-transactions-skeleton-card';
+export const TRANSACTIONS_DATE_GROUP_PREFIX = 'transactions-date-group-';
 
 export const BTC_CONVERT_FORM_TEST_ID = 'btc-convert-form-test-id';
 export const IC_CONVERT_FORM_TEST_ID = 'ic-convert-form-test-id';
@@ -294,6 +299,17 @@ export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkb
 export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
 	'agreements-modal-checkbox-license-agreement';
 export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
+export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
+export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 
 // UI components
 export const DATE_BADGE_ICON = 'date-badge-icon';
+
+// Confirmation modal
+export const CONFIRMATION_MODAL = 'confirmation-modal';
+
+// Stake
+export const STAKE_REVIEW_FORM_BUTTON = 'stake-review-form-button';
+export const STAKE_FORM_REVIEW_BUTTON = 'stake-form-next-button';
+export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
+export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';

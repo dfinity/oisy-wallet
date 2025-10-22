@@ -2,7 +2,7 @@ import type {
 	AccountSnapshot_Any,
 	Transaction_Any,
 	UserSnapshot
-} from '$declarations/rewards/rewards.did';
+} from '$declarations/rewards/declarations/rewards.did';
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import { ICRC_LEDGER_CANISTER_TESTNET_IDS } from '$env/networks/networks.icrc.env';
@@ -364,12 +364,24 @@ describe('user-snapshot.services', () => {
 			expect(registerAirdropRecipient).not.toHaveBeenCalled();
 		});
 
-		it('should do nothing if no exchange rates are found', async () => {
+		it('should send exchange rate 0 if no exchange rates are found', async () => {
 			vi.spyOn(exchangeDerived, 'exchanges', 'get').mockImplementation(() => readable({}));
 
 			await registerUserSnapshot();
 
-			expect(registerAirdropRecipient).not.toHaveBeenCalled();
+			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+				userSnapshot: {
+					...userSnapshot,
+					accounts: [
+						{ Any: { ...icpAccount[0].Any, approx_usd_per_token: 0 } },
+						{ Any: { ...ethMainnetAccounts[0].Any, approx_usd_per_token: 0 } },
+						{ Any: { ...icrcAccounts[0].Any, approx_usd_per_token: 0 } },
+						{ Any: { ...solMainnetAccounts[0].Any, approx_usd_per_token: 0 } },
+						{ Any: { ...solMainnetAccounts[1].Any, approx_usd_per_token: 0 } }
+					]
+				},
+				identity: mockIdentity
+			});
 		});
 
 		it('should handle multiple tokens and send correct snapshots', async () => {

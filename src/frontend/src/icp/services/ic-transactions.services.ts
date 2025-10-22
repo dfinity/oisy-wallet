@@ -9,7 +9,7 @@ import { mapTransactionIcpToSelf } from '$icp/utils/icp-transactions.utils';
 import { mapTransactionIcrcToSelf } from '$icp/utils/icrc-transactions.utils';
 import { isTokenIcrc } from '$icp/utils/icrc.utils';
 import { isNotIcToken, isNotIcTokenCanistersStrict } from '$icp/validation/ic-token.validation';
-import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { balancesStore } from '$lib/stores/balances.store';
 import { i18n } from '$lib/stores/i18n.store';

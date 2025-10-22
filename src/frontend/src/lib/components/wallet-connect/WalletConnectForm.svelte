@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { QRCodeReader } from '@dfinity/gix-components';
-	import { createEventDispatcher } from 'svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
@@ -8,12 +7,18 @@
 	import {
 		TRACK_COUNT_WALLET_CONNECT,
 		TRACK_COUNT_WALLET_CONNECT_QR_CODE
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 
-	let renderQRCodeReader = false;
+	interface Props {
+		onConnect: (uri: string) => void;
+	}
+
+	let { onConnect }: Props = $props();
+
+	let renderQRCodeReader = $state(false);
 
 	const error = () => {
 		renderQRCodeReader = false;
@@ -23,12 +28,9 @@
 		});
 	};
 
-	let uri = '';
+	let uri = $state('');
 
-	let invalid = true;
-	$: invalid = !uri;
-
-	const dispatch = createEventDispatcher();
+	let invalid = $derived(!uri);
 
 	const connect = (): 'success' | 'error' => {
 		if (!uri) {
@@ -38,7 +40,7 @@
 			return 'error';
 		}
 
-		dispatch('icConnect', uri);
+		onConnect(uri);
 
 		return 'success';
 	};

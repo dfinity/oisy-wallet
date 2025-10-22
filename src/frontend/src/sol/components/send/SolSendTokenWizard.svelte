@@ -14,7 +14,7 @@
 	import {
 		TRACK_COUNT_SOL_SEND_ERROR,
 		TRACK_COUNT_SOL_SEND_SUCCESS
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import { ZERO } from '$lib/constants/app.constants';
 	import {
 		solAddressDevnet,
@@ -22,10 +22,10 @@
 		solAddressMainnet
 	} from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -109,6 +109,12 @@
 		feeDecimalsStore.set(solanaNativeToken.decimals);
 	});
 
+	const feeExchangeRateStore = writable<number | undefined>(undefined);
+
+	$effect(() => {
+		feeExchangeRateStore.set($exchanges?.[solanaNativeToken.id]?.usd);
+	});
+
 	setContext<FeeContextType>(
 		SOL_FEE_CONTEXT_KEY,
 		initFeeContext({
@@ -117,7 +123,8 @@
 			ataFeeStore,
 			feeSymbolStore,
 			feeDecimalsStore,
-			feeTokenIdStore
+			feeTokenIdStore,
+			feeExchangeRateStore
 		})
 	);
 
@@ -130,7 +137,6 @@
 
 	const send = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -223,15 +229,17 @@
 </script>
 
 <SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</SolSendForm>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</SolSendForm>
+		{/if}
+	{/key}
 </SolFeeContext>

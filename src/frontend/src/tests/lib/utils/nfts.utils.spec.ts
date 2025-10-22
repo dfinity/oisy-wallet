@@ -4,10 +4,10 @@ import {
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
-import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { NetworkSchema } from '$lib/schema/network.schema';
+import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
-import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
+import type { Nft, NftId } from '$lib/types/nft';
 import {
 	filterSortByCollection,
 	findNewNftIds,
@@ -16,8 +16,8 @@ import {
 	findNftsByToken,
 	findNonFungibleToken,
 	findRemovedNfts,
-	getAllowMediaForNft,
 	getEnabledNfts,
+	getMediaStatus,
 	getNftCollectionUi,
 	getUpdatedNfts,
 	mapTokenToCollection,
@@ -28,7 +28,6 @@ import { NYAN_CAT_TOKEN } from '$tests/mocks/erc1155-tokens.mock';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN, DE_GODS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
-import { assertNonNullish } from '@dfinity/utils';
 
 describe('nfts.utils', () => {
 	const mockNft1: Nft = {
@@ -42,7 +41,7 @@ describe('nfts.utils', () => {
 
 	const mockNft2: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(12632),
+		id: parseNftId('12632'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
@@ -52,7 +51,7 @@ describe('nfts.utils', () => {
 
 	const mockNft3: Nft = {
 		...mockValidErc721Nft,
-		id: parseNftId(843764),
+		id: parseNftId('843764'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			address: DE_GODS_TOKEN.address,
@@ -62,7 +61,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki1 = {
 		...mockValidErc721Nft,
-		id: parseNftId(1),
+		id: parseNftId('1'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -73,7 +72,7 @@ describe('nfts.utils', () => {
 
 	const nftAzuki2 = {
 		...mockValidErc721Nft,
-		id: parseNftId(2),
+		id: parseNftId('2'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -84,7 +83,7 @@ describe('nfts.utils', () => {
 
 	const nftDeGods = {
 		...mockValidErc721Nft,
-		id: parseNftId(3),
+		id: parseNftId('3'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'DeGods',
@@ -95,7 +94,7 @@ describe('nfts.utils', () => {
 
 	const nftOtherNetwork = {
 		...mockValidErc721Nft,
-		id: parseNftId(4),
+		id: parseNftId('4'),
 		collection: {
 			...mockValidErc721Nft.collection,
 			name: 'Azuki Elemental Beans',
@@ -115,11 +114,6 @@ describe('nfts.utils', () => {
 	const azukiName = mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN).name ?? '';
 	const deGodsName = mapTokenToCollection(DE_GODS_TOKEN).name ?? '';
 
-	const filterSub =
-		azukiName && azukiName.length >= 3
-			? azukiName.slice(1, 4).toLowerCase()
-			: azukiName.toLowerCase();
-
 	describe('findNft', () => {
 		it('should return existing nft', () => {
 			const nfts = [mockNft1, mockNft2, mockNft3];
@@ -127,7 +121,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(12632)
+				tokenId: parseNftId('12632')
 			});
 
 			expect(result).toEqual(mockNft2);
@@ -139,7 +133,7 @@ describe('nfts.utils', () => {
 			const result = findNft({
 				nfts,
 				token: AZUKI_ELEMENTAL_BEANS_TOKEN,
-				tokenId: parseNftId(837373)
+				tokenId: parseNftId('837373')
 			});
 
 			expect(result).toBeUndefined();
@@ -310,7 +304,7 @@ describe('nfts.utils', () => {
 	describe('getUpdatedNfts', () => {
 		const mockErc1155Nft1 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(983524),
+			id: parseNftId('983524'),
 			balance: 2,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -320,7 +314,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft2 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(37534),
+			id: parseNftId('37534'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -330,7 +324,7 @@ describe('nfts.utils', () => {
 		};
 		const mockErc1155Nft3 = {
 			...mockValidErc1155Nft,
-			id: parseNftId(823746),
+			id: parseNftId('823746'),
 			balance: 3,
 			collection: {
 				...mockValidErc1155Nft.collection,
@@ -402,7 +396,7 @@ describe('nfts.utils', () => {
 	});
 
 	describe('parseMetadataResourceUrl', () => {
-		const mockError = new NftError(123456, PEPE_TOKEN.address);
+		const mockError = new NftError('123456', PEPE_TOKEN.address);
 
 		it('should raise an error if URL is not a parseable URL', () => {
 			const url = 'invalid-url';
@@ -470,18 +464,24 @@ describe('nfts.utils', () => {
 				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
 				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
-				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description
 			});
 		});
 
-		it('should not map empty name and symbol', () => {
-			const result = mapTokenToCollection({ ...AZUKI_ELEMENTAL_BEANS_TOKEN, name: '', symbol: '' });
+		it('should not map empty name, symbol and description', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN,
+				name: '',
+				symbol: '',
+				description: ''
+			});
 
 			expect(result).toEqual({
 				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
-				network: NetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
 			});
 		});
@@ -551,8 +551,14 @@ describe('nfts.utils', () => {
 				res[0].collection.address === AZUKI_ELEMENTAL_BEANS_TOKEN.address ? res : [res[1], res[0]];
 
 			// collection info matches mapTokenToCollection
-			expect(azukiUi.collection).toEqual(mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN));
-			expect(deGodsUi.collection).toEqual(mapTokenToCollection(DE_GODS_TOKEN));
+			expect(azukiUi.collection).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
+			expect({ ...azukiUi.collection, newestAcquiredAt: new Date(0) }).toEqual({
+				...mapTokenToCollection(AZUKI_ELEMENTAL_BEANS_TOKEN),
+				newestAcquiredAt: new Date(0)
+			});
 
 			// nfts grouped by collection AND network (the ETH one must be excluded)
 			expect(azukiUi.nfts).toEqual([nftAzuki1, nftAzuki2]);
@@ -600,22 +606,77 @@ describe('nfts.utils', () => {
 			return [ui[1], ui[0]];
 		})();
 
-		it('filters by collection name (case-insensitive substring)', () => {
+		it('filters NFTs by collection.name (case-insensitive substring)', () => {
 			const res = filterSortByCollection({
 				items: base,
-				filter: 'azu' // lowercase
+				filter: 'azu' // lowercase substring
 			});
 
 			expect(res).toEqual([nftAzuki2, nftAzuki1]);
 		});
 
-		it('sorts by collection name ascending', () => {
+		it('filters NFTs by nft.name', () => {
+			const custom = { ...nftAzuki1, name: 'Super Special NFT' };
+			const res = filterSortByCollection({
+				items: [custom, nftDeGods],
+				filter: 'special'
+			});
+
+			expect(res).toEqual([custom]);
+		});
+
+		it('filters NFTs by nft.id', () => {
+			const custom = { ...nftAzuki1, id: parseNftId('987654321') };
+			const res = filterSortByCollection({
+				items: [custom, nftDeGods],
+				filter: '987654321'
+			});
+
+			expect(res).toEqual([custom]);
+		});
+
+		it('filters collection UIs by collection.name', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				filter: 'god'
+			});
+
+			expect(res).toHaveLength(1);
+			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
+		});
+
+		it('filters collection UIs by inner nft.name', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
+			const custom = { ...nftAzuki1, name: 'Ultra Rare Azuki' };
+			const ui = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [custom]
+			});
+			const res = filterSortByCollection({ items: ui, filter: 'ultra rare' });
+
+			expect(res).toHaveLength(1);
+			expect(res[0].nfts).toEqual([custom]);
+		});
+
+		it('filters collection UIs by inner nft.id', () => {
+			const tokens = [AZUKI_ELEMENTAL_BEANS_TOKEN];
+			const custom = { ...nftAzuki1, id: parseNftId('123456789') };
+			const ui = getNftCollectionUi({
+				$nonFungibleTokens: tokens,
+				$nftStore: [custom]
+			});
+			const res = filterSortByCollection({ items: ui, filter: '123456789' });
+
+			expect(res).toHaveLength(1);
+			expect(res[0].nfts).toEqual([custom]);
+		});
+
+		it('sorts NFTs by collection name ascending', () => {
 			const res = filterSortByCollection({
 				items: base,
 				sort: { type: 'collection-name', order: 'asc' }
 			});
 
-			// "Azuki..." then "DeGods"
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'Azuki Elemental Beans',
 				'Azuki Elemental Beans',
@@ -623,13 +684,12 @@ describe('nfts.utils', () => {
 			]);
 		});
 
-		it('sorts by collection name descending', () => {
+		it('sorts NFTs by collection name descending', () => {
 			const res = filterSortByCollection({
 				items: base,
 				sort: { type: 'collection-name', order: 'desc' }
 			});
 
-			// "DeGods" then "Azuki..."
 			expect(res.map((n) => n.collection.name)).toEqual([
 				'DeGods',
 				'Azuki Elemental Beans',
@@ -637,71 +697,39 @@ describe('nfts.utils', () => {
 			]);
 		});
 
-		it('applies filter then sort', () => {
+		it('sorts collection UIs by name ascending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+			const expected = [azukiName, deGodsName].sort((a, b) => collator.compare(a ?? '', b ?? ''));
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
+		});
+
+		it('sorts collection UIs by name descending', () => {
+			const res = filterSortByCollection({
+				items: collections,
+				sort: { type: 'collection-name', order: 'desc' }
+			});
+			const expected = [azukiName, deGodsName]
+				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
+				.reverse();
+
+			expect(res.map((c) => c.collection.name ?? '')).toEqual(expected);
+		});
+
+		it('applies filter then sort for NFTs', () => {
 			const res = filterSortByCollection({
 				items: base,
 				filter: 'god',
 				sort: { type: 'collection-name', order: 'asc' }
 			});
 
-			// Only DeGods remains; sorted trivially
 			expect(res).toEqual([nftDeGods]);
 		});
 
-		it('returns the same reference when neither filter nor sort is provided', () => {
-			const input = [...base];
-			const res = filterSortByCollection({ items: input });
-
-			expect(res).toBe(input);
-		});
-
-		it('returns a new array when sort is provided (immutability)', () => {
-			const input = [...base];
-			const res = filterSortByCollection({
-				items: input,
-				sort: { type: 'collection-name', order: 'asc' }
-			});
-
-			expect(res).not.toBe(input);
-		});
-
-		it('filters collections by collection.name (case-insensitive substring)', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				filter: filterSub
-			});
-
-			expect(res).toHaveLength(1);
-			expect(res[0].collection.address).toBe(AZUKI_ELEMENTAL_BEANS_TOKEN.address);
-		});
-
-		it('sorts collections by name ascending', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				sort: { type: 'collection-name', order: 'asc' }
-			});
-
-			const expectedOrder = [azukiName, deGodsName].sort((a, b) =>
-				collator.compare(a ?? '', b ?? '')
-			);
-
-			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
-		});
-
-		it('sorts collections by name descending', () => {
-			const res = filterSortByCollection({
-				items: collections,
-				sort: { type: 'collection-name', order: 'desc' }
-			});
-
-			const expectedOrder = [azukiName, deGodsName]
-				.sort((a, b) => collator.compare(a ?? '', b ?? ''))
-				.reverse();
-
-			expect(res.map((c) => c.collection.name ?? '')).toEqual(expectedOrder);
-		});
-
-		it('applies filter for collection then sort', () => {
+		it('applies filter then sort for collections', () => {
 			const res = filterSortByCollection({
 				items: collections,
 				filter: 'god',
@@ -712,14 +740,31 @@ describe('nfts.utils', () => {
 			expect(res[0].collection.address).toBe(DE_GODS_TOKEN.address);
 		});
 
-		it('returns the same reference when neither filter nor sort is provided for collections', () => {
+		it('returns the same reference when neither filter nor sort is provided (NFTs)', () => {
+			const input = [...base];
+			const res = filterSortByCollection({ items: input });
+
+			expect(res).toBe(input);
+		});
+
+		it('returns the same reference when neither filter nor sort is provided (collections)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({ items: input });
 
 			expect(res).toBe(input);
 		});
 
-		it('returns a new array when sort is provided for collections (immutability)', () => {
+		it('returns a new array when sort is provided (NFTs)', () => {
+			const input = [...base];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'collection-name', order: 'asc' }
+			});
+
+			expect(res).not.toBe(input);
+		});
+
+		it('returns a new array when sort is provided (collections)', () => {
 			const input = [...collections];
 			const res = filterSortByCollection({
 				items: input,
@@ -727,6 +772,74 @@ describe('nfts.utils', () => {
 			});
 
 			expect(res).not.toBe(input);
+		});
+	});
+
+	describe('filterSortByCollection - date sorting', () => {
+		it('sorts NFTs by acquiredAt ascending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftNew, nftNewest, nftOld];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res).toEqual([nftOld, nftNew, nftNewest]);
+		});
+
+		it('sorts NFTs by acquiredAt descending', () => {
+			const nftOld = {
+				...nftAzuki1,
+				acquiredAt: new Date('2020-01-01')
+			};
+			const nftNew = {
+				...nftAzuki2,
+				acquiredAt: new Date('2022-01-01')
+			};
+			const nftNewest = {
+				...nftDeGods,
+				acquiredAt: new Date('2023-01-01')
+			};
+
+			const input = [nftOld, nftNewest, nftNew];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'desc' }
+			});
+
+			expect(res).toEqual([nftNewest, nftNew, nftOld]);
+		});
+
+		it('handles NFTs with missing acquiredAt gracefully', () => {
+			const nftWithDate = {
+				...nftAzuki1,
+				acquiredAt: new Date('2021-01-01')
+			};
+			const nftWithoutDate = {
+				...nftAzuki2,
+				acquiredAt: undefined
+			};
+
+			const input = [nftWithoutDate, nftWithDate];
+			const res = filterSortByCollection({
+				items: input,
+				sort: { type: 'date', order: 'asc' }
+			});
+
+			expect(res[0]).toBe(nftWithoutDate);
+			expect(res[1]).toBe(nftWithDate);
 		});
 	});
 
@@ -754,32 +867,101 @@ describe('nfts.utils', () => {
 		});
 	});
 
-	describe('getAllowMediaForNft', () => {
-		const tokens = [
-			{ ...AZUKI_ELEMENTAL_BEANS_TOKEN, allowExternalContentSource: false },
-			{ ...DE_GODS_TOKEN, allowExternalContentSource: false }
-		] as Erc721CustomToken[];
-
-		it('should correctly return the allow media prop for an nft contract address', () => {
-			const params = {
-				tokens,
-				networkId: AZUKI_ELEMENTAL_BEANS_TOKEN.network.id,
-				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address
-			};
-			const expected: NonFungibleToken | undefined = findNonFungibleToken(params);
-
-			assertNonNullish(expected);
-
-			const result = getAllowMediaForNft(params);
-
-			expect(result).toEqual(expected?.allowExternalContentSource);
+	describe('getMediaStatus', () => {
+		beforeEach(() => {
+			vi.restoreAllMocks();
 		});
 
-		it('should fallback to undefined if the nft cant be found or the consent has never been set', () => {
-			const params = { tokens, networkId: ETHEREUM_NETWORK.id, address: 'invalid address' };
-			const result = getAllowMediaForNft(params);
+		it('returns OK for valid image under the size limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
 
-			expect(result).toBeUndefined();
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns INVALID_DATA for invalid URL', async () => {
+			const result = await getMediaStatus('not-a-url');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns INVALID_DATA when fetch throws', async () => {
+			global.fetch = vi.fn().mockRejectedValueOnce(new Error('network error'));
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns INVALID_DATA when headers are missing', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: { get: () => null }
+			});
+
+			const result = await getMediaStatus('https://example.com/image.png');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+		});
+
+		it('returns NON_SUPPORTED_MEDIA_TYPE for non-image type', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type' ? 'video/mp4' : h === 'Content-Length' ? '100' : null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/video.mp4');
+
+			expect(result).toBe(NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE);
+		});
+
+		it('returns FILESIZE_LIMIT_EXCEEDED when file size exceeds the limit', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/jpeg'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT + 1).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('https://example.com/large.jpg');
+
+			expect(result).toBe(NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED);
+		});
+
+		it('fetches the data for IPFS URLs', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+
+			const result = await getMediaStatus('ipfs://ipfs-image-url');
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith('https://ipfs.io/ipfs/ipfs-image-url', {
+				method: 'HEAD'
+			});
 		});
 	});
 });

@@ -1,4 +1,4 @@
-import type { Event } from '$declarations/xtc_ledger/xtc_ledger.did';
+import type { Event } from '$declarations/xtc_ledger/declarations/xtc_ledger.did';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType } from '$lib/types/transaction';
@@ -40,6 +40,7 @@ export interface IcTransactionUi {
 	type: IcTransactionType;
 	// e.g. BTC Received
 	typeLabel?: string;
+	fee?: bigint;
 	from?: string;
 	// e.g. From: BTC Network
 	fromLabel?: string;
@@ -54,5 +55,6 @@ export interface IcTransactionUi {
 	status: IcTransactionStatus;
 	txExplorerUrl?: string;
 	approveSpender?: string;
+	approveSpenderExplorerUrl?: string;
 	approveExpiresAt?: bigint;
 }

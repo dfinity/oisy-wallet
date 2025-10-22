@@ -38,7 +38,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Start with *all three* being outdated (so all render) unless a test overrides
@@ -51,7 +52,6 @@ describe('AcceptAgreementsModal', () => {
 		vi.spyOn(agreementsDerived, 'outdatedAgreements', 'get').mockReturnValue(outdatedStore);
 
 		vi.spyOn(authServices, 'warnSignOut').mockImplementation(vi.fn());
-		vi.spyOn(authServices, 'nullishSignOut').mockImplementation(vi.fn());
 
 		vi.spyOn(backendApi, 'updateUserAgreements').mockImplementation(vi.fn());
 
@@ -74,7 +74,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Only termsOfUse is outdated; others omitted from the store
@@ -107,7 +108,8 @@ describe('AcceptAgreementsModal', () => {
 		const nullish: AgreementData = {
 			accepted: undefined,
 			lastAcceptedTimestamp: undefined,
-			lastUpdatedTimestamp: undefined
+			lastUpdatedTimestamp: undefined,
+			textSha256: undefined
 		};
 
 		// Only termsOfUse and privacyPolicy outdated
@@ -157,31 +159,26 @@ describe('AcceptAgreementsModal', () => {
 		expect(authServices.warnSignOut).toHaveBeenCalledWith(get(i18n).agreements.text.reject_warning);
 	});
 
-	it('clicking Accept calls nullishSignOut if the identity is nullish', async () => {
+	it('clicking Accept does not call updateUserAgreements if the identity is nullish', async () => {
 		mockAuthStore(null);
 
 		const { getByTestId } = render(AcceptAgreementsModal);
 
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
-		expect(authServices.nullishSignOut).toHaveBeenCalledOnce();
-
 		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
 
 		expect(emit).not.toHaveBeenCalled();
 	});
 
-	it('clicking Accept calls updateUserAgreements with no selected agreement', async () => {
+	it('clicking Accept does not call updateUserAgreements if there are not outdated agreements', async () => {
 		const { getByTestId } = render(AcceptAgreementsModal);
 
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
-		expect(backendApi.updateUserAgreements).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity,
-			agreements: {}
-		});
+		expect(backendApi.updateUserAgreements).not.toHaveBeenCalled();
 
-		expect(emit).toHaveBeenCalledExactlyOnceWith({ message: 'oisyRefreshUserProfile' });
+		expect(emit).not.toHaveBeenCalled();
 	});
 
 	it('clicking Accept calls updateUserAgreements with some agreements selected', async () => {
@@ -197,12 +194,14 @@ describe('AcceptAgreementsModal', () => {
 				termsOfUse: {
 					accepted: true,
 					lastAcceptedTimestamp: expect.any(BigInt),
-					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp
+					lastUpdatedTimestamp: agreementsData.termsOfUse.lastUpdatedTimestamp,
+					textSha256: agreementsData.termsOfUse.textSha256
 				},
 				privacyPolicy: {
 					accepted: true,
 					lastAcceptedTimestamp: expect.any(BigInt),
-					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp
+					lastUpdatedTimestamp: agreementsData.privacyPolicy.lastUpdatedTimestamp,
+					textSha256: agreementsData.privacyPolicy.textSha256
 				}
 			}
 		});
@@ -216,6 +215,8 @@ describe('AcceptAgreementsModal', () => {
 
 		const { getByTestId } = render(AcceptAgreementsModal);
 
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE));
+		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY));
 		await fireEvent.click(getByTestId(AGREEMENTS_MODAL_ACCEPT_BUTTON));
 
 		expect(toastsError).toHaveBeenCalledWith({

@@ -2,9 +2,9 @@
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { createEventDispatcher, getContext, setContext } from 'svelte';
-	import SwapTokenWizard from './SwapTokenWizard.svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
+	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
 	import SwapTokensList from '$lib/components/swap/SwapTokensList.svelte';
 	import ModalNetworksFilter from '$lib/components/tokens/ModalNetworksFilter.svelte';
 	import { swapWizardSteps } from '$lib/config/swap.config';
@@ -144,7 +144,7 @@
 		selectTokenType = undefined;
 	};
 
-	const selectToken = ({ detail: token }: CustomEvent<Token>) => {
+	const selectToken = (token: Token) => {
 		if (selectTokenType === 'source') {
 			setSourceToken(token);
 			setFilterNetwork(token.network);
@@ -214,36 +214,38 @@
 >
 	{#snippet title()}{titleString}{/snippet}
 
-	{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
-		<SwapTokensList
-			on:icSelectToken={selectToken}
-			on:icCloseTokensList={closeTokenList}
-			on:icSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
-		<ModalNetworksFilter
-			{allNetworksEnabled}
-			filteredNetworks={$filteredNetworks}
-			on:icNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
-		<SwapProviderListModal
-			on:icSelectProvider={selectProvider}
-			on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
-		/>
-	{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
-		<SwapTokenWizard
-			{currentStep}
-			onBack={modal.back}
-			onClose={close}
-			onNext={modal.next}
-			onShowTokensList={showTokensList}
-			bind:swapAmount
-			bind:receiveAmount
-			bind:slippageValue
-			bind:swapProgressStep
-			bind:swapFailedProgressSteps
-			on:icShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
-		/>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSwap.TOKENS_LIST}
+			<SwapTokensList
+				onCloseTokensList={closeTokenList}
+				onSelectNetworkFilter={() => goToStep(WizardStepsSwap.FILTER_NETWORKS)}
+				onSelectToken={selectToken}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.FILTER_NETWORKS}
+			<ModalNetworksFilter
+				{allNetworksEnabled}
+				filteredNetworks={$filteredNetworks}
+				onNetworkFilter={() => goToStep(WizardStepsSwap.TOKENS_LIST)}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
+			<SwapProviderListModal
+				on:icSelectProvider={selectProvider}
+				on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+			/>
+		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
+			<SwapTokenWizard
+				{currentStep}
+				onBack={modal.back}
+				onClose={close}
+				onNext={modal.next}
+				onShowTokensList={showTokensList}
+				bind:swapAmount
+				bind:receiveAmount
+				bind:slippageValue
+				bind:swapProgressStep
+				bind:swapFailedProgressSteps
+				on:icShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
+			/>
+		{/if}
+	{/key}
 </WizardModal>

@@ -12,13 +12,13 @@ import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import en from '$tests/mocks/i18n.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	IntersectionObserverActive,
+	IntersectionObserverPassive
+} from '$tests/mocks/infinite-scroll.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
 
 describe('AllTransactions', () => {
 	const customIcrcToken: IcrcCustomToken = {
@@ -26,6 +26,16 @@ describe('AllTransactions', () => {
 		version: 1n,
 		enabled: true
 	};
+
+	beforeAll(() => {
+		Object.defineProperty(window, 'IntersectionObserver', {
+			writable: true,
+			configurable: true,
+			value: IntersectionObserverActive
+		});
+	});
+
+	afterAll(() => (global.IntersectionObserver = IntersectionObserverPassive));
 
 	it('renders the title', () => {
 		const { container } = render(AllTransactions);

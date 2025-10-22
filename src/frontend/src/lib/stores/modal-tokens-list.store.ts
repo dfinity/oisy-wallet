@@ -2,12 +2,17 @@ import { ZERO } from '$lib/constants/app.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { Network, NetworkId } from '$lib/types/network';
-import type { Token, TokenUi } from '$lib/types/token';
+import type { Token } from '$lib/types/token';
+import type { TokenUi } from '$lib/types/token-ui';
 import {
 	filterTokensForSelectedNetwork,
 	filterTokensForSelectedNetworks
 } from '$lib/utils/network.utils';
-import { filterTokens, pinTokensWithBalanceAtTop } from '$lib/utils/tokens.utils';
+import {
+	filterTokens,
+	filterTokensByNft,
+	pinTokensWithBalanceAtTop
+} from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable } from 'svelte/store';
 
@@ -18,6 +23,7 @@ export interface ModalTokensListData {
 	filterZeroBalance?: boolean;
 	sortByBalance?: boolean;
 	filterNetworksIds?: NetworkId[];
+	filterNfts?: boolean;
 }
 
 export const initModalTokensListContext = (
@@ -32,6 +38,7 @@ export const initModalTokensListContext = (
 	const filterZeroBalance = derived([data], ([{ filterZeroBalance }]) => filterZeroBalance);
 	const sortByBalance = derived([data], ([{ sortByBalance }]) => sortByBalance ?? true);
 	const filterNetworksIds = derived([data], ([{ filterNetworksIds }]) => filterNetworksIds);
+	const filterNfts = derived([data], ([{ filterNfts }]) => filterNfts);
 
 	const filteredTokens = derived(
 		[
@@ -42,7 +49,8 @@ export const initModalTokensListContext = (
 			sortByBalance,
 			exchanges,
 			balancesStore,
-			filterNetworksIds
+			filterNetworksIds,
+			filterNfts
 		],
 		([
 			$tokens,
@@ -52,7 +60,8 @@ export const initModalTokensListContext = (
 			$sortByBalance,
 			$exchanges,
 			$balances,
-			$filterNetworksIds
+			$filterNetworksIds,
+			$filterNfts
 		]) => {
 			const filteredByQuery = filterTokens({ tokens: $tokens, filter: $filterQuery ?? '' });
 
@@ -71,12 +80,17 @@ export const initModalTokensListContext = (
 				isNullish($filterNetwork)
 			]);
 
+			const filteredByNft = filterTokensByNft({
+				tokens: filteredByNetwork,
+				filterNfts: $filterNfts
+			});
+
 			if (!$sortByBalance) {
-				return filteredByNetwork;
+				return filteredByNft;
 			}
 
 			const pinnedWithBalance = pinTokensWithBalanceAtTop({
-				$tokens: filteredByNetwork,
+				$tokens: filteredByNft,
 				$balances,
 				$exchanges
 			});

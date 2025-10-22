@@ -1,4 +1,4 @@
-import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/declarations/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, metadata } from '$icp/api/icrc-ledger.api';
@@ -17,7 +17,7 @@ import {
 	mapTokenOisySymbol,
 	type IcrcLoadData
 } from '$icp/utils/icrc.utils';
-import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.contants';
+import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { exchangeRateERC20ToUsd, exchangeRateICRCToUsd } from '$lib/services/exchange.services';
@@ -97,13 +97,6 @@ const loadDefaultIcrc = ({
 			trackEvent({
 				name: TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR,
 				metadata: { ...mapIcErrorMetadata(err), ledgerCanisterId }
-			});
-
-			toastsShow({
-				text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
-					$ledgerCanisterId: ledgerCanisterId
-				}),
-				level: 'warn'
 			});
 		},
 		strategy,
@@ -228,14 +221,26 @@ const loadCustomIcrcTokensData = async ({
 			// For development purposes, we want to see the error in the console.
 			console.error(result.reason);
 
-			const { token } = tokens[index];
+			const { enabled, token } = tokens[index];
 
 			if ('Icrc' in token) {
 				const {
 					Icrc: { ledger_id }
 				} = token;
 
-				icrcCustomTokensStore.reset(ledger_id.toString());
+				const ledgerCanisterId = ledger_id.toText();
+
+				icrcCustomTokensStore.reset(ledgerCanisterId);
+
+				// To avoid polluting the screen, we show the toast error only after the update call.
+				if (enabled && certified) {
+					toastsShow({
+						text: replacePlaceholders(get(i18n).init.error.icrc_canister_loading, {
+							$ledgerCanisterId: ledgerCanisterId
+						}),
+						level: 'warn'
+					});
+				}
 			}
 
 			return acc;
@@ -261,14 +266,15 @@ const loadIcrcCustomData = ({
 	icrcCustomTokensStore.setAll(tokens.map((token) => ({ data: token, certified })));
 };
 
-export const loadDisabledIcrcTokensBalances = ({
+// TODO: Refactor to use queryAndUpdate
+export const loadDisabledIcrcTokensBalances = async ({
 	identity,
 	disabledIcrcTokens
 }: {
 	identity: Identity;
 	disabledIcrcTokens: IcToken[];
-}): Promise<void[]> =>
-	Promise.all(
+}): Promise<void> => {
+	const results = await Promise.allSettled(
 		disabledIcrcTokens.map(async ({ ledgerCanisterId, id }) => {
 			const icrcTokenBalance = await balance({
 				identity,
@@ -276,6 +282,14 @@ export const loadDisabledIcrcTokensBalances = ({
 				ledgerCanisterId
 			});
 
+			return { id, icrcTokenBalance };
+		})
+	);
+
+	// TODO: Reduce the number of loops
+	results.forEach((result) => {
+		if (result.status === 'fulfilled') {
+			const { id, icrcTokenBalance } = result.value;
 			balancesStore.set({
 				id,
 				data: {
@@ -283,15 +297,16 @@ export const loadDisabledIcrcTokensBalances = ({
 					certified: true
 				}
 			});
-		})
-	);
+		}
+	});
+};
 
 export const loadDisabledIcrcTokensExchanges = async ({
 	disabledIcrcTokens
 }: {
 	disabledIcrcTokens: IcToken[];
 }): Promise<void> => {
-	const [currentErc20Prices, currentIcrcPrices] = await Promise.all([
+	const results = await Promise.allSettled([
 		exchangeRateERC20ToUsd({
 			coingeckoPlatformId: 'ethereum',
 			contractAddresses: disabledIcrcTokens.reduce<Erc20ContractAddress[]>((acc, token) => {
@@ -319,8 +334,12 @@ export const loadDisabledIcrcTokensExchanges = async ({
 		)
 	]);
 
+	const [erc20Result, icrcResult] = results;
+
 	exchangeStore.set([
-		...(nonNullish(currentErc20Prices) ? [currentErc20Prices] : []),
-		...(nonNullish(currentIcrcPrices) ? [currentIcrcPrices] : [])
+		...(erc20Result.status === 'fulfilled' && nonNullish(erc20Result.value)
+			? [erc20Result.value]
+			: []),
+		...(icrcResult.status === 'fulfilled' && nonNullish(icrcResult.value) ? [icrcResult.value] : [])
 	]);
 };

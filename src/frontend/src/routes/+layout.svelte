@@ -1,25 +1,28 @@
 <script lang="ts">
-	import { Spinner, Toasts, SystemThemeListener } from '@dfinity/gix-components';
+	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet } from 'svelte';
+	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$app/environment';
 	import Banner from '$lib/components/core/Banner.svelte';
 	import Busy from '$lib/components/ui/Busy.svelte';
 	import ModalExitHandler from '$lib/components/ui/ModalExitHandler.svelte';
+	import ResponsiveListener from '$lib/components/ui/ResponsiveListener.svelte';
 	import {
 		TRACK_SYNC_AUTH_AUTHENTICATED_COUNT,
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
+	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
+	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
-	import { initAuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore, type AuthStoreData } from '$lib/stores/auth.store';
+	import { AuthWorker } from '$lib/services/worker.auth.services';
+	import { authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { toastsError } from '$lib/stores/toasts.store';
+	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 
 	interface Props {
 		children: Snippet;
@@ -33,9 +36,9 @@
 
 	const init = async () => {
 		/**
-		 * We use `Promise.allSettled` to ensure that all initialization functions run,
+		 * We use `Promise.allSettled` to ensure that all initialisation functions run,
 		 * regardless of whether some of them fail. This avoids blocking the entire app
-		 * if non-critical services like analytics or i18n fail to initialize.
+		 * if non-critical services like analytics or i18n fail to initialise.
 		 *
 		 * Each service handles its own error handling,
 		 * and we avoid surfacing errors to the user here to keep the UX clean.
@@ -75,14 +78,10 @@
 	 * Workers
 	 */
 
-	let worker = $state<
-		| {
-				syncAuthIdle: (args: { auth: AuthStoreData; locked?: boolean }) => void;
-		  }
-		| undefined
-	>();
+	let worker = $state<AuthWorker | undefined>();
 
-	onMount(async () => (worker = await initAuthWorker()));
+	onMount(async () => (worker = await AuthWorker.init()));
+	onDestroy(() => worker?.destroy());
 
 	$effect(() => {
 		[worker, $authStore, $isLocked];
@@ -94,7 +93,7 @@
 	 */
 
 	// To improve the UX while the app is loading on mainnet we display a spinner which is attached statically in the index.html files.
-	// Once the authentication has been initialized we know most JavaScript resources has been loaded and therefore we can hide the spinner, the loading information.
+	// Once the authentication has been initialised, we know most JavaScript resources have been loaded, and therefore we can hide the spinner, the loading information.
 	$effect(() => {
 		if (!browser) {
 			return;
@@ -108,6 +107,44 @@
 		const spinner = document.querySelector('body > #app-spinner');
 		spinner?.remove();
 	});
+
+	const handleBroadcastLoginSuccess = async () => {
+		const wasPreviouslyAuthenticated = $authSignedIn;
+
+		await authStore.forceSync();
+
+		if ($authNotSignedIn) {
+			return;
+		}
+
+		if (!wasPreviouslyAuthenticated) {
+			toastsShow({
+				text: $i18n.auth.message.refreshed_authentication,
+				level: 'success'
+			});
+		}
+
+		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
+	};
+
+	const openBc = () => {
+		try {
+			const bc = new AuthBroadcastChannel();
+
+			bc.onLoginSuccess(handleBroadcastLoginSuccess);
+
+			return () => {
+				bc?.close();
+			};
+		} catch (err: unknown) {
+			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
+			// This is a non-critical feature that improves the UX when OISY is open in multiple tabs.
+			// We just print a warning in the console for debugging purposes.
+			console.warn('Auth BroadcastChannel initialization failed', err);
+		}
+	};
+
+	onMount(openBc);
 </script>
 
 <svelte:window onstorage={syncAuthStore} />
@@ -125,3 +162,4 @@
 <Busy />
 <ModalExitHandler />
 <SystemThemeListener />
+<ResponsiveListener />

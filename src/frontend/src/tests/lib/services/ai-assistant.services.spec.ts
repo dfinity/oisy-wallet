@@ -1,4 +1,5 @@
-import type { chat_response_v1 } from '$declarations/llm/llm.did';
+import type { chat_response_v1 } from '$declarations/llm/declarations/llm.did';
+import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { llmChat } from '$lib/api/llm.api';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';
 import { askLlm, executeTool } from '$lib/services/ai-assistant.services';
@@ -26,6 +27,13 @@ describe('ai-assistant.services', () => {
 		function: {
 			name: 'show_all_contacts',
 			arguments: []
+		}
+	};
+	const showBalanceToolCall = {
+		id: 'test',
+		function: {
+			name: 'show_balance',
+			arguments: [{ name: 'tokenSymbol', value: 'ICP' }]
 		}
 	};
 
@@ -129,6 +137,23 @@ describe('ai-assistant.services', () => {
 				type: 'show_filtered_contacts',
 				result: {
 					contacts: Object.values(get(extendedAddressContacts))
+				}
+			});
+		});
+
+		it('parses show_balance tool and returns the expected data', () => {
+			const result = executeTool({
+				toolCall: showBalanceToolCall,
+				requestStartTimestamp: 1000
+			});
+
+			expect(result).toEqual({
+				type: 'show_balance',
+				result: {
+					mainCard: {
+						token: { ...ICP_TOKEN, balance: undefined, usdBalance: undefined },
+						totalUsdBalance: 0
+					}
 				}
 			});
 		});

@@ -1,5 +1,4 @@
 import { browser } from '$app/environment';
-import { nullishSignOut } from '$lib/services/auth.services';
 import type { Balance } from '$lib/types/balance';
 import type { GetIdbBalancesParams, SetIdbBalancesParams } from '$lib/types/idb-balances';
 import { delMultiKeysByPrincipal } from '$lib/utils/idb.utils';
@@ -25,7 +24,6 @@ export const setIdbBalancesStore = async ({
 	balancesStoreData
 }: SetIdbBalancesParams) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

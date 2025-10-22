@@ -1,36 +1,44 @@
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
+import { saveCustomTokens as saveCustomErc1155Token } from '$eth/services/erc1155-custom-tokens.services';
+import { saveCustomTokens as saveCustomErc721Token } from '$eth/services/erc721-custom-tokens.services';
 import { transferErc1155, transferErc721 } from '$eth/services/nft-send.services';
+import type { OptionEthAddress } from '$eth/types/address';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 import { isTokenErc721 } from '$eth/utils/erc721.utils';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { ProgressStepsSend } from '$lib/enums/progress-steps';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { createBatches } from '$lib/services/batch.services';
 import { nftStore } from '$lib/stores/nft.store';
-import type { Address, OptionEthAddress } from '$lib/types/address';
+import type { Address } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
 import { findNftsByToken } from '$lib/utils/nfts.utils';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
+import { get } from 'svelte/store';
 
 export const loadNfts = async ({
 	tokens,
 	loadedNfts,
-	walletAddress
+	walletAddress,
+	force = false
 }: {
 	tokens: NonFungibleToken[];
 	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
+	force?: boolean;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		const tokensToLoad = tokens.filter((token) => {
-			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
-			return nftsByToken.length === 0;
-		});
+		const tokensToLoad = force
+			? tokens
+			: tokens.filter((token) => {
+					const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
+					return nftsByToken.length === 0;
+				});
 
 		if (tokensToLoad.length > 0) {
 			const nfts: Nft[] = await loadNftsByNetwork({
@@ -38,6 +46,7 @@ export const loadNfts = async ({
 				tokens: tokensToLoad,
 				walletAddress
 			});
+
 			nftStore.addAll(nfts);
 		}
 	});
@@ -99,7 +108,6 @@ export const sendNft = async ({
 	progress?: (step: ProgressStepsSend) => void;
 }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 
@@ -132,5 +140,56 @@ export const sendNft = async ({
 				progress
 			});
 		}
+	}
+};
+
+export const updateNftSection = async ({
+	section,
+	$authIdentity,
+	token,
+	$ethAddress
+}: {
+	section: CustomTokenSection | undefined;
+	$authIdentity: OptionIdentity;
+	token: NonFungibleToken;
+	$ethAddress: OptionEthAddress;
+}): Promise<NonFungibleToken | undefined> => {
+	if (isNullish($authIdentity)) {
+		return;
+	}
+
+	if (nonNullish(token)) {
+		const currentAllowMedia = token.allowExternalContentSource;
+
+		const saveToken = {
+			...token,
+			enabled: true,
+			section,
+			...((section === CustomTokenSection.SPAM ||
+				(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+				allowExternalContentSource: false
+			})
+		};
+
+		if (isTokenErc721(token)) {
+			await saveCustomErc721Token({
+				identity: $authIdentity,
+				tokens: [saveToken]
+			});
+		} else if (isTokenErc1155(token)) {
+			await saveCustomErc1155Token({
+				identity: $authIdentity,
+				tokens: [saveToken]
+			});
+		}
+
+		await loadNfts({
+			tokens: [saveToken],
+			walletAddress: $ethAddress,
+			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
+			force: true
+		});
+
+		return saveToken;
 	}
 };

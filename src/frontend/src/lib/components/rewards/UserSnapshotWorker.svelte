@@ -4,7 +4,7 @@
 	import { btcTransactionsStore } from '$btc/stores/btc-transactions.store';
 	import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 	import { icTransactionsStore } from '$icp/stores/ic-transactions.store';
-	import { TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.contants';
+	import { TRACK_SNAPSHOT_SEND_ERROR } from '$lib/constants/analytics.constants';
 	import { USER_SNAPSHOT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import {
 		btcAddressMainnet,
@@ -53,6 +53,16 @@
 		syncInProgress = false;
 	};
 
+	const scheduleNext = (): void => {
+		timer = setTimeout(async () => {
+			await sync();
+
+			if (nonNullish(timer)) {
+				scheduleNext();
+			}
+		}, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+	};
+
 	const startTimer = async () => {
 		if (nonNullish(timer)) {
 			return;
@@ -60,7 +70,7 @@
 
 		await sync();
 
-		timer = setInterval(sync, USER_SNAPSHOT_TIMER_INTERVAL_MILLIS);
+		scheduleNext();
 	};
 
 	const stopTimer = () => {
@@ -68,7 +78,7 @@
 			return;
 		}
 
-		clearInterval(timer);
+		clearTimeout(timer);
 		timer = undefined;
 	};
 

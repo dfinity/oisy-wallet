@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import type { BtcAddress } from '$btc/types/address';
 	import type { BitcoinNetwork } from '$btc/types/network';
 	import TokenMenu from '$lib/components/tokens/TokenMenu.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
@@ -13,7 +14,6 @@
 		btcAddressTestnetStore
 	} from '$lib/stores/address.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { BtcAddress } from '$lib/types/address';
 	import { mapAddress } from '$lib/utils/address.utils';
 	import { isNetworkIdBTCMainnet, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
 

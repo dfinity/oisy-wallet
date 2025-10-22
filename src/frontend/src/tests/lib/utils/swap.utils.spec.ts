@@ -1,7 +1,7 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/kong_backend.did';
+} from '$declarations/kong_backend/declarations/kong_backend.did';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
@@ -37,7 +37,8 @@ import {
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
-import type { Bridge, DeltaPrice, OptimalRate, SwapSide } from '@velora-dex/sdk';
+import type { Bridge, OptimalRate, SwapSide } from '@velora-dex/sdk';
+import type { QuoteWithDeltaPriceAndBridgePrice } from '@velora-dex/sdk/dist/methods/quote/getQuote';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -259,7 +260,7 @@ describe('swap utils', () => {
 		});
 
 		it('returns 0 for full slippage (100%)', () => {
-			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(0n);
+			expect(calculateSlippage({ quoteAmount: 12345n, slippagePercentage: 100 })).toBe(ZERO);
 		});
 	});
 
@@ -328,58 +329,72 @@ describe('swap utils', () => {
 	});
 
 	describe('mapVeloraSwapResult', () => {
-		it('should map DeltaPrice swap result correctly', () => {
-			const mockDeltaSwap: DeltaPrice = {
-				srcToken: '0x123',
-				destToken: '0x456',
-				srcAmount: '1000',
-				destAmount: '900',
-				destAmountBeforeFee: '920',
-				gasCost: '50000',
-				gasCostBeforeFee: '48000',
-				gasCostUSD: '15.5',
-				gasCostUSDBeforeFee: '14.8',
-				srcUSD: '1000.0',
-				destUSD: '895.5',
-				destUSDBeforeFee: '915.2',
-				partner: 'PartnerName',
-				partnerFee: 0.25,
-				hmac: 'abcd1234',
-				bridge: {} as Bridge
+		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
+			const mockDeltaSwap: QuoteWithDeltaPriceAndBridgePrice = {
+				delta: {
+					srcToken: '0x123',
+					destToken: '0x456',
+					srcAmount: '1000',
+					destAmount: '900',
+					destAmountBeforeFee: '920',
+					gasCost: '50000',
+					gasCostBeforeFee: '48000',
+					gasCostUSD: '15.5',
+					gasCostUSDBeforeFee: '14.8',
+					srcUSD: '1000.0',
+					destUSD: '895.5',
+					destUSDBeforeFee: '915.2',
+					partner: 'PartnerName',
+					partnerFee: 0.25,
+					hmac: 'abcd1234',
+					bridge: {} as Bridge
+				},
+				deltaAddress: '0xdelta123'
 			};
 
 			const result = mapVeloraSwapResult(mockDeltaSwap);
 
 			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
 			expect(result.receiveAmount).toBe(900n);
-			expect(result.swapDetails).toBe(mockDeltaSwap);
+			expect(result.swapDetails).toBe(mockDeltaSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 
-		it('should map BridgePrice swap result correctly', () => {
-			const mockDeltaSwap: DeltaPrice = {
-				srcToken: '0x123',
-				destToken: '0x456',
-				srcAmount: '1000',
-				destAmount: '900',
-				destAmountBeforeFee: '920',
-				gasCost: '50000',
-				gasCostBeforeFee: '48000',
-				gasCostUSD: '15.5',
-				gasCostUSDBeforeFee: '14.8',
-				srcUSD: '1000.0',
-				destUSD: '895.5',
-				destUSDBeforeFee: '915.2',
-				partner: 'PartnerName',
-				partnerFee: 0.25,
-				hmac: 'abcd1234',
-				bridge: {} as Bridge
+		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
+			const mockBridgeSwap: QuoteWithDeltaPriceAndBridgePrice = {
+				delta: {
+					srcToken: '0x123',
+					destToken: '0x456',
+					srcAmount: '1000',
+					destAmount: '900',
+					destAmountBeforeFee: '920',
+					gasCost: '50000',
+					gasCostBeforeFee: '48000',
+					gasCostUSD: '15.5',
+					gasCostUSDBeforeFee: '14.8',
+					srcUSD: '1000.0',
+					destUSD: '895.5',
+					destUSDBeforeFee: '915.2',
+					partner: 'PartnerName',
+					partnerFee: 0.25,
+					hmac: 'abcd1234',
+					bridge: {} as Bridge,
+					bridgeInfo: {
+						protocolName: 'Across',
+						destAmountAfterBridge: '800',
+						destUSDAfterBridge: '795.0',
+						fees: [],
+						estimatedTimeMs: 300000
+					}
+				},
+				deltaAddress: '0xdelta123'
 			};
-			const result = mapVeloraSwapResult(mockDeltaSwap);
+
+			const result = mapVeloraSwapResult(mockBridgeSwap);
 
 			expect(result.provider).toBe(VELORA_SWAP_PROVIDER);
-			expect(result.receiveAmount).toBe(900n);
-			expect(result.swapDetails).toBe(mockDeltaSwap);
+			expect(result.receiveAmount).toBe(800n);
+			expect(result.swapDetails).toBe(mockBridgeSwap.delta);
 			expect(result.type).toBe(VeloraSwapTypes.DELTA);
 		});
 	});

@@ -27,8 +27,7 @@ describe('clipboard.utils', () => {
 		it('should copy text to clipboard', async () => {
 			await copyToClipboard({ value, text });
 
-			expect(mockCopyText).toHaveBeenCalledOnce();
-			expect(mockCopyText).toHaveBeenCalledWith(value);
+			expect(mockCopyText).toHaveBeenCalledExactlyOnceWith(value);
 		});
 
 		it('should show a success toast if copy is successful', async () => {

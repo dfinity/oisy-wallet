@@ -5,7 +5,7 @@ import type {
 	IcrcToken,
 	UserProfile,
 	UserToken
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {
@@ -1171,7 +1171,8 @@ describe('backend.canister', () => {
 					license_agreement: {
 						accepted: toNullable(),
 						last_accepted_at_ns: toNullable(),
-						last_updated_at_ms: toNullable()
+						last_updated_at_ms: toNullable(),
+						text_sha256: toNullable()
 					}
 				},
 				current_user_version: []

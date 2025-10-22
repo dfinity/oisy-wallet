@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
+	import { WizardModal, type WizardStep } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { setContext } from 'svelte';
 	import { enabledErc20Tokens } from '$eth/derived/erc20.derived';
@@ -62,28 +62,32 @@
 	import { decodeQrCode } from '$lib/utils/qr-code.utils';
 	import { goToWizardStep } from '$lib/utils/wizard-modal.utils';
 
-	export let isTransactionsPage: boolean;
-	export let isNftsPage: boolean;
+	interface Props {
+		isTransactionsPage: boolean;
+		isNftsPage: boolean;
+	}
 
-	let destination = '';
-	let activeSendDestinationTab: SendDestinationTab = 'recentlyUsed';
-	let selectedContact: ContactUi | undefined = undefined;
-	let amount: number | undefined = undefined;
-	let sendProgressStep: string = ProgressStepsSend.INITIALIZATION;
+	let { isTransactionsPage, isNftsPage }: Props = $props();
 
-	let steps: WizardSteps<WizardStepsSend>;
-	$: steps = isTransactionsPage
-		? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
-		: isNftsPage
-			? nonNullish($pageNft)
-				? sendNftsWizardSteps({ i18n: $i18n })
-				: allSendNftsWizardSteps({ i18n: $i18n })
-			: allSendWizardSteps({ i18n: $i18n });
+	let destination = $state('');
+	let activeSendDestinationTab = $state<SendDestinationTab>('recentlyUsed');
+	let selectedContact = $state<ContactUi | undefined>();
+	let amount = $state<number | undefined>();
+	let sendProgressStep = $state<ProgressStepsSend>(ProgressStepsSend.INITIALIZATION);
 
-	let currentStep: WizardStep<WizardStepsSend> | undefined;
-	let modal: WizardModal<WizardStepsSend>;
-	let selectedNft: Nft | undefined;
-	$: selectedNft = $pageNft;
+	let steps = $derived(
+		isTransactionsPage
+			? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
+			: isNftsPage
+				? nonNullish($pageNft)
+					? sendNftsWizardSteps({ i18n: $i18n })
+					: allSendNftsWizardSteps({ i18n: $i18n })
+				: allSendWizardSteps({ i18n: $i18n })
+	);
+
+	let currentStep = $state<WizardStep<WizardStepsSend> | undefined>();
+	let modal = $state<WizardModal<WizardStepsSend>>();
+	let selectedNft = $derived($pageNft);
 
 	setContext<ModalTokensListContext>(
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -127,7 +131,7 @@
 									? $solAddressLocalnetNotLoaded
 									: false;
 
-	const onIcSendToken = async ({ detail: token }: CustomEvent<Token>) => {
+	const onSendToken = async (token: Token) => {
 		if (isDisabled(token)) {
 			const status = await waitWalletReady(() => isDisabled(token));
 
@@ -144,12 +148,15 @@
 		await loadTokenAndRun({ token, callback });
 	};
 
-	const goToStep = (stepName: WizardStepsSend) =>
-		goToWizardStep({
-			modal,
-			steps,
-			stepName
-		});
+	const goToStep = (stepName: WizardStepsSend) => {
+		if (nonNullish(modal)) {
+			goToWizardStep({
+				modal,
+				steps,
+				stepName
+			});
+		}
+	};
 
 	const onDecodeQrCode = ({
 		status,
@@ -206,53 +213,55 @@
 	>
 		{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-		{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
-			<SendTokensList
-				on:icSendToken={onIcSendToken}
-				on:icSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-			/>
-		{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
-			<SendNftsList
-				onSelect={selectNft}
-				onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
-			/>
-		{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
-			<ModalNetworksFilter on:icNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
-		{:else if currentStep?.name === WizardStepsSend.DESTINATION}
-			<SendDestinationWizardStep
-				formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
-					? 'close'
-					: 'back'}
-				bind:destination
-				bind:activeSendDestinationTab
-				bind:selectedContact
-				on:icBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				on:icNext={modal.next}
-				on:icClose={close}
-				on:icQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
-			/>
-		{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
-			<SendQrCodeScan
-				expectedToken={$token}
-				{onDecodeQrCode}
-				onIcQrCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
-				bind:destination
-				bind:amount
-			/>
-		{:else if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
-			<SendWizard
-				{currentStep}
-				{destination}
-				nft={selectedNft}
-				onBack={modal.back}
-				onClose={close}
-				onNext={modal.next}
-				onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
-				onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
-				{selectedContact}
-				bind:amount
-				bind:sendProgressStep
-			/>
-		{/if}
+		{#key currentStep?.name}
+			{#if currentStep?.name === WizardStepsSend.TOKENS_LIST}
+				<SendTokensList
+					onSelectNetworkFilter={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+					{onSendToken}
+				/>
+			{:else if currentStep?.name === WizardStepsSend.NFTS_LIST}
+				<SendNftsList
+					onSelect={selectNft}
+					onSelectNetwork={() => goToStep(WizardStepsSend.FILTER_NETWORKS)}
+				/>
+			{:else if currentStep?.name === WizardStepsSend.FILTER_NETWORKS}
+				<ModalNetworksFilter onNetworkFilter={() => goToStep(WizardStepsSend.TOKENS_LIST)} />
+			{:else if currentStep?.name === WizardStepsSend.DESTINATION}
+				<SendDestinationWizardStep
+					formCancelAction={isTransactionsPage || (isNftsPage && nonNullish($pageNft))
+						? 'close'
+						: 'back'}
+					onBack={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+					onClose={close}
+					onNext={modal.next}
+					onQRCodeScan={() => goToStep(WizardStepsSend.QR_CODE_SCAN)}
+					bind:destination
+					bind:activeSendDestinationTab
+					bind:selectedContact
+				/>
+			{:else if currentStep?.name === WizardStepsSend.QR_CODE_SCAN}
+				<SendQrCodeScan
+					expectedToken={$token}
+					{onDecodeQrCode}
+					onQRCodeBack={() => goToStep(WizardStepsSend.DESTINATION)}
+					bind:destination
+					bind:amount
+				/>
+			{:else if currentStep?.name === WizardStepsSend.SEND || currentStep?.name === WizardStepsSend.REVIEW || currentStep?.name === WizardStepsSend.SENDING}
+				<SendWizard
+					{currentStep}
+					{destination}
+					nft={selectedNft}
+					onBack={modal.back}
+					onClose={close}
+					onNext={modal.next}
+					onSendBack={() => goToStep(WizardStepsSend.DESTINATION)}
+					onTokensList={() => goToStep(WizardStepsSend.TOKENS_LIST)}
+					{selectedContact}
+					bind:amount
+					bind:sendProgressStep
+				/>
+			{/if}
+		{/key}
 	</WizardModal>
 </SendTokenContext>

@@ -1,5 +1,5 @@
-import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import type { IcCkToken } from '$icp/types/ic-token';
 import { busy } from '$lib/stores/busy.store';
 import { toastsError } from '$lib/stores/toasts.store';

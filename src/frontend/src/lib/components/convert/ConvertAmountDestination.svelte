@@ -9,28 +9,40 @@
 	import type { DisplayUnit } from '$lib/types/swap';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
 
-	export let sendAmount: OptionAmount = undefined;
-	export let receiveAmount: number | undefined = undefined;
-	export let destinationTokenFee: bigint | undefined = undefined;
-	export let exchangeValueUnit: DisplayUnit = 'usd';
-	export let inputUnit: DisplayUnit = 'token';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		destinationTokenFee?: bigint;
+		exchangeValueUnit?: DisplayUnit;
+		inputUnit?: DisplayUnit;
+	}
+
+	let {
+		sendAmount,
+		receiveAmount = $bindable(),
+		destinationTokenFee,
+		exchangeValueUnit = $bindable('usd'),
+		inputUnit = 'token'
+	}: Props = $props();
 
 	const { destinationToken, destinationTokenBalance, destinationTokenExchangeRate } =
 		getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
-	$: receiveAmount = nonNullish(sendAmount)
-		? nonNullish(destinationTokenFee)
-			? Math.max(
-					Number(sendAmount) -
-						formatTokenBigintToNumber({
-							value: destinationTokenFee,
-							displayDecimals: $destinationToken.decimals,
-							unitName: $destinationToken.decimals
-						}),
-					0
-				)
-			: Number(sendAmount)
-		: undefined;
+	$effect(() => {
+		receiveAmount = nonNullish(sendAmount)
+			? nonNullish(destinationTokenFee)
+				? Math.max(
+						Number(sendAmount) -
+							formatTokenBigintToNumber({
+								value: destinationTokenFee,
+								displayDecimals: $destinationToken.decimals,
+								unitName: $destinationToken.decimals
+							}),
+						0
+					)
+				: Number(sendAmount)
+			: undefined;
+	});
 </script>
 
 <TokenInput
@@ -41,19 +53,22 @@
 	isSelectable={false}
 	token={$destinationToken}
 >
-	<div slot="amount-info" class="text-tertiary">
-		<TokenInputAmountExchange
-			amount={receiveAmount}
-			exchangeRate={$destinationTokenExchangeRate}
-			token={$destinationToken}
-			bind:displayUnit={exchangeValueUnit}
-		/>
-	</div>
+	{#snippet amountInfo()}
+		<div class="text-tertiary">
+			<TokenInputAmountExchange
+				amount={receiveAmount}
+				exchangeRate={$destinationTokenExchangeRate}
+				token={$destinationToken}
+				bind:displayUnit={exchangeValueUnit}
+			/>
+		</div>
+	{/snippet}
 
-	<TokenInputBalance
-		slot="balance"
-		balance={$destinationTokenBalance}
-		testId="convert-amount-destination-balance"
-		token={$destinationToken}
-	/>
+	{#snippet balance()}
+		<TokenInputBalance
+			balance={$destinationTokenBalance}
+			testId="convert-amount-destination-balance"
+			token={$destinationToken}
+		/>
+	{/snippet}
 </TokenInput>

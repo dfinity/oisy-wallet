@@ -34,7 +34,7 @@
 
 	let slippageValueError = $derived(parsedValue >= maxSlippageInvalidValue || parsedValue <= 0);
 
-	let cmp = $state<Collapsible | undefined>(undefined);
+	let cmp = $state<Collapsible | undefined>();
 	let expanded = $state(false);
 
 	const extendedToggleContent = () => {
@@ -90,6 +90,7 @@
 						{name}
 						decimals={SWAP_SLIPPAGE_VALUE_DECIMALS}
 						error={slippageValueError}
+						onInput={() => {}}
 						bind:value={slippageValue}
 						on:focus={onFocus}
 						on:blur={onBlur}

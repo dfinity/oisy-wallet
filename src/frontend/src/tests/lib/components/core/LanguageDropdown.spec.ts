@@ -1,19 +1,22 @@
 import { LANGUAGES, SUPPORTED_LANGUAGES } from '$env/i18n';
 import LanguageDropdown from '$lib/components/core/LanguageDropdown.svelte';
-import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.contants';
+import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.constants';
 import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { Languages } from '$lib/enums/languages';
 import { trackEvent } from '$lib/services/analytics.services';
+import { i18n } from '$lib/stores/i18n.store';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('LanguageDropdown', () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		vi.mock('$lib/services/analytics.services.ts', () => ({
 			trackEvent: vi.fn()
 		}));
+
+		await i18n.switchLang(Languages.ENGLISH);
 	});
 
 	it('should render the language dropdown', () => {
@@ -71,7 +74,11 @@ describe('LanguageDropdown', () => {
 			}
 		}
 
-		expect(container.querySelector('.dropdown-button')).toContainHTML(LANGUAGES[Languages.GERMAN]);
+		await waitFor(() => {
+			expect(container.querySelector('.dropdown-button')).toContainHTML(
+				LANGUAGES[Languages.GERMAN]
+			);
+		});
 	});
 
 	it('should call plausible trackEvent when language is changed', async () => {

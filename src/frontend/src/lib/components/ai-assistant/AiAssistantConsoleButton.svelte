@@ -2,7 +2,7 @@
 	import { fade } from 'svelte/transition';
 	import { AI_ASSISTANT_CONSOLE_ENABLED } from '$env/ai-assistant.env';
 	import AnimatedIconAiAssistant from '$lib/components/icons/animated/AnimatedIconAiAssistant.svelte';
-	import { AI_ASSISTANT_OPEN_CONSOLE } from '$lib/constants/analytics.contants';
+	import { AI_ASSISTANT_OPEN_CONSOLE } from '$lib/constants/analytics.constants';
 	import { AI_ASSISTANT_CONSOLE_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { aiAssistantBetaEnabled } from '$lib/derived/user-experimental-features.derived';

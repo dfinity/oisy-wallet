@@ -3,10 +3,10 @@
 	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
+	import { page } from '$app/state';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import EthAddTokenReview from '$eth/components/tokens/EthAddTokenReview.svelte';
 	import { isInterfaceErc1155 } from '$eth/services/erc1155.services';
-	import type { SaveUserToken } from '$eth/services/erc20-user-tokens.services';
 	import { isInterfaceErc721 } from '$eth/services/erc721.services';
 	import {
 		saveErc1155CustomTokens,
@@ -17,6 +17,7 @@
 	import type { SaveErc1155CustomToken } from '$eth/types/erc1155-custom-token';
 	import type { Erc20Metadata } from '$eth/types/erc20';
 	import type { SaveErc20CustomToken } from '$eth/types/erc20-custom-token.js';
+	import type { SaveUserToken } from '$eth/types/erc20-user-token';
 	import type { Erc721Metadata } from '$eth/types/erc721';
 	import type { SaveErc721CustomToken } from '$eth/types/erc721-custom-token';
 	import type { EthereumNetwork } from '$eth/types/network';
@@ -27,7 +28,7 @@
 	import AddTokenByNetwork from '$lib/components/manage/AddTokenByNetwork.svelte';
 	import ManageTokens from '$lib/components/manage/ManageTokens.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
-	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.contants';
+	import { TRACK_UNRECOGNISED_ERC_INTERFACE } from '$lib/constants/analytics.constants';
 	import { addTokenSteps } from '$lib/constants/steps.constants';
 	import { MANAGE_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -42,6 +43,7 @@
 	import type { Network } from '$lib/types/network';
 	import type { Token, TokenMetadata } from '$lib/types/token';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 	import {
 		isNetworkIdEthereum,
 		isNetworkIdEvm,
@@ -54,20 +56,24 @@
 	import type { SolanaNetwork } from '$sol/types/network';
 	import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
 
-	let {
-		initialSearch,
-		onClose = () => {},
-		infoElement
-	}: { initialSearch?: string; onClose?: () => void; infoElement?: Snippet } = $props();
+	interface Props {
+		initialSearch?: string;
+		onClose?: () => void;
+		infoElement?: Snippet;
+	}
 
-	const steps: WizardSteps<WizardStepsManageTokens> = [
+	let { initialSearch, onClose = () => {}, infoElement }: Props = $props();
+
+	const isNftsPage = $derived(isRouteNfts(page));
+
+	const steps: WizardSteps<WizardStepsManageTokens> = $derived([
 		{
 			name: WizardStepsManageTokens.MANAGE,
-			title: $i18n.tokens.manage.text.title
+			title: isNftsPage ? $i18n.tokens.manage.text.title_nft : $i18n.tokens.manage.text.title
 		},
 		{
 			name: WizardStepsManageTokens.IMPORT,
-			title: $i18n.tokens.import.text.title
+			title: isNftsPage ? $i18n.tokens.import.text.title_nft : $i18n.tokens.import.text.title
 		},
 		{
 			name: WizardStepsManageTokens.REVIEW,
@@ -77,14 +83,14 @@
 			name: WizardStepsManageTokens.SAVING,
 			title: $i18n.tokens.import.text.updating
 		}
-	];
+	]);
 
 	let saveProgressStep: ProgressStepsAddToken = $state(ProgressStepsAddToken.INITIALIZATION);
 
 	let currentStep: WizardStep<WizardStepsManageTokens> | undefined = $state();
 	let modal: WizardModal<WizardStepsManageTokens> | undefined = $state();
 
-	const saveTokens = async ({ detail: tokens }: CustomEvent<Record<string, Token>>) => {
+	const saveTokens = async (tokens: Token[]) => {
 		await saveAllCustomTokens({
 			tokens,
 			progress,
@@ -309,47 +315,49 @@
 >
 	{#snippet title()}{currentStep?.title ?? ''}{/snippet}
 
-	{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
-		{#if isNetworkIdICP(network?.id)}
-			<IcAddTokenReview
-				{indexCanisterId}
-				{ledgerCanisterId}
-				on:icBack={modal.back}
-				on:icSave={addIcrcToken}
-				bind:metadata={icrcMetadata}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsManageTokens.REVIEW}
+			{#if isNetworkIdICP(network?.id)}
+				<IcAddTokenReview
+					{indexCanisterId}
+					{ledgerCanisterId}
+					onBack={modal.back}
+					onSave={addIcrcToken}
+					bind:metadata={icrcMetadata}
+				/>
+			{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
+				<EthAddTokenReview
+					contractAddress={ethContractAddress}
+					{network}
+					onBack={modal.back}
+					onSave={saveEthToken}
+					bind:metadata={ethMetadata}
+				/>
+			{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
+				<SolAddTokenReview
+					{network}
+					onBack={modal.back}
+					onSave={saveSplToken}
+					tokenAddress={splTokenAddress}
+					bind:metadata={splMetadata}
+				/>
+			{/if}
+		{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
+			<InProgressWizard
+				progressStep={saveProgressStep}
+				steps={addTokenSteps($i18n)}
+				warningType="manage"
 			/>
-		{:else if nonNullish(network) && (isNetworkIdEthereum(network?.id) || isNetworkIdEvm(network?.id))}
-			<EthAddTokenReview
-				contractAddress={ethContractAddress}
-				{network}
-				on:icBack={modal.back}
-				on:icSave={saveEthToken}
-				bind:metadata={ethMetadata}
-			/>
-		{:else if nonNullish(network) && isNetworkIdSolana(network?.id)}
-			<SolAddTokenReview
-				{network}
-				onBack={modal.back}
-				onSave={saveSplToken}
-				tokenAddress={splTokenAddress}
-				bind:metadata={splMetadata}
+		{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
+			<AddTokenByNetwork onBack={modal.back} onNext={modal.next} bind:network bind:tokenData />
+		{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
+			<ManageTokens
+				{infoElement}
+				{initialSearch}
+				{isNftsPage}
+				onAddToken={modal.next}
+				onSave={saveTokens}
 			/>
 		{/if}
-	{:else if currentStep?.name === WizardStepsManageTokens.SAVING}
-		<InProgressWizard
-			progressStep={saveProgressStep}
-			steps={addTokenSteps($i18n)}
-			warningType="manage"
-		/>
-	{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
-		<AddTokenByNetwork on:icBack={modal.back} on:icNext={modal.next} bind:network bind:tokenData />
-	{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
-		<ManageTokens
-			{infoElement}
-			{initialSearch}
-			on:icClose={close}
-			on:icAddToken={modal.next}
-			on:icSave={saveTokens}
-		/>
-	{/if}
+	{/key}
 </WizardModal>

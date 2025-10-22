@@ -13,7 +13,7 @@
 		TRACK_COUNT_BTC_SEND_ERROR,
 		TRACK_COUNT_BTC_SEND_SUCCESS,
 		TRACK_COUNT_BTC_VALIDATION_ERROR
-	} from '$lib/constants/analytics.contants';
+	} from '$lib/constants/analytics.constants';
 	import {
 		btcAddressMainnet,
 		btcAddressRegtest,
@@ -23,7 +23,6 @@
 	import { ProgressStepsSendBtc } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -78,6 +77,13 @@
 				: $btcAddressMainnet) ?? ''
 	);
 
+	$effect(() => {
+		[amount];
+
+		// if amount changes, we want to re-fetch the utxos
+		utxosFee = undefined;
+	});
+
 	const close = () => onClose();
 	const back = () => onSendBack();
 
@@ -122,7 +128,6 @@
 		}
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -199,22 +204,24 @@
 	};
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<BtcSendReview
-		{amount}
-		{destination}
-		{onBack}
-		onSend={send}
-		{selectedContact}
-		{source}
-		bind:utxosFee
-	/>
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<BtcSendProgress bind:sendProgressStep />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</BtcSendForm>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<BtcSendReview
+			{amount}
+			{destination}
+			{onBack}
+			onSend={send}
+			{selectedContact}
+			{source}
+			bind:utxosFee
+		/>
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<BtcSendProgress {sendProgressStep} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<BtcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
+		</BtcSendForm>
+	{/if}
+{/key}

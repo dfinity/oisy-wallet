@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { Modal, Html } from '@dfinity/gix-components';
+	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import episodeFour from '$lib/assets/oisy-episode-four.svg';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
@@ -15,12 +17,34 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
+	import { replaceOisyPlaceholders, resolveText } from '$lib/utils/i18n.utils';
+
+	interface Props {
+		reward: RewardCampaignDescription;
+	}
+
+	let { reward }: Props = $props();
+
+	let { title, subtitle, description } = $derived(reward.welcome ?? {});
+
+	let titleStr = $derived(
+		nonNullish(title) ? resolveText({ i18n: $i18n, path: title }) : undefined
+	);
+
+	let subtitleStr = $derived(
+		nonNullish(subtitle) ? resolveText({ i18n: $i18n, path: subtitle }) : undefined
+	);
+
+	let descriptionStr = $derived(
+		nonNullish(description) ? resolveText({ i18n: $i18n, path: description }) : undefined
+	);
 </script>
 
 <Modal onClose={modalStore.close}>
 	{#snippet title()}
-		<span class="text-xl">{replaceOisyPlaceholders($i18n.welcome.title)}</span>
+		{#if notEmptyString(titleStr)}
+			<span class="text-xl">{replaceOisyPlaceholders(titleStr)}</span>
+		{/if}
 	{/snippet}
 
 	<ContentWithToolbar>
@@ -33,8 +57,13 @@
 		</div>
 
 		<div class="text-center">
-			<h3 class="my-3">{$i18n.welcome.subtitle}</h3>
-			<Html text={$i18n.welcome.description} />
+			{#if notEmptyString(subtitleStr)}
+				<h3 class="my-3">{subtitleStr}</h3>
+			{/if}
+
+			{#if notEmptyString(descriptionStr)}
+				<Html text={descriptionStr} />
+			{/if}
 		</div>
 
 		<div class="flex justify-center pt-4">

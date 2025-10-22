@@ -7,6 +7,7 @@ import * as btcUtxosUtils from '$btc/utils/btc-utxos.utils';
 import * as btcUtils from '$icp/utils/btc.utils';
 import * as backendAPI from '$lib/api/backend.api';
 import * as signerAPI from '$lib/api/signer.api';
+import { ZERO } from '$lib/constants/app.constants';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -51,8 +52,7 @@ describe('btc-send.services', () => {
 
 			expect(onProgressSpy).toHaveBeenCalled();
 
-			expect(sendBtcApiSpy).toHaveBeenCalledOnce();
-			expect(sendBtcApiSpy).toHaveBeenCalledWith({
+			expect(sendBtcApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				feeSatoshis: toNullable(defaultParams.utxosFee.feeSatoshis),
@@ -69,8 +69,7 @@ describe('btc-send.services', () => {
 
 			expect(txidStringToUint8ArraySpy).toHaveBeenCalledWith(txid);
 
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledOnce();
-			expect(addPendingBtcTransactionSpy).toHaveBeenCalledWith({
+			expect(addPendingBtcTransactionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: defaultParams.identity,
 				network: mapToSignerBitcoinNetwork({ network: defaultParams.network }),
 				address: defaultParams.source,
@@ -217,7 +216,7 @@ describe('btc-send.services', () => {
 			});
 
 			it('should throw InvalidUtxoData error when UTXO has zero or negative value', async () => {
-				const invalidUtxo = { ...validUtxo, value: 0n };
+				const invalidUtxo = { ...validUtxo, value: ZERO };
 				const params = {
 					...defaultValidateParams,
 					utxosFee: { ...validUtxosFee, utxos: [invalidUtxo] }

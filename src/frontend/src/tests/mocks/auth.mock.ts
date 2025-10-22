@@ -6,5 +6,7 @@ import { readable } from 'svelte/store';
 export const mockAuthStore = (value: Identity | null = mockIdentity) =>
 	vi.spyOn(authStore, 'authIdentity', 'get').mockImplementation(() => readable(value));
 
-export const mockAuthSignedIn = (value = true) =>
+export const mockAuthSignedIn = (value = true) => {
 	vi.spyOn(authStore, 'authSignedIn', 'get').mockImplementation(() => readable(value));
+	vi.spyOn(authStore, 'authNotSignedIn', 'get').mockImplementation(() => readable(!value));
+};

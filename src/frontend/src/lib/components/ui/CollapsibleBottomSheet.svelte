@@ -8,17 +8,14 @@
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 
-	let {
-		content,
-		contentHeader,
-		contentFooter,
-		showContentHeader = false
-	}: {
+	interface Props {
 		content: Snippet;
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
-	} = $props();
+	}
+
+	let { content, contentHeader, contentFooter, showContentHeader = false }: Props = $props();
 
 	let expanded = $state(false);
 </script>
@@ -41,18 +38,20 @@
 
 	{#if expanded}
 		<div class="z-14 fixed inset-0">
-			<BottomSheet transition on:nnsClose={() => (expanded = false)}>
-				<div slot="header" class="w-full p-4">
-					<ButtonIcon
-						ariaLabel={$i18n.core.alt.close_details}
-						onclick={() => (expanded = false)}
-						styleClass="text-disabled float-right"
-					>
-						{#snippet icon()}
-							<IconClose size="24" />
-						{/snippet}
-					</ButtonIcon>
-				</div>
+			<BottomSheet transition>
+				{#snippet header()}
+					<div class="w-full p-4">
+						<ButtonIcon
+							ariaLabel={$i18n.core.alt.close_details}
+							onclick={() => (expanded = false)}
+							styleClass="text-disabled float-right"
+						>
+							{#snippet icon()}
+								<IconClose size="24" />
+							{/snippet}
+						</ButtonIcon>
+					</div>
+				{/snippet}
 
 				<div class="min-h-[35vh] w-full px-4 pb-4">
 					{#if showContentHeader}
@@ -60,13 +59,16 @@
 					{/if}
 					{@render content()}
 				</div>
-				<div slot="footer" class="w-full p-4">
-					{#if nonNullish(contentFooter)}
-						{@render contentFooter(() => {
-							expanded = false;
-						})}
-					{/if}
-				</div>
+
+				{#snippet footer()}
+					<div class="w-full p-4">
+						{#if nonNullish(contentFooter)}
+							{@render contentFooter(() => {
+								expanded = false;
+							})}
+						{/if}
+					</div>
+				{/snippet}
 			</BottomSheet>
 			<Backdrop on:nnsClose={() => (expanded = false)} />
 		</div>

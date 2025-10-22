@@ -15,7 +15,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore, type OpenTransactionParams } from '$lib/stores/modal.store';
 	import type { OptionToken } from '$lib/types/token';
-	import type { AnyTransactionUi } from '$lib/types/transaction';
+	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
@@ -25,8 +25,21 @@
 
 	const { transaction, token }: Props = $props();
 
-	let { id, from, to, value, timestamp, type, txExplorerUrl, fromExplorerUrl, toExplorerUrl } =
-		$derived(transaction);
+	let {
+		id,
+		from,
+		to,
+		value,
+		timestamp,
+		type,
+		txExplorerUrl,
+		fromExplorerUrl,
+		toExplorerUrl,
+		fee,
+		incoming,
+		approveSpender,
+		approveExpiresAt
+	} = $derived(transaction);
 
 	const onSaveAddressComplete = (data: OpenTransactionParams<AnyTransactionUi>) => {
 		modalStore.openIcTransaction({
@@ -66,14 +79,15 @@
 			{/snippet}
 		</ModalHero>
 
-		{#if nonNullish(to) && nonNullish(from)}
+		{#if (nonNullish(to) && nonNullish(from)) || (type === 'approve' && nonNullish(from))}
 			<TransactionContactCard
+				{approveSpender}
 				{from}
 				{fromExplorerUrl}
 				{onSaveAddressComplete}
 				{to}
 				{toExplorerUrl}
-				type={type === 'receive' ? 'receive' : 'send'}
+				type={type === 'receive' ? 'receive' : type === 'approve' ? 'approve' : 'send'}
 			/>
 		{/if}
 
@@ -113,6 +127,32 @@
 					/>
 				</span>
 			</ListItem>
+
+			{#if nonNullish(fee) && nonNullish(token) && !incoming}
+				<ListItem>
+					<span>{$i18n.fee.text.fee}</span>
+
+					<output>
+						{formatToken({
+							value: fee,
+							unitName: token.decimals,
+							displayDecimals: token.decimals
+						})}
+						{token.symbol}
+					</output>
+				</ListItem>
+			{/if}
+			{#if nonNullish(approveExpiresAt)}
+				<ListItem>
+					<span>{$i18n.transaction?.text?.expiration}</span>
+					<output>
+						{formatNanosecondsToDate({
+							nanoseconds: approveExpiresAt,
+							language: $currentLanguage
+						})}
+					</output>
+				</ListItem>
+			{/if}
 		</List>
 
 		{#snippet toolbar()}

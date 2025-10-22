@@ -3,8 +3,6 @@ import {
 	btcAddressMainnet,
 	btcAddressTestnet,
 	ethAddress,
-	ethAddressCertified,
-	ethAddressNotCertified,
 	ethAddressNotLoaded
 } from '$lib/derived/address.derived';
 import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
@@ -16,7 +14,7 @@ import {
 } from '$lib/derived/balances.derived';
 import { isBusy } from '$lib/derived/busy.derived';
 import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
-import { userHasPouhCredential } from '$lib/derived/has-pouh-credential';
+import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
 import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
 import {
 	combinedDerivedSortedFungibleNetworkTokens,
@@ -67,8 +65,6 @@ const derivedList: Record<string, Readable<unknown>> = {
 	exchangeInitialized,
 	exchanges,
 	ethAddress,
-	ethAddressCertified,
-	ethAddressNotCertified,
 	ethAddressNotLoaded,
 	hideZeroBalances,
 	isBusy,

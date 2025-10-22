@@ -1,3 +1,4 @@
+import { NFTS_ENABLED } from '$env/nft.env';
 import {
 	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
@@ -10,9 +11,9 @@ import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
 import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
-import { isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
+import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
 import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
-import { isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
+import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -25,9 +26,10 @@ import type { CertifiedStoreData } from '$lib/stores/certified.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import type { ExchangesData } from '$lib/types/exchange';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Token, TokenToPin, TokenUi } from '$lib/types/token';
+import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
+import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
@@ -100,7 +102,7 @@ export const sortTokens = <T extends Token>({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The sorted list of tokens.
  *
@@ -160,7 +162,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
@@ -271,7 +273,7 @@ export const defineEnabledTokens = <T extends Token>({
 	);
 
 export const groupTogglableTokens = (
-	tokens: Record<string, Token>
+	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
@@ -279,7 +281,7 @@ export const groupTogglableTokens = (
 	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
-	Object.values(tokens ?? {}).reduce<{
+	tokens.reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
@@ -308,7 +310,7 @@ export const saveAllCustomTokens = async ({
 	$authIdentity,
 	$i18n
 }: {
-	tokens: Record<string, Token>;
+	tokens: Token[];
 	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
 	modalNext?: () => void;
 	onSuccess?: () => void;
@@ -393,7 +395,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0
+		...(erc721.length > 0 && NFTS_ENABLED
 			? [
 					saveErc721CustomTokens({
 						...commonParams,
@@ -401,7 +403,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0
+		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
 					saveErc1155CustomTokens({
 						...commonParams,
@@ -419,3 +421,17 @@ export const saveAllCustomTokens = async ({
 			: [])
 	]);
 };
+
+export const filterTokensByNft = ({
+	tokens,
+	filterNfts
+}: {
+	tokens: Token[];
+	filterNfts?: boolean;
+}): Token[] =>
+	isNullish(filterNfts)
+		? tokens
+		: tokens.filter((t) => {
+				const isNft = isTokenErc1155(t) || isTokenErc721(t);
+				return filterNfts ? isNft : !isNft;
+			});
