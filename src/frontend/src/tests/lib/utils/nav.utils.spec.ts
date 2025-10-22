@@ -221,6 +221,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: 'testToken',
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: null
@@ -235,6 +237,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'testNetwork',
 				[URI_PARAM]: null
@@ -249,6 +253,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: 'testURI'
@@ -267,7 +273,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: '💰',
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 		});
 
@@ -283,7 +291,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'mock-params',
-				[URI_PARAM]: 'mock-params'
+				[URI_PARAM]: 'mock-params',
+				[COLLECTION_PARAM]: 'mock-params',
+				[NFT_PARAM]: 'mock-params'
 			});
 		});
 
@@ -299,7 +309,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 		});
 
@@ -325,7 +337,9 @@ describe('nav.utils', () => {
 			expect(result).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'testNetwork',
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 
 			vi.unstubAllGlobals();
