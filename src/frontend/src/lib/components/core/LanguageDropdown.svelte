@@ -5,17 +5,29 @@
 	import IconCheck from '$lib/components/icons/IconCheck.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Dropdown from '$lib/components/ui/Dropdown.svelte';
+	import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.constants';
 	import { LANGUAGE_DROPDOWN } from '$lib/constants/test-ids.constants';
+	import { authSignedIn } from '$lib/derived/auth.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
-	import { Languages } from '$lib/enums/languages';
+	import type { Languages } from '$lib/enums/languages';
+	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
 
 	let dropdown = $state<Dropdown>();
 
 	const currentLang: string = $derived(LANGUAGES[$currentLanguage]);
 
-	const handleLangChange = (lang: string) => {
-		i18n.switchLang(Languages[lang as keyof typeof Languages]);
+	const handleLangChange = async (lang: Languages) => {
+		await i18n.switchLang(lang);
+
+		trackEvent({
+			name: TRACK_CHANGE_LANGUAGE,
+			metadata: {
+				language: lang,
+				source: $authSignedIn ? 'app' : 'landing-page'
+			}
+		});
+
 		dropdown?.close();
 	};
 </script>
@@ -42,7 +54,7 @@
 							alignLeft
 							colorStyle="tertiary-alt"
 							fullWidth
-							onclick={() => handleLangChange(langKey)}
+							onclick={() => handleLangChange(langVal)}
 							paddingSmall
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
 							transparent
