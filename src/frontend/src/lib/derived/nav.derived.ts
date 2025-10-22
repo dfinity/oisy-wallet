@@ -36,10 +36,10 @@ export const routeCollection: Readable<OptionString> = derived(
 	[page],
 	([
 		{
-			// TODO: collectionId --> collection
-			params: { collectionId }
+			params: { collectionId },
+			data: { collection }
 		}
-	]) => collectionId
+	]) => collectionId ?? collection
 );
 
 // TODO: replace with `data` instead of `params`
