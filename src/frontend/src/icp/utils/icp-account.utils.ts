@@ -1,9 +1,13 @@
-import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
-import { assertNever } from '$lib/types/utils';
+import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
 import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
-import { decodeIcrcAccount, encodeIcrcAccount } from '@dfinity/ledger-icrc';
-import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
-import type { Principal } from '@icp-sdk/core/principal';
+import {
+	decodeIcrcAccount,
+	encodeIcrcAccount,
+	fromCandidAccount,
+	toCandidAccount
+} from '@dfinity/ledger-icrc';
+import type { Principal } from '@dfinity/principal';
+import { assertNever, nonNullish } from '@dfinity/utils';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });
@@ -23,10 +27,7 @@ export const parseIcrcv2AccountId = (address: string): Icrcv2AccountId | undefin
 	try {
 		const decoded = decodeIcrcAccount(address);
 		return {
-			WithPrincipal: {
-				owner: decoded.owner,
-				subaccount: toNullable(decoded.subaccount)
-			}
+			WithPrincipal: toCandidAccount(decoded)
 		};
 	} catch (_: unknown) {
 		return undefined;
@@ -44,15 +45,10 @@ export const getIcrcv2AccountIdString = (accountId: Icrcv2AccountId): string => 
 	}
 
 	if ('WithPrincipal' in accountId) {
-		const { owner, subaccount } = accountId.WithPrincipal;
-
-		return encodeIcrcAccount({
-			owner,
-			subaccount: fromNullable(subaccount)
-		});
+		return encodeIcrcAccount(fromCandidAccount(accountId.WithPrincipal));
 	}
 
-	return assertNever({ variable: accountId, typeName: 'Icrcv2AccountId' });
+	assertNever(accountId, `Unexpected Icrcv2AccountId: ${accountId}`);
 };
 
 /**

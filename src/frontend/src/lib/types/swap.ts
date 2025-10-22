@@ -1,12 +1,15 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
+import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
-import type { Identity } from '@icp-sdk/core/agent';
+import type { RequiredTransactionFeeData } from '$lib/types/transaction';
+import type { Identity } from '@dfinity/agent';
 import type {
 	BridgePrice,
 	DeltaPrice,
@@ -14,9 +17,6 @@ import type {
 	QuoteParams,
 	SimpleFetchSDK
 } from '@velora-dex/sdk';
-import type { EthAddress, OptionEthAddress } from './address';
-import type { Amount, OptionAmount } from './send';
-import type { RequiredTransactionFeeData } from './transaction';
 
 export type SwapSelectTokenType = 'source' | 'destination';
 
@@ -59,7 +59,7 @@ export interface FetchSwapAmountsParams {
 	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
-	isSourceTokenIcrc2: boolean;
+	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
 }
 
