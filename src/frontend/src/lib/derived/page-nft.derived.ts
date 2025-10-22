@@ -2,7 +2,7 @@ import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derive
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const pageCollectionNfts: Readable<Nft[]> = derived(

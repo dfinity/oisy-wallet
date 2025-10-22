@@ -2,6 +2,7 @@
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
+	import { SvelteMap } from 'svelte/reactivity';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import NoTokensPlaceholder from '$lib/components/tokens/NoTokensPlaceholder.svelte';
@@ -73,7 +74,7 @@
 		});
 
 		// We need to reset modified tokens; since the filter has changed, the selected token(s) may not be visible anymore
-		modifiedTokens = {};
+		modifiedTokens.clear();
 	};
 
 	// we debounce the filter input for updating the enabled tokens list
@@ -91,31 +92,30 @@
 
 	const onSave = async () => {
 		saveLoading = true;
-		await saveAllCustomTokens({ tokens: Object.values(modifiedTokens), $authIdentity, $i18n });
+		await saveAllCustomTokens({ tokens: tokensToBeSaved, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
 		saveLoading = false;
 	};
 
-	let modifiedTokens: Record<TokenId, Token> = $state({});
+	const modifiedTokens = new SvelteMap<TokenId, Token>();
 
-	let modifiedTokensLen = $derived(Object.getOwnPropertySymbols(modifiedTokens).length);
+	let tokensToBeSaved = $derived([...modifiedTokens.values()]);
 
-	let saveDisabled = $derived(modifiedTokensLen === 0);
+	let tokensToBeSavedLength = $derived(tokensToBeSaved.length);
+
+	let saveDisabled = $derived(tokensToBeSavedLength === 0);
 
 	const onToggle = ({ id, ...rest }: Token) => {
-		const { [id]: current, ...tokens } = modifiedTokens;
+		const current = modifiedTokens.get(id);
 
 		if (nonNullish(current)) {
-			modifiedTokens = { ...tokens };
+			modifiedTokens.delete(id);
 			return;
 		}
 
-		modifiedTokens = {
-			...tokens,
-			[id]: { id, ...rest }
-		};
+		modifiedTokens.set(id, { id, ...rest });
 	};
 
 	let ios = $derived(isIos());
@@ -182,7 +182,7 @@
 									styleClass="py-2"
 								>
 									{$i18n.core.text.apply}
-									{#if modifiedTokensLen > 0}({modifiedTokensLen}){/if}
+									{#if tokensToBeSavedLength > 0}({tokensToBeSavedLength}){/if}
 								</Button>
 							</div>
 						</div>

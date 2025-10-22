@@ -38,9 +38,9 @@
 	);
 </script>
 
-{#if nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
+{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<Nft />
-{:else if nonNullish($routeCollection) && nonNullish($routeNetwork)}
+{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<NftCollection />
 {:else}
 	<div>
