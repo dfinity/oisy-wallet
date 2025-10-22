@@ -7,7 +7,7 @@ import {
 	type QrStatus
 } from '$lib/types/qr-code';
 import type { OptionToken } from '$lib/types/token';
-import { decodePayment } from '@dfinity/ledger-icrc';
+import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 /**

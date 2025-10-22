@@ -19,7 +19,7 @@ import {
 	type BitcoinNetwork,
 	type PendingUtxo,
 	type UtxoStatus
-} from '@dfinity/ckbtc';
+} from '@icp-sdk/canisters/ckbtc';
 import { assertNonNullish, isNullish, jsonReplacer, uint8ArrayToHexString } from '@dfinity/utils';
 
 export class CkBTCUpdateBalanceScheduler

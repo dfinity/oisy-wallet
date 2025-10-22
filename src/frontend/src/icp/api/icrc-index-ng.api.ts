@@ -7,7 +7,7 @@ import {
 	IcrcIndexNgCanister,
 	type IcrcIndexNgGetTransactions,
 	type IcrcNgStatus
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';

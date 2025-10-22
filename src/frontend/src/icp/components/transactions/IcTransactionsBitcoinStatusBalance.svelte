@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
+	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
 	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { blur } from 'svelte/transition';

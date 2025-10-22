@@ -11,7 +11,7 @@ import { mockBlockchainResponse } from '$tests/mocks/blockchain.mock';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { BitcoinCanister, type BitcoinNetwork } from '@dfinity/ckbtc';
+import { BitcoinCanister, type BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';

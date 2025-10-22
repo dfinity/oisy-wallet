@@ -5,7 +5,7 @@ import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
-import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
+import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import {
 	candidNumberArrayToBigInt,
 	fromNullable,

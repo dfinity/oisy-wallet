@@ -11,7 +11,7 @@ import {
 	type RetrieveBtcStatusV2WithId,
 	type UpdateBalanceOk,
 	type Utxo
-} from '@dfinity/ckbtc';
+} from '@icp-sdk/canisters/ckbtc';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';

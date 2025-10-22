@@ -24,7 +24,7 @@ import {
 	MinterNoNewUtxosError,
 	type EstimateWithdrawalFee,
 	type PendingUtxo
-} from '@dfinity/ckbtc';
+} from '@icp-sdk/canisters/ckbtc';
 import {
 	assertNonNullish,
 	isNullish,

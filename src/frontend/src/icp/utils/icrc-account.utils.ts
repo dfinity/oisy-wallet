@@ -1,5 +1,5 @@
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
-import { decodeIcrcAccount, type IcrcAccount, type IcrcSubaccount } from '@dfinity/ledger-icrc';
+import { decodeIcrcAccount, type IcrcAccount, type IcrcSubaccount } from '@icp-sdk/canisters/ledger/icrc';
 import { isNullish } from '@dfinity/utils';
 import type { Principal } from '@icp-sdk/core/principal';
 

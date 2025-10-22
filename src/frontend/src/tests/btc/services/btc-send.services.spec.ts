@@ -11,7 +11,7 @@ import { ZERO } from '$lib/constants/app.constants';
 import { mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { mockUtxosFee } from '$tests/mocks/btc.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 import { toNullable } from '@dfinity/utils';
 
 // Mock environment variables (same as btc-utxos.service.spec.ts)

@@ -23,7 +23,7 @@ import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { Network, NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
 import type { SolanaNetwork } from '$sol/types/network';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import { nonNullish } from '@dfinity/utils';
 
 export type IsNetworkIdUtil = (networkId: NetworkId | undefined) => boolean;

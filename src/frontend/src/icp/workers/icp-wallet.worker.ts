@@ -9,7 +9,7 @@ import type {
 	GetAccountIdentifierTransactionsResponse,
 	Transaction,
 	TransactionWithId
-} from '@dfinity/ledger-icp';
+} from '@icp-sdk/canisters/ledger/icp';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
 
 const getBalanceAndTransactions = ({

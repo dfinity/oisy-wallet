@@ -4,7 +4,7 @@ import { authStore } from '$lib/stores/auth.store';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
 
 describe('network.derived', () => {

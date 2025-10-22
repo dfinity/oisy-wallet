@@ -10,7 +10,7 @@ import {
 	encodeIcrcAccount,
 	fromCandidAccount,
 	type IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import {
 	fromNullable,
 	fromNullishNullable,

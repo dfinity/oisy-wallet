@@ -15,7 +15,7 @@ import {
 	type IcrcStandardRecord,
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';

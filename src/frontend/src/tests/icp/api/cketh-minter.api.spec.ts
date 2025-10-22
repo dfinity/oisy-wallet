@@ -12,7 +12,7 @@ import {
 	type Eip1559TransactionPrice,
 	type RetrieveErc20Request,
 	type RetrieveEthRequest
-} from '@dfinity/cketh';
+} from '@icp-sdk/canisters/cketh';
 import { toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';

@@ -29,7 +29,7 @@ import {
 	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapToSignerBitcoinNetwork
 } from '$lib/utils/network.utils';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import {
 	assertNonNullish,
 	isNullish,

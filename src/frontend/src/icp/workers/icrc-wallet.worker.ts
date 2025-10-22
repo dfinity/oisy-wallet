@@ -24,7 +24,7 @@ import type {
 	IcrcIndexNgGetTransactions,
 	IcrcTransaction,
 	IcrcTransactionWithId
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
 type GetTransactions = IcrcIndexNgGetTransactions;

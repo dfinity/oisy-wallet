@@ -5,7 +5,7 @@ import {
 	tryToParseIcrcAccountStringToAccountIdentifierText
 } from '$icp/utils/icp-account.utils';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
-import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { isNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 

@@ -10,7 +10,7 @@ import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIcrcCustomToken, mockIcrcCustomTokens } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { isNullish, toNullable } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';

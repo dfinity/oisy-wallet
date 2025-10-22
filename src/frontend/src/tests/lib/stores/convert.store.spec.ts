@@ -18,7 +18,7 @@ import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { MinterInfo as CkEthMinterInfo } from '@icp-sdk/canisters/cketh';
 import { get, readable } from 'svelte/store';
 
 const ethExchangeValue = 1;

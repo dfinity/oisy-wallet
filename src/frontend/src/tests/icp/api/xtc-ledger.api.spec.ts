@@ -2,7 +2,7 @@ import { balance, transactions, transfer } from '$icp/api/xtc-ledger.api';
 import { XtcLedgerCanister } from '$icp/canisters/xtc-ledger.canister';
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
-import type { IcrcAccount } from '@dfinity/ledger-icrc';
+import type { IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 

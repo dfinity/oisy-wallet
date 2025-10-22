@@ -8,7 +8,7 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { RetrieveBtcStatusV2WithId } from '@dfinity/ckbtc';
+import type { RetrieveBtcStatusV2WithId } from '@icp-sdk/canisters/ckbtc';
 import { assertNonNullish, jsonReplacer, nonNullish, queryAndUpdate } from '@dfinity/utils';
 
 export class BtcStatusesScheduler implements Scheduler<PostMessageDataRequestIcCk> {

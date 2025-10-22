@@ -1,6 +1,6 @@
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 
 export interface UtxoSelectionResult {
 	selectedUtxos: Utxo[];

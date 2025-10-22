@@ -20,7 +20,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Network } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
-import type { PendingUtxo, RetrieveBtcStatusV2 } from '@dfinity/ckbtc';
+import type { PendingUtxo, RetrieveBtcStatusV2 } from '@icp-sdk/canisters/ckbtc';
 import { fromNullable, isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export const mapCkBTCTransaction = ({

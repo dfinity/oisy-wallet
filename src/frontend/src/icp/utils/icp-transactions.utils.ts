@@ -6,7 +6,7 @@ import type {
 } from '$icp/types/ic-transaction';
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
 import { fromNullable, jsonReplacer, nonNullish } from '@dfinity/utils';
 
 export const mapTransactionIcpToSelf = (

@@ -38,7 +38,7 @@ import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
-import type { MinterInfo } from '@dfinity/cketh';
+import type { MinterInfo } from '@icp-sdk/canisters/cketh';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
 import { InfuraProvider } from 'ethers/providers';

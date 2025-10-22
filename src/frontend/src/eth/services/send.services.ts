@@ -31,7 +31,7 @@ import type { TransferParams } from '$lib/types/send';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
 import type { ResultSuccess } from '$lib/types/utils';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import { encodePrincipalToEthAddress } from '@dfinity/cketh';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import { assertNonNullish, isNullish, nonNullish, toNullable } from '@dfinity/utils';
 import type { TransactionResponse } from 'ethers/providers';
 import { get } from 'svelte/store';

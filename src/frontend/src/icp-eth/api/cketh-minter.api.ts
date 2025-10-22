@@ -1,7 +1,7 @@
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { CkETHMinterCanister, type MinterInfo } from '@dfinity/cketh';
+import { CkETHMinterCanister, type MinterInfo } from '@icp-sdk/canisters/cketh';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';

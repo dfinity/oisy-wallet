@@ -19,7 +19,7 @@ import {
 	mockEthHelperContractAddress
 } from '$tests/mocks/ck-minter.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import type { MinterInfo } from '@dfinity/cketh';
+import type { MinterInfo } from '@icp-sdk/canisters/cketh';
 
 const transaction: Transaction = {
 	blockNumber: 123456,

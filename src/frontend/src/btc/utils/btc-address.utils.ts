@@ -10,7 +10,7 @@ import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
 	type BtcAddressInfo
-} from '@dfinity/ckbtc';
+} from '@icp-sdk/canisters/ckbtc';
 import { assertNever } from '@dfinity/utils';
 import { get } from 'svelte/store';
 

@@ -22,7 +22,7 @@ import {
 	type IcrcBlockIndex,
 	type IcrcGetBlocksResult,
 	type IcrcTokenMetadataResponse
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { toNullable } from '@dfinity/utils';
 import { mock } from 'vitest-mock-extended';
 

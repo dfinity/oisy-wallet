@@ -6,7 +6,7 @@ import type {
 	Eip1559TransactionPriceParams,
 	RetrieveErc20Request,
 	RetrieveEthRequest
-} from '@dfinity/cketh';
+} from '@icp-sdk/canisters/cketh';
 import { assertNonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 

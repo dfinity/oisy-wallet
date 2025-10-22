@@ -30,7 +30,7 @@ import {
 	mapTokenMetadata,
 	type IcrcTokenMetadataResponse,
 	type IcrcValue
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {

@@ -4,7 +4,7 @@ import * as authClientApi from '$lib/api/auth-client.api';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 

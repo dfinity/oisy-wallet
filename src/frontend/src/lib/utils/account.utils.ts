@@ -1,4 +1,4 @@
-import { checkAccountId } from '@dfinity/ledger-icp';
+import { checkAccountId } from '@icp-sdk/canisters/ledger/icp';
 import { isNullish } from '@dfinity/utils';
 import { isAddress } from 'ethers/address';
 
