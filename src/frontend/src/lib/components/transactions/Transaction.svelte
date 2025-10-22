@@ -93,20 +93,22 @@
 
 	let fetchedNft = $state<Nft | undefined>();
 
+	// It may happen that an NFT was sent out by the user or burnt.
+	// In that case, it will not be in the nftStore anymore.
+	// So we cannot find it and render the image in the transaction list.
+	// However, we prefer to always show it, so we try and fetch the metadata anyway.
 	const updateFetchedNft = async () => {
+		if (nonNullish(existingNft)) {
+			return;
+		}
+
 		if (isNullish($nftStore) || !isTokenNonFungible(token) || isNullish(tokenId)) {
 			return;
 		}
 
-		// It may happen that an NFT was sent out by the user or burnt.
-		// In that case, it will not be in the nftStore anymore.
-		// So we cannot find it and render the image in the transaction list.
-		// However, we prefer to always show it, so we try and fetch the metadata anyway.
-		if (isNullish(existingNft)) {
-			const { getNftMetadata } = alchemyProviders(network.id);
+		const { getNftMetadata } = alchemyProviders(network.id);
 
-			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
-		}
+		fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
 	};
 
 	$effect(() => {
