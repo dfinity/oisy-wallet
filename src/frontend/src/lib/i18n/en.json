@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "We improved OISY when being installed on your homescreen. If you encounter issues connecting to OISY from other applications, please remove OISY from your homescreen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>"
+			"standalone_mode": "We improved OISY when it's installed on a homescreen, like you have. If you encounter issues connecting to OISY from other applications, please remove OISY from the homescreen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>"
 		}
 	},
 	"navigation": {
