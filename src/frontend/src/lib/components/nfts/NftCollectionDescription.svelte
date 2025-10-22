@@ -15,12 +15,15 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		collection?: NftCollection;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection }: Props = $props();
+	const { collection, fromRoute }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)
@@ -35,6 +38,13 @@
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
+
+	const gotoCollection = (): void => {
+		const url = nftsUrl({ collection, fromRoute });
+		if (nonNullish(url)) {
+			goto(url);
+		}
+	};
 </script>
 
 {#if nonNullish(collection)}
@@ -49,7 +59,7 @@
 					<Button
 						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
-						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+						onclick={gotoCollection}
 						paddingSmall
 						styleClass="inline-block text-sm"
 					>
