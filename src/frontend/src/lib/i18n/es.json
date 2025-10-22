@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "No cierres esta pestaña hasta que la transacción esté completa",
-			"standalone_mode": "Hemos actualizado cómo funciona $oisy_short como una aplicación web, por favor, elimínala de tu pantalla de inicio y vuelve a instalarla (en iPhone, asegúrate de deseleccionar “Abrir como aplicación web”).<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Leer más</a>"
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
