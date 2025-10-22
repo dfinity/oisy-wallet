@@ -11,7 +11,7 @@ import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NonFungibleToken, OwnedContract } from '$lib/types/nft';
+import type { Nft, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { areAddressesEqual } from '$lib/utils/address.utils';
@@ -24,6 +24,7 @@ import {
 	AlchemySubscription,
 	NftOrdering,
 	type AlchemyEventType,
+	type Nft as AlchemyNft,
 	type AlchemySettings,
 	type Network,
 	type OwnedNft,
@@ -152,7 +153,7 @@ export class AlchemyProvider {
 		},
 		token
 	}: {
-		nft: OwnedNft;
+		nft: Omit<OwnedNft, 'balance'> & Partial<Pick<OwnedNft, 'balance'>>;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
 		const attributes = untypedAttributes as {
@@ -247,6 +248,24 @@ export class AlchemyProvider {
 		}, []);
 
 		return Promise.all(nftPromises);
+	};
+
+	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-metadata-endpoints/get-nft-metadata-v-3
+	getNftMetadata = async ({
+		token,
+		tokenId
+	}: {
+		token: NonFungibleToken;
+		tokenId: NftId;
+	}): Promise<Nft> => {
+		const { address: contractAddress } = token;
+
+		const nft: AlchemyNft = await this.deprecatedProvider.nft.getNftMetadata(
+			contractAddress,
+			tokenId
+		);
+
+		return await this.mapNftFromRpc({ nft, token });
 	};
 
 	// https://www.alchemy.com/docs/reference/nft-api-endpoints/nft-api-endpoints/nft-ownership-endpoints/get-contracts-for-owner-v-3
