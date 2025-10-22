@@ -1,13 +1,13 @@
-import { routeCollection, routeNft, routeNftNetwork } from '$lib/derived/nav.derived';
+import { routeCollection, routeNetwork, routeNft, routeNftNetwork } from '$lib/derived/nav.derived';
 import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const pageCollectionNfts: Readable<Nft[]> = derived(
-	[nftStore, routeCollection, routeNftNetwork],
-	([$nftStore, $routeCollection, $routeNftNetwork]) => {
+	[nftStore, routeCollection, routeNftNetwork, routeNetwork],
+	([$nftStore, $routeCollection, $routeNftNetwork, $routeNetwork]) => {
 		if (isNullish($nftStore)) {
 			return [];
 		}
@@ -16,10 +16,17 @@ export const pageCollectionNfts: Readable<Nft[]> = derived(
 			({
 				collection: {
 					address,
-					network: { name: networkName }
+					network: {
+						name: networkName,
+						id: { description: networkId }
+					}
 				}
 				// TODO: Confirm that `$routeNftNetwork` is the network name (not the ID) when comparing to `networkName` here.
-			}) => address === $routeCollection && networkName === $routeNftNetwork
+			}) =>
+				address === $routeCollection &&
+				(nonNullish($routeNftNetwork)
+					? networkName === $routeNftNetwork
+					: networkId === $routeNetwork)
 		);
 	}
 );
