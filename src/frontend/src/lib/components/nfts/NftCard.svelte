@@ -41,8 +41,7 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default',
-		fromRoute
+		source = 'default'
 	}: Props = $props();
 
 	const onClick = () => {

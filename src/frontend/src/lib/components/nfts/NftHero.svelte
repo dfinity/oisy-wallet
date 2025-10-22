@@ -24,7 +24,7 @@
 		fromRoute: NavigationTarget | null;
 	}
 
-	const { token, nft, fromRoute }: Props = $props();
+	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];

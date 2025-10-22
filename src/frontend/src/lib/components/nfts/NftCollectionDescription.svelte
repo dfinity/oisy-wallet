@@ -22,7 +22,7 @@
 		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, fromRoute }: Props = $props();
+	const { collection }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)

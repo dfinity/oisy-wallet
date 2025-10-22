@@ -27,7 +27,7 @@
 		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId, fromRoute }: Props = $props();
+	const { collection, disabled, testId }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
