@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
@@ -18,15 +18,17 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection: NftCollectionUi;
 		disabled?: boolean;
 		testId?: string;
+		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId }: Props = $props();
+	const { collection, disabled, testId, fromRoute }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -54,7 +56,10 @@
 			}
 		});
 
-		goto(`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`);
+		const url = nftsUrl({ collection: collection.collection, fromRoute });
+		if (nonNullish(url)) {
+			goto(url);
+		}
 	};
 </script>
 

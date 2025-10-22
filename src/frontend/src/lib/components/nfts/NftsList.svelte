@@ -124,6 +124,7 @@
 		{:else}
 			<NftCollectionList
 				asMainSection
+				{fromRoute}
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -131,6 +132,7 @@
 
 			{#if $showHidden}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={hiddenCollections}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
@@ -143,6 +145,7 @@
 
 			{#if $showSpam}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={spamCollections}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
