@@ -6,7 +6,6 @@ import type {
 	AlchemyProviderContract,
 	AlchemyProviderContracts
 } from '$eth/types/alchemy-contract';
-import type { AlchemyProviderOwnedNfts } from '$eth/types/alchemy-nfts';
 import type { Erc1155Metadata } from '$eth/types/erc1155';
 import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
@@ -26,7 +25,8 @@ import {
 	NftOrdering,
 	type AlchemyEventType,
 	type AlchemySettings,
-	type Network
+	type Network,
+	type OwnedNftsResponse
 } from 'alchemy-sdk';
 import type { Listener } from 'ethers/utils';
 import { get } from 'svelte/store';
@@ -162,21 +162,23 @@ export class AlchemyProvider {
 		address: EthAddress;
 		tokens: NonFungibleToken[];
 	}): Promise<Nft[]> => {
-		const result: AlchemyProviderOwnedNfts = await this.deprecatedProvider.nft.getNftsForOwner(
-			address,
-			{
-				contractAddresses: tokens.map((token) => token.address),
-				omitMetadata: false,
-				orderBy: NftOrdering.TRANSFERTIME
-			}
-		);
+		const result: OwnedNftsResponse = await this.deprecatedProvider.nft.getNftsForOwner(address, {
+			contractAddresses: tokens.map((token) => token.address),
+			omitMetadata: false,
+			orderBy: NftOrdering.TRANSFERTIME
+		});
 
 		const nftPromises = result.ownedNfts.reduce<Promise<Nft>[]>((acc, ownedNft) => {
 			const {
 				raw: {
-					metadata: { attributes }
+					metadata: { attributes: untypedAttributes }
 				}
 			} = ownedNft;
+
+			const attributes = untypedAttributes as {
+				trait_type: string;
+				value: string;
+			}[];
 
 			const token = tokens.find(({ address, network: { id: networkId } }) =>
 				areAddressesEqual({
