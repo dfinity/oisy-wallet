@@ -19,7 +19,7 @@
 	});
 </script>
 
-<svelte:window on:resize={rerender} />
+<svelte:window onresize={rerender} />
 
 <div
 	class="mx-auto mb-8 aspect-square h-80 max-h-[44vh] max-w-[100%] rounded-xl bg-white p-4"

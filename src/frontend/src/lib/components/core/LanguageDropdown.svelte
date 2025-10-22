@@ -14,8 +14,8 @@
 
 	const currentLang: string = $derived(LANGUAGES[$currentLanguage]);
 
-	const handleLangChange = (lang: string) => {
-		i18n.switchLang(Languages[lang as keyof typeof Languages]);
+	const handleLangChange = async (lang: string) => {
+		await i18n.switchLang(Languages[lang as keyof typeof Languages]);
 		dropdown?.close();
 	};
 </script>
