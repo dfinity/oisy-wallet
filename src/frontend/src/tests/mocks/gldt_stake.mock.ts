@@ -1,4 +1,7 @@
-import type { StakePositionResponse } from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type {
+	DailyAnalytics,
+	StakePositionResponse
+} from '$declarations/gldt_stake/declarations/gldt_stake.did';
 import type { Duration } from '$declarations/gldt_stake/gldt_stake.did';
 import { mockPrincipal } from '$tests/mocks/identity.mock';
 import { toNullable } from '@dfinity/utils';
@@ -24,3 +27,10 @@ export const stakePositionMockResponse = {
 	weighted_stake: 1000n,
 	instant_dissolve_fee: 1000n
 } as StakePositionResponse;
+
+export const dailyAnalyticsMockResponse = {
+	apy: 5,
+	staked_gldt: 1000000n,
+	rewards: toNullable([{ ICP: null }, 100n]),
+	weighted_stake: 1000n
+} as DailyAnalytics;

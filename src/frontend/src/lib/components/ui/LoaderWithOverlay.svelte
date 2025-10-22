@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Spinner } from '@dfinity/gix-components';
+
 	interface Props {
 		testId?: string;
 		ariaLabel?: string;
