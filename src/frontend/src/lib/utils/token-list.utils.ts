@@ -6,6 +6,7 @@ import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { SvelteMap } from 'svelte/reactivity';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
 	token.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0 ||
@@ -43,11 +44,11 @@ export const getDisabledOrModifiedTokens = ({
 	selectedNetwork
 }: {
 	$allTokens: TokenToggleable<Token>[];
-	modifiedTokens: Record<TokenId, Token>;
+	modifiedTokens: SvelteMap<TokenId, Token>;
 	selectedNetwork?: Network;
 }): TokenUiOrGroupUi[] =>
 	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
-		const isModified = nonNullish(modifiedTokens[token.id]);
+		const isModified = nonNullish(modifiedTokens.get(token.id));
 		if (
 			(!token.enabled || (token.enabled && isModified)) &&
 			showTokenFilteredBySelectedNetwork({
