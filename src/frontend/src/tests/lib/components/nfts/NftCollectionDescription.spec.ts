@@ -1,23 +1,30 @@
 import * as navUtils from '$app/navigation';
 import NftCollectionDescription from '$lib/components/nfts/NftCollectionDescription.svelte';
-import { AppPath } from '$lib/constants/routes.constants';
+import { NETWORK_PARAM } from '$lib/constants/routes.constants';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
 	NFT_COLLECTION_ACTION_SPAM
 } from '$lib/constants/test-ids.constants';
 import { i18n } from '$lib/stores/i18n.store';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import * as nftsUtils from '$lib/utils/nfts.utils';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
+import type { NavigationTarget } from '@sveltejs/kit';
 import { fireEvent, render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
 describe('NftCollectionDescription', () => {
+	const mockFromRoute: NavigationTarget = {
+		url: new URL(`https://example.com/?${NETWORK_PARAM}=test-network`)
+	} as unknown as NavigationTarget;
+
 	it('renders the description if available', () => {
 		const { container } = render(NftCollectionDescription, {
 			props: {
-				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' },
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -38,7 +45,8 @@ describe('NftCollectionDescription', () => {
 	it('should not render anything if no collection data is available', () => {
 		const { container } = render(NftCollectionDescription, {
 			props: {
-				collection: undefined
+				collection: undefined,
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -55,7 +63,8 @@ describe('NftCollectionDescription', () => {
 
 		const { getByTestId } = render(NftCollectionDescription, {
 			props: {
-				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' },
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -75,7 +84,8 @@ describe('NftCollectionDescription', () => {
 
 		const { getByText } = render(NftCollectionDescription, {
 			props: {
-				collection
+				collection,
+				fromRoute: mockFromRoute
 			}
 		});
 
@@ -83,8 +93,6 @@ describe('NftCollectionDescription', () => {
 
 		await fireEvent.click(link);
 
-		expect(gotoSpy).toHaveBeenCalledWith(
-			`${AppPath.Nfts}${collection.network.name}-${collection.address}`
-		);
+		expect(gotoSpy).toHaveBeenCalledWith(nftsUrl({ collection, fromRoute: mockFromRoute }));
 	});
 });
