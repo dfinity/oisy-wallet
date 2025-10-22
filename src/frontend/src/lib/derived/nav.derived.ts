@@ -31,7 +31,7 @@ export const routeNftNetwork: Readable<OptionString> = derived(
 	]) => networkId
 );
 
-// TODO: replace with `data` instead of `params`
+// TODO: remove `data`
 export const routeCollection: Readable<OptionString> = derived(
 	[page],
 	([
