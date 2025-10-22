@@ -31,7 +31,6 @@
 {/if}
 
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-<PwaBanner />
 
 <style lang="scss">
 	div.test-banner {
