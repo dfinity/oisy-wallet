@@ -51,7 +51,7 @@
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-				event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_COLLECTION_PAGE,
 				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
 				token_network: previewNft.collection.network.name,
 				token_address: previewNft.collection.address,
@@ -62,7 +62,14 @@
 	}}
 >
 	<div class="relative h-full w-full">
-		<NftDisplayGuard nft={previewNft} type="card">
+		<NftDisplayGuard
+			location={{
+				source: PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE,
+				subSource: 'card'
+			}}
+			nft={previewNft}
+			type="card"
+		>
 			<div
 				class="relative grid aspect-square gap-2 overflow-hidden rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-1.5"
 				class:grid-cols-1={collection.nfts.length === 1}

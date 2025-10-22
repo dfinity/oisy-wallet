@@ -1,20 +1,7 @@
 import { TRACK_CHANGE_LANGUAGE } from '$lib/constants/analytics.constants';
 import { authSignedIn } from '$lib/derived/auth.derived';
 import { Languages } from '$lib/enums/languages';
-import ar from '$lib/i18n/ar.json';
-import cs from '$lib/i18n/cs.json';
-import de from '$lib/i18n/de.json';
 import en from '$lib/i18n/en.json';
-import es from '$lib/i18n/es.json';
-import fr from '$lib/i18n/fr.json';
-import hi from '$lib/i18n/hi.json';
-import it from '$lib/i18n/it.json';
-import ja from '$lib/i18n/ja.json';
-import pl from '$lib/i18n/pl.json';
-import pt from '$lib/i18n/pt.json';
-import ru from '$lib/i18n/ru.json';
-import vi from '$lib/i18n/vi.json';
-import zhcn from '$lib/i18n/zh-CN.json';
 import { trackEvent } from '$lib/services/analytics.services';
 import { getDefaultLang, mergeWithFallback } from '$lib/utils/i18n.utils';
 import { get, set } from '$lib/utils/storage.utils';
@@ -25,116 +12,37 @@ export const enI18n = (): I18n => ({
 	lang: Languages.ENGLISH
 });
 
-const arI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: ar as I18n }),
-	lang: Languages.ARABIC
-});
+const loadLangI18n = async (lang: Languages): Promise<I18n> => {
+	const langMod = await import(`$lib/i18n/${lang}.json`);
 
-const csI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: cs as I18n }),
-	lang: Languages.CZECH
-});
+	return {
+		...mergeWithFallback({ refLang: enI18n(), targetLang: langMod.default }),
+		lang
+	};
+};
 
-const deI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: de as I18n }),
-	lang: Languages.GERMAN
-});
-
-const esI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: es as I18n }),
-	lang: Languages.SPANISH
-});
-
-const frI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: fr as I18n }),
-	lang: Languages.FRENCH
-});
-
-const hiI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: hi as I18n }),
-	lang: Languages.HINDI
-});
-
-const itI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: it as I18n }),
-	lang: Languages.ITALIAN
-});
-
-const jaI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: ja as I18n }),
-	lang: Languages.JAPANESE
-});
-
-const plI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: pl as I18n }),
-	lang: Languages.POLISH
-});
-
-const ptI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: pt as I18n }),
-	lang: Languages.PORTUGUESE
-});
-
-const ruI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: ru as I18n }),
-	lang: Languages.RUSSIAN
-});
-
-const viI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: vi as I18n }),
-	lang: Languages.VIETNAMESE
-});
-
-const zhcnI18n = (): I18n => ({
-	...mergeWithFallback({ refLang: enI18n(), targetLang: zhcn as I18n }),
-	lang: Languages.CHINESE_SIMPLIFIED
-});
-
-const loadLang = (lang: Languages): I18n => {
-	switch (lang) {
-		case Languages.ARABIC:
-			return arI18n();
-		case Languages.CHINESE_SIMPLIFIED:
-			return zhcnI18n();
-		case Languages.CZECH:
-			return csI18n();
-		case Languages.FRENCH:
-			return frI18n();
-		case Languages.GERMAN:
-			return deI18n();
-		case Languages.HINDI:
-			return hiI18n();
-		case Languages.ITALIAN:
-			return itI18n();
-		case Languages.JAPANESE:
-			return jaI18n();
-		case Languages.POLISH:
-			return plI18n();
-		case Languages.PORTUGUESE:
-			return ptI18n();
-		case Languages.RUSSIAN:
-			return ruI18n();
-		case Languages.SPANISH:
-			return esI18n();
-		case Languages.VIETNAMESE:
-			return viI18n();
-		default:
-			return enI18n();
+const loadLang = async (lang: Languages): Promise<I18n> => {
+	try {
+		return await loadLangI18n(lang);
+	} catch (_: unknown) {
+		return enI18n();
 	}
 };
 
 const saveLang = (lang: Languages) => set({ key: 'lang', value: lang });
 
 export interface I18nStore extends Readable<I18n> {
-	init: () => void;
-	switchLang: (lang: Languages) => void;
+	init: () => Promise<void>;
+	switchLang: (lang: Languages) => Promise<void>;
 }
 
 const initI18n = (): I18nStore => {
-	const { subscribe, set } = writable<I18n>(loadLang(getDefaultLang()));
+	const { subscribe, set } = writable<I18n>(enI18n());
 
-	const switchLang = ({ lang, track = true }: { lang: Languages; track?: boolean }) => {
-		set(loadLang(lang));
+	const switchLang = async ({ lang, track = true }: { lang: Languages; track?: boolean }) => {
+		const language = await loadLang(lang);
+
+		set(language);
 
 		if (track) {
 			trackEvent({
@@ -152,7 +60,7 @@ const initI18n = (): I18nStore => {
 	return {
 		subscribe,
 
-		init: () => {
+		init: async () => {
 			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
 
 			if (lang === getDefaultLang()) {
@@ -161,7 +69,7 @@ const initI18n = (): I18nStore => {
 				return;
 			}
 
-			switchLang({ lang, track: false });
+			await switchLang({ lang, track: false });
 		},
 
 		switchLang: (lang: Languages) => switchLang({ lang })

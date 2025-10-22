@@ -111,7 +111,7 @@
 
 	const trackEventOnClick = (clickedButton: string) => {
 		trackEvent({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
 				event_value: clickedButton,

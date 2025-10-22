@@ -2,12 +2,15 @@ import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
 import type { NetworkId } from '$lib/types/network';
+import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
@@ -166,4 +169,34 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	}
 
 	await goto(url, { replaceState: true, noScroll: true });
+};
+
+export const nftsUrl = (
+	params: {
+		fromRoute: NavigationTarget | null;
+	} & (
+		| {
+				nft?: Nft;
+		  }
+		| {
+				collection?: NftCollection;
+		  }
+	)
+): string | undefined => {
+	const { fromRoute } = params;
+
+	if ('nft' in params && nonNullish(params.nft)) {
+		fromRoute?.url.searchParams.set(NFT_PARAM, params.nft.id);
+		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
+		if (nonNullish(params.nft.collection.network.id.description)) {
+			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.nft.collection.network.id.description);
+		}
+	} else if ('collection' in params && nonNullish(params.collection)) {
+		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.collection.address);
+		if (nonNullish(params.collection.network.id.description)) {
+			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.collection.network.id.description);
+		}
+	}
+
+	return fromRoute?.url.toString();
 };

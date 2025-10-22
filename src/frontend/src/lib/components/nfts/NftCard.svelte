@@ -51,12 +51,13 @@
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
 					event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
-					event_value: PLAUSIBLE_EVENT_VALUES.NFT,
+					event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
 					location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
 					token_network: nft.collection.network.name,
 					token_address: nft.collection.address,
 					token_symbol: nft.collection.symbol ?? '',
-					token_name: nft.collection.name ?? ''
+					token_name: nft.name ?? '',
+					token_id: nft.id
 				}
 			});
 
@@ -80,7 +81,17 @@
 		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
-		<NftDisplayGuard {nft} type={type !== 'card-link' ? 'card-selectable' : 'card'}>
+		<NftDisplayGuard
+			location={{
+				source:
+					source === NFT_LIST_ROUTE
+						? PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE
+						: PLAUSIBLE_EVENT_SOURCES.NFT_COLLECTION,
+				subSource: 'card'
+			}}
+			{nft}
+			type={type !== 'card-link' ? 'card-selectable' : 'card'}
+		>
 			<div class="h-full w-full">
 				<BgImg
 					imageUrl={nft?.imageUrl}
