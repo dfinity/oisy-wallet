@@ -376,10 +376,10 @@ describe('nav.utils', () => {
 			const result = loadRouteParams({
 				url: {
 					searchParams: {
-						get: vi.fn((key) => {
+						get: vi.fn((key) => 
 							// explicitly return null for all keys
-							return null;
-						})
+							 null
+						)
 					}
 				}
 			} as unknown as LoadEvent);
