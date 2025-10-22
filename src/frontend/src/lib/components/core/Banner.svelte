@@ -4,7 +4,6 @@
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isPWAStandalone } from '$lib/utils/device.utils';
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let envBannerVisible = $state(true);
@@ -48,7 +47,7 @@
 {/if}
 
 <!-- TODO remove this WarningBanner again as soon a solution is found for enabling display type standalone  -->
-{#if isPWAStandalone() && pwaBannerVisible}
+{#if pwaBannerVisible}
 	<div
 		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
