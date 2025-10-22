@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { Html, IconClose, IconWarning } from '@dfinity/gix-components';
+	import IconInfo from '$lib/components/icons/lucide/IconInfo.svelte';
 	import WarningBanner from '$lib/components/ui/WarningBanner.svelte';
 	import { BETA, STAGING } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let envBannerVisible = $state(true);
 	let pwaBannerVisible = $state(true);
