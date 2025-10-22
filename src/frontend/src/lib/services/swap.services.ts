@@ -664,19 +664,23 @@ const fetchVeloraSwapAmount = async ({
 		partner: OISY_URL_HOSTNAME
 	};
 
-	const data = await sdk.quote.getQuote(
-		srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
-	);
+	try {
+		const data = await sdk.quote.getQuote(
+			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
+		);
 
-	if ('delta' in data) {
-		return mapVeloraSwapResult(data);
+		if ('delta' in data) {
+			return mapVeloraSwapResult(data);
+		}
+
+		if ('market' in data) {
+			return mapVeloraMarketSwapResult(data.market);
+		}
+
+		return null;
+	} catch (_: unknown) {
+		return null;
 	}
-
-	if ('market' in data) {
-		return mapVeloraMarketSwapResult(data.market);
-	}
-
-	return null;
 };
 
 export const withdrawUserUnusedBalance = async ({
