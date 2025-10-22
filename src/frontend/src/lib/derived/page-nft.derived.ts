@@ -21,7 +21,7 @@ export const pageCollectionNfts: Readable<Nft[]> = derived(
 						id: { description: networkId }
 					}
 				}
-				// TODO: Confirm that `$routeNftNetwork` is the network name (not the ID) when comparing to `networkName` here.
+				// TODO: Remove check by network name once routing refactoring has been completed
 			}) =>
 				address === $routeCollection &&
 				(nonNullish($routeNftNetwork)
