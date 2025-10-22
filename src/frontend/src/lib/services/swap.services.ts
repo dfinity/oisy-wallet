@@ -312,10 +312,10 @@ const fetchSwapAmountsICP = async ({
 				trackEvent({
 					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 					metadata: {
+						...trackEventBaseParams,
 						event_subcontext: provider.key,
 						result_status: 'error',
-						result_error: result.reason.message,
-						...trackEventBaseParams
+						result_error: result.reason.message
 					}
 				});
 
@@ -341,9 +341,9 @@ const fetchSwapAmountsICP = async ({
 				trackEvent({
 					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 					metadata: {
+						...trackEventBaseParams,
 						event_subcontext: provider.key,
 						result_status: 'success',
-						...trackEventBaseParams,
 						...(nonNullish(destinationUsdValue) && {
 							token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
 						})
@@ -764,9 +764,9 @@ const fetchVeloraSwapAmount = async ({
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 				metadata: {
+					...trackEventBaseParams,
 					result_status: 'success',
 					event_type: 'delta',
-					...trackEventBaseParams,
 					...(nonNullish(destinationUsdValue) && {
 						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
 					})
@@ -784,9 +784,9 @@ const fetchVeloraSwapAmount = async ({
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 				metadata: {
+					...trackEventBaseParams,
 					result_status: 'success',
 					event_type: 'market',
-					...trackEventBaseParams,
 					...(nonNullish(destinationUsdValue) && {
 						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
 					})
@@ -802,9 +802,9 @@ const fetchVeloraSwapAmount = async ({
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 			metadata: {
+				...trackEventBaseParams,
 				result_status: 'error',
-				result_error: errorMessage,
-				...trackEventBaseParams
+				result_error: errorMessage
 			}
 		});
 
