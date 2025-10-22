@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
@@ -9,20 +8,19 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
-	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
 		collection?: NftCollection;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, fromRoute }: Props = $props();
+	const { collection }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)
@@ -37,13 +35,6 @@
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
-
-	const gotoCollection = (): void => {
-		const url = nftsUrl({ collection, fromRoute });
-		if (nonNullish(url)) {
-			goto(url);
-		}
-	};
 </script>
 
 {#if nonNullish(collection)}
@@ -58,7 +49,7 @@
 					<Button
 						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
-						onclick={gotoCollection}
+						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
 						paddingSmall
 						styleClass="inline-block text-sm"
 					>
