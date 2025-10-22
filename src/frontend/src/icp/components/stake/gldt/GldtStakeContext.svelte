@@ -24,7 +24,7 @@
 
 			gldtStakeStore.setApy(Math.round(apy * 100) / 100);
 		} catch (_err: unknown) {
-			gldtStakeStore.setApy(undefined);
+			gldtStakeStore.resetApy();
 		}
 	};
 
@@ -39,7 +39,7 @@
 
 			gldtStakeStore.setPosition(position);
 		} catch (_err: unknown) {
-			gldtStakeStore.setPosition(undefined);
+			gldtStakeStore.resetPosition();
 		}
 	};
 
