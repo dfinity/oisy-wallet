@@ -1,7 +1,10 @@
 import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
-import { IcrcLedgerCanister, mapTokenMetadata } from '@dfinity/ledger-icrc';
-import type { IcrcTokenMetadataResponse } from '@dfinity/ledger-icrc/dist/types/types/ledger.responses';
+import {
+	IcrcLedgerCanister,
+	mapTokenMetadata,
+	type IcrcTokenMetadataResponse
+} from '@dfinity/ledger-icrc';
 import { createAgent } from '@dfinity/utils';
 import { AnonymousIdentity, type HttpAgent } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
