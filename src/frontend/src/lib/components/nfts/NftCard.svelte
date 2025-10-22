@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
@@ -11,7 +11,6 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
