@@ -260,9 +260,9 @@ const fetchSwapAmountsICP = async ({
 	tokens,
 	slippage,
 	isSourceTokenIcrc2
-}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & { amount: bigint }): Promise<
-	SwapMappedResult[]
-> => {
+}: Omit<FetchSwapAmountsParams, 'userEthAddress' | 'amount'> & {
+	amount: bigint;
+}): Promise<SwapMappedResult[]> => {
 	const enabledProviders = swapProviders.filter(({ isEnabled }) => isEnabled);
 
 	const settledResults = await Promise.allSettled(
