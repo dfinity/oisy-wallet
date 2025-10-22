@@ -24,7 +24,6 @@ import {
 } from '$lib/api/icp-swap-pool.api';
 import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
-import { TRACK_SWAP_OFFER } from '$lib/constants/analytics.constants';
 import {
 	KONG_BACKEND_CANISTER_ID,
 	NANO_SECONDS_IN_MINUTE,
@@ -39,6 +38,7 @@ import {
 	SWAP_SIDE
 } from '$lib/constants/swap.constants';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -87,7 +87,6 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
-import { formatUnits } from 'ethers/utils';
 import { get } from 'svelte/store';
 
 export const fetchKongSwap = async ({
@@ -288,16 +287,21 @@ const fetchSwapAmountsICP = async ({
 	});
 
 	const trackEventBaseParams = {
-		sourceToken: sourceToken.symbol,
-		sourceTokenNetwork: sourceToken.network.name,
-		sourceTokenCanister: (sourceToken as IcToken).ledgerCanisterId,
-		sourceAmount: amount.toString(),
-		destinationToken: destinationToken.symbol,
-		destinationTokenNetwork: destinationToken.network.name,
-		destinationTokenCanister: (destinationToken as IcToken).ledgerCanisterId,
-		amount: sourceTokenToDecimals,
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: (sourceToken as IcToken).ledgerCanisterId,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: (destinationToken as IcToken).ledgerCanisterId,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard,
+		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
-			sourceUSDValue: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
 		})
 	};
 
@@ -306,11 +310,11 @@ const fetchSwapAmountsICP = async ({
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
 				trackEvent({
-					name: TRACK_SWAP_OFFER,
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 					metadata: {
-						resultStatus: 'error',
-						error: result.reason.message,
-						provider: provider.key,
+						event_subcontext: provider.key,
+						result_status: 'error',
+						result_error: result.reason.message,
 						...trackEventBaseParams
 					}
 				});
@@ -335,15 +339,14 @@ const fetchSwapAmountsICP = async ({
 				});
 
 				trackEvent({
-					name: TRACK_SWAP_OFFER,
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 					metadata: {
-						resultStatus: 'success',
-						provider: provider.key,
-						receiveAmount: formatUnits(mapped.receiveAmount, destinationToken.decimals),
+						event_subcontext: provider.key,
+						result_status: 'success',
+						...trackEventBaseParams,
 						...(nonNullish(destinationUsdValue) && {
-							sourceUSDValue: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-						}),
-						...trackEventBaseParams
+							token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						})
 					}
 				});
 			}
@@ -726,17 +729,22 @@ const fetchVeloraSwapAmount = async ({
 	});
 
 	const trackEventBaseParams = {
-		provider: SwapProvider.VELORA,
-		sourceToken: sourceToken.symbol,
-		sourceTokenNetwork: sourceToken.network.name,
-		sourceTokenAddress: sourceToken.address,
-		sourceAmount: amount.toString(),
-		destinationToken: destinationToken.symbol,
-		destinationTokenNetwork: destinationToken.network.name,
-		destinationTokenCanister: destinationToken.address,
-		amount: sourceTokenToDecimals,
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		event_subcontext: SwapProvider.VELORA,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: sourceToken.address,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: destinationToken.address,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard,
+		token2_id: String(destinationToken.id),
 		...(nonNullish(sourceTokenUsdValue) && {
-			sourceUSDValue: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
 		})
 	};
 
@@ -754,18 +762,17 @@ const fetchVeloraSwapAmount = async ({
 			});
 
 			trackEvent({
-				name: TRACK_SWAP_OFFER,
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 				metadata: {
-					resultStatus: 'success',
-					swapType: 'delta',
-					receiveAmount: formatUnits(BigInt(data.delta.destAmount), destinationToken.decimals),
-					receiveAmountUSDValue: nonNullish(destinationUsdValue)
-						? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-						: '',
-					...trackEventBaseParams
+					result_status: 'success',
+					event_type: 'delta',
+					...trackEventBaseParams,
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
 				}
 			});
-			return mapVeloraSwapResult(data.delta);
+			return mapVeloraSwapResult(data);
 		}
 
 		if ('market' in data) {
@@ -775,37 +782,28 @@ const fetchVeloraSwapAmount = async ({
 			});
 
 			trackEvent({
-				name: TRACK_SWAP_OFFER,
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 				metadata: {
-					resultStatus: 'success',
-					swapType: 'market',
-					receiveAmount: formatUnits(BigInt(data.market.destAmount), destinationToken.decimals),
-					receiveAmountUSDValue: nonNullish(destinationUsdValue)
-						? `${destinationUsdValue * Number(destinationTokenToDecimals)}`
-						: '',
-					...trackEventBaseParams
+					result_status: 'success',
+					event_type: 'market',
+					...trackEventBaseParams,
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
 				}
 			});
 			return mapVeloraMarketSwapResult(data.market);
 		}
 
-		trackEvent({
-			name: TRACK_SWAP_OFFER,
-			metadata: {
-				resultStatus: 'error',
-				errorReason: 'No delta or market data in response',
-				...trackEventBaseParams
-			}
-		});
-
 		return null;
 	} catch (error: unknown) {
-		console.log({error});
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
 		trackEvent({
-			name: TRACK_SWAP_OFFER,
+			name: PLAUSIBLE_EVENTS.SWAP_OFFER,
 			metadata: {
-				resultStatus: 'error',
+				result_status: 'error',
+				result_error: errorMessage,
 				...trackEventBaseParams
 			}
 		});

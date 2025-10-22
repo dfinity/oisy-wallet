@@ -4,12 +4,14 @@ export enum PLAUSIBLE_EVENTS {
 	PAGE_OPEN = 'page_open',
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
 	NFT_MEDIA_CONSENT = 'nft_media_consent',
-	OPEN_MODAL = 'open_modal'
+	OPEN_MODAL = 'open_modal',
+	SWAP_OFFER = 'swap_offer'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NFT = 'nft',
-	ASSETS_TAB = 'assets_tab'
+	ASSETS_TAB = 'assets_tab',
+	TOKENS = 'tokens'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
