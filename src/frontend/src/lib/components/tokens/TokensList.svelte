@@ -92,7 +92,7 @@
 
 	const onSave = async () => {
 		saveLoading = true;
-		await saveAllCustomTokens({ tokens: [...modifiedTokens.values()], $authIdentity, $i18n });
+		await saveAllCustomTokens({ tokens: tokensToBeSaved, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
 		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
