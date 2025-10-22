@@ -103,9 +103,9 @@
 
 	let tokensToBeSaved = $derived([...modifiedTokens.values()]);
 
-	let tokensToBeSavedLen = $derived(tokensToBeSaved.length);
+	let tokensToBeSavedLength = $derived(tokensToBeSaved.length);
 
-	let saveDisabled = $derived(tokensToBeSavedLen === 0);
+	let saveDisabled = $derived(tokensToBeSavedLength === 0);
 
 	const onToggle = ({ id, ...rest }: Token) => {
 		const current = modifiedTokens.get(id);
@@ -182,7 +182,7 @@
 									styleClass="py-2"
 								>
 									{$i18n.core.text.apply}
-									{#if tokensToBeSavedLen > 0}({tokensToBeSavedLen}){/if}
+									{#if tokensToBeSavedLength > 0}({tokensToBeSavedLength}){/if}
 								</Button>
 							</div>
 						</div>
