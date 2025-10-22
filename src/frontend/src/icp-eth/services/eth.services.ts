@@ -25,8 +25,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import { emit } from '$lib/utils/events.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { encodePrincipalToEthAddress } from '@dfinity/cketh';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { encodePrincipalToEthAddress } from '@icp-sdk/canisters/cketh';
 import type { Log } from 'ethers/providers';
 import { get } from 'svelte/store';
 

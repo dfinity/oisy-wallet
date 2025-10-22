@@ -15,7 +15,7 @@ import type { Token, TokenId } from '$lib/types/token';
 import { bn1Bi, bn3Bi } from '$tests/mocks/balances.mock';
 import { mockCkBtcMinterInfo, mockCkBtcPendingUtxoTransaction } from '$tests/mocks/ckbtc.mock';
 import { createCertifiedIcTransactionUiMock } from '$tests/utils/transactions-stores.test-utils';
-import type { PendingUtxo } from '@dfinity/ckbtc';
+import type { PendingUtxo } from '@icp-sdk/canisters/ckbtc';
 
 export const createMockIcTransactionsUi = (n: number): IcTransactionUi[] =>
 	Array.from({ length: n }, () => ({

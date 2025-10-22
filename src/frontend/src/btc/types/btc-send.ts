@@ -1,4 +1,4 @@
-import type { Utxo } from '@dfinity/ckbtc';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 
 export class BtcAmountAssertionError extends Error {}
 

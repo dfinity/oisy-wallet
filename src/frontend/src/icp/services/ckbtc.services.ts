@@ -21,17 +21,17 @@ import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
 import {
-	MinterNoNewUtxosError,
-	type EstimateWithdrawalFee,
-	type PendingUtxo
-} from '@dfinity/ckbtc';
-import {
 	assertNonNullish,
 	isNullish,
 	nonNullish,
 	queryAndUpdate,
 	type QueryAndUpdateRequestParams
 } from '@dfinity/utils';
+import {
+	MinterNoNewUtxosError,
+	type EstimateWithdrawalFee,
+	type PendingUtxo
+} from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 export const updateBalance = async ({

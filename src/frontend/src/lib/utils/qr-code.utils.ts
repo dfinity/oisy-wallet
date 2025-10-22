@@ -7,8 +7,8 @@ import {
 	type QrStatus
 } from '$lib/types/qr-code';
 import type { OptionToken } from '$lib/types/token';
-import { decodePayment } from '@dfinity/ledger-icrc';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { decodePayment } from '@icp-sdk/canisters/ledger/icrc';
 
 /**
  * Decodes a URN string into a DecodedUrn object, breaking it down into its components.

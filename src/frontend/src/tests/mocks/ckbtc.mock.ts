@@ -1,7 +1,7 @@
 import { BTC_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
-import type { MinterInfo, PendingUtxo } from '@dfinity/ckbtc';
+import type { MinterInfo, PendingUtxo } from '@icp-sdk/canisters/ckbtc';
 
 export const mockPendingUtxo: PendingUtxo = {
 	value: 1000n,

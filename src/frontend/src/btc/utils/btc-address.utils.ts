@@ -6,12 +6,12 @@ import {
 } from '$lib/derived/address.derived';
 import type { NetworkId } from '$lib/types/network';
 import { isNetworkIdBTCRegtest, isNetworkIdBTCTestnet } from '$lib/utils/network.utils';
+import { assertNever } from '@dfinity/utils';
 import {
 	BtcAddressType,
 	parseBtcAddress as parseBtcAddressCkbtc,
 	type BtcAddressInfo
-} from '@dfinity/ckbtc';
-import { assertNever } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ckbtc';
 import { get } from 'svelte/store';
 
 const createBtcAddressFromAddressInfo = ({ info }: { info: BtcAddressInfo }): BtcAddress => {

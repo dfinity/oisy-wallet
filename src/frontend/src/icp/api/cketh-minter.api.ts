@@ -1,13 +1,13 @@
 import { ckEthMinterCanister } from '$icp-eth/api/cketh-minter.api';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
+import { assertNonNullish } from '@dfinity/utils';
 import type {
 	Eip1559TransactionPrice,
 	Eip1559TransactionPriceParams,
 	RetrieveErc20Request,
 	RetrieveEthRequest
-} from '@dfinity/cketh';
-import { assertNonNullish } from '@dfinity/utils';
+} from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 
 export const withdrawEth = async ({

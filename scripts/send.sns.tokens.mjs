@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { loadLocalIdentity, localAgent, SNSES } from './utils.mjs';
 

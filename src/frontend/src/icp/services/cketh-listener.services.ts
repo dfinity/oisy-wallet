@@ -6,8 +6,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { CertifiedData } from '$lib/types/store';
 import type { SyncState } from '$lib/types/sync';
 import { emit } from '$lib/utils/events.utils';
-import type { MinterInfo } from '@dfinity/cketh';
 import { jsonReviver } from '@dfinity/utils';
+import type { MinterInfo } from '@icp-sdk/canisters/cketh';
 import { get } from 'svelte/store';
 
 export const syncCkEthMinterInfo = ({ data: postMsgData, tokenId }: SyncCkMinterInfoSuccess) => {

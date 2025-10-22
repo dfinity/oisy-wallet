@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@dfinity/ckbtc';
 	import { IconReimbursed, Modal } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
+	import { MinterAlreadyProcessingError, MinterNoNewUtxosError } from '@icp-sdk/canisters/ckbtc';
 	import { blur } from 'svelte/transition';
 	import IcTransactionsBitcoinStatus from '$icp/components/transactions/IcTransactionsBitcoinStatusProgress.svelte';
 	import { tokenAsIcToken } from '$icp/derived/ic-token.derived';

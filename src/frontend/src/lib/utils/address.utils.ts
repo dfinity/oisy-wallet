@@ -9,8 +9,8 @@ import type { NetworkId } from '$lib/types/network';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 import { mapCertifiedData } from '$lib/utils/certified-store.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
-import { parseBtcAddress, type BtcAddress } from '@dfinity/ckbtc';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import { parseBtcAddress, type BtcAddress } from '@icp-sdk/canisters/ckbtc';
 
 export const mapAddress = <T extends Address>(
 	$addressStore: AddressStoreData<T>

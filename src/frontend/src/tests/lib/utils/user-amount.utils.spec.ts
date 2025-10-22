@@ -12,7 +12,7 @@ import { validateUserAmount } from '$lib/utils/user-amount.utils';
 import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckbtc.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { MinterInfo as CkEthMinterInfo } from '@icp-sdk/canisters/cketh';
 import type { MockInstance } from 'vitest';
 
 describe('validateUserAmount', () => {
