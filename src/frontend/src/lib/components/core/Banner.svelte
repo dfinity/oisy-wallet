@@ -6,12 +6,11 @@
 	import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils.js';
 
 	let envBannerVisible = $state(true);
-
-	const closeEnvBanner = () => (envBannerVisible = false);
-
 	let pwaBannerVisible = $state(true);
 
+	const closeEnvBanner = () => (envBannerVisible = false);
 	const closePwaBanner = () => (pwaBannerVisible = false);
+
 </script>
 
 {#if STAGING && envBannerVisible}
@@ -45,7 +44,7 @@
 		>
 			<IconInfo></IconInfo>
 			<span class="w-full px-2"><Html text={$i18n.core.warning.standalone_mode} /></span>
-			<button aria-label={$i18n.core.text.close} onclick={closeAwsTemporaryBanner}>
+			<button aria-label={$i18n.core.text.close} onclick={closePwaBanner}>
 				<IconClose />
 			</button>
 		</div>
