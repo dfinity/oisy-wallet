@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import type { Component, Snippet } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { type Component, type Snippet, untrack } from 'svelte';
+	import { alchemyProviders } from '$eth/providers/alchemy.providers';
 	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -17,6 +18,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { nftStore } from '$lib/stores/nft.store';
 	import type { Network } from '$lib/types/network';
+	import type { Nft } from '$lib/types/nft';
 	import type { Token } from '$lib/types/token';
 	import type { TransactionStatus, TransactionType } from '$lib/types/transaction';
 	import { filterAddressFromContact, getContactForAddress } from '$lib/utils/contact.utils';
@@ -83,11 +85,43 @@
 
 	const network: Network | undefined = $derived(token.network);
 
-	const nft = $derived(
+	const existingNft = $derived(
 		nonNullish($nftStore) && isTokenNonFungible(token) && nonNullish(tokenId)
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(tokenId)) })
 			: undefined
 	);
+
+	let fetchedNft = $state<Nft | undefined>();
+
+	// It may happen that an NFT was sent out by the user or burnt.
+	// In that case, it will not be in the nftStore anymore.
+	// So we cannot find it and render the image in the transaction list.
+	// However, we prefer to always show it, so we try and fetch the metadata anyway.
+	const updateFetchedNft = async () => {
+		if (nonNullish(existingNft)) {
+			return;
+		}
+
+		if (isNullish($nftStore) || !isTokenNonFungible(token) || isNullish(tokenId)) {
+			return;
+		}
+
+		try {
+			const { getNftMetadata } = alchemyProviders(network.id);
+
+			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+		} catch (_: unknown) {
+			fetchedNft = undefined;
+		}
+	};
+
+	$effect(() => {
+		[token, tokenId, existingNft];
+
+		untrack(() => updateFetchedNft());
+	});
+
+	const nft = $derived(existingNft ?? fetchedNft);
 </script>
 
 <button class={`contents ${styleClass ?? ''}`} onclick={onClick}>
@@ -108,7 +142,7 @@
 			{#snippet icon()}
 				<div>
 					{#if iconType === 'token'}
-						{#if isTokenNonFungible(token) && nonNullish(nft)}
+						{#if nonNullish(nft)}
 							<NftLogo
 								badge={{ type: 'icon', icon: cardIcon, ariaLabel: type }}
 								logoSize="md"
