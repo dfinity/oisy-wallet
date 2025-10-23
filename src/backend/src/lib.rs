@@ -970,7 +970,10 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
     read_state(|s| {
         s.user_profile
             .iter()
-            .map(|((_updated, StoredPrincipal(principal)), user)| {
+            .map(|entry| {
+                let (_updated, StoredPrincipal(principal)) = entry.key();
+                let principal = principal.clone();
+                let user = entry.value();
                 (principal, user.created_timestamp)
             })
             .collect()
