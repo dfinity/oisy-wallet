@@ -114,7 +114,7 @@ thread_local! {
 
     static STATE: RefCell<State> = RefCell::new(
         MEMORY_MANAGER.with(|mm| State {
-            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None).expect("config cell initialization should succeed"),
+            config: ConfigCell::init(mm.borrow().get(CONFIG_MEMORY_ID), None),
             user_token: UserTokenMap::init(mm.borrow().get(USER_TOKEN_MEMORY_ID)),
             custom_token: CustomTokenMap::init(mm.borrow().get(USER_CUSTOM_TOKEN_MEMORY_ID)),
             // Use `UserProfileModel` to access and manage access to these states
