@@ -1,5 +1,6 @@
 import { browser } from '$app/environment';
 import { goto, pushState } from '$app/navigation';
+import { page } from '$app/stores';
 import {
 	AppPath,
 	COLLECTION_PARAM,
@@ -16,6 +17,7 @@ import type { Token } from '$lib/types/token';
 import type { Option } from '$lib/types/utils';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
+import { get } from 'svelte/store';
 
 const normalizePath = (s: string | null) =>
 	nonNullish(s) ? (s.endsWith('/') ? s : `${s}/`) : null;
@@ -181,31 +183,31 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 };
 
 export const nftsUrl = (
-	params: {
-		fromRoute: NavigationTarget | null;
-	} & (
+	params:
 		| {
 				nft?: Nft;
 		  }
 		| {
 				collection?: NftCollection;
 		  }
-	)
-): string | undefined => {
-	const { fromRoute } = params;
+): string => {
+	const { url: urlSnapshot } = get(page);
+	const url = new URL(urlSnapshot);
+	url.searchParams.delete(NFT_PARAM);
+	url.searchParams.delete(COLLECTION_PARAM);
 
 	if ('nft' in params && nonNullish(params.nft)) {
-		fromRoute?.url.searchParams.set(NFT_PARAM, params.nft.id);
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
 		if (nonNullish(params.nft.collection.network.id.description)) {
-			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.nft.collection.network.id.description);
+			url.searchParams.set(NETWORK_PARAM, params.nft.collection.network.id.description);
 		}
+		url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
+		url.searchParams.set(NFT_PARAM, params.nft.id);
 	} else if ('collection' in params && nonNullish(params.collection)) {
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.collection.address);
 		if (nonNullish(params.collection.network.id.description)) {
-			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.collection.network.id.description);
+			url.searchParams.set(NETWORK_PARAM, params.collection.network.id.description);
 		}
+		url.searchParams.set(COLLECTION_PARAM, params.collection.address);
 	}
 
-	return fromRoute?.url.toString();
+	return `${url.toString()}`;
 };

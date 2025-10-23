@@ -61,7 +61,6 @@
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 			<NftCard
-				{fromRoute}
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}

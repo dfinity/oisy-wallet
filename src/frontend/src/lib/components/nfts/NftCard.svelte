@@ -30,7 +30,6 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
-		fromRoute?: NavigationTarget | null;
 	}
 
 	let {
@@ -41,15 +40,14 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default',
-		fromRoute
+		source = 'default'
 	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (type === 'card-link' && !disabled && nonNullish(fromRoute)) {
+		if (type === 'card-link' && !disabled) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
@@ -64,10 +62,8 @@
 				}
 			});
 
-			const url = nftsUrl({ nft, fromRoute });
-			if (nonNullish(url)) {
-				goto(url);
-			}
+			console.log('goto', nftsUrl({ nft }));
+			goto(nftsUrl({ nft }), { replaceState: true });
 		}
 	};
 </script>

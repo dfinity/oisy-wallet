@@ -25,10 +25,9 @@
 		collection: NftCollectionUi;
 		disabled?: boolean;
 		testId?: string;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId, fromRoute }: Props = $props();
+	const { collection, disabled, testId }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -55,11 +54,8 @@
 				token_name: previewNft.collection.name ?? ''
 			}
 		});
-
-		const url = nftsUrl({ collection: collection.collection, fromRoute });
-		if (nonNullish(url)) {
-			goto(url);
-		}
+		console.log('goto', nftsUrl({ collection: collection.collection }));
+		goto(nftsUrl({ collection: collection.collection }), { replaceState: true });
 	};
 </script>
 
