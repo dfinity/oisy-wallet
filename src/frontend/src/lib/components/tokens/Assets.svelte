@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -58,9 +59,13 @@
 											{
 												label: $i18n.tokens.text.title,
 												id: TokenTypes.TOKENS,
-												path: AppPath.Tokens
+												path: `${AppPath.Tokens}${$page.url.search}`
 											},
-											{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
+											{
+												label: $i18n.nfts.text.title,
+												id: TokenTypes.NFTS,
+												path: `${AppPath.Nfts}${$page.url.search}`
+											}
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
