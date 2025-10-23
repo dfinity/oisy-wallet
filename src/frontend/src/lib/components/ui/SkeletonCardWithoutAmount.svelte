@@ -13,9 +13,7 @@
 </script>
 
 <Card noMargin>
-	<span
-		class={`inline-block max-w-full ${isNullish(children) ? 'w-[120px] sm:w-[200px]' : ''}`}
-	>
+	<span class={`inline-block max-w-full ${isNullish(children) ? 'w-[120px] sm:w-[200px]' : ''}`}>
 		{#if nonNullish(children)}
 			{@render children()}
 		{:else}
