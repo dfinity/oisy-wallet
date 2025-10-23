@@ -224,7 +224,7 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
+<div class="mt-2 mb-8">
 	<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
 </div>
 

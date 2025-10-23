@@ -38,7 +38,7 @@
 	};
 </script>
 
-<div class="mb-1 mt-2">
+<div class="mt-2 mb-1">
 	<div class="flex justify-between gap-[12px]">
 		<Button
 			colorStyle="tertiary"

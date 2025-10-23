@@ -69,7 +69,7 @@
 	{#snippet items()}
 		<NetworkSwitcherList onSelected={onNetworkSelect} selectedNetworkId={$networkId} />
 
-		<div class="mb-3 ml-2 mt-6 flex flex-row justify-between text-nowrap">
+		<div class="mt-6 mb-3 ml-2 flex flex-row justify-between text-nowrap">
 			<span class="flex">
 				<Button
 					link
@@ -80,7 +80,7 @@
 				>
 			</span>
 			{#if enabledNetworks < totalNetworks}
-				<span class="ml-4 mr-2 flex text-nowrap text-right text-base">
+				<span class="mr-2 ml-4 flex text-right text-base text-nowrap">
 					{replacePlaceholders($i18n.networks.number_of_enabled, {
 						$numNetworksEnabled: `${enabledNetworks}`,
 						$numNetworksTotal: `${totalNetworks}`

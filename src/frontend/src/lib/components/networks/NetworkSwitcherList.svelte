@@ -65,7 +65,7 @@
 </ul>
 
 {#if $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
-	<span class="mb-3 mt-6 flex px-3 font-bold" transition:slide={SLIDE_EASING}
+	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
 

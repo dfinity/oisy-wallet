@@ -31,7 +31,7 @@
 				</ButtonIcon>
 			</div>
 
-			<h3 class="mb-2 mt-4 text-center">{@render title()}</h3>
+			<h3 class="mt-4 mb-2 text-center">{@render title()}</h3>
 
 			{@render content()}
 		</div>

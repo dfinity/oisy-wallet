@@ -132,7 +132,7 @@
 
 		<SignerConsentMessageWarning {consentInfo} />
 
-		<div class="msg mb-6 break-all rounded-lg border border-off-white px-8 py-4">
+		<div class="msg mb-6 rounded-lg border border-off-white px-8 py-4 break-all">
 			<Markdown text={content} />
 		</div>
 

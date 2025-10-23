@@ -26,7 +26,7 @@
 </script>
 
 <a
-	class="transition-bg duration-250 flex flex-col items-center rounded-2xl p-3 text-center text-primary no-underline shadow"
+	class="transition-bg flex flex-col items-center rounded-2xl p-3 text-center text-primary no-underline shadow duration-250"
 	class:bg-brand-subtle-20={!disabled}
 	class:bg-disabled-alt={disabled}
 	class:hover:bg-brand-subtle-30={!disabled}

@@ -86,7 +86,7 @@
 				class:opacity-50={disabled}
 			>
 				<span
-					class="bg-linear-to-tl -from-100% z-1 absolute m-[1px] h-full w-full from-[#382792A6] to-[#00000000] to-45% opacity-20"
+					class="-from-100% absolute z-1 m-[1px] h-full w-full bg-linear-to-tl from-[#382792A6] to-[#00000000] to-45% opacity-20"
 				>
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
@@ -107,7 +107,7 @@
 			</div>
 		</NftDisplayGuard>
 
-		<span class="absolute bottom-0 right-0 m-2.5">
+		<span class="absolute right-0 bottom-0 m-2.5">
 			<NetworkLogo
 				color="white"
 				network={collection.collection.network}
