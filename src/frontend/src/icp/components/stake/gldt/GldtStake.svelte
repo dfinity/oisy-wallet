@@ -5,7 +5,6 @@
 	import { EARNING_ENABLED } from '$env/earning';
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
-	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
@@ -31,7 +30,7 @@
 		store: initGldtStakeStore()
 	});
 
-	let gldtToken = $derived($enabledIcrcTokens.find((token) => isGLDTToken(token)));
+	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
 </script>
 
 <div class="flex flex-row items-center">
