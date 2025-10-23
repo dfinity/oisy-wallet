@@ -315,5 +315,5 @@ export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 
 // PWA
-export const PWA_WARNING_BANNER_TEST_ID = 'pwa-warning-banner';
-export const PWA_WARNING_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-warning-banner-close-button';
+export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
+export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
