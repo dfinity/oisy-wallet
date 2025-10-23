@@ -182,7 +182,7 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 
 export const nftsUrl = (
 	params: {
-		fromRoute: NavigationTarget | null;
+		fromRoute?: NavigationTarget | null;
 	} & (
 		| {
 				nft?: Nft;
@@ -190,22 +190,30 @@ export const nftsUrl = (
 		| {
 				collection?: NftCollection;
 		  }
+		| {
+				originSelectedNetwork?: NetworkId;
+		  }
 	)
-): string | undefined => {
-	const { fromRoute } = params;
+): string => {
+	let url = `${AppPath.Nfts}`;
 
 	if ('nft' in params && nonNullish(params.nft)) {
-		fromRoute?.url.searchParams.set(NFT_PARAM, params.nft.id);
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
+		url += `?${NFT_PARAM}=${params.nft.id}`;
+		url += `&${COLLECTION_PARAM}=${params.nft.collection.address}`;
 		if (nonNullish(params.nft.collection.network.id.description)) {
-			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.nft.collection.network.id.description);
+			url += `&${NETWORK_PARAM}=${params.nft.collection.network.id.description}`;
 		}
 	} else if ('collection' in params && nonNullish(params.collection)) {
-		fromRoute?.url.searchParams.set(COLLECTION_PARAM, params.collection.address);
+		url += `?${COLLECTION_PARAM}=${params.collection.address}`;
 		if (nonNullish(params.collection.network.id.description)) {
-			fromRoute?.url.searchParams.set(NETWORK_PARAM, params.collection.network.id.description);
+			url += `&${NETWORK_PARAM}=${params.collection.network.id.description}`;
 		}
+	} else if (
+		'originSelectedNetwork' in params &&
+		nonNullish(params.originSelectedNetwork?.description)
+	) {
+		url += `?${NETWORK_PARAM}=${params.originSelectedNetwork.description}`;
 	}
 
-	return fromRoute?.url.toString();
+	return url;
 };
