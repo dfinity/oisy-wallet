@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';

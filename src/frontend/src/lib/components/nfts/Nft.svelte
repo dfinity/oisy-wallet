@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
