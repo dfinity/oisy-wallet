@@ -20,6 +20,10 @@ where
         Cow::Owned(candid::encode_one(&self.0).expect("encoding should always succeed"))
     }
 
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
+    }
+
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
         Self(candid::decode_one(bytes.as_ref()).expect("decoding should succeed"))
     }
@@ -57,6 +61,10 @@ impl Storable for StoredPrincipal {
                 .to_bytes()
                 .into_owned(),
         )
+    }
+
+    fn into_bytes(self) -> Vec<u8> {
+        self.to_bytes().to_vec()
     }
 
     fn from_bytes(bytes: Cow<'_, [u8]>) -> Self {
