@@ -51,7 +51,8 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 	const actual = await importOriginal();
 	return {
 		...actual,
-		isTransactionMessageWithBlockhashLifetime: vi.fn()
+		isTransactionMessageWithBlockhashLifetime:
+			vi.fn() as unknown as typeof isTransactionMessageWithBlockhashLifetime
 	};
 });
 
@@ -111,6 +112,7 @@ describe('wallet-connect.services', () => {
 		vi.spyOn(solTransactionsUtils, 'decodeTransactionMessage').mockImplementation(
 			() => mockSolSignedTransaction
 		);
+
 		vi.mocked(isTransactionMessageWithBlockhashLifetime).mockReturnValue(true);
 
 		vi.spyOn(solSendServices, 'setLifetimeAndFeePayerToTransaction').mockResolvedValue(
