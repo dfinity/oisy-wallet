@@ -62,8 +62,7 @@
 				}
 			});
 
-			console.log('goto', nftsUrl({ nft }));
-			goto(nftsUrl({ nft }), { replaceState: true });
+			goto(nftsUrl({ nft }));
 		}
 	};
 </script>

@@ -22,14 +22,13 @@
 	interface Props {
 		token?: NonFungibleToken;
 		nft?: Nft;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { token, nft, fromRoute }: Props = $props();
+	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
-		const collectionUrl = nftsUrl({ collection: nft?.collection, fromRoute });
+		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: nftsUrl({}) }];
+		const collectionUrl = nftsUrl({ collection: nft?.collection });
 		if (nonNullish(nft) && nonNullish(nft.collection.name) && nonNullish(collectionUrl)) {
 			breadcrumbs = [
 				...breadcrumbs,

@@ -17,6 +17,7 @@
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
@@ -36,7 +37,7 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				goto(`${AppPath.Nfts}${page.url.search}`);
+				goto(nftsUrl({}));
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);
@@ -46,12 +47,6 @@
 				clearTimeout(timeout);
 			}
 		};
-	});
-
-	let fromRoute = $state<NavigationTarget | null>(null);
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
 	});
 </script>
 

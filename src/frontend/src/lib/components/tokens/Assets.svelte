@@ -18,7 +18,7 @@
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
+	import { routeCollection, routeNft, routeNftNetwork } from '$lib/derived/nav.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -38,9 +38,9 @@
 	);
 </script>
 
-{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
+{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNftNetwork)}
 	<Nft />
-{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNetwork)}
+{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNftNetwork)}
 	<NftCollection />
 {:else}
 	<div>

@@ -54,7 +54,7 @@
 				token_name: previewNft.collection.name ?? ''
 			}
 		});
-		console.log('goto', nftsUrl({ collection: collection.collection }));
+
 		goto(nftsUrl({ collection: collection.collection }), { replaceState: true });
 	};
 </script>
