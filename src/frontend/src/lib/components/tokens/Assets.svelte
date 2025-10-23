@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
