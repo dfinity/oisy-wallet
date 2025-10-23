@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import { isCollectionErc1155 } from '$eth/utils/erc1155.utils';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
@@ -29,6 +30,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
+		fromRoute?: NavigationTarget | null;
 	}
 
 	let {
@@ -39,14 +41,15 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default'
+		source = 'default',
+		fromRoute
 	}: Props = $props();
 
 	const onClick = () => {
 		if (type === 'card-selectable' && nonNullish(onSelect) && !disabled) {
 			onSelect(nft);
 		}
-		if (type === 'card-link' && !disabled) {
+		if (type === 'card-link' && !disabled && nonNullish(fromRoute)) {
 			trackEvent({
 				name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 				metadata: {
@@ -61,7 +64,10 @@
 				}
 			});
 
-			goto(nftsUrl({ nft }));
+			const url = nftsUrl({ nft, fromRoute });
+			if (nonNullish(url)) {
+				goto(url);
+			}
 		}
 	};
 </script>
