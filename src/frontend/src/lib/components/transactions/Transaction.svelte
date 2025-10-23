@@ -106,9 +106,13 @@
 			return;
 		}
 
-		const { getNftMetadata } = alchemyProviders(network.id);
+		try {
+			const { getNftMetadata } = alchemyProviders(network.id);
 
-		fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+			fetchedNft = await getNftMetadata({ token, tokenId: parseNftId(String(tokenId)) });
+		} catch (_: unknown) {
+			fetchedNft = undefined;
+		}
 	};
 
 	$effect(() => {
