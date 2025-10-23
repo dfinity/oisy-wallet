@@ -15,40 +15,29 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
-import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import { get } from 'svelte/store';
 
 export const loadNfts = async ({
 	tokens,
-	loadedNfts,
-	walletAddress,
-	force = false
+	walletAddress
 }: {
 	tokens: NonFungibleToken[];
-	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
-	force?: boolean;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		const tokensToLoad = force
-			? tokens
-			: tokens.filter((token) => {
-					const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
-					return nftsByToken.length === 0;
-				});
-
-		if (tokensToLoad.length > 0) {
-			const nfts: Nft[] = await loadNftsByNetwork({
-				networkId,
-				tokens: tokensToLoad,
-				walletAddress
-			});
-
-			nftStore.addAll(nfts);
+		if (tokens.length === 0) {
+			return;
 		}
+
+		const nfts: Nft[] = await loadNftsByNetwork({
+			networkId,
+			tokens,
+			walletAddress
+		});
+
+		nftStore.addAll(nfts);
 	});
 
 	await Promise.allSettled(promises);
@@ -185,9 +174,7 @@ export const updateNftSection = async ({
 
 		await loadNfts({
 			tokens: [saveToken],
-			walletAddress: $ethAddress,
-			loadedNfts: get(nftStore) ?? [], // we can fetch the store imperatively as that store is just updated above
-			force: true
+			walletAddress: $ethAddress
 		});
 
 		return saveToken;
