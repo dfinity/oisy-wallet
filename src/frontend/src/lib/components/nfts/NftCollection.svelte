@@ -16,8 +16,8 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
-	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
