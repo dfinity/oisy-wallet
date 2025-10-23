@@ -18,6 +18,7 @@
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
@@ -64,7 +65,7 @@
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
-			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
+			class="relative flex flex-col pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
 		>
@@ -93,11 +94,11 @@
 					</Loaders>
 				</SplitPane>
 
-				<Responsive down="md">
-					<div class="z-3 fixed bottom-16 right-2 block md:hidden">
+				{#if !$aiAssistantConsoleOpen}
+					<div class="z-3 fixed bottom-16 right-4 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
-				</Responsive>
+				{/if}
 
 				<MobileNavigationMenu>
 					<NavigationMenuMainItems testIdPrefix="mobile" />

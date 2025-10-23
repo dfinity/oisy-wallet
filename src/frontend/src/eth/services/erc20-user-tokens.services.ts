@@ -1,6 +1,6 @@
 import { loadErc20UserTokens } from '$eth/services/erc20.services';
 import { erc20UserTokensStore } from '$eth/stores/erc20-user-tokens.store';
-import type { Erc20UserToken } from '$eth/types/erc20-user-token';
+import type { SaveUserToken } from '$eth/types/erc20-user-token';
 import { toUserToken } from '$icp-eth/services/user-token.services';
 import { setManyUserTokens } from '$lib/api/backend.api';
 import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -9,12 +9,6 @@ import { i18n } from '$lib/stores/i18n.store';
 import type { TokenId } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
-
-export type SaveUserToken = Pick<
-	Erc20UserToken,
-	'enabled' | 'version' | 'symbol' | 'decimals' | 'address' | 'network'
-> &
-	Partial<Pick<Erc20UserToken, 'id'>>;
 
 export const saveUserTokens = async ({
 	progress,

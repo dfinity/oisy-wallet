@@ -140,14 +140,16 @@
 	const close = () => onClose();
 </script>
 
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-	<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
-{:else if currentStep?.name === WizardStepsSend.SENDING}
-	<IcSendProgress bind:sendProgressStep />
-{:else if currentStep?.name === WizardStepsSend.SEND}
-	<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-		{#snippet cancel()}
-			<ButtonBack onclick={back} />
-		{/snippet}
-	</IcSendForm>
-{/if}
+{#key currentStep?.name}
+	{#if currentStep?.name === WizardStepsSend.REVIEW}
+		<IcSendReview {amount} {destination} {onBack} onSend={send} {selectedContact} />
+	{:else if currentStep?.name === WizardStepsSend.SENDING}
+		<IcSendProgress {sendProgressStep} />
+	{:else if currentStep?.name === WizardStepsSend.SEND}
+		<IcSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+			{#snippet cancel()}
+				<ButtonBack onclick={back} />
+			{/snippet}
+		</IcSendForm>
+	{/if}
+{/key}

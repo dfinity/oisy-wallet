@@ -212,6 +212,24 @@ describe('i18n-utils', () => {
 			expect(getDefaultLang()).toBe(Languages.GERMAN);
 		});
 
+		it('returns GERMAN when browser language is de-CH', () => {
+			mockNavigatorLanguage('de-CH');
+
+			expect(getDefaultLang()).toBe(Languages.GERMAN);
+		});
+
+		it('returns FRENCH when browser language is fr-CH', () => {
+			mockNavigatorLanguage('fr-CH');
+
+			expect(getDefaultLang()).toBe(Languages.FRENCH);
+		});
+
+		it('returns ITALIAN when browser language is it-CH', () => {
+			mockNavigatorLanguage('it-CH');
+
+			expect(getDefaultLang()).toBe(Languages.ITALIAN);
+		});
+
 		it('returns ENGLISH when browser language is en-US', () => {
 			mockNavigatorLanguage('en-US');
 

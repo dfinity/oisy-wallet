@@ -3,6 +3,8 @@
 	import { fade } from 'svelte/transition';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
+	import Nft from '$lib/components/nfts/Nft.svelte';
+	import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 	import NftSettingsMenu from '$lib/components/nfts/NftSettingsMenu.svelte';
 	import NftSortMenu from '$lib/components/nfts/NftSortMenu.svelte';
 	import NftsList from '$lib/components/nfts/NftsList.svelte';
@@ -16,6 +18,8 @@
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
+	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
+	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 
@@ -34,62 +38,75 @@
 	);
 </script>
 
-<div>
-	<StickyHeader>
-		<div class="flex w-full justify-between">
-			<div class="grow-1 relative flex justify-between">
-				<TokensFilter>
-					{#snippet overflowableContent()}
-						{#if NFTS_ENABLED}
-							<Tabs
-								styleClass="mt-2 mb-8"
-								tabVariant="menu"
-								tabs={[
-									{ label: $i18n.tokens.text.title, id: TokenTypes.TOKENS, path: AppPath.Tokens },
-									{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
-								]}
-								bind:activeTab
-							/>
-						{:else}
-							<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
-						{/if}
-					{/snippet}
-				</TokensFilter>
-			</div>
-			{#if tab === TokenTypes.TOKENS}
-				<div class="flex">
-					<TokensMenu />
+{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
+	<Nft />
+{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNetwork)}
+	<NftCollection />
+{:else}
+	<div>
+		<StickyHeader>
+			{#snippet header()}
+				<div class="flex w-full justify-between">
+					<div class="grow-1 relative flex justify-between">
+						<TokensFilter>
+							{#snippet overflowableContent()}
+								{#if NFTS_ENABLED}
+									<Tabs
+										styleClass="mt-2 mb-8"
+										tabVariant="menu"
+										tabs={[
+											{
+												label: $i18n.tokens.text.title,
+												id: TokenTypes.TOKENS,
+												path: AppPath.Tokens
+											},
+											{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
+										]}
+										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
+										bind:activeTab
+									/>
+								{:else}
+									<Header><span class="mt-2 flex">{$i18n.tokens.text.title}</span></Header>
+								{/if}
+							{/snippet}
+						</TokensFilter>
+					</div>
+					{#if tab === TokenTypes.TOKENS}
+						<div class="flex">
+							<TokensMenu />
+						</div>
+					{:else}
+						<div class="flex">
+							<NftSortMenu />
+						</div>
+						<div class="ml-1 flex">
+							<NftSettingsMenu />
+						</div>
+					{/if}
 				</div>
+			{/snippet}
+
+			{#if activeTab === TokenTypes.TOKENS}
+				<TokensList />
 			{:else}
-				<div class="flex">
-					<NftSortMenu />
-				</div>
-				<div class="ml-1 flex">
-					<NftSettingsMenu />
-				</div>
+				<NftsList />
 			{/if}
+		</StickyHeader>
+
+		<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
+			<ManageTokensButton />
 		</div>
-	</StickyHeader>
-
-	{#if activeTab === TokenTypes.TOKENS}
-		<TokensList />
-	{:else}
-		<NftsList />
-	{/if}
-
-	<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
-		<ManageTokensButton />
 	</div>
-</div>
 
-{#if $modalManageTokens}
-	<ManageTokensModal {initialSearch}>
-		{#snippet infoElement()}
-			{#if nonNullish(message)}
-				<MessageBox level="info">
-					{message}
-				</MessageBox>
-			{/if}
-		{/snippet}
-	</ManageTokensModal>
+	{#if $modalManageTokens}
+		<ManageTokensModal {initialSearch}>
+			{#snippet infoElement()}
+				{#if nonNullish(message)}
+					<MessageBox level="info">
+						{message}
+					</MessageBox>
+				{/if}
+			{/snippet}
+		</ManageTokensModal>
+	{/if}
 {/if}

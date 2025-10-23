@@ -5,7 +5,7 @@ import type { PostMessage, PostMessageDataResponseAuth } from '$lib/types/post-m
 import { isNullish } from '@dfinity/utils';
 
 export class AuthWorker extends AppWorker {
-	constructor(worker: Worker) {
+	private constructor(worker: Worker) {
 		super(worker);
 
 		worker.onmessage = async ({
@@ -31,9 +31,15 @@ export class AuthWorker extends AppWorker {
 		return new AuthWorker(worker);
 	}
 
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopIdleTimer'
+		});
+	};
+
 	syncAuthIdle = ({ auth, locked = false }: { auth: AuthStoreData; locked?: boolean }) => {
 		if (locked || isNullish(auth.identity)) {
-			this.postMessage({ msg: 'stopIdleTimer' });
+			this.stopTimer();
 			return;
 		}
 

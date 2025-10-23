@@ -1,11 +1,13 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
+	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
@@ -45,6 +47,12 @@
 			}
 		};
 	});
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <NftCollectionHero nfts={collectionNfts} {token} />
@@ -53,9 +61,11 @@
 	{#if collectionNfts.length > 0}
 		{#each collectionNfts as nft, index (`${nft.id}-${index}`)}
 			<NftCard
+				{fromRoute}
 				isHidden={nonNullish(token) && token.section === CustomTokenSection.HIDDEN}
 				isSpam={nonNullish(token) && token.section === CustomTokenSection.SPAM}
 				{nft}
+				source={NFT_COLLECTION_ROUTE}
 				type="card-link"
 			/>
 		{/each}

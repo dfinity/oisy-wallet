@@ -49,7 +49,7 @@
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let errorType: TokenActionErrorType = $state<TokenActionErrorType | undefined>(undefined);
+	let errorType = $state<TokenActionErrorType | undefined>();
 
 	const {
 		feeStore: storeFeeData,

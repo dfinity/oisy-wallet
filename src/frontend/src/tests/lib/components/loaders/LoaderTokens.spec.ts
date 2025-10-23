@@ -7,7 +7,7 @@ import { loadErc20Tokens } from '$eth/services/erc20.services';
 import { loadErc721Tokens } from '$eth/services/erc721.services';
 import { loadIcrcTokens } from '$icp/services/icrc.services';
 import LoaderTokens from '$lib/components/loaders/LoaderTokens.svelte';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import {
 	ethAddressStore,
 	solAddressDevnetStore,
@@ -59,10 +59,6 @@ vi.mock('$icp/services/icrc.services', () => ({
 
 vi.mock('$sol/services/spl.services', () => ({
 	loadSplTokens: vi.fn()
-}));
-
-vi.mock('$lib/services/nft.services', () => ({
-	loadNfts: vi.fn()
 }));
 
 vi.mock('$lib/api/backend.api', () => ({
@@ -350,7 +346,7 @@ describe('LoaderTokens', () => {
 
 			setupTestnetsStore('enabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			userProfileStore.set({
 				certified: false,

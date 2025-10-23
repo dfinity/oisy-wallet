@@ -10,7 +10,7 @@ import { onPowProtectionMessage } from '$icp/workers/pow-protection.worker';
 import { POST_MESSAGE_REQUESTS } from '$lib/schema/post-message.schema';
 import { onAuthMessage } from '$lib/workers/auth.worker';
 import { onExchangeMessage } from '$lib/workers/exchange.worker';
-import '$lib/workers/workers';
+import { messageToHandler } from '$lib/workers/workers';
 import { onSolWalletMessage } from '$sol/workers/sol-wallet.worker';
 import { createMockEvent } from '$tests/mocks/workers.mock';
 
@@ -85,38 +85,62 @@ describe('workers', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should call all handlers with any message', async () => {
+		it('should ignore events with nullish', async () => {
+			const nullishEvent = { data: {} } as unknown as MessageEvent<unknown>;
+			// @ts-expect-error global onmessage is defined in the worker
+			await onmessage(nullishEvent);
+
+			onMessageFunctions.forEach(({ onMessageFn }) => {
+				expect(onMessageFn).not.toHaveBeenCalled();
+			});
+		});
+
+		it('should ignore events with unknown message', async () => {
 			// @ts-expect-error global onmessage is defined in the worker
 			await onmessage(mockEvent);
 
 			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
-				expect(onMessageFn).toHaveBeenNthCalledWith(1, mockEvent);
+				expect(onMessageFn).not.toHaveBeenCalled();
 			});
 		});
 
-		it.each(POST_MESSAGE_REQUESTS)(`should call all handlers with message %s`, async (msg) => {
+		it.each(POST_MESSAGE_REQUESTS)(`should call only the targeted handler for %s`, async (msg) => {
 			const event = createMockEvent(msg);
 
 			// @ts-expect-error global onmessage is defined in the worker
 			await onmessage(event);
 
+			const expected = messageToHandler[msg];
+
 			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
-				expect(onMessageFn).toHaveBeenNthCalledWith(1, event);
+				if (onMessageFn === expected) {
+					expect(onMessageFn).toHaveBeenCalledOnce();
+					expect(onMessageFn).toHaveBeenNthCalledWith(1, event);
+				} else {
+					expect(onMessageFn).not.toHaveBeenCalled();
+				}
 			});
 		});
 
-		it.each(onMessageFunctions)(`should ignore errors from $name`, async ({ onMessageFn }) => {
-			vi.mocked(onMessageFn).mockRejectedValueOnce(new Error('Test error'));
+		it.each(Object.entries(messageToHandler))(
+			`should ignore errors from handler for %s`,
+			// eslint-disable-next-line local-rules/prefer-object-params
+			async (msg, onMessageFn) => {
+				vi.mocked(onMessageFn).mockRejectedValueOnce(new Error('Test error'));
 
-			// @ts-expect-error global onmessage is defined in the worker
-			await onmessage(mockEvent);
+				const event = createMockEvent(msg);
+				// @ts-expect-error global onmessage is defined in the worker
+				await onmessage(event);
 
-			onMessageFunctions.forEach(({ onMessageFn }) => {
-				expect(onMessageFn).toHaveBeenCalledOnce();
-				expect(onMessageFn).toHaveBeenNthCalledWith(1, mockEvent);
-			});
-		});
+				onMessageFunctions.forEach(({ onMessageFn: fn }) => {
+					if (fn === onMessageFn) {
+						expect(fn).toHaveBeenCalledOnce();
+						expect(fn).toHaveBeenNthCalledWith(1, event);
+					} else {
+						expect(fn).not.toHaveBeenCalled();
+					}
+				});
+			}
+		);
 	});
 });

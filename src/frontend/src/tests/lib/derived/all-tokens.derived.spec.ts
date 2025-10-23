@@ -33,7 +33,7 @@ import type { Erc721TokenToggleable } from '$eth/types/erc721-token-toggleable';
 import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 import { enabledIcrcTokens, icrcTokens } from '$icp/derived/icrc.derived';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import {
 	allCrossChainSwapTokens,
 	allDisabledKongSwapCompatibleIcrcTokens,
@@ -101,7 +101,7 @@ describe('all-tokens.derived', () => {
 
 		vi.spyOn(btcEnv, 'BTC_MAINNET_ENABLED', 'get').mockImplementation(() => true);
 		vi.spyOn(ethEnv, 'ETH_MAINNET_ENABLED', 'get').mockImplementation(() => true);
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
 		// Mock the store subscriptions with empty arrays by default
 		vi.spyOn(erc20Tokens, 'subscribe').mockImplementation((fn) => {
@@ -264,7 +264,7 @@ describe('all-tokens.derived', () => {
 			setupTestnetsStore('enabled');
 			setupUserNetworksStore('allEnabled');
 
-			vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => true);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => true);
 
 			const tokens = get(allTokens);
 			const tokenSymbols = tokens.map((token) => token.id.description);

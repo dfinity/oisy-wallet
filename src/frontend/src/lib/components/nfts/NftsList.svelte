@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { NavigationTarget } from '@sveltejs/kit';
+	import { afterNavigate } from '$app/navigation';
 	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
@@ -7,6 +9,7 @@
 	import NftCollectionList from '$lib/components/nfts/NftCollectionList.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import NftsDisplayHandler from '$lib/components/nfts/NftsDisplayHandler.svelte';
+	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
 	import {
 		NFT_COLLECTION_LIST_COMMON,
 		NFT_COLLECTION_LIST_HIDDEN,
@@ -106,6 +109,12 @@
 			!(hasCommonCollections || hasVisibleSpamCollections || hasVisibleHiddenCollections)
 		);
 	});
+
+	let fromRoute = $state<NavigationTarget | null>(null);
+
+	afterNavigate(({ from }) => {
+		fromRoute = from;
+	});
 </script>
 
 <NftsDisplayHandler bind:nfts bind:nftCollections>
@@ -115,6 +124,7 @@
 		{:else}
 			<NftCollectionList
 				asMainSection
+				{fromRoute}
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -122,6 +132,7 @@
 
 			{#if $showHidden}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={hiddenCollections}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
@@ -134,6 +145,7 @@
 
 			{#if $showSpam}
 				<NftCollectionList
+					{fromRoute}
 					nftCollections={spamCollections}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
@@ -154,7 +166,7 @@
 			title={$i18n.nfts.text.all_assets}
 		>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} type="card-link" />
+				<NftCard {fromRoute} {nft} source={NFT_LIST_ROUTE} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -164,7 +176,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} type="card-link" />
+					<NftCard {fromRoute} isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -175,7 +187,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} type="card-link" />
+					<NftCard {fromRoute} isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}

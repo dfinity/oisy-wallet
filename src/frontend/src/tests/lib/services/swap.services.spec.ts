@@ -11,6 +11,7 @@ import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
@@ -25,20 +26,12 @@ import {
 	withdrawICPSwapAfterFailedSwap,
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import {
-	SwapErrorCodes,
-	SwapProvider,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
-import {
-	geSwapEthTokenAddress,
-	mapVeloraMarketSwapResult,
-	mapVeloraSwapResult
-} from '$lib/utils/swap.utils';
+import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
+import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -110,27 +103,7 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 
 	return {
 		...(actual as Record<string, unknown>),
-		geSwapEthTokenAddress: vi.fn(),
-
-		mapVeloraSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'delta'
-			})
-		),
-
-		mapVeloraMarketSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'market'
-			})
-		)
+		geSwapEthTokenAddress: vi.fn()
 	};
 });
 
@@ -423,13 +396,16 @@ describe('swap.services', () => {
 				userEthAddress
 			});
 
-			expect(mapVeloraSwapResult).not.toHaveBeenCalled();
-			expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
 			expect(result).toEqual([]);
 		});
 
-		it('calls delta mapper when quote contains delta and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({ delta: { receiveAmount: '123' } });
+		it('calls delta mapper when quote contains delta without bridge and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridge: { scalingFactor: 0 }
+				}
+			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -439,14 +415,19 @@ describe('swap.services', () => {
 			});
 
 			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-			expect(mapVeloraSwapResult).toHaveBeenCalledOnce();
-			expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(123n);
+			expect(result[0].type).toBe('delta');
 		});
 
-		it('calls market mapper when quote contains market and returns single-item array', async () => {
-			mockGetQuote.mockResolvedValue({ market: { receiveAmount: '456' } });
+		it('calls delta mapper when quote contains delta with bridge and returns correct receiveAmount', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridgeInfo: { destAmountAfterBridge: '949920' }
+				}
+			});
 
 			const result = await fetchSwapAmountsEVM({
 				sourceToken,
@@ -455,10 +436,31 @@ describe('swap.services', () => {
 				userEthAddress
 			});
 
-			expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();
-			expect(mapVeloraSwapResult).not.toHaveBeenCalled();
+			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
 			expect(result).toHaveLength(1);
 			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(949920n);
+			expect(result[0].type).toBe('delta');
+		});
+
+		it('calls market mapper when quote contains market and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				market: {
+					destAmount: '456'
+				}
+			});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(456n);
+			expect(result[0].type).toBe('market');
 		});
 	});
 
@@ -1244,6 +1246,324 @@ describe('swap.services', () => {
 				amount: 1500n,
 				fee: sourceToken.fee
 			});
+		});
+	});
+
+	describe('trackEvent for swap-offer for evm tokens', () => {
+		const sourceToken = {
+			symbol: 'SRC',
+			decimals: 18,
+			network: { chainId: '1' },
+			address: '0xSrcAddress',
+			id: 1
+		} as unknown as Erc20Token;
+
+		const destinationToken = {
+			symbol: 'DST',
+			decimals: 6,
+			network: { chainId: '137' },
+			address: '0xDestAddress',
+			id: 2
+		} as unknown as Erc20Token;
+
+		const amount = BigInt('1000000000000000000');
+		const userEthAddress = '0xUser';
+		const mockGetQuote = vi.fn();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(constructSimpleSDK).mockReturnValue({
+				quote: { getQuote: mockGetQuote }
+			} as unknown as ReturnType<typeof constructSimpleSDK>);
+
+			exchangeStore.set([
+				{ [sourceToken.address.toLowerCase()]: { usd: 1.5 } },
+				{ [destinationToken.address.toLowerCase()]: { usd: 2.0 } }
+			]);
+		});
+
+		afterEach(() => {
+			mockGetQuote.mockReset();
+			exchangeStore.reset();
+		});
+
+		it('should track SWAP_OFFER with delta event type on successful delta quote', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridge: { scalingFactor: 0 }
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'success',
+					event_type: 'delta',
+					token_symbol: sourceToken.symbol,
+					token2_symbol: destinationToken.symbol
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER with market event type on successful market quote', async () => {
+			mockGetQuote.mockResolvedValue({
+				market: {
+					destAmount: '456'
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'success',
+					event_type: 'market'
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER with error on failed Velora quote', async () => {
+			const error = new Error('Velora API Error');
+			mockGetQuote.mockRejectedValue(error);
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'error',
+					result_error: error.message
+				})
+			});
+		});
+
+		it('should track bridge info in delta swap', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridgeInfo: { destAmountAfterBridge: '949920' }
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_type: 'delta',
+					result_status: 'success'
+				})
+			});
+		});
+	});
+
+	describe('trackEvent for swap_offer for icp tokens', () => {
+		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
+		const [sourceToken, destinationToken] = mockTokens;
+		const amount = 1000;
+		const slippage = 0.5;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			exchangeStore.set([
+				{ [sourceToken.id]: { usd: 1.5 } },
+				{ [destinationToken.id]: { usd: 2.0 } }
+			]);
+		});
+
+		afterEach(() => {
+			exchangeStore.reset();
+		});
+
+		it('should track SWAP_OFFER event with success status for KONG_SWAP', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.KONG_SWAP,
+					result_status: 'success',
+					token_symbol: sourceToken.symbol,
+					token_network: sourceToken.network.name,
+					token_address: sourceToken.ledgerCanisterId,
+					token_name: sourceToken.name,
+					token_id: String(sourceToken.id),
+					token_standard: sourceToken.standard,
+					token2_symbol: destinationToken.symbol,
+					token2_network: destinationToken.network.name,
+					token2_address: destinationToken.ledgerCanisterId,
+					token2_name: destinationToken.name,
+					token2_standard: destinationToken.standard,
+					token2_id: String(destinationToken.id)
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER event with error status for failed KONG_SWAP', async () => {
+			const error = new Error('Kong Swap Error');
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockRejectedValue(error);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.KONG_SWAP,
+					result_status: 'error',
+					result_error: error.message
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER for ICP_SWAP when isSourceTokenIcrc2 is true', async () => {
+			const icpSwapResponse = {
+				receiveAmount: 975n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.ICP_SWAP,
+						result_status: 'success'
+					})
+				})
+			);
+		});
+
+		it('should track SWAP_OFFER event with error status for failed ICP_SWAP', async () => {
+			const error = new Error('ICP Swap Error');
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockRejectedValue(error);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.ICP_SWAP,
+						result_status: 'error',
+						result_error: error.message
+					})
+				})
+			);
+		});
+
+		it('should track both KONG_SWAP and ICP_SWAP events', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 975n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledTimes(2);
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.KONG_SWAP,
+						result_status: 'success'
+					})
+				})
+			);
 		});
 	});
 });

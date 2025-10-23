@@ -14,7 +14,7 @@
 		isNetworkIdSOLMainnet
 	} from '$lib/utils/network.utils';
 	import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
-	import { initSolWalletWorker as initWalletWorker } from '$sol/services/worker.sol-wallet.services';
+	import { SolWalletWorker } from '$sol/services/worker.sol-wallet.services';
 
 	interface Props {
 		children: Snippet;
@@ -32,6 +32,6 @@
 	);
 </script>
 
-<WalletWorkers {initWalletWorker} tokens={walletWorkerTokens}>
+<WalletWorkers initWalletWorker={SolWalletWorker.init} tokens={walletWorkerTokens}>
 	{@render children()}
 </WalletWorkers>

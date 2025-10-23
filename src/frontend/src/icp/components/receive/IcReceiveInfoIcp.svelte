@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 	import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
@@ -20,12 +20,16 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+	}
+
+	let { onQRCode }: Props = $props();
+
 	const { close } = getContext<ReceiveTokenContext>(RECEIVE_TOKEN_CONTEXT_KEY);
 
-	const dispatch = createEventDispatcher();
-
 	const displayQRCode = (details: Omit<ReceiveQRCode, 'addressToken'>) =>
-		dispatch('icQRCode', {
+		onQRCode({
 			...details,
 			addressToken: ICP_TOKEN
 		});
@@ -40,14 +44,14 @@
 		network={ICP_NETWORK}
 		qrCodeAction={{
 			enabled: true,
-			ariaLabel: $i18n.wallet.text.display_wallet_address_qr
+			ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
+			onClick: () =>
+				displayQRCode({
+					address: $icrcAccountIdentifierText ?? '',
+					addressLabel: $i18n.wallet.text.wallet_address,
+					copyAriaLabel: $i18n.wallet.text.wallet_address_copied
+				})
 		}}
-		on:click={() =>
-			displayQRCode({
-				address: $icrcAccountIdentifierText ?? '',
-				addressLabel: $i18n.wallet.text.wallet_address,
-				copyAriaLabel: $i18n.wallet.text.wallet_address_copied
-			})}
 	>
 		{#snippet title()}
 			{$i18n.wallet.text.wallet_address}
@@ -67,15 +71,15 @@
 		network={ICP_NETWORK}
 		qrCodeAction={{
 			enabled: true,
-			ariaLabel: $i18n.receive.icp.text.display_account_id_qr
+			ariaLabel: $i18n.receive.icp.text.display_account_id_qr,
+			onClick: () =>
+				displayQRCode({
+					address: $icpAccountIdentifierText ?? '',
+					addressLabel: $i18n.receive.icp.text.account_id,
+					copyAriaLabel: $i18n.receive.icp.text.account_id_copied
+				})
 		}}
 		testId={RECEIVE_TOKENS_MODAL_ICP_SECTION}
-		on:click={() =>
-			displayQRCode({
-				address: $icpAccountIdentifierText ?? '',
-				addressLabel: $i18n.receive.icp.text.account_id,
-				copyAriaLabel: $i18n.receive.icp.text.account_id_copied
-			})}
 	>
 		{#snippet title()}
 			{$i18n.receive.icp.text.account_id}

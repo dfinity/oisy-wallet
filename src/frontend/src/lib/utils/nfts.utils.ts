@@ -141,7 +141,10 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		standard: token.standard,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name }),
-		...(notEmptyString(token.description) && { description: token.description })
+		...(notEmptyString(token.description) && { description: token.description }),
+		...(nonNullish(token.allowExternalContentSource) && {
+			allowExternalContentSource: token.allowExternalContentSource
+		})
 	});
 
 export const getEnabledNfts = ({
@@ -333,36 +336,45 @@ export const findNonFungibleToken = ({
 }): NonFungibleToken | undefined =>
 	tokens.find((token) => token.address === address && token.network.id === networkId);
 
-// We offer this util so we dont mistakingly take the value from the nfts collection prop,
-// as it is not updated after updating the consent. Going through this function ensures no stale data
-export const getAllowMediaForNft = (params: {
-	tokens: NonFungibleToken[];
-	address: EthAddress;
-	networkId: NetworkId;
-}): boolean | undefined => findNonFungibleToken(params)?.allowExternalContentSource;
-
 export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
 	try {
-		const url = new URL(mediaUrl ?? '');
+		const url = adaptMetadataResourceUrl(new URL(mediaUrl));
+
+		if (isNullish(url)) {
+			return NftMediaStatusEnum.INVALID_DATA;
+		}
+
 		const response = await fetch(url.href, { method: 'HEAD' });
 
 		const type = response.headers.get('Content-Type');
 		const size = response.headers.get('Content-Length');
 
 		if (isNullish(type) || isNullish(size)) {
-			return NftMediaStatusEnum.INVALID_DATA;
+			// Not all servers return the Content-Type and Content-Length headers,
+			// so we can't be sure that the media is valid or not.
+			// For now, we assume that it is valid.
+			// TODO: this is not safe for the size limit, we should check the size of the file.
+			return NftMediaStatusEnum.OK;
 		}
 
-		if (nonNullish(type) && !type.startsWith('image/')) {
+		if (!type.startsWith('image/')) {
 			return NftMediaStatusEnum.NON_SUPPORTED_MEDIA_TYPE;
 		}
 
-		if (nonNullish(size) && Number(size) > NFT_MAX_FILESIZE_LIMIT) {
-			// 1MB
+		if (Number(size) > NFT_MAX_FILESIZE_LIMIT) {
 			return NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED;
 		}
 	} catch (_: unknown) {
-		return NftMediaStatusEnum.INVALID_DATA;
+		// The error here is caused by `fetch`, which can fail for various reasons (network error, CORS, DNS, etc).
+		// Empirically, it happens mostly for CORS policy block: we can't be sure that the media is valid or not.
+		// For now, we assume that it is valid to avoid blocking the user.
+		// Ideally, we should load this data in a backend service to avoid CORS issues.
+		// TODO: this is not safe for the size limit, we should check the size of the file in the backend (or similar solutions).
+		return NftMediaStatusEnum.OK;
 	}
 
 	return NftMediaStatusEnum.OK;
