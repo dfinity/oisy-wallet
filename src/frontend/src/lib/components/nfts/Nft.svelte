@@ -35,14 +35,8 @@
 			}
 		};
 	});
-
-	let fromRoute = $state<NavigationTarget | null>(null);
-
-	afterNavigate(({ from }) => {
-		fromRoute = from;
-	});
 </script>
 
-<NftHero {fromRoute} {nft} {token} />
+<NftHero {nft} {token} />
 
-<NftCollectionCard collection={nft?.collection} {fromRoute} />
+<NftCollectionCard collection={nft?.collection} />
