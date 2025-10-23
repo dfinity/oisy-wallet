@@ -112,7 +112,7 @@
 	};
 
 	$effect(() => {
-		[token, tokenId, nft];
+		[token, tokenId, existingNft];
 
 		untrack(() => updateFetchedNft());
 	});
