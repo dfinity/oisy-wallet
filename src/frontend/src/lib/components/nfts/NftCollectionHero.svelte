@@ -13,6 +13,9 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getContext } from 'svelte';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
+	import type { NetworkId } from '$lib/types/network';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -21,7 +24,14 @@
 
 	const { token, nfts }: Props = $props();
 
-	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: nftsUrl({}) }]);
+	const originSelectedNetwork: NetworkId | undefined = getContext(NFT_CONTEXT_KEY);
+
+	const breadcrumbItems = $derived([
+		{
+			label: $i18n.navigation.text.tokens,
+			url: nftsUrl({ originSelectedNetwork })
+		}
+	]);
 
 	const firstNft = $derived(nfts?.[0]);
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);

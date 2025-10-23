@@ -19,10 +19,9 @@
 
 	interface Props {
 		collection?: NftCollection;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, fromRoute }: Props = $props();
+	const { collection }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)
@@ -39,7 +38,7 @@
 	);
 
 	const gotoCollection = (): void => {
-		const url = nftsUrl({ collection, fromRoute });
+		const url = nftsUrl({ collection });
 		if (nonNullish(url)) {
 			goto(url);
 		}

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftActionButtons from '$lib/components/nfts/NftActionButtons.svelte';
@@ -12,12 +11,14 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getContext } from 'svelte';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
+	import type { NetworkId } from '$lib/types/network';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -26,15 +27,21 @@
 
 	const { token, nft }: Props = $props();
 
+	const originSelectedNetwork: NetworkId | undefined = getContext(NFT_CONTEXT_KEY);
+
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: nftsUrl({}) }];
-		const collectionUrl = nftsUrl({ collection: nft?.collection });
-		if (nonNullish(nft) && nonNullish(nft.collection.name) && nonNullish(collectionUrl)) {
+		let breadcrumbs = [
+			{
+				label: $i18n.navigation.text.tokens,
+				url: nftsUrl({ originSelectedNetwork })
+			}
+		];
+		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
 				{
 					label: nft.collection.name,
-					url: collectionUrl
+					url: nftsUrl({ collection: nft?.collection })
 				}
 			];
 		}

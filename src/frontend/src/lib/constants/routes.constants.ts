@@ -17,7 +17,6 @@ export const ROUTE_ID_GROUP_APP = '/(app)';
 
 export const TOKEN_PARAM = 'token';
 export const NETWORK_PARAM = 'network';
-export const NFT_NETWORK_PARAM = 'nftNetwork';
 export const COLLECTION_PARAM = 'collection';
 export const NFT_PARAM = 'nft';
 export const URI_PARAM = 'uri';

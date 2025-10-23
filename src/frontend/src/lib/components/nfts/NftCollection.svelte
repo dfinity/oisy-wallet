@@ -1,15 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
-	import { onMount } from 'svelte';
-	import { afterNavigate, goto } from '$app/navigation';
-	import { page } from '$app/state';
+	import { getContext, onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftCardSkeleton from '$lib/components/nfts/NftCardSkeleton.svelte';
 	import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 	import { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { pageCollectionNfts } from '$lib/derived/page-nft.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -18,6 +15,8 @@
 	import type { Nft, NftCollection, NonFungibleToken } from '$lib/types/nft';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
+	import type { NetworkId } from '$lib/types/network';
 
 	const collectionNfts: Nft[] = $derived($pageCollectionNfts);
 
@@ -31,13 +30,15 @@
 		})
 	);
 
+	const originSelectedNetwork: NetworkId | undefined = getContext(NFT_CONTEXT_KEY);
+
 	// Redirect to the assets' page if the collection can't be loaded within 10 seconds
 	let timeout: NodeJS.Timeout | undefined = $state();
 
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(collection)) {
-				goto(nftsUrl({}));
+				goto(nftsUrl({ originSelectedNetwork }));
 				toastsError({ msg: { text: $i18n.nfts.text.collection_not_loaded } });
 			}
 		}, FALLBACK_TIMEOUT);

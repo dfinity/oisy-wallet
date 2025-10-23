@@ -18,10 +18,13 @@
 	import Tabs from '$lib/components/ui/Tabs.svelte';
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
-	import { routeCollection, routeNft, routeNftNetwork } from '$lib/derived/nav.derived';
+	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { setContext } from 'svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -36,11 +39,15 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	$effect(() => {
+		setContext(NFT_CONTEXT_KEY, { ...$selectedNetwork });
+	});
 </script>
 
-{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNftNetwork)}
+{#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<Nft />
-{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNftNetwork)}
+{:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<NftCollection />
 {:else}
 	<div>

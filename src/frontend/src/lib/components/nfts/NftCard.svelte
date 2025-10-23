@@ -20,6 +20,9 @@
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
+	import { getContext } from 'svelte';
+	import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 
 	interface Props {
 		nft: Nft;

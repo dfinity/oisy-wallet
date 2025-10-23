@@ -37,13 +37,3 @@ export const routeNft: Readable<OptionString> = derived(
 		}
 	]) => nft
 );
-
-export const routeNftNetwork: Readable<OptionString> = derived(
-	[page, routeNetwork],
-	([
-		{
-			data: { nftNetwork }
-		},
-		$routeNetwork
-	]) => nftNetwork ?? $routeNetwork
-);

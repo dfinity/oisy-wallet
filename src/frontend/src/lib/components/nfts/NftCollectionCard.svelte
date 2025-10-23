@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
@@ -20,6 +19,9 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import type { OptionNetworkId } from '$lib/types/network';
+	import { getContext } from 'svelte';
+	import { NFT_CONTEXT_KEY } from '$lib/constants/nft.constants';
 
 	interface Props {
 		collection: NftCollectionUi;
@@ -55,7 +57,11 @@
 			}
 		});
 
-		goto(nftsUrl({ collection: collection.collection }), { replaceState: true });
+		goto(
+			nftsUrl({
+				collection: collection.collection
+			})
+		);
 	};
 </script>
 

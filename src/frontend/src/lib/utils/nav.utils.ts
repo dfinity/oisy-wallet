@@ -4,7 +4,6 @@ import {
 	AppPath,
 	COLLECTION_PARAM,
 	NETWORK_PARAM,
-	NFT_NETWORK_PARAM,
 	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
@@ -121,7 +120,6 @@ export interface RouteParams {
 	// NFT URI parameters
 	[NFT_PARAM]: OptionString;
 	[COLLECTION_PARAM]: OptionString;
-	[NFT_NETWORK_PARAM]: OptionString;
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
@@ -129,7 +127,6 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 		return {
 			[TOKEN_PARAM]: undefined,
 			[NETWORK_PARAM]: undefined,
-			[NFT_NETWORK_PARAM]: undefined,
 			[URI_PARAM]: undefined,
 			[NFT_PARAM]: undefined,
 			[COLLECTION_PARAM]: undefined
@@ -157,7 +154,6 @@ export const loadRouteParams = ($event: LoadEvent): RouteParams => {
 	return {
 		[TOKEN_PARAM]: nonNullish(token) ? replaceEmoji(decodeURIComponent(token)) : null,
 		[NETWORK_PARAM]: searchParams?.get(NETWORK_PARAM),
-		[NFT_NETWORK_PARAM]: searchParams?.get(NFT_NETWORK_PARAM),
 		[URI_PARAM]: nonNullish(uri) ? decodeURIComponent(uri) : null,
 		[NFT_PARAM]: searchParams?.get(NFT_PARAM),
 		[COLLECTION_PARAM]: searchParams?.get(COLLECTION_PARAM)
@@ -169,7 +165,6 @@ export const resetRouteParams = (): RouteParams => ({
 	[NFT_PARAM]: null,
 	[COLLECTION_PARAM]: null,
 	[NETWORK_PARAM]: null,
-	[NFT_NETWORK_PARAM]: null,
 	[URI_PARAM]: null
 });
 
@@ -186,32 +181,35 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 };
 
 export const nftsUrl = (
-	params:
+	params: {
+		originSelectedNetwork?: NetworkId;
+	} & (
 		| {
 				nft?: Nft;
 		  }
 		| {
 				collection?: NftCollection;
 		  }
+	)
 ): string => {
-	const url = new URL(window.location.href);
-
-	url.searchParams.delete(NFT_PARAM);
-	url.searchParams.delete(COLLECTION_PARAM);
-	url.searchParams.delete(NFT_NETWORK_PARAM);
+	let url = `${AppPath.Nfts}`;
 
 	if ('nft' in params && nonNullish(params.nft)) {
+		url += `?${NFT_PARAM}=${params.nft.id}`;
+		url += `&${COLLECTION_PARAM}=${params.nft.collection.address}`;
 		if (nonNullish(params.nft.collection.network.id.description)) {
-			url.searchParams.set(NFT_NETWORK_PARAM, params.nft.collection.network.id.description);
+			url += `&${NETWORK_PARAM}=${params.nft.collection.network.id.description}`;
 		}
-		url.searchParams.set(COLLECTION_PARAM, params.nft.collection.address);
-		url.searchParams.set(NFT_PARAM, params.nft.id);
 	} else if ('collection' in params && nonNullish(params.collection)) {
+		url += `?${COLLECTION_PARAM}=${params.collection.address}`;
 		if (nonNullish(params.collection.network.id.description)) {
-			url.searchParams.set(NFT_NETWORK_PARAM, params.collection.network.id.description);
+			url += `&${NETWORK_PARAM}=${params.collection.network.id.description}`;
 		}
-		url.searchParams.set(COLLECTION_PARAM, params.collection.address);
+	} else if (nonNullish(params.originSelectedNetwork?.description)) {
+		url += `?${NETWORK_PARAM}=${params.originSelectedNetwork.description}`;
+
+		console.log('goto', url);
 	}
 
-	return `${AppPath.Nfts}?${url.searchParams.toString()}`;
+	return url;
 };
