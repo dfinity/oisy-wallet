@@ -41,7 +41,7 @@
 	);
 
 	$effect(() => {
-		setContext(NFT_CONTEXT_KEY, { ...$selectedNetwork });
+		setContext(NFT_CONTEXT_KEY, $selectedNetwork?.id);
 	});
 </script>
 

@@ -26,7 +26,6 @@
 	onMount(() => {
 		timeout = setTimeout(() => {
 			if (isNullish(nft)) {
-				console.log(originSelectedNetwork);
 				goto(nftsUrl({ originSelectedNetwork }));
 				toastsError({ msg: { text: $i18n.nfts.text.nft_not_loaded } });
 			}
@@ -38,8 +37,6 @@
 			}
 		};
 	});
-
-	console.log(originSelectedNetwork);
 </script>
 
 <NftHero {nft} {token} />

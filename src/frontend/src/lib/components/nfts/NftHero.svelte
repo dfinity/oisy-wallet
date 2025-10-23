@@ -30,6 +30,7 @@
 	const originSelectedNetwork: NetworkId | undefined = getContext(NFT_CONTEXT_KEY);
 
 	const breadcrumbItems = $derived.by(() => {
+		console.log(originSelectedNetwork);
 		let breadcrumbs = [
 			{
 				label: $i18n.navigation.text.tokens,
