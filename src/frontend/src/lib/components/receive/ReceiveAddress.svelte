@@ -46,7 +46,7 @@
 
 		{#snippet content()}
 			{#if nonNullish(text)}
-				<p class="mb-1.5 break-normal py-2 text-tertiary">
+				<p class="mb-1.5 py-2 break-normal text-tertiary">
 					{@render text?.()}
 				</p>
 			{/if}
@@ -63,7 +63,7 @@
 				{#if nonNullish(address)}
 					<output
 						id="ic-wallet-address"
-						class="break-all text-sm"
+						class="text-sm break-all"
 						data-tid={RECEIVE_TOKENS_MODAL_ADDRESS_LABEL}
 						in:fade>{address}</output
 					>

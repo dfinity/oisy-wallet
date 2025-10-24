@@ -12,7 +12,7 @@
 
 <Responsive down="md">
 	<div
-		class="mobile-nav z-3 border-t-1 visible fixed bottom-0 left-0 right-0 flex flex-row border-tertiary bg-primary-inverted-alt md:hidden"
+		class="mobile-nav visible fixed right-0 bottom-0 left-0 z-3 flex flex-row border-t-1 border-tertiary bg-primary-inverted-alt md:hidden"
 		data-tid={MOBILE_NAVIGATION_MENU}
 	>
 		{@render children()}

@@ -88,7 +88,7 @@
 </script>
 
 <div
-	class="flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary bg-pos-0 p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
+	class="bg-pos-0 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-primary p-3 text-center text-primary-inverted transition-all duration-500 ease-in-out md:rounded-[28px] md:p-5"
 	class:bg-center={isVeurToken}
 	class:bg-cover={isTrumpToken || isVchfToken || isVeurToken}
 	class:bg-gradient-to-r={isGradientToRight}

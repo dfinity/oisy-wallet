@@ -64,7 +64,7 @@
 	{#snippet content()}
 		<SendReviewDestination aiAssistantConsoleView={true} {destination} selectedContact={contact} />
 
-		<div class="mb-2 mt-4">
+		<div class="mt-4 mb-2">
 			<ReviewNetwork sourceNetwork={$sendToken.network} />
 		</div>
 

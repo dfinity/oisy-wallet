@@ -106,7 +106,7 @@
 <!-- "In order to do customer verification before purchase, we require the following permissions to be given to the app. So this is definitely merely for the KYC  and also for fraud detection algorithms i suppose" -->
 
 <div
-	class="absolute bottom-0 left-0 right-0 top-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
+	class="absolute top-0 right-0 bottom-0 left-0 bg-surface text-brand-primary transition-all duration-500 ease-in-out"
 	class:invisible={themeLoaded}
 	class:opacity-0={themeLoaded}
 	class:opacity-100={!themeLoaded}

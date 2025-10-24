@@ -47,7 +47,7 @@
 		<StickyHeader>
 			{#snippet header()}
 				<div class="flex w-full justify-between">
-					<div class="grow-1 relative flex justify-between">
+					<div class="relative flex grow-1 justify-between">
 						<TokensFilter>
 							{#snippet overflowableContent()}
 								{#if NFTS_ENABLED}
@@ -93,7 +93,7 @@
 			{/if}
 		</StickyHeader>
 
-		<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
+		<div class="mt-12 mb-4 flex w-full justify-center sm:w-auto" in:fade>
 			<ManageTokensButton />
 		</div>
 	</div>
