@@ -80,7 +80,7 @@ describe('NftCard', () => {
 		assertNonNullish(mockValidErc721Nft.name);
 		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
 	});
 
 	it('should render the correct styles for each type', async () => {
