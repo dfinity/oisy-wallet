@@ -71,7 +71,7 @@
 			<ListItem>
 				<ListItemButton
 					onclick={() => {
-						trackSortingEvent({ order: 'asc', type: 'asc' });
+						trackSortingEvent({ order: 'asc', type: 'date' });
 						setSorting({ order: 'asc', type: 'date' });
 					}}
 					selectable
