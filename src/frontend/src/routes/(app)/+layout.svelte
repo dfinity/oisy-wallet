@@ -26,7 +26,6 @@
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
-	import NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
 
 	interface Props {
 		children: Snippet;
