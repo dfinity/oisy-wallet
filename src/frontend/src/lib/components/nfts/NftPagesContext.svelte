@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
-	import { getContext, setContext, type Snippet } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import {
 		initNftPagesStore,
 		NFT_PAGES_CONTEXT_KEY,
 		type NftPagesContext
 	} from '$lib/stores/nft-pages.store';
+	import { routeCollection } from '$lib/derived/nav.derived';
 
 	interface Props {
 		children: Snippet;
@@ -19,8 +19,8 @@
 	});
 
 	$effect(() => {
-		if (nonNullish($selectedNetwork?.id)) {
-			store.setOriginSelectedNetwork($selectedNetwork.id);
+		if (!$routeCollection) {
+			store.setOriginSelectedNetwork($selectedNetwork?.id);
 		}
 	});
 </script>

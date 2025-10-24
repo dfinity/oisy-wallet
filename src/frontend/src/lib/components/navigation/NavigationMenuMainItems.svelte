@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -31,6 +31,8 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
+	import { getContext } from 'svelte';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -41,7 +43,13 @@
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
+	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
+
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
+	const isNftsRoute = $derived(isRouteNfts(page));
+
+	const usePreviousRoute = $derived(isTransactionsRoute || isNullish(originSelectedNetwork));
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -53,9 +61,9 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: AppPath.Tokens,
+		path: isNftsRoute ? AppPath.Nfts : AppPath.Tokens,
 		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
+		usePreviousRoute,
 		fromRoute
 	})}
 	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
@@ -74,7 +82,7 @@
 	href={networkUrl({
 		path: AppPath.Activity,
 		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
+		usePreviousRoute,
 		fromRoute
 	})}
 	selected={isRouteActivity(page)}
@@ -94,7 +102,7 @@
 	href={networkUrl({
 		path: AppPath.Explore,
 		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
+		usePreviousRoute,
 		fromRoute
 	})}
 	selected={isRouteDappExplorer(page)}
@@ -115,7 +123,7 @@
 		href={networkUrl({
 			path: AppPath.Earning,
 			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute,
+			usePreviousRoute,
 			fromRoute
 		})}
 		selected={isRouteEarning(page)}
@@ -136,7 +144,7 @@
 		href={networkUrl({
 			path: AppPath.Rewards,
 			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute,
+			usePreviousRoute,
 			fromRoute
 		})}
 		selected={isRouteRewards(page)}
@@ -158,7 +166,7 @@
 	href={networkUrl({
 		path: AppPath.Settings,
 		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute,
+		usePreviousRoute,
 		fromRoute
 	})}
 	selected={isRouteSettings(page)}
