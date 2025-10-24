@@ -234,13 +234,13 @@
 				onBack={modal.back}
 				onClose={close}
 				onNext={modal.next}
+				onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
 				onShowTokensList={showTokensList}
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
 				bind:swapProgressStep
 				bind:swapFailedProgressSteps
-				on:icShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
 			/>
 		{/if}
 	{/key}
