@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import { setContext, type Snippet } from 'svelte';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
@@ -7,7 +8,6 @@
 		NFT_PAGES_CONTEXT_KEY,
 		type NftPagesContext
 	} from '$lib/stores/nft-pages.store';
-	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		children: Snippet;
@@ -15,9 +15,7 @@
 
 	const { children }: Props = $props();
 
-	const { store } = setContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY, {
-		store: initNftPagesStore()
-	});
+	const store = setContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY, initNftPagesStore());
 
 	$effect(() => {
 		// Add conditions to exclude certain pages from updating the origin network
