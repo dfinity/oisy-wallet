@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
 	import { setContext, type Snippet } from 'svelte';
+	import { routeCollection } from '$lib/derived/nav.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import {
 		initNftPagesStore,
@@ -19,8 +19,10 @@
 	});
 
 	$effect(() => {
-		if (nonNullish($selectedNetwork?.id)) {
-			store.setOriginSelectedNetwork($selectedNetwork.id);
+		// Add conditions to exclude certain pages from updating the origin network
+		// This way we have a way to know what network has been selected by the user
+		if (!$routeCollection) {
+			store.setOriginSelectedNetwork($selectedNetwork?.id);
 		}
 	});
 </script>
