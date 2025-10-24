@@ -184,6 +184,6 @@
 	};
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+{@render children?.()}
+
+<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} />
