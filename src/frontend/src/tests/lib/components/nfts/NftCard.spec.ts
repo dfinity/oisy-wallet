@@ -213,4 +213,47 @@ describe('NftCard', () => {
 			}
 		});
 	});
+
+	it('should render nft name when withCollectionLabel is false (default)', () => {
+		const { getByText, queryByText } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link'
+			}
+		});
+
+		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
+
+		// Should show nft.name as the main label
+		expect(getByText(mockValidErc721Nft.name)).toBeInTheDocument();
+
+		// Should NOT show collection name in title
+		expect(queryByText(mockValidErc721Nft.collection.name)).toBeNull();
+
+		// Subtitle should just be the id
+		expect(getByText(`#${mockValidErc721Nft.id}`)).toBeInTheDocument();
+		expect(queryByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeNull();
+	});
+
+	it('should render collection name and nft name when withCollectionLabel is true', () => {
+		const { getByText } = render(NftCard, {
+			props: {
+				nft: mockValidErc721Nft,
+				testId,
+				type: 'card-link',
+				withCollectionLabel: true
+			}
+		});
+
+		assertNonNullish(mockValidErc721Nft.name);
+		assertNonNullish(mockValidErc721Nft.collection.name);
+
+		// Should show collection name instead of nft name as title
+		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
+
+		// Subtitle should show both id and nft name
+		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
+	});
 });
