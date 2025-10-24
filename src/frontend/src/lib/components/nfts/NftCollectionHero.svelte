@@ -11,7 +11,6 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
@@ -25,7 +24,7 @@
 
 	const { token, nfts }: Props = $props();
 
-	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const store = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
 
 	const breadcrumbItems = $derived([

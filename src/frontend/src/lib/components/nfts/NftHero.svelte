@@ -12,15 +12,10 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
-	import {
-		NFT_PAGES_CONTEXT_KEY,
-		type NftPagesContext,
-		type NftPagesStore
-	} from '$lib/stores/nft-pages.store';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 
@@ -31,7 +26,7 @@
 
 	const { token, nft }: Props = $props();
 
-	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const store = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
 
 	const breadcrumbItems = $derived.by(() => {
