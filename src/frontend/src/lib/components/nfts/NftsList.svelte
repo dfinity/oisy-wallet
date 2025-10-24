@@ -166,7 +166,7 @@
 			title={$i18n.nfts.text.all_assets}
 		>
 			{#snippet nftListItem({ nft })}
-				<NftCard {fromRoute} {nft} source={NFT_LIST_ROUTE} type="card-link" />
+				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" />
 			{/snippet}
 		</NftList>
 
@@ -176,7 +176,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard {fromRoute} isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -187,7 +187,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard {fromRoute} isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
 				{/snippet}
 			</NftList>
 		{/if}
