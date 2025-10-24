@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, untrack } from 'svelte';
 	import SignerAlert from '$lib/components/signer/SignerAlert.svelte';
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
@@ -23,8 +22,10 @@
 		});
 	};
 
-	run(() => {
-		($payload, onPayload());
+	$effect(() => {
+		[$payload];
+
+		untrack(() => onPayload());
 	});
 </script>
 

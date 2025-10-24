@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
 	import VipRewardStateModal from '$lib/components/vip/VipRewardStateModal.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -11,12 +10,6 @@
 	import { modalStore } from '$lib/stores/modal.store';
 	import { hasUrlCode } from '$lib/stores/url-code.store';
 	import { removeSearchParam } from '$lib/utils/nav.utils';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	const modalId = Symbol();
 
@@ -55,8 +48,6 @@
 		handleSearchParams();
 	});
 </script>
-
-{@render children?.()}
 
 {#if $modalVipRewardState && nonNullish($modalVipRewardStateData)}
 	<VipRewardStateModal

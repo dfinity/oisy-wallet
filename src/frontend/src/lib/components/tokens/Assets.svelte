@@ -25,10 +25,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
-		tab?: TokenTypes;
+		tab: TokenTypes;
 	}
 
-	let { tab = TokenTypes.TOKENS }: Props = $props();
+	let { tab }: Props = $props();
 
 	let activeTab = $state(tab);
 

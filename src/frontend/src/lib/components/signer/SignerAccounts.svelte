@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { type Snippet, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext, type Snippet, untrack } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -32,9 +31,11 @@
 		resetPrompt();
 	};
 
-	run(() => {
-		($payload, (() => onAccountsPrompt())());
+	$effect(() => {
+		[$payload];
+
+		untrack(() => onAccountsPrompt());
 	});
 </script>
 
-{@render children?.()}
+{@render children()}

@@ -12,7 +12,7 @@
 
 	let { payload }: Props = $props();
 
-	let origin: Origin | undefined = $derived(payload?.origin);
+	let origin = $derived<Origin | undefined>(payload?.origin);
 
 	const mapHost = (origin: Origin | undefined): OptionString => {
 		if (isNullish(origin)) {
@@ -29,8 +29,7 @@
 	};
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
-
-	let host: OptionString = $derived(mapHost(origin));
+	let host = $derived(mapHost(origin));
 </script>
 
 {#if nonNullish(origin)}
