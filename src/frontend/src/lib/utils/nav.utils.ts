@@ -180,6 +180,7 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 	await goto(url, { replaceState: true, noScroll: true });
 };
 
+// Todo: remove fromRoute
 export const nftsUrl = (
 	params:
 		| {

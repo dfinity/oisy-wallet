@@ -52,6 +52,10 @@ export const modalGldtStake: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'gldt-stake'
 );
+export const modalGldtUnstake: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gldt-unstake'
+);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
@@ -25,10 +24,9 @@
 		collection: NftCollectionUi;
 		disabled?: boolean;
 		testId?: string;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, disabled, testId, fromRoute }: Props = $props();
+	const { collection, disabled, testId }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -56,10 +54,7 @@
 			}
 		});
 
-		const url = nftsUrl({ collection: collection.collection, fromRoute });
-		if (nonNullish(url)) {
-			goto(url);
-		}
+		goto(nftsUrl({ collection: collection.collection }));
 	};
 </script>
 
