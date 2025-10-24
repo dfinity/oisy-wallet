@@ -18,7 +18,6 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		isRouteActivity,
@@ -49,18 +48,13 @@
 	const assetsTab = $derived($store?.assetsTab ?? TokenTypes.TOKENS);
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
-	const isNftsRoute = $derived(isRouteNfts(page));
+
+	const networkId = $derived(originSelectedNetwork);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
 		fromRoute = from;
-	});
-
-	$effect(() => {
-		if (isNullish(originSelectedNetwork)) {
-			fromRoute = null;
-		}
 	});
 </script>
 
@@ -68,8 +62,8 @@
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
 		path: assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute || isNftsRoute,
+		networkId,
+		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
 	selected={isRouteTokens(page) || isRouteNfts(page) || isRouteTransactions(page)}
@@ -87,8 +81,8 @@
 	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute || isNftsRoute,
+		networkId,
+		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
 	selected={isRouteActivity(page)}
@@ -107,8 +101,8 @@
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute || isNftsRoute,
+		networkId,
+		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
 	selected={isRouteDappExplorer(page)}
@@ -128,8 +122,8 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Earning,
-			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute || isNftsRoute,
+			networkId,
+			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		selected={isRouteEarning(page)}
@@ -149,8 +143,8 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
-			networkId: $networkId,
-			usePreviousRoute: isTransactionsRoute || isNftsRoute,
+			networkId,
+			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
 		selected={isRouteRewards(page)}
@@ -171,8 +165,8 @@
 	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
-		networkId: $networkId,
-		usePreviousRoute: isTransactionsRoute || isNftsRoute,
+		networkId,
+		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
 	selected={isRouteSettings(page)}
