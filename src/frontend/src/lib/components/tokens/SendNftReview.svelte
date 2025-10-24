@@ -10,7 +10,7 @@
 	let { nft }: Props = $props();
 </script>
 
-<div class="border-1 mb-5 flex rounded-lg border-brand-subtle-20 bg-brand-subtle-10 p-3">
+<div class="mb-5 flex rounded-lg border-1 border-brand-subtle-20 bg-brand-subtle-10 p-3">
 	<div class="flex items-center">
 		<span class="flex">
 			<NftLogo badge={{ type: 'network' }} {nft} />

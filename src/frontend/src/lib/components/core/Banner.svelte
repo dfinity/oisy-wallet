@@ -19,7 +19,7 @@
 	</div>
 {:else if BETA && envBannerVisible}
 	<div
-		class="fixed left-[50%] top-6 z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
+		class="fixed top-6 left-[50%] z-10 flex min-w-80 -translate-x-[50%] justify-between gap-4 rounded-lg bg-primary"
 	>
 		<WarningBanner>
 			<span class="w-full px-2">{$i18n.core.info.test_banner_beta}</span>

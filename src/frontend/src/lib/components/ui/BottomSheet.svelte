@@ -16,7 +16,7 @@
 </script>
 
 {#if visible}
-	<div class="z-14 fixed inset-0">
+	<div class="fixed inset-0 z-14">
 		<BottomSheet transition>
 			{#snippet header()}
 				<div class="w-full p-4">
@@ -36,7 +36,7 @@
 				{@render content()}
 			</div>
 			{#if nonNullish(footer)}
-				<div class="border-t-1 overflow-hidden border-primary p-4">
+				<div class="overflow-hidden border-t-1 border-primary p-4">
 					{@render footer()}
 				</div>
 			{/if}
