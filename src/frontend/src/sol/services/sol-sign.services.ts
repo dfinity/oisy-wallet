@@ -12,7 +12,7 @@ export const signTransaction = async (
 ): Promise<{ signedTransaction: SolSignedTransaction; signature: Signature }> => {
 	const signedTransaction = await signTransactionMessageWithSigners(transactionMessage);
 
-	// This is purely for type-safe reasons: the `transactionMessage` input is already passed with a blockhash lifetime
+	// This is purely for type safety reasons: the `transactionMessage` input is already passed with a blockhash lifetime
 	assertIsTransactionWithBlockhashLifetime(signedTransaction);
 
 	const signature = getSignatureFromTransaction(signedTransaction);
