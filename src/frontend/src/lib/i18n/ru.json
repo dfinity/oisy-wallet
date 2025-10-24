@@ -1711,12 +1711,14 @@
 	"stake": {
 		"text": {
 			"stake": "Стейкинг",
+			"unstake": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
 			"executing_transaction": "Выполнение транзакции",
 			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
 			"provider": "Провайдер",
+			"earning_potential": "",
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
 			"current_apy_info": "Информация о текущем APY",

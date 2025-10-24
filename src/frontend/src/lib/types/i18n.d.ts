@@ -1388,12 +1388,14 @@ interface I18nEarning {
 interface I18nStake {
 	text: {
 		stake: string;
+		unstake: string;
 		enable_token_text: string;
 		enable_token_button: string;
 		review: string;
 		executing_transaction: string;
 		unsupported_token_staking: string;
 		provider: string;
+		earning_potential: string;
 		visit_provider: string;
 		current_apy: string;
 		current_apy_info: string;
