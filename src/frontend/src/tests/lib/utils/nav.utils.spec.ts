@@ -11,7 +11,6 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
-import type { Network } from '$lib/types/network';
 import {
 	back,
 	gotoReplaceRoot,
@@ -647,19 +646,17 @@ describe('nav.utils', () => {
 		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
 		const mockNft = mockValidErc1155Nft;
 
-		const getMockFromRoute = (network: Network) =>
-			({
-				url: new URL(`https://example.com?network=${network.id.description}`)
-			}) as unknown as NavigationTarget;
+		const getValidUrl = (params: string) => `https://dummy.com${params}`;
 
 		it('includes network and collection param when collection is provided', () => {
 			const result = nftsUrl({
-				collection: mockCollection,
-				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
+				collection: mockCollection
 			});
 
 			assertNonNullish(result);
-			const url = new URL(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockCollection.network.id.description);
 			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockCollection.address);
@@ -667,21 +664,36 @@ describe('nav.utils', () => {
 
 		it('includes all params when nft is passed', () => {
 			const result = nftsUrl({
-				nft: mockNft,
-				fromRoute: getMockFromRoute(ETHEREUM_NETWORK)
+				nft: mockNft
 			});
 			assertNonNullish(result);
-			const url = new URL(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNft.collection.network.id.description);
 			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockNft.collection.address);
 			expect(url.searchParams.get(NFT_PARAM)).toBe(mockNft.id);
 		});
 
-		it('persists network param if nothing is passed', () => {
-			const result = nftsUrl({ fromRoute: getMockFromRoute(ETHEREUM_NETWORK) });
+		it('doesnt keep search params if all params are undefined', () => {
+			const result = nftsUrl({});
 			assertNonNullish(result);
-			const url = new URL(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBeNull();
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();
+			expect(url.searchParams.get(NFT_PARAM)).toBeNull();
+		});
+
+		it('persists the network if originSelectedNetwork is passed', () => {
+			const result = nftsUrl({ originSelectedNetwork: ETHEREUM_NETWORK.id });
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
 
 			expect(url.searchParams.get(NETWORK_PARAM)).toBe(ETHEREUM_NETWORK.id.description);
 			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();

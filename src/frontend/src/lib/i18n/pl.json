@@ -1711,12 +1711,14 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"unstake": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"earning_potential": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
