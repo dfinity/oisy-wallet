@@ -19,7 +19,6 @@
 
 	$effect(() => {
 		if ($hasAcceptedAllLatestAgreements) {
-			å;
 			return;
 		}
 
