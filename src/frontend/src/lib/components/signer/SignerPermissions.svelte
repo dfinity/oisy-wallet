@@ -99,7 +99,7 @@
 					{@const { icon, label } = listItems[method]}
 
 					{@const SvelteComponent = icon}
-					<li class="flex items-center gap-2 break-normal pb-1.5">
+					<li class="flex items-center gap-2 pb-1.5 break-normal">
 						<SvelteComponent size="24" />
 						{label}
 					</li>
