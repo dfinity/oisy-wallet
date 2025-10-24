@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
@@ -12,9 +13,8 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { getContext } from 'svelte';
 	import { NFT_PAGES_CONTEXT_KEY, type NftPagesStore } from '$lib/stores/nft-pages.store';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
