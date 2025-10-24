@@ -17,6 +17,8 @@
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { getContext } from 'svelte';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -25,8 +27,13 @@
 
 	const { token, nft }: Props = $props();
 
+	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
+
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
+		let breadcrumbs = [
+			{ label: $i18n.navigation.text.tokens, url: nftsUrl({ originSelectedNetwork }) }
+		];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
