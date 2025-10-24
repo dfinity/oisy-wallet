@@ -1,16 +1,20 @@
 <!-- source: DFINITY foundation -->
 <script lang="ts">
+	import { isIos } from '$lib/utils/device.utils';
+
 	interface Props {
 		size?: string;
 		styleClass?: string;
 	}
 
 	let { size = '80', styleClass }: Props = $props();
+
+	let enableAnimations = $derived(!isIos());
 </script>
 
 <svg class={styleClass} fill="none" height={size} width={size} xmlns="http://www.w3.org/2000/svg">
 	<!-- Back layer - appears last -->
-	<g class="layer-back" filter="url(#a)">
+	<g class:layer-back={enableAnimations} filter="url(#a)">
 		<path
 			d="M39.9 66.0C25.5 66.0 13.9 54.4 13.9 40S25.5 13.9 39.9 13.9 66.0 25.5 66.0 40 54.4 66.0 39.9 66.0Z"
 			fill="#0066FF"
@@ -18,14 +22,28 @@
 	</g>
 
 	<!-- 3 circle - rotates counterclockwise -->
-	<circle class="layer-3-circle" cx="39.6" cy="38.8" fill="url(#b)" fill-opacity=".5" r="29.2" />
+	<circle
+		class:layer-3-circle={enableAnimations}
+		cx="39.6"
+		cy="38.8"
+		fill="url(#b)"
+		fill-opacity=".5"
+		r="29.2"
+	/>
 
 	<!-- 2 circle - rotates clockwise -->
-	<circle class="layer-2-circle" cx="39.7" cy="38.9" fill="url(#c)" fill-opacity=".5" r="26.4" />
+	<circle
+		class:layer-2-circle={enableAnimations}
+		cx="39.7"
+		cy="38.9"
+		fill="url(#c)"
+		fill-opacity=".5"
+		r="26.4"
+	/>
 
 	<!-- 1 circle -->
 	<circle
-		class="layer-1-circle"
+		class:layer-1-circle={enableAnimations}
 		cx="39.6"
 		cy="38.9"
 		fill="url(#d)"
@@ -35,12 +53,12 @@
 	/>
 
 	<!-- Front layer -->
-	<g class="layer-front" filter="url(#e)">
+	<g class:layer-front={enableAnimations} filter="url(#e)">
 		<ellipse cx="39.9" cy="38.8" fill="#06F" rx="25.2" ry="19.6" />
 	</g>
 
 	<!-- Eyes - move left-right -->
-	<g class="layer-eyes">
+	<g class:layer-eyes={enableAnimations}>
 		<rect fill="#fff" height="13.3" rx="2.0" width="7.1" x="28.2" y="31.8" />
 		<rect fill="#fff" height="13.3" rx="2.0" width="7.1" x="43.7" y="31.8" />
 	</g>
