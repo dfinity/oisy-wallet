@@ -10,7 +10,6 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import type { NFT_COLLECTION_ROUTE } from '$lib/constants/analytics.constants';
 	import { NFT_LIST_ROUTE } from '$lib/constants/analytics.constants.js';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
@@ -19,6 +18,7 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import type { Nft } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		nft: Nft;
@@ -61,7 +61,7 @@
 				}
 			});
 
-			goto(`${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}/${nft.id}`);
+			goto(nftsUrl({ nft }));
 		}
 	};
 </script>
@@ -104,18 +104,18 @@
 		</NftDisplayGuard>
 
 		{#if isHidden}
-			<div class="absolute left-2 top-2 invert dark:invert-0">
+			<div class="absolute top-2 left-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
 
 		{#if isSpam}
-			<div class="absolute left-2 top-2 text-warning-primary">
+			<div class="absolute top-2 left-2 text-warning-primary">
 				<IconAlertOctagon size="24" />
 			</div>
 		{/if}
 
-		<span class="absolute bottom-2 right-2 block flex items-center gap-1">
+		<span class="absolute right-2 bottom-2 block flex items-center gap-1">
 			{#if isCollectionErc1155(nft.collection) && type !== 'default'}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}
@@ -129,7 +129,7 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
+	<span class="flex w-full flex-col gap-1 p-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
 			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
 		</span>

@@ -16,6 +16,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -31,7 +32,7 @@
 				...breadcrumbs,
 				{
 					label: nft.collection.name,
-					url: `${AppPath.Nfts}${nft.collection.network.name}-${nft.collection.address}`
+					url: nftsUrl({ collection: nft?.collection })
 				}
 			];
 		}
@@ -84,7 +85,7 @@
 							<Img src={nft.imageUrl} styleClass="max-h-full max-w-full" />
 						</button>
 					</NftDisplayGuard>
-					<span class="absolute bottom-0 right-0 m-2.5">
+					<span class="absolute right-0 bottom-0 m-2.5">
 						<NetworkLogo color="white" network={nft.collection.network} size="xs" />
 					</span>
 				</div>

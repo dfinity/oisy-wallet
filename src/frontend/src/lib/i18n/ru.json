@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "Не закрывайте эту вкладку, пока транзакция не завершится",
-			"standalone_mode": "Обновите $oisy_short. Пожалуйста, удалите $oisy_short с главного экрана и переустановите (на iPhone убедитесь, что сняли флажок «Открыть как веб-приложение»).<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Подробнее</a>"
+			"standalone_mode": ""
 		}
 	},
 	"navigation": {
@@ -1711,12 +1711,14 @@
 	"stake": {
 		"text": {
 			"stake": "Стейкинг",
+			"unstake": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
 			"executing_transaction": "Выполнение транзакции",
 			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
 			"provider": "Провайдер",
+			"earning_potential": "",
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
 			"current_apy_info": "Информация о текущем APY",

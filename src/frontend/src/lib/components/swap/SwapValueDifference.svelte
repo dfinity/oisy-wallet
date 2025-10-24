@@ -10,7 +10,7 @@
 
 	interface Props {
 		swapAmount: OptionAmount;
-		receiveAmount: number | undefined;
+		receiveAmount?: number;
 	}
 
 	let { swapAmount, receiveAmount }: Props = $props();
@@ -18,19 +18,19 @@
 	const { sourceTokenExchangeRate, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
-	let paidValue: number | undefined = $derived(
+	let paidValue = $derived(
 		nonNullish(swapAmount) && nonNullish($sourceTokenExchangeRate)
 			? Number(swapAmount) * $sourceTokenExchangeRate
 			: undefined
 	);
 
-	let receivedValue: number | undefined = $derived(
+	let receivedValue = $derived(
 		nonNullish(receiveAmount) && nonNullish($destinationTokenExchangeRate)
 			? receiveAmount * $destinationTokenExchangeRate
 			: undefined
 	);
 
-	let valueDifference: number | undefined = $derived(
+	let valueDifference = $derived(
 		nonNullish(paidValue) && nonNullish(receivedValue) && paidValue !== 0
 			? ((receivedValue - paidValue) / paidValue) * 100
 			: undefined

@@ -5,11 +5,13 @@
 	import { EARNING_ENABLED } from '$env/earning';
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
+	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
 		type GldtStakeContext as GldtStakeContextType,
 		initGldtStakeStore
 	} from '$icp/stores/gldt-stake.store';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
@@ -27,6 +29,8 @@
 	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
 		store: initGldtStakeStore()
 	});
+
+	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
 </script>
 
 <div class="flex flex-row items-center">
@@ -56,5 +60,7 @@
 </div>
 
 <GldtStakeContext>
-	<GldtStakeEarnCard />
+	<div class="flex justify-between gap-4">
+		<GldtStakeEarnCard {gldtToken} />
+	</div>
 </GldtStakeContext>

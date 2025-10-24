@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { goto } from '$app/navigation';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import {
 		PLAUSIBLE_EVENT_CONTEXTS,
 		PLAUSIBLE_EVENT_SOURCES,
@@ -17,6 +17,7 @@
 	import { tokenListStore } from '$lib/stores/token-list.store';
 	import type { NftCollectionUi } from '$lib/types/nft';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -38,15 +39,8 @@
 	const previewNft = $derived(
 		collection.nfts.find((nft) => nft.mediaStatus !== NftMediaStatusEnum.OK) ?? collection.nfts[0]
 	);
-</script>
 
-<a
-	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
-	class:cursor-not-allowed={disabled}
-	class:hover:-translate-y-1={!disabled}
-	class:hover:bg-primary={!disabled}
-	href={`${AppPath.Nfts}${collection.collection.network.name}-${collection.collection.address}`}
-	onclick={() => {
+	const onClick = () => {
 		trackEvent({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
@@ -59,9 +53,19 @@
 				token_name: previewNft.collection.name ?? ''
 			}
 		});
-	}}
+
+		goto(nftsUrl({ collection: collection.collection }));
+	};
+</script>
+
+<button
+	class="group flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300"
+	class:cursor-not-allowed={disabled}
+	class:hover:-translate-y-1={!disabled}
+	class:hover:bg-primary={!disabled}
+	onclick={onClick}
 >
-	<div class="relative h-full w-full">
+	<span class="relative block h-full w-full">
 		<NftDisplayGuard
 			location={{
 				source: PLAUSIBLE_EVENT_SOURCES.NFTS_PAGE,
@@ -77,7 +81,7 @@
 				class:opacity-50={disabled}
 			>
 				<span
-					class="bg-linear-to-tl -from-100% z-1 absolute m-[1px] h-full w-full from-[#382792A6] to-[#00000000] to-45% opacity-20"
+					class="-from-100% absolute z-1 m-[1px] h-full w-full bg-linear-to-tl from-[#382792A6] to-[#00000000] to-45% opacity-20"
 				>
 				</span>
 				<span class="absolute z-0 h-full w-full bg-secondary-alt"></span>
@@ -98,7 +102,7 @@
 			</div>
 		</NftDisplayGuard>
 
-		<span class="absolute bottom-0 right-0 m-2.5">
+		<span class="absolute right-0 bottom-0 m-2.5">
 			<NetworkLogo
 				color="white"
 				network={collection.collection.network}
@@ -106,9 +110,9 @@
 				testId={`${testId}-network`}
 			/>
 		</span>
-	</div>
+	</span>
 
-	<div class="flex w-full flex-col gap-1 px-2 pb-2">
+	<span class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
 			class="truncate text-sm font-bold"
 			class:text-disabled={disabled}
@@ -119,5 +123,5 @@
 				$count: String(collection.nfts.length)
 			})}</span
 		>
-	</div>
-</a>
+	</span>
+</button>

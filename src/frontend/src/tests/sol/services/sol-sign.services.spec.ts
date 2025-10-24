@@ -4,7 +4,7 @@ import {
 	mockSolSignedTransaction,
 	mockSolTransactionMessage
 } from '$tests/mocks/sol-transactions.mock';
-import * as solanaWeb3Pkg from '@solana/kit';
+import * as solanaKit from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 vi.mock(import('@solana/kit'), async (importOriginal) => {
@@ -20,6 +20,7 @@ describe('sol-sign.services', () => {
 	describe('signTransaction', () => {
 		let spySignTransactionMessageWithSigners: MockInstance;
 		let spyGetSignatureFromTransaction: MockInstance;
+		let spyAssertIsTransactionWithBlockhashLifetime: MockInstance;
 
 		const mockSignature = mockSolSignature();
 		const mockTransactionMessage = mockSolTransactionMessage;
@@ -29,17 +30,23 @@ describe('sol-sign.services', () => {
 			vi.clearAllMocks();
 
 			spySignTransactionMessageWithSigners = vi
-				.spyOn(solanaWeb3Pkg, 'signTransactionMessageWithSigners')
+				.spyOn(solanaKit, 'signTransactionMessageWithSigners')
 				.mockResolvedValue(mockSignedTransaction);
 			spyGetSignatureFromTransaction = vi
-				.spyOn(solanaWeb3Pkg, 'getSignatureFromTransaction')
+				.spyOn(solanaKit, 'getSignatureFromTransaction')
 				.mockReturnValue(mockSignature);
+			spyAssertIsTransactionWithBlockhashLifetime = vi
+				.spyOn(solanaKit, 'assertIsTransactionWithBlockhashLifetime')
+				.mockImplementation(vi.fn());
 		});
 
 		it('should return a signed transaction and signature', async () => {
 			const result = await signTransaction(mockTransactionMessage);
 
 			expect(spySignTransactionMessageWithSigners).toHaveBeenCalledWith(mockTransactionMessage);
+			expect(spyAssertIsTransactionWithBlockhashLifetime).toHaveBeenCalledWith(
+				mockSignedTransaction
+			);
 			expect(spyGetSignatureFromTransaction).toHaveBeenCalledWith(mockSignedTransaction);
 			expect(result).toEqual({
 				signedTransaction: mockSignedTransaction,
