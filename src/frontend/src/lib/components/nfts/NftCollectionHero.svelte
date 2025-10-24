@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import NftMetadataList from '$lib/components/nfts/NftMetadataList.svelte';
+	import type NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
@@ -12,11 +14,9 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
-	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { getContext } from 'svelte';
 	import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
+	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
 
 	interface Props {
 		token?: NonFungibleToken;
