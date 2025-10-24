@@ -1,35 +1,37 @@
 import NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
-import { NFT_PAGES_CONTEXT_KEY, type NftPagesStore } from '$lib/stores/nft-pages.store';
-import type { NetworkId } from '$lib/types/network';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
-import { render } from '@testing-library/svelte';
+import { render, waitFor } from '@testing-library/svelte';
 
-// Mock selectedNetwork derived store
 vi.mock('$lib/derived/network.derived', () => ({
 	selectedNetwork: {
-		subscribe: (fn: (v: NetworkId) => void) => {
-			fn({ id: { description: 'mock-network' } } as unknown as NetworkId);
+		subscribe: (fn: (v: any) => void) => {
+			fn({ id: { description: 'mock-network' } });
 			return () => {};
 		}
 	}
 }));
 
-const mockContext = (store: NftPagesStore) => new Map([[NFT_PAGES_CONTEXT_KEY, { store }]]);
+const setOriginSelectedNetwork = vi.fn();
+const subscribe = vi.fn(() => () => {});
+
+vi.mock('$lib/stores/nft-pages.store', async (importOriginal) => {
+	const actual = (await importOriginal()) as typeof import('$lib/stores/nft-pages.store');
+	return {
+		...actual,
+		initNftPagesStore: vi.fn(() => ({
+			subscribe,
+			setOriginSelectedNetwork
+		}))
+	};
+});
 
 describe('NftPagesContext.svelte', () => {
-	it('calls store.setOriginSelectedNetwork with selectedNetwork.id', () => {
-		const setOriginSelectedNetwork = vi.fn();
+	it('calls store.setOriginSelectedNetwork with selectedNetwork.id', async () => {
+		render(NftPagesContext, { props: { children: mockSnippet } });
 
-		const mockStore = {
-			subscribe: vi.fn(),
-			setOriginSelectedNetwork
-		};
-
-		render(NftPagesContext, {
-			context: mockContext(mockStore),
-			props: { children: mockSnippet }
+		// wait for the $effect to run
+		await waitFor(() => {
+			expect(setOriginSelectedNetwork).toHaveBeenCalledWith({ description: 'mock-network' });
 		});
-
-		expect(setOriginSelectedNetwork).toHaveBeenCalledWith({ description: 'mock-network' });
 	});
 });
