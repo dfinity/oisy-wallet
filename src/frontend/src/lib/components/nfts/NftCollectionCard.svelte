@@ -19,14 +19,18 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils.js';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { filterSortByCollection } from '$lib/utils/nfts.utils';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
+	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
 
 	interface Props {
 		collection: NftCollectionUi;
+		isHidden?: boolean;
+		isSpam?: boolean;
 		disabled?: boolean;
 		testId?: string;
 	}
 
-	const { collection, disabled, testId }: Props = $props();
+	const { collection, isHidden, isSpam, disabled, testId }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -111,6 +115,18 @@
 			/>
 		</span>
 	</span>
+
+	{#if isHidden}
+		<div class="absolute top-2 left-2 invert dark:invert-0">
+			<IconEyeOff size="24" />
+		</div>
+	{/if}
+
+	{#if isSpam}
+		<div class="absolute top-2 left-2 text-warning-primary">
+			<IconAlertOctagon size="24" />
+		</div>
+	{/if}
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
