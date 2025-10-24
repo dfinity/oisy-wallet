@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish } from '@dfinity/utils';
-	import { type Snippet, untrack } from 'svelte';
+	import { untrack } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { isTokenErc1155 } from '$eth/utils/erc1155.utils';
 	import { ethAddress } from '$lib/derived/address.derived';
@@ -10,12 +10,6 @@
 	import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 	import { getTokensByNetwork } from '$lib/utils/nft.utils';
 	import { findNftsByToken, findRemovedNfts, getUpdatedNfts } from '$lib/utils/nfts.utils';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	const handleRemovedNfts = ({
 		token,
@@ -79,5 +73,3 @@
 		untrack(() => debounceLoad());
 	});
 </script>
-
-{@render children?.()}

@@ -143,7 +143,7 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
+<div class="mt-2 mb-8">
 	<IcTokenFee />
 </div>
 
