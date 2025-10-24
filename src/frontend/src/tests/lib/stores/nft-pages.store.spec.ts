@@ -19,7 +19,7 @@ describe('nft-pages.store', () => {
 		expect(get(store)?.originSelectedNetwork).toEqual(mockNetworkId);
 	});
 
-	it('updates originSelectedNetwork when setOriginSelectedNetwork is called', () => {
+	it('updates assetsTab when setAssetsTab is called', () => {
 		const store = initNftPagesStore();
 
 		store.setAssetsTab(TokenTypes.TOKENS);
