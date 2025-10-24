@@ -182,9 +182,7 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 
 // Todo: remove fromRoute
 export const nftsUrl = (
-	params: {
-		fromRoute?: NavigationTarget | null;
-	} & (
+	params:
 		| {
 				nft?: Nft;
 		  }
@@ -194,7 +192,6 @@ export const nftsUrl = (
 		| {
 				originSelectedNetwork?: NetworkId;
 		  }
-	)
 ): string => {
 	let url = `${AppPath.Nfts}`;
 
