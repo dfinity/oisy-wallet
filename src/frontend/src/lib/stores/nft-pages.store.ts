@@ -24,8 +24,6 @@ export const initNftPagesStore = (): NftPagesStore => {
 	};
 };
 
-export interface NftPagesContext {
-	store: NftPagesStore;
-}
+export interface NftPagesContext extends NftPagesStore {}
 
 export const NFT_PAGES_CONTEXT_KEY = Symbol('nft-pages');
