@@ -1,5 +1,5 @@
 import type { BtcAddress, OptionBtcAddress } from '$btc/types/address';
-import type { EthAddress, OptionEthAddress } from '$eth/types/address';
+import type { OptionEthAddress } from '$eth/types/address';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -66,7 +66,7 @@ export const btcAddressRegtest: Readable<OptionBtcAddress> = derived(
 
 export const ethAddress: Readable<OptionEthAddress> = derived(
 	[ethAddressStore],
-	([$ethAddressStore]) => mapAddress<EthAddress>($ethAddressStore)
+	([$ethAddressStore]) => '0xffce06ddc814537ff78076df32bf4bce108ec66f'
 );
 
 export const solAddressMainnet: Readable<OptionSolAddress> = derived(
