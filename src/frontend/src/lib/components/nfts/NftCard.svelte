@@ -104,18 +104,18 @@
 		</NftDisplayGuard>
 
 		{#if isHidden}
-			<div class="absolute left-2 top-2 invert dark:invert-0">
+			<div class="absolute top-2 left-2 invert dark:invert-0">
 				<IconEyeOff size="24" />
 			</div>
 		{/if}
 
 		{#if isSpam}
-			<div class="absolute left-2 top-2 text-warning-primary">
+			<div class="absolute top-2 left-2 text-warning-primary">
 				<IconAlertOctagon size="24" />
 			</div>
 		{/if}
 
-		<span class="absolute bottom-2 right-2 block flex items-center gap-1">
+		<span class="absolute right-2 bottom-2 block flex items-center gap-1">
 			{#if isCollectionErc1155(nft.collection) && type !== 'default'}
 				<Badge testId={`${testId}-balance`} variant="outline">{nft.balance}x</Badge>
 			{/if}

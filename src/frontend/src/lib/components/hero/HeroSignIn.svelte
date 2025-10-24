@@ -29,7 +29,7 @@
 		<InviteRewardsBanner />
 	</div>
 
-	<div class="mb-7 mt-5 pt-2">
+	<div class="mt-5 mb-7 pt-2">
 		<h1 class="text-4xl md:leading-tight lg:text-5xl">
 			{replaceOisyPlaceholders($i18n.auth.text.title_part_1)}<br /><span
 				class="text-brand-primary-alt">{$i18n.auth.text.title_part_2}</span

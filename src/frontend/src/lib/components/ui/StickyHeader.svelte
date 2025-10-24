@@ -29,7 +29,7 @@
 
 <div bind:this={rootElement}>
 	<div
-		class="z-3 sticky top-0 whitespace-nowrap px-1"
+		class="sticky top-0 z-3 px-1 whitespace-nowrap"
 		class:bg-page={scrolledSoon}
 		class:pt-6={scrolledSoon}
 	>

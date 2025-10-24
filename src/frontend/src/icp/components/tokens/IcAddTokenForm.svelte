@@ -43,4 +43,4 @@
 	bind:value={indexCanisterId}
 />
 
-<p class="mb-6 mt-2 text-sm">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>
+<p class="mt-2 mb-6 text-sm">{replaceOisyPlaceholders($i18n.tokens.import.text.info_index)}</p>

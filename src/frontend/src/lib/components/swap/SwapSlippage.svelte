@@ -53,7 +53,7 @@
 	};
 </script>
 
-<div class="mb-2 mt-6 flex items-center">
+<div class="mt-6 mb-2 flex items-center">
 	<span class="text-sm text-tertiary">{$i18n.swap.text.max_slippage}</span>
 
 	<button

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext, setContext } from 'svelte';
+	import { getContext, setContext } from 'svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
@@ -175,18 +175,14 @@
 					: (currentStep?.title ?? '')
 	);
 
-	// TODO: Remove dispatch once all tests pass and the SwapModal.svelte component is removed
-	const dispatch = createEventDispatcher();
-
 	const close = () =>
 		closeModal(() => {
 			currentStep = undefined;
 			selectTokenType = undefined;
 			showSelectProviderModal = false;
-			dispatch('nnsClose');
 		});
 
-	const selectProvider = ({ detail }: CustomEvent<SwapMappedResult>) => {
+	const selectProvider = (detail: SwapMappedResult) => {
 		swapAmountsStore.setSelectedProvider(detail);
 		goToStep(WizardStepsSwap.SWAP);
 	};
@@ -229,8 +225,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 			<SwapProviderListModal
-				on:icSelectProvider={selectProvider}
-				on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+				onSelectProvider={selectProvider}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard
@@ -238,13 +234,13 @@
 				onBack={modal.back}
 				onClose={close}
 				onNext={modal.next}
+				onShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
 				onShowTokensList={showTokensList}
 				bind:swapAmount
 				bind:receiveAmount
 				bind:slippageValue
 				bind:swapProgressStep
 				bind:swapFailedProgressSteps
-				on:icShowProviderList={() => goToStep(WizardStepsSwap.SELECT_PROVIDER)}
 			/>
 		{/if}
 	{/key}

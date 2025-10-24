@@ -19,6 +19,7 @@
 		swapFailedProgressSteps?: ProgressStepsSwap[];
 		currentStep?: WizardStep;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 		onBack: () => void;
@@ -31,6 +32,7 @@
 		swapFailedProgressSteps = $bindable(),
 		currentStep,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext,
 		onBack
@@ -72,15 +74,12 @@
 			{onBack}
 			{onClose}
 			{onNext}
+			{onShowProviderList}
 			{onShowTokensList}
 			bind:swapAmount
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
-			on:icClose
-			on:icShowTokensList
-			on:icShowProviderList
-			on:icNext
 		/>
 	{:else}
 		<SwapEthWizard
