@@ -31,8 +31,8 @@
 
 	const { token, nft }: Props = $props();
 
-	const nftPagesContext = getContext<NftPagesStore>(NFT_PAGES_CONTEXT_KEY);
-	const originSelectedNetwork = $derived($nftPagesContext?.originSelectedNetwork ?? undefined);
+	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [
