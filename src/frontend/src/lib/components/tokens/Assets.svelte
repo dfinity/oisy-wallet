@@ -23,6 +23,7 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
 
 	interface Props {
 		tab?: TokenTypes;
@@ -39,6 +40,7 @@
 	);
 </script>
 
+<NftPagesContext>
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
 	<Nft />
 {:else if NFTS_ENABLED && nonNullish($routeCollection) && nonNullish($routeNetwork)}
@@ -115,3 +117,4 @@
 		</ManageTokensModal>
 	{/if}
 {/if}
+</NftPagesContext>
