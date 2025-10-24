@@ -1,4 +1,4 @@
-import type { NetworkId } from '$lib/types/network';
+import type { OptionNetworkId } from '$lib/types/network';
 import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
@@ -7,7 +7,7 @@ export type NftPagesStoreData = Option<{
 }>;
 
 export interface NftPagesStore extends Readable<NftPagesStoreData> {
-	setOriginSelectedNetwork: (networkId: NetworkId | undefined) => void;
+	setOriginSelectedNetwork: (networkId: OptionNetworkId) => void;
 }
 
 export const initNftPagesStore = (): NftPagesStore => {
@@ -18,7 +18,7 @@ export const initNftPagesStore = (): NftPagesStore => {
 	return {
 		subscribe,
 
-		setOriginSelectedNetwork: (networkId: NetworkId | undefined) => {
+		setOriginSelectedNetwork: (networkId: OptionNetworkId) => {
 			set({ originSelectedNetwork: networkId });
 		}
 	};
