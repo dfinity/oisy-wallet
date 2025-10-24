@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -23,7 +24,6 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { getContext } from 'svelte';
 	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 
 	interface Props {
