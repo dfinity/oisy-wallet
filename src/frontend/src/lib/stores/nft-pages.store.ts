@@ -4,7 +4,7 @@ import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type NftPagesStoreData = Option<{
-	assetsTab: TokenTypes | undefined;
+	assetsTab?: TokenTypes;
 	originSelectedNetwork: OptionNetworkId;
 }>;
 
