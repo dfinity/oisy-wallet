@@ -23,8 +23,7 @@ describe('NftCollectionDescription', () => {
 	it('renders the description if available', () => {
 		const { container } = render(NftCollectionDescription, {
 			props: {
-				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' },
-				fromRoute: mockFromRoute
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
 		});
 
@@ -45,8 +44,7 @@ describe('NftCollectionDescription', () => {
 	it('should not render anything if no collection data is available', () => {
 		const { container } = render(NftCollectionDescription, {
 			props: {
-				collection: undefined,
-				fromRoute: mockFromRoute
+				collection: undefined
 			}
 		});
 
@@ -63,8 +61,7 @@ describe('NftCollectionDescription', () => {
 
 		const { getByTestId } = render(NftCollectionDescription, {
 			props: {
-				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' },
-				fromRoute: mockFromRoute
+				collection: { ...mockValidErc1155Nft.collection, description: 'Test description' }
 			}
 		});
 
@@ -84,8 +81,7 @@ describe('NftCollectionDescription', () => {
 
 		const { getByText } = render(NftCollectionDescription, {
 			props: {
-				collection,
-				fromRoute: mockFromRoute
+				collection
 			}
 		});
 
@@ -93,6 +89,6 @@ describe('NftCollectionDescription', () => {
 
 		await fireEvent.click(link);
 
-		expect(gotoSpy).toHaveBeenCalledWith(nftsUrl({ collection, fromRoute: mockFromRoute }));
+		expect(gotoSpy).toHaveBeenCalledWith(nftsUrl({ collection }));
 	});
 });
