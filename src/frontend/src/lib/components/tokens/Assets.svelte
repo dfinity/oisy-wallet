@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
-	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
@@ -23,12 +22,14 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { getContext } from 'svelte';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 
 	interface Props {
-		tab?: TokenTypes;
+		tab: TokenTypes;
 	}
 
-	let { tab = TokenTypes.TOKENS }: Props = $props();
+	let { tab }: Props = $props();
 
 	let activeTab = $state(tab);
 
@@ -37,6 +38,12 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+
+	$effect(() => {
+		store.setAssetsTab(activeTab);
+	});
 </script>
 
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
@@ -59,13 +66,9 @@
 											{
 												label: $i18n.tokens.text.title,
 												id: TokenTypes.TOKENS,
-												path: `${AppPath.Tokens}${$page.url.search}`
+												path: AppPath.Tokens
 											},
-											{
-												label: $i18n.nfts.text.title,
-												id: TokenTypes.NFTS,
-												path: `${AppPath.Nfts}${$page.url.search}`
-											}
+											{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
