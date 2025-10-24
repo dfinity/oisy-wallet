@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { getContext } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
@@ -43,7 +43,7 @@
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
-	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const store = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
 	const assetsTab = $derived($store?.assetsTab ?? TokenTypes.TOKENS);
 
