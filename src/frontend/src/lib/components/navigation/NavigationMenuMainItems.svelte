@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
+	import { getContext } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
@@ -20,6 +21,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -31,8 +33,6 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
-	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
-	import { getContext } from 'svelte';
 
 	interface Props {
 		testIdPrefix?: string;
