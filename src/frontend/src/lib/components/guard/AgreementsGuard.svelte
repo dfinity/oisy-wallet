@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { queryAndUpdate } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import AgreementsBanner from '$lib/components/agreements/AgreementsBanner.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import {
@@ -13,12 +12,6 @@
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
 	import { acceptAgreements } from '$lib/services/user-agreements.services';
 	import type { AgreementsToAccept } from '$lib/types/user-agreements';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	let accepting = false;
 
@@ -73,8 +66,6 @@
 		}
 	});
 </script>
-
-{@render children()}
 
 {#if Object.keys(initialAgreementsToAccept).length > 0}
 	<div
