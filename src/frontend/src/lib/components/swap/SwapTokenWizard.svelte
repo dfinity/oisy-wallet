@@ -77,10 +77,7 @@
 			bind:receiveAmount
 			bind:slippageValue
 			bind:swapProgressStep
-			on:icClose
-			on:icShowTokensList
 			on:icShowProviderList
-			on:icNext
 		/>
 	{:else}
 		<SwapEthWizard
