@@ -18,8 +18,8 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { NonEmptyArray } from '$lib/types/utils';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import type { SaveSplCustomToken } from '$sol/types/spl-custom-token';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 export interface ManageTokensSaveParams {

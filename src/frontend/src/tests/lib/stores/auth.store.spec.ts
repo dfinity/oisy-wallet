@@ -1,6 +1,6 @@
 import * as constants from '$lib/constants/app.constants';
 import { authStore } from '$lib/stores/auth.store';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import { get } from 'svelte/store';
 
 describe('auth.store', () => {

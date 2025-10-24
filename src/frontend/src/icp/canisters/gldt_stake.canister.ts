@@ -11,8 +11,8 @@ import { mapGldtStakeCanisterError } from '$icp/canisters/gldt_stake.errors';
 import { getAgent } from '$lib/actors/agents.ic';
 import { ZERO } from '$lib/constants/app.constants';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import type { Principal } from '@dfinity/principal';
 import { Canister, createServices, fromNullable, toNullable } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class GldtStakeCanister extends Canister<GldtStakeService> {
 	static async create({

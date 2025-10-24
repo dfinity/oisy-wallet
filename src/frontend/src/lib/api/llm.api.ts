@@ -2,8 +2,8 @@ import type { chat_request_v1, chat_response_v1 } from '$declarations/llm/declar
 import { LlmCanister } from '$lib/canisters/llm.canister';
 import { LLM_CANISTER_ID } from '$lib/constants/app.constants';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: LlmCanister | undefined = undefined;
 

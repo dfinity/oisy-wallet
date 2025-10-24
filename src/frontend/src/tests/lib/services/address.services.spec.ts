@@ -11,7 +11,7 @@ import { LoadIdbAddressError } from '$lib/types/errors';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
 import type { MockInstance } from 'vitest';
 
 describe('address.services', () => {

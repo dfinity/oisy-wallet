@@ -8,7 +8,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';

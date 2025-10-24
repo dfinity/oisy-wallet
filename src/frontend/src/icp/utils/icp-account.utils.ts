@@ -6,8 +6,8 @@ import {
 	fromCandidAccount,
 	toCandidAccount
 } from '@dfinity/ledger-icrc';
-import type { Principal } from '@dfinity/principal';
 import { assertNever, nonNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
 	AccountIdentifier.fromPrincipal({ principal, subAccount: undefined });

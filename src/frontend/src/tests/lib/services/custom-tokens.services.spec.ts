@@ -5,8 +5,8 @@ import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()

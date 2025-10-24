@@ -7,8 +7,8 @@ import { token as tokenStore } from '$lib/stores/token.store';
 import type { SaveCustomToken } from '$lib/types/custom-token';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token, TokenStandard } from '$lib/types/token';
-import type { Identity } from '@dfinity/agent';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export const loadTokenAndRun = async ({
 	token,
