@@ -49,21 +49,21 @@
 		<SignerSignIn />
 	{:else}
 		<LoaderUserProfile>
-			<AgreementsGuard>
-				<SignerAccounts>
-					{#if $idle}
-						<div in:fade={fadeParams}>
-							<SignerIdle />
-						</div>
-					{:else}
-						<SignerPermissions />
+			<SignerAccounts>
+				{#if $idle}
+					<div in:fade={fadeParams}>
+						<SignerIdle />
+					</div>
+				{:else}
+					<SignerPermissions />
 
-						<SignerConsentMessage />
+					<SignerConsentMessage />
 
-						<SignerCallCanister />
-					{/if}
-				</SignerAccounts>
-			</AgreementsGuard>
+					<SignerCallCanister />
+				{/if}
+			</SignerAccounts>
 		</LoaderUserProfile>
+
+		<AgreementsGuard />
 	{/if}
 </article>

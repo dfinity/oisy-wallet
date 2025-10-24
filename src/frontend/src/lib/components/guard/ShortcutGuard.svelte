@@ -1,14 +1,7 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
-
-	interface Props {
-		children: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	const handleKeydown = (e: KeyboardEvent) => {
 		const isInputField = e?.target instanceof HTMLInputElement;
@@ -25,7 +18,5 @@
 		}
 	};
 </script>
-
-{@render children()}
 
 <svelte:window onkeydown={handleKeydown} />
