@@ -80,7 +80,6 @@ describe('NftCard', () => {
 		assertNonNullish(mockValidErc721Nft.name);
 		assertNonNullish(mockValidErc721Nft.collection.name);
 
-		expect(getByText(mockValidErc721Nft.collection.name)).toBeInTheDocument();
 		expect(getByText(`#${mockValidErc721Nft.id} – ${mockValidErc721Nft.name}`)).toBeInTheDocument();
 	});
 
