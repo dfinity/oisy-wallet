@@ -3,7 +3,7 @@ import type { Option } from '$lib/types/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type NftPagesStoreData = Option<{
-	originSelectedNetwork: NetworkId | undefined;
+	originSelectedNetwork: OptionNetworkId;
 }>;
 
 export interface NftPagesStore extends Readable<NftPagesStoreData> {
