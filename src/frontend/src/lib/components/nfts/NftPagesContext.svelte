@@ -1,8 +1,12 @@
 <script lang="ts">
-	import { getContext, type Snippet } from 'svelte';
-	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
-	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext, setContext, type Snippet } from 'svelte';
+	import { selectedNetwork } from '$lib/derived/network.derived';
+	import {
+		initNftPagesStore,
+		NFT_PAGES_CONTEXT_KEY,
+		type NftPagesContext
+	} from '$lib/stores/nft-pages.store';
 
 	interface Props {
 		children: Snippet;
@@ -10,7 +14,9 @@
 
 	const { children }: Props = $props();
 
-	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+	const { store } = setContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY, {
+		store: initNftPagesStore()
+	});
 
 	$effect(() => {
 		if (nonNullish($selectedNetwork?.id)) {
