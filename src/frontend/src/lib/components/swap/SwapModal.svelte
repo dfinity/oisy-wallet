@@ -186,7 +186,7 @@
 			dispatch('nnsClose');
 		});
 
-	const selectProvider = ({ detail }: CustomEvent<SwapMappedResult>) => {
+	const selectProvider = (detail: SwapMappedResult) => {
 		swapAmountsStore.setSelectedProvider(detail);
 		goToStep(WizardStepsSwap.SWAP);
 	};
@@ -229,8 +229,8 @@
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SELECT_PROVIDER}
 			<SwapProviderListModal
-				on:icSelectProvider={selectProvider}
-				on:icCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+				onCloseProviderList={() => goToStep(WizardStepsSwap.SWAP)}
+				onSelectProvider={selectProvider}
 			/>
 		{:else if currentStep?.name === WizardStepsSwap.SWAP || currentStep?.name === WizardStepsSwap.REVIEW || currentStep?.name === WizardStepsSwap.SWAPPING}
 			<SwapTokenWizard
