@@ -7,6 +7,7 @@
 		NFT_PAGES_CONTEXT_KEY,
 		type NftPagesContext
 	} from '$lib/stores/nft-pages.store';
+	import { isNullish } from '@dfinity/utils';
 
 	interface Props {
 		children: Snippet;
@@ -21,7 +22,7 @@
 	$effect(() => {
 		// Add conditions to exclude certain pages from updating the origin network
 		// This way we have a way to know what network has been selected by the user
-		if (!$routeCollection) {
+		if (isNullish($routeCollection)) {
 			store.setOriginSelectedNetwork($selectedNetwork?.id);
 		}
 	});
