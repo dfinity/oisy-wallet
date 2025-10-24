@@ -17,7 +17,6 @@ const setOriginSelectedNetwork = vi.fn();
 const subscribe = vi.fn(() => () => {});
 
 vi.mock('$lib/stores/nft-pages.store', async (importOriginal) => {
-	//
 	const actual = (await importOriginal()) as typeof NftPagesStoreModule;
 	return {
 		...actual,
