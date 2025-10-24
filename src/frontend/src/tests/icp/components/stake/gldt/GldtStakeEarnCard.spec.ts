@@ -9,14 +9,14 @@ import { render } from '@testing-library/svelte';
 describe('GldtStakeEarnCard', () => {
 	beforeEach(() => {
 		icrcCustomTokensStore.resetAll();
-	});
 
-	it('should display correct values if GLDT token is not available', () => {
 		icrcCustomTokensStore.set({
 			data: mockIcrcCustomToken,
 			certified: false
 		});
+	});
 
+	it('should display correct values if GLDT token is not available', () => {
 		const { container } = render(GldtStakeEarnCard);
 
 		expect(container).toHaveTextContent(
@@ -28,18 +28,16 @@ describe('GldtStakeEarnCard', () => {
 	});
 
 	it('should display correct values if GLDT token is available', () => {
-		icrcCustomTokensStore.set({
-			data: {
-				...mockIcrcCustomToken,
-				standard: 'icrc',
-				enabled: true,
-				ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
-				symbol: 'GLDT'
-			},
-			certified: false
+		const { container } = render(GldtStakeEarnCard, {
+			props: {
+				gldtToken: {
+					...mockIcrcCustomToken,
+					standard: 'icrc',
+					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
+					symbol: 'GLDT'
+				}
+			}
 		});
-
-		const { container } = render(GldtStakeEarnCard);
 
 		expect(container).toHaveTextContent(
 			replacePlaceholders(en.stake.text.stake, { $token_symbol: 'GLDT' })
