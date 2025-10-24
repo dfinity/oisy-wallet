@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext, setContext, type Snippet } from 'svelte';
+	import { setContext, type Snippet } from 'svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import {
 		initNftPagesStore,
