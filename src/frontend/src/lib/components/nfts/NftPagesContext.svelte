@@ -15,9 +15,7 @@
 
 	const { children }: Props = $props();
 
-	const { store } = setContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY, {
-		store: initNftPagesStore()
-	});
+	const store = setContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY, initNftPagesStore());
 
 	$effect(() => {
 		// Add conditions to exclude certain pages from updating the origin network
