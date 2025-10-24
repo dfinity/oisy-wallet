@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { isNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
-	import type { NftCollectionUi } from '$lib/types/nft';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
-	import { isNullish } from '@dfinity/utils';
+	import type { NftCollectionUi } from '$lib/types/nft';
 
 	interface Props {
 		title: string;
@@ -31,8 +31,8 @@
 				{#each notEmptyCollections as collection, index (`${String(collection.collection.id)}-${index}`)}
 					<NftCollectionCard
 						{collection}
-						isSpam={section === CustomTokenSection.SPAM}
 						isHidden={section === CustomTokenSection.HIDDEN}
+						isSpam={section === CustomTokenSection.SPAM}
 					/>
 				{/each}
 			</div>
