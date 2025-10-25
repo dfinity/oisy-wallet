@@ -1,4 +1,4 @@
-import type { TokenTypes } from '$lib/enums/token-types';
+import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import type { OptionNetworkId } from '$lib/types/network';
 import type { Option } from '$lib/types/utils';
 import { derived, writable, type Readable } from 'svelte/store';
@@ -22,7 +22,7 @@ export const initNftPagesStore = (): NftPagesContext => {
 	const store = writable<NftPagesStoreData>(initialStore);
 
 	const originSelectedNetwork = derived([store], ([$store]) => $store?.originSelectedNetwork);
-	const assetsTab = derived([store], ([$store]) => $store?.assetsTab);
+	const assetsTab = derived([store], ([$store]) => $store?.assetsTab ?? TokenTypesEnum.TOKENS);
 
 	return {
 		subscribe: store.subscribe,
@@ -47,7 +47,7 @@ export const initNftPagesStore = (): NftPagesContext => {
 
 export interface NftPagesContext extends NftPagesStore {
 	originSelectedNetwork: Readable<OptionNetworkId>;
-	assetsTab: Readable<TokenTypes | undefined>;
+	assetsTab: Readable<TokenTypes>;
 }
 
 export const NFT_PAGES_CONTEXT_KEY = Symbol('nft-pages');

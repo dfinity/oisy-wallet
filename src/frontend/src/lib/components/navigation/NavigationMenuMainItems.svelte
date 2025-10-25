@@ -43,13 +43,9 @@
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
-	const store = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
-	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
-	const assetsTab = $derived($store?.assetsTab ?? TokenTypes.TOKENS);
+	const { originSelectedNetwork, assetsTab } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
-
-	const networkId = $derived(originSelectedNetwork);
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -61,8 +57,8 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
-		networkId,
+		path: $assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
+		networkId: $originSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -81,7 +77,7 @@
 	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
-		networkId,
+		networkId: $originSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -101,7 +97,7 @@
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
-		networkId,
+		networkId: $originSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -122,7 +118,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Earning,
-			networkId,
+			networkId: $originSelectedNetwork,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -143,7 +139,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
-			networkId,
+			networkId: $originSelectedNetwork,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -165,7 +161,7 @@
 	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
-		networkId,
+		networkId: $originSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
