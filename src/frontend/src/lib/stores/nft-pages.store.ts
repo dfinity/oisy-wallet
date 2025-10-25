@@ -21,7 +21,10 @@ const initialStore: NftPagesStoreData = {
 export const initNftPagesStore = (): NftPagesContext => {
 	const store = writable<NftPagesStoreData>(initialStore);
 
-	const originSelectedNetwork = derived([store], ([$store]) => $store?.originSelectedNetwork ?? undefined);
+	const originSelectedNetwork = derived(
+		[store],
+		([$store]) => $store?.originSelectedNetwork ?? undefined
+	);
 	const assetsTab = derived([store], ([$store]) => $store?.assetsTab ?? TokenTypesEnum.TOKENS);
 
 	return {
