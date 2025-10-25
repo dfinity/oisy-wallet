@@ -1,4 +1,5 @@
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
@@ -6,14 +7,42 @@ import {
 	NFT_HIDDEN_BADGE
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
+import type { OptionNetworkId } from '$lib/types/network';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
+import * as svelte from 'svelte';
+import { writable } from 'svelte/store';
+
+const createMockNftPagesStore = (originSelectedNetwork: OptionNetworkId) => {
+	const { subscribe, set } = writable({
+		assetsTab: undefined,
+		originSelectedNetwork
+	});
+	return {
+		subscribe,
+		setAssetsTab: vi.fn(),
+		setOriginSelectedNetwork: vi.fn(),
+		set
+	};
+};
+
+const originalGetContext = svelte.getContext;
+
+vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore(undefined) : originalGetContext(key)
+);
 
 describe('NftCollectionHero', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
 	const hideButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_HIDE}"]`;
 	const hiddenBadgeSelector = `span[data-tid="${NFT_HIDDEN_BADGE}"]`;
@@ -101,5 +130,47 @@ describe('NftCollectionHero', () => {
 		const hiddenBadge: HTMLSpanElement | null = container.querySelector(hiddenBadgeSelector);
 
 		expect(hiddenBadge).toBeInTheDocument();
+	});
+
+	it('should build root breadcrumb url without network query param', () => {
+		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
+			if (key === NFT_PAGES_CONTEXT_KEY) {
+				return createMockNftPagesStore(undefined);
+			}
+			return originalGetContext(key);
+		});
+
+		const { container } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
+
+		expect(breadcrumbItem?.getAttribute('href')).toEqual(nftsUrl({}));
+	});
+
+	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
+		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
+			if (key === NFT_PAGES_CONTEXT_KEY) {
+				return createMockNftPagesStore(ETHEREUM_NETWORK_ID);
+			}
+			return originalGetContext(key);
+		});
+
+		const { container } = render(NftCollectionHero, {
+			props: {
+				nfts: mockNftollectionUi.nfts,
+				token: mockToken
+			}
+		});
+
+		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
+
+		expect(breadcrumbItem?.getAttribute('href')).toEqual(
+			nftsUrl({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
+		);
 	});
 });

@@ -1,19 +1,47 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
+import type { OptionNetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import { get } from 'svelte/store';
+import * as svelte from 'svelte';
+import { get, writable } from 'svelte/store';
+
+const createMockNftPagesStore = (originSelectedNetwork: OptionNetworkId) => {
+	const { subscribe, set } = writable({
+		assetsTab: undefined,
+		originSelectedNetwork
+	});
+	return {
+		subscribe,
+		setAssetsTab: vi.fn(),
+		setOriginSelectedNetwork: vi.fn(),
+		set
+	};
+};
+
+const originalGetContext = svelte.getContext;
+
+vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore(undefined) : originalGetContext(key)
+);
 
 describe('NftHero', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+	});
+
 	const openFullscreenSpy = vi
 		.spyOn(modalStore, 'openNftFullscreenDisplay')
 		.mockImplementation(() => {});
@@ -164,5 +192,47 @@ describe('NftHero', () => {
 		});
 
 		expect(openSendSpy).toHaveBeenCalledOnce();
+	});
+
+	it('should build root breadcrumb url without network query param', () => {
+		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
+			if (key === NFT_PAGES_CONTEXT_KEY) {
+				return createMockNftPagesStore(undefined);
+			}
+			return originalGetContext(key);
+		});
+
+		const { container } = render(NftHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
+
+		expect(breadcrumbItem?.getAttribute('href')).toEqual(nftsUrl({}));
+	});
+
+	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
+		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
+			if (key === NFT_PAGES_CONTEXT_KEY) {
+				return createMockNftPagesStore(ETHEREUM_NETWORK_ID);
+			}
+			return originalGetContext(key);
+		});
+
+		const { container } = render(NftHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
+
+		expect(breadcrumbItem?.getAttribute('href')).toEqual(
+			nftsUrl({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
+		);
 	});
 });
