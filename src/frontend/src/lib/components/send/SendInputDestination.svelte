@@ -146,7 +146,7 @@
 		</InputTextWithAction>
 
 		{#if isErrorState}
-			<p class="mb-0 mt-4 text-error-primary" transition:slide={SLIDE_DURATION}>
+			<p class="mt-4 mb-0 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{$i18n.send.assertion.invalid_destination_address}
 			</p>
 		{/if}

@@ -109,7 +109,7 @@
 			</ListItem>
 		</List>
 
-		<span class="mb-2 mt-3 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
+		<span class="mt-3 mb-2 flex text-sm font-bold">{$i18n.tokens.manage.text.list_settings}</span>
 
 		<List condensed noPadding>
 			<ListItem>

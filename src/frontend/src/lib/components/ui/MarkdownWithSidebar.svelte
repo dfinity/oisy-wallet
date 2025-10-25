@@ -29,6 +29,6 @@
 	{/if}
 {/each}
 
-<div class="fixed right-12 top-10 hidden rounded-2xl bg-primary py-2 xl:block 1.5lg:top-28">
+<div class="fixed top-10 right-12 hidden rounded-2xl bg-primary py-2 1.5lg:top-28 xl:block">
 	<MarkdownSidebar headings={blocks.filter((block) => block.type === 'header')} />
 </div>

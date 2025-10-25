@@ -8,12 +8,12 @@
 	import BgImg from '$lib/components/ui/BgImg.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import Hr from '$lib/components/ui/Hr.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { NftCollection } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { findNonFungibleToken } from '$lib/utils/nfts.utils';
 
 	interface Props {
@@ -35,6 +35,10 @@
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(collection) ? collection.allowExternalContentSource : false
 	);
+
+	const gotoCollection = (): void => {
+		goto(nftsUrl({ collection }));
+	};
 </script>
 
 {#if nonNullish(collection)}
@@ -49,7 +53,7 @@
 					<Button
 						ariaLabel={$i18n.nfts.alt.go_to_collection}
 						link
-						onclick={() => goto(`${AppPath.Nfts}${collection.network.name}-${collection.address}`)}
+						onclick={gotoCollection}
 						paddingSmall
 						styleClass="inline-block text-sm"
 					>

@@ -1,19 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { setContext } from 'svelte';
-	import GldtStakeApyContext from '$icp/components/stake/gldt/GldtStakeApyContext.svelte';
 	import {
-		enabledIcrcTokens,
 		icrcTokens,
 		icrcCustomTokensNotInitialized,
 		icrcCustomTokensInitialized
 	} from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
-	import {
-		GLDT_STAKE_APY_CONTEXT_KEY,
-		type GldtStakeApyContext as GldtStakeApyContextType,
-		initGldtStakeApyStore
-	} from '$icp/stores/gldt-stake-apy.store';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
@@ -36,11 +29,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { calculateTokenUsdAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	setContext<GldtStakeApyContextType>(GLDT_STAKE_APY_CONTEXT_KEY, {
-		store: initGldtStakeApyStore()
-	});
+	interface Props {
+		gldtToken?: IcToken;
+	}
 
-	let gldtToken = $derived($enabledIcrcTokens.find((token) => isGLDTToken(token)));
+	let { gldtToken }: Props = $props();
 
 	let gldtTokenBalance = $derived(
 		nonNullish(gldtToken) ? ($balancesStore?.[gldtToken?.id]?.data ?? ZERO) : ZERO
@@ -76,10 +69,12 @@
 	};
 </script>
 
-<GldtStakeApyContext>
-	<StakeContentCard>
-		{#snippet content()}
-			{#if nonNullish(gldtToken)}
+<StakeContentCard>
+	{#snippet content()}
+		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
+
+		{#if nonNullish(gldtToken)}
+			<div class="flex gap-2">
 				<span class="font-bold">
 					{formatCurrency({
 						value: gldtTokenUsdBalance,
@@ -96,37 +91,37 @@
 					})}
 					{gldtTokenSymbol}
 				</span>
-			{:else if $icrcCustomTokensInitialized}
-				<span class="text-tertiary">
-					{replacePlaceholders($i18n.stake.text.enable_token_text, {
-						$token_symbol: gldtTokenSymbol
-					})}
-				</span>
-			{/if}
-		{/snippet}
+			</div>
+		{:else if $icrcCustomTokensInitialized}
+			<span class="text-tertiary">
+				{replacePlaceholders($i18n.stake.text.enable_token_text, {
+					$token_symbol: gldtTokenSymbol
+				})}
+			</span>
+		{/if}
+	{/snippet}
 
-		{#snippet buttons()}
-			{#if nonNullish(gldtToken)}
-				<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
-					{#snippet button(onclick)}
-						<Button disabled={gldtTokenBalance === ZERO} fullWidth {onclick}>
-							{replacePlaceholders($i18n.stake.text.stake, {
-								$token_symbol: gldtTokenSymbol
-							})}
-						</Button>
-					{/snippet}
+	{#snippet buttons()}
+		{#if nonNullish(gldtToken)}
+			<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
+				{#snippet button(onclick)}
+					<Button disabled={gldtTokenBalance === ZERO} fullWidth {onclick}>
+						{replacePlaceholders($i18n.stake.text.stake, {
+							$token_symbol: gldtTokenSymbol
+						})}
+					</Button>
+				{/snippet}
 
-					{#snippet modal()}
-						<StakeModal token={gldtToken} />
-					{/snippet}
-				</ButtonWithModal>
-			{:else}
-				<Button fullWidth loading={$icrcCustomTokensNotInitialized} onclick={enableStakingToken}>
-					{replacePlaceholders($i18n.stake.text.enable_token_button, {
-						$token_symbol: gldtTokenSymbol
-					})}
-				</Button>
-			{/if}
-		{/snippet}
-	</StakeContentCard>
-</GldtStakeApyContext>
+				{#snippet modal()}
+					<StakeModal token={gldtToken} />
+				{/snippet}
+			</ButtonWithModal>
+		{:else}
+			<Button fullWidth loading={$icrcCustomTokensNotInitialized} onclick={enableStakingToken}>
+				{replacePlaceholders($i18n.stake.text.enable_token_button, {
+					$token_symbol: gldtTokenSymbol
+				})}
+			</Button>
+		{/if}
+	{/snippet}
+</StakeContentCard>

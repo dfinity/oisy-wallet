@@ -77,6 +77,6 @@
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children()}
-</IntervalLoader>
+{@render children()}
+
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

@@ -16,6 +16,7 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import { OISY_NFT_DOCS_URL } from '$lib/constants/oisy.constants';
+	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -25,6 +26,7 @@
 		PLAUSIBLE_EVENTS
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
+	import { loadNfts } from '$lib/services/nft.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { nftStore } from '$lib/stores/nft.store';
@@ -65,29 +67,28 @@
 	const save = async (allowMedia: boolean) => {
 		saveLoading = true;
 		if (nonNullish(token) && nonNullish($authIdentity)) {
+			const saveToken = {
+				...token,
+				allowExternalContentSource: allowMedia,
+				enabled: true // must be true otherwise we couldnt see it at this point
+			};
+
 			if (isTokenErc721(token)) {
 				await saveErc721CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
+					tokens: [saveToken],
 					identity: $authIdentity
 				});
 			} else if (isTokenErc1155(token)) {
 				await saveErc1155CustomTokens({
-					tokens: [
-						{
-							...token,
-							allowExternalContentSource: allowMedia,
-							enabled: true // must be true otherwise we couldnt see it at this point
-						}
-					],
+					tokens: [saveToken],
 					identity: $authIdentity
 				});
 			}
+
+			await loadNfts({
+				tokens: [saveToken],
+				walletAddress: $ethAddress
+			});
 		}
 		saveLoading = false;
 		modalStore.close();
@@ -108,7 +109,7 @@
 
 	const trackEventOnClick = (clickedButton: string) => {
 		trackEvent({
-			name: PLAUSIBLE_EVENTS.NFT_MEDIA_CONSENT,
+			name: PLAUSIBLE_EVENTS.MEDIA_CONSENT,
 			metadata: {
 				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
 				event_value: clickedButton,

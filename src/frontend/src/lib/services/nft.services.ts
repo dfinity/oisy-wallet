@@ -15,34 +15,29 @@ import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftId, NonFungibleToken } from '$lib/types/nft';
 import { isNetworkIdEthereum, isNetworkIdEvm } from '$lib/utils/network.utils';
 import { getTokensByNetwork } from '$lib/utils/nft.utils';
-import { findNftsByToken } from '$lib/utils/nfts.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 export const loadNfts = async ({
 	tokens,
-	loadedNfts,
 	walletAddress
 }: {
 	tokens: NonFungibleToken[];
-	loadedNfts: Nft[];
 	walletAddress: OptionEthAddress;
 }) => {
 	const tokensByNetwork = getTokensByNetwork(tokens);
 
 	const promises = Array.from(tokensByNetwork).map(async ([networkId, tokens]) => {
-		const tokensToLoad = tokens.filter((token) => {
-			const nftsByToken = findNftsByToken({ nfts: loadedNfts, token });
-			return nftsByToken.length === 0;
+		if (tokens.length === 0) {
+			return;
+		}
+
+		const nfts: Nft[] = await loadNftsByNetwork({
+			networkId,
+			tokens,
+			walletAddress
 		});
 
-		if (tokensToLoad.length > 0) {
-			const nfts: Nft[] = await loadNftsByNetwork({
-				networkId,
-				tokens: tokensToLoad,
-				walletAddress
-			});
-			nftStore.addAll(nfts);
-		}
+		nftStore.addAll(nfts);
 	});
 
 	await Promise.allSettled(promises);
@@ -140,12 +135,14 @@ export const sendNft = async ({
 export const updateNftSection = async ({
 	section,
 	$authIdentity,
-	token
+	token,
+	$ethAddress
 }: {
 	section: CustomTokenSection | undefined;
 	$authIdentity: OptionIdentity;
 	token: NonFungibleToken;
-}): Promise<void> => {
+	$ethAddress: OptionEthAddress;
+}): Promise<NonFungibleToken | undefined> => {
 	if (isNullish($authIdentity)) {
 		return;
 	}
@@ -153,42 +150,33 @@ export const updateNftSection = async ({
 	if (nonNullish(token)) {
 		const currentAllowMedia = token.allowExternalContentSource;
 
+		const saveToken = {
+			...token,
+			enabled: true,
+			section,
+			...((section === CustomTokenSection.SPAM ||
+				(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
+				allowExternalContentSource: false
+			})
+		};
+
 		if (isTokenErc721(token)) {
 			await saveCustomErc721Token({
 				identity: $authIdentity,
-				tokens: [
-					{
-						...token,
-						enabled: true,
-						section,
-						...((section === CustomTokenSection.SPAM ||
-							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
-							allowExternalContentSource: false
-						})
-					}
-				]
+				tokens: [saveToken]
 			});
-
-			return;
-		}
-
-		if (isTokenErc1155(token)) {
+		} else if (isTokenErc1155(token)) {
 			await saveCustomErc1155Token({
 				identity: $authIdentity,
-				tokens: [
-					{
-						...token,
-						enabled: true,
-						section,
-						...((section === CustomTokenSection.SPAM ||
-							(section === CustomTokenSection.HIDDEN && isNullish(currentAllowMedia))) && {
-							allowExternalContentSource: false
-						})
-					}
-				]
+				tokens: [saveToken]
 			});
-
-			return;
 		}
+
+		await loadNfts({
+			tokens: [saveToken],
+			walletAddress: $ethAddress
+		});
+
+		return saveToken;
 	}
 };

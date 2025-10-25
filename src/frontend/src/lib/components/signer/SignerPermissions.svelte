@@ -92,13 +92,13 @@
 		<SignerOrigin payload={$payload} />
 
 		<div class="mb-6 rounded-lg border border-brand-subtle-10 bg-brand-subtle-20 p-6">
-			<p class="break-normal font-bold">{$i18n.signer.permissions.text.requested_permissions}</p>
+			<p class="font-bold break-normal">{$i18n.signer.permissions.text.requested_permissions}</p>
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as { scope: { method } } (method)}
 					{@const { icon, label } = listItems[method]}
 
-					<li class="flex items-center gap-2 break-normal pb-1.5">
+					<li class="flex items-center gap-2 pb-1.5 break-normal">
 						<svelte:component this={icon} size="24" />
 						{label}
 					</li>

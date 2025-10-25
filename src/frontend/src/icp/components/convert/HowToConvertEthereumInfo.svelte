@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 	import { tokenCkErc20Ledger } from '$icp/derived/ic-token.derived';
 	import {
@@ -25,15 +25,16 @@
 
 	interface Props {
 		formCancelAction?: 'back' | 'close';
+		onBack: () => void;
+		onConvert: () => void;
+		onQrCode: () => void;
 	}
 
-	let { formCancelAction = 'back' }: Props = $props();
+	let { formCancelAction = 'back', onBack, onConvert, onQrCode }: Props = $props();
 
 	const { sourceTokenBalance, sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
 	const ckErc20 = $derived($tokenCkErc20Ledger);
-
-	const dispatch = createEventDispatcher();
 </script>
 
 <ContentWithToolbar testId={HOW_TO_CONVERT_ETHEREUM_INFO}>
@@ -50,8 +51,8 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle-20 p-4">
-			<p class="break-normal font-bold">
+		<div class="mt-2 mb-4 rounded-lg bg-brand-subtle-20 p-4">
+			<p class="font-bold break-normal">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
 				})}
@@ -63,7 +64,7 @@
 				})}
 			</p>
 
-			<p class="break-normal pt-4">
+			<p class="pt-4 break-normal">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
 						value: $ckEthereumNativeTokenBalance ?? ZERO,
@@ -93,7 +94,7 @@
 			qrCodeAction={{
 				enabled: true,
 				ariaLabel: $i18n.wallet.text.display_wallet_address_qr,
-				onClick: () => dispatch('icQRCode')
+				onClick: onQrCode
 			}}
 		>
 			{#snippet title()}
@@ -150,12 +151,7 @@
 				{/snippet}
 
 				{#snippet content()}
-					<Button
-						colorStyle="secondary"
-						fullWidth
-						onclick={() => dispatch('icConvert')}
-						styleClass="mb-4 mt-3"
-					>
+					<Button colorStyle="secondary" fullWidth onclick={onConvert} styleClass="mb-4 mt-3">
 						<span class="text-dark-slate-blue font-bold">{$i18n.convert.text.set_amount}</span>
 					</Button>
 				{/snippet}
@@ -165,7 +161,7 @@
 
 	{#snippet toolbar()}
 		{#if formCancelAction === 'back'}
-			<ButtonBack fullWidth onclick={() => dispatch('icBack')} />
+			<ButtonBack fullWidth onclick={onBack} />
 		{:else}
 			<ButtonDone onclick={modalStore.close} />
 		{/if}

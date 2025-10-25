@@ -7,6 +7,7 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { loadNfts, sendNft, updateNftSection } from '$lib/services/nft.services';
 import { nftStore } from '$lib/stores/nft.store';
 import type { NonFungibleToken } from '$lib/types/nft';
+import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -75,7 +76,7 @@ describe('nft.services', () => {
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: NonFungibleToken[] = [];
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
 		});
@@ -85,7 +86,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1, mockNft2]);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2]);
 		});
@@ -95,7 +96,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
@@ -105,10 +106,21 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(new Error('Nfts Error'));
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
 			expect(get(nftStore)).toEqual([]);
+		});
+
+		it('should re-load NFTs', async () => {
+			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
+
+			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
+			vi.spyOn(nftsUtils, 'findNftsByToken').mockReturnValueOnce([]);
+
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
+
+			expect(get(nftStore)).toEqual([mockNft3]);
 		});
 	});
 
@@ -280,7 +292,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: null
+				$authIdentity: null,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();
@@ -291,7 +304,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -311,7 +325,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: { ...base721, allowExternalContentSource: true },
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -331,7 +346,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base721,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).toHaveBeenCalledWith({
@@ -351,7 +367,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -371,7 +388,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: { ...base1155, allowExternalContentSource: true },
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -391,7 +409,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.SPAM,
 				token: base1155,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc1155Spy).toHaveBeenCalledWith({
@@ -411,7 +430,8 @@ describe('nft.services', () => {
 			await updateNftSection({
 				section: CustomTokenSection.HIDDEN,
 				token: undefined as unknown as NonFungibleToken,
-				$authIdentity: mockIdentity
+				$authIdentity: mockIdentity,
+				$ethAddress: mockEthAddress
 			});
 
 			expect(erc721Spy).not.toHaveBeenCalled();

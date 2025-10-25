@@ -65,7 +65,8 @@ export interface Modal<T> {
 		| 'auth-help'
 		| 'nft-image-consent'
 		| 'nft-fullscreen-display'
-		| 'gldt-stake';
+		| 'gldt-stake'
+		| 'gldt-unstake';
 	data?: T;
 	id?: symbol;
 }
@@ -133,6 +134,7 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 	openNftImageConsent: (params: SetWithDataParams<NftCollection>) => void;
 	openNftFullscreenDisplay: (params: SetWithDataParams<Nft>) => void;
 	openGldtStake: (id: symbol) => void;
+	openGldtUnstake: (id: symbol) => void;
 	close: () => void;
 }
 
@@ -237,6 +239,7 @@ const initModalStore = <T>(): ModalStore<T> => {
 			setTypeWithData('nft-fullscreen-display')
 		),
 		openGldtStake: setType('gldt-stake'),
+		openGldtUnstake: setType('gldt-unstake'),
 		close: () => set(null),
 		subscribe
 	};

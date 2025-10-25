@@ -1,10 +1,12 @@
 import * as appEnvironment from '$app/environment';
 import * as appNavigation from '$app/navigation';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
+import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { ICP_NETWORK_ID } from '$env/networks/networks.icp.env';
 import {
 	AppPath,
+	COLLECTION_PARAM,
 	NETWORK_PARAM,
+	NFT_PARAM,
 	ROUTE_ID_GROUP_APP,
 	TOKEN_PARAM,
 	URI_PARAM
@@ -31,10 +33,15 @@ import {
 	loadRouteParams,
 	networkParam,
 	networkUrl,
+	nftsUrl,
 	removeSearchParam,
 	resetRouteParams,
 	type RouteParams
 } from '$lib/utils/nav.utils';
+import { mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import type { LoadEvent, NavigationTarget, Page } from '@sveltejs/kit';
 import type { MockInstance } from 'vitest';
 
@@ -213,6 +220,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: 'testToken',
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: null
@@ -227,6 +236,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'testNetwork',
 				[URI_PARAM]: null
@@ -241,6 +252,8 @@ describe('nav.utils', () => {
 					}
 				} as unknown as LoadEvent)
 			).toEqual({
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null,
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
 				[URI_PARAM]: 'testURI'
@@ -259,7 +272,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: '💰',
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 		});
 
@@ -275,7 +290,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'mock-params',
-				[URI_PARAM]: 'mock-params'
+				[URI_PARAM]: 'mock-params',
+				[COLLECTION_PARAM]: 'mock-params',
+				[NFT_PARAM]: 'mock-params'
 			});
 		});
 
@@ -291,7 +308,9 @@ describe('nav.utils', () => {
 			).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: null,
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 		});
 
@@ -317,10 +336,56 @@ describe('nav.utils', () => {
 			expect(result).toEqual({
 				[TOKEN_PARAM]: null,
 				[NETWORK_PARAM]: 'testNetwork',
-				[URI_PARAM]: null
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: null,
+				[NFT_PARAM]: null
 			});
 
 			vi.unstubAllGlobals();
+		});
+
+		it('should correctly parse collection and nft params when present', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn((key) => {
+							switch (key) {
+								case COLLECTION_PARAM:
+									return '0x123abc';
+								case NFT_PARAM:
+									return '42';
+								default:
+									return null;
+							}
+						})
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result).toEqual({
+				[TOKEN_PARAM]: null,
+				[NETWORK_PARAM]: null,
+				[URI_PARAM]: null,
+				[COLLECTION_PARAM]: '0x123abc',
+				[NFT_PARAM]: '42'
+			});
+		});
+
+		it('should return null for collection and nft when not present', () => {
+			const result = loadRouteParams({
+				url: {
+					searchParams: {
+						get: vi.fn(
+							() =>
+								// explicitly return null for all keys
+								null
+						)
+					}
+				}
+			} as unknown as LoadEvent);
+
+			expect(result[COLLECTION_PARAM]).toBeNull();
+			expect(result[NFT_PARAM]).toBeNull();
 		});
 	});
 
@@ -574,6 +639,65 @@ describe('nav.utils', () => {
 			expect(isEarningPath(withAppPrefix(AppPath.EarningRewards))).toBeTruthy();
 			expect(isEarningPath('/(app)/earning/whatever')).toBeTruthy();
 			expect(isEarningPath(null)).toBeFalsy();
+		});
+	});
+
+	describe('nftsUrl', () => {
+		const mockCollection = mapTokenToCollection(mockValidErc1155Token);
+		const mockNft = mockValidErc1155Nft;
+
+		const getValidUrl = (params: string) => `https://dummy.com${params}`;
+
+		it('includes network and collection param when collection is provided', () => {
+			const result = nftsUrl({
+				collection: mockCollection
+			});
+
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockCollection.network.id.description);
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockCollection.address);
+		});
+
+		it('includes all params when nft is passed', () => {
+			const result = nftsUrl({
+				nft: mockNft
+			});
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(mockNft.collection.network.id.description);
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBe(mockNft.collection.address);
+			expect(url.searchParams.get(NFT_PARAM)).toBe(mockNft.id);
+		});
+
+		it('doesnt keep search params if all params are undefined', () => {
+			const result = nftsUrl({});
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBeNull();
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();
+			expect(url.searchParams.get(NFT_PARAM)).toBeNull();
+		});
+
+		it('persists the network if originSelectedNetwork is passed', () => {
+			const result = nftsUrl({ originSelectedNetwork: ETHEREUM_NETWORK.id });
+			assertNonNullish(result);
+			const url = new URL(getValidUrl(result));
+
+			expect(url.pathname).toBe(AppPath.Nfts);
+
+			expect(url.searchParams.get(NETWORK_PARAM)).toBe(ETHEREUM_NETWORK.id.description);
+			expect(url.searchParams.get(COLLECTION_PARAM)).toBeNull();
+			expect(url.searchParams.get(NFT_PARAM)).toBeNull();
 		});
 	});
 });

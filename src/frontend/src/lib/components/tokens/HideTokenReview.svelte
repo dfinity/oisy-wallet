@@ -37,7 +37,7 @@
 		</p>
 	</div>
 
-	<p class="break-normal py-10">
+	<p class="py-10 break-normal">
 		<Html text={$i18n.tokens.hide.info} />
 	</p>
 
