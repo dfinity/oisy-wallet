@@ -76,7 +76,6 @@ describe('NftCollectionCard', () => {
 		expect(gotoSpy).toHaveBeenCalledWith(nftsUrl({ nft: mockNftollectionUi.nfts[0] }));
 	});
 
-
 	it('should render a spam icon if section is spam', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {
@@ -91,7 +90,7 @@ describe('NftCollectionCard', () => {
 		expect(decorator).toBeInTheDocument();
 	});
 
-	it('should render a spam icon if section is spam', () => {
+	it('should render a spam icon if section is hidden', () => {
 		const { container } = render(NftCollectionCard, {
 			props: {
 				isHidden: true,
