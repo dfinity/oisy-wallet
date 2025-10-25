@@ -42,6 +42,7 @@
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
+	const isNftsRoute = $derived(isRouteNfts(page));
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -53,7 +54,7 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: AppPath.Tokens,
+		path: isNftsRoute ? AppPath.Nfts : AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
