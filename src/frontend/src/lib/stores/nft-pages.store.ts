@@ -1,4 +1,4 @@
-import { type TokenTypes , TokenTypes as TokenTypesEnum } from '$lib/enums/token-types';
+import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import type { OptionNetworkId } from '$lib/types/network';
 import type { Option } from '$lib/types/utils';
 import { derived, writable, type Readable } from 'svelte/store';
