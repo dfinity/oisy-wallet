@@ -29,7 +29,6 @@
 	};
 
 	// Null being used if mapping the origin does not work - i.e. invalid origin. Probably an edge case.
-
 	let host = $derived(mapHost(origin));
 </script>
 
