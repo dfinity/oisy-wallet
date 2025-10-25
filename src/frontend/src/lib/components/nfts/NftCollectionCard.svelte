@@ -56,9 +56,9 @@
 
 		if (collection.nfts.length === 1) {
 			goto(nftsUrl({ nft: collection.nfts[0] }));
-		} else {
-			goto(nftsUrl({ collection: collection.collection }));
+			return;
 		}
+		goto(nftsUrl({ collection: collection.collection }));
 	};
 </script>
 
