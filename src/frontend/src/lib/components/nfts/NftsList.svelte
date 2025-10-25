@@ -123,9 +123,9 @@
 			{#if $showHidden}
 				<NftCollectionList
 					nftCollections={hiddenCollections}
+					section={CustomTokenSection.HIDDEN}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
-					section={CustomTokenSection.HIDDEN}
 				>
 					{#snippet icon()}
 						<IconEyeOff size="24" />
@@ -136,9 +136,9 @@
 			{#if $showSpam}
 				<NftCollectionList
 					nftCollections={spamCollections}
+					section={CustomTokenSection.SPAM}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
-					section={CustomTokenSection.SPAM}
 				>
 					{#snippet icon()}
 						<IconAlertOctagon size="24" />
