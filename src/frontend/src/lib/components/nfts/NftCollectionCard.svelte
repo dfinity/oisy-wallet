@@ -58,6 +58,10 @@
 			}
 		});
 
+		if (collection.nfts.length === 1) {
+			goto(nftsUrl({ nft: collection.nfts[0] }));
+			return;
+		}
 		goto(nftsUrl({ collection: collection.collection }));
 	};
 </script>
