@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -23,6 +24,7 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 
 	interface Props {
 		tab: TokenTypes;
@@ -37,6 +39,12 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+
+	$effect(() => {
+		store.setAssetsTab(activeTab);
+	});
 </script>
 
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
