@@ -41,4 +41,32 @@ describe('NftCollectionCard', () => {
 			)
 		).toBeInTheDocument();
 	});
+
+	it('should render a spam icon if section is spam', () => {
+		const { container } = render(NftCollectionCard, {
+			props: {
+				isSpam: true,
+				collection: mockNftollectionUi,
+				testId
+			}
+		});
+
+		const decorator = container.querySelector('div.absolute.text-warning-primary svg');
+
+		expect(decorator).toBeInTheDocument();
+	});
+
+	it('should render a spam icon if section is spam', () => {
+		const { container } = render(NftCollectionCard, {
+			props: {
+				isHidden: true,
+				collection: mockNftollectionUi,
+				testId
+			}
+		});
+
+		const decorator = container.querySelector('div.absolute.invert svg');
+
+		expect(decorator).toBeInTheDocument();
+	});
 });
