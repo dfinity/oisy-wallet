@@ -1,7 +1,9 @@
 export enum Languages {
 	ENGLISH = 'en',
+	ARABIC = 'ar',
 	CZECH = 'cs',
 	GERMAN = 'de',
+	SPANISH = 'es',
 	FRENCH = 'fr',
 	HINDI = 'hi',
 	ITALIAN = 'it',

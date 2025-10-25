@@ -5,6 +5,7 @@ export const SUPPORTED_LANGUAGES = Object.entries(Languages);
 // This is the label that is shown. We don't need to translate it as we always show it in its own language
 export const LANGUAGES = {
 	[Languages.ENGLISH]: 'English',
+	[Languages.ARABIC]: 'العربية',
 	[Languages.CZECH]: 'Čeština',
 	[Languages.FRENCH]: 'Français',
 	[Languages.GERMAN]: 'Deutsch',
@@ -14,6 +15,7 @@ export const LANGUAGES = {
 	[Languages.POLISH]: 'Polski',
 	[Languages.PORTUGUESE]: 'Português',
 	[Languages.RUSSIAN]: 'Русский',
+	[Languages.SPANISH]: 'Español',
 	[Languages.VIETNAMESE]: 'Tiếng việt',
 	[Languages.CHINESE_SIMPLIFIED]: '中文 (简体)'
 };
