@@ -114,19 +114,19 @@
 				testId={`${testId}-network`}
 			/>
 		</span>
+
+		{#if isHidden}
+			<div class="absolute top-2 left-2 invert dark:invert-0">
+				<IconEyeOff size="24" />
+			</div>
+		{/if}
+
+		{#if isSpam}
+			<div class="absolute top-2 left-2 text-warning-primary">
+				<IconAlertOctagon size="24" />
+			</div>
+		{/if}
 	</span>
-
-	{#if isHidden}
-		<div class="absolute top-2 left-2 invert dark:invert-0">
-			<IconEyeOff size="24" />
-		</div>
-	{/if}
-
-	{#if isSpam}
-		<div class="absolute top-2 left-2 text-warning-primary">
-			<IconAlertOctagon size="24" />
-		</div>
-	{/if}
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2">
 		<span
