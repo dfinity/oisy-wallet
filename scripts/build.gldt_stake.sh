@@ -19,7 +19,7 @@ EOF
 DFX_NETWORK="${DFX_NETWORK:-local}"
 export GLDT_STAKE_BUILDENV="$DFX_NETWORK"
 
-GLDT_STAKE_REPO_DOWNLOADS_URL="https://github.com/GoldDAO/gold-dao/releases/latest/download"
+GLDT_STAKE_REPO_DOWNLOADS_URL="https://github.com/GoldDAO/gold-dao/releases/tag/gldt_stake-v1.0.15/download"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${GLDT_STAKE_REPO_DOWNLOADS_URL}/can.did"
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
