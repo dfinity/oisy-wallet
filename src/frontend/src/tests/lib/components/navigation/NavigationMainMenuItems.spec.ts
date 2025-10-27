@@ -13,7 +13,6 @@ import { TokenTypes } from '$lib/enums/token-types';
 import { mockNftPagesContext } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
-import { vi } from 'vitest';
 
 vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_NETWORK_ID));
 
@@ -40,6 +39,7 @@ describe('NavigationMainMenuItems', () => {
 		});
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Nfts);
 	});
 
@@ -49,6 +49,7 @@ describe('NavigationMainMenuItems', () => {
 		});
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
 	});
 });
