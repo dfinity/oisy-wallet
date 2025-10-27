@@ -8,7 +8,7 @@ import type {
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
-import type { CoingeckoErc20PriceParams } from '$lib/types/exchange';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,

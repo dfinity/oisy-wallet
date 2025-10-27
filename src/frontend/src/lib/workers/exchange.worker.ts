@@ -15,7 +15,7 @@ import {
 	exchangeRateUsdToCurrency
 } from '$lib/services/exchange.services';
 import type { CoingeckoPlatformId } from '$lib/types/coingecko';
-import type { CoingeckoErc20PriceParams } from '$lib/types/exchange';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type {
 	PostMessage,
 	PostMessageDataRequestExchangeTimer,
