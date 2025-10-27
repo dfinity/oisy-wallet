@@ -24,10 +24,6 @@ vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
 );
 
 describe('NftCollectionHero', () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	const spamButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_SPAM}"]`;
 	const hideButtonSelector = `button[data-tid="${NFT_COLLECTION_ACTION_HIDE}"]`;
 	const hiddenBadgeSelector = `span[data-tid="${NFT_HIDDEN_BADGE}"]`;

@@ -28,10 +28,6 @@ vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
 );
 
 describe('NftHero', () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
 	const openFullscreenSpy = vi
 		.spyOn(modalStore, 'openNftFullscreenDisplay')
 		.mockImplementation(() => {});
