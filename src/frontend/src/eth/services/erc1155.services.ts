@@ -104,28 +104,27 @@ const loadCustomTokensWithMetadata = async (
 				const { getContractMetadata } = alchemyProviders(network.id);
 				const metadata = await getContractMetadata(tokenAddress);
 
-				return [
-					...(await acc),
-					{
-						...{
-							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-							name: tokenAddress,
-							address: tokenAddress,
-							network,
-							symbol: tokenAddress,
-							decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-							standard: 'erc1155' as const,
-							category: 'custom' as const,
-							enabled,
-							version,
-							...(nonNullish(mappedSection) && {
-								section: mappedSection
-							}),
-							allowExternalContentSource
-						},
-						...metadata
-					}
-				];
+				const newToken = {
+					...{
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+						name: tokenAddress,
+						address: tokenAddress,
+						network,
+						symbol: tokenAddress,
+						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+						standard: 'erc1155' as const,
+						category: 'custom' as const,
+						enabled,
+						version,
+						...(nonNullish(mappedSection) && {
+							section: mappedSection
+						}),
+						allowExternalContentSource
+					},
+					...metadata
+				};
+
+				return [...(await acc), newToken];
 			},
 			Promise.resolve([])
 		);
