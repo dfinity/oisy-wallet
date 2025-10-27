@@ -2,32 +2,17 @@ import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
 import { nftStore } from '$lib/stores/nft.store';
-import type { OptionNetworkId } from '$lib/types/network';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { createMockNftPagesStore, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
 import * as svelte from 'svelte';
-import { writable } from 'svelte/store';
-
-const createMockNftPagesStore = (originSelectedNetwork: OptionNetworkId) => {
-	const { subscribe, set } = writable({
-		assetsTab: undefined,
-		originSelectedNetwork
-	});
-	return {
-		subscribe,
-		setAssetsTab: vi.fn(),
-		setOriginSelectedNetwork: vi.fn(),
-		set
-	};
-};
 
 const originalGetContext = svelte.getContext;
 
 vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore(undefined) : originalGetContext(key)
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
 );
 
 describe('NftCollection', () => {
