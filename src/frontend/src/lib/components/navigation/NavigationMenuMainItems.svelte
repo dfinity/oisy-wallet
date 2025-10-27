@@ -31,6 +31,9 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
+	import { getContext } from 'svelte';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
+	import { TokenTypes } from '$lib/enums/token-types';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -40,6 +43,8 @@
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
+
+	const { assetsTab } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
@@ -53,7 +58,7 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: AppPath.Tokens,
+		path: $assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
