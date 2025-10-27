@@ -186,107 +186,111 @@ const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<Cus
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc20CustomToken[]> => {
-	const erc20CustomTokens = await loadErc20CustomTokens(params);
+	const loadCustomContracts = async (): Promise<Erc20CustomToken[]> => {
+		const erc20CustomTokens = await loadErc20CustomTokens(params);
 
-	const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
-		[Erc20CustomToken[], Erc20CustomToken[]]
-	>(
-		([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
-			if (!('Erc20' in token)) {
-				return [accExisting, accNonExisting];
+		const [existingTokens, nonExistingTokens] = erc20CustomTokens.reduce<
+			[Erc20CustomToken[], Erc20CustomToken[]]
+		>(
+			([accExisting, accNonExisting], { token, enabled, version: versionNullable }) => {
+				if (!('Erc20' in token)) {
+					return [accExisting, accNonExisting];
+				}
+
+				if (
+					![...SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS, ...SUPPORTED_EVM_NETWORKS_CHAIN_IDS].includes(
+						token.Erc20.chain_id
+					)
+				) {
+					return [accExisting, accNonExisting];
+				}
+
+				const version = fromNullable(versionNullable);
+
+				const {
+					Erc20: { token_address: tokenAddress, chain_id: tokenChainId }
+				} = token;
+
+				const existingToken = ALL_DEFAULT_ERC20_TOKENS.find(
+					({ address, network: { chainId } }) =>
+						tokenAddress.toLowerCase() === address.toLowerCase() && tokenChainId === chainId
+				);
+
+				if (nonNullish(existingToken)) {
+					return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
+				}
+
+				const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+					({ chainId }) => tokenChainId === chainId
+				);
+
+				// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+				assertNonNullish(
+					network,
+					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+				);
+
+				return [
+					accExisting,
+					[
+						...accNonExisting,
+						{
+							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+							name: tokenAddress,
+							address: tokenAddress,
+							network,
+							symbol: tokenAddress,
+							decimals: ETHEREUM_DEFAULT_DECIMALS,
+							standard: 'erc20' as const,
+							category: 'custom' as const,
+							exchange: 'erc20' as const,
+							enabled,
+							version
+						}
+					]
+				];
+			},
+			[[], []]
+		);
+
+		const safeLoadMetadata = async ({
+			networkId,
+			address
+		}: {
+			networkId: NetworkId;
+			address: Erc20ContractAddress;
+		}) => {
+			try {
+				// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
+				return await infuraErc20Providers(networkId).metadata({ address });
+			} catch (err: unknown) {
+				console.error(
+					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
+					err
+				);
+				return;
 			}
+		};
 
-			if (
-				![...SUPPORTED_ETHEREUM_NETWORKS_CHAIN_IDS, ...SUPPORTED_EVM_NETWORKS_CHAIN_IDS].includes(
-					token.Erc20.chain_id
-				)
-			) {
-				return [accExisting, accNonExisting];
-			}
-
-			const version = fromNullable(versionNullable);
-
+		const customTokens: Erc20CustomToken[] = await nonExistingTokens.reduce<
+			Promise<Erc20CustomToken[]>
+		>(async (acc, token) => {
 			const {
-				Erc20: { token_address: tokenAddress, chain_id: tokenChainId }
+				network: { id: networkId },
+				address
 			} = token;
 
-			const existingToken = ALL_DEFAULT_ERC20_TOKENS.find(
-				({ address, network: { chainId } }) =>
-					tokenAddress.toLowerCase() === address.toLowerCase() && tokenChainId === chainId
-			);
+			const metadata = await safeLoadMetadata({ networkId, address });
 
-			if (nonNullish(existingToken)) {
-				return [[...accExisting, { ...existingToken, enabled, version }], accNonExisting];
-			}
+			return nonNullish(metadata)
+				? [...(await acc), { ...token, icon: mapErc20Icon(metadata.symbol), ...metadata }]
+				: acc;
+		}, Promise.resolve([]));
 
-			const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-				({ chainId }) => tokenChainId === chainId
-			);
-
-			// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-			assertNonNullish(
-				network,
-				`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-			);
-
-			return [
-				accExisting,
-				[
-					...accNonExisting,
-					{
-						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-						name: tokenAddress,
-						address: tokenAddress,
-						network,
-						symbol: tokenAddress,
-						decimals: ETHEREUM_DEFAULT_DECIMALS,
-						standard: 'erc20' as const,
-						category: 'custom' as const,
-						exchange: 'erc20' as const,
-						enabled,
-						version
-					}
-				]
-			];
-		},
-		[[], []]
-	);
-
-	const safeLoadMetadata = async ({
-		networkId,
-		address
-	}: {
-		networkId: NetworkId;
-		address: Erc20ContractAddress;
-	}) => {
-		try {
-			// TODO(GIX-2740): check if metadata for address already loaded in store and reuse - using Infura is not a certified call anyway
-			return await infuraErc20Providers(networkId).metadata({ address });
-		} catch (err: unknown) {
-			console.error(
-				`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
-				err
-			);
-			return;
-		}
+		return [...existingTokens, ...customTokens];
 	};
 
-	const customTokens: Erc20CustomToken[] = await nonExistingTokens.reduce<
-		Promise<Erc20CustomToken[]>
-	>(async (acc, token) => {
-		const {
-			network: { id: networkId },
-			address
-		} = token;
-
-		const metadata = await safeLoadMetadata({ networkId, address });
-
-		return nonNullish(metadata)
-			? [...(await acc), { ...token, icon: mapErc20Icon(metadata.symbol), ...metadata }]
-			: acc;
-	}, Promise.resolve([]));
-
-	return [...existingTokens, ...customTokens];
+	return await loadCustomContracts();
 };
 
 const loadUserTokens = async (params: LoadUserTokenParams): Promise<Erc20UserToken[]> => {
