@@ -1,12 +1,7 @@
 <script lang="ts">
-	import { Markdown } from '@dfinity/gix-components';
-	import type {
-		ConsentMessageApproval,
-		Rejection,
-		ResultConsentInfo
-	} from '@dfinity/oisy-wallet-signer';
+	import { Markdown, preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
@@ -22,17 +17,14 @@
 		callCanisterPrompt: { reset: resetCallCanisterPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let approve: ConsentMessageApproval | undefined;
-	let reject: Rejection | undefined;
-	let consentInfo: ResultConsentInfo | undefined;
-
-	$: ({ approve, reject, consentInfo } =
+	let { approve, reject, consentInfo } = $derived(
 		nonNullish($payload) && $payload.status === 'result'
 			? $payload
-			: { approve: undefined, reject: undefined, consentInfo: undefined });
+			: { approve: undefined, reject: undefined, consentInfo: undefined }
+	);
 
-	let loading = false;
-	let displayMessage: string | undefined;
+	let loading = $state(false);
+	let displayMessage = $state<string | undefined>();
 
 	const onPayload = () => {
 		if ($payload?.status === 'loading') {
@@ -68,7 +60,11 @@
 				: undefined;
 	};
 
-	$: ($payload, onPayload());
+	$effect(() => {
+		[$payload];
+
+		untrack(() => onPayload());
+	});
 
 	type Text = { title: string; content: string } | undefined;
 
@@ -86,8 +82,7 @@
 		};
 	};
 
-	let text: Text;
-	$: text = mapText(displayMessage);
+	let text = $derived(mapText(displayMessage));
 
 	const onApprove = () => {
 		if (isNullish(approve)) {
@@ -125,7 +120,7 @@
 {:else if nonNullish(text)}
 	{@const { title, content } = text}
 
-	<form method="POST" on:submit|preventDefault={onApprove} in:fade>
+	<form method="POST" onsubmit={preventDefault(onApprove)} in:fade>
 		<h2 class="mb-4 text-center">{title}</h2>
 
 		<SignerOrigin payload={$payload} />
