@@ -1,19 +1,11 @@
 import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
-import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { createMockNftPagesStore, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockNftPagesContext, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
-import * as svelte from 'svelte';
-
-const originalGetContext = svelte.getContext;
-
-vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
-);
 
 describe('NftCollection', () => {
 	const mockNfts = [
@@ -23,8 +15,6 @@ describe('NftCollection', () => {
 	];
 
 	beforeAll(() => {
-		vi.clearAllMocks();
-
 		nftStore.addAll(mockNfts);
 
 		mockPage.mock({
@@ -34,7 +24,9 @@ describe('NftCollection', () => {
 	});
 
 	it('should render a list of the collections nfts', () => {
-		const { container } = render(NftCollection);
+		const { container } = render(NftCollection, {
+			context: mockNftPagesContext({})
+		});
 
 		const grid = container.querySelector('.grid');
 
