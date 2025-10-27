@@ -6,6 +6,13 @@ import { infuraErc1155Providers } from '$eth/providers/infura-erc1155.providers'
 import { erc1155CustomTokensStore } from '$eth/stores/erc1155-custom-tokens.store';
 import type { Erc1155ContractAddress } from '$eth/types/erc1155';
 import type { Erc1155CustomToken } from '$eth/types/erc1155-custom-token';
+import type { Erc721ContractAddress } from '$eth/types/erc721';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SUBCONTEXT_NFT
+} from '$lib/enums/plausible';
+import { trackEvent } from '$lib/services/analytics.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
@@ -14,7 +21,13 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import { mapTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseCustomTokenId } from '$lib/utils/custom-token.utils';
-import { assertNonNullish, fromNullable, nonNullish, queryAndUpdate } from '@dfinity/utils';
+import {
+	assertNonNullish,
+	fromNullable,
+	isNullish,
+	nonNullish,
+	queryAndUpdate
+} from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const isInterfaceErc1155 = async ({
@@ -61,6 +74,33 @@ const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<C
 		filterTokens: ({ token }) => 'Erc1155' in token
 	});
 
+const safeLoadMetadata = async ({
+	networkId,
+	address
+}: {
+	networkId: NetworkId;
+	address: Erc721ContractAddress['address'];
+}) => {
+	try {
+		const { getContractMetadata } = alchemyProviders(networkId);
+
+		return await getContractMetadata(address);
+	} catch (err: unknown) {
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.LOAD_CUSTOM_TOKENS,
+			metadata: {
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
+				token_address: address,
+				token_network: `${networkId.description}`
+			},
+			warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${err}`
+		});
+
+		return;
+	}
+};
+
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc1155CustomToken[]> => {
@@ -98,8 +138,11 @@ const loadCustomTokensWithMetadata = async (
 					`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
 				);
 
-				const { getContractMetadata } = alchemyProviders(network.id);
-				const metadata = await getContractMetadata(tokenAddress);
+				const metadata = await safeLoadMetadata({ networkId: network.id, address: tokenAddress });
+
+				if (isNullish(metadata)) {
+					return;
+				}
 
 				return {
 					...{
@@ -123,7 +166,9 @@ const loadCustomTokensWithMetadata = async (
 			}
 		);
 
-	return Promise.all(customTokenPromises);
+	const customTokens = await Promise.all(customTokenPromises);
+
+	return customTokens.filter(nonNullish);
 };
 
 const loadCustomTokenData = ({
