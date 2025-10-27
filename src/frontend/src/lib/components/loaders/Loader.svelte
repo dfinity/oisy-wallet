@@ -126,11 +126,3 @@
 </script>
 
 {@render children()}
-
-<style lang="scss">
-	:root:has(:global(.login-modal)) {
-		--alert-max-width: 90vw;
-		--alert-max-height: initial;
-		--dialog-border-radius: calc(var(--border-radius-sm) * 3);
-	}
-</style>
