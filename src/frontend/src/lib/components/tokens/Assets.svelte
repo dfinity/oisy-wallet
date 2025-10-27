@@ -25,6 +25,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
+	import { navStore } from '$lib/stores/nav.store';
 
 	interface Props {
 		tab: TokenTypes;
@@ -40,10 +41,8 @@
 			: { initialSearch: undefined, message: undefined }
 	);
 
-	const { store } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
-
 	$effect(() => {
-		store.setAssetsTab(activeTab);
+		navStore.setSelectedAssetsTab(activeTab);
 	});
 </script>
 

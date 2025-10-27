@@ -9,6 +9,7 @@ import {
 	TOKEN_PARAM,
 	URI_PARAM
 } from '$lib/constants/routes.constants';
+import { navStore } from '$lib/stores/nav.store';
 import type { NetworkId } from '$lib/types/network';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
@@ -177,10 +178,11 @@ export const switchNetwork = async (networkId: Option<NetworkId>) => {
 		url.searchParams.set(NETWORK_PARAM, networkId.description);
 	}
 
+	navStore.setUserSelectedNetwork(networkId);
+
 	await goto(url, { replaceState: true, noScroll: true });
 };
 
-// Todo: remove fromRoute
 export const nftsUrl = (
 	params:
 		| {

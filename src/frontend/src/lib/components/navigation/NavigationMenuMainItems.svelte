@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { getContext } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import { EARNING_ENABLED } from '$env/earning';
@@ -21,7 +20,6 @@
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -33,6 +31,7 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
+	import { selectedAssetsTab, userSelectedNetwork } from '$lib/derived/nav.derived';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -42,8 +41,6 @@
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
-
-	const { originSelectedNetwork, assetsTab } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
@@ -57,8 +54,8 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: $assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
-		networkId: $originSelectedNetwork,
+		path: $selectedAssetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
+		networkId: $userSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -77,7 +74,7 @@
 	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
-		networkId: $originSelectedNetwork,
+		networkId: $userSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -97,7 +94,7 @@
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
-		networkId: $originSelectedNetwork,
+		networkId: $userSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -118,7 +115,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Earning,
-			networkId: $originSelectedNetwork,
+			networkId: $userSelectedNetwork,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -139,7 +136,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
-			networkId: $originSelectedNetwork,
+			networkId: $userSelectedNetwork,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -161,7 +158,7 @@
 	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
-		networkId: $originSelectedNetwork,
+		networkId: $userSelectedNetwork,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}

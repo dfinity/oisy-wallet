@@ -73,41 +73,39 @@
 			<Header />
 
 			<AuthGuard>
-				<NftPagesContext>
-					<SplitPane>
-						{#snippet menu()}
-							<NavigationMenu>
-								{#if tokensRoute || nftsRoute}
-									<Responsive up="xl">
-										<div class="hidden xl:block" transition:fade>
-											<DappsCarousel />
-										</div>
-									</Responsive>
-								{/if}
-							</NavigationMenu>
-						{/snippet}
+				<SplitPane>
+					{#snippet menu()}
+						<NavigationMenu>
+							{#if tokensRoute || nftsRoute}
+								<Responsive up="xl">
+									<div class="hidden xl:block" transition:fade>
+										<DappsCarousel />
+									</div>
+								</Responsive>
+							{/if}
+						</NavigationMenu>
+					{/snippet}
 
-						{#if showHero}
-							<Hero />
-						{/if}
-
-						<Loaders>
-							{@render children()}
-						</Loaders>
-					</SplitPane>
-
-					{#if !$aiAssistantConsoleOpen}
-						<div class="fixed right-4 bottom-16 z-3 block">
-							<AiAssistantConsoleButton styleClass="mb-2" />
-						</div>
+					{#if showHero}
+						<Hero />
 					{/if}
 
-					<MobileNavigationMenu>
-						<NavigationMenuMainItems testIdPrefix="mobile" />
-					</MobileNavigationMenu>
+					<Loaders>
+						{@render children()}
+					</Loaders>
+				</SplitPane>
 
-					<Modals />
-				</NftPagesContext>
+				{#if !$aiAssistantConsoleOpen}
+					<div class="fixed right-4 bottom-16 z-3 block">
+						<AiAssistantConsoleButton styleClass="mb-2" />
+					</div>
+				{/if}
+
+				<MobileNavigationMenu>
+					<NavigationMenuMainItems testIdPrefix="mobile" />
+				</MobileNavigationMenu>
+
+				<Modals />
 			</AuthGuard>
 
 			<Footer />

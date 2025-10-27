@@ -16,6 +16,7 @@
 	import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { userSelectedNetwork } from '$lib/derived/nav.derived';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -24,12 +25,10 @@
 
 	const { token, nfts }: Props = $props();
 
-	const { originSelectedNetwork } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
-
 	const breadcrumbItems = $derived([
 		{
 			label: $i18n.navigation.text.tokens,
-			url: nftsUrl({ originSelectedNetwork: $originSelectedNetwork ?? undefined })
+			url: nftsUrl({ originSelectedNetwork: $userSelectedNetwork })
 		}
 	]);
 

@@ -1,4 +1,7 @@
 import { page } from '$app/stores';
+import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
+import { navStore } from '$lib/stores/nav.store';
+import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import { derived, type Readable } from 'svelte/store';
 
@@ -36,4 +39,14 @@ export const routeNft: Readable<OptionString> = derived(
 			data: { nft }
 		}
 	]) => nft
+);
+
+export const userSelectedNetwork: Readable<NetworkId | undefined> = derived(
+	[navStore],
+	([$navStore]) => $navStore?.userSelectedNetwork ?? undefined
+);
+
+export const selectedAssetsTab: Readable<TokenTypes> = derived(
+	[navStore],
+	([$navStore]) => $navStore?.selectedAssetsTab ?? TokenTypesEnum.TOKENS
 );
