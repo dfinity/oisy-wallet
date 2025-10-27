@@ -131,9 +131,7 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation(() => {
-			return createMockNftPagesStore({ originSelectedNetwork: ETHEREUM_NETWORK_ID });
-		});
+		vi.spyOn(svelte, 'getContext').mockImplementation(() => createMockNftPagesStore({ originSelectedNetwork: ETHEREUM_NETWORK_ID }));
 
 		const { container } = render(NftCollectionHero, {
 			props: {
