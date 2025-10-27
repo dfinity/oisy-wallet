@@ -870,7 +870,6 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
 	destinationNetwork,
 	userAddress,
@@ -892,7 +891,11 @@ export const fetchVeloraDeltaSwap = async ({
 	const deltaContract = await sdk.delta.getDeltaContract();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
+		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
+		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
+		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
+		quoteAmount: BigInt(swapDetails.destAmount),
 		slippagePercentage: Number(slippageValue)
 	});
 
