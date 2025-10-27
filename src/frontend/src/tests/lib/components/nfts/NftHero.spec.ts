@@ -6,35 +6,25 @@ import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
 import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
-import type { OptionNetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import {
+	createMockNftPagesStore,
+	mockNftollectionUi,
+	mockValidErc1155Nft
+} from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 import * as svelte from 'svelte';
-import { get, writable } from 'svelte/store';
-
-const createMockNftPagesStore = (originSelectedNetwork: OptionNetworkId) => {
-	const { subscribe, set } = writable({
-		assetsTab: undefined,
-		originSelectedNetwork
-	});
-	return {
-		subscribe,
-		setAssetsTab: vi.fn(),
-		setOriginSelectedNetwork: vi.fn(),
-		set
-	};
-};
+import { get } from 'svelte/store';
 
 const originalGetContext = svelte.getContext;
 
 vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore(undefined) : originalGetContext(key)
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
 );
 
 describe('NftHero', () => {
@@ -195,13 +185,6 @@ describe('NftHero', () => {
 	});
 
 	it('should build root breadcrumb url without network query param', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
-			if (key === NFT_PAGES_CONTEXT_KEY) {
-				return createMockNftPagesStore(undefined);
-			}
-			return originalGetContext(key);
-		});
-
 		const { container } = render(NftHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
@@ -215,11 +198,8 @@ describe('NftHero', () => {
 	});
 
 	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
-			if (key === NFT_PAGES_CONTEXT_KEY) {
-				return createMockNftPagesStore(ETHEREUM_NETWORK_ID);
-			}
-			return originalGetContext(key);
+		vi.spyOn(svelte, 'getContext').mockImplementation(() => {
+			return createMockNftPagesStore({ originSelectedNetwork: ETHEREUM_NETWORK_ID });
 		});
 
 		const { container } = render(NftHero, {

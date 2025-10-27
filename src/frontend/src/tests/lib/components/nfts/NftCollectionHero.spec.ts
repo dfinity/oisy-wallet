@@ -8,34 +8,19 @@ import {
 } from '$lib/constants/test-ids.constants';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
-import type { OptionNetworkId } from '$lib/types/network';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
+import { createMockNftPagesStore, mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 import * as svelte from 'svelte';
-import { writable } from 'svelte/store';
-
-const createMockNftPagesStore = (originSelectedNetwork: OptionNetworkId) => {
-	const { subscribe, set } = writable({
-		assetsTab: undefined,
-		originSelectedNetwork
-	});
-	return {
-		subscribe,
-		setAssetsTab: vi.fn(),
-		setOriginSelectedNetwork: vi.fn(),
-		set
-	};
-};
 
 const originalGetContext = svelte.getContext;
 
 vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore(undefined) : originalGetContext(key)
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
 );
 
 describe('NftCollectionHero', () => {
@@ -133,13 +118,6 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should build root breadcrumb url without network query param', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
-			if (key === NFT_PAGES_CONTEXT_KEY) {
-				return createMockNftPagesStore(undefined);
-			}
-			return originalGetContext(key);
-		});
-
 		const { container } = render(NftCollectionHero, {
 			props: {
 				nfts: mockNftollectionUi.nfts,
@@ -153,11 +131,8 @@ describe('NftCollectionHero', () => {
 	});
 
 	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
-			if (key === NFT_PAGES_CONTEXT_KEY) {
-				return createMockNftPagesStore(ETHEREUM_NETWORK_ID);
-			}
-			return originalGetContext(key);
+		vi.spyOn(svelte, 'getContext').mockImplementation(() => {
+			return createMockNftPagesStore({ originSelectedNetwork: ETHEREUM_NETWORK_ID });
 		});
 
 		const { container } = render(NftCollectionHero, {
