@@ -145,7 +145,6 @@ describe('erc1155.services', () => {
 
 			// query + update
 			expect(trackEvent).toHaveBeenCalledTimes(mockCustomTokensErc1155.length * 2);
-			expect(console.error).toHaveBeenCalledTimes(mockCustomTokensErc1155.length * 2);
 
 			mockCustomTokensErc1155.forEach(({ token }, index) => {
 				assert('Erc1155' in token);
@@ -165,7 +164,8 @@ describe('erc1155.services', () => {
 						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
 						token_address: address,
 						token_network: `${networkId.description}`
-					}
+					},
+					warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${mockError}`
 				});
 
 				expect(trackEvent).toHaveBeenNthCalledWith(index + 1 + mockCustomTokensErc1155.length, {
@@ -175,20 +175,9 @@ describe('erc1155.services', () => {
 						event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
 						token_address: address,
 						token_network: `${networkId.description}`
-					}
+					},
+					warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${mockError}`
 				});
-
-				expect(console.error).toHaveBeenNthCalledWith(
-					index + 1,
-					`Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}`,
-					mockError
-				);
-
-				expect(console.error).toHaveBeenNthCalledWith(
-					index + 1 + mockCustomTokensErc1155.length,
-					`Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}`,
-					mockError
-				);
 			});
 		});
 

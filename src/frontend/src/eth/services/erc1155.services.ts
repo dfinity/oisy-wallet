@@ -93,13 +93,10 @@ const safeLoadMetadata = async ({
 				event_subcontext: PLAUSIBLE_EVENT_SUBCONTEXT_NFT.ERC1155,
 				token_address: address,
 				token_network: `${networkId.description}`
-			}
+			},
+			warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${err}`
 		});
 
-		console.error(
-			`Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}`,
-			err
-		);
 		return;
 	}
 };
