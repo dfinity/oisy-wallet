@@ -56,7 +56,7 @@ export const activeAssetsTabStore = initStorageStore<TokenTypes>({
 	defaultValue: TokenTypesEnum.TOKENS
 });
 
-export const activeAssetsTabStore = initStorageStore<TokenTypes | undefined>({
+export const activeAssetsTabStore = initStorageStore<TokenTypes>({
 	key: 'active-assets-tab',
 	defaultValue: TokenTypesEnum.TOKENS
 });
