@@ -110,8 +110,7 @@ const loadCustomTokensWithMetadata = async (
 				`Inconsistency in token data: no symbol found for token ${tokenAddress}`
 			);
 
-			return {
-				...(await acc),
+			const newToken = {
 				...{
 					id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
 					name: tokenAddress,
@@ -130,6 +129,8 @@ const loadCustomTokensWithMetadata = async (
 				},
 				...metadata
 			};
+
+			return [...(await acc), newToken];
 		},
 		Promise.resolve([])
 	);
