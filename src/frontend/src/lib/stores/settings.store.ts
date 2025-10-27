@@ -51,7 +51,7 @@ export const userSelectedNetworkStore = initStorageStore<string | undefined>({
 	defaultValue: undefined
 });
 
-export const activeAssetsTabStore = initStorageStore<TokenTypes | undefined>({
+export const activeAssetsTabStore = initStorageStore<TokenTypes>({
 	key: 'active-assets-tab',
 	defaultValue: TokenTypesEnum.TOKENS
 });
