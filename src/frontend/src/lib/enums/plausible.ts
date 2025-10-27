@@ -17,6 +17,7 @@ export enum PLAUSIBLE_EVENT_CONTEXTS {
 
 export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
 	ERC721 = 'erc721'
+	ERC1155 = 'erc1155'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
