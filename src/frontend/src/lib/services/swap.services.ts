@@ -870,7 +870,6 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
 	destinationNetwork,
 	userAddress,
@@ -892,7 +891,7 @@ export const fetchVeloraDeltaSwap = async ({
 	const deltaContract = await sdk.delta.getDeltaContract();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		quoteAmount: BigInt(swapDetails.destAmount),
 		slippagePercentage: Number(slippageValue)
 	});
 
