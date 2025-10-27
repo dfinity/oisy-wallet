@@ -1,3 +1,4 @@
+import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
 import { initStorageStore } from '$lib/stores/storage.store';
 
 export interface SettingsData {
@@ -48,4 +49,9 @@ export const nftGroupByCollectionStore = initStorageStore<boolean>({
 export const userSelectedNetworkStore = initStorageStore<string | undefined>({
 	key: 'user-selected-network',
 	defaultValue: 'eth'
+});
+
+export const activeAssetsTabStore = initStorageStore<TokenTypes | undefined>({
+	key: 'active-assets-tab',
+	defaultValue: TokenTypesEnum.TOKENS
 });
