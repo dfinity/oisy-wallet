@@ -1,13 +1,7 @@
 <script lang="ts">
-	import { Markdown } from '@dfinity/gix-components';
-	import type {
-		ConsentMessageApproval,
-		Rejection,
-		ResultConsentInfo
-	} from '@dfinity/oisy-wallet-signer';
+	import { Markdown, preventDefault } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
-	import { run, preventDefault } from 'svelte/legacy';
+	import { getContext, untrack } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import SignerConsentMessageWarning from '$lib/components/signer/SignerConsentMessageWarning.svelte';
 	import SignerLoading from '$lib/components/signer/SignerLoading.svelte';
@@ -23,19 +17,14 @@
 		callCanisterPrompt: { reset: resetCallCanisterPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let approve: ConsentMessageApproval | undefined = $state();
-	let reject: Rejection | undefined = $state();
-	let consentInfo: ResultConsentInfo | undefined = $state();
-
-	run(() => {
-		({ approve, reject, consentInfo } =
-			nonNullish($payload) && $payload.status === 'result'
-				? $payload
-				: { approve: undefined, reject: undefined, consentInfo: undefined });
-	});
+	let { approve, reject, consentInfo } = $derived(
+		nonNullish($payload) && $payload.status === 'result'
+			? $payload
+			: { approve: undefined, reject: undefined, consentInfo: undefined }
+	);
 
 	let loading = $state(false);
-	let displayMessage: string | undefined = $state();
+	let displayMessage = $state<string | undefined>();
 
 	const onPayload = () => {
 		if ($payload?.status === 'loading') {
@@ -71,8 +60,10 @@
 				: undefined;
 	};
 
-	run(() => {
-		($payload, onPayload());
+	$effect(() => {
+		[$payload];
+
+		untrack(() => onPayload());
 	});
 
 	type Text = { title: string; content: string } | undefined;
@@ -91,7 +82,7 @@
 		};
 	};
 
-	let text: Text = $derived(mapText(displayMessage));
+	let text = $derived(mapText(displayMessage));
 
 	const onApprove = () => {
 		if (isNullish(approve)) {

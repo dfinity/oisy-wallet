@@ -1,15 +1,8 @@
 <script lang="ts">
 	import { IconWallet } from '@dfinity/gix-components';
-	import {
-		ICRC25_PERMISSION_GRANTED,
-		ICRC27_ACCOUNTS,
-		type IcrcScope,
-		type IcrcScopedMethod,
-		type PermissionsConfirmation
-	} from '@dfinity/oisy-wallet-signer';
+	import { ICRC25_PERMISSION_GRANTED, ICRC27_ACCOUNTS } from '@dfinity/oisy-wallet-signer';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { type Component, getContext } from 'svelte';
-	import { run } from 'svelte/legacy';
+	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
@@ -27,9 +20,9 @@
 		permissionsPrompt: { payload, reset: resetPrompt }
 	} = getContext<SignerContext>(SIGNER_CONTEXT_KEY);
 
-	let scopes: IcrcScope[] = $derived($payload?.requestedScopes ?? []);
+	let scopes = $derived($payload?.requestedScopes ?? []);
 
-	let confirm: PermissionsConfirmation | undefined = $derived($payload?.confirm);
+	let confirm = $derived($payload?.confirm);
 
 	/**
 	 * During the initial UX review, it was decided that permissions should not be permanently denied when "Rejected," but instead should be ignored.
@@ -66,7 +59,7 @@
 
 	const onApprove = () => approvePermissions();
 
-	let listItems: Record<IcrcScopedMethod, { icon: Component; label: string }> = $derived({
+	let listItems = $derived({
 		icrc27_accounts: {
 			icon: IconWallet,
 			label: replaceOisyPlaceholders($i18n.signer.permissions.text.icrc27_accounts)
@@ -77,12 +70,9 @@
 		}
 	});
 
-	let requestAccountsPermissions = $state(false);
-	run(() => {
-		requestAccountsPermissions = nonNullish(
-			scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS)
-		);
-	});
+	let requestAccountsPermissions = $derived(
+		nonNullish(scopes.find(({ scope: { method } }) => method === ICRC27_ACCOUNTS))
+	);
 </script>
 
 {#if nonNullish($payload)}
@@ -96,11 +86,11 @@
 
 			<ul class="mt-2.5 flex list-none flex-col gap-1">
 				{#each scopes as { scope: { method } } (method)}
-					{@const { icon, label } = listItems[method]}
+					{@const { icon: Icon, label } = listItems[method]}
 
 					{@const SvelteComponent = icon}
 					<li class="flex items-center gap-2 pb-1.5 break-normal">
-						<SvelteComponent size="24" />
+						<Icon size="24" />
 						{label}
 					</li>
 				{/each}
