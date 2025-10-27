@@ -23,9 +23,10 @@ import { get } from 'svelte/store';
 
 const originalGetContext = svelte.getContext;
 
-vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
-);
+vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
+	console.log('key', key);
+	return key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key);
+});
 
 describe('NftHero', () => {
 	const openFullscreenSpy = vi
