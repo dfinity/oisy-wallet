@@ -23,6 +23,8 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
+	import { getContext } from 'svelte';
 
 	interface Props {
 		tab: TokenTypes;
@@ -37,6 +39,12 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	const { setAssetsTab } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
+
+	$effect(() => {
+		setAssetsTab(activeTab);
+	});
 </script>
 
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
