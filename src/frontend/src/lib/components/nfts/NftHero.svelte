@@ -26,12 +26,14 @@
 
 	const { token, nft }: Props = $props();
 
-	const store = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
-	const originSelectedNetwork = $derived($store?.originSelectedNetwork ?? undefined);
+	const { originSelectedNetwork } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 
 	const breadcrumbItems = $derived.by(() => {
 		let breadcrumbs = [
-			{ label: $i18n.navigation.text.tokens, url: nftsUrl({ originSelectedNetwork }) }
+			{
+				label: $i18n.navigation.text.tokens,
+				url: nftsUrl({ originSelectedNetwork: $originSelectedNetwork ?? undefined })
+			}
 		];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
