@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
@@ -64,71 +64,68 @@ const loadErc1155CustomTokens = async (params: LoadCustomTokenParams): Promise<C
 const loadCustomTokensWithMetadata = async (
 	params: LoadCustomTokenParams
 ): Promise<Erc1155CustomToken[]> => {
-	const loadCustomContracts = async (): Promise<Erc1155CustomToken[]> => {
-		const erc1155CustomTokens: CustomToken[] = await loadErc1155CustomTokens(params);
+	const erc1155CustomTokens: CustomToken[] = await loadErc1155CustomTokens(params);
 
-		const customTokenPromises = erc1155CustomTokens
-			.filter(
-				(customToken): customToken is CustomToken & { token: { Erc1155: ErcToken } } =>
-					'Erc1155' in customToken.token
-			)
-			.map(
-				async ({
-					token,
-					enabled,
-					version: versionNullable,
-					section: sectionNullable,
-					allow_external_content_source: allowExternalContentSourceNullable
-				}) => {
-					const version = fromNullable(versionNullable);
-					const section = fromNullable(sectionNullable);
-					const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
-					const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
+	return await erc1155CustomTokens.reduce<Promise<Erc1155CustomToken[]>>(
+		async (
+			acc,
+			{
+				token,
+				enabled,
+				version: versionNullable,
+				section: sectionNullable,
+				allow_external_content_source: allowExternalContentSourceNullable
+			}
+		) => {
+			if (!('Erc1155' in token)) {
+				return acc;
+			}
 
-					const {
-						Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
-					} = token;
+			const version = fromNullable(versionNullable);
+			const section = fromNullable(sectionNullable);
+			const mappedSection = nonNullish(section) ? mapTokenSection(section) : undefined;
+			const allowExternalContentSource = fromNullable(allowExternalContentSourceNullable);
 
-					const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
-						({ chainId }) => tokenChainId === chainId
-					);
+			const {
+				Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
+			} = token;
 
-					// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
-					assertNonNullish(
-						network,
-						`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
-					);
-
-					const { getContractMetadata } = alchemyProviders(network.id);
-					const metadata = await getContractMetadata(tokenAddress);
-
-					return {
-						...{
-							id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
-							name: tokenAddress,
-							address: tokenAddress,
-							network,
-							symbol: tokenAddress,
-							decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
-							standard: 'erc1155' as const,
-							category: 'custom' as const,
-							enabled,
-							version,
-							...(nonNullish(mappedSection) && {
-								section: mappedSection
-							}),
-							allowExternalContentSource
-						},
-						...metadata
-					};
-				}
+			const network = [...SUPPORTED_ETHEREUM_NETWORKS, ...SUPPORTED_EVM_NETWORKS].find(
+				({ chainId }) => tokenChainId === chainId
 			);
 
-		return Promise.all(customTokenPromises);
-	};
+			// This should not happen because we filter the chain_id in the previous filter, but we need it to be type safe
+			assertNonNullish(
+				network,
+				`Inconsistency in network data: no network found for chainId ${tokenChainId} in custom token, even though it is in the environment`
+			);
 
-	const customContracts = await loadCustomContracts();
-	return await Promise.all(customContracts);
+			const { getContractMetadata } = alchemyProviders(network.id);
+			const metadata = await getContractMetadata(tokenAddress);
+
+			return {
+				...(await acc),
+				...{
+					id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
+					name: tokenAddress,
+					address: tokenAddress,
+					network,
+					symbol: tokenAddress,
+					decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
+					standard: 'erc1155' as const,
+					category: 'custom' as const,
+					enabled,
+					version,
+					...(nonNullish(mappedSection) && {
+						section: mappedSection
+					}),
+					allowExternalContentSource
+				},
+				...metadata
+			};
+		},
+		Promise.resolve([])
+	);
 };
 
 const loadCustomTokenData = ({
