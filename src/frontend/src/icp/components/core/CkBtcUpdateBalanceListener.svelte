@@ -2,7 +2,7 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 	import IcCkListener from '$icp/components/core/IcCkListener.svelte';
-	import { initCkBTCUpdateBalanceWorker } from '$icp/services/worker.ckbtc-update-balance.services';
+	import { CkBTCUpdateBalanceWorker } from '$icp/services/worker.ckbtc-update-balance.services';
 	import { enabledIcTokens } from '$lib/derived/tokens.derived';
 	import { findTwinToken } from '$lib/utils/token.utils';
 
@@ -16,7 +16,7 @@
 
 {#if nonNullish(ckBtcToken)}
 	<IcCkListener
-		initFn={initCkBTCUpdateBalanceWorker}
+		initFn={CkBTCUpdateBalanceWorker.init}
 		token={ckBtcToken}
 		twinToken={ckBtcToken.twinToken}
 	/>
