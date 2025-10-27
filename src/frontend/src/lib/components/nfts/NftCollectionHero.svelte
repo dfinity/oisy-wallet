@@ -11,12 +11,12 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { userSelectedNetwork } from '$lib/derived/nav.derived';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
-	import { userSelectedNetwork } from '$lib/derived/nav.derived';
 
 	interface Props {
 		token?: NonFungibleToken;

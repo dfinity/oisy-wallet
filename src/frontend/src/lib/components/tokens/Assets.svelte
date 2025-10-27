@@ -24,6 +24,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { navStore } from '$lib/stores/nav.store';
+	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 
 	interface Props {
 		tab: TokenTypes;
