@@ -1,4 +1,4 @@
-import { type TokenTypes } from '$lib/enums/token-types';
+import type { TokenTypes } from '$lib/enums/token-types';
 import { initStorageStore } from '$lib/stores/storage.store';
 import type { OptionNetworkId } from '$lib/types/network';
 import type { Option } from '$lib/types/utils';
