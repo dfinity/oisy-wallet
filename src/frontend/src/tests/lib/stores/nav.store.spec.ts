@@ -16,8 +16,8 @@ describe('nav.store', () => {
 	});
 
 	it('updates selectedAssetsTab when setSelectedAssetsTab is called', () => {
-		navStore.setSelectedAssetsTab(TokenTypes.TOKENS);
+		navStore.setActiveAssetsTab(TokenTypes.TOKENS);
 
-		expect(get(navStore)?.selectedAssetsTab).toEqual(TokenTypes.TOKENS);
+		expect(get(navStore)?.activeAssetsTab).toEqual(TokenTypes.TOKENS);
 	});
 });

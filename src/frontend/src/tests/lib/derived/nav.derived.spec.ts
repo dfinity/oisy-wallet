@@ -1,5 +1,5 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import { selectedAssetsTab, userSelectedNetwork } from '$lib/derived/nav.derived';
+import { activeAssetsTab, userSelectedNetwork } from '$lib/derived/nav.derived';
 import { TokenTypes as TokenTypesEnum } from '$lib/enums/token-types';
 import { navStore } from '$lib/stores/nav.store';
 import { get } from 'svelte/store';
@@ -26,25 +26,25 @@ describe('nav.derived', () => {
 
 		it('does not overwrite selectedAssetsTab when updating userSelectedNetwork', () => {
 			// set both
-			navStore.setSelectedAssetsTab(TokenTypesEnum.NFTS);
+			navStore.setActiveAssetsTab(TokenTypesEnum.NFTS);
 			navStore.setUserSelectedNetwork(ETHEREUM_NETWORK_ID);
 
 			expect(get(userSelectedNetwork)).toEqual(ETHEREUM_NETWORK_ID);
-			expect(get(selectedAssetsTab)).toBe(TokenTypesEnum.NFTS);
+			expect(get(activeAssetsTab)).toBe(TokenTypesEnum.NFTS);
 		});
 	});
 
 	describe('selectedAssetsTab', () => {
 		it('returns TOKENS as default when navStore.selectedAssetsTab is undefined', () => {
-			navStore.setSelectedAssetsTab(TokenTypesEnum.TOKENS);
-			const value = get(selectedAssetsTab);
+			navStore.setActiveAssetsTab(TokenTypesEnum.TOKENS);
+			const value = get(activeAssetsTab);
 
 			expect(value).toBe(TokenTypesEnum.TOKENS);
 		});
 
 		it('returns the selectedAssetsTab from navStore when defined', () => {
-			navStore.setSelectedAssetsTab(TokenTypesEnum.NFTS);
-			const value = get(selectedAssetsTab);
+			navStore.setActiveAssetsTab(TokenTypesEnum.NFTS);
+			const value = get(activeAssetsTab);
 
 			expect(value).toBe(TokenTypesEnum.NFTS);
 		});
@@ -52,9 +52,9 @@ describe('nav.derived', () => {
 		it('does not overwrite userSelectedNetwork when updating selectedAssetsTab', () => {
 			// set both
 			navStore.setUserSelectedNetwork(ETHEREUM_NETWORK_ID);
-			navStore.setSelectedAssetsTab(TokenTypesEnum.NFTS);
+			navStore.setActiveAssetsTab(TokenTypesEnum.NFTS);
 
-			expect(get(selectedAssetsTab)).toBe(TokenTypesEnum.NFTS);
+			expect(get(activeAssetsTab)).toBe(TokenTypesEnum.NFTS);
 			expect(get(userSelectedNetwork)).toEqual(ETHEREUM_NETWORK_ID);
 		});
 	});

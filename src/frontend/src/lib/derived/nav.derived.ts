@@ -51,7 +51,7 @@ export const userSelectedNetwork: Readable<NetworkId | undefined> = derived(
 			: undefined
 );
 
-export const selectedAssetsTab: Readable<TokenTypes> = derived(
+export const activeAssetsTab: Readable<TokenTypes> = derived(
 	[navStore],
 	([$navStore]) => $navStore?.activeAssetsTab ?? TokenTypesEnum.TOKENS
 );
