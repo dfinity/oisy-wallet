@@ -18,6 +18,7 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
+	import { selectedAssetsTab, userSelectedNetwork } from '$lib/derived/nav.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
@@ -31,7 +32,6 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
-	import { selectedAssetsTab, userSelectedNetwork } from '$lib/derived/nav.derived';
 
 	interface Props {
 		testIdPrefix?: string;
