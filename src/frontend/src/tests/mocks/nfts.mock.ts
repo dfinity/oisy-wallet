@@ -96,7 +96,7 @@ export const createMockNftPagesStore = ({
 	assetsTab?: TokenTypes;
 }) => {
 	const { subscribe, set } = writable({
-		assetsTab: assetsTab,
+		assetsTab,
 		originSelectedNetwork
 	});
 	return {
