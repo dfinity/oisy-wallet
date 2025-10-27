@@ -4,7 +4,7 @@
 	import SignerCenteredContent from '$lib/components/signer/SignerCenteredContent.svelte';
 
 	interface Props {
-		children?: Snippet;
+		children: Snippet;
 	}
 
 	let { children }: Props = $props();
@@ -14,5 +14,5 @@
 	<div class="text-brand-primary">
 		<Spinner inline />
 	</div>
-	<span>{@render children?.()}</span>
+	<span>{@render children()}</span>
 </SignerCenteredContent>
