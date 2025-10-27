@@ -1,5 +1,4 @@
 import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
-import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
@@ -23,10 +22,11 @@ import { get } from 'svelte/store';
 
 const originalGetContext = svelte.getContext;
 
-vi.spyOn(svelte, 'getContext').mockImplementation((key) => {
-	console.log('key', key);
-	return key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key);
-});
+vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
+	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
+);
+
+import NftHero from '$lib/components/nfts/NftHero.svelte';
 
 describe('NftHero', () => {
 	const openFullscreenSpy = vi
