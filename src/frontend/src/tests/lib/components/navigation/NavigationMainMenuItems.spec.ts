@@ -14,7 +14,6 @@ import { mockNftPagesContext } from '$tests/mocks/nfts.mock';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
-
 vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_NETWORK_ID));
 
 describe('NavigationMainMenuItems', () => {

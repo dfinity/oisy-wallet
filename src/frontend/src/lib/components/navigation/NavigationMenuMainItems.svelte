@@ -34,7 +34,7 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
-			
+
 	interface Props {
 		testIdPrefix?: string;
 	}
