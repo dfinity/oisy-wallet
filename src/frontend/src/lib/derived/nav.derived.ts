@@ -3,6 +3,8 @@ import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-
 import { navStore } from '$lib/stores/nav.store';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
+import { parseNetworkId } from '$lib/validation/network.validation';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const routeToken: Readable<OptionString> = derived(
