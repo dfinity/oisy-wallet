@@ -21,7 +21,7 @@ describe('nav.derived', () => {
 			navStore.setUserSelectedNetwork(mockNetwork);
 			const value = get(userSelectedNetwork);
 
-			expect(value).toEqual(mockNetwork);
+			expect(value?.description).toEqual(mockNetwork.description);
 		});
 
 		it('does not overwrite selectedAssetsTab when updating userSelectedNetwork', () => {
@@ -29,7 +29,7 @@ describe('nav.derived', () => {
 			navStore.setActiveAssetsTab(TokenTypesEnum.NFTS);
 			navStore.setUserSelectedNetwork(ETHEREUM_NETWORK_ID);
 
-			expect(get(userSelectedNetwork)).toEqual(ETHEREUM_NETWORK_ID);
+			expect(get(userSelectedNetwork)?.description).toEqual(ETHEREUM_NETWORK_ID.description);
 			expect(get(activeAssetsTab)).toBe(TokenTypesEnum.NFTS);
 		});
 	});
@@ -55,7 +55,7 @@ describe('nav.derived', () => {
 			navStore.setActiveAssetsTab(TokenTypesEnum.NFTS);
 
 			expect(get(activeAssetsTab)).toBe(TokenTypesEnum.NFTS);
-			expect(get(userSelectedNetwork)).toEqual(ETHEREUM_NETWORK_ID);
+			expect(get(userSelectedNetwork)?.description).toEqual(ETHEREUM_NETWORK_ID.description);
 		});
 	});
 });

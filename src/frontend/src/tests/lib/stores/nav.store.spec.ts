@@ -12,7 +12,7 @@ describe('nav.store', () => {
 		const mockNetworkId = { description: 'network-123' } as unknown as NetworkId;
 		navStore.setUserSelectedNetwork(mockNetworkId);
 
-		expect(get(navStore)?.userSelectedNetwork).toEqual(mockNetworkId);
+		expect(get(navStore)?.userSelectedNetwork).toEqual(mockNetworkId.description);
 	});
 
 	it('updates selectedAssetsTab when setSelectedAssetsTab is called', () => {
