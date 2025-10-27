@@ -16,6 +16,7 @@
 	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		visible: boolean;
@@ -27,7 +28,7 @@
 	let dropdown = $state<Dropdown | undefined>();
 
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
-		await switchNetwork(networkId);
+		await switchNetwork({ networkId, userSelectedNetworkStore });
 
 		if (isRouteTransactions(page)) {
 			await gotoReplaceRoot();
