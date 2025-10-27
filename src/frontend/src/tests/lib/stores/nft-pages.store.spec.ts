@@ -26,4 +26,21 @@ describe('nft-pages.store', () => {
 
 		expect(get(store)?.assetsTab).toEqual(TokenTypes.TOKENS);
 	});
+
+	it('provides derived store for originSelectedNetwork', () => {
+		const store = initNftPagesStore();
+
+		const mockNetworkId = { description: 'network-123' } as unknown as NetworkId;
+		store.setOriginSelectedNetwork(mockNetworkId);
+
+		expect(get(store.originSelectedNetwork)).toBe(mockNetworkId);
+	});
+
+	it('provides derived store for assetsTab', () => {
+		const store = initNftPagesStore();
+
+		store.setAssetsTab(TokenTypes.NFTS);
+
+		expect(get(store.assetsTab)).toBe(TokenTypes.NFTS);
+	});
 });
