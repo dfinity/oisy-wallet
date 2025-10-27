@@ -115,7 +115,6 @@
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList
-				asMainSection
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -124,6 +123,7 @@
 			{#if $showHidden}
 				<NftCollectionList
 					nftCollections={hiddenCollections}
+					section={CustomTokenSection.HIDDEN}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
 				>
@@ -136,6 +136,7 @@
 			{#if $showSpam}
 				<NftCollectionList
 					nftCollections={spamCollections}
+					section={CustomTokenSection.SPAM}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
 				>
