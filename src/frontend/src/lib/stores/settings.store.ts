@@ -1,4 +1,5 @@
 import { initStorageStore } from '$lib/stores/storage.store';
+import type { NetworkId } from '$lib/types/network';
 
 export interface SettingsData {
 	enabled: boolean;
@@ -22,6 +23,11 @@ export const showHiddenStore = initStorageStore<SettingsData>({
 export const showSpamStore = initStorageStore<SettingsData>({
 	key: 'show-spam',
 	defaultValue: { enabled: false }
+});
+
+export const networkFilterStore = initStorageStore<NetworkId | undefined>({
+	key: 'network-filter',
+	defaultValue: undefined
 });
 
 export type NftSortOrder = 'asc' | 'desc';
