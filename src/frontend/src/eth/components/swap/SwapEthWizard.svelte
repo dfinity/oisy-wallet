@@ -43,6 +43,8 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -74,8 +76,14 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		setIsTokenSupportPermit,
+		isSourceTokenSupportsPermit
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -120,6 +128,31 @@
 						displayDecimals: $destinationToken.decimals
 					})
 				: undefined;
+	});
+
+	$effect(() => {
+		if (isNullish($sourceToken) || !isTokenErc20($sourceToken) || isNullish($ethAddress)) {
+			return;
+		}
+
+		if (isNullish($isSourceTokenSupportsPermit)) {
+			(async () => {
+				const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
+				const isPermitSupported = await isErc20SupportsPermit({
+					contractAddress: $sourceToken.address,
+					userAddress: $ethAddress
+				});
+
+				setIsTokenSupportPermit({
+					address: $sourceToken.address,
+					isPermitSupported
+				});
+			})();
+		}
+	});
+
+	$effect(() => {
+		console.log({ isSourceTokenSupportPermit: $isSourceTokenSupportsPermit });
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
@@ -175,7 +208,8 @@
 			isNullish($ethAddress) ||
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
-			isNullish(gas)
+			isNullish(gas) ||
+			isNullish($isSourceTokenSupportsPermit)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -203,7 +237,8 @@
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
+				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails,
+				isGasless: $isSourceTokenSupportsPermit
 			};
 
 			if ($swapAmountsStore.swaps[0].type === VeloraSwapTypes.DELTA) {

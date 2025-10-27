@@ -1,3 +1,4 @@
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -24,6 +25,7 @@ type IsTokensIcrc2Map = Record<string, boolean>;
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
+	const isErc20TokenSupportsPermit = writable<IsTokensIcrc2Map | undefined>();
 	const { update } = data;
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
@@ -59,6 +61,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		}
 	);
 
+	const isSourceTokenSupportsPermit = derived(
+		[isErc20TokenSupportsPermit, sourceToken],
+		([$isErc20TokenSupportsPermit, $sourceToken]) => {
+			if (
+				isNullish($sourceToken) ||
+				!isTokenErc20($sourceToken) ||
+				isNullish($isErc20TokenSupportsPermit)
+			) {
+				return;
+			}
+			return $isErc20TokenSupportsPermit[$sourceToken.address];
+		}
+	);
+
 	return {
 		sourceToken,
 		destinationToken,
@@ -67,6 +83,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
+		isSourceTokenSupportsPermit,
 		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: Token) =>
 			update((state) => ({
@@ -93,6 +110,17 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			isTokensIcrc2.update((state) => ({
 				...state,
 				[ledgerCanisterId]: isIcrc2Supported
+			})),
+		setIsTokenSupportPermit: ({
+			address,
+			isPermitSupported
+		}: {
+			address: string;
+			isPermitSupported: boolean;
+		}) =>
+			isErc20TokenSupportsPermit.update((state) => ({
+				...state,
+				[address]: isPermitSupported
 			}))
 	};
 };
@@ -105,8 +133,10 @@ export interface SwapContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean | undefined>;
+	isSourceTokenSupportsPermit: Readable<boolean | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
+	setIsTokenSupportPermit: (args: { address: string; isPermitSupported: boolean }) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;

@@ -46,7 +46,7 @@
 		onNext
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, sourceTokenBalance } =
+	const { sourceToken, destinationToken, sourceTokenBalance, isSourceTokenSupportsPermit } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
@@ -62,7 +62,11 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
-		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		isSourceTokenSupportsPermit
+			? 0n
+			: isApproveNeeded && nonNullish($maxGasFee)
+				? $maxGasFee * 2n
+				: $maxGasFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {

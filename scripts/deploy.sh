@@ -26,7 +26,7 @@ dfx deploy cycles_ledger
 dfx deploy cycles_depositor
 dfx deploy rewards
 dfx deploy llm
-dfx deploy gldt_stake
+# dfx deploy gldt_stake
 
 dfx deploy sol_rpc
 

@@ -1,5 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
-import { INFURA_API_KEY } from '$env/rest/infura.env';
+import { createPermit } from '$eth/services/permit2';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { EthAddress } from '$eth/types/address';
@@ -88,9 +88,6 @@ import {
 	type DeltaPrice,
 	type OptimalRate
 } from '@velora-dex/sdk';
-import { AbiCoder, Contract, Signature, getBytes, toBeHex, zeroPadValue } from 'ethers';
-import { TypedDataEncoder, verifyTypedData } from 'ethers/hash';
-import { InfuraProvider } from 'ethers/providers';
 import { get } from 'svelte/store';
 
 export const fetchKongSwap = async ({
@@ -867,8 +864,6 @@ export const withdrawUserUnusedBalance = async ({
 	}
 };
 
-const TEST_MODE = true;
-
 export const fetchVeloraDeltaSwap = async ({
 	identity,
 	progress,
@@ -880,6 +875,7 @@ export const fetchVeloraDeltaSwap = async ({
 	slippageValue,
 	destinationNetwork,
 	userAddress,
+	isGasless,
 	gas,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
@@ -906,135 +902,60 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	const provider = new InfuraProvider(Number(sourceNetwork.chainId), INFURA_API_KEY);
+	let signableOrderData;
 
-	// Створи контракт токена
-	const tokenContract = new Contract(
-		sourceToken.address,
-		[
-			'function nonces(address owner) view returns (uint256)',
-			'function name() view returns (string)',
-			'function version() view returns (string)'
-		],
-		provider
-	);
+	if (isGasless) {
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
 
-	// Отримай дані для permit
-	const [nonce, name] = await Promise.all([
-		tokenContract.nonces(userAddress),
-		tokenContract.name()
-	]);
+		progress(ProgressStepsSwap.SWAP);
 
-	console.log('=== TOKEN INFO ===');
-	console.log('Token name:', name);
-	console.log('Current nonce:', nonce.toString());
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			deltaPrice: swapDetails as DeltaPrice,
+			owner: userAddress,
+			srcToken: sourceToken.address,
+			destToken: destinationToken.address,
+			srcAmount: parsedSwapAmount.toString(),
+			destAmount: `${slippageMinimum}`,
+			destChainId: Number(destinationNetwork.chainId),
+			partner: OISY_URL_HOSTNAME,
+			deadline,
+			nonce: Number(nonce),
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
 
-	// Створи deadline
-	const now = Math.floor(Date.now() / 1000);
-	const deadline = now + 5 * 60; // 5 хвилин
-
-	// EIP-2612 domain для native permit
-	const domain = {
-		name,
-		version: '2', // Для USDC зазвичай "2"
-		chainId: Number(sourceNetwork.chainId),
-		verifyingContract: sourceToken.address
-	};
-
-	const types = {
-		Permit: [
-			{ name: 'owner', type: 'address' },
-			{ name: 'spender', type: 'address' },
-			{ name: 'value', type: 'uint256' },
-			{ name: 'nonce', type: 'uint256' },
-			{ name: 'deadline', type: 'uint256' }
-		]
-	};
-
-	const values = {
-		owner: userAddress,
-		spender: deltaContract, // Velodrome Delta контракт
-		value: parsedSwapAmount.toString(),
-		nonce: nonce.toString(),
-		deadline: deadline.toString()
-	};
-
-	console.log('=== NATIVE PERMIT ===');
-	console.log('Domain:', domain);
-	console.log('Values:', values);
-
-	// Підписуй permit
-	const permitHash = TypedDataEncoder.hash(domain, types, values);
-	const permitSignature = await signPrehash({
-		hash: permitHash,
-		identity
-	});
-
-	console.log('Permit signature:', permitSignature);
-
-	// Перевір підпис
-	const recoveredAddress = verifyTypedData(domain, types, values, permitSignature);
-	console.log('Signature valid:', recoveredAddress.toLowerCase() === userAddress.toLowerCase());
-
-	if (recoveredAddress.toLowerCase() !== userAddress.toLowerCase()) {
-		throw new Error('Invalid permit signature!');
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			deltaPrice: swapDetails as DeltaPrice,
+			owner: userAddress,
+			srcToken: sourceToken.address,
+			destToken: destinationToken.address,
+			srcAmount: parsedSwapAmount.toString(),
+			destAmount: `${slippageMinimum}`,
+			destChainId: Number(destinationNetwork.chainId),
+			partner: OISY_URL_HOSTNAME
+		});
 	}
 
-	// Створи permit data для Velodrome
-	// Native permit format: case 0x01 в контракті
-	const sig = Signature.from(permitSignature);
-
-	const abiCoder = AbiCoder.defaultAbiCoder();
-
-	const permitData = abiCoder.encode(
-		['address', 'address', 'uint256', 'uint256', 'uint8', 'bytes32', 'bytes32'],
-		[
-			userAddress, // owner
-			deltaContract, // spender
-			parsedSwapAmount, // value
-			deadline, // deadline
-			sig.v, // v
-			sig.r, // r
-			sig.s // s
-		]
-	);
-
-	console.log('=== NATIVE PERMIT DATA ===');
-	console.log('Owner:', zeroPadValue(userAddress, 32));
-	console.log('Spender:', zeroPadValue(deltaContract, 32));
-	console.log('Value:', toBeHex(parsedSwapAmount, 32));
-	console.log('Deadline:', toBeHex(deadline, 32));
-	console.log('V:', toBeHex(sig.v, 32));
-	console.log('R:', sig.r);
-	console.log('S:', sig.s);
-	console.log('Total length:', getBytes(permitData).length);
-
-	progress(ProgressStepsSwap.SWAP);
-
-	// Створи Order з тими самими значеннями
-	const signableOrderData = await sdk.delta.buildDeltaOrder({
-		deltaPrice: swapDetails as DeltaPrice,
-		owner: userAddress,
-		srcToken: sourceToken.address,
-		destToken: destinationToken.address,
-		srcAmount: parsedSwapAmount.toString(),
-		destAmount: `${slippageMinimum}`,
-		destChainId: Number(destinationNetwork.chainId),
-		partner: OISY_URL_HOSTNAME,
-		deadline,
-		nonce: Number(nonce), // Використай nonce з токена
-		permit: permitData // Native permit data
-	});
-
-	console.log('=== ORDER VALIDATION ===');
-	console.log('Order srcAmount:', signableOrderData.data.srcAmount);
-	console.log('Permit amount:', values.value);
-	console.log('Order deadline:', signableOrderData.data.deadline);
-	console.log('Permit deadline:', values.deadline);
-	console.log('Order nonce:', signableOrderData.data.nonce);
-	console.log('Permit nonce:', values.nonce);
-
-	// Підписуй Order
 	const hash = getSignParamsEIP712(signableOrderData);
 	const signature = await signPrehash({
 		hash,
@@ -1042,18 +963,11 @@ export const fetchVeloraDeltaSwap = async ({
 	});
 	const compactSignature = getCompactSignature(signature);
 
-	console.log('=== SENDING TO API ===');
-	console.log('Order:', JSON.stringify(signableOrderData.data, null, 2));
-
-	// Відправ Order
 	const deltaAuction = await sdk.delta.postDeltaOrder({
 		order: signableOrderData.data,
 		signature: compactSignature
 	});
 
-	console.log('✅ Order created:', deltaAuction.id);
-
-	// Чекай виконання
 	await checkDeltaOrderStatus({
 		sdk,
 		auctionId: deltaAuction.id
