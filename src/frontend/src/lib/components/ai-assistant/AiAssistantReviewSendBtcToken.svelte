@@ -12,7 +12,6 @@
 		validateBtcSend
 	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
-	import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -40,6 +39,7 @@
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
+	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 
 	interface Props {
 		amount: number;
