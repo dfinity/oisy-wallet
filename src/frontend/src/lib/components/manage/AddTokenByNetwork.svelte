@@ -21,15 +21,23 @@
 		isNetworkIdSolana
 	} from '$lib/utils/network.utils';
 	import SolAddTokenForm from '$sol/components/tokens/SolAddTokenForm.svelte';
+	import { nftEnabledNetworks } from '$lib/derived/page-nft.derived';
 
 	interface Props {
 		network?: Network;
 		tokenData: Partial<AddTokenData>;
 		onBack: () => void;
 		onNext: () => void;
+		isNftsPage?: boolean;
 	}
 
-	let { network = $bindable(), tokenData = $bindable(), onBack, onNext }: Props = $props();
+	let {
+		network = $bindable(),
+		tokenData = $bindable(),
+		onBack,
+		onNext,
+		isNftsPage
+	}: Props = $props();
 
 	let networkName = $state<string | undefined>(network?.name);
 
@@ -90,9 +98,12 @@
 
 	// filter out BTC networks - they do not have custom tokens
 	let availableNetworks = $derived(
-		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
-			({ id }) => !isNetworkIdBitcoin(id)
-		)
+		($selectedNetwork?.env === 'testnet'
+			? $networks
+			: isNftsPage
+				? $nftEnabledNetworks
+				: $networksMainnets
+		).filter(({ id }) => !isNetworkIdBitcoin(id))
 	);
 </script>
 
