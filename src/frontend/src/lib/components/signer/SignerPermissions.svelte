@@ -88,7 +88,6 @@
 				{#each scopes as { scope: { method } } (method)}
 					{@const { icon: Icon, label } = listItems[method]}
 
-					{@const SvelteComponent = icon}
 					<li class="flex items-center gap-2 pb-1.5 break-normal">
 						<Icon size="24" />
 						{label}
