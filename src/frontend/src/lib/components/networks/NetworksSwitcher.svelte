@@ -17,7 +17,6 @@
 	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
-	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		visible: boolean;
