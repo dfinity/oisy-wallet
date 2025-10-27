@@ -12,6 +12,7 @@ describe('nav.derived', () => {
 	describe('userSelectedNetwork', () => {
 		it('returns undefined when navStore has no userSelectedNetwork', () => {
 			const value = get(userSelectedNetwork);
+
 			expect(value).toBeUndefined();
 		});
 
