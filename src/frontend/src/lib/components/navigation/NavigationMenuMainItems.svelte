@@ -34,10 +34,7 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
-	import { getContext } from 'svelte';
-	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
-	import { TokenTypes } from '$lib/enums/token-types';
-
+			
 	interface Props {
 		testIdPrefix?: string;
 	}
