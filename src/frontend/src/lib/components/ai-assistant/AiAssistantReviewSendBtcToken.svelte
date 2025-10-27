@@ -6,6 +6,7 @@
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import {
 		handleBtcValidationError,
 		sendBtc,
@@ -39,7 +40,6 @@
 	import { mapNetworkIdToBitcoinNetwork } from '$lib/utils/network.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
 	import { isInvalidDestinationBtc } from '$lib/utils/send.utils';
-	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 
 	interface Props {
 		amount: number;
