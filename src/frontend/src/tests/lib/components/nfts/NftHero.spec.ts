@@ -4,27 +4,19 @@ import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
-import { NFT_PAGES_CONTEXT_KEY } from '$lib/stores/nft-pages.store';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import {
-	createMockNftPagesStore,
+	mockNftPagesContext,
 	mockNftollectionUi,
 	mockValidErc1155Nft
 } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
-import * as svelte from 'svelte';
 import { get } from 'svelte/store';
-
-const originalGetContext = svelte.getContext;
-
-vi.spyOn(svelte, 'getContext').mockImplementation((key) =>
-	key === NFT_PAGES_CONTEXT_KEY ? createMockNftPagesStore({}) : originalGetContext(key)
-);
 
 import NftHero from '$lib/components/nfts/NftHero.svelte';
 
@@ -39,7 +31,8 @@ describe('NftHero', () => {
 		const { getByText } = render(NftHero, {
 			props: {
 				nft: { ...mockValidErc1155Nft, description: 'Test description about the NFT' }
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		assertNonNullish(mockValidErc1155Nft.name);
@@ -104,7 +97,8 @@ describe('NftHero', () => {
 		const { container } = render(NftHero, {
 			props: {
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		const imageElement: HTMLImageElement | null = container.querySelector('img');
@@ -121,7 +115,8 @@ describe('NftHero', () => {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN, section: CustomTokenSection.HIDDEN },
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		const hiddenBadge: HTMLSpanElement | null = container.querySelector(hiddenBadgeSelector);
@@ -134,7 +129,8 @@ describe('NftHero', () => {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN, section: CustomTokenSection.HIDDEN },
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		const nftImageButton = container.querySelector('.h-64 button');
@@ -163,7 +159,8 @@ describe('NftHero', () => {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		const nftSendButton = getByText(get(i18n).send.text.send);
@@ -186,7 +183,8 @@ describe('NftHero', () => {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({})
 		});
 
 		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
@@ -195,15 +193,12 @@ describe('NftHero', () => {
 	});
 
 	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
-		vi.spyOn(svelte, 'getContext').mockImplementation(() =>
-			createMockNftPagesStore({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
-		);
-
 		const { container } = render(NftHero, {
 			props: {
 				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
 				nft: mockValidErc1155Nft
-			}
+			},
+			context: mockNftPagesContext({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
 		});
 
 		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');

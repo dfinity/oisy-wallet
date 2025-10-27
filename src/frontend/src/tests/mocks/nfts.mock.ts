@@ -1,13 +1,18 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
-import { TokenTypes as TokenTypesEnum, type TokenTypes } from '$lib/enums/token-types';
+import type { TokenTypes } from '$lib/enums/token-types';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
+import {
+	NFT_PAGES_CONTEXT_KEY,
+	initNftPagesStore,
+	type NftPagesContext
+} from '$lib/stores/nft-pages.store';
 import type { OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
 import type { TokenId } from '$lib/types/token';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { readable, writable } from 'svelte/store';
+import { readable } from 'svelte/store';
 
 export const getMockNonFungibleToken = (params: {
 	addresses: string[];
@@ -88,23 +93,19 @@ export const [mockNonFungibleToken2]: NonFungibleToken[] = getMockNonFungibleTok
 	names: ['Nft 2']
 });
 
-export const createMockNftPagesStore = ({
+export const mockNftPagesContext = ({
 	originSelectedNetwork,
 	assetsTab
 }: {
 	originSelectedNetwork?: OptionNetworkId;
 	assetsTab?: TokenTypes;
 }) => {
-	const { subscribe, set } = writable({
-		assetsTab,
-		originSelectedNetwork
-	});
-	return {
-		subscribe,
-		assetsTab: readable(assetsTab ?? TokenTypesEnum.TOKENS),
+	const mockContext = new Map([]);
+	const mockStore = initNftPagesStore();
+	mockContext.set(NFT_PAGES_CONTEXT_KEY, {
+		...mockStore,
 		originSelectedNetwork: readable(originSelectedNetwork ?? undefined),
-		setAssetsTab: vi.fn(),
-		setOriginSelectedNetwork: vi.fn(),
-		set
-	};
+		assetsTab: readable(assetsTab ?? undefined)
+	} as NftPagesContext);
+	return mockContext;
 };
