@@ -43,10 +43,13 @@ export const routeNft: Readable<OptionString> = derived(
 
 export const userSelectedNetwork: Readable<NetworkId | undefined> = derived(
 	[navStore],
-	([$navStore]) => $navStore?.userSelectedNetwork ?? undefined
+	([$navStore]) =>
+		nonNullish($navStore?.userSelectedNetwork)
+			? parseNetworkId($navStore.userSelectedNetwork)
+			: undefined
 );
 
 export const selectedAssetsTab: Readable<TokenTypes> = derived(
 	[navStore],
-	([$navStore]) => $navStore?.selectedAssetsTab ?? TokenTypesEnum.TOKENS
+	([$navStore]) => $navStore?.activeAssetsTab ?? TokenTypesEnum.TOKENS
 );
