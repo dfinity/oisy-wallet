@@ -232,8 +232,12 @@ export const filterTokens = <T extends Token>({
 			return true;
 		}
 
-		if (icTokenIcrcCustomToken(token)) {
-			return (token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase());
+		if (
+			icTokenIcrcCustomToken(token) &&
+			nonNullish(token.alternativeName) &&
+			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
+		) {
+			return true;
 		}
 
 		return false;
