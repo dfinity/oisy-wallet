@@ -1,4 +1,4 @@
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
@@ -12,7 +12,7 @@ import { isNullish } from '@dfinity/utils';
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export class ExchangeWorker extends AppWorker {
-	private constructor(worker: Worker) {
+	private constructor(worker: WorkerData) {
 		super(worker);
 
 		this.setOnMessage(

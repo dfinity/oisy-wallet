@@ -5,7 +5,7 @@ import {
 } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { STAGING } from '$lib/constants/app.constants';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -25,7 +25,7 @@ import { get } from 'svelte/store';
 
 export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly data: PostMessageDataRequestBtc,
 		hideToast: boolean

@@ -11,7 +11,7 @@ import {
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type { IcCkMetadata } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCk,
@@ -49,7 +49,7 @@ export const initCkETHMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorke
 
 export class CkMinterInfoWorker extends AppWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		private readonly tokenId: TokenId,
 		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
 		private readonly postMessageKey: CkMinterInfoWorkerCallbacks['postMessageKey'],

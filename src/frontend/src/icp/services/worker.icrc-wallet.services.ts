@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -18,7 +18,7 @@ import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly ledgerCanisterId: IcToken['ledgerCanisterId'],
 		private readonly indexCanisterId: IcToken['indexCanisterId'],

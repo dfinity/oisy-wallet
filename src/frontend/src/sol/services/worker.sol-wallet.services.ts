@@ -1,4 +1,4 @@
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -21,7 +21,7 @@ import { get } from 'svelte/store';
 
 export class SolWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly data: PostMessageDataRequestSol
 	) {

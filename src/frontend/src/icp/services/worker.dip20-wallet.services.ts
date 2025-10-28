@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -17,7 +17,7 @@ import type { TokenId } from '$lib/types/token';
 
 export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly canisterId: IcToken['ledgerCanisterId']
 	) {
