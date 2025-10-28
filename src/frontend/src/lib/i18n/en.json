@@ -356,6 +356,11 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Learn more"
 				}
+			},
+			"axie-infinity": {
+				"name": "Axie Infinity",
+				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
+				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
 			}
 		}
 	},
