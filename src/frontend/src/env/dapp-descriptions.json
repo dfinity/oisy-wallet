@@ -338,6 +338,22 @@
 		"screenshots": ["/images/dapps/beam-screenshot.webp"]
 	},
 	{
+		"id": "axie-infinity",
+		"name": "dapps.descriptions.axie_infinity.name",
+		"oneLiner": "dapps.descriptions.axie_infinity.one_liner",
+		"website": "https://axieinfinity.com/",
+		"twitter": "https://twitter.com/AxieInfinity",
+		"telegram": "https://t.me/axieinfinity",
+		"discord": "https://welcome.skymavis.com/regional-servers",
+		"tags": ["dapps.categories.game"],
+		"description": "dapps.descriptions.axie_infinity.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/axie-infinity-logo.webp",
+		"screenshots": ["/images/dapps/axie-infinity-screenshot.webp"]
+	},
+	{
 		"id": "mobox",
 		"name": "dapps.descriptions.mobox.name",
 		"oneLiner": "dapps.descriptions.mobox.one_liner",
