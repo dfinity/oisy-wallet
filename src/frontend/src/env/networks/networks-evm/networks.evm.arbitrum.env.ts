@@ -25,6 +25,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 42161n,
 	icon: arbitrumMainnetIcon,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
+	nftEnabled: true,
 	providers: {
 		infura: 'arbitrum',
 		alchemy: 'arbitrum',

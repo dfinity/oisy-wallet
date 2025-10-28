@@ -23,6 +23,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 137n,
 	icon: polygonMainnetIcon,
 	explorerUrl: POLYGON_EXPLORER_URL,
+	nftEnabled: true,
 	providers: {
 		infura: 'matic',
 		alchemy: 'matic',

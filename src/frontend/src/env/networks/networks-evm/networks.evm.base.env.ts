@@ -23,6 +23,7 @@ export const BASE_NETWORK: EthereumNetwork = {
 	chainId: 8453n,
 	icon: baseMainnetIcon,
 	explorerUrl: BASE_EXPLORER_URL,
+	nftEnabled: true,
 	providers: {
 		infura: 'base',
 		alchemy: 'base',

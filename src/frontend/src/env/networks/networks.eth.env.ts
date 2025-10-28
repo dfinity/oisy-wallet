@@ -26,6 +26,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	chainId: 1n,
 	icon: ethereumIcon,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	nftEnabled: true,
 	providers: {
 		infura: 'mainnet',
 		alchemy: 'mainnet',
