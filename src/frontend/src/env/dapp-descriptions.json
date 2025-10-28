@@ -337,4 +337,22 @@
 		"logo": "/images/dapps/beam-logo.svg",
 		"screenshots": ["/images/dapps/beam-screenshot.webp"]
 	}
+
+	,{
+		"id": "mobox",
+		"name": "dapps.descriptions.mobox.name",
+		"oneLiner": "dapps.descriptions.mobox.one_liner",
+		"website": "https://www.mobox.io/",		
+		"twitter": "https://twitter.com/MOBOX_Official",
+		"telegram": "https://t.me/mobox_io",
+		"discord": "https://discord.gg/TrNrTGYzB3",
+		"medium": "https://mbox.medium.com/",
+		"tags": ["dapps.categories.game"],
+		"description": "dapps.descriptions.mobox.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/mobox-logo.svg",
+		"screenshots": ["/images/dapps/mobox-screenshot.webp"]
+	}
 ]
