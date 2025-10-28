@@ -9,7 +9,6 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
