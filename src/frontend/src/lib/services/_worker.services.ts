@@ -18,8 +18,8 @@ export abstract class AppWorker {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
 	}
-  
-  	static async getInstance(): Promise<Worker> {
+
+	static async getInstance(): Promise<Worker> {
 		return await this.newInstance();
 	}
 
