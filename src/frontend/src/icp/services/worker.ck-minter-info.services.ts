@@ -59,31 +59,35 @@ export class CkMinterInfoWorker extends AppWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncCkMinterInfo':
-					onSyncSuccess({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
-				case 'syncCkMinterInfoError':
-					onSyncError({
-						tokenId,
-						error: data.error
-					});
-					return;
-				case 'syncCkMinterInfoStatus':
-					onSyncStatus((data as PostMessageSyncState).state);
-					return;
+				switch (msg) {
+					case 'syncCkMinterInfo':
+						onSyncSuccess({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkMinterInfoError':
+						onSyncError({
+							tokenId,
+							error: data.error
+						});
+						return;
+					case 'syncCkMinterInfoStatus':
+						onSyncStatus((data as PostMessageSyncState).state);
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({

@@ -18,28 +18,32 @@ export class BtcStatusesWorker extends AppWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseError
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncBtcStatuses':
-					syncBtcStatuses({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
-				case 'syncBtcStatusesError':
-					onLoadBtcStatusesError({
-						tokenId,
-						error: data.error
-					});
-					return;
+				switch (msg) {
+					case 'syncBtcStatuses':
+						syncBtcStatuses({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncBtcStatusesError':
+						onLoadBtcStatusesError({
+							tokenId,
+							error: data.error
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({
