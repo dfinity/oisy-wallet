@@ -34,6 +34,7 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -43,8 +44,6 @@
 
 	const addTestIdPrefix = (testId: string): string =>
 		nonNullish(testIdPrefix) ? `${testIdPrefix}-${testId}` : testId;
-
-	const { assetsTab } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
@@ -58,7 +57,7 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: $assetsTab === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
+		path: $activeAssetsTabStore === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
