@@ -70,6 +70,7 @@
 	$effect(() => {
 		const root = document.getElementById('content-root');
 		if (root) {
+			root.classList.add('border-3');
 			if (nonNullish($modalStore?.type)) {
 				document.addEventListener('touchmove', preventScroll, { passive: false });
 				root.classList.remove('overflow-y-auto');
