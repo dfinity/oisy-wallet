@@ -362,6 +362,11 @@
 				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
 				"call_to_action": "Get involved",
 				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
+			},
+			"axie_infinity": {
+				"name": "Axie Infinity",
+				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
+				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
 			}
 		}
 	},
