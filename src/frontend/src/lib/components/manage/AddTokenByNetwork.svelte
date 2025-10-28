@@ -10,6 +10,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { networks, networksMainnets } from '$lib/derived/networks.derived';
+	import { nftEnabledNetworks } from '$lib/derived/page-nft.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Network } from '$lib/types/network';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
