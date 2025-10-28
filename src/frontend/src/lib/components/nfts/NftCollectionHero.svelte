@@ -12,10 +12,10 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
 	import { parseNetworkId } from '$lib/validation/network.validation';
-	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		token?: NonFungibleToken;
