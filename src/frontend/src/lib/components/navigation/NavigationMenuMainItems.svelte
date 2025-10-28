@@ -20,6 +20,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { userSelectedNetworkStore, activeAssetsTabStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -31,7 +32,6 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
-	import { userSelectedNetworkStore, activeAssetsTabStore } from '$lib/stores/settings.store';
 	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
