@@ -15,7 +15,7 @@ export abstract class AppWorker {
 	readonly #worker: Worker;
 	readonly #queue: WorkerQueue;
 
-	private static _singletonWorker?: Worker;
+	static #singletonWorker?: Worker;
 
 	protected constructor(workerData: WorkerData) {
 		const { worker } = workerData;
@@ -24,26 +24,26 @@ export abstract class AppWorker {
 		this.#queue = new WorkerQueue(worker);
 	}
 
-	protected static async newInstance(): Promise<Worker> {
+	static #newInstance = async (): Promise<Worker> => {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
-	}
+	};
 
-	protected static async getInstanceAsSingleton(): Promise<Worker> {
-		if (isNullish(this._singletonWorker)) {
-			this._singletonWorker = await this.newInstance();
+	static #getInstanceAsSingleton = async (): Promise<Worker> => {
+		if (isNullish(this.#singletonWorker)) {
+			this.#singletonWorker = await this.#newInstance();
 		}
 
-		return this._singletonWorker;
-	}
+		return this.#singletonWorker;
+	};
 
-	static async getInstance(
+	static getInstance = async (
 		{ asSingleton = false }: { asSingleton?: boolean } = { asSingleton: false }
-	): Promise<WorkerData> {
-		const worker = asSingleton ? await this.getInstanceAsSingleton() : await this.newInstance();
+	): Promise<WorkerData> => {
+		const worker = asSingleton ? await this.#getInstanceAsSingleton() : await this.#newInstance();
 
 		return { worker, isSingleton: asSingleton };
-	}
+	};
 
 	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
 		fn: (ev: MessageEvent<PostMessage<T>>) => void
