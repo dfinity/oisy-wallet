@@ -8,22 +8,22 @@ export class AuthWorker extends AppWorker {
 	private constructor(worker: Worker) {
 		super(worker);
 
-		worker.onmessage = async ({
-			data: dataMsg
-		}: MessageEvent<PostMessage<PostMessageDataResponseAuth>>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			async ({ data: dataMsg }: MessageEvent<PostMessage<PostMessageDataResponseAuth>>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				// TODO Investigate extra 'signOutIdleTimer' tick after lock
-				// syncAuthIdle stop the idle timer when the user is logOut or locked
-				case 'signOutIdleTimer':
-					await idleSignOut();
-					return;
-				case 'delegationRemainingTime':
-					authRemainingTimeStore.set(data?.authRemainingTime);
-					return;
+				switch (msg) {
+					// TODO Investigate extra 'signOutIdleTimer' tick after lock
+					// syncAuthIdle stop the idle timer when the user is logOut or locked
+					case 'signOutIdleTimer':
+						await idleSignOut();
+						return;
+					case 'delegationRemainingTime':
+						authRemainingTimeStore.set(data?.authRemainingTime);
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init(): Promise<AuthWorker> {

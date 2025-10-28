@@ -42,5 +42,6 @@ export const NetworkSchema = z.object({
 	name: z.string(),
 	icon: IconSchema.optional(),
 	exchange: NetworkExchangeSchema.optional(),
-	buy: NetworkBuySchema.optional()
+	buy: NetworkBuySchema.optional(),
+	supportsNft: z.boolean().optional()
 });
