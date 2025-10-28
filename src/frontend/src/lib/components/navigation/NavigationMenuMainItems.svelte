@@ -18,10 +18,8 @@
 		NAVIGATION_ITEM_SETTINGS,
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
-	import { networkId } from '$lib/derived/network.derived';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -33,6 +31,8 @@
 		isRouteTokens,
 		isRouteNfts
 	} from '$lib/utils/nav.utils';
+	import { userSelectedNetworkStore, activeAssetsTabStore } from '$lib/stores/settings.store';
+	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		testIdPrefix?: string;
@@ -45,6 +45,10 @@
 
 	const isTransactionsRoute = $derived(isRouteTransactions(page));
 
+	const networkId = $derived(
+		nonNullish($userSelectedNetworkStore) ? parseNetworkId($userSelectedNetworkStore) : undefined
+	);
+
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
@@ -56,7 +60,7 @@
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
 		path: $activeAssetsTabStore === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -75,7 +79,7 @@
 	ariaLabel={$i18n.navigation.alt.activity}
 	href={networkUrl({
 		path: AppPath.Activity,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -95,7 +99,7 @@
 	ariaLabel={$i18n.navigation.alt.dapp_explorer}
 	href={networkUrl({
 		path: AppPath.Explore,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
@@ -116,7 +120,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Earning,
-			networkId: $networkId,
+			networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -137,7 +141,7 @@
 		ariaLabel={$i18n.navigation.alt.airdrops}
 		href={networkUrl({
 			path: AppPath.Rewards,
-			networkId: $networkId,
+			networkId,
 			usePreviousRoute: isTransactionsRoute,
 			fromRoute
 		})}
@@ -159,7 +163,7 @@
 	ariaLabel={$i18n.navigation.alt.settings}
 	href={networkUrl({
 		path: AppPath.Settings,
-		networkId: $networkId,
+		networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
 	})}
