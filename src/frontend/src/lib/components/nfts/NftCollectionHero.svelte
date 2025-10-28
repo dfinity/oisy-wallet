@@ -13,6 +13,9 @@
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
+	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { parseNetworkId } from '$lib/validation/network.validation';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -21,9 +24,19 @@
 
 	const { token, nfts }: Props = $props();
 
-	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
-
 	const firstNft = $derived(nfts?.[0]);
+
+	const breadcrumbItems = $derived([
+		{
+			label: $i18n.navigation.text.tokens,
+			url: nftsUrl({
+				originSelectedNetwork: nonNullish($userSelectedNetworkStore)
+					? parseNetworkId($userSelectedNetworkStore)
+					: undefined
+			})
+		}
+	]);
+
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
 </script>
 

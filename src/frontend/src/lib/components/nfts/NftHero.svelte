@@ -17,6 +17,8 @@
 	import { modalStore } from '$lib/stores/modal.store.js';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
+	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -26,7 +28,16 @@
 	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
+		let breadcrumbs = [
+			{
+				label: $i18n.navigation.text.tokens,
+				url: nftsUrl({
+					originSelectedNetwork: nonNullish($userSelectedNetworkStore)
+						? parseNetworkId($userSelectedNetworkStore)
+						: undefined
+				})
+			}
+		];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,
