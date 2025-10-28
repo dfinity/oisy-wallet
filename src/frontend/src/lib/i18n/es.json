@@ -356,6 +356,12 @@
 					"text": "Hola, internet que se escribe solo",
 					"call_to_action": "Saber más"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},

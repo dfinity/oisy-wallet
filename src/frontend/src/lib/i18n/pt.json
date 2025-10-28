@@ -356,6 +356,12 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},

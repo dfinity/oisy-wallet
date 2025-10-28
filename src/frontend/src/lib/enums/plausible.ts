@@ -5,13 +5,19 @@ export enum PLAUSIBLE_EVENTS {
 	LIST_SETTINGS_CHANGE = 'list_settings_change',
 	SWAP_OFFER = 'swap_offer',
 	MEDIA_CONSENT = 'media_consent',
-	OPEN_MODAL = 'open_modal'
+	OPEN_MODAL = 'open_modal',
+	LOAD_CUSTOM_TOKENS = 'load_custom_tokens'
 }
 
 export enum PLAUSIBLE_EVENT_CONTEXTS {
 	NFT = 'nft',
 	ASSETS_TAB = 'assets_tab',
 	TOKENS = 'tokens'
+}
+
+export enum PLAUSIBLE_EVENT_SUBCONTEXT_NFT {
+	ERC721 = 'erc721',
+	ERC1155 = 'erc1155'
 }
 
 export enum PLAUSIBLE_EVENT_VALUES {
