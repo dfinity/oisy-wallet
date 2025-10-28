@@ -10,7 +10,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
-import { mockNftPagesContext } from '$tests/mocks/nfts.mock';
+import { activeAssetsTabStore } from '$lib/stores/settings.store';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -19,12 +19,14 @@ vi.spyOn(networkDerived, 'networkId', 'get').mockReturnValue(readable(ETHEREUM_N
 describe('NavigationMainMenuItems', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
+		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
 	});
 
 	it('renders all basic navigation items', () => {
-		const { getByTestId } = render(NavigationMainMenuItems, {
-			context: mockNftPagesContext({})
-		});
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TOKENS });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
 
 		expect(getByTestId(NAVIGATION_ITEM_TOKENS)).toBeInTheDocument();
 		expect(getByTestId(NAVIGATION_ITEM_ACTIVITY)).toBeInTheDocument();
@@ -33,20 +35,20 @@ describe('NavigationMainMenuItems', () => {
 		expect(getByTestId(NAVIGATION_ITEM_SETTINGS)).toBeInTheDocument();
 	});
 
-	it('builds token link with NFTs path when assetsTab = NFTS', () => {
-		const { getByTestId } = render(NavigationMainMenuItems, {
-			context: mockNftPagesContext({ assetsTab: TokenTypes.NFTS })
-		});
+	it('builds assets link with NFTs path when assetsTab = NFTS', () => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.NFTS });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Nfts);
 	});
 
-	it('builds token link with Tokens path when assetsTab = TOKENS', () => {
-		const { getByTestId } = render(NavigationMainMenuItems, {
-			context: mockNftPagesContext({ assetsTab: TokenTypes.TOKENS })
-		});
+	it('builds assets link with Tokens path when assetsTab = TOKENS', () => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: TokenTypes.TOKENS });
+
+		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
