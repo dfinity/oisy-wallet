@@ -68,18 +68,17 @@
 	};
 
 	$effect(() => {
-		if (nonNullish($modalStore?.type)) {
-			document.addEventListener('touchmove', preventScroll, { passive: false });
-			/*
-			document.body.children[0].classList.add('overflow-hidden');
-			document.body.children[0].classList.add('fixed');
-			 */
-		} else {
-			document.removeEventListener('touchmove', preventScroll);
-			/*
-	document.body.children[0].classList.remove('overflow-hidden');
-	document.body.children[0].classList.remove('fixed');
-			 */
+		const root = document.getElementById('content-root');
+		if (root) {
+			if (nonNullish($modalStore?.type)) {
+				document.addEventListener('touchmove', preventScroll, { passive: false });
+				root.classList.remove('overflow-y-auto');
+				root.classList.add('overflow-y-hidden');
+			} else {
+				document.removeEventListener('touchmove', preventScroll);
+				root.classList.add('overflow-y-auto');
+				root.classList.remove('overflow-y-hidden');
+			}
 		}
 	});
 </script>
