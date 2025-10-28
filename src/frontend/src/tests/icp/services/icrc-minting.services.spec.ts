@@ -24,7 +24,7 @@ describe('icrc-minting.services', () => {
 			await expect(isUserMintingAccount({ ...params, identity: null })).resolves.toBeFalsy();
 		});
 
-		it('should return false if account is undefined', async () => {
+		it('should return false if account is nullish', async () => {
 			await expect(isUserMintingAccount({ ...params, account: undefined })).resolves.toBeFalsy();
 		});
 
