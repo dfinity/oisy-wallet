@@ -63,8 +63,10 @@
 	$effect(() => {
 		if (nonNullish($modalStore?.type)) {
 			document.body.classList.add('overflow-hidden');
+			document.body.classList.add('disable-pointer-events');
 		} else {
 			document.body.classList.remove('overflow-hidden');
+			document.body.classList.remove('disable-pointer-events');
 		}
 	});
 </script>
