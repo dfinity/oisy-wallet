@@ -356,6 +356,12 @@
 					"text": "Меняйте токены на DEX",
 					"call_to_action": "Попробовать KongSwap"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},
