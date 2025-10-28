@@ -35,7 +35,7 @@
 		tokenData = $bindable(),
 		onBack,
 		onNext,
-		isNftsPage
+		isNftsPage = false
 	}: Props = $props();
 
 	let networkName = $state<string | undefined>(network?.name);
