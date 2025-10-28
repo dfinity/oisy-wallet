@@ -1,4 +1,9 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
+import type {
+	PostMessage,
+	PostMessageDataRequest,
+	PostMessageDataResponseLoose
+} from '$lib/types/post-message';
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
@@ -13,6 +18,12 @@ export abstract class AppWorker {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
 	}
+
+	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
+		fn: (ev: MessageEvent<PostMessage<T>>) => void
+	) => {
+		this.#worker.onmessage = fn;
+	};
 
 	protected postMessage = <T>(data: T) => {
 		// Route via queue to enforce back-pressure
