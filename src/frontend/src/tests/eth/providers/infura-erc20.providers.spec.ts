@@ -575,7 +575,7 @@ describe('infura-erc20.providers', () => {
 					userAddress: mockUserAddress
 				});
 
-				expect(result).toBeTruthy();
+				expect(result).toBeFalsy();
 				expect(mockNonces).toHaveBeenCalledWith(mockUserAddress);
 			});
 
