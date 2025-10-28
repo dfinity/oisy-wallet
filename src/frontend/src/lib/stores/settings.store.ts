@@ -44,3 +44,8 @@ export const nftGroupByCollectionStore = initStorageStore<boolean>({
 	key: 'nft-group-by-collection',
 	defaultValue: true
 });
+
+export const userSelectedNetworkStore = initStorageStore<string | undefined>({
+	key: 'user-selected-network',
+	defaultValue: undefined
+});
