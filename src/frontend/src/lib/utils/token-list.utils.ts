@@ -4,6 +4,7 @@ import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
+import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
@@ -41,11 +42,13 @@ export const getFilteredTokenGroup = ({
 export const getDisabledOrModifiedTokens = ({
 	$allTokens,
 	modifiedTokens,
-	selectedNetwork
+	selectedNetwork,
+	includeNonFungibleTokens = true
 }: {
 	$allTokens: TokenToggleable<Token>[];
 	modifiedTokens: SvelteMap<TokenId, Token>;
 	selectedNetwork?: Network;
+	includeNonFungibleTokens?: boolean;
 }): TokenUiOrGroupUi[] =>
 	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
 		const isModified = nonNullish(modifiedTokens.get(token.id));
@@ -55,7 +58,9 @@ export const getDisabledOrModifiedTokens = ({
 				token,
 				$selectedNetwork: selectedNetwork,
 				$pseudoNetworkChainFusion: isNullish(selectedNetwork)
-			})
+			}) &&
+			includeNonFungibleTokens &&
+			!isTokenNonFungible(token)
 		) {
 			acc.push({
 				token: token as TokenUi

@@ -259,5 +259,45 @@ describe('token-list.utils', () => {
 
 			expect(result).toEqual([]);
 		});
+
+		it('excludes non-fungible tokens when includeNonFungibleTokens is false', () => {
+			const nftToken = {
+				...ICP_TOKEN,
+				id: parseTokenId('nft1'),
+				standard: 'ERC721', // or however your isTokenNonFungible() detects NFTs
+				enabled: false
+			} as unknown as TokenToggleable<Token>;
+
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
+
+			const result = getDisabledOrModifiedTokens({
+				$allTokens: [nftToken],
+				modifiedTokens: emptyTokensMap,
+				selectedNetwork: ICP_NETWORK,
+				includeNonFungibleTokens: false
+			});
+
+			expect(result).toEqual([]); // NFT excluded
+		});
+
+		it('includes non-fungible tokens when includeNonFungibleTokens is true', () => {
+			const nftToken = {
+				...ICP_TOKEN,
+				id: parseTokenId('nft2'),
+				standard: 'ERC721',
+				enabled: false
+			} as unknown as TokenToggleable<Token>;
+
+			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
+
+			const result = getDisabledOrModifiedTokens({
+				$allTokens: [nftToken],
+				modifiedTokens: emptyTokensMap,
+				selectedNetwork: ICP_NETWORK,
+				includeNonFungibleTokens: true
+			});
+
+			expect(result).toEqual([{ token: nftToken }]); // NFT included
+		});
 	});
 });
