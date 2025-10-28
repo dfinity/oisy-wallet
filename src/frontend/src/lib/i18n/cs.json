@@ -356,6 +356,12 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Zjistit více"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},

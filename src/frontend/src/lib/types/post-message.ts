@@ -31,7 +31,7 @@ import type * as z from 'zod';
 import type { ZodType } from 'zod';
 
 export type PostMessageDataRequest = z.infer<typeof PostMessageDataRequestSchema>;
-type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
+export type PostMessageDataResponseLoose = z.infer<typeof PostMessageDataResponseLooseSchema>;
 
 export type PostMessageDataRequestExchangeTimer = z.infer<
 	typeof PostMessageDataRequestExchangeTimerSchema

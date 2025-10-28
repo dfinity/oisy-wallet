@@ -27,28 +27,28 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncSolWallet':
-					syncWallet({
-						tokenId,
-						data: data as SolPostMessageDataResponseWallet
-					});
-					return;
+				switch (msg) {
+					case 'syncSolWallet':
+						syncWallet({
+							tokenId,
+							data: data as SolPostMessageDataResponseWallet
+						});
+						return;
 
-				case 'syncSolWalletError':
-					syncWalletError({
-						tokenId,
-						error: data.error,
-						hideToast: true
-					});
-					return;
+					case 'syncSolWalletError':
+						syncWalletError({
+							tokenId,
+							error: data.error,
+							hideToast: true
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({ token }: { token: Token }): Promise<SolWalletWorker> {

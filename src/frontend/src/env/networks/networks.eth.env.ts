@@ -26,6 +26,7 @@ export const ETHEREUM_NETWORK: EthereumNetwork = {
 	chainId: 1n,
 	icon: ethereumIcon,
 	explorerUrl: ETHEREUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'mainnet',
 		alchemy: 'mainnet',
@@ -47,6 +48,7 @@ export const SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 11155111n,
 	icon: sepoliaIcon,
 	explorerUrl: SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'sepolia',
 		alchemy: 'sepolia',

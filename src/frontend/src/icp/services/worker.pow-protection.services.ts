@@ -16,33 +16,35 @@ export class PowProtectorWorker extends AppWorker {
 	private constructor(worker: Worker) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponsePowProtectorProgress
-				| PostMessageDataResponsePowProtectorNextAllowance
-				| PostMessageDataResponseError
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponsePowProtectorProgress
+					| PostMessageDataResponsePowProtectorNextAllowance
+					| PostMessageDataResponseError
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncPowProgress': {
-					syncPowProgress({
-						data: data as PostMessageDataResponsePowProtectorProgress
-					});
-					return;
-				}
-				case 'syncPowNextAllowance': {
-					// Check if data.data exists and has proper structure
-					syncPowNextAllowance({
-						data: data as PostMessageDataResponsePowProtectorNextAllowance
-					});
-					return;
+				switch (msg) {
+					case 'syncPowProgress': {
+						syncPowProgress({
+							data: data as PostMessageDataResponsePowProtectorProgress
+						});
+						return;
+					}
+					case 'syncPowNextAllowance': {
+						// Check if data.data exists and has proper structure
+						syncPowNextAllowance({
+							data: data as PostMessageDataResponsePowProtectorNextAllowance
+						});
+						return;
+					}
 				}
 			}
-		};
+		);
 	}
 
 	static async init(): Promise<PowProtectorWorker> {

@@ -25,6 +25,7 @@ export const ARBITRUM_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 42161n,
 	icon: arbitrumMainnetIcon,
 	explorerUrl: ARBITRUM_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'arbitrum',
 		alchemy: 'arbitrum',
@@ -48,6 +49,7 @@ export const ARBITRUM_SEPOLIA_NETWORK: EthereumNetwork = {
 	chainId: 421614n,
 	icon: arbitrumSepoliaIcon,
 	explorerUrl: ARBITRUM_SEPOLIA_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'arbitrum-sepolia',
 		alchemy: 'arbitrum-sepolia',
