@@ -122,7 +122,7 @@
 	{#if nonNullish(nft)}
 		<ListItem>
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.received_at}</span>
-			{#if nonNullish(nft?.acquiredAt)}
+			{#if nonNullish(nft?.acquiredAt) && nft?.acquiredAt.getTime() > 0}
 				<output
 					>{formatSecondsToDate({
 						seconds: nft.acquiredAt.getTime() / 1000,
@@ -130,9 +130,7 @@
 					})}</output
 				>
 			{:else}
-				<span class="min-w-12">
-					<SkeletonText />
-				</span>
+				<output>&ndash;</output>
 			{/if}
 		</ListItem>
 		<ListItem>
