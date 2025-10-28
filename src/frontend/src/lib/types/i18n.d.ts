@@ -267,6 +267,7 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		beam: { name: string; one_liner: string; call_to_action: string; description: string };
+		axie_infinity: { name: string; one_liner: string; description: string };
 	};
 }
 
