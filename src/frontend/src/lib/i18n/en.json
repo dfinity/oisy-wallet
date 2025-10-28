@@ -363,6 +363,13 @@
 				"call_to_action": "Get involved",
 				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
 			}
+
+			,"mobox": {
+				"name": "Mobox",
+				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
+				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
+			}
+
 		}
 	},
 	"rewards": {
