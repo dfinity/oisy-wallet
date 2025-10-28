@@ -336,13 +336,12 @@
 		"stats": "",
 		"logo": "/images/dapps/beam-logo.svg",
 		"screenshots": ["/images/dapps/beam-screenshot.webp"]
-	}
-
-	,{
+	},
+	{
 		"id": "mobox",
 		"name": "dapps.descriptions.mobox.name",
 		"oneLiner": "dapps.descriptions.mobox.one_liner",
-		"website": "https://www.mobox.io/",		
+		"website": "https://www.mobox.io/",
 		"twitter": "https://twitter.com/MOBOX_Official",
 		"telegram": "https://t.me/mobox_io",
 		"discord": "https://discord.gg/TrNrTGYzB3",
