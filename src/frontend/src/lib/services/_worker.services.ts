@@ -9,9 +9,13 @@ export abstract class AppWorker {
 		this.#queue = new WorkerQueue(worker);
 	}
 
-	static async getInstance(): Promise<Worker> {
+	protected static async newInstance(): Promise<Worker> {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
+	}
+
+	static async getInstance(): Promise<Worker> {
+		return await this.newInstance();
 	}
 
 	protected postMessage = <T>(data: T) => {
