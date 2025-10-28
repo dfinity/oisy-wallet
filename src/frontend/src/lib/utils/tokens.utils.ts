@@ -239,7 +239,7 @@ export const filterTokens = <T extends Token>({
 			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
 		) {
 			return true;
-    }
+		}
 
 		if (isTokenErc20(token) || isTokenSpl(token)) {
 			return areAddressesPartiallyEqual({
