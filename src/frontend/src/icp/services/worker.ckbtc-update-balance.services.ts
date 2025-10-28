@@ -5,7 +5,7 @@ import {
 } from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorkerParams } from '$icp/types/ck-listener';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCkBTCUpdateBalance,
@@ -20,7 +20,7 @@ import { get } from 'svelte/store';
 
 export class CkBTCUpdateBalanceWorker extends AppWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		private readonly tokenId: TokenId,
 		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
 		private readonly twinToken: IcCkWorkerParams['twinToken']
