@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
@@ -58,6 +58,19 @@
 				await navigation.complete;
 			});
 		});
+	});
+
+	onMount(() => {
+		document.addEventListener(
+			'touchmove',
+			(e) => {
+				const target = e.target as Element | null;
+				if (!target?.closest('.modal')) {
+					e.preventDefault();
+				}
+			},
+			{ passive: false }
+		);
 	});
 
 	$effect(() => {
