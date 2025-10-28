@@ -152,7 +152,7 @@
 			<Button
 				colorStyle="secondary-light"
 				disabled={$pseudoNetworkICPTestnet ||
-					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork?.supportsNft)}
+					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
 				onclick={onAddToken}
 				><IconPlus />
 				{isNftsPage
