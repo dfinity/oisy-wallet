@@ -29,6 +29,10 @@ describe('NftCollectionHero', () => {
 		description: 'Some descriptive text'
 	};
 
+	beforeEach(() => {
+		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+	});
+
 	it('should render the collection data', async () => {
 		const { container, getByText, getAllByText } = render(NftCollectionHero, {
 			props: {
