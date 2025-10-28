@@ -19,7 +19,9 @@
 		NAVIGATION_ITEM_TOKENS
 	} from '$lib/constants/test-ids.constants';
 	import { networkId } from '$lib/derived/network.derived';
+	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 	import {
 		isRouteActivity,
 		isRouteRewards,
@@ -53,7 +55,7 @@
 <NavigationItem
 	ariaLabel={$i18n.navigation.alt.tokens}
 	href={networkUrl({
-		path: AppPath.Tokens,
+		path: $activeAssetsTabStore === TokenTypes.NFTS ? AppPath.Nfts : AppPath.Tokens,
 		networkId: $networkId,
 		usePreviousRoute: isTransactionsRoute,
 		fromRoute
