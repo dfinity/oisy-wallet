@@ -346,7 +346,7 @@
 		"telegram": "https://t.me/mobox_io",
 		"discord": "https://discord.gg/TrNrTGYzB3",
 		"medium": "https://mbox.medium.com/",
-		"tags": ["dapps.categories.game"],
+		"tags": ["dapps.categories.game", "dapps.categories.staking"],
 		"description": "dapps.descriptions.mobox.description",
 		"usesInternetIdentity": false,
 		"display": "Large",
