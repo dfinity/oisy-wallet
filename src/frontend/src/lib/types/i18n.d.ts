@@ -268,6 +268,7 @@ interface I18nDapps {
 		};
 		beam: { name: string; one_liner: string; call_to_action: string; description: string };
 		axie_infinity: { name: string; one_liner: string; description: string };
+		mobox: { name: string; one_liner: string; description: string };
 	};
 }
 

@@ -2,7 +2,7 @@ import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -13,7 +13,7 @@ import type {
 
 // TODO: add tests for POW worker/scheduler
 export class PowProtectorWorker extends AppWorker {
-	private constructor(worker: Worker) {
+	private constructor(worker: WorkerData) {
 		super(worker);
 
 		this.setOnMessage(

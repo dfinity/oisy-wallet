@@ -12,7 +12,7 @@ import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-cu
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
-import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
@@ -31,12 +31,13 @@ import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -238,6 +239,24 @@ export const filterTokens = <T extends Token>({
 			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
 		) {
 			return true;
+		}
+
+		if (isTokenErc20(token) || isTokenSpl(token)) {
+			return areAddressesPartiallyEqual({
+				address1: token.address,
+				address2: filter,
+				networkId: token.network.id
+			});
+		}
+
+		if (isTokenIcrc(token)) {
+			const { ledgerCanisterId, indexCanisterId } = token;
+
+			return (
+				ledgerCanisterId.toLowerCase().includes(filter.toLowerCase()) ||
+				(nonNullish(indexCanisterId) &&
+					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
+			);
 		}
 
 		return false;

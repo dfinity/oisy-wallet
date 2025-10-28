@@ -221,4 +221,38 @@ describe('NftHero', () => {
 
 		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
 	});
+
+	it('should render the acquiredAt', () => {
+		const { queryByText } = render(NftHero, {
+			props: {
+				nft: { ...mockValidErc1155Nft }
+			}
+		});
+
+		const acquired_at: HTMLElement | null = queryByText(
+			formatSecondsToDate({
+				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
+				language: get(currentLanguage)
+			})
+		);
+
+		expect(acquired_at).toBeInTheDocument();
+	});
+
+	it('should render a dash instead of the acquiredAt if the date is nullish or timestamp is 0', () => {
+		const { queryByText } = render(NftHero, {
+			props: {
+				nft: { ...mockValidErc1155Nft, acquiredAt: new Date(0) }
+			}
+		});
+
+		const acquired_at: HTMLElement | null = queryByText(
+			formatSecondsToDate({
+				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
+				language: get(currentLanguage)
+			})
+		);
+
+		expect(acquired_at).not.toBeInTheDocument();
+	});
 });
