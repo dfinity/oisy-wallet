@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="55px" height="55px" viewBox="0 0 55 55" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Clipped</title>
+    <defs>
+        <circle id="path-1" cx="27.5" cy="27.5" r="27.5"></circle>
+    </defs>
+    <g id="Lock-and-Logout" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Clipped">
+            <mask id="mask-2" fill="white">
+                <use xlink:href="#path-1"></use>
+            </mask>
+            <g id="Oval"></g>
+            <g id="Group" mask="url(#mask-2)" fill-rule="nonzero">
+                <rect id="Rectangle" fill="#4066C9" x="0" y="0" width="55" height="13.75"></rect>
+                <rect id="Rectangle" fill="#EC450D" x="0" y="13.7501294" width="55" height="13.75"></rect>
+                <rect id="Rectangle" fill="#10A35D" x="0" y="41.2498382" width="55" height="13.75"></rect>
+                <rect id="Rectangle" fill="#FFA50A" x="0" y="27.5001618" width="55" height="13.75"></rect>
+            </g>
+        </g>
+    </g>
+</svg>
