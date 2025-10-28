@@ -22,11 +22,11 @@
 	import type { Token, TokenId } from '$lib/types/token';
 	import type { TokenUi } from '$lib/types/token-ui';
 	import type { TokenUiGroup, TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-	import { isIos } from '$lib/utils/device.utils';
 	import { transactionsUrl } from '$lib/utils/nav.utils';
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
+	import { isIOS } from '@dfinity/gix-components/dist/utils/device.utils';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
@@ -118,7 +118,7 @@
 		modifiedTokens.set(id, { id, ...rest });
 	};
 
-	let ios = $derived(isIos());
+	let ios = $derived(isIOS());
 
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
