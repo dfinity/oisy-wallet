@@ -27,42 +27,44 @@ export class CkBTCUpdateBalanceWorker extends AppWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = async ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			async ({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncBtcPendingUtxos':
-					syncBtcPendingUtxos({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
-				case 'syncCkBTCUpdateBalanceStatus':
-					emit({
-						message: 'oisyCkBtcUpdateBalance',
-						detail: (data as PostMessageSyncState).state
-					});
-					return;
-				case 'syncBtcAddress':
-					syncBtcAddress({
-						tokenId,
-						data: data as PostMessageDataResponseBTCAddress
-					});
-					return;
-				case 'syncCkBTCUpdateOk':
-					await syncCkBTCUpdateOk({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
+				switch (msg) {
+					case 'syncBtcPendingUtxos':
+						syncBtcPendingUtxos({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkBTCUpdateBalanceStatus':
+						emit({
+							message: 'oisyCkBtcUpdateBalance',
+							detail: (data as PostMessageSyncState).state
+						});
+						return;
+					case 'syncBtcAddress':
+						syncBtcAddress({
+							tokenId,
+							data: data as PostMessageDataResponseBTCAddress
+						});
+						return;
+					case 'syncCkBTCUpdateOk':
+						await syncCkBTCUpdateOk({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({
