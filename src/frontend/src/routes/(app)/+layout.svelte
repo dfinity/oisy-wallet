@@ -60,35 +60,26 @@
 		});
 	});
 
-	onMount(() => {
-		document.addEventListener(
-			'touchmove',
-			(e) => {
-				const target = e.target as Element | null;
-				if (!target?.closest('.modal')) {
-					e.preventDefault();
-				}
-			},
-			{ passive: false }
-		);
-	});
+	const preventScroll = (e: TouchEvent) => {
+		const target = e.target as Element | null;
+		if (!target?.closest('.modal')) {
+			e.preventDefault();
+		}
+	};
 
 	$effect(() => {
-		const root = document.getElementById('content-root');
-		if (root) {
-			if (nonNullish($modalStore?.type)) {
-				root.style.overflow = 'hidden';
-				/*
+		if (nonNullish($modalStore?.type)) {
+			document.addEventListener('touchmove', preventScroll, { passive: false });
+			/*
 			document.body.children[0].classList.add('overflow-hidden');
 			document.body.children[0].classList.add('fixed');
 			 */
-			} else {
-				root.style.overflow = 'auto';
-				/*
+		} else {
+			document.removeEventListener('touchmove', preventScroll);
+			/*
 	document.body.children[0].classList.remove('overflow-hidden');
 	document.body.children[0].classList.remove('fixed');
 			 */
-			}
 		}
 	});
 </script>
