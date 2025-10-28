@@ -372,6 +372,11 @@
 				"name": "Mobox",
 				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
 				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
+			},
+			"cyql": {
+				"name": "cyql.io",
+				"one_liner": "THE Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer.",
+				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
 			}
 		}
 	},
