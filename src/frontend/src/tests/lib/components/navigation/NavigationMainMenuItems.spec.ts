@@ -10,7 +10,7 @@ import {
 } from '$lib/constants/test-ids.constants';
 import * as networkDerived from '$lib/derived/network.derived';
 import { TokenTypes } from '$lib/enums/token-types';
-import { activeAssetsTabStore } from '$lib/stores/settings.store';
+import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
 import { render } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
@@ -21,6 +21,7 @@ describe('NavigationMainMenuItems', () => {
 		vi.clearAllMocks();
 
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
+		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
 	it('renders all basic navigation items', () => {
@@ -53,5 +54,26 @@ describe('NavigationMainMenuItems', () => {
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
 
 		expect(tokenLink.getAttribute('href')).toContain(AppPath.Tokens);
+	});
+
+	it('should incorporate the network query param if userSelectedNetwork is set', () => {
+		userSelectedNetworkStore.set({
+			key: 'user-selected-network',
+			value: ETHEREUM_NETWORK_ID.description
+		});
+
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
+		expect(tokenLink.getAttribute('href')).toContain(ETHEREUM_NETWORK_ID.description);
+	});
+
+	it('should not incorporate the network query param if userSelectedNetwork is not set', () => {
+		const { getByTestId } = render(NavigationMainMenuItems);
+
+		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
+
+		expect(tokenLink.getAttribute('href')).not.toContain(ETHEREUM_NETWORK_ID.description);
 	});
 });
