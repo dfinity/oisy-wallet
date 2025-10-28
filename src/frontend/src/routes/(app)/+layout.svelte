@@ -61,12 +61,21 @@
 	});
 
 	$effect(() => {
-		if (nonNullish($modalStore?.type)) {
-			document.body.classList.add('overflow-hidden');
-			document.body.classList.add('fixed');
-		} else {
-			document.body.classList.remove('overflow-hidden');
-			document.body.classList.remove('fixed');
+		const root = document.getElementById('content-root');
+		if (root) {
+			if (nonNullish($modalStore?.type)) {
+				root.style.overflow = 'hidden';
+				/*
+			document.body.children[0].classList.add('overflow-hidden');
+			document.body.children[0].classList.add('fixed');
+			 */
+			} else {
+				root.style.overflow = 'auto';
+				/*
+	document.body.children[0].classList.remove('overflow-hidden');
+	document.body.children[0].classList.remove('fixed');
+			 */
+			}
 		}
 	});
 </script>
