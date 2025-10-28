@@ -24,8 +24,6 @@
 
 	const { token, nfts }: Props = $props();
 
-	const firstNft = $derived(nfts?.[0]);
-
 	const breadcrumbItems = $derived([
 		{
 			label: $i18n.navigation.text.tokens,
@@ -37,6 +35,7 @@
 		}
 	]);
 
+	const firstNft = $derived(nfts?.[0]);
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
 </script>
 

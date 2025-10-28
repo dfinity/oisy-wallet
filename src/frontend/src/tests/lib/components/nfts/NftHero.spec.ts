@@ -1,9 +1,11 @@
+import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NftHero from '$lib/components/nfts/NftHero.svelte';
 import { NFT_HIDDEN_BADGE } from '$lib/constants/test-ids.constants';
 import { currentLanguage } from '$lib/derived/i18n.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { i18n } from '$lib/stores/i18n.store';
 import { modalStore } from '$lib/stores/modal.store';
+import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 import type { OptionString } from '$lib/types/string';
 import { formatSecondsToDate, shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
@@ -19,6 +21,10 @@ describe('NftHero', () => {
 		.mockImplementation(() => {});
 
 	const openSendSpy = vi.spyOn(modalStore, 'openSend');
+
+	beforeEach(() => {
+		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
+	});
 
 	it('should render the nft data', () => {
 		const { getByText } = render(NftHero, {
@@ -164,5 +170,55 @@ describe('NftHero', () => {
 		});
 
 		expect(openSendSpy).toHaveBeenCalledOnce();
+	});
+
+	it('should render the root breadcrumb with network query param if userSelectedNetwork is defined', () => {
+		mockPage.mock({
+			network: mockValidErc1155Nft.collection.network as unknown as OptionString
+		});
+		mockPage.mockDynamicRoutes({
+			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+		});
+		userSelectedNetworkStore.set({
+			key: 'user-selected-network',
+			value: ETHEREUM_NETWORK_ID.description
+		});
+
+		const { container } = render(NftHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const firstBreadcrumElmt = container.querySelector(
+			'div.text-xs.font-bold a.no-underline:first-of-type'
+		);
+
+		expect(firstBreadcrumElmt?.getAttribute('href')).toContain(
+			`network=${ETHEREUM_NETWORK_ID.description}`
+		);
+	});
+
+	it('should render the root breadcrumb without network query param if userSelectedNetwork is not defined', () => {
+		mockPage.mock({
+			network: mockValidErc1155Nft.collection.network as unknown as OptionString
+		});
+		mockPage.mockDynamicRoutes({
+			collectionId: `${mockValidErc1155Nft.collection.network.name}-${mockValidErc1155Nft.collection.address}`
+		});
+
+		const { container } = render(NftHero, {
+			props: {
+				token: { ...AZUKI_ELEMENTAL_BEANS_TOKEN },
+				nft: mockValidErc1155Nft
+			}
+		});
+
+		const firstBreadcrumElmt = container.querySelector(
+			'div.text-xs.font-bold a.no-underline:first-of-type'
+		);
+
+		expect(firstBreadcrumElmt?.getAttribute('href')).not.toContain('network=');
 	});
 });
