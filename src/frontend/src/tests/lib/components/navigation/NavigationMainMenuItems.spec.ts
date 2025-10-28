@@ -21,6 +21,7 @@ describe('NavigationMainMenuItems', () => {
 		vi.clearAllMocks();
 
 		activeAssetsTabStore.reset({ key: 'active-assets-tab' });
+		userSelectedNetworkStore.reset({ key: 'user-selected-network' });
 	});
 
 	it('renders all basic navigation items', () => {
@@ -68,7 +69,7 @@ describe('NavigationMainMenuItems', () => {
 		expect(tokenLink.getAttribute('href')).toContain(ETHEREUM_NETWORK_ID.description);
 	});
 
-	it('should not incorporate the network query param if userSelectedNetwork is set', () => {
+	it('should not incorporate the network query param if userSelectedNetwork is not set', () => {
 		const { getByTestId } = render(NavigationMainMenuItems);
 
 		const tokenLink = getByTestId(NAVIGATION_ITEM_TOKENS);
