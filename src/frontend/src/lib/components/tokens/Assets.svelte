@@ -23,6 +23,7 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 
 	interface Props {
 		tab: TokenTypes;
@@ -37,6 +38,10 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	$effect(() => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+	});
 </script>
 
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
