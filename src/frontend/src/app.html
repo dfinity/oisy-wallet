@@ -254,33 +254,41 @@
 				min-width: 1728px;
 			}
 
-      :root[theme='light'] {
-          #app-background-light {
-              display: block;
-          }
+			:root[theme='light'] {
+				#app-background-light {
+					display: block;
+				}
 
-          #app-background-dark {
-              display: none;
-          }
-      }
+				#app-background-dark {
+					display: none;
+				}
+			}
 
-      :root[theme='dark'] {
-          #app-background-light {
-              display: none;
-          }
+			:root[theme='dark'] {
+				#app-background-light {
+					display: none;
+				}
 
-          #app-background-dark {
-              display: block;
-          }
-      }
+				#app-background-dark {
+					display: block;
+				}
+			}
 		</style>
 
 		<!-- LINKS_PRELOADER -->
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div id="app-background-container">
-			<img id="app-background-light" src="/images/oisy_bg_light.webp" alt="OISY Background light theme" />
-			<img id="app-background-dark" src="/images/oisy_bg_dark.webp" alt="OISY Background dark theme" />
+			<img
+				id="app-background-light"
+				src="/images/oisy_bg_light.webp"
+				alt="OISY Background light theme"
+			/>
+			<img
+				id="app-background-dark"
+				src="/images/oisy_bg_dark.webp"
+				alt="OISY Background dark theme"
+			/>
 		</div>
 
 		<div style="display: contents">%sveltekit.body%</div>
