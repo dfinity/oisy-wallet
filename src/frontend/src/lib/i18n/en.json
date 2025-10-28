@@ -356,6 +356,12 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Learn more"
 				}
+			},
+			"beam": {
+				"name": "Beam",
+				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
+				"call_to_action": "Get involved",
+				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
 			}
 		}
 	},

@@ -356,6 +356,12 @@
 					"text": "Xin chào, internet tự viết",
 					"call_to_action": "Tìm hiểu thêm"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
 			}
 		}
 	},

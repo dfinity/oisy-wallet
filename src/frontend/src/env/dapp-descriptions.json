@@ -319,5 +319,22 @@
 		"stats": "",
 		"logo": "/images/dapps/usdai-logo.svg",
 		"screenshots": ["/images/dapps/usdai-screenshot.webp"]
+	},
+	{
+		"id": "beam",
+		"name": "dapps.descriptions.beam.name",
+		"oneLiner": "dapps.descriptions.beam.one_liner",
+		"website": "https://onbeam.com/",
+		"telegram": "https://t.me/buildonbeam_news",
+		"twitter": "https://twitter.com/BuildOnBeam",
+		"discord": "http://discord.gg/beamcommunity",
+		"medium": "https://medium.com/@onbeam",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.beam.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/beam-logo.svg",
+		"screenshots": ["/images/dapps/beam-screenshot.webp"]
 	}
 ]
