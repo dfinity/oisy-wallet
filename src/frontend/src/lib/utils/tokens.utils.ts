@@ -222,11 +222,26 @@ export const filterTokens = <T extends Token>({
 	tokens: T[];
 	filter: string;
 }): T[] => {
-	const matchingToken = (token: Token) =>
-		token.name.toLowerCase().includes(filter.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
-		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
+	const matchingToken = (token: Token): boolean => {
+		const { name, symbol } = token;
+
+		if (
+			name.toLowerCase().includes(filter.toLowerCase()) ||
+			symbol.toLowerCase().includes(filter.toLowerCase())
+		) {
+			return true;
+		}
+
+		if (
+			icTokenIcrcCustomToken(token) &&
+			nonNullish(token.alternativeName) &&
+			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
+		) {
+			return true;
+		}
+
+		return false;
+	};
 
 	return isNullishOrEmpty(filter)
 		? tokens

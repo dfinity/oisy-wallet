@@ -23,39 +23,41 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponseWallet
-				| PostMessageDataResponseError
-				| PostMessageDataResponseWalletCleanUp
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponseWallet
+					| PostMessageDataResponseError
+					| PostMessageDataResponseWalletCleanUp
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncDip20Wallet':
-					syncWallet({
-						tokenId,
-						data: data as PostMessageDataResponseWallet
-					});
-					return;
-				case 'syncDip20WalletError':
-					onLoadTransactionsError({
-						tokenId,
-						error: data.error
-					});
+				switch (msg) {
+					case 'syncDip20Wallet':
+						syncWallet({
+							tokenId,
+							data: data as PostMessageDataResponseWallet
+						});
+						return;
+					case 'syncDip20WalletError':
+						onLoadTransactionsError({
+							tokenId,
+							error: data.error
+						});
 
-					return;
-				case 'syncDip20WalletCleanUp':
-					onTransactionsCleanUp({
-						tokenId,
-						transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
-					});
-					return;
+						return;
+					case 'syncDip20WalletCleanUp':
+						onTransactionsCleanUp({
+							tokenId,
+							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({
