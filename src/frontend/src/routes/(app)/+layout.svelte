@@ -62,9 +62,9 @@
 
 	$effect(() => {
 		if (nonNullish($modalStore?.type)) {
-			document.body.classList.add('modal-open');
+			document.body.classList.add('overflow-hidden');
 		} else {
-			document.body.classList.remove('modal-open');
+			document.body.classList.remove('overflow-hidden');
 		}
 	});
 </script>
