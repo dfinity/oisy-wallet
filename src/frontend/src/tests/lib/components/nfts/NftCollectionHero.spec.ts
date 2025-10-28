@@ -1,5 +1,4 @@
 import { POLYGON_MAINNET_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
-import { ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import NftCollectionHero from '$lib/components/nfts/NftCollectionHero.svelte';
 import {
 	NFT_COLLECTION_ACTION_HIDE,
@@ -9,9 +8,8 @@ import {
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { NonFungibleToken } from '$lib/types/nft';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
-import { nftsUrl } from '$lib/utils/nav.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftPagesContext, mockNftollectionUi } from '$tests/mocks/nfts.mock';
+import { mockNftollectionUi } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
 
@@ -31,8 +29,7 @@ describe('NftCollectionHero', () => {
 			props: {
 				nfts: mockNftollectionUi.nfts,
 				token: mockToken
-			},
-			context: mockNftPagesContext({})
+			}
 		});
 
 		assertNonNullish(mockNftollectionUi.collection.name);
@@ -77,8 +74,7 @@ describe('NftCollectionHero', () => {
 			props: {
 				nfts: mockNftollectionUi.nfts,
 				token: mockToken
-			},
-			context: mockNftPagesContext({})
+			}
 		});
 
 		const parent = container.querySelector('.h-64');
@@ -99,42 +95,11 @@ describe('NftCollectionHero', () => {
 			props: {
 				nfts: mockNftollectionUi.nfts,
 				token: { ...mockToken, section: CustomTokenSection.HIDDEN }
-			},
-			context: mockNftPagesContext({})
+			}
 		});
 
 		const hiddenBadge: HTMLSpanElement | null = container.querySelector(hiddenBadgeSelector);
 
 		expect(hiddenBadge).toBeInTheDocument();
-	});
-
-	it('should build root breadcrumb url without network query param', () => {
-		const { container } = render(NftCollectionHero, {
-			props: {
-				nfts: mockNftollectionUi.nfts,
-				token: mockToken
-			},
-			context: mockNftPagesContext({})
-		});
-
-		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
-
-		expect(breadcrumbItem?.getAttribute('href')).toEqual(nftsUrl({}));
-	});
-
-	it('should build root breadcrumb url with network query param if originSelectedNetwork is set', () => {
-		const { container } = render(NftCollectionHero, {
-			props: {
-				nfts: mockNftollectionUi.nfts,
-				token: mockToken
-			},
-			context: mockNftPagesContext({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
-		});
-
-		const breadcrumbItem = container.querySelector('div.flex.text-xs a.no-underline:first-of-type');
-
-		expect(breadcrumbItem?.getAttribute('href')).toEqual(
-			nftsUrl({ originSelectedNetwork: ETHEREUM_NETWORK_ID })
-		);
 	});
 });

@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
 	import { slide } from 'svelte/transition';
 	import NftBadge from '$lib/components/nfts/NftBadge.svelte';
 	import NftCollectionActionButtons from '$lib/components/nfts/NftCollectionActionButtons.svelte';
@@ -10,11 +9,10 @@
 	import BreadcrumbNavigation from '$lib/components/ui/BreadcrumbNavigation.svelte';
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
+	import { AppPath } from '$lib/constants/routes.constants';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { NFT_PAGES_CONTEXT_KEY, type NftPagesContext } from '$lib/stores/nft-pages.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
-	import { nftsUrl } from '$lib/utils/nav.utils';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -23,14 +21,7 @@
 
 	const { token, nfts }: Props = $props();
 
-	const { originSelectedNetwork } = getContext<NftPagesContext>(NFT_PAGES_CONTEXT_KEY);
-
-	const breadcrumbItems = $derived([
-		{
-			label: $i18n.navigation.text.tokens,
-			url: nftsUrl({ originSelectedNetwork: $originSelectedNetwork ?? undefined })
-		}
-	]);
+	const breadcrumbItems = $derived([{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts }]);
 
 	const firstNft = $derived(nfts?.[0]);
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);

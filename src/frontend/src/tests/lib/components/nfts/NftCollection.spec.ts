@@ -2,7 +2,7 @@ import NftCollection from '$lib/components/nfts/NftCollection.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import { nftStore } from '$lib/stores/nft.store';
 import { parseNftId } from '$lib/validation/nft.validation';
-import { mockNftPagesContext, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -24,9 +24,7 @@ describe('NftCollection', () => {
 	});
 
 	it('should render a list of the collections nfts', () => {
-		const { container } = render(NftCollection, {
-			context: mockNftPagesContext({})
-		});
+		const { container } = render(NftCollection);
 
 		const grid = container.querySelector('.grid');
 
