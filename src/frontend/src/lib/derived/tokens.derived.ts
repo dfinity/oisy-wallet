@@ -16,6 +16,7 @@ import { defaultIcpTokens } from '$icp/derived/tokens.derived';
 import type { IcToken } from '$icp/types/ic-token';
 import { isTokenIc } from '$icp/utils/icrc.utils';
 import { exchanges } from '$lib/derived/exchange.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
@@ -122,6 +123,12 @@ export const enabledFungibleTokens: Readable<Token[]> = derived(
 export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 	[nonFungibleTokens],
 	filterEnabledTokens
+);
+
+export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokens],
+	([$enabledNonFungibleTokens]) =>
+		$enabledNonFungibleTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
 );
 
 /**

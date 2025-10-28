@@ -115,7 +115,6 @@
 			<EmptyNftsList />
 		{:else}
 			<NftCollectionList
-				asMainSection
 				nftCollections={commonCollections}
 				testId={NFT_COLLECTION_LIST_COMMON}
 				title={$i18n.nfts.text.collections}
@@ -124,6 +123,7 @@
 			{#if $showHidden}
 				<NftCollectionList
 					nftCollections={hiddenCollections}
+					section={CustomTokenSection.HIDDEN}
 					testId={NFT_COLLECTION_LIST_HIDDEN}
 					title={$i18n.nfts.text.hidden}
 				>
@@ -136,6 +136,7 @@
 			{#if $showSpam}
 				<NftCollectionList
 					nftCollections={spamCollections}
+					section={CustomTokenSection.SPAM}
 					testId={NFT_COLLECTION_LIST_SPAM}
 					title={$i18n.nfts.text.spam}
 				>
@@ -155,7 +156,7 @@
 			title={$i18n.nfts.text.all_assets}
 		>
 			{#snippet nftListItem({ nft })}
-				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" />
+				<NftCard {nft} source={NFT_LIST_ROUTE} type="card-link" withCollectionLabel />
 			{/snippet}
 		</NftList>
 
@@ -165,7 +166,7 @@
 					<IconEyeOff size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard isHidden {nft} source={NFT_LIST_ROUTE} type="card-link" withCollectionLabel />
 				{/snippet}
 			</NftList>
 		{/if}
@@ -176,7 +177,7 @@
 					<IconAlertOctagon size="24" />
 				{/snippet}
 				{#snippet nftListItem({ nft })}
-					<NftCard isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" />
+					<NftCard isSpam {nft} source={NFT_LIST_ROUTE} type="card-link" withCollectionLabel />
 				{/snippet}
 			</NftList>
 		{/if}

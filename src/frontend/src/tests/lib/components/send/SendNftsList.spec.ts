@@ -25,8 +25,8 @@ describe('SendNftsList.spec', () => {
 			onSelectNetwork: vi.fn()
 		});
 
-		for (const name of ['Null', 'Eins', 'Zwei']) {
-			expect(getByText(name)).toBeInTheDocument();
+		for (const nft of mockNfts) {
+			expect(getByText(`#${nft.id} – ${nft.name}`)).toBeInTheDocument();
 		}
 
 		const networkBtn = getByRole('button', { name: get(i18n).networks.chain_fusion });
@@ -45,9 +45,9 @@ describe('SendNftsList.spec', () => {
 
 		await fireEvent.input(input, { target: { value: 'ein' } });
 
-		expect(queryByText('Null')).not.toBeInTheDocument();
-		expect(getByText('Eins')).toBeInTheDocument();
-		expect(queryByText('Zwei')).not.toBeInTheDocument();
+		expect(queryByText('#0 – Null')).not.toBeInTheDocument();
+		expect(getByText(`#1 – Eins`)).toBeInTheDocument();
+		expect(queryByText('#2 – Zwei')).not.toBeInTheDocument();
 	});
 
 	it('shows empty-state when no matches', async () => {
@@ -93,7 +93,7 @@ describe('SendNftsList.spec', () => {
 			onSelectNetwork: vi.fn()
 		});
 
-		const nftCard = getByText('Eins');
+		const nftCard = getByText('#1 – Eins');
 
 		await fireEvent.click(nftCard);
 

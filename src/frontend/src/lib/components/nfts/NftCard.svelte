@@ -29,6 +29,7 @@
 		type?: 'default' | 'card-selectable' | 'card-link';
 		onSelect?: (nft: Nft) => void;
 		source?: 'default' | typeof NFT_LIST_ROUTE | typeof NFT_COLLECTION_ROUTE;
+		withCollectionLabel?: boolean;
 	}
 
 	let {
@@ -39,7 +40,8 @@
 		isSpam,
 		type = 'default',
 		onSelect,
-		source = 'default'
+		source = 'default',
+		withCollectionLabel = false
 	}: Props = $props();
 
 	const onClick = () => {
@@ -131,11 +133,11 @@
 
 	<span class="flex w-full flex-col gap-1 p-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
-			{source !== NFT_LIST_ROUTE ? nft.name : nft.collection.name}
+			{withCollectionLabel ? nft.collection.name : nft.name}
 		</span>
 		<span class="truncate text-xs" class:text-tertiary={!disabled}>
 			#{nft.id}
-			{#if source === NFT_LIST_ROUTE}
+			{#if withCollectionLabel}
 				&ndash; {nft.name}
 			{/if}
 		</span>

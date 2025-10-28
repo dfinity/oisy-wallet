@@ -100,6 +100,8 @@ export const signIn = async (
 
 		return { success: 'error', err };
 	} finally {
+		await disconnectWalletConnect();
+
 		busy.stop();
 	}
 };

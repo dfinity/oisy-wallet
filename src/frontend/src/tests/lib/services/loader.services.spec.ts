@@ -109,13 +109,11 @@ describe('loader.services', () => {
 	describe('initLoader', () => {
 		const mockValidateAddresses = vi.fn();
 		const mockProgressAndLoad = vi.fn();
-		const mockSetProgressModal = vi.fn();
 
 		const mockParams = {
 			identity: mockIdentity,
 			validateAddresses: mockValidateAddresses,
-			progressAndLoad: mockProgressAndLoad,
-			setProgressModal: mockSetProgressModal
+			progressAndLoad: mockProgressAndLoad
 		};
 
 		beforeEach(() => {
