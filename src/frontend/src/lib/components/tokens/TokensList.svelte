@@ -69,7 +69,12 @@
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
-				getDisabledOrModifiedTokens({ $allTokens, modifiedTokens, selectedNetwork })
+				getDisabledOrModifiedTokens({
+					$allTokens,
+					modifiedTokens,
+					selectedNetwork,
+					includeNonFungibleTokens: false
+				})
 			)
 		});
 
