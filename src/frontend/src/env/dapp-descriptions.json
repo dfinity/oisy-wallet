@@ -137,6 +137,21 @@
 		"screenshots": ["/images/dapps/1-inch.webp"]
 	},
 	{
+		"id": "cyql",
+		"name": "dapps.descriptions.cyql.name",
+		"oneLiner": "dapps.descriptions.cyql.one_liner",
+		"website": "https://cyql.io/",
+		"twitter": "https://x.com/cyqlio",
+		"discord": "https://discord.gg/AnjyrfvvXX",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.cyql.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/cyql-logo.svg",
+		"screenshots": ["/images/dapps/cyql-screenshot.webp"]
+	},
+	{
 		"id": "compound-finance",
 		"name": "dapps.descriptions.compound_finance.name",
 		"oneLiner": "dapps.descriptions.compound_finance.one_liner",
