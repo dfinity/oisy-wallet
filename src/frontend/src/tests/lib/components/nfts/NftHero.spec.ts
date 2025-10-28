@@ -223,13 +223,13 @@ describe('NftHero', () => {
 	});
 
 	it('should render the acquiredAt', () => {
-		const { getByText } = render(NftHero, {
+		const { queryByText } = render(NftHero, {
 			props: {
 				nft: { ...mockValidErc1155Nft }
 			}
 		});
 
-		const acquired_at: HTMLElement | null = getByText(
+		const acquired_at: HTMLElement | null = queryByText(
 			formatSecondsToDate({
 				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
 				language: get(currentLanguage)
@@ -240,13 +240,13 @@ describe('NftHero', () => {
 	});
 
 	it('should render a dash instead of the acquiredAt if the date is nullish or timestamp is 0', () => {
-		const { getByText } = render(NftHero, {
+		const { queryByText } = render(NftHero, {
 			props: {
 				nft: { ...mockValidErc1155Nft, acquiredAt: new Date(0) }
 			}
 		});
 
-		const acquired_at: HTMLElement | null = getByText(
+		const acquired_at: HTMLElement | null = queryByText(
 			formatSecondsToDate({
 				seconds: (mockValidErc1155Nft.acquiredAt as Date).getTime() / 1000,
 				language: get(currentLanguage)
