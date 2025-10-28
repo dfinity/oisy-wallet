@@ -1,4 +1,5 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
+import { nonNullish } from '@dfinity/utils';
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
@@ -6,6 +7,7 @@ export abstract class AppWorker {
 
 	private static _worker: Worker | null = null;
 	private static _clients = 0;
+	private static _asSingleton = false;
 
 	private _listener?: (ev: MessageEvent) => void;
 
@@ -14,20 +16,30 @@ export abstract class AppWorker {
 		this.#queue = new WorkerQueue(worker);
 	}
 
-	static async getInstance(): Promise<Worker> {
+	static async newInstance(): Promise<Worker> {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
 	}
 
-	static async getInstance2(): Promise<Worker> {
-		if (this._worker) {
+	static async getInstanceAsSingleton(): Promise<Worker> {
+		if (nonNullish(this._worker)) {
 			this._clients++;
 			return this._worker;
 		}
-		const Workers = await import('$lib/workers/workers?worker');
-		this._worker = new Workers.default(); // module worker (vite ?worker)
+
+		this._worker = await this.newInstance();
 		this._clients = 1;
 		return this._worker;
+	}
+
+	static async getInstance(asSingleton = false): Promise<Worker> {
+		this._asSingleton = asSingleton;
+
+		if (asSingleton) {
+			return this.getInstanceAsSingleton();
+		}
+
+		return await this.newInstance();
 	}
 
 	protected addMessageListener<T = unknown>(fn: (ev: MessageEvent<T>) => void) {
@@ -36,10 +48,21 @@ export abstract class AppWorker {
 	}
 
 	protected removeMessageListener() {
-		if (this._listener) {
+		if (nonNullish(this._listener)) {
 			this.worker.removeEventListener('message', this._listener);
 		}
+
 		this._listener = undefined;
+	}
+
+	protected setOnMessage<T = unknown>(fn: (ev: MessageEvent<T>) => void) {
+		if (this._asSingleton) {
+			this.addMessageListener(fn);
+
+			return;
+		}
+
+		this.#worker.onmessage = fn;
 	}
 
 	protected postMessage = <T>(data: T) => {
@@ -67,6 +90,7 @@ export abstract class AppWorker {
 		this.isDestroying = true;
 		this.stopTimer();
 		this.terminate();
+		this.removeMessageListener();
 		this.isDestroying = false;
 		this.destroyCallback();
 	};
