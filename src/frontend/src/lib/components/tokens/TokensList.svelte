@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { flip } from 'svelte/animate';
@@ -26,7 +27,6 @@
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import { isIOS } from '@dfinity/gix-components';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
