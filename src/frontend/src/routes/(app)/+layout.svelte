@@ -59,6 +59,38 @@
 			});
 		});
 	});
+
+	onMount(() => {
+		let focused = false;
+
+		const disableTouch = (e: TouchEvent) => {
+			if (focused) e.preventDefault();
+		};
+
+		const onFocusIn = (e: FocusEvent) => {
+			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+				focused = true;
+				document.body.style.touchAction = 'none'; // disables touch gestures
+				document.body.style.overflow = 'hidden'; // as a backup for Android
+			}
+		};
+
+		const onFocusOut = () => {
+			focused = false;
+			document.body.style.touchAction = '';
+			document.body.style.overflow = '';
+		};
+
+		document.addEventListener('focusin', onFocusIn);
+		document.addEventListener('focusout', onFocusOut);
+		document.addEventListener('touchmove', disableTouch, { passive: false });
+
+		return () => {
+			document.removeEventListener('focusin', onFocusIn);
+			document.removeEventListener('focusout', onFocusOut);
+			document.removeEventListener('touchmove', disableTouch);
+		};
+	});
 </script>
 
 {#if $isAuthLocked}
