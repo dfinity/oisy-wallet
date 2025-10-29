@@ -907,6 +907,17 @@ export const fetchVeloraDeltaSwap = async ({
 
 	let signableOrderData;
 
+	const deltaOrderBaseParams = {
+		deltaPrice: swapDetails as DeltaPrice,
+		owner: userAddress,
+		srcToken: sourceToken.address,
+		destToken: destinationToken.address,
+		srcAmount: parsedSwapAmount.toString(),
+		destAmount: `${slippageMinimum}`,
+		destChainId: Number(destinationNetwork.chainId),
+		partner: OISY_URL_HOSTNAME
+	};
+
 	if (isGasless) {
 		progress(ProgressStepsSwap.APPROVE);
 
@@ -919,14 +930,7 @@ export const fetchVeloraDeltaSwap = async ({
 		});
 
 		signableOrderData = await sdk.delta.buildDeltaOrder({
-			deltaPrice: swapDetails as DeltaPrice,
-			owner: userAddress,
-			srcToken: sourceToken.address,
-			destToken: destinationToken.address,
-			srcAmount: parsedSwapAmount.toString(),
-			destAmount: `${slippageMinimum}`,
-			destChainId: Number(destinationNetwork.chainId),
-			partner: OISY_URL_HOSTNAME,
+			...deltaOrderBaseParams,
 			deadline,
 			nonce: Number(nonce),
 			permit: encodedPermit
@@ -947,19 +951,8 @@ export const fetchVeloraDeltaSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
-		signableOrderData = await sdk.delta.buildDeltaOrder({
-			deltaPrice: swapDetails as DeltaPrice,
-			owner: userAddress,
-			srcToken: sourceToken.address,
-			destToken: destinationToken.address,
-			srcAmount: `${parsedSwapAmount}`,
-			destAmount: `${slippageMinimum}`,
-			destChainId: Number(destinationNetwork.chainId),
-			partner: OISY_URL_HOSTNAME
-		});
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
 	}
-
-	progress(ProgressStepsSwap.SWAP);
 
 	const hash = getSignParamsEIP712(signableOrderData);
 
