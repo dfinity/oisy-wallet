@@ -146,7 +146,7 @@ dependencies = [
  "getrandom",
  "hex",
  "ic-cdk 0.17.2",
- "ic-cdk-macros 0.17.2",
+ "ic-cdk-macros 0.18.7",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-ledger-types",
@@ -1675,6 +1675,19 @@ dependencies = [
  "quote",
  "serde",
  "serde_tokenstream",
+ "syn 2.0.101",
+]
+
+[[package]]
+name = "ic-cdk-macros"
+version = "0.18.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7eb14c5d691cc9d72bb95459b4761e3a4b3444b85a63d17555d5ddd782969a1e"
+dependencies = [
+ "candid",
+ "darling",
+ "proc-macro2",
+ "quote",
  "syn 2.0.101",
 ]
 
@@ -3761,7 +3774,7 @@ dependencies = [
  "hex",
  "ic-canister-sig-creation",
  "ic-cdk 0.17.2",
- "ic-cdk-macros 0.17.2",
+ "ic-cdk-macros 0.18.7",
  "ic-cdk-timers",
  "ic-cycles-ledger-client",
  "ic-metrics-encoder",
