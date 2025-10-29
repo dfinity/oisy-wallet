@@ -17,9 +17,7 @@
 		NFT_LIST_HIDDEN,
 		NFT_LIST_SPAM
 	} from '$lib/constants/test-ids.constants';
-	import {
-		selectedNetworkNftUnsupported
-	} from '$lib/derived/network.derived';
+	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 	import { nftGroupByCollection, showHidden, showSpam } from '$lib/derived/settings.derived';
 	import { nonFungibleTokens } from '$lib/derived/tokens.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';

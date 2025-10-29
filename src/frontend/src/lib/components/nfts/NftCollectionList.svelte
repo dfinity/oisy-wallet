@@ -4,9 +4,7 @@
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftCollectionCard from '$lib/components/nfts/NftCollectionCard.svelte';
 	import NftsNetworkUnsupported from '$lib/components/nfts/NftsNetworkUnsupported.svelte';
-	import {
-		selectedNetworkNftUnsupported
-	} from '$lib/derived/network.derived';
+	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import type { NftCollectionUi } from '$lib/types/nft';
 

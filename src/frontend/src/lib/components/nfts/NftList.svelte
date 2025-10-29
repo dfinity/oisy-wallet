@@ -3,9 +3,7 @@
 	import type { Snippet } from 'svelte';
 	import EmptyNftsList from '$lib/components/nfts/EmptyNftsList.svelte';
 	import NftsNetworkUnsupported from '$lib/components/nfts/NftsNetworkUnsupported.svelte';
-	import {
-		selectedNetworkNftUnsupported
-	} from '$lib/derived/network.derived';
+	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 	import type { Nft } from '$lib/types/nft';
 
 	interface Props {
