@@ -971,7 +971,8 @@ pub fn get_account_creation_timestamps() -> Vec<(Principal, Timestamp)> {
         s.user_profile
             .iter()
             .map(|entry| {
-                let (_updated, StoredPrincipal(&principal)) = entry.key();
+                let (_updated, StoredPrincipal(principal)) = entry.key();
+                let principal = *principal;
                 let user = entry.value();
                 (principal, user.created_timestamp)
             })
