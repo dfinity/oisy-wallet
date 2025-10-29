@@ -50,12 +50,7 @@
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-			><MainnetNetwork
-				{labelsSize}
-				{network}
-				{onSelected}
-				{selectedNetworkId}
-			/></li
+			><MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 		>
 	{/each}
 </ul>
@@ -68,12 +63,7 @@
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-				><Network
-					{labelsSize}
-					{network}
-					{onSelected}
-					{selectedNetworkId}
-				/></li
+				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}
 	</ul>

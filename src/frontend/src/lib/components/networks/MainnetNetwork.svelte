@@ -11,20 +11,9 @@
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
-	let {
-		network,
-		selectedNetworkId,
-		labelsSize = 'md',
-		onSelected
-	}: Props = $props();
+	let { network, selectedNetworkId, labelsSize = 'md', onSelected }: Props = $props();
 
 	let usdBalance = $derived($enabledMainnetTokensUsdBalancesPerNetwork[network.id] ?? 0);
 </script>
 
-<NetworkComponent
-	{labelsSize}
-	{network}
-	{onSelected}
-	{selectedNetworkId}
-	{usdBalance}
-/>
+<NetworkComponent {labelsSize} {network} {onSelected} {selectedNetworkId} {usdBalance} />
