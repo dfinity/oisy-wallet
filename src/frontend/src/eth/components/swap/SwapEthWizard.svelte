@@ -203,6 +203,7 @@
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
+				isGasless: false,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
 
