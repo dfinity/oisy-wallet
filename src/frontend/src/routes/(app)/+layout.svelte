@@ -23,9 +23,9 @@
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
-	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		children: Snippet;
@@ -64,7 +64,9 @@
 		let focused = false;
 
 		const disableTouch = (e: TouchEvent) => {
-			if (focused) e.preventDefault();
+			if (focused) {
+				e.preventDefault();
+			}
 		};
 
 		const onFocusIn = (e: FocusEvent) => {
