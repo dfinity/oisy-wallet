@@ -7,6 +7,7 @@
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import SwapEthForm from '$eth/components/swap/SwapEthForm.svelte';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 	import {
 		ETH_FEE_CONTEXT_KEY,
 		initEthFeeContext,
@@ -16,6 +17,7 @@
 	import type { Erc20Token } from '$eth/types/erc20';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import type { ProgressStep } from '$eth/types/send';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
 	import { isNotDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import { enabledEvmTokens } from '$evm/derived/tokens.derived';
 	import SwapProgress from '$lib/components/swap/SwapProgress.svelte';
@@ -74,8 +76,14 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		setIsTokenPermitSupported,
+		isSourceTokenPermitSupported
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -120,6 +128,28 @@
 						displayDecimals: $destinationToken.decimals
 					})
 				: undefined;
+	});
+
+	$effect(() => {
+		if (
+			isNullish($sourceToken) ||
+			!isTokenErc20($sourceToken) ||
+			isNullish($ethAddress) ||
+			nonNullish($isSourceTokenPermitSupported)
+		) {
+			return;
+		}
+		(async () => {
+			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
+			const isPermitSupported = await isErc20SupportsPermit({
+				contractAddress: $sourceToken.address,
+				userAddress: $ethAddress
+			});
+			setIsTokenPermitSupported({
+				address: $sourceToken.address,
+				isPermitSupported
+			});
+		})();
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
@@ -203,6 +233,7 @@
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
+				isGasless: false,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
 

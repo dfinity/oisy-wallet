@@ -270,6 +270,7 @@ interface I18nDapps {
 		axie_infinity: { name: string; one_liner: string; description: string };
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
+		icpanda_message: { name: string; one_liner: string; description: string };
 	};
 }
 
