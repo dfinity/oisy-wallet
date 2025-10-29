@@ -24,7 +24,7 @@
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore, userSelectedNetworkStore } from '$lib/stores/settings.store';
-	import { selectedNetwork } from '$lib/derived/network.derived';
+	import { selectedNetwork, selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 
 	interface Props {
 		tab: TokenTypes;
@@ -71,7 +71,7 @@
 												label: $i18n.nfts.text.title,
 												id: TokenTypes.NFTS,
 												path: `${AppPath.Nfts}${$page.url.search}`,
-												disabled: ($selectedNetwork?.name.indexOf('Eth') ?? 0) < 0
+												disabled: $selectedNetworkNftUnsupported
 											}
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
