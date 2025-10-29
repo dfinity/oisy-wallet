@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { page } from '$app/stores';
 	import ButtonHero from '$lib/components/hero/ButtonHero.svelte';
 	import IconCkConvert from '$lib/components/icons/IconCkConvert.svelte';
 	import { SWAP_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isRouteNfts } from '$lib/utils/nav.utils';
 
 	interface Props {
 		onclick: () => void;
@@ -16,7 +14,7 @@
 
 <ButtonHero
 	ariaLabel={$i18n.swap.text.swap}
-	disabled={$isBusy || isRouteNfts($page)}
+	disabled={$isBusy}
 	{onclick}
 	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 >
