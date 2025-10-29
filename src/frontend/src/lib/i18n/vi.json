@@ -356,6 +356,27 @@
 					"text": "Xin chào, internet tự viết",
 					"call_to_action": "Tìm hiểu thêm"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1711,12 +1732,14 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"unstake": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"earning_potential": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",

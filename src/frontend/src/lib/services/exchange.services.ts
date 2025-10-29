@@ -5,10 +5,10 @@ import { fetchBatchKongSwapPrices } from '$lib/rest/kongswap.rest';
 import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import type {
-	CoingeckoErc20PriceParams,
 	CoingeckoSimplePriceResponse,
 	CoingeckoSimpleTokenPriceResponse
 } from '$lib/types/coingecko';
+import type { CoingeckoErc20PriceParams } from '$lib/types/coingecko-erc20';
 import type { PostMessageDataResponseExchange } from '$lib/types/post-message';
 import {
 	findMissingLedgerCanisterIds,

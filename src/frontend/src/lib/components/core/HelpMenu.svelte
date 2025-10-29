@@ -87,7 +87,7 @@
 
 	<Hr />
 
-	<div class="mt-2 flex gap-2 text-nowrap text-xs text-tertiary">
+	<div class="mt-2 flex gap-2 text-xs text-nowrap text-tertiary">
 		<TermsOfUseLink />
 		<PrivacyPolicyLink />
 		<LicenseAgreementLink />

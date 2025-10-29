@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { UrlSchema } from '@dfinity/zod-schemas';
-	import { createEventDispatcher } from 'svelte';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import Amount from '$lib/components/ui/Amount.svelte';
@@ -21,6 +20,7 @@
 		usdBalance: OptionAmount;
 		dapp?: OisyDappDescription;
 		isBestRate: boolean;
+		onClick: () => void;
 	}
 
 	const {
@@ -29,7 +29,8 @@
 		logoSize = 'md',
 		usdBalance,
 		dapp,
-		isBestRate
+		isBestRate,
+		onClick
 	}: Props = $props();
 
 	let displayURL: string | null = $state(null);
@@ -47,12 +48,10 @@
 			displayURL = null;
 		}
 	});
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(dapp)}
-	<LogoButton dividers onClick={() => dispatch('click')}>
+	<LogoButton dividers {onClick}>
 		{#snippet title()}
 			{resolveText({ i18n: $i18n, path: dapp.name })}
 		{/snippet}

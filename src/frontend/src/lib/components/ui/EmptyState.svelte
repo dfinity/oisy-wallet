@@ -13,7 +13,7 @@
 
 <div class="my-10 flex flex-col items-center justify-center px-4 text-center" in:fade>
 	<IconOisyEmptyState />
-	<div class="mb-1 mt-5 font-bold">{title}</div>
+	<div class="mt-5 mb-1 font-bold">{title}</div>
 
 	{#if notEmptyString(description)}
 		<div class="text-sm">{description}</div>

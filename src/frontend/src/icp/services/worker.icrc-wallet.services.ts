@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -18,7 +18,7 @@ import { nonNullish } from '@dfinity/utils';
 
 export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly ledgerCanisterId: IcToken['ledgerCanisterId'],
 		private readonly indexCanisterId: IcToken['indexCanisterId'],
@@ -26,45 +26,47 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponseWallet
-				| PostMessageDataResponseError
-				| PostMessageDataResponseWalletCleanUp
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponseWallet
+					| PostMessageDataResponseError
+					| PostMessageDataResponseWalletCleanUp
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncIcrcWallet':
-					syncWallet({
-						tokenId,
-						data: data as PostMessageDataResponseWallet
-					});
-					return;
-				case 'syncIcrcWalletError':
-					onLoadTransactionsError({
-						tokenId,
-						error: data.error
-					});
+				switch (msg) {
+					case 'syncIcrcWallet':
+						syncWallet({
+							tokenId,
+							data: data as PostMessageDataResponseWallet
+						});
+						return;
+					case 'syncIcrcWalletError':
+						onLoadTransactionsError({
+							tokenId,
+							error: data.error
+						});
 
-					// In case of error, we start the listener again, but only with the ledgerCanisterId,
-					// to make it request only the balance and not the transactions
-					if (nonNullish(indexCanisterId)) {
-						this.restartWorkerWithLedgerOnly();
-					}
+						// In case of error, we start the listener again, but only with the ledgerCanisterId,
+						// to make it request only the balance and not the transactions
+						if (nonNullish(indexCanisterId)) {
+							this.restartWorkerWithLedgerOnly();
+						}
 
-					return;
-				case 'syncIcrcWalletCleanUp':
-					onTransactionsCleanUp({
-						tokenId,
-						transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
-					});
-					return;
+						return;
+					case 'syncIcrcWalletCleanUp':
+						onTransactionsCleanUp({
+							tokenId,
+							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({

@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -17,44 +17,46 @@ import type { TokenId } from '$lib/types/token';
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly indexCanisterId: IcToken['indexCanisterId']
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponseWallet
-				| PostMessageDataResponseError
-				| PostMessageDataResponseWalletCleanUp
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponseWallet
+					| PostMessageDataResponseError
+					| PostMessageDataResponseWalletCleanUp
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncIcpWallet':
-					syncWallet({
-						tokenId,
-						data: data as PostMessageDataResponseWallet
-					});
-					return;
-				case 'syncIcpWalletError':
-					onLoadTransactionsError({
-						tokenId,
-						error: data.error
-					});
-					return;
-				case 'syncIcpWalletCleanUp':
-					onTransactionsCleanUp({
-						tokenId,
-						transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
-					});
-					return;
+				switch (msg) {
+					case 'syncIcpWallet':
+						syncWallet({
+							tokenId,
+							data: data as PostMessageDataResponseWallet
+						});
+						return;
+					case 'syncIcpWalletError':
+						onLoadTransactionsError({
+							tokenId,
+							error: data.error
+						});
+						return;
+					case 'syncIcpWalletCleanUp':
+						onTransactionsCleanUp({
+							tokenId,
+							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({

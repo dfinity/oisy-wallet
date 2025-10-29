@@ -71,7 +71,7 @@
 {:else}
 	<NftList nfts={filtered}>
 		{#snippet nftListItem({ nft })}
-			<NftCard {nft} {onSelect} type="card-selectable" />
+			<NftCard {nft} {onSelect} type="card-selectable" withCollectionLabel />
 		{/snippet}
 	</NftList>
 {/if}

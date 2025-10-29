@@ -27,7 +27,7 @@
 	let previewList = $derived(enabledList.slice(0, numberOfIcons));
 </script>
 
-<div class="mr-2 mt-1 flex flex-row">
+<div class="mt-1 mr-2 flex flex-row">
 	{#each previewList as network (network.id)}
 		<div class="-ml-1 flex">
 			<NetworkLogo {network} size="xxs" />

@@ -5,7 +5,8 @@ import Plausible from 'plausible-tracker';
 
 let plausibleTracker: ReturnType<typeof Plausible> | null = null;
 
-export const initPlausibleAnalytics = () => {
+// eslint-disable-next-line require-await -- We use this service during initialisation among other async functions, so for consistency we force the asynchronicity here.
+export const initPlausibleAnalytics = async () => {
 	if (!PLAUSIBLE_ENABLED || isNullish(PLAUSIBLE_DOMAIN)) {
 		return;
 	}

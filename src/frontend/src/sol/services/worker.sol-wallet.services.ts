@@ -1,4 +1,4 @@
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -21,34 +21,34 @@ import { get } from 'svelte/store';
 
 export class SolWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly data: PostMessageDataRequestSol
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({ data: dataMsg }: MessageEvent<PostMessage<SolPostMessageDataResponseWallet>>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncSolWallet':
-					syncWallet({
-						tokenId,
-						data: data as SolPostMessageDataResponseWallet
-					});
-					return;
+				switch (msg) {
+					case 'syncSolWallet':
+						syncWallet({
+							tokenId,
+							data: data as SolPostMessageDataResponseWallet
+						});
+						return;
 
-				case 'syncSolWalletError':
-					syncWalletError({
-						tokenId,
-						error: data.error,
-						hideToast: true
-					});
-					return;
+					case 'syncSolWalletError':
+						syncWalletError({
+							tokenId,
+							error: data.error,
+							hideToast: true
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({ token }: { token: Token }): Promise<SolWalletWorker> {

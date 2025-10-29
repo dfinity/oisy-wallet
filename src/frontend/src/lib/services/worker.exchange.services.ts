@@ -1,4 +1,4 @@
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
@@ -12,74 +12,76 @@ import { isNullish } from '@dfinity/utils';
 let errorMessages: { msg: string; timestamp: number }[] = [];
 
 export class ExchangeWorker extends AppWorker {
-	private constructor(worker: Worker) {
+	private constructor(worker: WorkerData) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<PostMessageDataResponseExchange | PostMessageDataResponseExchangeError>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			// If Coingecko throws an error, for instance, if too many requests are queried within the same minute, it is possible that the window may receive the same error twice because we start and stop the worker based on certain store changes.
-			// To prevent the same issue from being displayed multiple times, which would not be user-friendly, the following function keeps track of errors and only displays those that have occurred with a time span of one minute or more.
-			const _toastError = (value: PostMessageDataResponseExchangeError | undefined) => {
-				const text = 'An error occurred while attempting to retrieve the USD exchange rates.';
+				// If Coingecko throws an error, for instance, if too many requests are queried within the same minute, it is possible that the window may receive the same error twice because we start and stop the worker based on certain store changes.
+				// To prevent the same issue from being displayed multiple times, which would not be user-friendly, the following function keeps track of errors and only displays those that have occurred with a time span of one minute or more.
+				const _toastError = (value: PostMessageDataResponseExchangeError | undefined) => {
+					const text = 'An error occurred while attempting to retrieve the USD exchange rates.';
 
-				const msg = value?.err;
+					const msg = value?.err;
 
-				if (isNullish(msg)) {
-					toastsError({
-						msg: { text }
-					});
-					return;
-				}
-
-				const now = Date.now();
-
-				const errorIndex = errorMessages.findIndex(
-					({ msg: message, timestamp }) =>
-						msg === message && timestamp > new Date(now - 1000 * 60).getTime()
-				);
-
-				if (errorIndex > -1) {
-					errorMessages.splice(errorIndex, 1);
-					errorMessages.push({
-						msg,
-						timestamp: now
-					});
-					return;
-				}
-
-				errorMessages = [
-					...errorMessages,
-					{
-						msg,
-						timestamp: now
+					if (isNullish(msg)) {
+						toastsError({
+							msg: { text }
+						});
+						return;
 					}
-				];
 
-				toastsError({
-					msg: { text },
-					err: value?.err
-				});
-			};
+					const now = Date.now();
 
-			switch (msg) {
-				case 'syncExchange':
-					syncExchange(data as PostMessageDataResponseExchange | undefined);
-					return;
-				case 'syncExchangeError':
-					// TODO: error appears to often currently and is super annoying. So until we figure out a way to solve this, hide the error to the console.
-					console.error(
-						'An error occurred while attempting to retrieve the USD exchange rates.',
-						(data as PostMessageDataResponseExchangeError | undefined)?.err
+					const errorIndex = errorMessages.findIndex(
+						({ msg: message, timestamp }) =>
+							msg === message && timestamp > new Date(now - 1000 * 60).getTime()
 					);
-					// toastError(value as PostMessageDataResponseExchangeError | undefined);
-					return;
+
+					if (errorIndex > -1) {
+						errorMessages.splice(errorIndex, 1);
+						errorMessages.push({
+							msg,
+							timestamp: now
+						});
+						return;
+					}
+
+					errorMessages = [
+						...errorMessages,
+						{
+							msg,
+							timestamp: now
+						}
+					];
+
+					toastsError({
+						msg: { text },
+						err: value?.err
+					});
+				};
+
+				switch (msg) {
+					case 'syncExchange':
+						syncExchange(data as PostMessageDataResponseExchange | undefined);
+						return;
+					case 'syncExchangeError':
+						// TODO: error appears to often currently and is super annoying. So until we figure out a way to solve this, hide the error to the console.
+						console.error(
+							'An error occurred while attempting to retrieve the USD exchange rates.',
+							(data as PostMessageDataResponseExchangeError | undefined)?.err
+						);
+						// toastError(value as PostMessageDataResponseExchangeError | undefined);
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init(): Promise<ExchangeWorker> {
