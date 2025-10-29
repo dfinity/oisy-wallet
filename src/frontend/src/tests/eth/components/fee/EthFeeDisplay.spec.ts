@@ -4,6 +4,7 @@ import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/st
 import { maxGasFee as maxGasFeeUtils } from '$eth/utils/fee.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { formatToken } from '$lib/utils/format.utils';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -40,5 +41,38 @@ describe('EthFeeDisplay', () => {
 				unitName: ETHEREUM_TOKEN.decimals
 			})} ${ETHEREUM_TOKEN.symbol}`
 		);
+	});
+
+	it('passes isFeeGasless=true to FeeDisplay', () => {
+		const { container } = render(EthFeeDisplay, {
+			props: {
+				isFeeGasless: true
+			},
+			context: mockContext
+		});
+
+		expect(container).not.toHaveTextContent(ETHEREUM_TOKEN.symbol);
+		expect(container).toHaveTextContent(en.swap.text.gasless);
+	});
+
+	it('passes isFeeGasless=false to FeeDisplay', () => {
+		const { container } = render(EthFeeDisplay, {
+			props: {
+				isFeeGasless: false
+			},
+			context: mockContext
+		});
+
+		expect(container).not.toHaveTextContent(en.swap.text.gasless);
+		expect(container).toHaveTextContent(ETHEREUM_TOKEN.symbol);
+	});
+
+	it('passes isFeeGasless=undefined to FeeDisplay', () => {
+		const { container } = render(EthFeeDisplay, {
+			context: mockContext
+		});
+
+		expect(container).not.toHaveTextContent(en.swap.text.gasless);
+		expect(container).toHaveTextContent(ETHEREUM_TOKEN.symbol);
 	});
 });

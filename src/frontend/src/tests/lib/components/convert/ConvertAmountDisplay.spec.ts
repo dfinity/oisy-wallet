@@ -6,6 +6,7 @@ import {
 	CONVERT_AMOUNT_EXCHANGE_SKELETON,
 	CONVERT_AMOUNT_EXCHANGE_VALUE
 } from '$lib/constants/test-ids.constants';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('ConvertAmountDisplay', () => {
@@ -55,5 +56,35 @@ describe('ConvertAmountDisplay', () => {
 
 		expect(getByTestId(skeletonTestId)).toBeInTheDocument();
 		expect(getByTestId(exchangeSkeleton)).toBeInTheDocument();
+	});
+
+	it('passes isFeeGasless=true to FeeDisplay', () => {
+		const { container } = render(ConvertAmountDisplay, {
+			isFeeGasless: true,
+			...props
+		});
+
+		expect(container).not.toHaveTextContent(symbol);
+		expect(container).toHaveTextContent(en.swap.text.gasless);
+	});
+
+	it('passes isFeeGasless=false to FeeDisplay', () => {
+		const { container } = render(ConvertAmountDisplay, {
+			isFeeGasless: false,
+			...props
+		});
+
+		expect(container).not.toHaveTextContent(en.swap.text.gasless);
+		expect(container).toHaveTextContent(symbol);
+	});
+
+	it('passes isFeeGasless=undefined to FeeDisplay', () => {
+		const { container } = render(ConvertAmountDisplay, {
+			isFeeGasless: undefined,
+			...props
+		});
+
+		expect(container).not.toHaveTextContent(en.swap.text.gasless);
+		expect(container).toHaveTextContent(symbol);
 	});
 });

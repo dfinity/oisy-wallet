@@ -7,9 +7,10 @@
 	interface Props {
 		label?: Snippet;
 		isApproveNeeded?: boolean;
+		isFeeGasless?: boolean;
 	}
 
-	let { label, isApproveNeeded }: Props = $props();
+	let { label, isApproveNeeded, isFeeGasless }: Props = $props();
 
 	const { maxGasFee, feeSymbolStore, feeDecimalsStore, feeExchangeRateStore }: EthFeeContext =
 		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
@@ -29,5 +30,6 @@
 		{feeAmount}
 		{label}
 		symbol={$feeSymbolStore}
+		{isFeeGasless}
 	/>
 {/if}

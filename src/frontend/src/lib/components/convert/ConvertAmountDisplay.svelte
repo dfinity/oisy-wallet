@@ -10,6 +10,7 @@
 		CONVERT_AMOUNT_DISPLAY_VALUE
 	} from '$lib/constants/test-ids.constants';
 	import type { OptionAmount } from '$lib/types/send';
+	import { i18n } from '$lib/stores/i18n.store';
 
 	interface Props {
 		amount?: OptionAmount;
@@ -18,6 +19,7 @@
 		displayExchangeRate?: boolean;
 		zeroAmountLabel?: string;
 		label?: Snippet;
+		isFeeGasless?: boolean;
 	}
 
 	let {
@@ -26,7 +28,8 @@
 		exchangeRate,
 		displayExchangeRate = true,
 		zeroAmountLabel,
-		label
+		label,
+		isFeeGasless
 	}: Props = $props();
 </script>
 
@@ -34,9 +37,11 @@
 	{#snippet mainValue()}
 		{#if nonNullish(amount)}
 			<div data-tid={CONVERT_AMOUNT_DISPLAY_VALUE} in:fade>
-				{nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
-					? zeroAmountLabel
-					: `${amount} ${symbol}`}
+				{isFeeGasless
+					? $i18n.swap.text.gasless
+					: nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
+						? zeroAmountLabel
+						: `${amount} ${symbol}`}
 			</div>
 		{:else}
 			<div class="w-14 sm:w-24" data-tid={CONVERT_AMOUNT_DISPLAY_SKELETON}>
@@ -47,7 +52,7 @@
 
 	{#snippet secondaryValue()}
 		{#if displayExchangeRate}
-			<ConvertAmountExchange {amount} {exchangeRate} />
+			<ConvertAmountExchange amount={isFeeGasless ? 0 : amount} {exchangeRate} />
 		{/if}
 	{/snippet}
 </ModalValue>
