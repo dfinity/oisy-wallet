@@ -1,20 +1,16 @@
 import RadioBox from '$lib/components/ui/RadioBox.svelte';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { fireEvent, render } from '@testing-library/svelte';
-import { createRawSnippet } from 'svelte';
 
 describe('RadioBox', () => {
-	const labelText = 'RadioBox';
-	const descriptionText = 'This is a radio box';
+	const labelTestId = 'label';
+	const descriptionTestId = 'description';
 	const props = {
 		checked: false,
 		disabled: false,
-		label: createRawSnippet(() => ({
-			render: () => `<span>${labelText}</span>`
-		})),
-		description: createRawSnippet(() => ({
-			render: () => `<span>${descriptionText}</span>`
-		})),
+		label: createMockSnippet(labelTestId),
+		description: createMockSnippet(descriptionTestId),
 		onChange: vi.fn(),
 		id: 'radio-id'
 	};
@@ -57,22 +53,21 @@ describe('RadioBox', () => {
 	});
 
 	it('should render a label and optional description', async () => {
-		const { queryByText, rerender } = render(RadioBox, {
+		const { getByTestId, rerender } = render(RadioBox, {
 			props
 		});
 
-		let label: HTMLElement | null = queryByText(labelText);
-		let description: HTMLElement | null = queryByText(descriptionText);
+		let label: HTMLElement | null = getByTestId(labelTestId);
+		const description: HTMLElement | null = getByTestId(descriptionTestId);
 
 		expect(label).toBeInTheDocument();
 		expect(description).toBeInTheDocument();
 
 		await rerender({ ...props, description: undefined });
 
-		label = queryByText(labelText);
-		description = queryByText(descriptionText);
+		label = getByTestId(labelTestId);
 
 		expect(label).toBeInTheDocument();
-		expect(description).not.toBeInTheDocument();
+		expect(() => getByTestId(descriptionTestId)).toThrow();
 	});
 });
