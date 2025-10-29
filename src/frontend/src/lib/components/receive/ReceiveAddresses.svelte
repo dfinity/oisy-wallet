@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import { page } from '$app/state';
 	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
 		BTC_MAINNET_NETWORK,
@@ -72,7 +73,6 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
-	import { page } from '$app/state';
 
 	interface Props {
 		onQRCode: (details: ReceiveQRCode) => void;
@@ -264,7 +264,8 @@
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
 		{#each receiveAddressList as { title: _title, text: _text, condition, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
-			{@const showAddress = condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
+			{@const showAddress =
+				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
 
 			{#if showAddress}
 				{#if nonNullish(_text)}
