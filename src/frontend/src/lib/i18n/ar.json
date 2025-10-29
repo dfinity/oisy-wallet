@@ -372,6 +372,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "",
 			"as_plain_list": "",
 			"by_collection": "",

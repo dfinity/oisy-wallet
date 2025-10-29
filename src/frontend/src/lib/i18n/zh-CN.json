@@ -372,6 +372,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "标题",
 			"title_empty": "标题为空",
 			"description_empty": "描述为空",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "分组",
 			"as_plain_list": "以普通列表显示",
 			"by_collection": "按合集分组",

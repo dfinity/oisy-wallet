@@ -61,6 +61,21 @@
 		}
 	},
 	{
+		"id": "icpanda-message",
+		"name": "dapps.descriptions.icpanda_message.name",
+		"oneLiner": "dapps.descriptions.icpanda_message.one_liner",
+		"website": "https://dmsg.net/",
+		"twitter": "https://x.com/icpandadao",
+		"github": "https://github.com/ldclabs",
+		"tags": ["dapps.categories.social_media"],
+		"description": "dapps.descriptions.icpanda_message.description",
+		"usesInternetIdentity": true,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/icpanda-message-logo.svg",
+		"screenshots": ["/images/dapps/icpanda-message-screenshot.webp"]
+	},
+	{
 		"id": "decideid",
 		"name": "dapps.descriptions.decideid.name",
 		"oneLiner": "dapps.descriptions.decideid.one_liner",
@@ -135,6 +150,21 @@
 		"description": "dapps.descriptions.oneinch.description",
 		"logo": "/images/dapps/1-inch-logo.svg",
 		"screenshots": ["/images/dapps/1-inch.webp"]
+	},
+	{
+		"id": "cyql",
+		"name": "dapps.descriptions.cyql.name",
+		"oneLiner": "dapps.descriptions.cyql.one_liner",
+		"website": "https://cyql.io/",
+		"twitter": "https://x.com/cyqlio",
+		"discord": "https://discord.gg/AnjyrfvvXX",
+		"tags": ["dapps.categories.tools"],
+		"description": "dapps.descriptions.cyql.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/cyql-logo.svg",
+		"screenshots": ["/images/dapps/cyql-screenshot.webp"]
 	},
 	{
 		"id": "compound-finance",

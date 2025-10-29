@@ -139,6 +139,7 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
+		section: token.section,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name }),
 		...(notEmptyString(token.description) && { description: token.description }),

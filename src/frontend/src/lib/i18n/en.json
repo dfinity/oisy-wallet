@@ -372,6 +372,16 @@
 				"name": "Mobox",
 				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
 				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
+			},
+			"cyql": {
+				"name": "cyql.io",
+				"one_liner": "THE Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer.",
+				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
+			},
+			"icpanda_message": {
+				"name": "dMsg.net",
+				"one_liner": "Decentralized alternative to Signal.",
+				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
+			"title_not_supported": "NFTs are not yet supported on the selected network",
+			"description_not_supported": "Please do not send NTFs to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",

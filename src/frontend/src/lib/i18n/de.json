@@ -372,6 +372,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Deine NFTs erscheinen hier",
 			"description_empty": "Es scheint als hättest du noch keine NFTs erhalten",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Gruppierung",
 			"as_plain_list": "Als Liste anzeigen",
 			"by_collection": "Nach Kollektion gruppieren",

@@ -372,6 +372,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "Vypadá to, že jste ještě neobdrželi NFT.",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Seskupování",
 			"as_plain_list": "Zobrazit jako prostý seznam",
 			"by_collection": "Seskupit podle kolekce",

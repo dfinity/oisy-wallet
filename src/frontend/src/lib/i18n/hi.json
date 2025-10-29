@@ -372,6 +372,16 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1124,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "समूहीकरण",
 			"as_plain_list": "सादी सूची के रूप में दिखाएँ",
 			"by_collection": "संग्रह के अनुसार समूहित करें",
