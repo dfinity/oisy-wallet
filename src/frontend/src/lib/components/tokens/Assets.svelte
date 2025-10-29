@@ -20,11 +20,11 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { modalManageTokens, modalManageTokensData } from '$lib/derived/modal.derived';
 	import { routeCollection, routeNetwork, routeNft } from '$lib/derived/nav.derived';
+	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { activeAssetsTabStore } from '$lib/stores/settings.store';
-	import { selectedNetworkNftUnsupported } from '$lib/derived/network.derived';
 
 	interface Props {
 		tab: TokenTypes;

@@ -52,6 +52,7 @@
 			class:border-b-2={activeTab === id || tabVariant === 'default'}
 			class:border-brand-primary={activeTab === id}
 			class:border-primary={activeTab !== id}
+			class:cursor-not-allowed={disabled}
 			class:h-6={tabVariant === 'menu'}
 			class:hover:text-brand-primary={tabVariant === 'default' && !disabled}
 			class:hover:text-primary={tabVariant === 'menu' && !disabled}
@@ -62,9 +63,8 @@
 			class:text-tertiary-inverted={activeTab !== id && tabVariant === 'default'}
 			class:w-full={tabVariant === 'default'}
 			aria-label={label}
-			onclick={() => handleClick({ id, path })}
 			{disabled}
-			class:cursor-not-allowed={disabled}
+			onclick={() => handleClick({ id, path })}
 		>
 			{label}
 		</button>
