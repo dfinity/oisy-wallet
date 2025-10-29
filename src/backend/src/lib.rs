@@ -1,3 +1,5 @@
+use ic_cdk::{export_candid, init, post_upgrade, query};
+use ic_cdk::update;
 use std::{cell::RefCell, time::Duration};
 
 use bitcoin_utils::estimate_fee;
@@ -8,7 +10,6 @@ use heap_state::{
     btc_user_pending_tx_state::StoredPendingTransaction, state::with_btc_pending_transactions,
 };
 use ic_cdk::{api::time, eprintln};
-use ic_cdk_macros::{export_candid, init, post_upgrade, query, update};
 use ic_cdk_timers::{set_timer, set_timer_interval};
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager},
