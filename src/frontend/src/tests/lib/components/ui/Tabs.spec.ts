@@ -60,8 +60,8 @@ describe('Tabs', () => {
 		expect(goto).toHaveBeenNthCalledWith(2, 'test2');
 	});
 
-	it('should not do anything if disabled', async () => {
-		const { getByText, getByTestId } = render(Tabs, {
+	it('should disable the tab when disabled prop is set', () => {
+		const { getByText } = render(Tabs, {
 			props: {
 				...props,
 				tabs: props.tabs.map((t) => ({ ...t, path: t.id, disabled: true })) as NonEmptyArray<{
