@@ -61,17 +61,17 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		}
 	);
 
-	const isSourceTokenSupportsPermit = derived(
+	const isSourceTokenPermitSupported = derived(
 		[isErc20PermitSupported, sourceToken],
-		([$isErc20TokenSupportsPermit, $sourceToken]) => {
+		([$isErc20PermitSupported, $sourceToken]) => {
 			if (
 				isNullish($sourceToken) ||
 				!isTokenErc20($sourceToken) ||
-				isNullish($isErc20TokenSupportsPermit)
+				isNullish($isErc20PermitSupported)
 			) {
 				return;
 			}
-			return $isErc20TokenSupportsPermit[$sourceToken.address];
+			return $isErc20PermitSupported[$sourceToken.address];
 		}
 	);
 
@@ -83,7 +83,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
-		isSourceTokenSupportsPermit,
+		isSourceTokenPermitSupported,
 		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: Token) =>
 			update((state) => ({
@@ -111,7 +111,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 				...state,
 				[ledgerCanisterId]: isIcrc2Supported
 			})),
-		setIsTokenSupportPermit: ({
+		setIsTokenPermitSupported: ({
 			address,
 			isPermitSupported
 		}: {
@@ -133,10 +133,10 @@ export interface SwapContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean | undefined>;
-	isSourceTokenSupportsPermit: Readable<boolean | undefined>;
+	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
-	setIsTokenSupportPermit: ({
+	setIsTokenPermitSupported: ({
 		address,
 		isPermitSupported
 	}: {

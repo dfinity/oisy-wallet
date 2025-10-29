@@ -199,78 +199,78 @@ describe('swapStore', () => {
 		});
 	});
 
-	describe('isSourceTokenSupportsPermit', () => {
+	describe('isSourceTokenPermitSupported', () => {
 		it('should initialize with empty values', () => {
-			const { isSourceTokenSupportsPermit } = initSwapContext({
+			const { isSourceTokenPermitSupported } = initSwapContext({
 				sourceToken: mockValidErc20Token
 			});
 
-			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+			expect(get(isSourceTokenPermitSupported)).toBeUndefined();
 		});
 
 		it('should return undefined when sourceToken is not set', () => {
-			const { isSourceTokenSupportsPermit } = initSwapContext();
+			const { isSourceTokenPermitSupported } = initSwapContext();
 
-			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+			expect(get(isSourceTokenPermitSupported)).toBeUndefined();
 		});
 
 		it('should cache isPermitSupported status', () => {
-			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit } = initSwapContext({
+			const { isSourceTokenPermitSupported, setIsTokenPermitSupported } = initSwapContext({
 				sourceToken: mockValidErc20Token
 			});
 
-			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+			expect(get(isSourceTokenPermitSupported)).toBeUndefined();
 
-			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: true });
+			setIsTokenPermitSupported({ address: mockValidErc20Token.address, isPermitSupported: true });
 
-			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+			expect(get(isSourceTokenPermitSupported)).toBeTruthy();
 		});
 
 		it('should update isSourceTokenSupportsPermit when cache changes', () => {
-			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit } = initSwapContext({
+			const { isSourceTokenPermitSupported, setIsTokenPermitSupported } = initSwapContext({
 				sourceToken: mockValidErc20Token
 			});
 
-			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: false });
+			setIsTokenPermitSupported({ address: mockValidErc20Token.address, isPermitSupported: false });
 
-			expect(get(isSourceTokenSupportsPermit)).toBeFalsy();
+			expect(get(isSourceTokenPermitSupported)).toBeFalsy();
 
-			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: true });
+			setIsTokenPermitSupported({ address: mockValidErc20Token.address, isPermitSupported: true });
 
-			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+			expect(get(isSourceTokenPermitSupported)).toBeTruthy();
 		});
 
 		it('should return correct value when sourceToken changes', () => {
-			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit, setSourceToken } =
+			const { isSourceTokenPermitSupported, setIsTokenPermitSupported, setSourceToken } =
 				initSwapContext({
 					sourceToken: mockValidErc20Token
 				});
 
-			setIsTokenSupportPermit({ address: PEPE_TOKEN.address, isPermitSupported: true });
-			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: false });
+			setIsTokenPermitSupported({ address: PEPE_TOKEN.address, isPermitSupported: true });
+			setIsTokenPermitSupported({ address: mockValidErc20Token.address, isPermitSupported: false });
 
 			setSourceToken(PEPE_TOKEN);
 
-			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+			expect(get(isSourceTokenPermitSupported)).toBeTruthy();
 
 			setSourceToken(mockValidErc20Token);
 
-			expect(get(isSourceTokenSupportsPermit)).toBeFalsy();
+			expect(get(isSourceTokenPermitSupported)).toBeFalsy();
 		});
 
 		it('should return undefined for uncached token', () => {
-			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit, setSourceToken } =
+			const { isSourceTokenPermitSupported, setIsTokenPermitSupported, setSourceToken } =
 				initSwapContext({
 					sourceToken: PEPE_TOKEN
 				});
 
-			setIsTokenSupportPermit({ address: PEPE_TOKEN.address, isPermitSupported: true });
+			setIsTokenPermitSupported({ address: PEPE_TOKEN.address, isPermitSupported: true });
 
-			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+			expect(get(isSourceTokenPermitSupported)).toBeTruthy();
 
 			setSourceToken(mockValidErc20Token);
 
-			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+			expect(get(isSourceTokenPermitSupported)).toBeUndefined();
 		});
 	});
 });
