@@ -28,8 +28,8 @@
 		decimals={$feeDecimalsStore}
 		exchangeRate={$feeExchangeRateStore}
 		{feeAmount}
+		{isFeeGasless}
 		{label}
 		symbol={$feeSymbolStore}
-		{isFeeGasless}
 	/>
 {/if}

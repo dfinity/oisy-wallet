@@ -9,8 +9,8 @@
 		CONVERT_AMOUNT_DISPLAY_SKELETON,
 		CONVERT_AMOUNT_DISPLAY_VALUE
 	} from '$lib/constants/test-ids.constants';
-	import type { OptionAmount } from '$lib/types/send';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { OptionAmount } from '$lib/types/send';
 
 	interface Props {
 		amount?: OptionAmount;

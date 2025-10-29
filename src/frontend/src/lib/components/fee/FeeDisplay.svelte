@@ -37,8 +37,8 @@
 	amount={formattedFeeAmount}
 	{displayExchangeRate}
 	{exchangeRate}
+	{isFeeGasless}
 	{label}
 	{symbol}
 	{zeroAmountLabel}
-	{isFeeGasless}
 />
