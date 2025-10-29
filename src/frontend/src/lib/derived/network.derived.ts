@@ -83,7 +83,7 @@ export const networkAddress: Readable<OptionEthAddress | string> = derived(
 		$networkICP ? $icrcAccountIdentifierStore : $address
 );
 
-const selectedNetworkNftSupported: Readable<boolean> = derived(
+export const selectedNetworkNftSupported: Readable<boolean> = derived(
 	[selectedNetwork],
 	([$selectedNetwork]) =>
 		isNullish($selectedNetwork) ? true : ($selectedNetwork.supportsNft ?? false)
