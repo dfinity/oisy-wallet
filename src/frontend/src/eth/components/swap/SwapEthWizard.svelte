@@ -43,6 +43,8 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import { isTokenErc20 } from '$eth/utils/erc20.utils';
+	import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -74,8 +76,14 @@
 		onBack
 	}: Props = $props();
 
-	const { sourceToken, destinationToken, failedSwapError, sourceTokenExchangeRate } =
-		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+	const {
+		sourceToken,
+		destinationToken,
+		failedSwapError,
+		sourceTokenExchangeRate,
+		setIsTokenPermitSupported,
+		isSourceTokenPermitSupported
+	} = getContext<SwapContext>(SWAP_CONTEXT_KEY);
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContextType>(SWAP_AMOUNTS_CONTEXT_KEY);
 
@@ -120,6 +128,25 @@
 						displayDecimals: $destinationToken.decimals
 					})
 				: undefined;
+	});
+
+	$effect(() => {
+		if (isNullish($sourceToken) || !isTokenErc20($sourceToken) || isNullish($ethAddress)) {
+			return;
+		}
+		if (isNullish($isSourceTokenPermitSupported)) {
+			(async () => {
+				const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
+				const isPermitSupported = await isErc20SupportsPermit({
+					contractAddress: $sourceToken.address,
+					userAddress: $ethAddress
+				});
+				setIsTokenPermitSupported({
+					address: $sourceToken.address,
+					isPermitSupported
+				});
+			})();
+		}
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
