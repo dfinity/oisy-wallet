@@ -59,29 +59,6 @@
 			});
 		});
 	});
-
-	const preventScroll = (e: TouchEvent) => {
-		const target = e.target as Element | null;
-		if (!target?.closest('.modal')) {
-			e.preventDefault();
-		}
-	};
-
-	$effect(() => {
-		const root = document.getElementById('content-root');
-		if (root) {
-			root.classList.add('border-3');
-			if (nonNullish($modalStore?.type)) {
-				document.addEventListener('touchmove', preventScroll, { passive: false });
-				root.classList.remove('overflow-y-auto');
-				root.classList.add('overflow-y-hidden');
-			} else {
-				document.removeEventListener('touchmove', preventScroll);
-				root.classList.add('overflow-y-auto');
-				root.classList.remove('overflow-y-hidden');
-			}
-		}
-	});
 </script>
 
 {#if $isAuthLocked}
