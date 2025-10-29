@@ -932,7 +932,7 @@ export const fetchVeloraDeltaSwap = async ({
 		signableOrderData = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
-			nonce: Number(nonce),
+			nonce,
 			permit: encodedPermit
 		});
 	} else {
