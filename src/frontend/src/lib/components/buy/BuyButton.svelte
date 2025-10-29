@@ -7,17 +7,21 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { isNullishOrEmpty } from '$lib/utils/input.utils';
 	import { isRouteNfts } from '$lib/utils/nav.utils';
+	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
+	import { getContext } from 'svelte';
 
 	interface Props {
 		onclick: () => void;
 	}
 
 	let { onclick }: Props = $props();
+
+	const { inflowActionsDisabled } = getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
 	ariaLabel={$i18n.send.text.send}
-	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY) || isRouteNfts($page)}
+	disabled={$isBusy || isNullishOrEmpty(ONRAMPER_API_KEY) || $inflowActionsDisabled}
 	{onclick}
 >
 	{#snippet icon()}
