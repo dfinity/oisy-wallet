@@ -6,6 +6,7 @@
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -15,7 +16,6 @@
 	import type { Nft } from '$lib/types/nft';
 	import { isDesktop } from '$lib/utils/device.utils';
 	import { findNftsByNetwork } from '$lib/utils/nfts.utils';
-	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 
 	interface Props {
 		onSelect: (nft: Nft) => void;
