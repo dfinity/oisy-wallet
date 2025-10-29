@@ -1,3 +1,4 @@
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -23,8 +24,9 @@ type IsTokensIcrc2Map = Record<string, boolean>;
 
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
-	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
 	const { update } = data;
+	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
+	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
 	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
@@ -59,6 +61,20 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		}
 	);
 
+	const isSourceTokenPermitSupported = derived(
+		[isErc20PermitSupported, sourceToken],
+		([$isErc20PermitSupported, $sourceToken]) => {
+			if (
+				isNullish($sourceToken) ||
+				!isTokenErc20($sourceToken) ||
+				isNullish($isErc20PermitSupported)
+			) {
+				return;
+			}
+			return $isErc20PermitSupported[$sourceToken.address];
+		}
+	);
+
 	return {
 		sourceToken,
 		destinationToken,
@@ -67,6 +83,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
+		isSourceTokenPermitSupported,
 		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: Token) =>
 			update((state) => ({
@@ -93,6 +110,17 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			isTokensIcrc2.update((state) => ({
 				...state,
 				[ledgerCanisterId]: isIcrc2Supported
+			})),
+		setIsTokenPermitSupported: ({
+			address,
+			isPermitSupported
+		}: {
+			address: string;
+			isPermitSupported: boolean;
+		}) =>
+			isErc20PermitSupported.update((state) => ({
+				...state,
+				[address]: isPermitSupported
 			}))
 	};
 };
@@ -105,8 +133,16 @@ export interface SwapContext {
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
 	isSourceTokenIcrc2: Readable<boolean | undefined>;
+	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
 	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
+	setIsTokenPermitSupported: ({
+		address,
+		isPermitSupported
+	}: {
+		address: string;
+		isPermitSupported: boolean;
+	}) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;

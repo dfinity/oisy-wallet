@@ -217,6 +217,7 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	destinationNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 	swapDetails: VeloraSwapDetails;
+	isGasless: boolean;
 }
 
 export interface CheckDeltaOrderStatusParams {
