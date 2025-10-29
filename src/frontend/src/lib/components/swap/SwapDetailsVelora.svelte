@@ -38,7 +38,7 @@
 		{/snippet}
 
 		{#snippet mainValue()}
-			{$currentCurrencySymbol}0
+			{$currentCurrencySymbol}0.00
 		{/snippet}
 	</ModalValue>
 {/if}
