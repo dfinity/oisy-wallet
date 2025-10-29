@@ -5,6 +5,7 @@
 	import GldtStakeProvider from '$icp/components/stake/gldt/GldtStakeProvider.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
@@ -31,6 +32,10 @@
 </script>
 
 <StakeReview {amount} {destination} disabled={invalid} {onBack} {onStake}>
+	{#snippet subtitle()}
+		{$i18n.stake.text.stake_review_subtitle}
+	{/snippet}
+
 	{#snippet provider()}
 		<GldtStakeProvider />
 	{/snippet}
