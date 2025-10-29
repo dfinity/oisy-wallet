@@ -27,28 +27,24 @@ const fetchPermitMetadata = async ({
 	customDeadline,
 	tokenName
 }: FetchPermitMetadataParams): Promise<PermitMetadata> => {
-	try {
-		const [nonce, version] = await Promise.all([
-			tokenContract.nonces(userAddress),
-			tokenContract.version()
-		]);
+	const [nonceResult, versionResult] = await Promise.allSettled([
+		tokenContract.nonces(userAddress),
+		tokenContract.version()
+	]);
 
-		return {
-			name: tokenName,
-			version,
-			nonce: nonce.toString(),
-			deadline: customDeadline ?? createDeadline()
-		};
-	} catch {
-		const nonce = await tokenContract.nonces(userAddress);
-
-		return {
-			name: tokenName,
-			version: '1',
-			nonce: nonce.toString(),
-			deadline: customDeadline ?? createDeadline()
-		};
+	if (nonceResult.status === 'rejected') {
+		throw nonceResult.reason;
 	}
+
+	const nonce = nonceResult.value;
+	const version = versionResult.status === 'fulfilled' ? versionResult.value : '1';
+
+	return {
+		name: tokenName,
+		version,
+		nonce: nonce.toString(),
+		deadline: customDeadline ?? createDeadline()
+	};
 };
 
 /**

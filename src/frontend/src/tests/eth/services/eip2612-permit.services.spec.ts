@@ -563,10 +563,13 @@ describe('EIP2612 Permit Services', () => {
 	describe('error handling', () => {
 		it('should throw error when nonces call fails', async () => {
 			const mockError = new Error('Contract call failed');
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
+
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: vi.fn().mockRejectedValue(mockError)
+						nonces: vi.fn().mockRejectedValue(mockError),
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
