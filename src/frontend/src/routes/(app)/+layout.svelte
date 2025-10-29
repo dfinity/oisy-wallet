@@ -25,6 +25,7 @@
 	import { pageNonFungibleToken, pageToken } from '$lib/derived/page-token.derived';
 	import { token } from '$lib/stores/token.store';
 	import { isRouteNfts, isRouteTokens, isRouteTransactions } from '$lib/utils/nav.utils';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		children: Snippet;
@@ -95,7 +96,7 @@
 				</SplitPane>
 
 				{#if !$aiAssistantConsoleOpen}
-					<div class="fixed right-4 bottom-16 z-3 block">
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}

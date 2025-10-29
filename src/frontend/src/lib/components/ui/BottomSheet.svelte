@@ -5,6 +5,7 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		visible: boolean;
@@ -13,6 +14,14 @@
 	}
 
 	let { visible = $bindable(), content, footer }: Props = $props();
+
+	$effect(() => {
+		if (visible) {
+			modalStore.openBottomSheet(Symbol('bottomsheet'));
+		} else {
+			modalStore.close();
+		}
+	});
 </script>
 
 {#if visible}
