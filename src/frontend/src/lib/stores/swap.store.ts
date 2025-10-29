@@ -26,7 +26,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
 	const { update } = data;
 	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
-	const isErc20SupportsPermit = writable<IsTokensIcrc2Map | undefined>();
+	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
 	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
@@ -62,7 +62,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	);
 
 	const isSourceTokenSupportsPermit = derived(
-		[isErc20SupportsPermit, sourceToken],
+		[isErc20PermitSupported, sourceToken],
 		([$isErc20TokenSupportsPermit, $sourceToken]) => {
 			if (
 				isNullish($sourceToken) ||
@@ -118,7 +118,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			address: string;
 			isPermitSupported: boolean;
 		}) =>
-			isErc20SupportsPermit.update((state) => ({
+			isErc20PermitSupported.update((state) => ({
 				...state,
 				[address]: isPermitSupported
 			}))
