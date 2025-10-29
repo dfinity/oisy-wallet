@@ -29,6 +29,7 @@ export interface EthFeeContext {
 	feeDecimalsStore: Writable<number | undefined>;
 	maxGasFee: Readable<bigint | undefined>;
 	minGasFee: Readable<bigint | undefined>;
+	isFeeGasless?: Writable<boolean | undefined>;
 	feeExchangeRateStore?: Writable<number | undefined>;
 	evaluateFee?: () => void;
 }
