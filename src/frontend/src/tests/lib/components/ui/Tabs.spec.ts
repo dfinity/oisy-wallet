@@ -59,4 +59,26 @@ describe('Tabs', () => {
 		expect(goto).toHaveBeenNthCalledWith(1, 'test1');
 		expect(goto).toHaveBeenNthCalledWith(2, 'test2');
 	});
+
+	it('should not do anything if disabled', async () => {
+		const { getByText, getByTestId } = render(Tabs, {
+			props: {
+				...props,
+				tabs: props.tabs.map((t) => ({ ...t, path: t.id, disabled: true })) as NonEmptyArray<{
+					label: string;
+					id: string;
+					path?: string | undefined;
+					disabled?: boolean;
+				}>
+			}
+		});
+
+		const tab0 = getByText(props.tabs[0].label);
+		const tab1 = getByText(props.tabs[1].label);
+
+		expect(tab0).toBeInTheDocument();
+		expect(tab1).toBeInTheDocument();
+		expect(tab0).toBeDisabled();
+		expect(tab1).toBeDisabled();
+	});
 });
