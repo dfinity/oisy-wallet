@@ -5,6 +5,7 @@ import {
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NftMediaStatusEnum, NftNetworkSchema } from '$lib/schema/nft.schema';
 import { NftError } from '$lib/types/errors';
 import type { Nft, NftId } from '$lib/types/nft';
@@ -483,6 +484,41 @@ describe('nfts.utils', () => {
 				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
 				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
 				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard
+			});
+		});
+
+		it('should map token section correctly', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN,
+				section: CustomTokenSection.HIDDEN
+			});
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				section: CustomTokenSection.HIDDEN,
+				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
+			});
+		});
+
+		it('should have undefined section if not set', () => {
+			const result = mapTokenToCollection({
+				...AZUKI_ELEMENTAL_BEANS_TOKEN
+			});
+
+			expect(result).toEqual({
+				address: AZUKI_ELEMENTAL_BEANS_TOKEN.address,
+				description: AZUKI_ELEMENTAL_BEANS_TOKEN.description,
+				id: AZUKI_ELEMENTAL_BEANS_TOKEN.id,
+				name: AZUKI_ELEMENTAL_BEANS_TOKEN.name,
+				network: NftNetworkSchema.parse(AZUKI_ELEMENTAL_BEANS_TOKEN.network),
+				standard: AZUKI_ELEMENTAL_BEANS_TOKEN.standard,
+				section: undefined,
+				symbol: AZUKI_ELEMENTAL_BEANS_TOKEN.symbol
 			});
 		});
 	});
