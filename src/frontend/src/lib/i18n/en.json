@@ -379,7 +379,7 @@
 				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
 			},
 			"icpanda_message": {
-				"name": "ICPanda Message (dMsg.net)",
+				"name": "dMsg.net",
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			}
