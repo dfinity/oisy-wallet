@@ -7,7 +7,6 @@
 	interface Props {
 		network: Network;
 		selectedNetworkId?: NetworkId;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
@@ -15,7 +14,6 @@
 	let {
 		network,
 		selectedNetworkId,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		onSelected
 	}: Props = $props();
@@ -24,7 +22,6 @@
 </script>
 
 <NetworkComponent
-	{delayOnNetworkSelect}
 	{labelsSize}
 	{network}
 	{onSelected}

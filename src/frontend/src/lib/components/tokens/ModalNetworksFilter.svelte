@@ -37,7 +37,6 @@
 <ContentWithToolbar>
 	<NetworkSwitcherList
 		{allNetworksEnabled}
-		delayOnNetworkSelect={false}
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}

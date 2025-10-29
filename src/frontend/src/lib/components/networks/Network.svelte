@@ -9,7 +9,6 @@
 		selectedNetworkId?: NetworkId;
 		usdBalance?: number;
 		testIdPrefix?: string;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
@@ -19,14 +18,12 @@
 		selectedNetworkId,
 		usdBalance,
 		testIdPrefix = NETWORKS_SWITCHER_SELECTOR,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		onSelected
 	}: Props = $props();
 </script>
 
 <NetworkButton
-	{delayOnNetworkSelect}
 	isTestnet={network.env === 'testnet'}
 	{labelsSize}
 	{network}

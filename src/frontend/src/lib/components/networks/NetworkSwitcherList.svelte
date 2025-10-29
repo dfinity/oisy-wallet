@@ -14,7 +14,6 @@
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
@@ -23,7 +22,6 @@
 
 	let {
 		selectedNetworkId,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		supportedNetworks,
 		allNetworksEnabled = true,
@@ -42,7 +40,6 @@
 
 {#if allNetworksEnabled}
 	<NetworkButton
-		{delayOnNetworkSelect}
 		{labelsSize}
 		{onSelected}
 		{selectedNetworkId}
@@ -54,7 +51,6 @@
 	{#each enabledNetworks as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 			><MainnetNetwork
-				{delayOnNetworkSelect}
 				{labelsSize}
 				{network}
 				{onSelected}
@@ -73,7 +69,6 @@
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
 				><Network
-					{delayOnNetworkSelect}
 					{labelsSize}
 					{network}
 					{onSelected}
