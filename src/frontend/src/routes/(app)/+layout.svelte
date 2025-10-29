@@ -64,7 +64,9 @@
 		let focused = false;
 
 		const disableTouch = (e: TouchEvent) => {
-			if (focused) {e.preventDefault();}
+			if (focused) {
+				e.preventDefault();
+			}
 		};
 
 		const onFocusIn = (e: FocusEvent) => {
