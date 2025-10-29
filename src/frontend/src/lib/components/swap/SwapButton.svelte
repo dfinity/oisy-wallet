@@ -4,17 +4,22 @@
 	import { SWAP_TOKENS_MODAL_OPEN_BUTTON } from '$lib/constants/test-ids.constants';
 	import { isBusy } from '$lib/derived/busy.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { getContext } from 'svelte';
+	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 
 	interface Props {
 		onclick: () => void;
 	}
 
 	let { onclick }: Props = $props();
+
+	const { outflowActionsDisabled, inflowActionsDisabled } =
+		getContext<HeroContext>(HERO_CONTEXT_KEY);
 </script>
 
 <ButtonHero
 	ariaLabel={$i18n.swap.text.swap}
-	disabled={$isBusy}
+	disabled={$isBusy || $outflowActionsDisabled || $inflowActionsDisabled}
 	{onclick}
 	testId={SWAP_TOKENS_MODAL_OPEN_BUTTON}
 >
