@@ -1,3 +1,4 @@
+import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
 import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { IcToken } from '$icp/types/ic-token';
@@ -5,6 +6,7 @@ import * as exchanges from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
 import { initSwapContext } from '$lib/stores/swap.store';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
+import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { testDerivedUpdates } from '$tests/utils/derived.test-utils';
@@ -194,6 +196,81 @@ describe('swapStore', () => {
 			switchTokens();
 
 			expect(get(isSourceTokenIcrc2)).toBeTruthy();
+		});
+	});
+
+	describe('isSourceTokenSupportsPermit', () => {
+		it('should initialize with empty values', () => {
+			const { isSourceTokenSupportsPermit } = initSwapContext({
+				sourceToken: mockValidErc20Token
+			});
+
+			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+		});
+
+		it('should return undefined when sourceToken is not set', () => {
+			const { isSourceTokenSupportsPermit } = initSwapContext();
+
+			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+		});
+
+		it('should cache isPermitSupported status', () => {
+			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit } = initSwapContext({
+				sourceToken: mockValidErc20Token
+			});
+
+			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
+
+			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: true });
+
+			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+		});
+
+		it('should update isSourceTokenSupportsPermit when cache changes', () => {
+			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit } = initSwapContext({
+				sourceToken: mockValidErc20Token
+			});
+
+			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: false });
+
+			expect(get(isSourceTokenSupportsPermit)).toBeFalsy();
+
+			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: true });
+
+			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+		});
+
+		it('should return correct value when sourceToken changes', () => {
+			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit, setSourceToken } =
+				initSwapContext({
+					sourceToken: mockValidErc20Token
+				});
+
+			setIsTokenSupportPermit({ address: PEPE_TOKEN.address, isPermitSupported: true });
+			setIsTokenSupportPermit({ address: mockValidErc20Token.address, isPermitSupported: false });
+
+			setSourceToken(PEPE_TOKEN);
+
+			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+
+			setSourceToken(mockValidErc20Token);
+
+			expect(get(isSourceTokenSupportsPermit)).toBeFalsy();
+		});
+
+		it('should return undefined for uncached token', () => {
+			const { isSourceTokenSupportsPermit, setIsTokenSupportPermit, setSourceToken } =
+				initSwapContext({
+					sourceToken: PEPE_TOKEN
+				});
+
+			setIsTokenSupportPermit({ address: PEPE_TOKEN.address, isPermitSupported: true });
+
+			expect(get(isSourceTokenSupportsPermit)).toBeTruthy();
+
+			setSourceToken(mockValidErc20Token);
+
+			expect(get(isSourceTokenSupportsPermit)).toBeUndefined();
 		});
 	});
 });
