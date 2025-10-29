@@ -1,7 +1,7 @@
 <script lang="ts">
-	import oisyLogoLarge from '$lib/assets/oisy-logo-large.svg';
 	import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
+	import OisyLogoLarge from '$lib/components/icons/oisyLogoLarge.svelte';
+	import IconAstronautHelmetHalloween from '$lib/components/icons/IconAstronautHelmetHalloween.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -11,10 +11,21 @@
 </script>
 
 <div class="mr-3">
-	<IconAstronautHelmet />
+	<IconAstronautHelmetHalloween />
 </div>
 
-<picture class="invert-on-dark-theme hidden w-24 xs:block" aria-label={ariaLabel}>
-	<source media="(max-width: 639px)" srcset={oisyLogoSmall} />
-	<Img alt={ariaLabel} src={oisyLogoLarge} />
-</picture>
+<!-- Small logo for mobile screens -->
+<div class="invert-on-dark-theme block w-16 xs:hidden logo-container" aria-label={ariaLabel}>
+	<Img src={oisyLogoSmall} alt={ariaLabel} />
+</div>
+
+<!-- Large animated logo for larger screens -->
+<div class="invert-on-dark-theme hidden w-24 xs:block logo-container" aria-label={ariaLabel}>
+	<OisyLogoLarge />
+</div>
+
+<style>
+	.logo-container {
+		cursor: pointer;
+	}
+</style>
