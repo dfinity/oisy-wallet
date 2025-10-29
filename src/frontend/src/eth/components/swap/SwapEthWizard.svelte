@@ -131,22 +131,25 @@
 	});
 
 	$effect(() => {
-		if (isNullish($sourceToken) || !isTokenErc20($sourceToken) || isNullish($ethAddress)) {
+		if (
+			isNullish($sourceToken) ||
+			!isTokenErc20($sourceToken) ||
+			isNullish($ethAddress) ||
+			nonNullish($isSourceTokenPermitSupported)
+		) {
 			return;
 		}
-		if (isNullish($isSourceTokenPermitSupported)) {
-			(async () => {
-				const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
-				const isPermitSupported = await isErc20SupportsPermit({
-					contractAddress: $sourceToken.address,
-					userAddress: $ethAddress
-				});
-				setIsTokenPermitSupported({
-					address: $sourceToken.address,
-					isPermitSupported
-				});
-			})();
-		}
+		(async () => {
+			const { isErc20SupportsPermit } = infuraErc20Providers($sourceToken.network.id);
+			const isPermitSupported = await isErc20SupportsPermit({
+				contractAddress: $sourceToken.address,
+				userAddress: $ethAddress
+			});
+			setIsTokenPermitSupported({
+				address: $sourceToken.address,
+				isPermitSupported
+			});
+		})();
 	});
 
 	const progress = (step: ProgressStepsSwap) => (swapProgressStep = step);
