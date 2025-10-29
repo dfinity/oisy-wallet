@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { NavigationTarget } from '@sveltejs/kit';
 	import { fade } from 'svelte/transition';
 	import { goto } from '$app/navigation';
 	import IconExpand from '$lib/components/icons/IconExpand.svelte';
@@ -19,10 +18,9 @@
 
 	interface Props {
 		collection?: NftCollection;
-		fromRoute: NavigationTarget | null;
 	}
 
-	const { collection, fromRoute }: Props = $props();
+	const { collection }: Props = $props();
 
 	const token = $derived(
 		nonNullish(collection)
@@ -39,10 +37,7 @@
 	);
 
 	const gotoCollection = (): void => {
-		const url = nftsUrl({ collection, fromRoute });
-		if (nonNullish(url)) {
-			goto(url);
-		}
+		goto(nftsUrl({ collection }));
 	};
 </script>
 

@@ -10,7 +10,10 @@
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
 	import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { authIdentity } from '$lib/derived/auth.derived';
-	import { enabledErc20Tokens, enabledNonFungibleTokens } from '$lib/derived/tokens.derived';
+	import {
+		enabledErc20Tokens,
+		enabledNonFungibleTokensWithoutSpam
+	} from '$lib/derived/tokens.derived';
 	import { syncTransactionsFromCache } from '$lib/services/listener.services';
 
 	interface Props {
@@ -25,7 +28,7 @@
 		...$enabledEthereumTokens,
 		...$enabledErc20Tokens,
 		...$enabledEvmTokens,
-		...(NFTS_ENABLED ? $enabledNonFungibleTokens : [])
+		...(NFTS_ENABLED ? $enabledNonFungibleTokensWithoutSpam : [])
 	]);
 
 	const onLoad = async () => {
@@ -77,6 +80,6 @@
 	});
 </script>
 
-<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children()}
-</IntervalLoader>
+{@render children()}
+
+<IntervalLoader interval={WALLET_TIMER_INTERVAL_MILLIS} {onLoad} />

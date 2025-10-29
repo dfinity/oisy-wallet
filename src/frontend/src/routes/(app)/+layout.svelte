@@ -65,7 +65,7 @@
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
-			class="relative flex flex-col pb-5 md:pb-0"
+			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
 		>
@@ -95,7 +95,7 @@
 				</SplitPane>
 
 				{#if !$aiAssistantConsoleOpen}
-					<div class="z-3 fixed bottom-16 right-4 block">
+					<div class="fixed right-4 bottom-16 z-3 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}

@@ -44,7 +44,7 @@
 			{/if}
 		</div>
 
-		<span class="w-full whitespace-normal break-all" class:text-sm={aiAssistantConsoleView}>
+		<span class="w-full break-all whitespace-normal" class:text-sm={aiAssistantConsoleView}>
 			{destination}
 		</span>
 	{/snippet}

@@ -194,7 +194,7 @@
 
 			{#snippet description()}
 				<span
-					class="flex min-w-0 flex-col items-start items-center text-xs text-primary sm:flex-row sm:text-sm"
+					class="flex min-w-0 flex-col items-center items-start text-xs text-primary sm:flex-row sm:text-sm"
 				>
 					<span class="inline-flex min-w-0 items-center gap-1">
 						{#if type === 'send'}
@@ -208,7 +208,7 @@
 						{#if nonNullish(contact)}
 							<ContactWithAvatar {contact} {contactAddress} />
 						{:else if nonNullish(address)}
-							<span class="max-w-38 inline-block flex min-w-0 flex-wrap items-center truncate">
+							<span class="flex inline-block max-w-38 min-w-0 flex-wrap items-center truncate">
 								{shortenWithMiddleEllipsis({ text: address })}
 							</span>
 						{/if}

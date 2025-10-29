@@ -6,13 +6,13 @@
 	import BtcUtxosFee from '$btc/components/send/BtcUtxosFee.svelte';
 	import { BTC_MINIMUM_AMOUNT } from '$btc/constants/btc.constants';
 	import { BtcPendingSentTransactionsStatus } from '$btc/derived/btc-pending-sent-transactions-status.derived';
+	import { getBtcSourceAddress } from '$btc/services/btc-address.services';
 	import {
 		handleBtcValidationError,
 		sendBtc,
 		validateBtcSend
 	} from '$btc/services/btc-send.services';
 	import { BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
-	import { getBtcSourceAddress } from '$btc/utils/btc-address.utils';
 	import { convertSatoshisToBtc } from '$btc/utils/btc-send.utils';
 	import { invalidSendAmount } from '$btc/utils/input.utils';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -224,7 +224,7 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
+<div class="mt-2 mb-8">
 	<BtcUtxosFee {amount} networkId={$sendTokenNetworkId} {source} bind:utxosFee />
 </div>
 

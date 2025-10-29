@@ -266,6 +266,11 @@ interface I18nDapps {
 			description: string;
 			carousel: { text: string; call_to_action: string };
 		};
+		beam: { name: string; one_liner: string; call_to_action: string; description: string };
+		axie_infinity: { name: string; one_liner: string; description: string };
+		mobox: { name: string; one_liner: string; description: string };
+		cyql: { name: string; one_liner: string; description: string };
+		icpanda_message: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -914,6 +919,8 @@ interface I18nNfts {
 		title: string;
 		title_empty: string;
 		description_empty: string;
+		title_not_supported: string;
+		description_not_supported: string;
 		grouping: string;
 		as_plain_list: string;
 		by_collection: string;
@@ -1388,12 +1395,14 @@ interface I18nEarning {
 interface I18nStake {
 	text: {
 		stake: string;
+		unstake: string;
 		enable_token_text: string;
 		enable_token_button: string;
 		review: string;
 		executing_transaction: string;
 		unsupported_token_staking: string;
 		provider: string;
+		earning_potential: string;
 		visit_provider: string;
 		current_apy: string;
 		current_apy_info: string;

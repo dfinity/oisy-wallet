@@ -88,5 +88,5 @@
 </script>
 
 <SwapButtonWithModal isOpen={$modalSwap} onOpen={onOpenSwap}>
-	<SwapModal on:nnsClose />
+	<SwapModal />
 </SwapButtonWithModal>

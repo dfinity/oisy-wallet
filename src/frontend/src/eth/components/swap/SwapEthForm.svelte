@@ -147,7 +147,7 @@
 			{/if}
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider {slippageValue} on:icShowProviderList />
+				<SwapProvider {slippageValue} />
 				<EthFeeDisplay {isApproveNeeded}>
 					{#snippet label()}
 						<Html text={$i18n.fee.text.total_fee} />

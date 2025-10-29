@@ -59,8 +59,8 @@
 	let tooManyButtons = $derived(
 		sendAction &&
 			swapAction &&
-			(convertErc20 || convertEth || convertCkBtc || convertBtc) &&
-			buyAction
+			isTransactionsPage &&
+			(convertErc20 || convertEth || convertCkBtc || convertBtc)
 	);
 </script>
 

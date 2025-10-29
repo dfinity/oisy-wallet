@@ -356,6 +356,32 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Learn more"
 				}
+			},
+			"beam": {
+				"name": "Beam",
+				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
+				"call_to_action": "Get involved",
+				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
+			},
+			"axie_infinity": {
+				"name": "Axie Infinity",
+				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
+				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
+			},
+			"mobox": {
+				"name": "Mobox",
+				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
+				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
+			},
+			"cyql": {
+				"name": "cyql.io",
+				"one_liner": "THE Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer.",
+				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
+			},
+			"icpanda_message": {
+				"name": "dMsg.net",
+				"one_liner": "Decentralized alternative to Signal.",
+				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			}
 		}
 	},
@@ -1108,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
+			"title_not_supported": "NFTs are not yet supported on the selected network",
+			"description_not_supported": "Please do not send NTFs to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",
@@ -1711,12 +1739,14 @@
 	"stake": {
 		"text": {
 			"stake": "Stake $token_symbol",
+			"unstake": "Unstake",
 			"enable_token_text": "You need to enable $token_symbol",
 			"enable_token_button": "Enable $token_symbol",
 			"review": "Review transaction",
 			"executing_transaction": "Executing transaction...",
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
+			"earning_potential": "Earning potential",
 			"visit_provider": "Visit website",
 			"current_apy": "Current APY $apy%",
 			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",

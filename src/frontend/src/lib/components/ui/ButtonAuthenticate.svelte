@@ -12,7 +12,7 @@
 </script>
 
 <button
-	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg font-bold leading-6 text-primary-inverted sm:px-12"
+	class="login-button flex w-full items-center justify-center gap-4 rounded-2xl bg-brand-primary py-3 text-lg leading-6 font-bold text-primary-inverted sm:px-12"
 	class:sm:w-80={!fullWidth}
 	data-tid={LOGIN_BUTTON}
 	{onclick}

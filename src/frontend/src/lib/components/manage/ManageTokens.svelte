@@ -149,7 +149,11 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" disabled={$pseudoNetworkICPTestnet} onclick={onAddToken}
+			<Button
+				colorStyle="secondary-light"
+				disabled={$pseudoNetworkICPTestnet ||
+					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
+				onclick={onAddToken}
 				><IconPlus />
 				{isNftsPage
 					? $i18n.tokens.manage.text.import_nft

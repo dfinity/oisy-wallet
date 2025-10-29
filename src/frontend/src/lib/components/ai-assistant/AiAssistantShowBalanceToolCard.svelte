@@ -84,7 +84,7 @@
 	{/snippet}
 
 	{#snippet titleEnd()}
-		<span class="ml-2 block min-w-12 text-nowrap text-sm">
+		<span class="ml-2 block min-w-12 text-sm text-nowrap">
 			{#if $isPrivacyMode}
 				<IconDots styleClass="h-[1rem] items-center" times={3} />
 			{:else if nonNullish(token) && isNullish(tokenCount)}

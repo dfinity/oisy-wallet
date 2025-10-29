@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -22,12 +21,6 @@
 	import type { OwnedContract } from '$lib/types/nft';
 	import type { NonEmptyArray } from '$lib/types/utils';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
-
-	interface Props {
-		children?: Snippet;
-	}
-
-	let { children }: Props = $props();
 
 	const handleErc721 = async ({
 		contracts,
@@ -184,6 +177,4 @@
 	};
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad}>
-	{@render children?.()}
-</IntervalLoader>
+<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} />

@@ -29,7 +29,7 @@
 	} from '$lib/derived/modal.derived';
 	import {
 		enabledFungibleNetworkTokens,
-		enabledNonFungibleNetworkTokens
+		enabledNonFungibleNetworkTokensWithoutSpam
 	} from '$lib/derived/network-tokens.derived';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { AllTransactionUiWithCmp } from '$lib/types/transaction-ui';
@@ -41,7 +41,7 @@
 
 	let transactions = $derived(
 		mapAllTransactionsUi({
-			tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokens],
+			tokens: [...$enabledFungibleNetworkTokens, ...$enabledNonFungibleNetworkTokensWithoutSpam],
 			$btcTransactions: $btcTransactionsStore,
 			$ethTransactions: $ethTransactionsStore,
 			$ckEthMinterInfo: $ckEthMinterInfoStore,

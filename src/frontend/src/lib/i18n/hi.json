@@ -356,6 +356,32 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1108,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "आपके NFTs यहाँ दिखाई देंगे",
 			"description_empty": "ऐसा लगता है कि आपने अभी तक NFTs प्राप्त नहीं किए हैं",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "समूहीकरण",
 			"as_plain_list": "सादी सूची के रूप में दिखाएँ",
 			"by_collection": "संग्रह के अनुसार समूहित करें",
@@ -1711,12 +1739,14 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"unstake": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"earning_potential": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",

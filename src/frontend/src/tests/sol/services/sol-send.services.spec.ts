@@ -50,6 +50,7 @@ vi.mock(import('@solana/kit'), async (importOriginal) => {
 		assertIsFullySignedTransaction: vi.fn(),
 		assertIsTransactionPartialSigner: vi.fn(),
 		assertIsTransactionSigner: vi.fn(),
+		assertIsTransactionWithBlockhashLifetime: vi.fn(),
 		assertIsTransactionWithinSizeLimit: vi.fn(),
 		createTransactionMessage: vi.fn().mockReturnValue('mock-transaction-message'),
 		getSignatureFromTransaction: vi.fn(),

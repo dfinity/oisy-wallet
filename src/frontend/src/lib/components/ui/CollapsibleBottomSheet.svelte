@@ -37,7 +37,7 @@
 	</div>
 
 	{#if expanded}
-		<div class="z-14 fixed inset-0">
+		<div class="fixed inset-0 z-14">
 			<BottomSheet transition>
 				{#snippet header()}
 					<div class="w-full p-4">

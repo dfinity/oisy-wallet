@@ -1,27 +1,42 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import Radio from '$lib/components/ui/Radio.svelte';
 
 	interface Props {
 		checked: boolean;
 		disabled?: boolean;
+		styleClass?: string;
 		onChange: () => void;
 		id?: string;
-		label: string;
-		description?: string;
+		label: Snippet;
+		description?: Snippet;
 	}
 
-	const { checked, disabled = false, onChange, id, label, description }: Props = $props();
+	const {
+		checked,
+		disabled = false,
+		styleClass,
+		onChange,
+		id,
+		label,
+		description
+	}: Props = $props();
 </script>
 
 <label
-	class="flex w-full cursor-pointer items-center gap-3 rounded-xl border border-brand-subtle-20 bg-brand-subtle-10 p-3 transition hover:bg-brand-subtle-20"
+	class={`flex w-full cursor-pointer gap-3 rounded-xl border p-3 transition hover:bg-brand-subtle-20 ${styleClass ?? ''}`}
+	class:bg-brand-subtle-10={checked}
+	class:bg-secondary={!checked}
+	class:border-brand-subtle-20={checked}
+	class:border-disabled={!checked}
 >
 	<Radio {checked} {disabled} inputId={id} {onChange} />
-	<span class="flex flex-col items-start text-left">
-		<span class="font-bold">{label}</span>
-		{#if nonNullish(description)}
-			<span class="text-sm text-tertiary">{description}</span>
-		{/if}
+
+	<span class="flex w-full flex-col">
+		{@render label()}
+
+		<span class="mt-4 flex w-full flex-col">
+			{@render description?.()}
+		</span>
 	</span>
 </label>

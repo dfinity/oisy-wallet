@@ -5,7 +5,7 @@ import {
 } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { STAGING } from '$lib/constants/app.constants';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -25,40 +25,40 @@ import { get } from 'svelte/store';
 
 export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		tokenId: TokenId,
 		private readonly data: PostMessageDataRequestBtc,
 		hideToast: boolean
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({ data: dataMsg }: MessageEvent<PostMessage<BtcPostMessageDataResponseWallet>>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncBtcWallet':
-					syncWallet({
-						tokenId,
-						data: data as BtcPostMessageDataResponseWallet
-					});
-					return;
+				switch (msg) {
+					case 'syncBtcWallet':
+						syncWallet({
+							tokenId,
+							data: data as BtcPostMessageDataResponseWallet
+						});
+						return;
 
-				case 'syncBtcWalletError':
-					syncWalletError({
-						tokenId,
-						error: data.error,
-						/**
-						 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
-						 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
-						 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
-						 * **/
-						hideToast
-					});
-					return;
+					case 'syncBtcWalletError':
+						syncWalletError({
+							tokenId,
+							error: data.error,
+							/**
+							 * TODO: Do not launch worker locally if BTC canister is not deployed, and remove "isRegtestNetwork" afterwards.
+							 * TODO: Wait for testnet BTC canister to be fixed on the IC side, and remove "isTestnetNetwork" afterwards.
+							 * TODO: Investigate the "ingress_expiry" error that is sometimes thrown by update BTC balance call, and remove "isMainnetNetwork" afterwards.
+							 * **/
+							hideToast
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({

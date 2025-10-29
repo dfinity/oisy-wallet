@@ -349,7 +349,13 @@
 				warningType="manage"
 			/>
 		{:else if currentStep?.name === WizardStepsManageTokens.IMPORT}
-			<AddTokenByNetwork onBack={modal.back} onNext={modal.next} bind:network bind:tokenData />
+			<AddTokenByNetwork
+				{isNftsPage}
+				onBack={modal.back}
+				onNext={modal.next}
+				bind:network
+				bind:tokenData
+			/>
 		{:else if currentStep?.name === WizardStepsManageTokens.MANAGE}
 			<ManageTokens
 				{infoElement}

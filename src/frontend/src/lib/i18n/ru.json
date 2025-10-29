@@ -356,6 +356,32 @@
 					"text": "Меняйте токены на DEX",
 					"call_to_action": "Попробовать KongSwap"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1108,6 +1134,8 @@
 			"title": "NFT",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Группировка",
 			"as_plain_list": "Простой список",
 			"by_collection": "По коллекции",
@@ -1711,12 +1739,14 @@
 	"stake": {
 		"text": {
 			"stake": "Стейкинг",
+			"unstake": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
 			"executing_transaction": "Выполнение транзакции",
 			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
 			"provider": "Провайдер",
+			"earning_potential": "",
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
 			"current_apy_info": "Информация о текущем APY",

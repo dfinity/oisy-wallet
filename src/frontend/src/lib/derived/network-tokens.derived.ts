@@ -5,6 +5,7 @@ import {
 	enabledNonFungibleTokens,
 	tokensToPin
 } from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
@@ -27,6 +28,12 @@ export const enabledFungibleNetworkTokens: Readable<Token[]> = derived(
 export const enabledNonFungibleNetworkTokens: Readable<NonFungibleToken[]> = derived(
 	[enabledNonFungibleTokens, selectedNetwork, pseudoNetworkChainFusion],
 	filterTokensForSelectedNetwork
+);
+
+export const enabledNonFungibleNetworkTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleNetworkTokens],
+	([$enabledNonFungibleNetworkTokens]) =>
+		$enabledNonFungibleNetworkTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
 );
 
 /**

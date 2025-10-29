@@ -39,7 +39,7 @@
 	} = $derived(nft);
 </script>
 
-<div class="bg-primary/80 relative rounded-xl">
+<div class="relative rounded-xl bg-primary/80">
 	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
 		<NftDisplayGuard {nft} type="nft-logo">
 			<Logo

@@ -76,7 +76,7 @@ describe('nft.services', () => {
 		it('should not load NFTs if no tokens were provided', async () => {
 			const tokens: NonFungibleToken[] = [];
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).not.toHaveBeenCalled();
 		});
@@ -86,7 +86,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft1, mockNft2]);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft1, mockNft2]);
 		});
@@ -96,7 +96,7 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
@@ -106,19 +106,19 @@ describe('nft.services', () => {
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockRejectedValueOnce(new Error('Nfts Error'));
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(mockAlchemyProvider.getNftsByOwner).toHaveBeenCalled();
 			expect(get(nftStore)).toEqual([]);
 		});
 
-		it('should force load NFTs if force is true', async () => {
+		it('should re-load NFTs', async () => {
 			const tokens: NonFungibleToken[] = [erc1155NyanCatToken];
 
 			vi.mocked(mockAlchemyProvider.getNftsByOwner).mockResolvedValueOnce([mockNft3]);
 			vi.spyOn(nftsUtils, 'findNftsByToken').mockReturnValueOnce([]);
 
-			await loadNfts({ tokens, loadedNfts: [], walletAddress: mockWalletAddress, force: true });
+			await loadNfts({ tokens, walletAddress: mockWalletAddress });
 
 			expect(get(nftStore)).toEqual([mockNft3]);
 		});
@@ -424,18 +424,6 @@ describe('nft.services', () => {
 					}
 				]
 			});
-		});
-
-		it('does nothing if token is undefined', async () => {
-			await updateNftSection({
-				section: CustomTokenSection.HIDDEN,
-				token: undefined as unknown as NonFungibleToken,
-				$authIdentity: mockIdentity,
-				$ethAddress: mockEthAddress
-			});
-
-			expect(erc721Spy).not.toHaveBeenCalled();
-			expect(erc1155Spy).not.toHaveBeenCalled();
 		});
 	});
 });

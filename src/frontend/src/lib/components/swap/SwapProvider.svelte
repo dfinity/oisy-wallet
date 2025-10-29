@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import SwapBestRateBadge from '$lib/components/swap/SwapBestRateBadge.svelte';
 	import SwapDetailsIcp from '$lib/components/swap/SwapDetailsIcp.svelte';
 	import SwapDetailsKong from '$lib/components/swap/SwapDetailsKongSwap.svelte';
@@ -25,11 +25,12 @@
 	interface Props {
 		slippageValue: OptionAmount;
 		showSelectButton?: boolean;
+		onShowProviderList?: () => void;
 	}
 
 	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
-	let { showSelectButton = false, slippageValue }: Props = $props();
+	let { showSelectButton = false, slippageValue, onShowProviderList }: Props = $props();
 
 	let displayURL = $state<OptionString>(null);
 
@@ -50,8 +51,6 @@
 			displayURL = null;
 		}
 	});
-
-	const dispatch = createEventDispatcher();
 </script>
 
 {#if nonNullish(swapDApp) && nonNullish(selectedProvider) && nonNullish($swapAmountsStore)}
@@ -62,9 +61,7 @@
 					<div class="flex justify-center gap-2">
 						{$i18n.swap.text.swap_provider}
 						{#if nonNullish($swapAmountsStore) && $swapAmountsStore?.swaps.length > 1 && !isInBottomSheet && showSelectButton}
-							<Button link onclick={() => dispatch('icShowProviderList')}
-								>{$i18n.swap.text.select}</Button
-							>
+							<Button link onclick={onShowProviderList}>{$i18n.swap.text.select}</Button>
 						{/if}
 					</div>
 				{/snippet}

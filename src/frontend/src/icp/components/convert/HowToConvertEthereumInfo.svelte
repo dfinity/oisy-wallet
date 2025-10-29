@@ -51,8 +51,8 @@
 	</div>
 
 	{#if ckErc20}
-		<div class="mb-4 mt-2 rounded-lg bg-brand-subtle-20 p-4">
-			<p class="break-normal font-bold">
+		<div class="mt-2 mb-4 rounded-lg bg-brand-subtle-20 p-4">
+			<p class="font-bold break-normal">
 				{replacePlaceholders($i18n.convert.text.check_balance_for_fees, {
 					$token: $ckEthereumNativeToken.symbol
 				})}
@@ -64,7 +64,7 @@
 				})}
 			</p>
 
-			<p class="break-normal pt-4">
+			<p class="pt-4 break-normal">
 				{$i18n.convert.text.current_balance}&nbsp;<output class="font-bold"
 					>{formatToken({
 						value: $ckEthereumNativeTokenBalance ?? ZERO,

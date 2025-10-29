@@ -199,10 +199,7 @@
 				</TokenInputNetworkWrapper>
 			</div>
 
-			<SwapSwitchTokensButton
-				disabled={isSwitchTokensButtonDisabled()}
-				on:icSwitchTokens={onTokensSwitch}
-			/>
+			<SwapSwitchTokensButton disabled={isSwitchTokensButtonDisabled()} {onTokensSwitch} />
 
 			<TokenInputNetworkWrapper
 				showGradient={isCrossChainNetworks}

@@ -10,10 +10,12 @@
 </script>
 
 <!-- TODO: add styling according to the designs -->
-<div class="flex w-1/2 flex-col items-center rounded-xl bg-secondary p-4">
-	<div class="mb-8 flex justify-center gap-2">
+<div class="flex w-1/2 flex-col items-center justify-between rounded-xl bg-secondary p-4">
+	<div class="mb-8 flex flex-col justify-center gap-2 text-center">
 		{@render content()}
 	</div>
 
-	{@render buttons()}
+	<div class="w-full">
+		{@render buttons()}
+	</div>
 </div>

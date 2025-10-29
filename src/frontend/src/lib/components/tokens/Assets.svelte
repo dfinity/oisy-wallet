@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { fade } from 'svelte/transition';
+	import { page } from '$app/stores';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import ManageTokensModal from '$lib/components/manage/ManageTokensModal.svelte';
 	import Nft from '$lib/components/nfts/Nft.svelte';
@@ -22,12 +23,13 @@
 	import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
 	import { TokenTypes } from '$lib/enums/token-types';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { activeAssetsTabStore } from '$lib/stores/settings.store';
 
 	interface Props {
-		tab?: TokenTypes;
+		tab: TokenTypes;
 	}
 
-	let { tab = TokenTypes.TOKENS }: Props = $props();
+	let { tab }: Props = $props();
 
 	let activeTab = $state(tab);
 
@@ -36,6 +38,10 @@
 			? $modalManageTokensData
 			: { initialSearch: undefined, message: undefined }
 	);
+
+	$effect(() => {
+		activeAssetsTabStore.set({ key: 'active-assets-tab', value: activeTab });
+	});
 </script>
 
 {#if NFTS_ENABLED && nonNullish($routeNft) && nonNullish($routeCollection) && nonNullish($routeNetwork)}
@@ -47,7 +53,7 @@
 		<StickyHeader>
 			{#snippet header()}
 				<div class="flex w-full justify-between">
-					<div class="grow-1 relative flex justify-between">
+					<div class="relative flex grow-1 justify-between">
 						<TokensFilter>
 							{#snippet overflowableContent()}
 								{#if NFTS_ENABLED}
@@ -58,9 +64,13 @@
 											{
 												label: $i18n.tokens.text.title,
 												id: TokenTypes.TOKENS,
-												path: AppPath.Tokens
+												path: `${AppPath.Tokens}${$page.url.search}`
 											},
-											{ label: $i18n.nfts.text.title, id: TokenTypes.NFTS, path: AppPath.Nfts }
+											{
+												label: $i18n.nfts.text.title,
+												id: TokenTypes.NFTS,
+												path: `${AppPath.Nfts}${$page.url.search}`
+											}
 										]}
 										trackEventName={PLAUSIBLE_EVENTS.VIEW_OPEN}
 										bind:activeTab
@@ -93,7 +103,7 @@
 			{/if}
 		</StickyHeader>
 
-		<div class="mb-4 mt-12 flex w-full justify-center sm:w-auto" in:fade>
+		<div class="mt-12 mb-4 flex w-full justify-center sm:w-auto" in:fade>
 			<ManageTokensButton />
 		</div>
 	</div>
