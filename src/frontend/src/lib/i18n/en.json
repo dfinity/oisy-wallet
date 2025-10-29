@@ -1134,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
+			"title_not_supported": "NFTs are not yet supported on the selected network",
+			"description_not_supported": "Please do not send NTFs to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",

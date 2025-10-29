@@ -1134,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "NFT của bạn sẽ xuất hiện ở đây",
 			"description_empty": "Có vẻ như bạn chưa nhận được NFT nào",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Nhóm",
 			"as_plain_list": "Hiển thị dưới dạng danh sách đơn giản",
 			"by_collection": "Nhóm theo bộ sưu tập",

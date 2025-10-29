@@ -1134,6 +1134,8 @@
 			"title": "NFT",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Группировка",
 			"as_plain_list": "Простой список",
 			"by_collection": "По коллекции",

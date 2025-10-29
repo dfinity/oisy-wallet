@@ -919,6 +919,8 @@ interface I18nNfts {
 		title: string;
 		title_empty: string;
 		description_empty: string;
+		title_not_supported: string;
+		description_not_supported: string;
 		grouping: string;
 		as_plain_list: string;
 		by_collection: string;

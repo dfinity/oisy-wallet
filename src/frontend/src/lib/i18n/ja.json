@@ -1134,6 +1134,8 @@
 			"title": "NFT",
 			"title_empty": "あなたのNFTがここに表示されます",
 			"description_empty": "まだNFTを受け取っていないようです",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "グループ化",
 			"as_plain_list": "リスト表示",
 			"by_collection": "コレクションでグループ化",
