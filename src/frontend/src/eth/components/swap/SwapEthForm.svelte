@@ -167,17 +167,6 @@
 
 			<div class="flex flex-col gap-3">
 				<SwapProvider {slippageValue} />
-				<EthFeeDisplay {isApproveNeeded}>
-					{#snippet label()}
-						<Html text={$i18n.fee.text.total_fee} />
-					{/snippet}
-				</EthFeeDisplay>
-
-				<SwapEthFeeInfo
-					decimals={$feeDecimalsStore}
-					feeSymbol={$feeSymbolStore}
-					feeTokenId={$feeTokenIdStore}
-				/>
 
 				{#if nonNullish($swapAmountsStore?.selectedProvider)}
 					{#if isGasless}
