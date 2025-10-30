@@ -307,8 +307,8 @@
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapEthForm
 					{isApproveNeeded}
-					{isSwapAmountsLoading}
 					{isGasless}
+					{isSwapAmountsLoading}
 					{nativeEthereumToken}
 					{onClose}
 					{onNext}
