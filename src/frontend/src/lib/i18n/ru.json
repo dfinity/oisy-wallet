@@ -1754,8 +1754,10 @@
 			"current_apy_info": "Информация о текущем APY",
 			"stake_review_subtitle": "",
 			"delayed_dissolve": "",
+			"immediate_dissolve": "",
 			"delayed_dissolve_terms": "",
-			"delayed_dissolve_info": ""
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": ""
 		}
 	},
 	"temporal": {
