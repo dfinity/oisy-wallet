@@ -23,6 +23,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
 		children: Snippet;
@@ -146,35 +147,37 @@
 
 	onMount(openBc);
 
-	// This fix below is to prevent the page from scrolling when the user taps on an input field.
+	// This fix below is to prevent the page from scrolling when the user is focused on an input field.
 	// This is a bug in IOS which makes pages behind modals scrollable when an input is focused
 	onMount(() => {
-		let focused = false;
-		const disableTouch = (e: TouchEvent) => {
-			if (focused) {
-				e.preventDefault();
-			}
-		};
-		const onFocusIn = (e: FocusEvent) => {
-			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-				focused = true;
-				document.body.style.touchAction = 'none'; // disables touch gestures
-				document.body.style.overflow = 'hidden'; // as a backup for Android
-			}
-		};
-		const onFocusOut = () => {
-			focused = false;
-			document.body.style.touchAction = '';
-			document.body.style.overflow = '';
-		};
-		document.addEventListener('focusin', onFocusIn);
-		document.addEventListener('focusout', onFocusOut);
-		document.addEventListener('touchmove', disableTouch, { passive: false });
-		return () => {
-			document.removeEventListener('focusin', onFocusIn);
-			document.removeEventListener('focusout', onFocusOut);
-			document.removeEventListener('touchmove', disableTouch);
-		};
+		if (isIos()) {
+			let focused = false;
+			const disableTouch = (e: TouchEvent) => {
+				if (focused && e.target instanceof Element && e.target?.closest('.modal')) {
+					e.preventDefault();
+				}
+			};
+			const onFocusIn = (e: FocusEvent) => {
+				if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+					focused = true;
+					document.body.style.touchAction = 'none'; // disables touch gestures
+					document.body.style.overflow = 'hidden'; // as a backup
+				}
+			};
+			const onFocusOut = () => {
+				focused = false;
+				document.body.style.touchAction = '';
+				document.body.style.overflow = '';
+			};
+			document.addEventListener('focusin', onFocusIn);
+			document.addEventListener('focusout', onFocusOut);
+			document.addEventListener('touchmove', disableTouch, { passive: false });
+			return () => {
+				document.removeEventListener('focusin', onFocusIn);
+				document.removeEventListener('focusout', onFocusOut);
+				document.removeEventListener('touchmove', disableTouch);
+			};
+		}
 	});
 </script>
 
