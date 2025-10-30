@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import type { Snippet } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import ConvertAmountExchange from '$lib/components/convert/ConvertAmountExchange.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -11,6 +11,7 @@
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionAmount } from '$lib/types/send';
+	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
 
 	interface Props {
 		amount?: OptionAmount;
@@ -19,7 +20,6 @@
 		displayExchangeRate?: boolean;
 		zeroAmountLabel?: string;
 		label?: Snippet;
-		isFeeGasless?: boolean;
 	}
 
 	let {
@@ -28,16 +28,17 @@
 		exchangeRate,
 		displayExchangeRate = true,
 		zeroAmountLabel,
-		label,
-		isFeeGasless
+		label
 	}: Props = $props();
+
+	const { isFeeGasless }: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 </script>
 
 <ModalValue {label}>
 	{#snippet mainValue()}
 		{#if nonNullish(amount)}
 			<div data-tid={CONVERT_AMOUNT_DISPLAY_VALUE} in:fade>
-				{isFeeGasless
+				{$isFeeGasless
 					? $i18n.swap.text.gasless
 					: nonNullish(amount) && Number(amount) === 0 && nonNullish(zeroAmountLabel)
 						? zeroAmountLabel
@@ -52,7 +53,7 @@
 
 	{#snippet secondaryValue()}
 		{#if displayExchangeRate}
-			<ConvertAmountExchange amount={isFeeGasless ? 0 : amount} {exchangeRate} />
+			<ConvertAmountExchange amount={$isFeeGasless ? 0 : amount} {exchangeRate} />
 		{/if}
 	{/snippet}
 </ModalValue>

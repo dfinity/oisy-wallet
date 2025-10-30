@@ -12,7 +12,6 @@
 		displayExchangeRate?: boolean;
 		zeroAmountLabel?: string;
 		label?: Snippet;
-		isFeeGasless?: boolean;
 	}
 
 	let {
@@ -22,8 +21,7 @@
 		exchangeRate,
 		displayExchangeRate = true,
 		zeroAmountLabel,
-		label,
-		isFeeGasless
+		label
 	}: Props = $props();
 
 	let formattedFeeAmount = $derived(
@@ -37,7 +35,6 @@
 	amount={formattedFeeAmount}
 	{displayExchangeRate}
 	{exchangeRate}
-	{isFeeGasless}
 	{label}
 	{symbol}
 	{zeroAmountLabel}

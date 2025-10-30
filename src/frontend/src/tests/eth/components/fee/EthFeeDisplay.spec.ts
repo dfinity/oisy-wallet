@@ -26,7 +26,6 @@ describe('EthFeeDisplay', () => {
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
 			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
-			isFeeGasless: writable(undefined)
 		})
 	);
 
@@ -42,56 +41,5 @@ describe('EthFeeDisplay', () => {
 				unitName: ETHEREUM_TOKEN.decimals
 			})} ${ETHEREUM_TOKEN.symbol}`
 		);
-	});
-
-	it('passes isFeeGasless=true to FeeDisplay', () => {
-		const contextWithGasless = new Map();
-		contextWithGasless.set(
-			ETH_FEE_CONTEXT_KEY,
-			initEthFeeContext({
-				feeStore: store,
-				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
-				isFeeGasless: writable(true)
-			})
-		);
-
-		const { container } = render(EthFeeDisplay, {
-			context: contextWithGasless
-		});
-
-		expect(container).toHaveTextContent(en.swap.text.gasless);
-		expect(container).not.toHaveTextContent(ETHEREUM_TOKEN.symbol);
-	});
-
-	it('passes isFeeGasless=false to FeeDisplay', () => {
-		const contextWithoutGasless = new Map();
-		contextWithoutGasless.set(
-			ETH_FEE_CONTEXT_KEY,
-			initEthFeeContext({
-				feeStore: store,
-				feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
-				feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-				feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
-				isFeeGasless: writable(false)
-			})
-		);
-
-		const { container } = render(EthFeeDisplay, {
-			context: contextWithoutGasless
-		});
-
-		expect(container).not.toHaveTextContent(en.swap.text.gasless);
-		expect(container).toHaveTextContent(ETHEREUM_TOKEN.symbol);
-	});
-
-	it('passes isFeeGasless=undefined to FeeDisplay', () => {
-		const { container } = render(EthFeeDisplay, {
-			context: mockContext
-		});
-
-		expect(container).not.toHaveTextContent(en.swap.text.gasless);
-		expect(container).toHaveTextContent(ETHEREUM_TOKEN.symbol);
 	});
 });

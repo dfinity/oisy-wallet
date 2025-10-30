@@ -15,8 +15,7 @@
 		maxGasFee,
 		feeSymbolStore,
 		feeDecimalsStore,
-		feeExchangeRateStore,
-		isFeeGasless
+		feeExchangeRateStore
 	}: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
@@ -32,7 +31,6 @@
 		decimals={$feeDecimalsStore}
 		exchangeRate={$feeExchangeRateStore}
 		{feeAmount}
-		isFeeGasless={$isFeeGasless}
 		{label}
 		symbol={$feeSymbolStore}
 	/>

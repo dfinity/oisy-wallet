@@ -102,6 +102,7 @@
 	const feeTokenIdStore = writable<TokenId | undefined>(undefined);
 	const feeDecimalsStore = writable<number | undefined>(undefined);
 	const feeExchangeRateStore = writable<number | undefined>(undefined);
+	const isFeeGasless = writable<boolean | undefined>(undefined);
 
 	$effect(() => {
 		if (nonNullish(nativeEthereumToken)) {
@@ -114,6 +115,12 @@
 	$effect(() => {
 		if (nonNullish(nativeEthereumToken)) {
 			feeExchangeRateStore.set($exchanges?.[nativeEthereumToken.id]?.usd);
+		}
+	});
+
+	$effect(() => {
+		if (nonNullish($isSourceTokenPermitSupported)) {
+			isFeeGasless.set($isSourceTokenPermitSupported);
 		}
 	});
 
@@ -164,6 +171,7 @@
 			feeTokenIdStore,
 			feeDecimalsStore,
 			feeExchangeRateStore,
+			isFeeGasless,
 			evaluateFee
 		})
 	);
