@@ -70,7 +70,7 @@
 											{
 												label: $i18n.nfts.text.title,
 												id: TokenTypes.NFTS,
-												path: `${AppPath.Nfts}${$page.url.search}`,
+												path: `${AppPath.Nfts}${page.url.search}`,
 												disabled: $selectedNetworkNftUnsupported
 											}
 										]}
