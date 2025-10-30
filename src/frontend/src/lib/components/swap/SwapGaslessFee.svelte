@@ -1,10 +1,10 @@
 <script lang="ts">
+	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
-	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 </script>
 
 <ModalValue>
