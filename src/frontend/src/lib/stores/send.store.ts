@@ -25,7 +25,13 @@ const initSendStore = (token: Token): SendStore => {
 	};
 };
 
-export const initSendContext = ({ token }: { token: Token }): SendContext => {
+export const initSendContext = ({
+	token,
+	customSendBalance
+}: {
+	token: Token;
+	customSendBalance?: OptionBalance;
+}): SendContext => {
 	const sendToken = initSendStore(token);
 
 	const sendTokenDecimals = derived(sendToken, ({ decimals }) => decimals);
@@ -36,7 +42,7 @@ export const initSendContext = ({ token }: { token: Token }): SendContext => {
 
 	const sendBalance = derived(
 		[balancesStore, sendTokenId],
-		([$balanceStore, $sendTokenId]) => $balanceStore?.[$sendTokenId]?.data
+		([$balanceStore, $sendTokenId]) => customSendBalance ?? $balanceStore?.[$sendTokenId]?.data
 	);
 
 	const sendTokenExchangeRate = derived([exchanges, sendToken], ([$exchanges, $sendToken]) =>
