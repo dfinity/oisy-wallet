@@ -13,9 +13,7 @@
 	{/snippet}
 
 	{#snippet mainValue()}
-		<div>
 			{$i18n.swap.text.gasless}
-		</div>
 	{/snippet}
 
 	{#snippet secondaryValue()}
