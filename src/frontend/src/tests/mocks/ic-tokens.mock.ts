@@ -34,7 +34,7 @@ export const mockValidDip20Token: IcToken = {
 
 export const mockValidIcCkToken: IcCkToken = {
 	...mockValidIcToken,
-	twinToken: mockValidToken,
+	twinToken: { ...mockValidToken, standard: 'erc20' },
 	feeLedgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID,
 	minterCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
 };
