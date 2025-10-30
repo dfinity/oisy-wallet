@@ -50,6 +50,10 @@ describe('SwapFormEth', () => {
 		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
 	});
 
+	afterEach(() => {
+		mockContext.clear();
+	});
+
 	const props = {
 		swapAmount: '1',
 		receiveAmount: 2,
