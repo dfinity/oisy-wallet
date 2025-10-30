@@ -1740,6 +1740,7 @@
 		"text": {
 			"stake": "Stake $token_symbol",
 			"unstake": "Unstake",
+			"unstaking": "Unstaking...",
 			"enable_token_text": "You need to enable $token_symbol",
 			"enable_token_button": "Enable $token_symbol",
 			"review": "Review transaction",
