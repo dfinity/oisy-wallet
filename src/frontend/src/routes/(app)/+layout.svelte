@@ -16,7 +16,6 @@
 	import MobileNavigationMenu from '$lib/components/navigation/MobileNavigationMenu.svelte';
 	import NavigationMenu from '$lib/components/navigation/NavigationMenu.svelte';
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
-	import NftPagesContext from '$lib/components/nfts/NftPagesContext.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
 	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
