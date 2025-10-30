@@ -16,6 +16,7 @@ import { usdValue } from '$lib/utils/exchange.utils';
 import {
 	calculateTokenUsdAmount,
 	calculateTokenUsdBalance,
+	filterEnabledToken,
 	findTwinToken,
 	getMaxTransactionAmount,
 	getTokenDisplaySymbol,
@@ -541,6 +542,34 @@ describe('token.utils', () => {
 			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
 
 			expect(isTokenToggleable({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
+		});
+	});
+
+	describe('filterEnabledToken', () => {
+		it('should return true if token has property `enabled` as true', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: true })).toBeTruthy();
+		});
+
+		it('should return false if token has property `enabled` as false', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: false })).toBeFalsy();
+		});
+
+		it('should return true if token has no property `enabled`', () => {
+			expect(filterEnabledToken(ICP_TOKEN)).toBeTruthy();
+		});
+
+		it('should return false if token has nullish `enabled`', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: undefined })).toBeFalsy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: null })).toBeFalsy();
+		});
+
+		it('should return true if token has property `enabled` but not boolean', () => {
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 123 })).toBeTruthy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: 'random-string' })).toBeTruthy();
+
+			expect(filterEnabledToken({ ...ICP_TOKEN, enabled: {} })).toBeTruthy();
 		});
 	});
 });
