@@ -14,6 +14,7 @@
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { fungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -26,7 +27,6 @@
 	import { isTokenUiGroup, sortTokenOrGroupUi } from '$lib/utils/token-group.utils';
 	import { getDisabledOrModifiedTokens, getFilteredTokenList } from '$lib/utils/token-list.utils';
 	import { saveAllCustomTokens } from '$lib/utils/tokens.utils';
-	import { fungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 
 	let tokens: TokenUiOrGroupUi[] | undefined = $state();
 
