@@ -155,8 +155,10 @@
 
 			const touchStart = () => {
 				modalContent = document.querySelector('.modal .content');
-				document.body.style.overflow = 'hidden';
-				document.body.style.touchAction = 'none';
+				if (nonNullish(modalContent)) {
+					document.body.style.overflow = 'hidden';
+					document.body.style.touchAction = 'none';
+				}
 			};
 
 			const disableTouch = (e: TouchEvent) => {
