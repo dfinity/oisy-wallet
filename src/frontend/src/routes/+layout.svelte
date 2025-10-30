@@ -170,6 +170,7 @@
 			};
 
 			const touchEnd = () => {
+				modalContent = null;
 				document.body.style.overflow = '';
 				document.body.style.touchAction = '';
 			};
