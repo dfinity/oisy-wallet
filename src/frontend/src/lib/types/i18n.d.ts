@@ -1410,8 +1410,10 @@ interface I18nStake {
 		current_apy_info: string;
 		stake_review_subtitle: string;
 		delayed_dissolve: string;
+		immediate_dissolve: string;
 		delayed_dissolve_terms: string;
 		delayed_dissolve_info: string;
+		immediate_dissolve_terms: string;
 	};
 }
 
