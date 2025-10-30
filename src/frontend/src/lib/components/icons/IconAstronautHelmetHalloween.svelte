@@ -1,5 +1,11 @@
 <!-- source: DFINITY foundation -->
-<svg class="halloween-helmet-svg" fill="none" height="44" width="44" xmlns="http://www.w3.org/2000/svg">
+<svg
+	class="halloween-helmet-svg"
+	fill="none"
+	height="44"
+	width="44"
+	xmlns="http://www.w3.org/2000/svg"
+>
 	<mask
 		id="astronaut-helmet-mask"
 		style="mask-type:alpha"
@@ -72,18 +78,25 @@
 	</defs>
 </svg>
 
-<style>
+<style lang="scss">
+	:global(a[href='/']:hover > div:has(.halloween-helmet-svg)) {
+		.bat {
+			animation: bat-flap 1.5s ease-in-out infinite;
+
+			@media (prefers-reduced-motion: reduce) {
+				animation: none;
+			}
+		}
+	}
+
 	.bat {
 		transform-origin: center;
 		transition: transform 0.3s ease-in-out;
 	}
 
-	.halloween-helmet-svg:hover .bat {
-		animation: bat-flap 1.5s ease-in-out infinite;
-	}
-
 	@keyframes bat-flap {
-		0%, 100% {
+		0%,
+		100% {
 			transform: rotate(0deg) scale(1);
 		}
 		25% {
@@ -94,13 +107,6 @@
 		}
 		75% {
 			transform: rotate(8deg) scale(0.9);
-		}
-	}
-
-	/* Accessibility: Respect user's motion preferences */
-	@media (prefers-reduced-motion: reduce) {
-		.halloween-helmet-svg:hover .bat {
-			animation: none;
 		}
 	}
 </style>

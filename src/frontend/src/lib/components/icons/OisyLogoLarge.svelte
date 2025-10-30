@@ -6,7 +6,6 @@
 	let { description }: Props = $props();
 </script>
 
-<!-- Inline SVG for animations to work -->
 <svg
 	class="logo-svg"
 	aria-describedby="spider-animation"
@@ -74,6 +73,23 @@
 </svg>
 
 <style lang="scss">
+	:global(a[href='/']:hover > div:has(.logo-svg)) {
+		.spider {
+			transform: translateY(var(--spider-drop-distance));
+		}
+
+		.spider-web {
+			transform: translateY(var(--spider-web-translate)) scaleY(var(--spider-web-scale));
+		}
+
+		@media (prefers-reduced-motion: reduce) {
+			.spider,
+			.spider-web {
+				transform: none;
+			}
+		}
+	}
+
 	.logo-svg {
 		--spider-drop-distance: 8px;
 		--spider-web-scale: 2.5;
@@ -90,28 +106,10 @@
 			transform-origin: top center;
 		}
 
-		&:hover {
-			.spider {
-				transform: translateY(var(--spider-drop-distance));
-			}
-
-			.spider-web {
-				transform: translateY(var(--spider-web-translate)) scaleY(var(--spider-web-scale));
-			}
-		}
-
-		/* Accessibility: Respect user's motion preferences */
 		@media (prefers-reduced-motion: reduce) {
 			.spider,
 			.spider-web {
 				transition: none;
-			}
-
-			&:hover {
-				.spider,
-				.spider-web {
-					transform: none;
-				}
 			}
 		}
 	}
