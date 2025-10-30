@@ -22,8 +22,8 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { isTokenToggleable } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
-    import {isTokenToggleable} from "$lib/utils/token.utils";
 
 	interface Props {
 		initialSearch?: string;
