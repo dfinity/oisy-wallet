@@ -1086,10 +1086,7 @@ export const fetchVeloraMarketSwap = async ({
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
 		userAddress,
-		partner: OISY_URL_HOSTNAME,
-		permit: 'gfdgd',
-		deadline: 'gfd',
-		nonce
+		partner: OISY_URL_HOSTNAME
 	});
 
 	await swap({
