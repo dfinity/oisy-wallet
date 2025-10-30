@@ -59,8 +59,7 @@ export const getDisabledOrModifiedTokens = ({
 				$selectedNetwork: selectedNetwork,
 				$pseudoNetworkChainFusion: isNullish(selectedNetwork)
 			}) &&
-			includeNonFungibleTokens &&
-			!isTokenNonFungible(token)
+			((isTokenNonFungible(token) && includeNonFungibleTokens) || !isTokenNonFungible(token))
 		) {
 			acc.push({
 				token: token as TokenUi

@@ -264,7 +264,7 @@ describe('token-list.utils', () => {
 			const nftToken = {
 				...ICP_TOKEN,
 				id: parseTokenId('nft1'),
-				standard: 'ERC721', // or however your isTokenNonFungible() detects NFTs
+				standard: 'erc721',
 				enabled: false
 			} as unknown as TokenToggleable<Token>;
 
