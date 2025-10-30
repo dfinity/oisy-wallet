@@ -24,6 +24,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isIos } from '$lib/utils/device.utils';
+	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		children: Snippet;
@@ -147,6 +148,20 @@
 
 	onMount(openBc);
 
+	$effect(() => {
+		if (nonNullish($modalStore?.type)) {
+			document.body.style.overflow = 'hidden';
+			document.body.style.overflowX = 'hidden';
+			document.body.style.overflowY = 'hidden';
+			document.body.style.touchAction = 'none';
+		} else {
+			document.body.style.overflow = '';
+			document.body.style.overflowX = '';
+			document.body.style.overflowY = '';
+			document.body.style.touchAction = '';
+		}
+	});
+
 	// This fix below is to prevent the page from scrolling when the user is focused on an input field.
 	// This is a bug in IOS which makes pages behind modals scrollable when an input is focused
 	onMount(() => {
@@ -155,10 +170,6 @@
 
 			const touchStart = () => {
 				modalContent = document.querySelector('.modal .content');
-				if (nonNullish(modalContent)) {
-					document.body.style.overflow = 'hidden';
-					document.body.style.touchAction = 'none';
-				}
 			};
 
 			const disableTouch = (e: TouchEvent) => {
@@ -171,8 +182,6 @@
 
 			const touchEnd = () => {
 				modalContent = null;
-				document.body.style.overflow = '';
-				document.body.style.touchAction = '';
 			};
 
 			document.addEventListener('touchstart', touchStart);
