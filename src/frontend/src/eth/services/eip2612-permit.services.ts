@@ -27,17 +27,10 @@ const fetchPermitMetadata = async ({
 	customDeadline,
 	tokenName
 }: FetchPermitMetadataParams): Promise<PermitMetadata> => {
-	// Some ERC-20 tokens don't implement version() method, so we wrap it in a safe call
-	// that defaults to "1" if the method is not available (e.g., older permit implementations)
-	const safeVersion = async (): Promise<string> => {
-		try {
-			return await tokenContract.version();
-		} catch (_: unknown) {
-			return '1';
-		}
-	};
-
-	const [nonce, version] = await Promise.all([tokenContract.nonces(userAddress), safeVersion()]);
+	const [nonce, version] = await Promise.all([
+		tokenContract.nonces(userAddress),
+		tokenContract.version()
+	]);
 
 	return {
 		name: tokenName,
