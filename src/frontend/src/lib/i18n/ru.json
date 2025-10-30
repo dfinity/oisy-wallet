@@ -1740,6 +1740,7 @@
 		"text": {
 			"stake": "Стейкинг",
 			"unstake": "",
+			"unstaking": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
