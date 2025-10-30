@@ -153,8 +153,10 @@
 		if (isIos()) {
 			let modalContent: Element | null = null;
 
-			const getModalContentElement = () => {
+			const touchStart = () => {
 				modalContent = document.querySelector('.modal .content');
+				document.body.style.overflow = 'hidden';
+				document.body.style.touchAction = 'none';
 			};
 
 			const disableTouch = (e: TouchEvent) => {
@@ -165,11 +167,18 @@
 				}
 			};
 
-			document.addEventListener('touchstart', getModalContentElement);
+			const touchEnd = () => {
+				document.body.style.overflow = '';
+				document.body.style.touchAction = '';
+			};
+
+			document.addEventListener('touchstart', touchStart);
 			document.addEventListener('touchmove', disableTouch, { passive: false });
+			document.addEventListener('touchend', touchEnd);
 			return () => {
-				document.removeEventListener('touchstart', getModalContentElement);
+				document.removeEventListener('touchstart', touchStart);
 				document.removeEventListener('touchmove', disableTouch);
+				document.removeEventListener('touchend', touchEnd);
 			};
 		}
 	});
