@@ -4,6 +4,10 @@
 	import type { WalletKitTypes } from '@reown/walletkit';
 	import WalletConnectSignReview from '$eth/components/wallet-connect/WalletConnectSignReview.svelte';
 	import { walletConnectSignSteps } from '$eth/constants/steps.constants';
+	import {
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
+		SESSION_REQUEST_ETH_SIGN_V4
+	} from '$eth/constants/wallet-connect.constants';
 	import { signMessage } from '$eth/services/wallet-connect.services';
 	import { getSignParamsMessageTypedDataV4 } from '$eth/utils/wallet-connect.utils';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
@@ -14,10 +18,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
-	import {
-		SESSION_REQUEST_ETH_SIGN_LEGACY,
-		SESSION_REQUEST_ETH_SIGN_V4
-	} from '$eth/constants/wallet-connect.constants';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
