@@ -1,7 +1,7 @@
 <script lang="ts">
 	import oisyLogoSmall from '$lib/assets/oisy-logo-small.svg';
-	import OisyLogoLarge from '$lib/components/icons/oisyLogoLarge.svelte';
 	import IconAstronautHelmetHalloween from '$lib/components/icons/IconAstronautHelmetHalloween.svelte';
+	import OisyLogoLarge from '$lib/components/icons/OisyLogoLarge.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -15,17 +15,17 @@
 </div>
 
 <!-- Small logo for mobile screens -->
-<div class="invert-on-dark-theme block w-16 xs:hidden logo-container" aria-label={ariaLabel}>
-	<Img src={oisyLogoSmall} alt={ariaLabel} />
+<div
+	class="invert-on-dark-theme logo-container block w-16 cursor-pointer xs:hidden"
+	aria-label={ariaLabel}
+>
+	<Img alt={ariaLabel} src={oisyLogoSmall} />
 </div>
 
 <!-- Large animated logo for larger screens -->
-<div class="invert-on-dark-theme hidden w-24 xs:block logo-container" aria-label={ariaLabel}>
+<div
+	class="invert-on-dark-theme logo-container hidden w-24 cursor-pointer xs:block"
+	aria-label={ariaLabel}
+>
 	<OisyLogoLarge />
 </div>
-
-<style>
-	.logo-container {
-		cursor: pointer;
-	}
-</style>
