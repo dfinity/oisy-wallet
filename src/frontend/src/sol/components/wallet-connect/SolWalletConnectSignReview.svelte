@@ -8,7 +8,6 @@
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { Token } from '$lib/types/token';
-	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount?: bigint;
@@ -26,13 +25,10 @@
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
 
-	let amountDisplay = $derived(
-		nonNullish(amount) ? formatToken({ value: amount, unitName: token.decimals }) : undefined
-	);
 </script>
 
 <ContentWithToolbar>
-	<SendData amount={amountDisplay} {application} {balance} {destination} {source} {token}>
+	<SendData {amount} {application} {balance} {destination} {source} {token}>
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />
 
 		<!-- TODO: add checks for insufficient funds if and when we are able to correctly parse the amount -->

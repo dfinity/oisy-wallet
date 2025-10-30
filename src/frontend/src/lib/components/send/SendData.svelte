@@ -11,7 +11,7 @@
 
 	interface Props {
 		destination: string | null;
-		amount: OptionAmount;
+		amount?: bigint;
 		token: Token;
 		exchangeRate?: number;
 		balance: OptionBalance;
