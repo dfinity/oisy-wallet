@@ -85,6 +85,8 @@ describe('NftHero', () => {
 
 			expect(attrTypeEl).toBeInTheDocument();
 
+			assertNonNullish(attr.value);
+
 			const attrValEl: HTMLElement | null = getByText(attr.value);
 
 			expect(attrValEl).toBeInTheDocument();
