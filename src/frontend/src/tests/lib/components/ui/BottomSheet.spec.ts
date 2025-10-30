@@ -11,7 +11,7 @@ describe('BottomSheet component', () => {
 		});
 
 		expect(screen.getByText('Hello content')).toBeInTheDocument();
-		expect(get(bottomSheetOpenStore)).toBe(true);
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
 	});
 
 	it('does not render when visible is false', () => {
@@ -21,7 +21,7 @@ describe('BottomSheet component', () => {
 		});
 
 		expect(screen.queryByText('Hidden content')).not.toBeInTheDocument();
-		expect(get(bottomSheetOpenStore)).toBe(false);
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
 	it('renders footer if provided', () => {
@@ -32,7 +32,7 @@ describe('BottomSheet component', () => {
 		});
 
 		expect(screen.getByText('Footer content')).toBeInTheDocument();
-		expect(get(bottomSheetOpenStore)).toBe(true);
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
 	});
 
 	it('closes when close button is clicked and updates store', async () => {
@@ -41,15 +41,15 @@ describe('BottomSheet component', () => {
 			contentTest: 'Close me'
 		});
 
-		expect(get(bottomSheetOpenStore)).toBe(true);
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
 
 		await fireEvent.click(screen.getByRole('button', { name: /close details/i }));
 
 		// verify that visible is now false
-		expect(component.visible).toBe(false);
+		expect(component.visible).toBeFalsy();
 
 		// store should reflect that change
-		expect(get(bottomSheetOpenStore)).toBe(false);
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
 	it('closes when backdrop is clicked and updates store', async () => {
@@ -58,13 +58,13 @@ describe('BottomSheet component', () => {
 			contentTest: 'Back content'
 		});
 
-		expect(get(bottomSheetOpenStore)).toBe(true);
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
 
 		const backdrop = screen.getByTestId('backdrop');
 		await fireEvent.click(backdrop);
 
-		expect(component.visible).toBe(false);
-		expect(get(bottomSheetOpenStore)).toBe(false);
+		expect(component.visible).toBeFalsy();
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 
 	it('store toggles correctly when visibility changes programmatically', async () => {
@@ -73,12 +73,14 @@ describe('BottomSheet component', () => {
 			contentTest: 'Dynamic toggle'
 		});
 
-		expect(get(bottomSheetOpenStore)).toBe(false);
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 
 		await rerender({ visible: true });
-		expect(get(bottomSheetOpenStore)).toBe(true);
+
+		expect(get(bottomSheetOpenStore)).toBeTruthy();
 
 		await rerender({ visible: false });
-		expect(get(bottomSheetOpenStore)).toBe(false);
+
+		expect(get(bottomSheetOpenStore)).toBeFalsy();
 	});
 });
