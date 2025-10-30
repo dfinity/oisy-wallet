@@ -151,21 +151,24 @@
 	// This is a bug in IOS which makes pages behind modals scrollable when an input is focused
 	onMount(() => {
 		if (isIos()) {
-			let focused = false;
+			let preventTouchmove = false;
 			const disableTouch = (e: TouchEvent) => {
-				if (focused && e.target instanceof Element && e.target?.closest('.modal')) {
+				if (preventTouchmove) {
 					e.preventDefault();
 				}
 			};
 			const onFocusIn = (e: FocusEvent) => {
-				if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-					focused = true;
+				if (
+					(e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) &&
+					e.target.closest('.modal')
+				) {
+					preventTouchmove = true;
 					document.body.style.touchAction = 'none'; // disables touch gestures
 					document.body.style.overflow = 'hidden'; // as a backup
 				}
 			};
 			const onFocusOut = () => {
-				focused = false;
+				preventTouchmove = false;
 				document.body.style.touchAction = '';
 				document.body.style.overflow = '';
 			};
