@@ -1396,6 +1396,7 @@ interface I18nStake {
 	text: {
 		stake: string;
 		unstake: string;
+		unstaking: string;
 		enable_token_text: string;
 		enable_token_button: string;
 		review: string;

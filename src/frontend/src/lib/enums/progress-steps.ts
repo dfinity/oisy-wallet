@@ -117,3 +117,10 @@ export enum ProgressStepsStake {
 	UPDATE_UI = 'update_ui',
 	DONE = 'done'
 }
+
+export enum ProgressStepsUnstake {
+	INITIALIZATION = 'initialization',
+	UNSTAKE = 'unstake',
+	UPDATE_UI = 'update_ui',
+	DONE = 'done'
+}
