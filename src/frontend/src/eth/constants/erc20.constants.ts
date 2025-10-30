@@ -18,6 +18,7 @@ export const ERC20_ABI = [
 // Spec: https://eips.ethereum.org/EIPS/eip-2612
 export const ERC20_PERMIT_ABI = [
 	'function nonces(address owner) view returns (uint256)',
+	'function version() view returns (string)',
 	'function DOMAIN_SEPARATOR() view returns (bytes32)'
 ];
 

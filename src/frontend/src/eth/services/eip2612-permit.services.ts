@@ -27,11 +27,14 @@ const fetchPermitMetadata = async ({
 	customDeadline,
 	tokenName
 }: FetchPermitMetadataParams): Promise<PermitMetadata> => {
-	const nonce = await tokenContract.nonces(userAddress);
+	const [nonce, version] = await Promise.all([
+		tokenContract.nonces(userAddress),
+		tokenContract.version()
+	]);
 
 	return {
 		name: tokenName,
-		version: '1',
+		version,
 		nonce: nonce.toString(),
 		deadline: customDeadline ?? createDeadline()
 	};
