@@ -3,6 +3,7 @@
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import IconBan from '$lib/components/icons/lucide/IconBan.svelte';
 	import IconClock from '$lib/components/icons/lucide/IconClock.svelte';
+	import { SECONDS_IN_DAY } from '$lib/constants/app.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -18,7 +19,7 @@
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	let dissolveDelayInDays = $derived(
-		Math.floor(Number($gldtStakeStore?.position?.dissolve_delay.secs ?? 0) / (24 * 60 * 60))
+		Math.floor(Number($gldtStakeStore?.position?.dissolve_delay.secs ?? 0) / SECONDS_IN_DAY)
 	);
 </script>
 

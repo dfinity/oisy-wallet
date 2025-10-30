@@ -5,6 +5,7 @@ import {
 	initGldtStakeStore,
 	type GldtStakeContext
 } from '$icp/stores/gldt-stake.store';
+import { SECONDS_IN_DAY } from '$lib/constants/app.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
@@ -30,7 +31,7 @@ describe('GldtUnstakeDelayedDissolveTerms', () => {
 
 		expect(container).toHaveTextContent(en.stake.text.delayed_dissolve);
 		expect(container).toHaveTextContent(
-			`${Math.floor(Number(stakePositionMockResponse.dissolve_delay.secs) / (24 * 60 * 60))}`
+			`${Math.floor(Number(stakePositionMockResponse.dissolve_delay.secs) / SECONDS_IN_DAY)}`
 		);
 
 		expect(container).toHaveTextContent(
