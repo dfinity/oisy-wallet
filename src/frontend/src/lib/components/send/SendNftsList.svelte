@@ -37,9 +37,7 @@
 		)
 	);
 	const filtered: Nft[] = $derived(
-		nonNullish($filterNetwork)
-			? findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork.id })
-			: filteredByInputAndSection
+		findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork?.id })
 	);
 
 	let noNftsMatch = $derived(filtered.length === 0);
