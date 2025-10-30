@@ -27,7 +27,7 @@
 </svg>
 
 <style>
-	:root {
+	.logo-svg {
 		--spider-drop-distance: 10px;
 		--spider-web-scale: 2.5;
 		--spider-web-translate: -1.5px;
