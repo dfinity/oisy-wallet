@@ -929,6 +929,8 @@ export const fetchVeloraDeltaSwap = async ({
 			identity
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
@@ -951,12 +953,12 @@ export const fetchVeloraDeltaSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
 	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
-
-	progress(ProgressStepsSwap.SWAP);
 
 	const signature = await signPrehash({
 		hash,
@@ -1084,7 +1086,10 @@ export const fetchVeloraMarketSwap = async ({
 		slippage: Number(slippageValue) * 100,
 		priceRoute: swapDetails as OptimalRate,
 		userAddress,
-		partner: OISY_URL_HOSTNAME
+		partner: OISY_URL_HOSTNAME,
+		permit: 'gfdgd',
+		deadline: 'gfd',
+		nonce
 	});
 
 	await swap({
