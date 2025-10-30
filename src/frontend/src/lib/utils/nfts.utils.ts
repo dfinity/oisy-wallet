@@ -3,7 +3,7 @@ import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
-import type { NetworkId } from '$lib/types/network';
+import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
@@ -43,8 +43,11 @@ export const findNftsByNetwork = ({
 	networkId
 }: {
 	nfts: Nft[];
-	networkId: NetworkId;
-}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
+	networkId: OptionNetworkId;
+}): Nft[] =>
+	nonNullish(networkId)
+		? nfts.filter((nft) => nft.collection.network.id === networkId)
+		: nfts.filter((nft) => nft.collection.network.env !== 'testnet');
 
 export const findNewNftIds = ({
 	nfts,
