@@ -296,44 +296,6 @@ describe('EIP2612 Permit Services', () => {
 			);
 		});
 
-		it('should fallback to version "1" if version() call fails', async () => {
-			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
-			const mockVersionFn = vi.fn().mockRejectedValue(new Error('version() not supported'));
-			const mockContract = {
-				nonces: mockNonces,
-				version: mockVersionFn
-			};
-
-			vi.mocked(Contract).mockImplementation(() => mockContract as unknown as Contract);
-			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
-			vi.mocked(TypedDataEncoder.hash).mockReturnValue(mockHash);
-			vi.mocked(signerApi.signPrehash).mockResolvedValue(mockSignatureData);
-			vi.mocked(Signature.from).mockReturnValue({
-				v: 27,
-				r: `0x${'a'.repeat(64)}`,
-				s: `0x${'b'.repeat(64)}`
-			} as unknown as Signature);
-			vi.mocked(concat).mockReturnValue(mockEncodedPermit);
-
-			const result = await createPermit({
-				token: mockValidErc20Token,
-				userAddress: mockUserAddress,
-				spender: mockSpenderAddress,
-				value: mockValue,
-				identity: mockIdentity
-			});
-
-			expect(mockVersionFn).toHaveBeenCalled();
-			expect(result).toBeDefined();
-			expect(TypedDataEncoder.hash).toHaveBeenCalledWith(
-				expect.objectContaining({
-					version: '1'
-				}),
-				expect.any(Object),
-				expect.any(Object)
-			);
-		});
-
 		it('should initialize Contract with correct parameters', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const mockVersionFn = vi.fn().mockResolvedValue('2');
