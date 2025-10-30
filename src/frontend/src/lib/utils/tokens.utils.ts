@@ -33,7 +33,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { calculateTokenUsdBalance, isTokenToggleable, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
@@ -199,7 +199,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  * @returns The list of "enabled" tokens.
  */
 export const filterEnabledTokens = <T extends Token>([$tokens]: [$tokens: T[]]): T[] =>
-	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
+	$tokens.filter((token) => (isTokenToggleable(token) ? token.enabled : true));
 
 /** Pins enabled tokens at the top of the list, preserving the order of the parts.
  *

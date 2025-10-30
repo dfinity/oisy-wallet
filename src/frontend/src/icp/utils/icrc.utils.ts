@@ -23,6 +23,7 @@ import { isTokenIcTestnet } from '$icp/utils/ic-ledger.utils';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory, TokenMetadata } from '$lib/types/token';
+import { isTokenToggleable } from '$lib/utils/token.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
 import {
@@ -170,7 +171,7 @@ export const isTokenIc = (token: Partial<IcToken>): token is IcToken =>
 	isTokenIcp(token) || isTokenIcrc(token) || isTokenDip20(token);
 
 export const icTokenIcrcCustomToken = (token: Partial<IcrcCustomToken>): token is IcrcCustomToken =>
-	isTokenIc(token) && 'enabled' in token;
+	isTokenIc(token) && isTokenToggleable(token);
 
 const isIcCkInterface = (token: IcInterface): token is IcCkInterface =>
 	'minterCanisterId' in token && 'twinToken' in token;
