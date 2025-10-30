@@ -13,7 +13,7 @@
 	{/snippet}
 
 	{#snippet mainValue()}
-			{$i18n.swap.text.gasless}
+		{$i18n.swap.text.gasless}
 	{/snippet}
 
 	{#snippet secondaryValue()}
