@@ -24,7 +24,6 @@
 		$props();
 
 	let balance = $derived($balancesStore?.[token.id]?.data);
-
 </script>
 
 <ContentWithToolbar>
