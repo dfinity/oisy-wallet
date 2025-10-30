@@ -1396,6 +1396,8 @@ interface I18nStake {
 	text: {
 		stake: string;
 		unstake: string;
+		unstaking: string;
+		unstake_token: string;
 		enable_token_text: string;
 		enable_token_button: string;
 		review: string;
@@ -1407,6 +1409,11 @@ interface I18nStake {
 		current_apy: string;
 		current_apy_info: string;
 		stake_review_subtitle: string;
+		delayed_dissolve: string;
+		immediate_dissolve: string;
+		delayed_dissolve_terms: string;
+		delayed_dissolve_info: string;
+		immediate_dissolve_terms: string;
 	};
 }
 

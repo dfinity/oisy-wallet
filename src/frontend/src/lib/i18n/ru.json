@@ -1740,6 +1740,8 @@
 		"text": {
 			"stake": "Стейкинг",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
@@ -1750,7 +1752,12 @@
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
 			"current_apy_info": "Информация о текущем APY",
-			"stake_review_subtitle": "Подзаголовок проверки стейкинга"
+			"stake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": ""
 		}
 	},
 	"temporal": {

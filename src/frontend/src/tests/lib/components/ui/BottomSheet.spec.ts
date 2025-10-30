@@ -68,7 +68,7 @@ describe('BottomSheet component', () => {
 	});
 
 	it('store toggles correctly when visibility changes programmatically', async () => {
-		const { component, rerender } = render(BottomSheetTest, {
+		const { rerender } = render(BottomSheetTest, {
 			visible: false,
 			contentTest: 'Dynamic toggle'
 		});

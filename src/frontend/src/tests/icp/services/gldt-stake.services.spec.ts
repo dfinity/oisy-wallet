@@ -1,11 +1,11 @@
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as gldtStakeApi from '$icp/api/gldt_stake.api';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
-import { stakeGldt } from '$icp/services/gldt-stake.services';
+import { stakeGldt, unstakeGldt } from '$icp/services/gldt-stake.services';
 import * as dateUtils from '$icp/utils/date.utils';
 import * as appConstants from '$lib/constants/app.constants';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { ProgressStepsStake } from '$lib/enums/progress-steps';
+import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
 import { mockLedgerCanisterId, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
@@ -24,7 +24,6 @@ describe('gldt-stake.services', () => {
 		identity: mockIdentity,
 		amount: mockAmount,
 		progress: mockProgress,
-		stakeCompleted: mockStakeCompleted,
 		gldtToken
 	};
 
@@ -41,7 +40,7 @@ describe('gldt-stake.services', () => {
 
 	describe('stakeGldt', () => {
 		it('calls all required functions and returns response correctly', async () => {
-			const response = await stakeGldt(baseParams);
+			const response = await stakeGldt({ ...baseParams, stakeCompleted: mockStakeCompleted });
 
 			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsStake.APPROVE);
 			expect(icrcLedgerApi.approve).toHaveBeenCalledExactlyOnceWith({
@@ -60,6 +59,41 @@ describe('gldt-stake.services', () => {
 			});
 			expect(response).toBe(stakePositionMockResponse);
 			expect(mockProgress).toHaveBeenNthCalledWith(3, ProgressStepsStake.UPDATE_UI);
+			expect(mockStakeCompleted).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe('unstakeGldt', () => {
+		const unstakeParams = {
+			...baseParams,
+			unstakeCompleted: mockStakeCompleted,
+			totalStakedAmount: 100000n,
+			dissolveInstantly: false
+		};
+
+		it('calls all required functions and returns response correctly when dissolving with delay', async () => {
+			const response = await unstakeGldt(unstakeParams);
+
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsUnstake.UNSTAKE);
+			expect(gldtStakeApi.manageStakePosition).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				positionParams: { StartDissolving: { fraction: 10 } }
+			});
+			expect(response).toBe(stakePositionMockResponse);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsUnstake.UPDATE_UI);
+			expect(mockStakeCompleted).toHaveBeenCalledOnce();
+		});
+
+		it('calls all required functions and returns response correctly when dissolving immediately', async () => {
+			const response = await unstakeGldt({ ...unstakeParams, dissolveInstantly: true });
+
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsUnstake.UNSTAKE);
+			expect(gldtStakeApi.manageStakePosition).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				positionParams: { DissolveInstantly: { fraction: 10 } }
+			});
+			expect(response).toBe(stakePositionMockResponse);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsUnstake.UPDATE_UI);
 			expect(mockStakeCompleted).toHaveBeenCalledOnce();
 		});
 	});

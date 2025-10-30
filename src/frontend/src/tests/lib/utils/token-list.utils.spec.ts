@@ -264,40 +264,19 @@ describe('token-list.utils', () => {
 			const nftToken = {
 				...ICP_TOKEN,
 				id: parseTokenId('nft1'),
-				standard: 'ERC721', // or however your isTokenNonFungible() detects NFTs
+				standard: 'erc721',
 				enabled: false
-			} as unknown as TokenToggleable<Token>;
+			} as TokenToggleable<Token>;
 
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
 				$allTokens: [nftToken],
 				modifiedTokens: emptyTokensMap,
-				selectedNetwork: ICP_NETWORK,
-				includeNonFungibleTokens: false
+				selectedNetwork: ICP_NETWORK
 			});
 
 			expect(result).toEqual([]); // NFT excluded
-		});
-
-		it('includes non-fungible tokens when includeNonFungibleTokens is true', () => {
-			const nftToken = {
-				...ICP_TOKEN,
-				id: parseTokenId('nft2'),
-				standard: 'ERC721',
-				enabled: false
-			} as unknown as TokenToggleable<Token>;
-
-			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
-
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: [nftToken],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: ICP_NETWORK,
-				includeNonFungibleTokens: true
-			});
-
-			expect(result).toEqual([{ token: nftToken }]); // NFT included
 		});
 	});
 });

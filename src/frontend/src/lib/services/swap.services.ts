@@ -929,10 +929,12 @@ export const fetchVeloraDeltaSwap = async ({
 			identity
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
-			nonce: Number(nonce),
+			nonce,
 			permit: encodedPermit
 		});
 	} else {
@@ -951,12 +953,12 @@ export const fetchVeloraDeltaSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
 	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
-
-	progress(ProgressStepsSwap.SWAP);
 
 	const signature = await signPrehash({
 		hash,
