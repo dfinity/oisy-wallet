@@ -37,13 +37,13 @@ export const getFilteredTokenGroup = ({
 // then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
 // we also apply the same logic for filtering networks as in manage tokens modal
 export const getDisabledOrModifiedTokens = ({
-	$allTokens,
+	tokens,
 	modifiedTokens
 }: {
-	$allTokens: Token[];
+	tokens: Token[];
 	modifiedTokens: SvelteMap<TokenId, Token>;
 }): TokenUiOrGroupUi[] =>
-	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
+	tokens.reduce<TokenUiOrGroupUi[]>((acc, token) => {
 		const isEnabled = isTokenToggleable(token) && token.enabled;
 		const isModified = nonNullish(modifiedTokens.get(token.id));
 		if (!isEnabled || isModified) {

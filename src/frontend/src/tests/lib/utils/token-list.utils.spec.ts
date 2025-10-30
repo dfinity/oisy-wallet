@@ -113,49 +113,14 @@ describe('token-list.utils', () => {
 
 		it('returns an empty array when no tokens are provided', () => {
 			const result = getDisabledOrModifiedTokens({
-				$allTokens: [],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: dummyNetwork
+				tokens: [],
+				modifiedTokens: emptyTokensMap
 			});
 
 			expect(result).toEqual([]);
 		});
 
-		it('returns only disabled tokens that pass the network filter', () => {
-			const token = {
-				...ICP_TOKEN,
-				enabled: false
-			} as TokenToggleable<Token>;
-
-			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
-
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: [token],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: dummyNetwork
-			});
-
-			expect(result).toEqual([{ token }]);
-		});
-
-		it('excludes disabled tokens that fail the network filter', () => {
-			const token = {
-				...ICP_TOKEN,
-				enabled: false
-			} as TokenToggleable<Token>;
-
-			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(false);
-
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: [token],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: dummyNetwork
-			});
-
-			expect(result).toEqual([]);
-		});
-
-		it('returns enabled but modified tokens that pass the network filter', () => {
+		it('returns enabled but modified tokens', () => {
 			const token = {
 				...ICP_TOKEN,
 				id: parseTokenId('2'),
@@ -169,9 +134,8 @@ describe('token-list.utils', () => {
 			modifiedTokens.set(token.id, token);
 
 			const result = getDisabledOrModifiedTokens({
-				$allTokens: [token],
-				modifiedTokens,
-				selectedNetwork: dummyNetwork
+				tokens: [token],
+				modifiedTokens
 			});
 
 			expect(result).toEqual([{ token }]);
@@ -186,29 +150,11 @@ describe('token-list.utils', () => {
 			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
 
 			const result = getDisabledOrModifiedTokens({
-				$allTokens: [token],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: dummyNetwork
+				tokens: [token],
+				modifiedTokens: emptyTokensMap
 			});
 
 			expect(result).toEqual([]);
-		});
-
-		it('handles nullish selectedNetwork (pseudo network case)', () => {
-			const token = {
-				...ICP_TOKEN,
-				enabled: false
-			} as TokenToggleable<Token>;
-
-			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
-
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: [token],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: undefined
-			});
-
-			expect(result).toEqual([{ token }]);
 		});
 
 		it('returns multiple matching tokens', () => {
@@ -239,44 +185,14 @@ describe('token-list.utils', () => {
 			modifiedTokens.set(tokens[1].id, tokens[1]);
 
 			const result = getDisabledOrModifiedTokens({
-				$allTokens: tokens,
-				modifiedTokens,
-				selectedNetwork: dummyNetwork
+				tokens,
+				modifiedTokens
 			});
 
 			expect(result.map((r) => (!isTokenUiGroup(r) ? r.token.id : undefined))).toEqual([
 				tokens[0].id,
 				tokens[1].id
 			]);
-		});
-
-		it('gracefully handles null/undefined $allTokens', () => {
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: null as unknown as TokenToggleable<Token>[],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: dummyNetwork
-			});
-
-			expect(result).toEqual([]);
-		});
-
-		it('excludes non-fungible tokens when includeNonFungibleTokens is false', () => {
-			const nftToken = {
-				...ICP_TOKEN,
-				id: parseTokenId('nft1'),
-				standard: 'erc721',
-				enabled: false
-			} as TokenToggleable<Token>;
-
-			vi.mocked(showTokenFilteredBySelectedNetwork).mockReturnValue(true);
-
-			const result = getDisabledOrModifiedTokens({
-				$allTokens: [nftToken],
-				modifiedTokens: emptyTokensMap,
-				selectedNetwork: ICP_NETWORK
-			});
-
-			expect(result).toEqual([]); // NFT excluded
 		});
 	});
 });

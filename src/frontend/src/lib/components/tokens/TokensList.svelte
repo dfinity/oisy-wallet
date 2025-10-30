@@ -64,7 +64,7 @@
 			filter,
 			list: sortTokenOrGroupUi(
 				getDisabledOrModifiedTokens({
-					$allTokens: $fungibleNetworkTokens,
+					tokens: $fungibleNetworkTokens,
 					modifiedTokens
 				})
 			)
