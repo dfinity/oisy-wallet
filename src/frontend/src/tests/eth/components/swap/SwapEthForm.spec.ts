@@ -42,7 +42,7 @@ describe('SwapFormEth', () => {
 		const swapAmountsStore = writable({
 			selectedProvider: {
 				provider: 'Velora',
-				receiveAmount: 1000000n
+				receiveAmount: 1n
 			},
 			swaps: []
 		});
