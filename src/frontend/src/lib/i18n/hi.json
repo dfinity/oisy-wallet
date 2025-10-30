@@ -1741,6 +1741,7 @@
 			"stake": "",
 			"unstake": "",
 			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1751,7 +1752,10 @@
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": ""
 		}
 	},
 	"temporal": {
