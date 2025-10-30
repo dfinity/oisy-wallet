@@ -4,7 +4,6 @@ import { ETH_FEE_CONTEXT_KEY, initEthFeeContext, initEthFeeStore } from '$eth/st
 import { maxGasFee as maxGasFeeUtils } from '$eth/utils/fee.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { formatToken } from '$lib/utils/format.utils';
-import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
@@ -25,7 +24,7 @@ describe('EthFeeDisplay', () => {
 			feeStore: store,
 			feeSymbolStore: writable(ETHEREUM_TOKEN.symbol),
 			feeTokenIdStore: writable(ETHEREUM_TOKEN.id),
-			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals),
+			feeDecimalsStore: writable(ETHEREUM_TOKEN.decimals)
 		})
 	);
 

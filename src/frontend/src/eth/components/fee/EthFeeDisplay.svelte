@@ -11,12 +11,8 @@
 
 	let { label, isApproveNeeded }: Props = $props();
 
-	const {
-		maxGasFee,
-		feeSymbolStore,
-		feeDecimalsStore,
-		feeExchangeRateStore
-	}: EthFeeContext = getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
+	const { maxGasFee, feeSymbolStore, feeDecimalsStore, feeExchangeRateStore }: EthFeeContext =
+		getContext<EthFeeContext>(ETH_FEE_CONTEXT_KEY);
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const feeAmount = $derived(
