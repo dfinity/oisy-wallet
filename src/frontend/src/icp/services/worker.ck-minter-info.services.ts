@@ -11,7 +11,7 @@ import {
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type { IcCkMetadata } from '$icp/types/ic-token';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCk,
@@ -49,7 +49,7 @@ export const initCkETHMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorke
 
 export class CkMinterInfoWorker extends AppWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		private readonly tokenId: TokenId,
 		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
 		private readonly postMessageKey: CkMinterInfoWorkerCallbacks['postMessageKey'],
@@ -59,31 +59,35 @@ export class CkMinterInfoWorker extends AppWorker {
 	) {
 		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncCkMinterInfo':
-					onSyncSuccess({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
-				case 'syncCkMinterInfoError':
-					onSyncError({
-						tokenId,
-						error: data.error
-					});
-					return;
-				case 'syncCkMinterInfoStatus':
-					onSyncStatus((data as PostMessageSyncState).state);
-					return;
+				switch (msg) {
+					case 'syncCkMinterInfo':
+						onSyncSuccess({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkMinterInfoError':
+						onSyncError({
+							tokenId,
+							error: data.error
+						});
+						return;
+					case 'syncCkMinterInfoStatus':
+						onSyncStatus((data as PostMessageSyncState).state);
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({

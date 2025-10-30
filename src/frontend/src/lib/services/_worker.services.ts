@@ -1,22 +1,55 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
+import type {
+	PostMessage,
+	PostMessageDataRequest,
+	PostMessageDataResponseLoose
+} from '$lib/types/post-message';
+import { isNullish } from '@dfinity/utils';
+
+export interface WorkerData {
+	worker: Worker;
+	isSingleton: boolean;
+}
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
 	readonly #queue: WorkerQueue;
 
-	protected constructor(worker: Worker) {
+	static #singletonWorker?: Worker;
+
+	protected constructor(workerData: WorkerData) {
+		const { worker } = workerData;
+
 		this.#worker = worker;
 		this.#queue = new WorkerQueue(worker);
 	}
 
-	protected static async newInstance(): Promise<Worker> {
+	static #newInstance = async (): Promise<Worker> => {
 		const Workers = await import('$lib/workers/workers?worker');
 		return new Workers.default();
-	}
+	};
 
-	static async getInstance(): Promise<Worker> {
-		return await this.newInstance();
-	}
+	static #getInstanceAsSingleton = async (): Promise<Worker> => {
+		if (isNullish(this.#singletonWorker)) {
+			this.#singletonWorker = await this.#newInstance();
+		}
+
+		return this.#singletonWorker;
+	};
+
+	static getInstance = async (
+		{ asSingleton = false }: { asSingleton?: boolean } = { asSingleton: false }
+	): Promise<WorkerData> => {
+		const worker = asSingleton ? await this.#getInstanceAsSingleton() : await this.#newInstance();
+
+		return { worker, isSingleton: asSingleton };
+	};
+
+	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
+		fn: (ev: MessageEvent<PostMessage<T>>) => void
+	) => {
+		this.#worker.onmessage = fn;
+	};
 
 	protected postMessage = <T>(data: T) => {
 		// Route via queue to enforce back-pressure

@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { EthAddress } from '$eth/types/address';
@@ -874,6 +875,7 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationNetwork,
 	userAddress,
 	gas,
+	isGasless,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
@@ -903,33 +905,58 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	await approveToken({
-		token: sourceToken,
-		from: userAddress,
-		to: deltaContract,
-		amount: parsedSwapAmount,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		shouldSwapWithApproval: true,
-		maxPriorityFeePerGas,
-		progress,
-		progressSteps: ProgressStepsSwap
-	});
+	let signableOrderData;
 
-	progress(ProgressStepsSwap.SWAP);
-
-	const signableOrderData = await sdk.delta.buildDeltaOrder({
+	const deltaOrderBaseParams = {
 		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
-		srcAmount: `${parsedSwapAmount}`,
+		srcAmount: parsedSwapAmount.toString(),
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME
-	});
+	};
+
+	if (isGasless) {
+		progress(ProgressStepsSwap.APPROVE);
+
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			...deltaOrderBaseParams,
+			deadline,
+			nonce,
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
 

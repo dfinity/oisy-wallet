@@ -13,6 +13,7 @@
 	import { SettingsModalType } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { OptionNetworkId } from '$lib/types/network';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { gotoReplaceRoot, isRouteTransactions, switchNetwork } from '$lib/utils/nav.utils';
@@ -27,7 +28,7 @@
 	let dropdown = $state<Dropdown | undefined>();
 
 	const onNetworkSelect = async (networkId: OptionNetworkId) => {
-		await switchNetwork(networkId);
+		await switchNetwork({ networkId, userSelectedNetworkStore });
 
 		if (isRouteTransactions(page)) {
 			await gotoReplaceRoot();

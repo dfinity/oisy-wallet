@@ -5,7 +5,7 @@ import {
 } from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorkerParams } from '$icp/types/ck-listener';
-import { AppWorker } from '$lib/services/_worker.services';
+import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCkBTCUpdateBalance,
@@ -20,49 +20,51 @@ import { get } from 'svelte/store';
 
 export class CkBTCUpdateBalanceWorker extends AppWorker {
 	private constructor(
-		worker: Worker,
+		worker: WorkerData,
 		private readonly tokenId: TokenId,
 		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
 		private readonly twinToken: IcCkWorkerParams['twinToken']
 	) {
 		super(worker);
 
-		worker.onmessage = async ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			async ({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageSyncState | PostMessageDataResponseBTCAddress
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncBtcPendingUtxos':
-					syncBtcPendingUtxos({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
-				case 'syncCkBTCUpdateBalanceStatus':
-					emit({
-						message: 'oisyCkBtcUpdateBalance',
-						detail: (data as PostMessageSyncState).state
-					});
-					return;
-				case 'syncBtcAddress':
-					syncBtcAddress({
-						tokenId,
-						data: data as PostMessageDataResponseBTCAddress
-					});
-					return;
-				case 'syncCkBTCUpdateOk':
-					await syncCkBTCUpdateOk({
-						tokenId,
-						data: data as PostMessageJsonDataResponse
-					});
-					return;
+				switch (msg) {
+					case 'syncBtcPendingUtxos':
+						syncBtcPendingUtxos({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkBTCUpdateBalanceStatus':
+						emit({
+							message: 'oisyCkBtcUpdateBalance',
+							detail: (data as PostMessageSyncState).state
+						});
+						return;
+					case 'syncBtcAddress':
+						syncBtcAddress({
+							tokenId,
+							data: data as PostMessageDataResponseBTCAddress
+						});
+						return;
+					case 'syncCkBTCUpdateOk':
+						await syncCkBTCUpdateOk({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+				}
 			}
-		};
+		);
 	}
 
 	static async init({
