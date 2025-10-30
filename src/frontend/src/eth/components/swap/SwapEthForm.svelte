@@ -21,10 +21,6 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
-	import {
-		SWAP_AMOUNTS_CONTEXT_KEY,
-		type SwapAmountsContext
-	} from '$lib/stores/swap-amounts.store';
 
 	interface Props {
 		swapAmount: OptionAmount;
