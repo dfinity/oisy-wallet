@@ -231,3 +231,10 @@ export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 
 export const isTokenToggleable = <T extends Token>(token: T): token is TokenToggleable<T> =>
 	'enabled' in token;
+
+/**
+ * Checks if a token is specifically defined as enabled/disabled, otherwise it defaults to true.
+ * This is useful for native tokens that will never have the `enabled` prop.
+ */
+export const filterEnabledToken = <T extends Token>(token: T): boolean =>
+	isTokenToggleable(token) ? token.enabled : true;
