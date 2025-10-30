@@ -170,7 +170,14 @@
 
 	const isApproveNeeded = $derived<boolean>(
 		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
-			isNotDefaultEthereumToken($sourceToken)
+			isNotDefaultEthereumToken($sourceToken) &&
+			!$isSourceTokenPermitSupported
+	);
+
+	const isGasless = $derived<boolean>(
+		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+			nonNullish($isSourceTokenPermitSupported) &&
+			$isSourceTokenPermitSupported
 	);
 
 	let sourceTokenUsdValue = $derived(
@@ -300,6 +307,7 @@
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapEthForm
 					{isApproveNeeded}
+					{isGasless}
 					{isSwapAmountsLoading}
 					{nativeEthereumToken}
 					{onClose}
