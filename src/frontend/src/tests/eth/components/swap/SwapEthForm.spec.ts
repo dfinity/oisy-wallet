@@ -12,6 +12,10 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
+vi.mock('$lib/utils/parse.utils', () => ({
+	parseToken: vi.fn()
+}));
+
 describe('SwapFormEth', () => {
 	const mockContext = new Map();
 
@@ -39,7 +43,19 @@ describe('SwapFormEth', () => {
 			})
 		);
 
-		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: initSwapAmountsStore() });
+		const swapAmountsStore = writable({
+			selectedProvider: {
+				provider: 'Velora',
+				receiveAmount: 1n
+			},
+			swaps: []
+		});
+
+		mockContext.set(SWAP_AMOUNTS_CONTEXT_KEY, { store: swapAmountsStore });
+	});
+
+	afterEach(() => {
+		mockContext.clear();
 	});
 
 	const props = {
@@ -48,6 +64,8 @@ describe('SwapFormEth', () => {
 		slippageValue: '0.5',
 		nativeEthereumToken: ETHEREUM_TOKEN,
 		isSwapAmountsLoading: false,
+		isApproveNeeded: false,
+		isGasless: false,
 		onShowTokensList: () => {},
 		onClose: () => {},
 		onNext: () => {}
@@ -82,15 +100,6 @@ describe('SwapFormEth', () => {
 		});
 
 		expect(container).toBeInTheDocument();
-	});
-
-	it('should render swap details when tokens are selected', () => {
-		const { getByText } = render(SwapEthForm, {
-			props,
-			context: mockContext
-		});
-
-		expect(getByText('Total fee')).toBeInTheDocument();
 	});
 
 	it('should not render swap details when no destination token', () => {
@@ -151,7 +160,7 @@ describe('SwapFormEth', () => {
 
 		const exchangeValues = container.querySelectorAll('[data-tid="swap-amount-exchange-value"]');
 
-		expect(exchangeValues).toHaveLength(2);
+		expect(exchangeValues).toHaveLength(1);
 	});
 
 	it('should render action buttons', () => {

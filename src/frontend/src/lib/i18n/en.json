@@ -1741,6 +1741,7 @@
 			"stake": "Stake $token_symbol",
 			"unstake": "Unstake",
 			"unstaking": "Unstaking...",
+			"unstake_token": "Unstake $token_symbol",
 			"enable_token_text": "You need to enable $token_symbol",
 			"enable_token_button": "Enable $token_symbol",
 			"review": "Review transaction",
@@ -1751,7 +1752,10 @@
 			"visit_provider": "Visit website",
 			"current_apy": "Current APY $apy%",
 			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
-			"stake_review_subtitle": "You stake"
+			"stake_review_subtitle": "You stake",
+			"delayed_dissolve": "Receive with a delay",
+			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
+			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards."
 		}
 	},
 	"temporal": {
