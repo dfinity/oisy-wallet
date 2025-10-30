@@ -12,6 +12,10 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
+vi.mock('$lib/utils/parse.utils', () => ({
+	parseToken: vi.fn()
+}));
+
 describe('SwapFormEth', () => {
 	const mockContext = new Map();
 
