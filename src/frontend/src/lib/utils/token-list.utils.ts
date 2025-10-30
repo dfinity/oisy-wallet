@@ -4,6 +4,7 @@ import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
