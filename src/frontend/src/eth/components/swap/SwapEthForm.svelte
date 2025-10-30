@@ -21,6 +21,11 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -50,6 +55,8 @@
 
 	const { sourceToken, destinationToken, sourceTokenBalance } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
+
+	const { store: swapAmountsStore } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
@@ -171,6 +178,24 @@
 					feeSymbol={$feeSymbolStore}
 					feeTokenId={$feeTokenIdStore}
 				/>
+
+				{#if nonNullish($swapAmountsStore?.selectedProvider)}
+					{#if isGasless}
+						<SwapGaslessFee />
+					{:else}
+						<EthFeeDisplay {isApproveNeeded}>
+							{#snippet label()}
+								<Html text={$i18n.fee.text.total_fee} />
+							{/snippet}
+						</EthFeeDisplay>
+
+						<SwapEthFeeInfo
+							decimals={$feeDecimalsStore}
+							feeSymbol={$feeSymbolStore}
+							feeTokenId={$feeTokenIdStore}
+						/>
+					{/if}
+				{/if}
 			</div>
 		{/if}
 	{/snippet}

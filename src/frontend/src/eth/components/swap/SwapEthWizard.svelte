@@ -45,6 +45,7 @@
 	import type { TokenId } from '$lib/types/token';
 	import { errorDetailToString } from '$lib/utils/error.utils';
 	import { formatTokenBigintToNumber } from '$lib/utils/format.utils';
+	import SwapGaslessFee from '$lib/components/swap/SwapGaslessFee.svelte';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -328,11 +329,15 @@
 					{swapAmount}
 				>
 					{#snippet swapFees()}
-						<EthFeeDisplay>
-							{#snippet label()}
-								<Html text={$i18n.fee.text.total_fee} />
-							{/snippet}
-						</EthFeeDisplay>
+						{#if isGasless}
+							<SwapGaslessFee />
+						{:else}
+							<EthFeeDisplay>
+								{#snippet label()}
+									<Html text={$i18n.fee.text.total_fee} />
+								{/snippet}
+							</EthFeeDisplay>
+						{/if}
 					{/snippet}
 				</SwapReview>
 			{:else if currentStep?.name === WizardStepsSwap.SWAPPING}
