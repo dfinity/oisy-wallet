@@ -171,8 +171,7 @@
 
 	const isApproveNeeded = $derived<boolean>(
 		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
-			isNotDefaultEthereumToken($sourceToken) &&
-			!$isSourceTokenPermitSupported
+			isNotDefaultEthereumToken($sourceToken)
 	);
 
 	const isGasless = $derived<boolean>(
