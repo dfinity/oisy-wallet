@@ -150,48 +150,15 @@
 
 	$effect(() => {
 		if (nonNullish($modalStore?.type)) {
-			document.body.style.overflow = 'hidden';
-			document.body.style.overflowX = 'hidden';
-			document.body.style.overflowY = 'hidden';
-			document.body.style.touchAction = 'none';
+			const scrollY = window.scrollY;
+			document.body.style.position = 'fixed';
+			document.body.style.top = `-${scrollY}px`;
+			document.body.style.width = '100%';
 		} else {
-			document.body.style.overflow = '';
-			document.body.style.overflowX = '';
-			document.body.style.overflowY = '';
-			document.body.style.touchAction = '';
-		}
-	});
-
-	// This fix below is to prevent the page from scrolling when the user is focused on an input field.
-	// This is a bug in IOS which makes pages behind modals scrollable when an input is focused
-	onMount(() => {
-		if (isIos()) {
-			let modalContent: Element | null = null;
-
-			const touchStart = () => {
-				modalContent = document.querySelector('.modal .content');
-			};
-
-			const disableTouch = (e: TouchEvent) => {
-				// only prevent touchmove if the modal content is not scrollable
-				// explicitly seperate if condition to avoid unnessesary calculation
-				if (nonNullish(modalContent) && modalContent.scrollHeight === modalContent.clientHeight) {
-					e.preventDefault();
-				}
-			};
-
-			const touchEnd = () => {
-				modalContent = null;
-			};
-
-			document.addEventListener('touchstart', touchStart);
-			document.addEventListener('touchmove', disableTouch, { passive: false });
-			document.addEventListener('touchend', touchEnd);
-			return () => {
-				document.removeEventListener('touchstart', touchStart);
-				document.removeEventListener('touchmove', disableTouch);
-				document.removeEventListener('touchend', touchEnd);
-			};
+			const y = parseInt(document.body.style.top || '0', 10) * -1;
+			document.body.style.position = '';
+			document.body.style.top = '';
+			window.scrollTo(0, y);
 		}
 	});
 </script>
