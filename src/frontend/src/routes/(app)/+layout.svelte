@@ -95,7 +95,7 @@
 				</SplitPane>
 
 				{#if !$aiAssistantConsoleOpen}
-					<div class="fixed right-4 bottom-16 z-3 block">
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}
