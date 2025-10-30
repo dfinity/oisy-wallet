@@ -153,6 +153,10 @@
 		if (isIos()) {
 			let modalContent: Element | null = null;
 
+			const getModalContentElement = () => {
+				modalContent = document.querySelector('.modal .content');
+			};
+
 			const disableTouch = (e: TouchEvent) => {
 				// only prevent touchmove if the modal content is not scrollable
 				// explicitly seperate if condition to avoid unnessesary calculation
@@ -161,11 +165,10 @@
 				}
 			};
 
-			document.addEventListener('touchstart', () => {
-				modalContent = document.querySelector('.modal .content');
-			});
+			document.addEventListener('touchstart', getModalContentElement);
 			document.addEventListener('touchmove', disableTouch, { passive: false });
 			return () => {
+				document.removeEventListener('touchstart', getModalContentElement);
 				document.removeEventListener('touchmove', disableTouch);
 			};
 		}
