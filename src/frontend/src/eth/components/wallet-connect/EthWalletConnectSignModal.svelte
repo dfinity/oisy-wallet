@@ -14,6 +14,10 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
+	import {
+		SESSION_REQUEST_ETH_SIGN_LEGACY,
+		SESSION_REQUEST_ETH_SIGN_V4
+	} from '$eth/constants/wallet-connect.constants';
 
 	interface Props {
 		listener: OptionWalletConnectListener;
@@ -22,9 +26,19 @@
 
 	let { listener = $bindable(), request }: Props = $props();
 
-	let {
-		domain: { name: domainName }
-	} = $derived(getSignParamsMessageTypedDataV4(request.params.request.params));
+	let method = $derived(request.params.request.method);
+
+	let domainName = $derived.by(() => {
+		if (method === SESSION_REQUEST_ETH_SIGN_V4 || method === SESSION_REQUEST_ETH_SIGN_LEGACY) {
+			const {
+				domain: { name }
+			} = getSignParamsMessageTypedDataV4(request.params.request.params);
+
+			return name;
+		}
+
+		return;
+	});
 
 	/**
 	 * Modal
