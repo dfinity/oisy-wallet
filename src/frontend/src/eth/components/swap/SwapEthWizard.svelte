@@ -119,9 +119,7 @@
 	});
 
 	$effect(() => {
-		if (nonNullish($isSourceTokenPermitSupported)) {
-			isFeeGasless.set($isSourceTokenPermitSupported);
-		}
+			isFeeGasless.set($isSourceTokenPermitSupported ?? false);
 	});
 
 	// Automatically update receiveAmount when store changes (for price updates every 5 seconds)
