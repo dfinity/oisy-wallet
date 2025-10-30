@@ -42,13 +42,11 @@ export const getFilteredTokenGroup = ({
 export const getDisabledOrModifiedTokens = ({
 	$allTokens,
 	modifiedTokens,
-	selectedNetwork,
-	includeNonFungibleTokens = true
+	selectedNetwork
 }: {
 	$allTokens: TokenToggleable<Token>[];
 	modifiedTokens: SvelteMap<TokenId, Token>;
 	selectedNetwork?: Network;
-	includeNonFungibleTokens?: boolean;
 }): TokenUiOrGroupUi[] =>
 	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
 		const isModified = nonNullish(modifiedTokens.get(token.id));
@@ -59,7 +57,6 @@ export const getDisabledOrModifiedTokens = ({
 				$selectedNetwork: selectedNetwork,
 				$pseudoNetworkChainFusion: isNullish(selectedNetwork)
 			}) &&
-			includeNonFungibleTokens &&
 			!isTokenNonFungible(token)
 		) {
 			acc.push({
