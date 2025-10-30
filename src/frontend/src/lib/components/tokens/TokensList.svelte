@@ -72,8 +72,7 @@
 				getDisabledOrModifiedTokens({
 					$allTokens,
 					modifiedTokens,
-					selectedNetwork,
-					includeNonFungibleTokens: false
+					selectedNetwork
 				})
 			)
 		});
