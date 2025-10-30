@@ -1,7 +1,16 @@
+<script lang="ts">
+	interface Props {
+		description: string;
+	}
+
+	let { description }: Props = $props();
+</script>
+
 <!-- Inline SVG for animations to work -->
 <svg
 	class="logo-svg"
 	aria-describedby="spider-animation"
+	aria-label={description}
 	fill="none"
 	height="36"
 	role="img"
@@ -9,7 +18,7 @@
 	width="102"
 	xmlns="http://www.w3.org/2000/svg"
 >
-	<desc id="spider-animation">OISY WALLET Halloween-themed logo</desc>
+	<desc id="spider-animation">{description}</desc>
 	<g clip-path="url(#clip0_2910_20911)">
 		<path
 			d="M73.3175 0.531828L79.2904 7.85737L85.2785 0.531828H94.7318L83.2724 13.9822V20.9582H75.3085V13.9822L63.849 0.531828H73.3175Z"
@@ -71,35 +80,39 @@
 		--spider-web-translate: -1.5px;
 		--animation-duration: 0.3s;
 		--animation-easing: ease;
-	}
 
-	.logo-svg .spider {
-		transition: transform var(--animation-duration) var(--animation-easing);
-	}
-
-	.logo-svg .spider-web {
-		transition: transform var(--animation-duration) var(--animation-easing);
-		transform-origin: top center;
-	}
-
-	.logo-svg:hover .spider {
-		transform: translateY(var(--spider-drop-distance));
-	}
-
-	.logo-svg:hover .spider-web {
-		transform: translateY(var(--spider-web-translate)) scaleY(var(--spider-web-scale));
-	}
-
-	/* Accessibility: Respect user's motion preferences */
-	@media (prefers-reduced-motion: reduce) {
-		.logo-svg .spider,
-		.logo-svg .spider-web {
-			transition: none;
+		.spider {
+			transition: transform var(--animation-duration) var(--animation-easing);
 		}
 
-		.logo-svg:hover .spider,
-		.logo-svg:hover .spider-web {
-			transform: none;
+		.spider-web {
+			transition: transform var(--animation-duration) var(--animation-easing);
+			transform-origin: top center;
+		}
+
+		&:hover {
+			.spider {
+				transform: translateY(var(--spider-drop-distance));
+			}
+
+			.spider-web {
+				transform: translateY(var(--spider-web-translate)) scaleY(var(--spider-web-scale));
+			}
+		}
+
+		/* Accessibility: Respect user's motion preferences */
+		@media (prefers-reduced-motion: reduce) {
+			.spider,
+			.spider-web {
+				transition: none;
+			}
+
+			&:hover {
+				.spider,
+				.spider-web {
+					transform: none;
+				}
+			}
 		}
 	}
 </style>
