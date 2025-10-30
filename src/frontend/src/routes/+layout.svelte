@@ -148,18 +148,17 @@
 
 	onMount(openBc);
 
-	$effect(() => {
-		if (nonNullish($modalStore?.type)) {
-			const scrollY = window.scrollY;
-			document.body.style.position = 'fixed';
-			document.body.style.top = `-${scrollY}px`;
-			document.body.style.width = '100%';
-		} else {
-			const y = parseInt(document.body.style.top || '0', 10) * -1;
-			document.body.style.position = '';
-			document.body.style.top = '';
-			window.scrollTo(0, y);
-		}
+	onMount(() => {
+		document.addEventListener(
+			'touchmove',
+			(e) => {
+				const modal = document.querySelector('.modal');
+				if (nonNullish(modal) && e.target instanceof Element && !modal.contains(e.target)) {
+					e.preventDefault();
+				}
+			},
+			{ passive: false }
+		);
 	});
 </script>
 
