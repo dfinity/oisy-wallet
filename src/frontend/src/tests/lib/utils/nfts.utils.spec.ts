@@ -1,6 +1,7 @@
 import {
 	POLYGON_AMOY_NETWORK,
-	POLYGON_AMOY_NETWORK_ID
+	POLYGON_AMOY_NETWORK_ID,
+	POLYGON_MAINNET_NETWORK
 } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import { ETHEREUM_NETWORK, ETHEREUM_NETWORK_ID } from '$env/networks/networks.eth.env';
 import { PEPE_TOKEN } from '$env/tokens/tokens-erc20/tokens.pepe.env';
@@ -208,6 +209,20 @@ describe('nfts.utils', () => {
 			});
 
 			expect(nfts).toEqual([mockNft1, mockNft2, mockNft3]);
+		});
+
+		it('should return all non-testnet-nfts if networkId is nullish', () => {
+			const mockMainnetNft = {
+				...mockNft3,
+				collection: { ...mockNft3.collection, network: POLYGON_MAINNET_NETWORK }
+			};
+
+			const nfts: Nft[] = findNftsByNetwork({
+				nfts: [mockNft1, mockNft2, mockMainnetNft],
+				networkId: null
+			});
+
+			expect(nfts).toEqual([mockMainnetNft]);
 		});
 	});
 
