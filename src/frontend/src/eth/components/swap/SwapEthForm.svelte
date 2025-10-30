@@ -85,11 +85,11 @@
 					})
 				: ZERO;
 
-		if (isGasless) {
-			if (userAmount > parsedSendBalance) {
-				return 'insufficient-funds';
-			}
+		if (userAmount > parsedSendBalance) {
+			return 'insufficient-funds';
+		}
 
+		if (isGasless) {
 			return;
 		}
 
