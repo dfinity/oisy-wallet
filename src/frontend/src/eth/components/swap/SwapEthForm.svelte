@@ -21,6 +21,10 @@
 	import { formatToken } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { parseToken } from '$lib/utils/parse.utils';
+	import {
+		SWAP_AMOUNTS_CONTEXT_KEY,
+		type SwapAmountsContext
+	} from '$lib/stores/swap-amounts.store';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -32,6 +36,7 @@
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
+		isGasless: boolean;
 	}
 
 	let {
@@ -43,7 +48,8 @@
 		isApproveNeeded,
 		onShowTokensList,
 		onClose,
-		onNext
+		onNext,
+		isGasless
 	}: Props = $props();
 
 	const { sourceToken, destinationToken, sourceTokenBalance } =
@@ -62,7 +68,7 @@
 
 	// TODO: improve this fee calculation at the source, depending on the method (or methods) that is going to be used
 	const totalFee = $derived(
-		isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
+		isGasless ? ZERO : isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee
 	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType | undefined => {
@@ -83,6 +89,14 @@
 					})
 				: ZERO;
 
+		if (isGasless) {
+			if (userAmount > parsedSendBalance) {
+				return 'insufficient-funds';
+			}
+
+			return;
+		}
+
 		// If ETH, the balance should cover the user entered amount plus the min gas fee
 		if (isSupportedEthTokenId($sourceToken?.id) || isSupportedEvmNativeTokenId($sourceToken?.id)) {
 			const total = userAmount + ($minGasFee ?? ZERO);
@@ -99,7 +113,9 @@
 
 		// Finally, if ERC20, the ETH balance should be less or greater than the max gas fee
 		const ethBalance = $balancesStore?.[nativeEthereumToken.id]?.data ?? ZERO;
-		if (nonNullish($maxGasFee) && ethBalance < $maxGasFee) {
+		const maxFeeToCheck = isApproveNeeded && nonNullish($maxGasFee) ? $maxGasFee * 2n : $maxGasFee;
+
+		if (nonNullish(maxFeeToCheck) && ethBalance < maxFeeToCheck) {
 			return 'insufficient-funds-for-fee';
 		}
 	};

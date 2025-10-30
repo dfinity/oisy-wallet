@@ -170,7 +170,13 @@
 
 	const isApproveNeeded = $derived<boolean>(
 		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.MARKET &&
-			isNotDefaultEthereumToken($sourceToken)
+			isNotDefaultEthereumToken($sourceToken) &&
+			!$isSourceTokenPermitSupported
+	);
+
+	const isGasless = $derived<boolean>(
+		$swapAmountsStore?.swaps[0]?.type === VeloraSwapTypes.DELTA &&
+			$isSourceTokenPermitSupported === true
 	);
 
 	let sourceTokenUsdValue = $derived(
@@ -205,7 +211,8 @@
 			isNullish($ethAddress) ||
 			isNullish(maxFeePerGas) ||
 			isNullish(maxPriorityFeePerGas) ||
-			isNullish(gas)
+			isNullish(gas) ||
+			isNullish($isSourceTokenPermitSupported)
 		) {
 			toastsError({
 				msg: { text: $i18n.swap.error.unexpected_missing_data }
@@ -233,7 +240,7 @@
 				gas,
 				maxFeePerGas,
 				maxPriorityFeePerGas,
-				isGasless: false,
+				isGasless: $isSourceTokenPermitSupported,
 				swapDetails: $swapAmountsStore.swaps[0].swapDetails as VeloraSwapDetails
 			};
 
@@ -300,6 +307,7 @@
 			{#if currentStep?.name === WizardStepsSwap.SWAP}
 				<SwapEthForm
 					{isApproveNeeded}
+					{isGasless}
 					{isSwapAmountsLoading}
 					{nativeEthereumToken}
 					{onClose}
