@@ -28,7 +28,7 @@
 
 <style>
 	.logo-svg {
-		--spider-drop-distance: 10px;
+		--spider-drop-distance: 8px;
 		--spider-web-scale: 2.5;
 		--spider-web-translate: -1.5px;
 		--animation-duration: 0.3s;
