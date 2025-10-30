@@ -1740,6 +1740,7 @@
 		"text": {
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
