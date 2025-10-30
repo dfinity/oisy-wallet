@@ -173,6 +173,9 @@ div.modal {
 
 	// This is a fix to get rid of scroll bleed through modals on IOS
 	// TODO: these should go into gix-components
+    .wrapper {
+      position: fixed !important;
+    }
 	pointer-events: auto !important;
 	touch-action: none !important;
 
