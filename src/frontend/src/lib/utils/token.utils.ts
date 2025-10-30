@@ -228,3 +228,6 @@ export const findTwinToken = ({
  */
 export const getTokenDisplaySymbol = (token: Token | CardData): string =>
 	token.oisySymbol?.oisySymbol ?? token.symbol;
+
+export const isTokenToggleable = <T extends Token>(token: T): token is TokenToggleable<T> =>
+	'enabled' in token;
