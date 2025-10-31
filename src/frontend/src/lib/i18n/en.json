@@ -1755,6 +1755,8 @@
 			"stake_review_subtitle": "You stake",
 			"delayed_dissolve": "Receive with a delay",
 			"immediate_dissolve": "Receive immediately",
+			"included_token_fee": "Included network fee",
+			"included_dissolve_fee": "Included unlock fee",
 			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
 			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking."

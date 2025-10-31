@@ -528,22 +528,23 @@ describe('tokens.utils', () => {
 			);
 		});
 
-		it('should filter by canister IDs for ICRC tokens', () => {
+		it('should filter by canister IDs for IC tokens', () => {
 			expect(filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId })).toStrictEqual([
-				mockValidIcrcToken
+				mockValidIcrcToken,
+				mockValidIcCkToken
 			]);
 
 			expect(
 				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toLowerCase() })
-			).toStrictEqual([mockValidIcrcToken]);
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
 
 			expect(
 				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toUpperCase() })
-			).toStrictEqual([mockValidIcrcToken]);
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
 
 			expect(
 				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.slice(0, 5) })
-			).toStrictEqual([mockValidIcrcToken]);
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
 
 			const mockToken = { ...mockValidIcrcToken, indexCanisterId: mockIndexCanisterId };
 
