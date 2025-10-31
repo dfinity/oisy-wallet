@@ -1405,10 +1405,13 @@ interface I18nStake {
 		unsupported_token_staking: string;
 		provider: string;
 		earning_potential: string;
+		active_earning: string;
+		active_earning_per_year: string;
 		visit_provider: string;
 		current_apy: string;
 		current_apy_info: string;
 		stake_review_subtitle: string;
+		unstake_review_subtitle: string;
 		delayed_dissolve: string;
 		immediate_dissolve: string;
 		included_token_fee: string;
@@ -1416,6 +1419,7 @@ interface I18nStake {
 		delayed_dissolve_terms: string;
 		delayed_dissolve_info: string;
 		immediate_dissolve_terms: string;
+		amount_to_receive: string;
 	};
 }
 
