@@ -67,7 +67,7 @@ export const parseToAiAssistantTokens = (tokens: Token[]): AiAssistantToken[] =>
 				name,
 				symbol,
 				standard,
-				networkId: networkId.description ?? ''
+				networkId: `${networkId.description}`
 			}
 		];
 	}, []);

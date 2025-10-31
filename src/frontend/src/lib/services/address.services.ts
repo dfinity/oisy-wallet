@@ -42,7 +42,7 @@ export const loadTokenAddress = async <T extends Address>({
 		toastsError({
 			msg: {
 				text: replacePlaceholders(get(i18n).init.error.loading_address, {
-					$symbol: networkId.description ?? ''
+					$symbol: `${networkId.description}`
 				})
 			},
 			err
