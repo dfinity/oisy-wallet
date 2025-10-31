@@ -109,7 +109,7 @@ export const onLoadTransactionsError = ({
 	trackEvent({
 		name: TRACK_COUNT_IC_LOADING_TRANSACTIONS_ERROR,
 		metadata: {
-			tokenId: tokenId.description ?? '',
+			tokenId: `${tokenId.description}`,
 			...(mapIcErrorMetadata(err) ?? {})
 		}
 	});

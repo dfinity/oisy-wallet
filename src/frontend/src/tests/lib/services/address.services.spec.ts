@@ -88,7 +88,7 @@ describe('address.services', () => {
 			expect(spyToastsError).toHaveBeenCalledWith({
 				msg: {
 					text: replacePlaceholders(en.init.error.loading_address, {
-						$symbol: mockNetworkId.description ?? ''
+						$symbol: `${mockNetworkId.description}`
 					})
 				},
 				err: expect.any(Error)

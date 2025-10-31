@@ -74,7 +74,7 @@ const tokenUrl = ({
 	)}${nonNullish(networkId.description) ? `&${networkParam(networkId)}` : ''}`;
 
 export const networkParam = (networkId: NetworkId | undefined): string =>
-	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description ?? ''}`;
+	isNullish(networkId) ? '' : `${NETWORK_PARAM}=${networkId.description}`;
 
 export const networkUrl = ({
 	path,
