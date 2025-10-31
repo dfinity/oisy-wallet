@@ -121,10 +121,10 @@
 					identity
 				}),
 			erc1155Tokens.length > 0 &&
-				( saveErc1155CustomTokens({
+				saveErc1155CustomTokens({
 					tokens: erc1155Tokens as NonEmptyArray<SaveErc1155CustomToken>,
 					identity
-				}))
+				})
 		]);
 	};
 
