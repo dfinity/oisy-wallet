@@ -1749,17 +1749,21 @@
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
 			"earning_potential": "Earning potential",
+			"active_earning": "Active earning",
+			"active_earning_per_year": "$amount/year",
 			"visit_provider": "Visit website",
 			"current_apy": "Current APY $apy%",
 			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
 			"stake_review_subtitle": "You stake",
+			"unstake_review_subtitle": "You unstake",
 			"delayed_dissolve": "Receive with a delay",
 			"immediate_dissolve": "Receive immediately",
 			"included_token_fee": "Included network fee",
 			"included_dissolve_fee": "Included unlock fee",
 			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
 			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
-			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking."
+			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
+			"amount_to_receive": "Amount to receive"
 		}
 	},
 	"temporal": {
