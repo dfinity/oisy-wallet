@@ -8,6 +8,7 @@ import {
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { stakePositionMockResponse } from '$tests/mocks/gldt_stake.mock';
+import en from '$tests/mocks/i18n.mock';
 import { render } from '@testing-library/svelte';
 
 describe('GldtUnstakeReview', () => {
@@ -72,5 +73,35 @@ describe('GldtUnstakeReview', () => {
 		});
 
 		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+	});
+
+	it('should display immediate dissolve fee if flag is true', () => {
+		const { getByText } = render(GldtUnstakeReview, {
+			props: {
+				...props,
+				dissolveInstantly: true
+			},
+			context: mockContext()
+		});
+
+		expect(getByText(en.stake.text.included_dissolve_fee)).toBeInTheDocument();
+	});
+
+	it('should not display immediate dissolve fee if flag is false', () => {
+		const { getByText } = render(GldtUnstakeReview, {
+			props,
+			context: mockContext()
+		});
+
+		expect(() => getByText(en.stake.text.included_dissolve_fee)).toThrow();
+	});
+
+	it('should display correct network name', () => {
+		const { getByText } = render(GldtUnstakeReview, {
+			props,
+			context: mockContext()
+		});
+
+		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
 	});
 });
