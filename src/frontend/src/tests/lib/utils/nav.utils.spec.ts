@@ -673,10 +673,9 @@ describe('nav.utils', () => {
 
 			expect(get(userSelectedNetworkStore)).toBe(ICP_NETWORK_ID.description);
 
-			expect(goto).toHaveBeenCalledExactlyOnceWith(
-				`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`,
-				{ replaceState: true, noScroll: true }
-			);
+			const newUrl = new URL(`${baseUrl}?${NETWORK_PARAM}=${ICP_NETWORK_ID.description}`);
+
+			expect(goto).toHaveBeenCalledExactlyOnceWith(newUrl, { replaceState: true, noScroll: true });
 		});
 	});
 
