@@ -1,3 +1,4 @@
+import type { NetworkId } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
@@ -7,6 +8,7 @@ export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
+	setAllByNetwork: (params: { nfts: Nft[]; networkId: NetworkId }) => void;
 	removeSelectedNfts: (nfts: Nft[]) => void;
 	updateSelectedNfts: (nfts: Nft[]) => void;
 	resetAll: () => void;
@@ -35,6 +37,23 @@ const initNftStore = (): NftStore => {
 								}) &&
 								newNft.collection.network.id === oldNft.collection.network.id
 						)
+				);
+
+				return [...oldNfts, ...nfts];
+			});
+		},
+		setAllByNetwork: ({ networkId, nfts }: { networkId: NetworkId; nfts: Nft[] }) => {
+			update((currentNfts) => {
+				if (isNullish(currentNfts)) {
+					return nfts;
+				}
+
+				const oldNfts = currentNfts.filter(
+					({
+						collection: {
+							network: { id: nftNetworkId }
+						}
+					}) => nftNetworkId !== networkId
 				);
 
 				return [...oldNfts, ...nfts];
