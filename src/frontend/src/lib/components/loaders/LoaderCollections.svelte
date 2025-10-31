@@ -22,7 +22,7 @@
 	import type { NonEmptyArray } from '$lib/types/utils';
 	import { areAddressesEqual } from '$lib/utils/address.utils';
 
-	const handleErc721 = async ({
+	const handleErcTokens = async ({
 		contracts,
 		customTokens,
 		network,
@@ -33,95 +33,99 @@
 		network: EthereumNetwork;
 		identity: Identity;
 	}) => {
-		const tokens = contracts.reduce<SaveErc721CustomToken[]>((acc, contract) => {
-			const existingToken = customTokens.find(({ token }) => {
-				if (!('Erc721' in token)) {
-					return false;
+		const [erc721Tokens, erc1155Tokens] = contracts.reduce<
+			[SaveErc721CustomToken[], SaveErc1155CustomToken[]]
+		>(
+			(acc, { standard: rawStandard, address }) => {
+				const [erc721TokensAcc, erc1155TokensAcc] = acc;
+
+				const standard = rawStandard.toLowerCase();
+
+				if (standard === 'erc721') {
+					const existingToken = customTokens.find(({ token }) => {
+						if (!('Erc721' in token)) {
+							return false;
+						}
+
+						const {
+							Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
+						} = token;
+
+						return (
+							areAddressesEqual({
+								address1: tokenAddress,
+								address2: address,
+								networkId: network.id
+							}) && tokenChainId === network.chainId
+						);
+					});
+
+					if (nonNullish(existingToken)) {
+						return acc;
+					}
+
+					const newToken: SaveErc721CustomToken = {
+						address,
+						network,
+						enabled: true
+					};
+
+					erc721TokensAcc.push(newToken);
+
+					return [erc721TokensAcc, erc1155TokensAcc];
 				}
 
-				const {
-					Erc721: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
+				if (standard === 'erc1155') {
+					const existingToken = customTokens.find(({ token }) => {
+						if (!('Erc1155' in token)) {
+							return false;
+						}
 
-				return (
-					areAddressesEqual({
-						address1: tokenAddress,
-						address2: contract.address,
-						networkId: network.id
-					}) && tokenChainId === network.chainId
-				);
-			});
+						const {
+							Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
+						} = token;
 
-			if (nonNullish(existingToken)) {
-				return acc;
-			}
+						return (
+							areAddressesEqual({
+								address1: tokenAddress,
+								address2: address,
+								networkId: network.id
+							}) && tokenChainId === network.chainId
+						);
+					});
 
-			const newToken: SaveErc721CustomToken = {
-				address: contract.address,
-				network,
-				enabled: true
-			};
+					if (nonNullish(existingToken)) {
+						return acc;
+					}
 
-			return [...acc, newToken];
-		}, []);
+					const newToken: SaveErc1155CustomToken = {
+						address,
+						network,
+						enabled: true
+					};
 
-		if (tokens.length > 0) {
-			await saveErc721CustomTokens({
-				tokens: tokens as NonEmptyArray<SaveErc721CustomToken>,
-				identity
-			});
-		}
-	};
+					erc1155TokensAcc.push(newToken);
 
-	const handleErc1155 = async ({
-		contracts,
-		customTokens,
-		network,
-		identity
-	}: {
-		contracts: OwnedContract[];
-		customTokens: CustomToken[];
-		network: EthereumNetwork;
-		identity: Identity;
-	}) => {
-		const tokens = contracts.reduce<SaveErc1155CustomToken[]>((acc, contract) => {
-			const existingToken = customTokens.find(({ token }) => {
-				if (!('Erc1155' in token)) {
-					return false;
+					return [erc721TokensAcc, erc1155TokensAcc];
 				}
 
-				const {
-					Erc1155: { token_address: tokenAddress, chain_id: tokenChainId }
-				} = token;
-
-				return (
-					areAddressesEqual({
-						address1: tokenAddress,
-						address2: contract.address,
-						networkId: network.id
-					}) && tokenChainId === network.chainId
-				);
-			});
-
-			if (nonNullish(existingToken)) {
 				return acc;
-			}
+			},
+			[[], []]
+		);
 
-			const newToken: SaveErc1155CustomToken = {
-				address: contract.address,
-				network,
-				enabled: true
-			};
-
-			return [...acc, newToken];
-		}, []);
-
-		if (tokens.length > 0) {
-			await saveErc1155CustomTokens({
-				tokens: tokens as NonEmptyArray<SaveErc1155CustomToken>,
-				identity
-			});
-		}
+		await Promise.all([
+			erc721Tokens.length > 0 &&
+				saveErc721CustomTokens({
+					tokens: erc721Tokens as NonEmptyArray<SaveErc721CustomToken>,
+					identity
+				}),
+			erc1155Tokens.length > 0 &&
+				saveErc1155CustomTokens({
+					tokens: erc1155Tokens as NonEmptyArray<SaveErc1155CustomToken>,
+					identity
+				})
+		]);
 	};
 
 	const loadContracts = async (network: EthereumNetwork): Promise<OwnedContract[]> => {
@@ -143,35 +147,19 @@
 			return;
 		}
 
-		const tokens = await listCustomTokens({
+		const customTokens = await listCustomTokens({
 			identity: $authIdentity,
 			certified: true,
 			nullishIdentityErrorMessage: get(i18n).auth.error.no_internet_identity
 		});
 
-		const customErc721Tokens = tokens.filter(({ token }) => 'Erc721' in token);
-		const customErc1155Tokens = tokens.filter(({ token }) => 'Erc1155' in token);
-
 		const networks = [...$enabledEthereumNetworks, ...$enabledEvmNetworks];
 		for (const network of networks) {
 			const contracts: OwnedContract[] = await loadContracts(network);
 
-			const erc721Contracts = contracts.filter(
-				(contract) => contract.standard.toLowerCase() === 'erc721'
-			);
-			const erc1155Contracts = contracts.filter(
-				(contract) => contract.standard.toLowerCase() === 'erc1155'
-			);
-
-			await handleErc721({
-				contracts: erc721Contracts,
-				customTokens: customErc721Tokens,
-				network,
-				identity: $authIdentity
-			});
-			await handleErc1155({
-				contracts: erc1155Contracts,
-				customTokens: customErc1155Tokens,
+			await handleErcTokens({
+				contracts,
+				customTokens,
 				network,
 				identity: $authIdentity
 			});
