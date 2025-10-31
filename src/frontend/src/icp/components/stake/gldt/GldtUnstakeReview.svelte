@@ -35,7 +35,7 @@
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on the previous wizard step
-	let invalid = $derived(invalidAmount(amount));
+	let invalid = $derived(invalidAmount(amount) || Number(amount) === 0);
 
 	let tokenFee = $derived(
 		formatTokenBigintToNumber({

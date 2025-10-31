@@ -49,4 +49,28 @@ describe('GldtUnstakeReview', () => {
 
 		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
 	});
+
+	it('should disable the next button clickable if amount is less than zero', () => {
+		const { getByTestId } = render(GldtUnstakeReview, {
+			props: {
+				...props,
+				amount: -1
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+	});
+
+	it('should disable the next button clickable if amount is zero', () => {
+		const { getByTestId } = render(GldtUnstakeReview, {
+			props: {
+				...props,
+				amount: 0
+			},
+			context: mockContext()
+		});
+
+		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+	});
 });
