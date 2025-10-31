@@ -51,6 +51,7 @@
 					}) && tokenChainId === network.chainId
 				);
 			});
+
 			if (nonNullish(existingToken)) {
 				return acc;
 			}
@@ -58,7 +59,7 @@
 			const newToken: SaveErc721CustomToken = {
 				address: contract.address,
 				network,
-				enabled: !contract.isSpam
+				enabled: true
 			};
 
 			return [...acc, newToken];
@@ -101,6 +102,7 @@
 					}) && tokenChainId === network.chainId
 				);
 			});
+
 			if (nonNullish(existingToken)) {
 				return acc;
 			}
@@ -108,7 +110,7 @@
 			const newToken: SaveErc1155CustomToken = {
 				address: contract.address,
 				network,
-				enabled: !contract.isSpam
+				enabled: true
 			};
 
 			return [...acc, newToken];
