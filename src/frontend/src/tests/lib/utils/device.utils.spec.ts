@@ -1,4 +1,4 @@
-import { isDesktop, isIos, isMobile, isPWAStandalone } from '$lib/utils/device.utils';
+import { isDesktop, isMobile, isPWAStandalone } from '$lib/utils/device.utils';
 
 describe('device.utils', () => {
 	describe('isMobile', () => {
@@ -180,84 +180,6 @@ describe('device.utils', () => {
 			});
 
 			expect(isPWAStandalone()).toBeFalsy();
-		});
-	});
-
-	describe('isIos', () => {
-		it('should return true for iPad', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (iPad; CPU OS 13_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-				}
-			});
-
-			expect(isIos()).toBeTruthy();
-		});
-
-		it('should return true for iPhone', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-				}
-			});
-
-			expect(isIos()).toBeTruthy();
-		});
-
-		it('should return true for iPod', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (iPod; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-				}
-			});
-
-			expect(isIos()).toBeTruthy();
-		});
-
-		it('should return true for iPads that pretend to be Macs', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
-					platform: 'MacIntel',
-					maxTouchPoints: 2
-				}
-			});
-
-			expect(isIos()).toBeTruthy();
-		});
-
-		it('should return false for Macs', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.1 Safari/605.1.15',
-					platform: 'MacIntel',
-					maxTouchPoints: 0
-				}
-			});
-
-			expect(isIos()).toBeFalsy();
-		});
-
-		it('should return false for any other device', () => {
-			Object.defineProperty(window, 'navigator', {
-				writable: true,
-				value: {
-					userAgent:
-						'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36'
-				}
-			});
-
-			expect(isIos()).toBeFalsy();
 		});
 	});
 });
