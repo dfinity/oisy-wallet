@@ -1411,6 +1411,8 @@ interface I18nStake {
 		stake_review_subtitle: string;
 		delayed_dissolve: string;
 		immediate_dissolve: string;
+		included_token_fee: string;
+		included_dissolve_fee: string;
 		delayed_dissolve_terms: string;
 		delayed_dissolve_info: string;
 		immediate_dissolve_terms: string;

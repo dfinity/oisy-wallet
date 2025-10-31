@@ -1755,6 +1755,8 @@
 			"stake_review_subtitle": "",
 			"delayed_dissolve": "",
 			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": ""
