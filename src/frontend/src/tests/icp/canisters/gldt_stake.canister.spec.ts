@@ -122,8 +122,9 @@ describe('gldt_stake.canister', () => {
 		});
 
 		it('should throw an error if manage_stake_position returns an AddStakeError error', async () => {
+			const canisterErrorMessage = 'error';
 			service.manage_stake_position.mockResolvedValue({
-				Err: { AddStakeError: { TransferError: 'error' } }
+				Err: { AddStakeError: { TransferError: canisterErrorMessage } }
 			});
 
 			const { manageStakePosition } = await createGldtStakeCanister({
@@ -132,7 +133,7 @@ describe('gldt_stake.canister', () => {
 
 			const res = manageStakePosition(params);
 
-			await expect(res).rejects.toThrow(new CanisterInternalError('Failed to add stake'));
+			await expect(res).rejects.toThrow(new CanisterInternalError(canisterErrorMessage));
 		});
 	});
 
