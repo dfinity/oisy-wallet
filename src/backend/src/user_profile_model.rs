@@ -53,7 +53,9 @@ impl<'a> UserProfileModel<'a> {
             self.user_profile_updated_map.len(),
             "The number of entries should be the same"
         );
-        for (user_principal, timestamp) in self.user_profile_updated_map.iter() {
+        for entry in self.user_profile_updated_map.iter() {
+            let user_principal = *entry.key();
+            let timestamp = entry.value();
             assert!(
                 self.user_profile_map
                     .contains_key(&(timestamp, user_principal)),
