@@ -3,12 +3,12 @@ import {
 	createAuthClient,
 	loadIdentity,
 	safeCreateAuthClient
-} from '$lib/api/auth-client.api';
+} from '$lib/providers/auth-client.providers';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { AuthClient, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@dfinity/auth-client';
 import { mock } from 'vitest-mock-extended';
 
-describe('auth-client.api', () => {
+describe('auth-client.providers', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
 

@@ -1,5 +1,5 @@
-import * as authClientApi from '$lib/api/auth-client.api';
-import { loadIdentity } from '$lib/api/auth-client.api';
+import * as authClientApi from '$lib/providers/auth-client.providers';
+import { loadIdentity } from '$lib/providers/auth-client.providers';
 import { SchedulerTimer } from '$lib/schedulers/scheduler';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { MockInstance } from 'vitest';
