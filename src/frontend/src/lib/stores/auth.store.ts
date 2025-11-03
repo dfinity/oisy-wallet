@@ -2,7 +2,7 @@ import {
 	authClientStorage,
 	createAuthClient,
 	safeCreateAuthClient
-} from '$lib/api/auth-client.api';
+} from '$lib/providers/auth-client.providers';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 

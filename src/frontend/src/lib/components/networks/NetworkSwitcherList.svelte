@@ -17,6 +17,7 @@
 		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
+		showTestnets?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
@@ -25,6 +26,7 @@
 		labelsSize = 'md',
 		supportedNetworks,
 		allNetworksEnabled = true,
+		showTestnets = true,
 		onSelected
 	}: Props = $props();
 
@@ -55,7 +57,7 @@
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
+{#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
 	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>

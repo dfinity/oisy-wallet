@@ -1,4 +1,4 @@
-import { loadIdentity } from '$lib/api/auth-client.api';
+import { loadIdentity } from '$lib/providers/auth-client.providers';
 import type {
 	PostMessageDataError,
 	PostMessageResponse,
