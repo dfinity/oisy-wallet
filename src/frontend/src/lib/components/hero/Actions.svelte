@@ -47,7 +47,8 @@
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-	(	!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) && !isNftsPage
+		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
+			!isNftsPage
 	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
