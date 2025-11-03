@@ -14,11 +14,24 @@ import {
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
-import * as authClientApi from '$lib/providers/auth-client.providers';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import type { MockInstance } from 'vitest';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('pow-protector.worker', () => {
 	let spyCreatePowChallenge: MockInstance;
@@ -105,7 +118,8 @@ describe('pow-protector.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
 		// Mock the allowance API call that hasRequiredCycles depends on
 		_spyAllowance = vi.spyOn(icrcLedgerApi, 'allowance').mockResolvedValue({

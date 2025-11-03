@@ -1,11 +1,25 @@
-import * as authClientApi from '$lib/providers/auth-client.providers';
-import { loadIdentity } from '$lib/providers/auth-client.providers';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { SchedulerTimer } from '$lib/schedulers/scheduler';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { MockInstance } from 'vitest';
 
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
+
 describe('scheduler', () => {
 	describe('SchedulerTimer', () => {
+		const provider = AuthClientProvider.getInstance();
+
 		let originalPostmessage: unknown;
 
 		let scheduler: SchedulerTimer;
@@ -35,7 +49,7 @@ describe('scheduler', () => {
 
 			scheduler = new SchedulerTimer(statusMsg);
 
-			vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+			vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 		});
 
 		afterEach(() => {
@@ -51,7 +65,7 @@ describe('scheduler', () => {
 
 		describe('start', () => {
 			it('should not start if identity is nullish', async () => {
-				vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValueOnce(undefined);
+				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValueOnce(undefined);
 
 				await scheduler.start(mockParams);
 
@@ -170,7 +184,7 @@ describe('scheduler', () => {
 			const { interval: _, ...mockTriggerParams } = mockParams;
 
 			it('should not trigger if identity is nullish', async () => {
-				vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValueOnce(undefined);
+				const loadIdentity = vi.spyOn(provider, 'loadIdentity').mockResolvedValueOnce(undefined);
 
 				await scheduler.trigger(mockTriggerParams);
 
