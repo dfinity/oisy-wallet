@@ -1,5 +1,5 @@
 <script lang="ts">
-	import IconAstronautHelmetHalloween from '$lib/components/icons/IconAstronautHelmetHalloween.svelte';
+	import IconAstronautHelmetHalloween from '$lib/components/icons/icon-astronaut/IconAstronautHelmetHalloween.svelte';
 	import OisyLogoLarge from '$lib/components/icons/OisyLogoLarge.svelte';
 	import { OISY_NAME } from '$lib/constants/oisy.constants';
 	import { i18n } from '$lib/stores/i18n.store';
