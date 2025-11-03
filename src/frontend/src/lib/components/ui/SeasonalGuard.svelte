@@ -23,7 +23,7 @@
 			(currentMonth === 10 && currentDay <= 3)
 	);
 
-	// From the 18th of December to the 29th of December
+	// From the 18th of December to the 6th of January
 	let isChristmas = $derived(
 		(currentMonth === 11 && currentDay >= 18) ||
 			(currentMonth === 0 && currentDay <= 6)
