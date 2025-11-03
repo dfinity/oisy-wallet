@@ -104,15 +104,15 @@
 		</StickyHeader>
 
 		<div class="mt-12 mb-4 flex w-full justify-center sm:w-auto" in:fade>
-			<ManageTokensButton >
-                {#snippet label()}
-                    {#if activeTab === TokenTypes.TOKENS}
-                        {$i18n.tokens.manage.text.manage_list}
-                    {:else}
-                        {$i18n.tokens.manage.text.manage_list_nft}
-                    {/if}
-                {/snippet}
-            </ManageTokensButton>
+			<ManageTokensButton>
+				{#snippet label()}
+					{#if activeTab === TokenTypes.TOKENS}
+						{$i18n.tokens.manage.text.manage_list}
+					{:else}
+						{$i18n.tokens.manage.text.manage_list_nft}
+					{/if}
+				{/snippet}
+			</ManageTokensButton>
 		</div>
 	</div>
 

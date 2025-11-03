@@ -1,15 +1,15 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import IconManage from '$lib/components/icons/lucide/IconManage.svelte';
 	import { MANAGE_TOKENS_MODAL_BUTTON } from '$lib/constants/test-ids.constants';
 	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { modalStore } from '$lib/stores/modal.store';
-    import type {Snippet} from "svelte";
 
-    interface Props {
-        label: Snippet;
-    }
+	interface Props {
+		label: Snippet;
+	}
 
-    let { label }: Props = $props();
+	let { label }: Props = $props();
 
 	let disabled = $derived($authNotSignedIn);
 
@@ -23,5 +23,5 @@
 	onclick={() => modalStore.openManageTokens({ id: manageTokensId })}
 >
 	<IconManage />
-    {@render label()}
+	{@render label()}
 </button>
