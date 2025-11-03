@@ -40,6 +40,7 @@
 		labelsSize="lg"
 		onSelected={onNetworkSelect}
 		selectedNetworkId={$filterNetwork?.id}
+		showTestnets={false}
 		supportedNetworks={filteredNetworks}
 	/>
 

@@ -5,7 +5,6 @@ import type {
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
 import { PowProtectionScheduler } from '$icp/schedulers/pow-protection.scheduler';
 import * as powProtectorServices from '$icp/services/pow-protector.services';
-import * as authClientApi from '$lib/api/auth-client.api';
 import * as backendApi from '$lib/api/backend.api';
 import {
 	ChallengeCompletionErrorEnum,
@@ -15,6 +14,7 @@ import {
 } from '$lib/canisters/backend.errors';
 import { ZERO } from '$lib/constants/app.constants';
 import { POW_CHALLENGE_INTERVAL_MILLIS } from '$lib/constants/pow.constants';
+import * as authClientApi from '$lib/providers/auth-client.providers';
 import type { PostMessageDataRequest } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
