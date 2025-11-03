@@ -1329,17 +1329,7 @@ interface I18nCarousel {
 }
 
 interface I18nAgreements {
-	text: {
-		review_title: string;
-		review_updated_title: string;
-		review_description: string;
-		review_updated_description: string;
-		reject_warning: string;
-		i_have_accepted: string;
-		i_have_accepted_updated: string;
-		accept_and_continue: string;
-		updated_agreements_warning: string;
-	};
+	text: { updated_agreements_warning: string };
 	error: { cannot_update_user_agreements: string };
 }
 

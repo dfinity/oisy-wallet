@@ -1654,14 +1654,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Přečtěte si smluvní podmínky",
-			"review_updated_title": "Prohlédněte si aktualizované smluvní podmínky",
-			"review_description": "Než budete moci používat peněženku OISY, musíte si přečíst a souhlasit s našimi Podmínkami služby a Zásadami ochrany osobních údajů. Tyto dokumenty vysvětlují pravidla naší služby a to, jak chráníme vaše data.",
-			"review_updated_description": "Chcete-li nadále používat peněženku OISY, přečtěte si prosím a souhlaste s našimi aktualizovanými Podmínkami služby a Zásadami ochrany osobních údajů. Tyto změny jsou důležité pro zajištění bezpečnosti a souladu našich služeb s předpisy.",
-			"reject_warning": "Pro pokračování musíte přijmout Smluvní podmínky. Neváhejte to kdykoli zkusit znovu.",
-			"i_have_accepted": "Přečetl(a) jsem si a souhlasím s",
-			"i_have_accepted_updated": "Přečetl(a) jsem si a souhlasím s aktualizovanými",
-			"accept_and_continue": "Přijmout a pokračovat",
 			"updated_agreements_warning": "Aktualizovali jsme $agreements. Používáním $oisy_short potvrzujete, že jste si přečetli aktualizace a souhlasíte s nimi."
 		},
 		"error": {

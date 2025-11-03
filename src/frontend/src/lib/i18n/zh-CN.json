@@ -1654,14 +1654,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "查看条款与条件",
-			"review_updated_title": "查看更新后的条款与条件",
-			"review_description": "在使用 OISY 钱包之前，你必须查看并同意我们的服务条款和隐私政策。这些文件解释了我们的服务规则以及我们如何保护你的数据。",
-			"review_updated_description": "要继续使用 OISY 钱包，请查看并同意我们更新后的服务条款和隐私政策。这些更改对于保持我们的服务安全和合规非常重要。",
-			"reject_warning": "你必须接受条款与条件才能继续。你可以随时再次尝试。",
-			"i_have_accepted": "我已阅读并同意",
-			"i_have_accepted_updated": "我已阅读并同意更新后的",
-			"accept_and_continue": "接受并继续",
 			"updated_agreements_warning": "我们已更新$agreements。使用$oisy_short即表示您确认已阅读并同意更新内容。"
 		},
 		"error": {
