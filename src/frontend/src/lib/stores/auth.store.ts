@@ -13,7 +13,7 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
