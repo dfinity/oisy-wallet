@@ -19,14 +19,12 @@
 
 	// From the 30th of October to the 3rd of November
 	let isHalloween = $derived(
-		(currentMonth === 9 && currentDay >= 30) ||
-			(currentMonth === 10 && currentDay <= 3)
+		(currentMonth === 9 && currentDay >= 30) || (currentMonth === 10 && currentDay <= 3)
 	);
 
 	// From the 18th of December to the 6th of January
 	let isChristmas = $derived(
-		(currentMonth === 11 && currentDay >= 18) ||
-			(currentMonth === 0 && currentDay <= 6)
+		(currentMonth === 11 && currentDay >= 18) || (currentMonth === 0 && currentDay <= 6)
 	);
 </script>
 
