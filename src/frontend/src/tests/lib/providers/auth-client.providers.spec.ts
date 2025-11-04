@@ -53,7 +53,7 @@ describe('auth-client.providers', () => {
 			expect(console.warn).not.toHaveBeenCalled();
 		});
 
-		it('should not hide console warn when creating auth client', async () => {
+		it('should not hide console warn when creating auth client without workaround', async () => {
 			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
 			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
 			vi.spyOn(console, 'warn');
