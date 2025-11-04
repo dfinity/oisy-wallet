@@ -133,13 +133,9 @@ const enabledNonFungibleTokensBySection: Readable<
 		(acc, token) => {
 			const { section } = token;
 
-			if (isNullish(section)) {
-				acc['null'] = [...(acc['null'] ?? []), token];
+			const key = isNullish(section) ? 'null' : section;
 
-				return acc;
-			}
-
-			acc[section] = [...(acc[section] ?? []), token];
+			(acc[key] ??= []).push(token);
 
 			return acc;
 		},
