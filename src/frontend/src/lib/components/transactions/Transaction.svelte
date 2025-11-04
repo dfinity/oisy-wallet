@@ -61,6 +61,10 @@
 		approveSpender
 	}: Props = $props();
 
+	$effect(()=>{
+		console.log('transaction', token)
+	})
+
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
@@ -162,7 +166,7 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}
