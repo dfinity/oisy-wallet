@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Snippet } from 'svelte';
+	import { onMount, type Snippet } from 'svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import { MOBILE_NAVIGATION_MENU } from '$lib/constants/test-ids.constants';
 	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
