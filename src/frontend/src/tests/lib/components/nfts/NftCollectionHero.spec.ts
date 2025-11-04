@@ -13,7 +13,7 @@ import type { NonFungibleToken } from '$lib/types/nft';
 import type { OptionString } from '$lib/types/string';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
-import { mockNftollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
+import { mockNftCollectionUi, mockValidErc1155Nft } from '$tests/mocks/nfts.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, waitFor } from '@testing-library/svelte';
@@ -36,12 +36,12 @@ describe('NftCollectionHero', () => {
 	it('should render the collection data', async () => {
 		const { container, getByText, getAllByText } = render(NftCollectionHero, {
 			props: {
-				nfts: mockNftollectionUi.nfts,
+				nfts: mockNftCollectionUi.nfts,
 				token: mockToken
 			}
 		});
 
-		assertNonNullish(mockNftollectionUi.collection.name);
+		assertNonNullish(mockNftCollectionUi.collection.name);
 
 		const names: HTMLElement[] | null = getAllByText(mockToken.name);
 
@@ -81,7 +81,7 @@ describe('NftCollectionHero', () => {
 	it('should render the collections first nft image as a banner', () => {
 		const { container } = render(NftCollectionHero, {
 			props: {
-				nfts: mockNftollectionUi.nfts,
+				nfts: mockNftCollectionUi.nfts,
 				token: mockToken
 			}
 		});
@@ -95,14 +95,14 @@ describe('NftCollectionHero', () => {
 		assertNonNullish(imageElement);
 
 		expect(imageElement.getAttribute('style')).toContain(
-			`background-image: url("${mockNftollectionUi.nfts[0].imageUrl}")`
+			`background-image: url("${mockNftCollectionUi.nfts[0].imageUrl}")`
 		);
 	});
 
 	it('should render the hidden badge in the banner', () => {
 		const { container } = render(NftCollectionHero, {
 			props: {
-				nfts: mockNftollectionUi.nfts,
+				nfts: mockNftCollectionUi.nfts,
 				token: { ...mockToken, section: CustomTokenSection.HIDDEN }
 			}
 		});
