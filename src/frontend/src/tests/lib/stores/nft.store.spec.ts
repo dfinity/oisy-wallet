@@ -3,7 +3,7 @@ import { nftStore } from '$lib/stores/nft.store';
 import type { Nft } from '$lib/types/nft';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { mockEthAddress2 } from '$tests/mocks/eth.mock';
-import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
+import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { get } from 'svelte/store';
 
 describe('nftStore', () => {
