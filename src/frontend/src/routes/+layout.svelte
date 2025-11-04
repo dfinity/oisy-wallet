@@ -150,9 +150,7 @@
 
 	onMount(() => {
 		const toggle = (e) => {
-			if (e.target instanceof Element) {
-				e.target.classList.toggle('active');
-			}
+			console.log('toggle', e.target);
 		};
 
 		document.addEventListener('touchstart', toggle);
