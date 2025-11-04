@@ -1,8 +1,4 @@
-import {
-	authClientStorage,
-	createAuthClient,
-	safeCreateAuthClient
-} from '$lib/providers/auth-client.providers';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 
@@ -53,6 +49,8 @@ const initAuthStore = (): AuthStore => {
 			return authClient;
 		}
 
+		const { createAuthClient, safeCreateAuthClient } = AuthClientProvider.getInstance();
+
 		const refreshed = await createAuthClient();
 
 		if (await refreshed.isAuthenticated()) {
@@ -96,7 +94,10 @@ const initAuthStore = (): AuthStore => {
 
 			const key = authClient['_key'];
 
-			await authClientStorage.set(KEY_STORAGE_KEY, (key as ECDSAKeyIdentity).getKeyPair());
+			await AuthClientProvider.getInstance().storage.set(
+				KEY_STORAGE_KEY,
+				(key as ECDSAKeyIdentity).getKeyPair()
+			);
 		} catch (_: unknown) {
 			// In the unlikely event of an error while setting a value in IndexedDB,
 			// we log out the user and refresh the page to prevent potential conflicts.
@@ -108,7 +109,9 @@ const initAuthStore = (): AuthStore => {
 	};
 
 	const sync = async ({ forceSync }: { forceSync: boolean }) => {
-		authClient = forceSync ? await createAuthClient() : await pickAuthClient();
+		authClient = forceSync
+			? await AuthClientProvider.getInstance().createAuthClient()
+			: await pickAuthClient();
 
 		const isAuthenticated: boolean = await authClient.isAuthenticated();
 
@@ -177,7 +180,8 @@ const initAuthStore = (): AuthStore => {
 			}),
 
 		signOut: async () => {
-			const client: AuthClient = authClient ?? (await createAuthClient());
+			const client: AuthClient =
+				authClient ?? (await AuthClientProvider.getInstance().createAuthClient());
 
 			await client.logout();
 
