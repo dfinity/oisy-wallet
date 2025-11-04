@@ -24,7 +24,13 @@
 
 	const { nft, children, showMessage = true, type, location }: Props = $props();
 
-	const mediaStatus = $derived(nonNullish(nft) ? nft.mediaStatus : NftMediaStatusEnum.INVALID_DATA);
+	const mediaStatus = $derived(
+		nonNullish(nft)
+			? nft.id === '10570'
+				? NftMediaStatusEnum.FILESIZE_LIMIT_EXCEEDED
+				: nft.mediaStatus
+			: NftMediaStatusEnum.INVALID_DATA
+	);
 
 	const hasConsent: boolean | undefined = $derived(
 		nonNullish(nft) ? nft.collection.allowExternalContentSource : false
