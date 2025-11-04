@@ -17,15 +17,13 @@
 	let currentMonth = $derived(currentDate.getMonth());
 	let currentDay = $derived(currentDate.getDate());
 
-	// From the 30th of October to the 3rd of November
+	// From the 27th of October to the 3rd of November
 	let isHalloween = $derived(
-		(currentMonth === 9 && currentDay >= 30) || (currentMonth === 10 && currentDay <= 3)
+		(currentMonth === 9 && currentDay >= 27) || (currentMonth === 10 && currentDay <= 3)
 	);
 
-	// From the 18th of December to the 6th of January
-	let isChristmas = $derived(
-		(currentMonth === 11 && currentDay >= 18) || (currentMonth === 0 && currentDay <= 6)
-	);
+	// From the 18th of December to the 30th of December
+	let isChristmas = $derived(currentMonth === 11 && currentDay >= 18 && currentDay <= 30);
 </script>
 
 {#if isHalloween}

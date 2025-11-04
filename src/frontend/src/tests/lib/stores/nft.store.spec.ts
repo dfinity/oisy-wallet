@@ -67,7 +67,7 @@ describe('nftStore', () => {
 				...mockValidErc721Nft,
 				collection: {
 					...mockValidErc721Nft.collection,
-					address: mockValidErc1155Nft.collection.address.toUpperCase()
+					address: mockValidErc721Nft.collection.address.toUpperCase()
 				}
 			};
 

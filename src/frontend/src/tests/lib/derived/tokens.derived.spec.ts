@@ -39,7 +39,16 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
-import { enabledUniqueTokensSymbols, fungibleTokens, tokens } from '$lib/derived/tokens.derived';
+import {
+	enabledNonFungibleTokensBySectionHidden,
+	enabledNonFungibleTokensBySectionSpam,
+	enabledNonFungibleTokensWithoutSection,
+	enabledNonFungibleTokensWithoutSpam,
+	enabledUniqueTokensSymbols,
+	fungibleTokens,
+	tokens
+} from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { splCustomTokensStore } from '$sol/stores/spl-custom-tokens.store';
 import { splDefaultTokensStore } from '$sol/stores/spl-default-tokens.store';
@@ -105,6 +114,68 @@ describe('tokens.derived', () => {
 		id: parseTokenId('SplDefaultTokenId1'),
 		symbol: 'SplDefaultTokenId1'
 	};
+
+	const erc721EnabledNoSection = {
+		...mockErc721CustomToken,
+		enabled: true,
+		section: undefined
+	};
+
+	const erc721DisabledNoSection = {
+		...mockErc721CustomToken,
+		enabled: false,
+		section: undefined
+	};
+
+	const erc1155EnabledNoSection = {
+		...mockErc1155CustomToken,
+		enabled: true,
+		section: undefined
+	};
+
+	const erc1155DisabledNoSection = {
+		...mockErc1155CustomToken,
+		enabled: false,
+		section: undefined
+	};
+
+	const erc721EnabledSpam = {
+		...mockErc721CustomToken,
+		enabled: true,
+		section: CustomTokenSection.SPAM
+	};
+
+	const erc721DisabledSpam = {
+		...mockErc721CustomToken,
+		enabled: false,
+		section: CustomTokenSection.SPAM
+	};
+
+	const erc1155EnabledHidden = {
+		...mockErc1155CustomToken,
+		enabled: true,
+		section: CustomTokenSection.HIDDEN
+	};
+
+	const erc1155DisabledHidden = {
+		...mockErc1155CustomToken,
+		enabled: false,
+		section: CustomTokenSection.HIDDEN
+	};
+
+	const mockErc721CustomTokens = [
+		erc721EnabledNoSection,
+		erc721DisabledNoSection,
+		erc721EnabledSpam,
+		erc721DisabledSpam
+	].map((token) => ({ data: token, certified: false }));
+
+	const mockErc1155CustomTokens = [
+		erc1155EnabledNoSection,
+		erc1155DisabledNoSection,
+		erc1155EnabledHidden,
+		erc1155DisabledHidden
+	].map((token) => ({ data: token, certified: false }));
 
 	beforeEach(() => {
 		vi.resetAllMocks();
@@ -278,6 +349,85 @@ describe('tokens.derived', () => {
 				BNB_MAINNET_TOKEN.symbol,
 				POL_MAINNET_TOKEN.symbol
 			]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensWithoutSection', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens without section', () => {
+			expect(get(enabledNonFungibleTokensWithoutSection)).toStrictEqual([
+				erc721EnabledNoSection,
+				erc1155EnabledNoSection
+			]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensWithoutSection)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensBySectionHidden', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens marked as hidden', () => {
+			expect(get(enabledNonFungibleTokensBySectionHidden)).toStrictEqual([erc1155EnabledHidden]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensBySectionHidden)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensBySectionSpam', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens marked as spam', () => {
+			expect(get(enabledNonFungibleTokensBySectionSpam)).toStrictEqual([erc721EnabledSpam]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensBySectionSpam)).toStrictEqual([]);
+		});
+	});
+
+	describe('enabledNonFungibleTokensWithoutSpam', () => {
+		beforeEach(() => {
+			erc721CustomTokensStore.setAll(mockErc721CustomTokens);
+			erc1155CustomTokensStore.setAll(mockErc1155CustomTokens);
+		});
+
+		it('should return all enabled non-fungible tokens not marked as spam', () => {
+			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([
+				erc721EnabledNoSection,
+				erc1155EnabledNoSection,
+				erc1155EnabledHidden
+			]);
+		});
+
+		it('should fallback to an empty list', () => {
+			erc721CustomTokensStore.resetAll();
+			erc1155CustomTokensStore.resetAll();
+
+			expect(get(enabledNonFungibleTokensWithoutSpam)).toStrictEqual([]);
 		});
 	});
 });

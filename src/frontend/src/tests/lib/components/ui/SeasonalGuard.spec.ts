@@ -39,9 +39,18 @@ describe('SeasonalGuard', () => {
 	});
 
 	describe('Halloween Period', () => {
-		it('should render the Halloween snippet when in the Halloween period', () => {
-			const testCases = ['2025-10-30', '2025-10-31', '2025-11-01', '2025-11-02', '2025-11-03'];
+		const testCases = [
+			'2025-10-27',
+			'2025-10-28',
+			'2025-10-29',
+			'2025-10-30',
+			'2025-10-31',
+			'2025-11-01',
+			'2025-11-02',
+			'2025-11-03'
+		];
 
+		it('should render the Halloween snippet when in the Halloween period', () => {
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
 
@@ -59,7 +68,7 @@ describe('SeasonalGuard', () => {
 		});
 
 		it('should not render the Halloween snippet when not in the Halloween period', () => {
-			const testCases = ['2025-10-29', '2025-11-04'];
+			const testCases = ['2025-10-26', '2025-11-04'];
 
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
@@ -78,8 +87,6 @@ describe('SeasonalGuard', () => {
 		});
 
 		it('should default to the main snippet if no seasonal snippet is provided', () => {
-			const testCases = ['2025-10-30', '2025-10-31', '2025-11-01', '2025-11-02', '2025-11-03'];
-
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
 
@@ -98,18 +105,18 @@ describe('SeasonalGuard', () => {
 	});
 
 	describe('Christmas Period', () => {
-		it('should render the Christmas snippet when in the Christmas period', () => {
-			const testCases = [
-				'2025-12-18',
-				'2025-12-24',
-				'2025-12-25',
-				'2025-12-26',
-				'2025-12-31',
-				'2026-01-01',
-				'2026-01-02',
-				'2026-01-06'
-			];
+		const testCases = [
+			'2025-12-18',
+			'2025-12-24',
+			'2025-12-25',
+			'2025-12-26',
+			'2025-12-27',
+			'2025-12-28',
+			'2025-12-29',
+			'2025-12-30'
+		];
 
+		it('should render the Christmas snippet when in the Christmas period', () => {
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
 
@@ -127,7 +134,7 @@ describe('SeasonalGuard', () => {
 		});
 
 		it('should not render the Christmas snippet when not in the Christmas period', () => {
-			const testCases = ['2025-12-17', '2026-01-07'];
+			const testCases = ['2025-12-17', '2025-12-31', '2026-01-07'];
 
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
@@ -146,8 +153,6 @@ describe('SeasonalGuard', () => {
 		});
 
 		it('should default to the main snippet if no seasonal snippet is provided', () => {
-			const testCases = ['2025-12-24', '2025-12-25', '2025-12-26', '2025-12-27', '2025-12-28'];
-
 			testCases.forEach((date) => {
 				vi.setSystemTime(new Date(date));
 
