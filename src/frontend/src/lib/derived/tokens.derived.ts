@@ -134,13 +134,14 @@ const enabledNonFungibleTokensBySection: Readable<
 			const { section } = token;
 
 			if (isNullish(section)) {
-				return { ...acc, [0]: [...(acc[0] ?? []), token] };
+				acc['null'] = [...(acc['null'] ?? []), token];
+
+				return acc;
 			}
 
-			return {
-				...acc,
-				[section]: [...(acc[section] ?? []), token]
-			};
+			acc[section] = [...(acc[section] ?? []), token];
+
+			return acc;
 		},
 		{} as Record<CustomTokenSection | 0, NonFungibleToken[]>
 	)
@@ -148,7 +149,7 @@ const enabledNonFungibleTokensBySection: Readable<
 
 export const enabledNonFungibleTokensWithoutSection: Readable<NonFungibleToken[]> = derived(
 	[enabledNonFungibleTokensBySection],
-	([$enabledNonFungibleTokensBySection]) => $enabledNonFungibleTokensBySection['0'] ?? []
+	([$enabledNonFungibleTokensBySection]) => $enabledNonFungibleTokensBySection['null'] ?? []
 );
 
 export const enabledNonFungibleTokensBySectionHidden: Readable<NonFungibleToken[]> = derived(
