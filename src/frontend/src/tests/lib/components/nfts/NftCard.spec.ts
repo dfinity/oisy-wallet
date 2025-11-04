@@ -1,11 +1,14 @@
 import NftCard from '$lib/components/nfts/NftCard.svelte';
 import { NFT_COLLECTION_ROUTE, NFT_LIST_ROUTE } from '$lib/constants/analytics.constants';
-import { NETWORK_PARAM } from '$lib/constants/routes.constants';
-import { PLAUSIBLE_EVENTS } from '$lib/enums/plausible';
+import {
+	PLAUSIBLE_EVENTS,
+	PLAUSIBLE_EVENT_CONTEXTS,
+	PLAUSIBLE_EVENT_SOURCES,
+	PLAUSIBLE_EVENT_VALUES
+} from '$lib/enums/plausible';
 import { trackEvent } from '$lib/services/analytics.services';
 import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { assertNonNullish } from '@dfinity/utils';
-import type { NavigationTarget } from '@sveltejs/kit';
 import { render } from '@testing-library/svelte';
 
 vi.mock('$lib/services/analytics.services', () => ({
@@ -22,10 +25,6 @@ describe('NftCard', () => {
 	const imageSelector = `div[data-tid="${testId}-image"]`;
 	const networkLogoSelector = `div[data-tid="${testId}-network-light-container"]`;
 	const balanceSelector = `span[data-tid="${testId}-balance"]`;
-
-	const mockFromRoute: NavigationTarget = {
-		url: new URL(`https://example.com/?${NETWORK_PARAM}=test-network`)
-	} as unknown as NavigationTarget;
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -127,8 +126,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isSpam: true,
-				fromRoute: mockFromRoute
+				isSpam: true
 			}
 		});
 
@@ -140,14 +138,14 @@ describe('NftCard', () => {
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				event_context: 'nft',
-				event_value: 'nft-page',
-				location_source: 'navigation',
-				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_id: '173563',
-				token_name: 'Beanz 123',
-				token_network: 'Ethereum',
-				token_symbol: 'MC'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
 	});
@@ -158,8 +156,7 @@ describe('NftCard', () => {
 				nft: mockValidErc721Nft,
 				testId,
 				type: 'card-link',
-				isHidden: true,
-				fromRoute: mockFromRoute
+				isHidden: true
 			}
 		});
 
@@ -171,14 +168,14 @@ describe('NftCard', () => {
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				event_context: 'nft',
-				event_value: 'nft-page',
-				location_source: 'navigation',
-				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_id: '173563',
-				token_name: 'Beanz 123',
-				token_network: 'Ethereum',
-				token_symbol: 'MC'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
 	});
@@ -188,8 +185,7 @@ describe('NftCard', () => {
 			props: {
 				nft: mockValidErc721Nft,
 				testId,
-				type: 'card-link',
-				fromRoute: mockFromRoute
+				type: 'card-link'
 			}
 		});
 
@@ -201,14 +197,14 @@ describe('NftCard', () => {
 		expect(trackEvent).toHaveBeenCalledWith({
 			name: PLAUSIBLE_EVENTS.PAGE_OPEN,
 			metadata: {
-				event_context: 'nft',
-				event_value: 'nft-page',
-				location_source: 'navigation',
-				token_address: '0x1d638414860ed08dd31fae848e527264f20512fa75d7d63cea9bbb372f020000',
-				token_id: '173563',
-				token_name: 'Beanz 123',
-				token_network: 'Ethereum',
-				token_symbol: 'MC'
+				event_context: PLAUSIBLE_EVENT_CONTEXTS.NFT,
+				event_value: PLAUSIBLE_EVENT_VALUES.NFT_PAGE,
+				location_source: PLAUSIBLE_EVENT_SOURCES.NAVIGATION,
+				token_network: mockValidErc721Nft.collection.network.name,
+				token_address: mockValidErc721Nft.collection.address,
+				token_symbol: mockValidErc721Nft.collection.symbol,
+				token_name: mockValidErc721Nft.name,
+				token_id: mockValidErc721Nft.id
 			}
 		});
 	});
