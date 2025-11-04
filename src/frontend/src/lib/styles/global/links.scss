@@ -80,39 +80,32 @@ button.nav-item[disabled]:not(.loading) {
 	@apply py-1.5;
 }
 
-div.mobile-nav-wrapper {
-	position: fixed;
-	inset: auto 0 0 0;
+div.mobile-nav {
 	// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
 	padding-bottom: calc(0.1rem + env(safe-area-inset-bottom));
 
-	.mobile-nav {
-		position: sticky;
-		bottom: 0;
+	a.nav-item:not([disabled]):not(.disabled):not(.loading),
+	button.nav-item:not([disabled]):not(.disabled):not(.loading),
+	a.nav-item:hover:not([disabled]):not(.disabled):not(.loading),
+	button.nav-item:hover:not([disabled]):not(.disabled):not(.loading) {
+		@apply flex;
+		@apply flex-col;
+		@apply text-center;
+		@apply text-primary;
+		@apply bg-transparent;
+		@apply items-center;
+		@apply gap-0;
+		@apply p-1.5;
+		@apply pt-2.25;
+		@apply text-sm;
 
-		a.nav-item:not([disabled]):not(.disabled):not(.loading),
-		button.nav-item:not([disabled]):not(.disabled):not(.loading),
-		a.nav-item:hover:not([disabled]):not(.disabled):not(.loading),
-		button.nav-item:hover:not([disabled]):not(.disabled):not(.loading) {
-			@apply flex;
-			@apply flex-col;
-			@apply text-center;
-			@apply text-primary;
-			@apply bg-transparent;
-			@apply items-center;
-			@apply gap-0;
-			@apply p-1.5;
-			@apply pt-2.25;
-			@apply text-sm;
+		svg {
+			width: 24px;
+			height: 24px;
+		}
 
-			svg {
-				width: 24px;
-				height: 24px;
-			}
-
-			&.selected {
-				@apply text-brand-primary-alt;
-			}
+		&.selected {
+			@apply text-brand-primary-alt;
 		}
 	}
 }
