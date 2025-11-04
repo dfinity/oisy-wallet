@@ -1069,6 +1069,7 @@
 				"title": "Gestionar tokens",
 				"title_nft": "Gestionar colecciones de NFT",
 				"manage_list": "Gestionar tokens",
+				"manage_list_nft": "",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
 				"import_nft": "Importar colección de NFT",
