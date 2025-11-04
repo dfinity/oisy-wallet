@@ -1069,6 +1069,7 @@
 				"title": "管理代币",
 				"title_nft": "",
 				"manage_list": "管理代币",
+				"manage_list_nft": "",
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
 				"import_nft": "",
