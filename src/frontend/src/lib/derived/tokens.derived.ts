@@ -30,6 +30,7 @@ import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -125,10 +126,49 @@ export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 	filterEnabledTokens
 );
 
+const enabledNonFungibleTokensBySection: Readable<
+	Record<CustomTokenSection | 0, NonFungibleToken[]>
+> = derived([enabledNonFungibleTokens], ([$enabledNonFungibleTokens]) =>
+	$enabledNonFungibleTokens.reduce<Record<CustomTokenSection | 0, NonFungibleToken[]>>(
+		(acc, token) => {
+			const { section } = token;
+
+			if (isNullish(section)) {
+				return { ...acc, [0]: [...(acc[0] ?? []), token] };
+			}
+
+			return {
+				...acc,
+				[section]: [...(acc[section] ?? []), token]
+			};
+		},
+		{} as Record<CustomTokenSection | 0, NonFungibleToken[]>
+	)
+);
+
+export const enabledNonFungibleTokensWithoutSection: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) => $enabledNonFungibleTokensBySection['0'] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionHidden: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.HIDDEN] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.SPAM] ?? []
+);
+
 export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
-	[enabledNonFungibleTokens],
-	([$enabledNonFungibleTokens]) =>
-		$enabledNonFungibleTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
+	[enabledNonFungibleTokensWithoutSection, enabledNonFungibleTokensBySectionHidden],
+	([$enabledNonFungibleTokensWithoutSection, $enabledNonFungibleTokensBySectionHidden]) => [
+		...$enabledNonFungibleTokensWithoutSection,
+		...$enabledNonFungibleTokensBySectionHidden
+	]
 );
 
 /**
