@@ -149,6 +149,15 @@
 	onMount(openBc);
 
 	onMount(() => {
+		const toggle = (e) => {
+			if (e.target instanceof Element) {
+				e.target.classList.toggle('active');
+			}
+		};
+
+		document.addEventListener('touchstart', toggle);
+		document.addEventListener('touchend', toggle);
+
 		document.addEventListener(
 			'touchmove',
 			(e) => {
