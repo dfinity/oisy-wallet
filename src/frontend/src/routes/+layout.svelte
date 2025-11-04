@@ -152,6 +152,7 @@
 		document.addEventListener(
 			'touchmove',
 			(e) => {
+				e.target instanceof Element && e.target.classList.add('touch');
 				const modal = document.querySelector('.modal');
 				if (nonNullish(modal) && e.target instanceof Element && !modal.contains(e.target)) {
 					e.preventDefault();
