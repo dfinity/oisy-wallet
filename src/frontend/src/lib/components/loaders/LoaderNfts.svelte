@@ -26,7 +26,7 @@
 		await Promise.allSettled(promises);
 	};
 
-	const debounceLoad = debounce(onLoad, 1000);
+	const debounceLoad = debounce(onLoad);
 
 	$effect(() => {
 		[$enabledNonFungibleTokens, NFTS_ENABLED, $ethAddress];
