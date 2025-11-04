@@ -45,28 +45,6 @@ describe('auth-client.providers', () => {
 			expect(authClientStorage.remove).not.toHaveBeenCalled();
 		});
 
-		it('should hide console warn when creating auth client', async () => {
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn');
-
-			await createAuthClient();
-
-			expect(console.warn).not.toHaveBeenCalled();
-		});
-
-		it('should not hide console warn when creating auth client without workaround', async () => {
-			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
-			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
-			vi.spyOn(console, 'warn');
-
-			await createAuthClient({ hideConsoleWarn: false });
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
-			);
-		});
-
 		it('should not create a new key when called a second time', async () => {
 			const result = await createAuthClient();
 
@@ -135,6 +113,28 @@ describe('auth-client.providers', () => {
 			);
 
 			expect(authClientStorage.remove).toHaveBeenCalledExactlyOnceWith(KEY_STORAGE_KEY);
+		});
+	});
+
+	describe('AuthClient workaround', () => {
+		it('should not record console warn being called when creating auth client', async () => {
+			vi.spyOn(console, 'warn');
+
+			await safeCreateAuthClient();
+
+			expect(console.warn).not.toHaveBeenCalled();
+		});
+
+		it('should not hide console warn when creating auth client without workaround', async () => {
+			// Providing a custom IDB storage to AuthClient.create raises a console warning (purely informational).
+			// TODO: Remove this when icp-js-core supports an opt-out of that warning.
+			vi.spyOn(console, 'warn');
+
+			await safeCreateAuthClient({ hideConsoleWarn: false });
+
+			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
+				"You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use 'Ed25519' as the key type, as it can serialize to a string"
+			);
 		});
 	});
 

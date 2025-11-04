@@ -56,9 +56,11 @@ export class AuthClientProvider {
 	 * they could be tampered with and affect the next login.
 	 * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
 	 */
-	safeCreateAuthClient = async (): Promise<AuthClient> => {
+	safeCreateAuthClient = async (
+		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+	): Promise<AuthClient> => {
 		await this.#storage.remove(KEY_STORAGE_KEY);
-		return await this.createAuthClient();
+		return await this.createAuthClient(args);
 	};
 
 	/**
