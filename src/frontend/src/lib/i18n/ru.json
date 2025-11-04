@@ -1069,6 +1069,7 @@
 				"title": "Управление токенами",
 				"title_nft": "Управление NFT",
 				"manage_list": "Управление токенами",
+				"manage_list_nft": "",
 				"list_settings": "Настройки списка",
 				"import_token": "Добавить",
 				"import_nft": "Добавить NFT",
