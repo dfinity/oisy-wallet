@@ -23,9 +23,7 @@
 	);
 
 	// From the 18th of December to the 30th of December
-	let isChristmas = $derived(
-		(currentMonth === 11 && currentDay >= 18) || (currentMonth === 11 && currentDay <= 30)
-	);
+	let isChristmas = $derived(currentMonth === 11 && currentDay >= 18 && currentDay <= 30);
 </script>
 
 {#if isHalloween}
