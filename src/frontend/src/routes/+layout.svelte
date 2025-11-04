@@ -151,7 +151,7 @@
 	let scrollY = 0;
 
 	const lockBodyScroll = () => {
-		scrollY = window.scrollY;
+		({ scrollY } = window);
 		document.body.style.position = 'fixed';
 		document.body.style.top = `-${scrollY}px`;
 		document.body.style.width = '100%';
