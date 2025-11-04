@@ -19,12 +19,12 @@
 	} from '$lib/enums/plausible';
 	import { trackEvent } from '$lib/services/analytics.services';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		nftGroupByCollectionStore,
 		showHiddenStore,
 		showSpamStore
 	} from '$lib/stores/settings.store';
-	import {modalStore} from "$lib/stores/modal.store";
 
 	let visible = $state(false);
 
