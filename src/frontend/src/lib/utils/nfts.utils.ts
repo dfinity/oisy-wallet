@@ -59,48 +59,6 @@ export const findNewNftIds = ({
 	inventory: NftId[];
 }): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
 
-export const findRemovedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: NftId[];
-}): Nft[] =>
-	nfts.filter(
-		(nft) =>
-			nft.collection.network === token.network &&
-			nft.collection.address === token.address &&
-			isNullish(inventory.find((nftId) => nftId === nft.id))
-	);
-
-export const getUpdatedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: Nft[];
-}): Nft[] =>
-	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
-		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
-			return acc;
-		}
-
-		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-
-		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
-			acc.push({
-				...nft,
-				balance: ownedNft.balance
-			});
-		}
-
-		return acc;
-	}, []);
-
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
 	const IPFS_GATEWAY = 'https://ipfs.io/ipfs/';

@@ -1,12 +1,23 @@
 import type { Identity } from '@dfinity/agent';
 import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@dfinity/auth-client';
+import { isNullish } from '@dfinity/utils';
 
 export class AuthClientProvider {
+	static #instance: AuthClientProvider;
+
 	// We use a dedicated storage for the auth client to better manage it, e.g. clear it for a new login
 	readonly #storage: IdbStorage;
 
-	constructor() {
+	private constructor() {
 		this.#storage = new IdbStorage();
+	}
+
+	static getInstance(): AuthClientProvider {
+		if (isNullish(this.#instance)) {
+			this.#instance = new AuthClientProvider();
+		}
+
+		return this.#instance;
 	}
 
 	createAuthClient = async (
@@ -70,11 +81,3 @@ export class AuthClientProvider {
 		return this.#storage;
 	}
 }
-
-const {
-	storage: authClientStorage,
-	safeCreateAuthClient,
-	loadIdentity,
-	createAuthClient
-} = new AuthClientProvider();
-export { authClientStorage, createAuthClient, loadIdentity, safeCreateAuthClient };
