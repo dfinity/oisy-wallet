@@ -84,7 +84,7 @@ div.mobile-nav-wrapper {
 	position: fixed;
 	inset: auto 0 0 0;
 	// iOS bottom bar offset so the nav doesnt get overrun by OS bottom bar
-	//padding-bottom: calc(0.1rem + env(safe-area-inset-bottom));
+	padding-bottom: calc(0.1rem + env(safe-area-inset-bottom));
 
 	.mobile-nav {
 		position: sticky;

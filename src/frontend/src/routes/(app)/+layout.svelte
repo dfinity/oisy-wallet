@@ -66,7 +66,7 @@
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
 			class="relative flex flex-col pb-5 md:pb-0"
-			class:h-full={$authSignedIn}
+			class:min-h-screen={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
 			class:overflow-x-hidden={$authNotSignedIn}
 		>
