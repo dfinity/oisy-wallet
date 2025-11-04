@@ -25,21 +25,28 @@ import * as addressStore from '$lib/derived/address.derived';
 import * as authStore from '$lib/derived/auth.derived';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { registerUserSnapshot } from '$lib/services/user-snapshot.services';
 import * as balancesStores from '$lib/stores/balances.store';
 import { balancesStore, type BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedSetterStoreStore } from '$lib/stores/certified-setter.store';
 import type { WritableUpdateStore } from '$lib/stores/certified.store';
+import { nftStore } from '$lib/stores/nft.store';
 import type { ExchangesData } from '$lib/types/exchange';
+import type { Nft } from '$lib/types/nft';
 import type { Token } from '$lib/types/token';
+import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { solTransactionsStore } from '$sol/stores/sol-transactions.store';
 import type { SolTransactionUi } from '$sol/types/sol-transaction';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcCkToken, mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity, mockPrincipalText } from '$tests/mocks/identity.mock';
+import { mockValidErc1155Nft, mockValidErc721Nft } from '$tests/mocks/nfts.mock';
 import { createMockSolTransactionsUi } from '$tests/mocks/sol-transactions.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
 import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
@@ -283,6 +290,8 @@ describe('user-snapshot.services', () => {
 				readable(mockEthAddress)
 			);
 
+			nftStore.resetAll();
+
 			tokens.forEach(({ id }) => {
 				balancesStore.reset(id);
 				icTransactionsStore.reset(id);
@@ -428,6 +437,90 @@ describe('user-snapshot.services', () => {
 				userSnapshot: {
 					...userSnapshot,
 					accounts: [...icpAccount, ...icrcAccounts.slice(0, 1), ...solMainnetAccounts]
+				},
+				identity: mockIdentity
+			});
+		});
+
+		it('should customize the symbol for NFTs', async () => {
+			const mockNft1: Nft = {
+				...mockValidErc721Nft,
+				collection: mockValidErc721Token
+			};
+
+			const mockNft2: Nft = {
+				...mockValidErc721Nft,
+				id: parseNftId('12632'),
+				collection: mockValidErc721Token
+			};
+
+			const mockNft3: Nft = {
+				...mockValidErc1155Nft,
+				id: parseNftId('843764'),
+				collection: mockValidErc1155Token
+			};
+
+			const mockNfts = [mockNft1, mockNft2, mockNft3];
+
+			nftStore.addAll(mockNfts);
+
+			const mockTokens = [
+				mockValidErc721Token,
+				{ ...mockValidErc1155Token, section: CustomTokenSection.HIDDEN }
+			];
+
+			const expectedAccounts: { Any: AccountSnapshot_Any }[] = [
+				{
+					Any: {
+						decimals: mockValidErc721Token.decimals,
+						approx_usd_per_token: 0,
+						amount: 2n,
+						timestamp: nowNanoseconds,
+						network: {
+							testnet_for: toNullable(),
+							network_id: `${mockValidErc721Token.network.id.description}`
+						},
+						account: mockEthAddress,
+						token_address: {
+							token_symbol: `nft#${mockValidErc721Token.name}#${mockValidErc721Token.address}#`,
+							wraps: toNullable()
+						},
+						last_transactions: []
+					}
+				},
+				{
+					Any: {
+						decimals: mockValidErc1155Token.decimals,
+						approx_usd_per_token: 0,
+						amount: 1n,
+						timestamp: nowNanoseconds,
+						network: {
+							testnet_for: toNullable(),
+							network_id: `${mockValidErc1155Token.network.id.description}`
+						},
+						account: mockEthAddress,
+						token_address: {
+							token_symbol: `nft#${mockValidErc1155Token.name}#${mockValidErc1155Token.address}#${CustomTokenSection.HIDDEN}`,
+							wraps: toNullable()
+						},
+						last_transactions: []
+					}
+				}
+			];
+
+			const userSnapshot: UserSnapshot = {
+				accounts: [...icpAccount, ...ethMainnetAccounts, ...icrcAccounts, ...solMainnetAccounts],
+				timestamp: toNullable(nowNanoseconds)
+			};
+
+			vi.spyOn(tokensDerived, 'tokens', 'get').mockImplementation(() => readable(mockTokens));
+
+			await registerUserSnapshot();
+
+			expect(registerAirdropRecipient).toHaveBeenCalledWith({
+				userSnapshot: {
+					...userSnapshot,
+					accounts: expectedAccounts
 				},
 				identity: mockIdentity
 			});
