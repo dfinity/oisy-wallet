@@ -10,7 +10,9 @@ export class AuthClientProvider {
 	}
 
 	createAuthClient = async (): Promise<AuthClient> => {
-		// TODO: Workaround for agent-js. Disable annoying console.warn used as pseudo documentation.
+		// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
+		// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
+		// supports CryptoKey as it's literally the default provided implementation.
 		const hideAgentJsConsoleWarn = globalThis.console.warn;
 		globalThis.console.warn = (): null => null;
 
