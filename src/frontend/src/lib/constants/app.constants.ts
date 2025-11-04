@@ -171,6 +171,7 @@ export const EIGHT_DECIMALS = 8;
 export const ZERO = 0n;
 
 // NFTs
+export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
 export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
 
 // Wallets
