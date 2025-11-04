@@ -111,7 +111,7 @@
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.47.2",
 		"@sveltejs/vite-plugin-svelte": "^6.2.1",
-		"@tailwindcss/postcss": "4.1.15",
+		"@tailwindcss/postcss": "4.1.16",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/svelte": "^5.2.8",
 		"@types/dom-view-transitions": "^1.0.5",
