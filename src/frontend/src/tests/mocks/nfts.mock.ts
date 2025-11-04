@@ -5,7 +5,6 @@ import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 export const getMockNonFungibleToken = (params: {
 	addresses: string[];
@@ -72,10 +71,10 @@ export const mockNftCollectionUi: NftCollectionUi = {
 };
 
 export const [mockNonFungibleToken1]: NonFungibleToken[] = getMockNonFungibleToken({
-	addresses: [mockEthAddress],
+	addresses: [mockValidErc1155Token.address],
 	names: ['Nft 1']
 });
 export const [mockNonFungibleToken2]: NonFungibleToken[] = getMockNonFungibleToken({
-	addresses: [mockEthAddress],
+	addresses: [mockValidErc1155Token.address],
 	names: ['Nft 2']
 });
