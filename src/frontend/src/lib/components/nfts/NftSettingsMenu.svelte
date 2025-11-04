@@ -24,6 +24,7 @@
 		showHiddenStore,
 		showSpamStore
 	} from '$lib/stores/settings.store';
+	import {modalStore} from "$lib/stores/modal.store";
 
 	let visible = $state(false);
 
@@ -64,6 +65,13 @@
 				...metadata
 			}
 		});
+	};
+
+	const manageTokensId = Symbol();
+
+	const openManageTokens = () => {
+		modalStore.openManageTokens({ id: manageTokensId });
+		visible = false;
 	};
 </script>
 
@@ -135,6 +143,16 @@
 					{/snippet}
 					{#snippet action()}
 						<NftsShowSpamToggle />
+					{/snippet}
+				</LogoButton>
+			</ListItem>
+			<ListItem>
+				<LogoButton fullWidth onClick={openManageTokens}>
+					{#snippet logo()}
+						<IconManage />
+					{/snippet}
+					{#snippet title()}
+						<span class="text-sm font-normal">{$i18n.tokens.manage.text.title_nft}</span>
 					{/snippet}
 				</LogoButton>
 			</ListItem>
