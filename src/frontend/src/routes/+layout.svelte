@@ -166,7 +166,7 @@
 
 	$effect(() => {
 		if (isIos()) {
-			if ($modalStore?.type) {
+			if (nonNullish($modalStore?.type)) {
 				lockBodyScroll();
 			} else {
 				unlockBodyScroll();
