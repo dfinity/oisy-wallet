@@ -148,25 +148,28 @@
 
 	onMount(openBc);
 
-	onMount(() => {
-		const toggle = (e) => {
-			console.log('toggle', e.target);
-		};
+	let scrollY = 0;
 
-		document.addEventListener('touchstart', toggle);
-		document.addEventListener('touchend', toggle);
+	function lockBodyScroll() {
+		scrollY = window.scrollY;
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+	}
 
-		document.addEventListener(
-			'touchmove',
-			(e) => {
-				e.target instanceof Element && e.target.classList.add('touch');
-				const modal = document.querySelector('.modal');
-				if (nonNullish(modal) && e.target instanceof Element && !modal.contains(e.target)) {
-					e.preventDefault();
-				}
-			},
-			{ passive: false }
-		);
+	function unlockBodyScroll() {
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.width = '';
+		window.scrollTo(0, scrollY);
+	}
+
+	$effect(() => {
+		if ($modalStore?.type) {
+			lockBodyScroll();
+		} else {
+			unlockBodyScroll();
+		}
 	});
 </script>
 
