@@ -127,9 +127,9 @@ export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 );
 
 const enabledNonFungibleTokensBySection: Readable<
-	Record<CustomTokenSection | 0, NonFungibleToken[]>
+	Record<CustomTokenSection | 'null', NonFungibleToken[]>
 > = derived([enabledNonFungibleTokens], ([$enabledNonFungibleTokens]) =>
-	$enabledNonFungibleTokens.reduce<Record<CustomTokenSection | 0, NonFungibleToken[]>>(
+	$enabledNonFungibleTokens.reduce<Record<CustomTokenSection | 'null', NonFungibleToken[]>>(
 		(acc, token) => {
 			const { section } = token;
 
@@ -143,7 +143,7 @@ const enabledNonFungibleTokensBySection: Readable<
 
 			return acc;
 		},
-		{} as Record<CustomTokenSection | 0, NonFungibleToken[]>
+		{} as Record<CustomTokenSection | 'null', NonFungibleToken[]>
 	)
 );
 
