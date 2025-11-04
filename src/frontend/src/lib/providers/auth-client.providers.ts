@@ -9,12 +9,23 @@ export class AuthClientProvider {
 		this.#storage = new IdbStorage();
 	}
 
-	createAuthClient = async (): Promise<AuthClient> => {
-		// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
-		// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
-		// supports CryptoKey as it's literally the default provided implementation.
-		const hideAgentJsConsoleWarn = globalThis.console.warn;
-		globalThis.console.warn = (): null => null;
+	createAuthClient = async (
+		{ hideConsoleWarn }: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+	): Promise<AuthClient> => {
+		const hideWarn = (): (() => void) => {
+			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
+			// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
+			// supports CryptoKey as it's literally the default provided implementation.
+			const hideAgentJsConsoleWarn = globalThis.console.warn;
+			globalThis.console.warn = (): null => null;
+
+			return () => {
+				// Redo console.warn
+				globalThis.console.warn = hideAgentJsConsoleWarn;
+			};
+		};
+
+		const redoConsoleWarn = hideConsoleWarn ? hideWarn() : undefined;
 
 		try {
 			return await AuthClient.create({
@@ -25,8 +36,7 @@ export class AuthClientProvider {
 				}
 			});
 		} finally {
-			// Redo console.warn
-			globalThis.console.warn = hideAgentJsConsoleWarn;
+			redoConsoleWarn?.();
 		}
 	};
 
