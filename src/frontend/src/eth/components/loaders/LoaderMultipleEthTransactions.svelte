@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { onMount, type Snippet, untrack } from 'svelte';
+	import { type Snippet, untrack } from 'svelte';
 	import { NFTS_ENABLED } from '$env/nft.env';
 	import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
 	import { batchLoadTransactions } from '$eth/services/eth-transactions-batch.services';
@@ -55,7 +55,7 @@
 		untrack(() => debounceLoad());
 	});
 
-	onMount(async () => {
+	const loadFromCache = async () => {
 		const principal = $authIdentity?.getPrincipal();
 
 		if (isNullish(principal)) {
@@ -77,6 +77,14 @@
 				});
 			})
 		);
+	};
+
+	const debounceLoadFromCache = debounce(loadFromCache);
+
+	$effect(() => {
+		[tokens, $authIdentity];
+
+		untrack(() => debounceLoadFromCache());
 	});
 </script>
 
