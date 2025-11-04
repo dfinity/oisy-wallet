@@ -1,9 +1,10 @@
 import { ETHEREUM_NETWORK } from '$env/networks/networks.eth.env';
 import { NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { Nft, NftCollectionUi, NonFungibleToken } from '$lib/types/nft';
-import type { TokenId } from '$lib/types/token';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { parseTokenId } from '$lib/validation/token.validation';
+import { mockValidErc1155Token } from '$tests/mocks/erc1155-tokens.mock';
+import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 
 export const getMockNonFungibleToken = (params: {
@@ -30,10 +31,8 @@ export const mockValidErc721Nft: Nft = {
 		{ traitType: 'Type', value: 'Tone 4' }
 	],
 	collection: {
+		...mockValidErc721Token,
 		id: parseTokenId('TokenId'),
-		address: mockEthAddress,
-		network: ETHEREUM_NETWORK,
-		standard: 'erc721',
 		symbol: 'MC',
 		name: 'MyContract',
 		allowExternalContentSource: true
@@ -51,10 +50,8 @@ export const mockValidErc1155Nft: Nft = {
 	],
 	balance: 2,
 	collection: {
+		...mockValidErc1155Token,
 		id: parseTokenId('TokenId'),
-		address: mockEthAddress,
-		network: ETHEREUM_NETWORK,
-		standard: 'erc1155',
 		symbol: 'NYAN',
 		name: 'MyContract',
 		allowExternalContentSource: true
@@ -63,15 +60,13 @@ export const mockValidErc1155Nft: Nft = {
 	acquiredAt: new Date('2023-01-01T00:00:00.000Z')
 };
 
-export const mockNftollectionUi: NftCollectionUi = {
+export const mockNftCollectionUi: NftCollectionUi = {
 	nfts: [{ ...mockValidErc1155Nft, imageUrl: 'https://example.com/nft.png' }, mockValidErc1155Nft],
 	collection: {
+		...mockValidErc1155Token,
 		name: 'Testcollection',
-		address: mockEthAddress,
-		network: ETHEREUM_NETWORK,
-		standard: 'erc1155',
 		symbol: 'testcollection',
-		id: 'testcollection' as unknown as TokenId,
+		id: parseTokenId('testcollection'),
 		allowExternalContentSource: true
 	}
 };
