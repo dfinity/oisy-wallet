@@ -124,6 +124,7 @@ export interface RouteParams {
 }
 
 export const loadRouteParams = ($event: LoadEvent): RouteParams => {
+	console.log('loadRouteParams', $event);
 	if (!browser) {
 		return {
 			[TOKEN_PARAM]: undefined,
