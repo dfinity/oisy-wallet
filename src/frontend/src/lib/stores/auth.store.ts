@@ -38,7 +38,7 @@ export interface AuthStore extends Readable<AuthStoreData> {
 }
 
 const initAuthStore = (): AuthStore => {
-	const { subscribe, set, update } = writable<AuthStoreData>({
+	const { subscribe, set } = writable<AuthStoreData>({
 		identity: undefined
 	});
 
@@ -151,10 +151,7 @@ const initAuthStore = (): AuthStore => {
 					onSuccess: async () => {
 						await overwriteStoredIdentityKey();
 
-						update((state: AuthStoreData) => ({
-							...state,
-							identity: authClient?.getIdentity()
-						}));
+						set({ identity: authClient?.getIdentity() });
 
 						try {
 							// If the user has more than one tab open in the same browser,
@@ -188,10 +185,7 @@ const initAuthStore = (): AuthStore => {
 			// This fixes a "sign in -> sign-out -> sign in again" flow without reloading the window.
 			authClient = null;
 
-			update((state: AuthStoreData) => ({
-				...state,
-				identity: null
-			}));
+			set({ identity: null });
 		},
 
 		/**
