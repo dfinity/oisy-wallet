@@ -101,14 +101,16 @@
 					</div>
 				{/if}
 
-				<MobileNavigationMenu>
-					<NavigationMenuMainItems testIdPrefix="mobile" />
-				</MobileNavigationMenu>
-
 				<Modals />
 			</AuthGuard>
 
 			<Footer />
 		</div>
 	</div>
+
+	{#if $authSignedIn}
+		<MobileNavigationMenu>
+			<NavigationMenuMainItems testIdPrefix="mobile" />
+		</MobileNavigationMenu>
+	{/if}
 {/if}
