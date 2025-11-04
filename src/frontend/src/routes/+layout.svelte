@@ -22,9 +22,9 @@
 	import { authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
 	import { isIos } from '$lib/utils/device.utils';
-	import { modalStore } from '$lib/stores/modal.store';
 
 	interface Props {
 		children: Snippet;
