@@ -61,10 +61,6 @@
 		approveSpender
 	}: Props = $props();
 
-	$effect(()=>{
-		console.log('transaction', token)
-	})
-
 	const cardIcon: Component = $derived(mapTransactionIcon({ type, status }));
 
 	const iconWithOpacity: boolean = $derived(status === 'pending' || status === 'unconfirmed');
