@@ -141,12 +141,17 @@ export interface ModalStore<T> extends Readable<ModalData<T>> {
 const initModalStore = <T>(): ModalStore<T> => {
 	const { subscribe, set } = writable<ModalData<T>>(undefined);
 
-	const setType = (type: Modal<T>['type']) => (id: symbol) => set({ type, id });
+	const setType = (type: Modal<T>['type']) => (id: symbol) => {
+		console.log('open modal', type, id);
+		return set({ type, id });
+	};
 
 	const setTypeWithData =
 		(type: Modal<T>['type']) =>
-		<D extends T>({ id, data }: { id: symbol; data: D }) =>
-			set({ type, id, data });
+		<D extends T>({ id, data }: { id: symbol; data: D }) => {
+			console.log('open modal', type, id);
+			return set({ type, id, data });
+		};
 
 	return {
 		openEthReceive: setType('eth-receive'),
@@ -240,7 +245,10 @@ const initModalStore = <T>(): ModalStore<T> => {
 		),
 		openGldtStake: setType('gldt-stake'),
 		openGldtUnstake: setType('gldt-unstake'),
-		close: () => set(null),
+		close: () => {
+			console.log('close modal');
+			return set(null);
+		},
 		subscribe
 	};
 };
