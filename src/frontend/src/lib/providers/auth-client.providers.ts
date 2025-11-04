@@ -1,31 +1,66 @@
 import type { Identity } from '@dfinity/agent';
 import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@dfinity/auth-client';
+import { isNullish } from '@dfinity/utils';
 
 export class AuthClientProvider {
+	static #instance: AuthClientProvider;
+
 	// We use a dedicated storage for the auth client to better manage it, e.g. clear it for a new login
 	readonly #storage: IdbStorage;
 
-	constructor() {
+	private constructor() {
 		this.#storage = new IdbStorage();
 	}
 
-	createAuthClient = (): Promise<AuthClient> =>
-		AuthClient.create({
-			storage: this.#storage,
-			idleOptions: {
-				disableIdle: true,
-				disableDefaultIdleCallback: true
-			}
-		});
+	static getInstance(): AuthClientProvider {
+		if (isNullish(this.#instance)) {
+			this.#instance = new AuthClientProvider();
+		}
+
+		return this.#instance;
+	}
+
+	createAuthClient = async (
+		{ hideConsoleWarn }: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+	): Promise<AuthClient> => {
+		const hideWarn = (): (() => void) => {
+			// TODO: Workaround for agent-js. Disable the console.warn "You are using a custom storage provider..."
+			// printed in the browser console as pseudo-documentation. There is no opt-out, and we know our custom storage
+			// supports CryptoKey as it's literally the default provided implementation.
+			const hideAgentJsConsoleWarn = globalThis.console.warn;
+			globalThis.console.warn = (): null => null;
+
+			return () => {
+				// Redo console.warn
+				globalThis.console.warn = hideAgentJsConsoleWarn;
+			};
+		};
+
+		const redoConsoleWarn = hideConsoleWarn ? hideWarn() : undefined;
+
+		try {
+			return await AuthClient.create({
+				storage: this.#storage,
+				idleOptions: {
+					disableIdle: true,
+					disableDefaultIdleCallback: true
+				}
+			});
+		} finally {
+			redoConsoleWarn?.();
+		}
+	};
 
 	/**
 	 * Since icp-js-core persists identity keys in IndexedDB by default,
 	 * they could be tampered with and affect the next login.
 	 * To ensure each session starts clean and safe, we clear the stored keys before creating a new AuthClient.
 	 */
-	safeCreateAuthClient = async (): Promise<AuthClient> => {
+	safeCreateAuthClient = async (
+		args: { hideConsoleWarn: boolean } = { hideConsoleWarn: true }
+	): Promise<AuthClient> => {
 		await this.#storage.remove(KEY_STORAGE_KEY);
-		return await this.createAuthClient();
+		return await this.createAuthClient(args);
 	};
 
 	/**
@@ -48,11 +83,3 @@ export class AuthClientProvider {
 		return this.#storage;
 	}
 }
-
-const {
-	storage: authClientStorage,
-	safeCreateAuthClient,
-	loadIdentity,
-	createAuthClient
-} = new AuthClientProvider();
-export { authClientStorage, createAuthClient, loadIdentity, safeCreateAuthClient };
