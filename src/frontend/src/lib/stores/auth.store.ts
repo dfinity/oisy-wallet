@@ -14,7 +14,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import { type AuthClient } from '@icp-sdk/auth/client';
+import type { AuthClient } from '@icp-sdk/auth/client';
 import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
 
@@ -103,9 +103,7 @@ const initAuthStore = (): AuthStore => {
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-					onSuccess: async () => {
-						await overwriteStoredIdentityKey();
-
+					onSuccess: () => {
 						set({ identity: authClient?.getIdentity() });
 
 						try {
