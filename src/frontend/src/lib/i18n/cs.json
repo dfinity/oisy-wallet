@@ -1069,6 +1069,7 @@
 				"title": "Spravovat tokeny",
 				"title_nft": "",
 				"manage_list": "Spravovat tokeny",
+				"manage_list_nft": "",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
 				"import_nft": "",

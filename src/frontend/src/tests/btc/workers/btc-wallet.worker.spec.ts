@@ -1,8 +1,8 @@
 import { BtcWalletScheduler } from '$btc/schedulers/btc-wallet.scheduler';
 import { mapBtcTransaction } from '$btc/utils/btc-transactions.utils';
-import * as authClientApi from '$lib/api/auth-client.api';
 import { SignerCanister } from '$lib/canisters/signer.canister';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import * as blockchainRest from '$lib/rest/blockchain.rest';
 import * as blockstreamRest from '$lib/rest/blockstream.rest';
 import type { PostMessageDataRequestBtc } from '$lib/types/post-message';
@@ -16,6 +16,19 @@ import { jsonReplacer } from '@dfinity/utils';
 import { waitFor } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('btc-wallet.worker', () => {
 	let spyGetCertifiedBalance: MockInstance;
@@ -97,7 +110,8 @@ describe('btc-wallet.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
 		let mockBlockHeight = 1000;
 		vi.spyOn(blockstreamRest, 'btcLatestBlockHeight').mockResolvedValue(mockBlockHeight++);

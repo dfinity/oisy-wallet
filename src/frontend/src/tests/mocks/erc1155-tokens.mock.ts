@@ -7,7 +7,6 @@ import type { NetworkEnvironment } from '$lib/types/network';
 import type { CertifiedData } from '$lib/types/store';
 import type { TokenId } from '$lib/types/token';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
 
 const NYAN_CAT_SYMBOL = 'NYAN';
@@ -49,7 +48,7 @@ export const mockValidErc1155Token: Erc1155Token = {
 	id: parseTokenId('Erc1155TokenId'),
 	network: ETHEREUM_NETWORK,
 	standard: 'erc1155',
-	address: mockEthAddress
+	address: '0x206571b68c66E1d112b74d65695043ad2b5F95D5'
 };
 
 export const createMockErc1155Tokens = ({
