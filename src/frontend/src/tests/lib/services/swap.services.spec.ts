@@ -6,6 +6,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
+import * as icrcServices from '$icp/services/icrc.services';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
@@ -17,6 +18,7 @@ import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
 import {
+	fetchKongSwap,
 	fetchSwapAmounts,
 	fetchSwapAmountsEVM,
 	fetchVeloraDeltaSwap,
@@ -39,6 +41,7 @@ import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.moc
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { kongIcToken, mockKongBackendTokens } from '$tests/mocks/kong_backend.mock';
+import { Principal } from '@dfinity/principal';
 import { constructSimpleSDK } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
