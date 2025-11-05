@@ -27,7 +27,8 @@
 	import {
 		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
-		TRACK_COUNT_ETH_SEND_SUCCESS
+		TRACK_COUNT_ETH_SEND_SUCCESS,
+		AI_ASSISTANT_SEND_TOKEN_SOURCE
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
@@ -285,6 +286,14 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
+
 		try {
 			await executeSend({
 				from: $ethAddress,
@@ -305,20 +314,14 @@
 
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
