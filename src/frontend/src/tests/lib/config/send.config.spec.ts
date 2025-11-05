@@ -1,4 +1,9 @@
-import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
+import {
+	allSendNftsWizardSteps,
+	allSendWizardSteps,
+	sendNftsWizardStepsWithQrCodeScan,
+	sendWizardStepsWithQrCodeScan
+} from '$lib/config/send.config';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import en from '$tests/mocks/i18n.mock';
 import type { WizardSteps } from '@dfinity/gix-components';
@@ -27,6 +32,25 @@ describe('send.config', () => {
 		}
 	];
 
+	const expectedNftBaseConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.DESTINATION,
+			title: en.send.text.send
+		},
+		{
+			name: WizardStepsSend.REVIEW,
+			title: en.send.text.review
+		}
+	];
+
+	const expectedNftSendConfig: WizardSteps<WizardStepsSend> = [
+		...expectedNftBaseConfig,
+		{
+			name: WizardStepsSend.SENDING,
+			title: en.send.text.sending
+		}
+	];
+
 	const expectedConvertConfig: WizardSteps<WizardStepsSend> = [
 		...expectedBaseConfig,
 		{
@@ -42,15 +66,27 @@ describe('send.config', () => {
 		}
 	];
 
+	const expectedFilterNetworksConfig: WizardSteps<WizardStepsSend> = [
+		{
+			name: WizardStepsSend.FILTER_NETWORKS,
+			title: en.send.text.select_network_filter
+		}
+	];
+
 	const expectedAllSendConfig: WizardSteps<WizardStepsSend> = [
 		{
 			name: WizardStepsSend.TOKENS_LIST,
 			title: en.send.text.select_token
 		},
+		...expectedFilterNetworksConfig
+	];
+
+	const expectedNftAllSendConfig: WizardSteps<WizardStepsSend> = [
 		{
-			name: WizardStepsSend.FILTER_NETWORKS,
-			title: en.send.text.select_network_filter
-		}
+			name: WizardStepsSend.NFTS_LIST,
+			title: en.send.text.select_nft
+		},
+		...expectedFilterNetworksConfig
 	];
 
 	const mockParams = {
@@ -104,6 +140,26 @@ describe('send.config', () => {
 			expect(steps).toStrictEqual([
 				...expectedAllSendConfig,
 				...expectedConvertConfig,
+				...expectedQrCodeConfig
+			]);
+		});
+	});
+
+	describe('sendNftsWizardStepsWithQrCodeScan', () => {
+		it('should return the correct steps with expected text and state', () => {
+			const steps = sendNftsWizardStepsWithQrCodeScan(mockParams);
+
+			expect(steps).toStrictEqual([...expectedNftSendConfig, ...expectedQrCodeConfig]);
+		});
+	});
+
+	describe('allSendNftsWizardSteps', () => {
+		it('should return the correct steps with expected text and state', () => {
+			const steps = allSendNftsWizardSteps(mockParams);
+
+			expect(steps).toStrictEqual([
+				...expectedNftAllSendConfig,
+				...expectedNftSendConfig,
 				...expectedQrCodeConfig
 			]);
 		});

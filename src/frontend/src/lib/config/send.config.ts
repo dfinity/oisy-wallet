@@ -62,9 +62,7 @@ export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps<W
 	...sendWizardStepsWithQrCodeScan(params)
 ];
 
-export const sendNftsWizardSteps = (
-	params: SendWizardStepsParams
-): WizardSteps<WizardStepsSend> => [
+const sendNftsWizardSteps = (params: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
 	{
 		name: WizardStepsSend.DESTINATION,
 		title: params.i18n.send.text.send
@@ -79,6 +77,13 @@ export const sendNftsWizardSteps = (
 	}
 ];
 
+export const sendNftsWizardStepsWithQrCodeScan = (
+	params: SendWizardStepsParams
+): WizardSteps<WizardStepsSend> => [
+	...sendNftsWizardSteps(params),
+	...sendWizardStepsQrCodeScan(params)
+];
+
 export const allSendNftsWizardSteps = (
 	params: SendWizardStepsParams
 ): WizardSteps<WizardStepsSend> => [
@@ -87,5 +92,5 @@ export const allSendNftsWizardSteps = (
 		title: params.i18n.send.text.select_nft
 	},
 	...sendWizardStepsFilterNetworks(params),
-	...sendNftsWizardSteps(params)
+	...sendNftsWizardStepsWithQrCodeScan(params)
 ];
