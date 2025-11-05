@@ -69,7 +69,7 @@
 </script>
 
 <button
-	class="block w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
+	class="flex w-full flex-col gap-2 rounded-xl text-left no-underline transition-all duration-300 hover:text-inherit"
 	class:bg-primary={type === 'default'}
 	class:cursor-default={type === 'default'}
 	class:cursor-not-allowed={disabled}
