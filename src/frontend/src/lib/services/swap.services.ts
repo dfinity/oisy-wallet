@@ -498,6 +498,7 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
+// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" 
 			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
 
 			const isApprovalNeeded = await checkNeedsApproval({
