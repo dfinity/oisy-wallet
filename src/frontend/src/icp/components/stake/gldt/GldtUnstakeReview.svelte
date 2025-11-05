@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { getContext } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
+	import GldtStakeTokenFeeModalValue from '$icp/components/stake/gldt/GldtStakeTokenFeeModalValue.svelte';
 	import GldtUnstakeDelayedDissolveTerms from '$icp/components/stake/gldt/GldtUnstakeDelayedDissolveTerms.svelte';
 	import GldtUnstakeImmediateDissolveTerms from '$icp/components/stake/gldt/GldtUnstakeImmediateDissolveTerms.svelte';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
-	import type { IcToken } from '$icp/types/ic-token';
 	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
@@ -29,21 +29,13 @@
 
 	let { amount, dissolveInstantly, amountToReceive, onBack, onUnstake }: Props = $props();
 
-	const { sendTokenSymbol, sendToken, sendTokenDecimals, sendTokenExchangeRate } =
+	const { sendTokenSymbol, sendTokenDecimals, sendTokenExchangeRate } =
 		getContext<SendContext>(SEND_CONTEXT_KEY);
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on the previous wizard step
 	let invalid = $derived(invalidAmount(amount) || Number(amount) === 0);
-
-	let tokenFee = $derived(
-		formatTokenBigintToNumber({
-			value: ($sendToken as IcToken).fee,
-			displayDecimals: $sendTokenDecimals,
-			unitName: $sendTokenDecimals
-		})
-	);
 
 	let instantDissolveFee = $derived(
 		formatTokenBigintToNumber({
@@ -76,25 +68,11 @@
 	{/snippet}
 
 	{#snippet fee()}
-		<ModalValue>
+		<GldtStakeTokenFeeModalValue>
 			{#snippet label()}
 				{$i18n.stake.text.included_token_fee}
 			{/snippet}
-
-			{#snippet mainValue()}
-				{tokenFee}
-				{$sendTokenSymbol}
-			{/snippet}
-
-			{#snippet secondaryValue()}
-				{formatCurrency({
-					value: tokenFee * ($sendTokenExchangeRate ?? 0),
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}
-			{/snippet}
-		</ModalValue>
+		</GldtStakeTokenFeeModalValue>
 
 		{#if dissolveInstantly}
 			<ModalValue>
