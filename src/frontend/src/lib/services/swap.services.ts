@@ -156,6 +156,7 @@ export const fetchKongSwap = async ({
 		: undefined;
 
 	if (isSourceTokenIcrc2) {
+// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
 		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
 
 		const isApprovalNeeded = await checkNeedsApproval({
