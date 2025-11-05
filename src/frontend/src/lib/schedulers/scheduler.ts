@@ -1,4 +1,4 @@
-import { loadIdentity } from '$lib/api/auth-client.api';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
 	PostMessageDataError,
 	PostMessageResponse,
@@ -44,7 +44,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
@@ -82,7 +82,7 @@ export class SchedulerTimer {
 	}
 
 	async trigger<T>(params: SchedulerParams<T>) {
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We cannot execute without an identity

@@ -1,7 +1,7 @@
-import { authClientStorage, createAuthClient } from '$lib/api/auth-client.api';
 import { AUTH_TIMER_INTERVAL, NANO_SECONDS_IN_MILLISECOND } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type { PostMessage, PostMessageDataRequest } from '$lib/types/post-message';
-import { KEY_STORAGE_DELEGATION, type AuthClient } from '@dfinity/auth-client';
+import { KEY_STORAGE_DELEGATION } from '@dfinity/auth-client';
 import { DelegationChain, isDelegationValid } from '@dfinity/identity';
 import { nonNullish } from '@dfinity/utils';
 
@@ -71,7 +71,7 @@ const onIdleSignOut = async () => {
  * @returns true if authenticated
  */
 const checkAuthentication = async (): Promise<boolean> => {
-	const authClient: AuthClient = await createAuthClient();
+	const authClient = await AuthClientProvider.getInstance().createAuthClient();
 	return authClient.isAuthenticated();
 };
 
@@ -84,7 +84,8 @@ const checkDelegationChain = async (): Promise<{
 	valid: boolean;
 	delegation: DelegationChain | null;
 }> => {
-	const delegationChain: string | null = await authClientStorage.get(KEY_STORAGE_DELEGATION);
+	const delegationChain =
+		await AuthClientProvider.getInstance().storage.get(KEY_STORAGE_DELEGATION);
 
 	const delegation = delegationChain !== null ? DelegationChain.fromJSON(delegationChain) : null;
 

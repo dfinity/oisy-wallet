@@ -184,19 +184,15 @@
 
 	const selectNft = (nft: Nft) => {
 		selectedNft = nft;
+
 		const token = findNonFungibleToken({
 			tokens: $nonFungibleTokens,
 			networkId: nft.collection.network.id,
 			address: nft.collection.address
 		});
+
 		if (nonNullish(token)) {
-			loadTokenAndRun({
-				token,
-				// eslint-disable-next-line require-await
-				callback: async () => {
-					goToStep(WizardStepsSend.DESTINATION);
-				}
-			});
+			onSendToken(token);
 		}
 	};
 </script>

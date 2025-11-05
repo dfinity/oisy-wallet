@@ -868,6 +868,7 @@ interface I18nTokens {
 			title: string;
 			title_nft: string;
 			manage_list: string;
+			manage_list_nft: string;
 			list_settings: string;
 			import_token: string;
 			import_nft: string;

@@ -152,7 +152,7 @@ const loadCustomTokensWithMetadata = async (
 
 				return {
 					...{
-						id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,

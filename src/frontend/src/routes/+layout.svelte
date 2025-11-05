@@ -15,14 +15,16 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
-	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
 		children: Snippet;
@@ -146,35 +148,30 @@
 
 	onMount(openBc);
 
-	// This fix below is to prevent the page from scrolling when the user taps on an input field.
-	// This is a bug in IOS which makes pages behind modals scrollable when an input is focused
-	onMount(() => {
-		let focused = false;
-		const disableTouch = (e: TouchEvent) => {
-			if (focused) {
-				e.preventDefault();
+	let scrollY = 0;
+
+	const lockBodyScroll = () => {
+		({ scrollY } = window);
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+	};
+
+	const unlockBodyScroll = () => {
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.width = '';
+		window.scrollTo(0, scrollY);
+	};
+
+	$effect(() => {
+		if (isIos()) {
+			if (nonNullish($modalStore?.type)) {
+				lockBodyScroll();
+			} else {
+				unlockBodyScroll();
 			}
-		};
-		const onFocusIn = (e: FocusEvent) => {
-			if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
-				focused = true;
-				document.body.style.touchAction = 'none'; // disables touch gestures
-				document.body.style.overflow = 'hidden'; // as a backup for Android
-			}
-		};
-		const onFocusOut = () => {
-			focused = false;
-			document.body.style.touchAction = '';
-			document.body.style.overflow = '';
-		};
-		document.addEventListener('focusin', onFocusIn);
-		document.addEventListener('focusout', onFocusOut);
-		document.addEventListener('touchmove', disableTouch, { passive: false });
-		return () => {
-			document.removeEventListener('focusin', onFocusIn);
-			document.removeEventListener('focusout', onFocusOut);
-			document.removeEventListener('touchmove', disableTouch);
-		};
+		}
 	});
 </script>
 
