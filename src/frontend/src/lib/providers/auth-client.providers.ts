@@ -1,6 +1,6 @@
 import type { Identity } from '@dfinity/agent';
-import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { isNullish } from '@dfinity/utils';
+import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 
 export class AuthClientProvider {
 	static #instance: AuthClientProvider;
