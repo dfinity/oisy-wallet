@@ -157,7 +157,6 @@ describe('etherscan.providers', () => {
 					action: 'txlist',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
@@ -174,7 +173,6 @@ describe('etherscan.providers', () => {
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
