@@ -145,6 +145,8 @@ describe('LoaderMultipleEthTransactions', () => {
 		erc1155CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.setAll(mockErc1155CertifiedCustomTokens);
 
+		ethTransactionsStore.reinitialize();
+
 		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});
 
