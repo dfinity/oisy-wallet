@@ -37,6 +37,7 @@
 	import { isTokenNonFungible } from '$lib/utils/nft.utils';
 	import { findNft } from '$lib/utils/nfts.utils';
 	import { parseNftId } from '$lib/validation/nft.validation';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		transaction: EthTransactionUi;
@@ -102,6 +103,14 @@
 			? findNft({ nfts: $nftStore, token, tokenId: parseNftId(String(transaction.tokenId)) })
 			: undefined
 	);
+
+	onMount(() => {
+		console.log('EthTransactionModal mounted');
+
+		return () => {
+			console.log('EthTransactionModal unmounted');
+		};
+	});
 </script>
 
 <Modal onClose={modalStore.close}>

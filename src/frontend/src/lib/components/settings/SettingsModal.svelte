@@ -6,12 +6,21 @@
 	import { SettingsModalType as SettingsModalEnum } from '$lib/enums/settings-modal-types';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { onMount } from 'svelte';
 
 	let settingsType = $derived($modalSettingsData);
 
 	let modalTitle = $derived(
 		settingsType === SettingsModalEnum.ENABLED_NETWORKS ? $i18n.settings.text.active_networks : ''
 	);
+
+	onMount(() => {
+		console.log('SettingsModal mounted');
+
+		return () => {
+			console.log('SettingsModal unmounted');
+		};
+	});
 </script>
 
 <Modal onClose={modalStore.close} testId={SETTINGS_NETWORKS_MODAL}>

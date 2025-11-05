@@ -273,6 +273,14 @@
 			callback();
 		}
 	};
+
+	onMount(() => {
+		console.log('AddressBookModal mounted');
+
+		return () => {
+			console.log("AddressBookModal unmounted");
+		}
+	})
 </script>
 
 <WizardModal

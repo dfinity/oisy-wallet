@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, setContext } from 'svelte';
+	import { getContext, onMount, setContext } from 'svelte';
 	import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 	import SwapProviderListModal from '$lib/components/swap/SwapProviderListModal.svelte';
 	import SwapTokenWizard from '$lib/components/swap/SwapTokenWizard.svelte';
@@ -198,6 +198,14 @@
 			stepName
 		});
 	};
+
+	onMount(() => {
+		console.log('SwapModal mounted');
+
+		return () => {
+			console.log('SwapModal unmounted');
+		};
+	});
 </script>
 
 <WizardModal

@@ -13,6 +13,7 @@
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
 	import { closeModal } from '$lib/utils/modal.utils';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		infoCmp:
@@ -66,6 +67,14 @@
 		addressToken = undefined;
 		copyAriaLabel = undefined;
 	};
+
+	onMount(() => {
+		console.log('ReceiveModal mounted');
+
+		return () => {
+			console.log('ReceiveModal unmounted');
+		};
+	});
 </script>
 
 <WizardModal

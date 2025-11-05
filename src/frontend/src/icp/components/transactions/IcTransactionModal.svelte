@@ -17,6 +17,7 @@
 	import type { OptionToken } from '$lib/types/token';
 	import type { AnyTransactionUi } from '$lib/types/transaction-ui';
 	import { formatNanosecondsToDate, formatToken } from '$lib/utils/format.utils';
+	import { onMount } from 'svelte';
 
 	interface Props {
 		transaction: IcTransactionUi;
@@ -47,6 +48,14 @@
 			data: data as OpenTransactionParams<IcTransactionUi>
 		});
 	};
+
+	onMount(() => {
+		console.log('IcTransactionModal mounted');
+
+		return () => {
+			console.log('IcTransactionModal unmounted');
+		};
+	});
 </script>
 
 <Modal onClose={modalStore.close}>

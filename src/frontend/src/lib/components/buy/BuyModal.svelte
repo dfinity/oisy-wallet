@@ -4,6 +4,15 @@
 	import OnramperWidget from '$lib/components/onramper/OnramperWidget.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import { onMount } from 'svelte';
+
+	onMount(() => {
+		console.log('BuyModal mounted');
+
+		return () => {
+			console.log('BuyModal unmounted');
+		};
+	});
 </script>
 
 <Modal onClose={modalStore.close}>
