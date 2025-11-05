@@ -80,7 +80,7 @@
 	onclick={onClick}
 >
 	<span
-		class="relative block h-full w-full aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+		class="relative block aspect-square h-full w-full overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
 		<NftDisplayGuard
