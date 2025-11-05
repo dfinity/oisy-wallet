@@ -359,7 +359,7 @@ export const hasSufficientIcrcAllowance = async ({
 	owner,
 	spender,
 	amount,
-	allowanceBuffer = 30_000_000_000n
+	allowanceBuffer
 }: {
 	identity: Identity;
 	ledgerCanisterId: CanisterIdText;
@@ -368,20 +368,23 @@ export const hasSufficientIcrcAllowance = async ({
 	amount: bigint;
 	allowanceBuffer?: bigint;
 }): Promise<boolean> => {
-	try {
-		const { allowance, expires_at } = await icrcAllowance({
-			identity,
-			ledgerCanisterId,
-			owner: { owner },
-			spender: { owner: spender }
-		});
+	const { allowance, expires_at } = await icrcAllowance({
+		identity,
+		ledgerCanisterId,
+		owner: { owner },
+		spender: { owner: spender },
+		certified: false
+	});
 
-		const expiredBuffer = nowInBigIntNanoSeconds() + allowanceBuffer;
-		const hasSufficientAllowance = allowance >= amount;
-		const isNotExpired = nonNullish(expires_at[0]) && expires_at[0] > expiredBuffer;
+	const hasSufficientAllowance = allowance >= amount;
 
-		return hasSufficientAllowance && isNotExpired;
-	} catch (_: unknown) {
-		return false;
+	if (isNullish(allowanceBuffer)) {
+		return hasSufficientAllowance;
 	}
+
+	const expiredBuffer = nowInBigIntNanoSeconds() + allowanceBuffer;
+	const expiredAt = fromNullable(expires_at);
+	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
+
+	return hasSufficientAllowance && isNotExpired;
 };

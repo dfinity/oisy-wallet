@@ -561,7 +561,7 @@ describe('icrc.services', () => {
 			expect(result).toBeTruthy();
 		});
 
-		it('should return false when allowance has no expiration', async () => {
+		it('should return true when allowance has no expiration and no buffer is provided', async () => {
 			ledgerCanisterMock.allowance.mockResolvedValue({
 				allowance: 2_000_000n,
 				expires_at: []
@@ -575,7 +575,7 @@ describe('icrc.services', () => {
 				amount: mockAmount
 			});
 
-			expect(result).toBeFalsy();
+			expect(result).toBeTruthy();
 		});
 
 		it('should return false when allowance is insufficient', async () => {
@@ -610,7 +610,8 @@ describe('icrc.services', () => {
 				ledgerCanisterId: mockLedgerCanisterId,
 				owner: mockOwner,
 				spender: mockSpender,
-				amount: mockAmount
+				amount: mockAmount,
+				allowanceBuffer: pastExpiration
 			});
 
 			expect(result).toBeFalsy();
@@ -629,7 +630,8 @@ describe('icrc.services', () => {
 				ledgerCanisterId: mockLedgerCanisterId,
 				owner: mockOwner,
 				spender: mockSpender,
-				amount: mockAmount
+				amount: mockAmount,
+				allowanceBuffer: expirationWithinBuffer
 			});
 
 			expect(result).toBeFalsy();
@@ -654,19 +656,19 @@ describe('icrc.services', () => {
 			expect(result).toBeFalsy();
 		});
 
-		it('should return false when allowance call throws an error', async () => {
-			const err = new Error('Network error');
+		it('should thow an error when allowance call throws an error', async () => {
+			const err = new Error('test');
 			ledgerCanisterMock.allowance.mockRejectedValue(err);
 
-			const result = await hasSufficientIcrcAllowance({
-				identity: mockIdentity,
-				ledgerCanisterId: mockLedgerCanisterId,
-				owner: mockOwner,
-				spender: mockSpender,
-				amount: mockAmount
-			});
-
-			expect(result).toBeFalsy();
+			await expect(
+				hasSufficientIcrcAllowance({
+					identity: mockIdentity,
+					ledgerCanisterId: mockLedgerCanisterId,
+					owner: mockOwner,
+					spender: mockSpender,
+					amount: mockAmount
+				})
+			).rejects.toThrow(err);
 		});
 	});
 });
