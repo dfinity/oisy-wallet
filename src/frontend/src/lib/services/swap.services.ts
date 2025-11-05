@@ -9,7 +9,7 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -27,6 +27,7 @@ import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import {
 	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_HALF_MINUTE,
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
@@ -90,6 +91,31 @@ import {
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
 
+const checkNeedsApproval = async ({
+	identity,
+	ledgerCanisterId,
+	amount
+}: {
+	identity: Identity;
+	ledgerCanisterId: string;
+	amount: bigint;
+}): Promise<boolean> => {
+	try {
+		const isAllowanceSufficient = await hasSufficientIcrcAllowance({
+			identity,
+			ledgerCanisterId,
+			owner: identity.getPrincipal(),
+			spender: Principal.from(KONG_BACKEND_CANISTER_ID),
+			amount,
+			allowanceBuffer: NANO_SECONDS_IN_HALF_MINUTE
+		});
+
+		return !isAllowanceSufficient;
+	} catch (_: unknown) {
+		return true;
+	}
+};
+
 export const fetchKongSwap = async ({
 	identity,
 	progress,
@@ -127,17 +153,27 @@ export const fetchKongSwap = async ({
 				})
 		: undefined;
 
-	isSourceTokenIcrc2 &&
-		(await approve({
+	if (isSourceTokenIcrc2) {
+		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+		const isApprovalNeeded = await checkNeedsApproval({
 			identity,
 			ledgerCanisterId,
-			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-			amount: parsedSwapAmount + sourceTokenFee * 2n,
-			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-			spender: {
-				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
-			}
-		}));
+			amount: amountWithFees
+		});
+
+		if (isApprovalNeeded) {
+			await approve({
+				identity,
+				ledgerCanisterId,
+				amount: amountWithFees,
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				spender: {
+					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
+				}
+			});
+		}
+	}
 
 	await kongSwap({
 		identity,
@@ -456,15 +492,25 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
-			await approve({
+			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: parsedSwapAmount + sourceTokenFee * 2n,
-				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: { owner: pool.canisterId }
+				amount: amountWithFees
 			});
+
+			if (isApprovalNeeded) {
+				await approve({
+					identity,
+					ledgerCanisterId: sourceLedgerCanisterId,
+					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+					amount: parsedSwapAmount + sourceTokenFee * 2n,
+					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+					spender: { owner: pool.canisterId }
+				});
+			}
 
 			await depositFrom({
 				identity,
