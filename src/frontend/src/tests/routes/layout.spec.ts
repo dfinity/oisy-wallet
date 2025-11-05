@@ -1,5 +1,4 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
-import * as authBroadcastServices from '$lib/providers/auth-broadcast.providers';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
 import { authStore } from '$lib/stores/auth.store';
@@ -16,6 +15,10 @@ vi.mock('$lib/services/worker.auth.services', () => ({
 	AuthWorker: {
 		init: vi.fn()
 	}
+}));
+
+vi.mock('$lib/providers/auth-broadcast.providers', async (importActual) => ({
+	...(await importActual())
 }));
 
 describe('App Layout', () => {
@@ -134,12 +137,11 @@ describe('App Layout', () => {
 		});
 
 		it('should initialize a channel for auth synchronization', () => {
-			const spy = vi.fn();
+			const spy = vi
+				.spyOn(AuthBroadcastChannel.prototype, 'onLoginSuccess')
+				.mockImplementationOnce(vi.fn());
 
-			vi.spyOn(authBroadcastServices, 'AuthBroadcastChannel').mockReturnValueOnce({
-				onLoginSuccess: spy,
-				close: vi.fn()
-			} as unknown as AuthBroadcastChannel);
+			vi.spyOn(AuthBroadcastChannel.prototype, 'close').mockImplementationOnce(vi.fn());
 
 			expect(spy).not.toHaveBeenCalled();
 
