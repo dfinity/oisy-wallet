@@ -171,6 +171,7 @@ export const fetchKongSwap = async ({
 				identity,
 				ledgerCanisterId,
 				amount: amountWithFees,
+// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
 				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 				spender: {
 					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
