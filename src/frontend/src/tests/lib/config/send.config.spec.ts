@@ -1,8 +1,4 @@
-import {
-	allSendWizardSteps,
-	sendWizardSteps,
-	sendWizardStepsWithQrCodeScan
-} from '$lib/config/send.config';
+import { allSendWizardSteps, sendWizardStepsWithQrCodeScan } from '$lib/config/send.config';
 import { WizardStepsSend } from '$lib/enums/wizard-steps';
 import en from '$tests/mocks/i18n.mock';
 import type { WizardSteps } from '@dfinity/gix-components';
@@ -60,26 +56,6 @@ describe('send.config', () => {
 	const mockParams = {
 		i18n: en
 	};
-
-	describe('sendWizardSteps', () => {
-		it('should return the correct steps with expected text and state', () => {
-			const steps = sendWizardSteps(mockParams);
-
-			expect(steps).toStrictEqual(expectedSendConfig);
-		});
-
-		it('should return the correct steps with expected text and state when converting is false', () => {
-			const steps = sendWizardSteps({ ...mockParams, converting: false });
-
-			expect(steps).toStrictEqual(expectedSendConfig);
-		});
-
-		it('should return the correct steps with expected text and state when converting is true', () => {
-			const steps = sendWizardSteps({ ...mockParams, converting: true });
-
-			expect(steps).toStrictEqual(expectedConvertConfig);
-		});
-	});
 
 	describe('sendWizardStepsWithQrCodeScan', () => {
 		it('should return the correct steps with expected text and state', () => {

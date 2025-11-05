@@ -24,7 +24,7 @@ const sendWizardStepsFilterNetworks = ({
 	}
 ];
 
-export const sendWizardSteps = ({
+const sendWizardSteps = ({
 	i18n,
 	converting
 }: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
