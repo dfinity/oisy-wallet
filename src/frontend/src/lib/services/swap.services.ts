@@ -10,6 +10,7 @@ import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-t
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
