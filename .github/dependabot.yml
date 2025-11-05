@@ -25,6 +25,7 @@ updates:
       - dependency-type: all
     ignore:
       - dependency-name: '@dfinity/*'
+      - dependency-name: '@icp-sdk/*'
       - dependency-name: '@types/*'
       - dependency-name: 'typescript'
     open-pull-requests-limit: 10
