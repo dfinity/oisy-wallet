@@ -98,7 +98,7 @@ const checkNeedsApproval = async ({
 	spender
 }: {
 	identity: Identity;
-	ledgerCanisterId: string;
+	ledgerCanisterId: LedgerCanisterIdText;
 	amount: bigint;
 	spender: Principal;
 }): Promise<boolean> => {
