@@ -94,18 +94,20 @@ import { get } from 'svelte/store';
 const checkNeedsApproval = async ({
 	identity,
 	ledgerCanisterId,
-	amount
+	amount,
+	spender
 }: {
 	identity: Identity;
 	ledgerCanisterId: string;
 	amount: bigint;
+	spender: Principal;
 }): Promise<boolean> => {
 	try {
 		const isAllowanceSufficient = await hasSufficientIcrcAllowance({
 			identity,
 			ledgerCanisterId,
 			owner: identity.getPrincipal(),
-			spender: Principal.from(KONG_BACKEND_CANISTER_ID),
+			spender,
 			amount,
 			allowanceBuffer: NANO_SECONDS_IN_HALF_MINUTE
 		});
@@ -159,7 +161,8 @@ export const fetchKongSwap = async ({
 		const isApprovalNeeded = await checkNeedsApproval({
 			identity,
 			ledgerCanisterId,
-			amount: amountWithFees
+			amount: amountWithFees,
+			spender: Principal.from(KONG_BACKEND_CANISTER_ID)
 		});
 
 		if (isApprovalNeeded) {
@@ -497,7 +500,8 @@ export const fetchIcpSwap = async ({
 			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				amount: amountWithFees
+				amount: amountWithFees,
+				spender: pool.canisterId
 			});
 
 			if (isApprovalNeeded) {
