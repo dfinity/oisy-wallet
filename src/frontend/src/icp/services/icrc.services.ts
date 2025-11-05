@@ -350,6 +350,10 @@ export const loadDisabledIcrcTokensExchanges = async ({
 /**
  * Checks if the owner has sufficient allowance for the spender to execute a transaction.
  *
+ * The allowanceBuffer ensures the allowance won't expire while the transaction is being processed.
+ * For example, if the allowance expires in 10 seconds but the swap takes 20 seconds to complete,
+ * we should request a new approval instead of starting a transaction that will fail.
+ *
  * @returns `true` if allowance is sufficient and won't expire within the buffer period, `false` otherwise
  *
  */

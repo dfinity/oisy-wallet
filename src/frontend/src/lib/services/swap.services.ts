@@ -7,7 +7,7 @@ import type { Erc20Token } from '$eth/types/erc20';
 import { getCompactSignature, getSignParamsEIP712 } from '$eth/utils/eip712.utils';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
-import { approve, allowance as icrcAllowance } from '$icp/api/icrc-ledger.api';
+import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
 import { loadCustomTokens } from '$icp/services/icrc.services';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
@@ -52,7 +52,6 @@ import {
 	type KongSwapTokensStoreData
 } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
-import type { CanisterIdText } from '$lib/types/canister';
 import {
 	SwapErrorCodes,
 	SwapProvider,
@@ -128,31 +127,17 @@ export const fetchKongSwap = async ({
 				})
 		: undefined;
 
-	if (isSourceTokenIcrc2) {
-		// Amount to approve: swap amount + fees for approve and transfer
-		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
-
-		const isAllowanceSufficient = await checkForAllowance({
+	isSourceTokenIcrc2 &&
+		(await approve({
 			identity,
 			ledgerCanisterId,
-			owner: identity.getPrincipal(),
-			spender: Principal.from(KONG_BACKEND_CANISTER_ID),
-			amount: amountWithFees
-		});
-
-		if (!isAllowanceSufficient) {
-			await approve({
-				identity,
-				ledgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: amountWithFees,
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: {
-					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
-				}
-			});
-		}
-	}
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+			amount: parsedSwapAmount + sourceTokenFee * 2n,
+			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+			spender: {
+				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
+			}
+		}));
 
 	await kongSwap({
 		identity,
@@ -176,49 +161,6 @@ export const fetchKongSwap = async ({
 	}
 
 	await waitAndTriggerWallet();
-};
-
-/**
- * Checks if the owner has sufficient allowance for the spender to execute a transaction.
- *
- * @returns `true` if allowance is sufficient and won't expire within the buffer period, `false` otherwise
- *
- */
-export const checkForAllowance = async ({
-	identity,
-	ledgerCanisterId,
-	owner,
-	spender,
-	amount,
-	allowanceBuffer = 30_000_000_000n
-}: {
-	identity: Identity;
-	ledgerCanisterId: CanisterIdText;
-	owner: Principal;
-	spender: Principal;
-	amount: bigint;
-	allowanceBuffer?: bigint;
-}): Promise<boolean> => {
-	try {
-		const { allowance, expires_at } = await icrcAllowance({
-			identity,
-			ledgerCanisterId,
-			owner: { owner },
-			spender: { owner: spender }
-		});
-
-
-		console.log({allowance, expires_at});
-		
-
-		const expiredBuffer = nowInBigIntNanoSeconds() + allowanceBuffer;
-		const hasSufficientAllowance = allowance >= amount;
-		const isNotExpired = expires_at.length === 0 || expires_at[0] > expiredBuffer;
-
-		return hasSufficientAllowance && isNotExpired;
-	} catch (_: unknown) {
-		return false;
-	}
 };
 
 export const loadKongSwapTokens = async ({
