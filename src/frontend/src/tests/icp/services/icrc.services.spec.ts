@@ -1,13 +1,16 @@
 import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
+	hasSufficientIcrcAllowance,
 	loadCustomTokens,
 	loadDisabledIcrcTokensBalances,
 	loadDisabledIcrcTokensExchanges
 } from '$icp/services/icrc.services';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { TRACK_COUNT_IC_LOADING_ICRC_CANISTER_ERROR } from '$lib/constants/analytics.constants';
+import { ZERO } from '$lib/constants/app.constants';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as exchangeServices from '$lib/services/exchange.services';
 import { balancesStore } from '$lib/stores/balances.store';
@@ -503,6 +506,169 @@ describe('icrc.services', () => {
 					data: balance
 				}
 			});
+		});
+	});
+
+	describe('hasSufficientIcrcAllowance', () => {
+		const mockOwner = Principal.fromText('aaaaa-aa');
+		const mockSpender = Principal.fromText('l4lgk-raaaa-aaaar-qahpq-cai');
+		const mockAmount = 1_000_000n;
+		const mockNow = nowInBigIntNanoSeconds();
+
+		const ledgerCanisterMock = mock<IcrcLedgerCanister>();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			vi.spyOn(IcrcLedgerCanister, 'create').mockImplementation(() => ledgerCanisterMock);
+		});
+
+		it('should return true when allowance is sufficient and not expired', async () => {
+			const futureExpiration = mockNow + 60_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: 2_000_000n,
+				expires_at: [futureExpiration]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount
+			});
+
+			expect(result).toBeTruthy();
+		});
+
+		it('should return true when allowance is exactly equal to required amount', async () => {
+			const futureExpiration = mockNow + 60_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: mockAmount,
+				expires_at: [futureExpiration]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount
+			});
+
+			expect(result).toBeTruthy();
+		});
+
+		it('should return true when allowance has no expiration and no buffer is provided', async () => {
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: 2_000_000n,
+				expires_at: []
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount
+			});
+
+			expect(result).toBeTruthy();
+		});
+
+		it('should return false when allowance is insufficient', async () => {
+			const futureExpiration = mockNow + 60_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: 500_000n,
+				expires_at: [futureExpiration]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount
+			});
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false when allowance is expired', async () => {
+			const pastExpiration = mockNow - 10_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: 2_000_000n,
+				expires_at: [pastExpiration]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount,
+				allowanceBuffer: pastExpiration
+			});
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false when allowance expires within buffer period', async () => {
+			const expirationWithinBuffer = mockNow + 15_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: 2_000_000n,
+				expires_at: [expirationWithinBuffer]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount,
+				allowanceBuffer: expirationWithinBuffer
+			});
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should return false when allowance is zero', async () => {
+			const futureExpiration = mockNow + 60_000_000_000n;
+
+			ledgerCanisterMock.allowance.mockResolvedValue({
+				allowance: ZERO,
+				expires_at: [futureExpiration]
+			});
+
+			const result = await hasSufficientIcrcAllowance({
+				identity: mockIdentity,
+				ledgerCanisterId: mockLedgerCanisterId,
+				owner: mockOwner,
+				spender: mockSpender,
+				amount: mockAmount
+			});
+
+			expect(result).toBeFalsy();
+		});
+
+		it('should thow an error when allowance call throws an error', async () => {
+			const err = new Error('test');
+			ledgerCanisterMock.allowance.mockRejectedValue(err);
+
+			await expect(
+				hasSufficientIcrcAllowance({
+					identity: mockIdentity,
+					ledgerCanisterId: mockLedgerCanisterId,
+					owner: mockOwner,
+					spender: mockSpender,
+					amount: mockAmount
+				})
+			).rejects.toThrow(err);
 		});
 	});
 });

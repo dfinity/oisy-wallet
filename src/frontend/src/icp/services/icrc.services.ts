@@ -1,7 +1,7 @@
 import type { CustomToken, IcrcToken } from '$declarations/backend/declarations/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
-import { balance, metadata } from '$icp/api/icrc-ledger.api';
+import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
 import { buildIndexedDip20Tokens } from '$icp/services/dip20-tokens.services';
 import { buildIndexedIcpTokens } from '$icp/services/icp-tokens.services';
 import { buildIndexedIcrcCustomTokens } from '$icp/services/icrc-custom-tokens.services';
@@ -10,6 +10,7 @@ import { icrcDefaultTokensStore } from '$icp/stores/icrc-default-tokens.store';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcCkToken, IcInterface, IcToken } from '$icp/types/ic-token';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
+import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import {
 	buildIcrcCustomTokenMetadataPseudoResponse,
 	mapIcrcToken,
@@ -25,11 +26,13 @@ import { balancesStore } from '$lib/stores/balances.store';
 import { exchangeStore } from '$lib/stores/exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { AnonymousIdentity, type Identity } from '@dfinity/agent';
+import type { Principal } from '@dfinity/principal';
 import {
 	fromNullable,
 	isNullish,
@@ -342,4 +345,50 @@ export const loadDisabledIcrcTokensExchanges = async ({
 			: []),
 		...(icrcResult.status === 'fulfilled' && nonNullish(icrcResult.value) ? [icrcResult.value] : [])
 	]);
+};
+
+/**
+ * Checks if the owner has sufficient allowance for the spender to execute a transaction.
+ *
+ * The allowanceBuffer ensures the allowance won't expire while the transaction is being processed.
+ * For example, if the allowance expires in 10 seconds but the swap takes 20 seconds to complete,
+ * we should request a new approval instead of starting a transaction that will fail.
+ *
+ * @returns `true` if allowance is sufficient and won't expire within the buffer period, `false` otherwise
+ *
+ */
+export const hasSufficientIcrcAllowance = async ({
+	identity,
+	ledgerCanisterId,
+	owner,
+	spender,
+	amount,
+	allowanceBuffer
+}: {
+	identity: Identity;
+	ledgerCanisterId: CanisterIdText;
+	owner: Principal;
+	spender: Principal;
+	amount: bigint;
+	allowanceBuffer?: bigint;
+}): Promise<boolean> => {
+	const { allowance, expires_at } = await icrcAllowance({
+		identity,
+		ledgerCanisterId,
+		owner: { owner },
+		spender: { owner: spender },
+		certified: false
+	});
+
+	const hasSufficientAllowance = allowance >= amount;
+
+	if (isNullish(allowanceBuffer)) {
+		return hasSufficientAllowance;
+	}
+
+	const expiredBuffer = nowInBigIntNanoSeconds() + allowanceBuffer;
+	const expiredAt = fromNullable(expires_at);
+	const isNotExpired = nonNullish(expiredAt) && expiredAt > expiredBuffer;
+
+	return hasSufficientAllowance && isNotExpired;
 };
