@@ -1,6 +1,6 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
-import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -171,7 +171,8 @@ export const EIGHT_DECIMALS = 8;
 export const ZERO = 0n;
 
 // NFTs
-export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 1000; // 1 minute in milliseconds
+export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
+export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds

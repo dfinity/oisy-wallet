@@ -15,7 +15,7 @@
 	import {
 		allSendNftsWizardSteps,
 		allSendWizardSteps,
-		sendNftsWizardSteps,
+		sendNftsWizardStepsWithQrCodeScan,
 		sendWizardStepsWithQrCodeScan
 	} from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
@@ -80,7 +80,7 @@
 			? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 			: isNftsPage
 				? nonNullish($pageNft)
-					? sendNftsWizardSteps({ i18n: $i18n })
+					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
 				: allSendWizardSteps({ i18n: $i18n })
 	);
@@ -184,19 +184,15 @@
 
 	const selectNft = (nft: Nft) => {
 		selectedNft = nft;
+
 		const token = findNonFungibleToken({
 			tokens: $nonFungibleTokens,
 			networkId: nft.collection.network.id,
 			address: nft.collection.address
 		});
+
 		if (nonNullish(token)) {
-			loadTokenAndRun({
-				token,
-				// eslint-disable-next-line require-await
-				callback: async () => {
-					goToStep(WizardStepsSend.DESTINATION);
-				}
-			});
+			onSendToken(token);
 		}
 	};
 </script>

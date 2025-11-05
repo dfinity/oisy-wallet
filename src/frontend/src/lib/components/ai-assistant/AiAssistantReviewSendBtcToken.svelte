@@ -115,11 +115,6 @@
 			metadata: sharedTrackingEventMetadata
 		});
 
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
-
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -161,6 +156,12 @@
 
 		loading = true;
 
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			feeSatoshis: utxosFee.feeSatoshis.toString()
+		};
+
 		// Validate UTXOs before proceeding
 		try {
 			await validateBtcSend({
@@ -191,6 +192,7 @@
 
 			return;
 		}
+
 		try {
 			await sendBtc({
 				destination,

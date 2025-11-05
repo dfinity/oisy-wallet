@@ -1069,6 +1069,7 @@
 				"title": "Gestionar tokens",
 				"title_nft": "Gestionar colecciones de NFT",
 				"manage_list": "Gestionar tokens",
+				"manage_list_nft": "",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
 				"import_nft": "Importar colección de NFT",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Revisar Términos y Condiciones",
-			"review_updated_title": "Revisar Términos y Condiciones Actualizados",
-			"review_description": "Antes de que puedas usar OISY Wallet, debes revisar y aceptar nuestros Términos de Servicio y Política de Privacidad. Estos documentos explican las reglas de nuestro servicio y cómo protegemos tus datos.",
-			"review_updated_description": "Para continuar usando OISY Wallet, por favor revisa y acepta nuestros Términos de Servicio y Política de Privacidad actualizados. Estos cambios son importantes para mantener nuestro servicio seguro y en cumplimiento.",
-			"reject_warning": "Debes aceptar los Términos y Condiciones para continuar. No dudes en intentarlo de nuevo en cualquier momento.",
-			"i_have_accepted": "He leído y acepto los",
-			"i_have_accepted_updated": "He leído y acepto los actualizados",
-			"accept_and_continue": "Aceptar y continuar",
 			"updated_agreements_warning": "Hemos actualizado $agreements. Al usar $oisy_short, confirmas que has leído y aceptas las actualizaciones."
 		},
 		"error": {

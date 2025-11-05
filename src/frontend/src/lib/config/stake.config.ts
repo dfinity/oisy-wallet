@@ -1,4 +1,4 @@
-import { WizardStepsStake } from '$lib/enums/wizard-steps';
+import { WizardStepsStake, WizardStepsUnstake } from '$lib/enums/wizard-steps';
 import { StakeProvider } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -24,6 +24,26 @@ export const stakeWizardSteps = ({
 	},
 	{
 		name: WizardStepsStake.STAKING,
+		title: i18n.stake.text.executing_transaction
+	}
+];
+
+export const unstakeWizardSteps = ({
+	i18n,
+	tokenSymbol
+}: StakeWizardStepsParams): WizardSteps<WizardStepsUnstake> => [
+	{
+		name: WizardStepsUnstake.UNSTAKE,
+		title: replacePlaceholders(i18n.stake.text.unstake_token, {
+			$token_symbol: tokenSymbol
+		})
+	},
+	{
+		name: WizardStepsUnstake.REVIEW,
+		title: i18n.stake.text.review
+	},
+	{
+		name: WizardStepsUnstake.UNSTAKING,
 		title: i18n.stake.text.executing_transaction
 	}
 ];

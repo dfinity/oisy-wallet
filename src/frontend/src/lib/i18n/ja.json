@@ -1069,6 +1069,7 @@
 				"title": "トークンの管理",
 				"title_nft": "",
 				"manage_list": "トークンの管理",
+				"manage_list_nft": "",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
 				"import_nft": "",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": "",
 			"updated_agreements_warning": ""
 		},
 		"error": {

@@ -5,7 +5,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { EthAddress } from '$eth/types/address';
 import * as signerApi from '$lib/api/signer.api';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Contract } from 'ethers/contract';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';

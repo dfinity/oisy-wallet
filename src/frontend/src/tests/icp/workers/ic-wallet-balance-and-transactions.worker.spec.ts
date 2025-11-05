@@ -11,8 +11,8 @@ import { mapIcrcTransaction } from '$icp/utils/icrc-transactions.utils';
 import { initDip20WalletScheduler } from '$icp/workers/dip20-wallet.worker';
 import { initIcpWalletScheduler } from '$icp/workers/icp-wallet.worker';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
-import * as authClientApi from '$lib/api/auth-client.api';
 import { WALLET_TIMER_INTERVAL_MILLIS, ZERO } from '$lib/constants/app.constants';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataRequestIcp,
@@ -30,6 +30,19 @@ import {
 import { arrayOfNumberToUint8Array, jsonReplacer, toNullable } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
+
+vi.mock('$lib/providers/auth-client.providers', async (importActual) => {
+	const authClientProvider = vi.fn().mockReturnValue({
+		loadIdentity: vi.fn()
+	});
+
+	return {
+		...(await importActual()),
+		AuthClientProvider: Object.assign(authClientProvider, {
+			getInstance: authClientProvider
+		})
+	};
+});
 
 describe('ic-wallet-balance-and-transactions.worker', () => {
 	let spyGetBalance: MockInstance;
@@ -106,7 +119,8 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		vi.clearAllMocks();
 		vi.useFakeTimers();
 
-		vi.spyOn(authClientApi, 'loadIdentity').mockResolvedValue(mockIdentity);
+		const provider = AuthClientProvider.getInstance();
+		vi.mocked(provider.loadIdentity).mockResolvedValue(mockIdentity);
 
 		vi.spyOn(eventsUtils, 'emit');
 

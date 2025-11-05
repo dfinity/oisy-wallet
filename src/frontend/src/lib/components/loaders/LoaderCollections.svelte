@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';
@@ -14,7 +14,7 @@
 	import { enabledEvmNetworks } from '$evm/derived/networks.derived';
 	import { listCustomTokens } from '$lib/api/backend.api';
 	import IntervalLoader from '$lib/components/core/IntervalLoader.svelte';
-	import { NFT_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
+	import { COLLECTION_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -167,4 +167,4 @@
 	};
 </script>
 
-<IntervalLoader interval={NFT_TIMER_INTERVAL_MILLIS} {onLoad} />
+<IntervalLoader interval={COLLECTION_TIMER_INTERVAL_MILLIS} {onLoad} />

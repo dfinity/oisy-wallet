@@ -1069,6 +1069,7 @@
 				"title": "टोकन मैनेज करें",
 				"title_nft": "",
 				"manage_list": "टोकन मैनेज करें",
+				"manage_list_nft": "",
 				"list_settings": "सूची सेटिंग्स",
 				"import_token": "टोकन आयात करें",
 				"import_nft": "",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": "",
 			"updated_agreements_warning": ""
 		},
 		"error": {

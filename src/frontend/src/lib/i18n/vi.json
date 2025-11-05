@@ -1069,6 +1069,7 @@
 				"title": "Quản lý token",
 				"title_nft": "",
 				"manage_list": "Quản lý token",
+				"manage_list_nft": "",
 				"list_settings": "Cài đặt danh sách",
 				"import_token": "Nhập token",
 				"import_nft": "",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Xem Điều khoản & Điều kiện",
-			"review_updated_title": " Xem Điều khoản & Điều kiện đã cập nhật",
-			"review_description": "Trước khi sử dụng OISY Wallet, bạn phải xem và đồng ý với Điều khoản Dịch vụ và Chính sách Quyền riêng tư của chúng tôi. Các tài liệu này giải thích các quy tắc của dịch vụ và cách chúng tôi bảo vệ dữ liệu của bạn.",
-			"review_updated_description": "Để tiếp tục sử dụng OISY Wallet, vui lòng xem và đồng ý với Điều khoản Dịch vụ và Chính sách Quyền riêng tư đã cập nhật của chúng tôi. Những thay đổi này rất quan trọng để giữ cho dịch vụ của chúng tôi an toàn và tuân thủ.",
-			"reject_warning": "Bạn phải chấp nhận Điều khoản và Điều kiện để tiếp tục. Bạn có thể thử lại bất cứ lúc nào.",
-			"i_have_accepted": "Tôi đã đọc và đồng ý với",
-			"i_have_accepted_updated": "Tôi đã đọc và đồng ý với phiên bản cập nhật của",
-			"accept_and_continue": "Chấp nhận và tiếp tục",
 			"updated_agreements_warning": "Chúng tôi đã cập nhật $agreements. Bằng cách sử dụng $oisy_short, bạn xác nhận rằng bạn đã đọc và đồng ý với các cập nhật."
 		},
 		"error": {

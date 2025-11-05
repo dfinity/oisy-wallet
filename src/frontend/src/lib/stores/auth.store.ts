@@ -1,4 +1,4 @@
-import { createAuthClient, safeCreateAuthClient } from '$lib/api/auth-client.api';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { AuthClientNotInitializedError } from '$lib/types/errors';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
@@ -9,13 +9,13 @@ import {
 	INTERNET_IDENTITY_CANISTER_ID,
 	TEST
 } from '$lib/constants/app.constants';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import type { Identity } from '@dfinity/agent';
-import type { AuthClient } from '@dfinity/auth-client';
+import { type AuthClient } from '@icp-sdk/auth/client';
+import type { Identity } from '@icp-sdk/core/agent';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {
@@ -37,16 +37,18 @@ export interface AuthStore extends Readable<AuthStoreData> {
 }
 
 const initAuthStore = (): AuthStore => {
-	const { subscribe, set, update } = writable<AuthStoreData>({
+	const { subscribe, set } = writable<AuthStoreData>({
 		identity: undefined
 	});
 
-	// With different tabs opened of OISy in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
+	// With different tabs opened of OISY in the same browser, it may happen that separate authClient objects are out-of-sync among themselves.
 	// To avoid issues, we use this method to pick the most up-to-date authClient object, since the data are cached in IndexedDB.
 	const pickAuthClient = async (): Promise<AuthClient> => {
 		if (nonNullish(authClient) && (await authClient.isAuthenticated())) {
 			return authClient;
 		}
+
+		const { createAuthClient, safeCreateAuthClient } = AuthClientProvider.getInstance();
 
 		const refreshed = await createAuthClient();
 
@@ -62,7 +64,9 @@ const initAuthStore = (): AuthStore => {
 	};
 
 	const sync = async ({ forceSync }: { forceSync: boolean }) => {
-		authClient = forceSync ? await createAuthClient() : await pickAuthClient();
+		authClient = forceSync
+			? await AuthClientProvider.getInstance().createAuthClient()
+			: await pickAuthClient();
 
 		const isAuthenticated: boolean = await authClient.isAuthenticated();
 
@@ -99,11 +103,10 @@ const initAuthStore = (): AuthStore => {
 
 				await authClient.login({
 					maxTimeToLive: AUTH_MAX_TIME_TO_LIVE,
-					onSuccess: () => {
-						update((state: AuthStoreData) => ({
-							...state,
-							identity: authClient?.getIdentity()
-						}));
+					onSuccess: async () => {
+						await overwriteStoredIdentityKey();
+
+						set({ identity: authClient?.getIdentity() });
 
 						try {
 							// If the user has more than one tab open in the same browser,
@@ -129,17 +132,15 @@ const initAuthStore = (): AuthStore => {
 			}),
 
 		signOut: async () => {
-			const client: AuthClient = authClient ?? (await createAuthClient());
+			const client: AuthClient =
+				authClient ?? (await AuthClientProvider.getInstance().createAuthClient());
 
 			await client.logout();
 
 			// This fixes a "sign in -> sign-out -> sign in again" flow without reloading the window.
 			authClient = null;
 
-			update((state: AuthStoreData) => ({
-				...state,
-				identity: null
-			}));
+			set({ identity: null });
 		},
 
 		/**

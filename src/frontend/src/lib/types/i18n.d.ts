@@ -868,6 +868,7 @@ interface I18nTokens {
 			title: string;
 			title_nft: string;
 			manage_list: string;
+			manage_list_nft: string;
 			list_settings: string;
 			import_token: string;
 			import_nft: string;
@@ -1329,17 +1330,7 @@ interface I18nCarousel {
 }
 
 interface I18nAgreements {
-	text: {
-		review_title: string;
-		review_updated_title: string;
-		review_description: string;
-		review_updated_description: string;
-		reject_warning: string;
-		i_have_accepted: string;
-		i_have_accepted_updated: string;
-		accept_and_continue: string;
-		updated_agreements_warning: string;
-	};
+	text: { updated_agreements_warning: string };
 	error: { cannot_update_user_agreements: string };
 }
 

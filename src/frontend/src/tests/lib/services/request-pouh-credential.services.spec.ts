@@ -8,8 +8,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile, mockUserProfileVersion } from '$tests/mocks/user-profile.mock';
 import { toastsStore } from '@dfinity/gix-components';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { Principal } from '@dfinity/principal';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 

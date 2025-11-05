@@ -1069,6 +1069,7 @@
 				"title": "Gerir tokens",
 				"title_nft": "",
 				"manage_list": "Gerir tokens",
+				"manage_list_nft": "",
 				"list_settings": "Configurações da lista",
 				"import_token": "Importar token",
 				"import_nft": "",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Revise os Termos e Condições",
-			"review_updated_title": "Revise os Termos e Condições atualizados",
-			"review_description": "Antes de usar a Carteira OISY, você deve revisar e concordar com nossos Termos de Serviço e Política de Privacidade. Esses documentos explicam as regras do nosso serviço e como protegemos seus dados.",
-			"review_updated_description": "Para continuar usando a Carteira OISY, revise e concorde com nossos Termos de Serviço e Política de Privacidade atualizados. Essas alterações são importantes para manter nosso serviço seguro e em conformidade.",
-			"reject_warning": "Você deve aceitar os Termos e Condições para prosseguir. Sinta-se à vontade para tentar novamente quando quiser.",
-			"i_have_accepted": "Li e concordo com os",
-			"i_have_accepted_updated": "Li e concordo com os atualizados",
-			"accept_and_continue": "Aceite e continue",
 			"updated_agreements_warning": "Atualizamos $agreements. Ao usar $oisy_short, você confirma que leu e concorda com as atualizações."
 		},
 		"error": {
