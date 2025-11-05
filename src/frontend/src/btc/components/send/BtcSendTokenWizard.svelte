@@ -133,6 +133,12 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: `${networkId.description}`,
+			feeSatoshis: utxosFee.feeSatoshis.toString()
+		};
+
 		if (BTC_EXTENSION_FEATURE_FLAG_ENABLED) {
 			// Validate UTXOs before proceeding
 			try {
@@ -151,10 +157,7 @@
 
 				trackEvent({
 					name: TRACK_COUNT_BTC_VALIDATION_ERROR,
-					metadata: {
-						token: $sendToken.symbol,
-						network: `${networkId?.description ?? 'unknown'}`
-					}
+					metadata: sendTrackingEventMetadata
 				});
 
 				// go back to the previous step so the user can correct/ try again
@@ -163,6 +166,7 @@
 				return;
 			}
 		}
+
 		try {
 			progress(ProgressStepsSendBtc.SEND);
 			await sendBtc({
@@ -176,10 +180,7 @@
 
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			progress(ProgressStepsSendBtc.DONE);
@@ -188,10 +189,7 @@
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_BTC_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: `${networkId.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
