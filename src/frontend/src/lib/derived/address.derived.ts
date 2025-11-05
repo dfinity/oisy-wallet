@@ -51,7 +51,7 @@ export const solAddressLocalnetNotLoaded: Readable<boolean> = derived(
 
 export const btcAddressMainnet: Readable<OptionBtcAddress> = derived(
 	[btcAddressMainnetStore],
-	([$btcAddressMainnetStore]) => mapAddress<BtcAddress>($btcAddressMainnetStore)
+	([$btcAddressMainnetStore]) => 'bc1qk8nmd4y4lzpxenkmvrck04nrdpctyfs9y7fw3e'
 );
 
 export const btcAddressTestnet: Readable<OptionBtcAddress> = derived(
@@ -71,7 +71,7 @@ export const ethAddress: Readable<OptionEthAddress> = derived(
 
 export const solAddressMainnet: Readable<OptionSolAddress> = derived(
 	[solAddressMainnetStore],
-	([$solAddressMainnetStore]) => mapAddress<SolAddress>($solAddressMainnetStore)
+	([$solAddressMainnetStore]) => '6t1RMTVVUVEjkxA758YMKR9Kwc9YuA3W79LCuqnctLNT'
 );
 
 export const solAddressDevnet: Readable<OptionSolAddress> = derived(
