@@ -6,6 +6,15 @@ interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
 }
 
+const sendWizardStepsQrCodeScan = ({
+	i18n
+}: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
+	{
+		name: WizardStepsSend.QR_CODE_SCAN,
+		title: i18n.send.text.scan_qr
+	}
+];
+
 export const sendWizardSteps = ({
 	i18n,
 	converting
@@ -32,10 +41,7 @@ export const sendWizardStepsWithQrCodeScan = (
 	params: SendWizardStepsParams
 ): WizardSteps<WizardStepsSend> => [
 	...sendWizardSteps(params),
-	{
-		name: WizardStepsSend.QR_CODE_SCAN,
-		title: params.i18n.send.text.scan_qr
-	}
+	...sendWizardStepsQrCodeScan(params)
 ];
 
 export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
