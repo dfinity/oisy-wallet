@@ -80,7 +80,7 @@
 	onclick={onClick}
 >
 	<span
-		class="relative block aspect-square overflow-hidden rounded-xl bg-secondary-alt"
+		class="relative block aspect-square h-full w-full overflow-hidden rounded-xl bg-secondary-alt"
 		class:opacity-50={disabled}
 	>
 		<NftDisplayGuard
@@ -131,7 +131,7 @@
 		</span>
 	</span>
 
-	<span class="flex w-full flex-col gap-1 p-2" class:text-disabled={disabled}>
+	<span class="flex w-full flex-col gap-1 px-2 pb-2" class:text-disabled={disabled}>
 		<span class="truncate text-sm font-bold" class:text-primary={!disabled}>
 			{withCollectionLabel ? nft.collection.name : nft.name}
 		</span>
