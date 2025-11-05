@@ -15,7 +15,7 @@
 	import {
 		allSendNftsWizardSteps,
 		allSendWizardSteps,
-		sendNftsWizardSteps,
+		sendNftsWizardStepsWithQrCodeScan,
 		sendWizardStepsWithQrCodeScan
 	} from '$lib/config/send.config';
 	import { SEND_TOKENS_MODAL } from '$lib/constants/test-ids.constants';
@@ -80,7 +80,7 @@
 			? sendWizardStepsWithQrCodeScan({ i18n: $i18n })
 			: isNftsPage
 				? nonNullish($pageNft)
-					? sendNftsWizardSteps({ i18n: $i18n })
+					? sendNftsWizardStepsWithQrCodeScan({ i18n: $i18n })
 					: allSendNftsWizardSteps({ i18n: $i18n })
 				: allSendWizardSteps({ i18n: $i18n })
 	);
