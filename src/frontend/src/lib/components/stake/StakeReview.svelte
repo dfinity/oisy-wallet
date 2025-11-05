@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import { getContext, type Snippet } from 'svelte';
 	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import SendTokenReview from '$lib/components/tokens/SendTokenReview.svelte';
@@ -14,11 +15,12 @@
 
 	interface Props {
 		amount?: OptionAmount;
-		destination: Address;
+		destination?: Address;
 		disabled?: boolean;
 		network?: Snippet;
 		fee?: Snippet;
 		provider?: Snippet;
+		subtitle?: Snippet;
 		onBack: () => void;
 		onStake: () => void;
 	}
@@ -30,6 +32,7 @@
 		network,
 		fee,
 		provider,
+		subtitle,
 		onBack,
 		onStake
 	}: Props = $props();
@@ -38,15 +41,18 @@
 </script>
 
 <ContentWithToolbar>
-	<SendTokenReview exchangeRate={$sendTokenExchangeRate} sendAmount={amount} token={$sendToken}>
-		{#snippet subtitle()}
-			{$i18n.stake.text.stake_review_subtitle}
-		{/snippet}
-	</SendTokenReview>
+	<SendTokenReview
+		exchangeRate={$sendTokenExchangeRate}
+		sendAmount={amount}
+		{subtitle}
+		token={$sendToken}
+	/>
 
-	<div class="mb-4">
-		<SendReviewDestination {destination} />
-	</div>
+	{#if nonNullish(destination)}
+		<div class="mb-4">
+			<SendReviewDestination {destination} />
+		</div>
+	{/if}
 
 	{@render network?.()}
 

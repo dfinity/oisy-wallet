@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { EthAddress } from '$eth/types/address';
@@ -37,6 +38,8 @@ import {
 	SWAP_MODE,
 	SWAP_SIDE
 } from '$lib/constants/swap.constants';
+import { exchanges } from '$lib/derived/exchange.derived';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { swapProviders } from '$lib/providers/swap.providers';
 import { trackEvent } from '$lib/services/analytics.services';
@@ -65,6 +68,7 @@ import {
 	type VeloraQuoteParams
 } from '$lib/types/swap';
 import { toCustomToken } from '$lib/utils/custom-token.utils';
+import { formatToken } from '$lib/utils/format.utils';
 import { isNetworkIdICP } from '$lib/utils/network.utils';
 import { parseToken } from '$lib/utils/parse.utils';
 import {
@@ -276,10 +280,46 @@ const fetchSwapAmountsICP = async ({
 		)
 	);
 
+	const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
+
+	const trackEventBaseParams = {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: (sourceToken as IcToken).ledgerCanisterId,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: (destinationToken as IcToken).ledgerCanisterId,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard,
+		token2_id: String(destinationToken.id),
+		...(nonNullish(sourceTokenUsdValue) && {
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
+	};
+
 	const mappedProvidersResults = enabledProviders.reduce<SwapMappedResult[]>(
 		(acc, provider, index) => {
 			const result = settledResults[index];
 			if (result.status !== 'fulfilled') {
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'error',
+						result_error: result.reason.message
+					}
+				});
+
 				return acc;
 			}
 
@@ -291,6 +331,25 @@ const fetchSwapAmountsICP = async ({
 			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
 				mapped = provider.mapQuoteResult({ swap, slippage });
+			}
+
+			if (nonNullish(mapped)) {
+				const destinationTokenToDecimals = formatToken({
+					value: mapped.receiveAmount,
+					unitName: destinationToken.decimals
+				});
+
+				trackEvent({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: {
+						...trackEventBaseParams,
+						event_subcontext: provider.key,
+						result_status: 'success',
+						...(nonNullish(destinationUsdValue) && {
+							token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+						})
+					}
+				});
 			}
 
 			if (mapped && Number(mapped.receiveAmount) > 0) {
@@ -664,21 +723,92 @@ const fetchVeloraSwapAmount = async ({
 		partner: OISY_URL_HOSTNAME
 	};
 
+	const sourceTokenUsdValue = get(exchanges)?.[sourceToken.id]?.usd;
+	const sourceTokenToDecimals = formatToken({
+		value: amount,
+		unitName: sourceToken.decimals
+	});
+
+	const trackEventBaseParams = {
+		event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+		event_subcontext: SwapProvider.VELORA,
+		token_symbol: sourceToken.symbol,
+		token_network: sourceToken.network.name,
+		token_address: sourceToken.address,
+		token_name: sourceToken.name,
+		token_standard: sourceToken.standard,
+		token_id: String(sourceToken.id),
+		token2_symbol: destinationToken.symbol,
+		token2_network: destinationToken.network.name,
+		token2_address: destinationToken.address,
+		token2_name: destinationToken.name,
+		token2_standard: destinationToken.standard,
+		token2_id: String(destinationToken.id),
+		...(nonNullish(sourceTokenUsdValue) && {
+			token_usd_value: `${sourceTokenUsdValue * Number(sourceTokenToDecimals)}`
+		})
+	};
+
 	try {
 		const data = await sdk.quote.getQuote(
 			srcChainId !== destChainId ? { ...baseParams, destChainId: Number(destChainId) } : baseParams
 		);
 
+		const destinationUsdValue = get(exchanges)?.[destinationToken.id]?.usd;
+
 		if ('delta' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.delta.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					event_type: 'delta',
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
+				}
+			});
 			return mapVeloraSwapResult(data);
 		}
 
 		if ('market' in data) {
+			const destinationTokenToDecimals = formatToken({
+				value: BigInt(data.market.destAmount),
+				unitName: destinationToken.decimals
+			});
+
+			trackEvent({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: {
+					...trackEventBaseParams,
+					result_status: 'success',
+					event_type: 'market',
+					...(nonNullish(destinationUsdValue) && {
+						token2_usd_value: `${destinationUsdValue * Number(destinationTokenToDecimals)}`
+					})
+				}
+			});
 			return mapVeloraMarketSwapResult(data.market);
 		}
 
 		return null;
-	} catch (_: unknown) {
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+		trackEvent({
+			name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+			metadata: {
+				...trackEventBaseParams,
+				result_status: 'error',
+				result_error: errorMessage
+			}
+		});
+
 		return null;
 	}
 };
@@ -741,11 +871,11 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
 	destinationNetwork,
 	userAddress,
 	gas,
+	isGasless,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
@@ -763,7 +893,11 @@ export const fetchVeloraDeltaSwap = async ({
 	const deltaContract = await sdk.delta.getDeltaContract();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
+		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
+		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
+		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
+		quoteAmount: BigInt(swapDetails.destAmount),
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -771,33 +905,58 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	await approveToken({
-		token: sourceToken,
-		from: userAddress,
-		to: deltaContract,
-		amount: parsedSwapAmount,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		shouldSwapWithApproval: true,
-		maxPriorityFeePerGas,
-		progress,
-		progressSteps: ProgressStepsSwap
-	});
+	let signableOrderData;
 
-	progress(ProgressStepsSwap.SWAP);
-
-	const signableOrderData = await sdk.delta.buildDeltaOrder({
+	const deltaOrderBaseParams = {
 		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
-		srcAmount: `${parsedSwapAmount}`,
+		srcAmount: parsedSwapAmount.toString(),
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME
-	});
+	};
+
+	if (isGasless) {
+		progress(ProgressStepsSwap.APPROVE);
+
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			...deltaOrderBaseParams,
+			deadline,
+			nonce,
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
 

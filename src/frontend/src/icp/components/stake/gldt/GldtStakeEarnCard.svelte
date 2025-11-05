@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import {
-		enabledIcrcTokens,
 		icrcTokens,
 		icrcCustomTokensNotInitialized,
 		icrcCustomTokensInitialized
 	} from '$icp/derived/icrc.derived';
 	import { loadCustomTokens } from '$icp/services/icrc.services';
+	import type { IcToken } from '$icp/types/ic-token';
 	import { setCustomToken } from '$icp-eth/services/custom-token.services';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
@@ -29,7 +29,11 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { calculateTokenUsdAmount, getTokenDisplaySymbol } from '$lib/utils/token.utils';
 
-	let gldtToken = $derived($enabledIcrcTokens.find((token) => isGLDTToken(token)));
+	interface Props {
+		gldtToken?: IcToken;
+	}
+
+	let { gldtToken }: Props = $props();
 
 	let gldtTokenBalance = $derived(
 		nonNullish(gldtToken) ? ($balancesStore?.[gldtToken?.id]?.data ?? ZERO) : ZERO
@@ -67,23 +71,27 @@
 
 <StakeContentCard>
 	{#snippet content()}
-		{#if nonNullish(gldtToken)}
-			<span class="font-bold">
-				{formatCurrency({
-					value: gldtTokenUsdBalance,
-					currency: $currentCurrency,
-					exchangeRate: $currencyExchangeStore,
-					language: $currentLanguage
-				})}
-			</span>
+		<div class="text-sm">{$i18n.stake.text.earning_potential}</div>
 
-			<span class="text-tertiary">
-				{formatToken({
-					value: gldtTokenBalance,
-					unitName: gldtToken.decimals
-				})}
-				{gldtTokenSymbol}
-			</span>
+		{#if nonNullish(gldtToken)}
+			<div class="flex gap-2">
+				<span class="font-bold">
+					{formatCurrency({
+						value: gldtTokenUsdBalance,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage
+					})}
+				</span>
+
+				<span class="text-tertiary">
+					{formatToken({
+						value: gldtTokenBalance,
+						unitName: gldtToken.decimals
+					})}
+					{gldtTokenSymbol}
+				</span>
+			</div>
 		{:else if $icrcCustomTokensInitialized}
 			<span class="text-tertiary">
 				{replacePlaceholders($i18n.stake.text.enable_token_text, {

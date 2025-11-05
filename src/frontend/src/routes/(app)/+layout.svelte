@@ -68,6 +68,7 @@
 			class="relative flex flex-col pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
+			class:overflow-x-hidden={$authNotSignedIn}
 		>
 			<Header />
 
@@ -77,7 +78,7 @@
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
-									<div class="hidden xl:block" transition:fade>
+									<div transition:fade>
 										<DappsCarousel />
 									</div>
 								</Responsive>
@@ -95,7 +96,7 @@
 				</SplitPane>
 
 				{#if !$aiAssistantConsoleOpen}
-					<div class="z-3 fixed bottom-16 right-4 block">
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}

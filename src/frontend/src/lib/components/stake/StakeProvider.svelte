@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { getContext } from 'svelte';
-	import IconLineChart from '$lib/components/icons/lucide/IconLineChart.svelte';
+	import type { Snippet } from 'svelte';
 	import ExternalLink from '$lib/components/ui/ExternalLink.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import { stakeProvidersConfig } from '$lib/config/stake.config';
@@ -9,18 +8,15 @@
 		STAKE_PROVIDER_LOGO
 	} from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { StakeProvider } from '$lib/types/stake';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		provider: StakeProvider;
-		currentApy?: number;
+		content: Snippet;
 	}
 
-	let { provider, currentApy = 0 }: Props = $props();
-
-	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
+	let { provider, content }: Props = $props();
 </script>
 
 <div class="my-4 rounded-lg border border-disabled bg-secondary px-2 py-3">
@@ -51,17 +47,7 @@
 		</ExternalLink>
 	</div>
 
-	<div class="mt-3 flex px-4">
-		<div class="mt-0.5"><IconLineChart /></div>
-
-		<div class="ml-3 w-full text-sm">
-			<div class="mb-1 font-bold">
-				{replacePlaceholders($i18n.stake.text.current_apy, { $apy: `${currentApy}` })}
-			</div>
-
-			<div class="text-tertiary">
-				{replacePlaceholders($i18n.stake.text.current_apy_info, { $token: $sendTokenSymbol })}
-			</div>
-		</div>
+	<div class="mt-4 flex flex-col px-4">
+		{@render content()}
 	</div>
 </div>

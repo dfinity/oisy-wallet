@@ -1,14 +1,14 @@
+import type { NetworkId } from '$lib/types/network';
 import type { Nft } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isNullish } from '@dfinity/utils';
 import { writable, type Readable } from 'svelte/store';
 
 export type NftStoreData = Nft[] | undefined;
 
 export interface NftStore extends Readable<NftStoreData> {
 	addAll: (nfts: Nft[]) => void;
-	removeSelectedNfts: (nfts: Nft[]) => void;
-	updateSelectedNfts: (nfts: Nft[]) => void;
+	setAllByNetwork: (params: { nfts: Nft[]; networkId: NetworkId }) => void;
 	resetAll: () => void;
 }
 
@@ -40,47 +40,21 @@ const initNftStore = (): NftStore => {
 				return [...oldNfts, ...nfts];
 			});
 		},
-		removeSelectedNfts: (nfts: Nft[]) => {
+		setAllByNetwork: ({ networkId, nfts }: { networkId: NetworkId; nfts: Nft[] }) => {
 			update((currentNfts) => {
 				if (isNullish(currentNfts)) {
-					return currentNfts;
+					return nfts;
 				}
 
-				return currentNfts.filter(
-					(currentNft) =>
-						!nfts.some(
-							(nftToRemove) =>
-								currentNft.id === nftToRemove.id &&
-								areAddressesEqual({
-									address1: currentNft.collection.address,
-									address2: nftToRemove.collection.address,
-									networkId: currentNft.collection.network.id
-								}) &&
-								currentNft.collection.network.id === nftToRemove.collection.network.id
-						)
+				const oldNfts = currentNfts.filter(
+					({
+						collection: {
+							network: { id: nftNetworkId }
+						}
+					}) => nftNetworkId !== networkId
 				);
-			});
-		},
-		updateSelectedNfts: (nfts: Nft[]) => {
-			update((currentNfts) => {
-				if (isNullish(currentNfts)) {
-					return currentNfts;
-				}
 
-				return currentNfts.map((currentNft) => {
-					const updatedNft = nfts.find(
-						(nft) =>
-							nft.id === currentNft.id &&
-							areAddressesEqual({
-								address1: nft.collection.address,
-								address2: currentNft.collection.address,
-								networkId: currentNft.collection.network.id
-							}) &&
-							nft.collection.network.id === currentNft.collection.network.id
-					);
-
-					return nonNullish(updatedNft) ? updatedNft : currentNft;
-				});
+				return [...oldNfts, ...nfts];
 			});
 		},
 		resetAll: () => set(undefined)

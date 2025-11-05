@@ -2,6 +2,7 @@ import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transaction from '$lib/components/transactions/Transaction.svelte';
 import { contactsStore } from '$lib/stores/contacts.store';
+import { nftStore } from '$lib/stores/nft.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
@@ -134,21 +135,32 @@ describe('Transaction', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
 	});
 
-	it('should not render amount for ERC-721 tokens', () => {
-		const { queryByText } = render(Transaction, {
-			displayAmount: 999n,
-			type: 'send',
-			status: 'confirmed',
-			token: NFT_TEST_TOKEN,
-			iconType: 'transaction',
-			to: '0xaddr',
-			children: mockSnippet
-		});
+	it('should render NFT logo in token icon mode when token is non-fungible and nft is found', () => {
+		const { container, getByLabelText, getByText, queryByText, getByAltText } = render(
+			Transaction,
+			{
+				type: 'receive',
+				status: 'unconfirmed',
+				token: NFT_TEST_TOKEN,
+				iconType: 'token',
+				from: '0xaddr',
+				tokenId: 1,
+				children: mockSnippet
+			}
+		);
 
-		expect(queryByText(/MBeans/)).toBeNull();
+		expect(getByLabelText('receive')).toBeInTheDocument(); // badge
+		expect(getByText(/^from$/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
+		expect(queryByText(/MBeans/)).toBeNull(); // no amount shown for NFT
+		expect(
+			getByAltText(replacePlaceholders(en.core.alt.logo, { $name: NFT_TEST_TOKEN.name }))
+		).toBeInTheDocument();
 	});
 
-	it('should render NFT logo in token icon mode when token is non-fungible and nft is found', () => {
+	it('should render NFT logo in token icon mode when token is non-fungible and nft is not found but has metadata', () => {
+		nftStore.resetAll();
+
 		const { container, getByLabelText, getByText, queryByText, getByAltText } = render(
 			Transaction,
 			{

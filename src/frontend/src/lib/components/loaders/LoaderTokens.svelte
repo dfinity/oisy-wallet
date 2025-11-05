@@ -88,8 +88,8 @@
 	});
 </script>
 
-<LoaderCollections>
-	<LoaderNfts>
-		{@render children()}
-	</LoaderNfts>
-</LoaderCollections>
+{@render children()}
+
+<LoaderCollections />
+
+<LoaderNfts />

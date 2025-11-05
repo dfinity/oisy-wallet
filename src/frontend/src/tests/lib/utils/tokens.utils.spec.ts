@@ -46,8 +46,13 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
-import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockIndexCanisterId,
+	mockValidIcCkToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
@@ -458,19 +463,23 @@ describe('tokens.utils', () => {
 	});
 
 	describe('filterTokens', () => {
+		const tokens = [
+			...mockTokens,
+			mockValidIcrcToken,
+			mockValidIcCkToken,
+			mockValidErc20Token,
+			mockValidSplToken
+		];
+
 		it('should filter tokens by symbol correctly when filter is provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'BTC' })).toStrictEqual([
-				BTC_MAINNET_TOKEN
-			]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'PEPE' })).toStrictEqual([]);
+			expect(filterTokens({ tokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'PEPE' })).toStrictEqual([]);
 		});
 
 		it('should filter tokens by name correctly when filter is provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: 'Bit' })).toStrictEqual([
-				BTC_MAINNET_TOKEN
-			]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
 		});
 
 		it('should filter tokens by twin token symbol correctly when filter is provided', () => {
@@ -480,7 +489,89 @@ describe('tokens.utils', () => {
 		});
 
 		it('should filter tokens correctly when filter is not provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
+			expect(filterTokens({ tokens, filter: '' })).toStrictEqual(tokens);
+		});
+
+		it('should filter by address for ERC tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidErc20Token.address })).toStrictEqual([
+				mockValidErc20Token
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.toLowerCase() })
+			).toStrictEqual([mockValidErc20Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.toUpperCase() })
+			).toStrictEqual([mockValidErc20Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.slice(0, 5) })
+			).toStrictEqual([mockValidErc20Token]);
+		});
+
+		it('should filter by address for SPL tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidSplToken.address })).toStrictEqual([
+				mockValidSplToken
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidSplToken.address.toLowerCase() })
+			).toStrictEqual([]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidSplToken.address.toUpperCase() })
+			).toStrictEqual([]);
+
+			expect(filterTokens({ tokens, filter: mockValidSplToken.address.slice(0, 5) })).toStrictEqual(
+				[mockValidSplToken]
+			);
+		});
+
+		it('should filter by canister IDs for IC tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId })).toStrictEqual([
+				mockValidIcrcToken,
+				mockValidIcCkToken
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toLowerCase() })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toUpperCase() })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.slice(0, 5) })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			const mockToken = { ...mockValidIcrcToken, indexCanisterId: mockIndexCanisterId };
+
+			expect(
+				filterTokens({ tokens: [...tokens, mockToken], filter: mockToken.indexCanisterId })
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.toLowerCase()
+				})
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.toUpperCase()
+				})
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.slice(0, 5)
+				})
+			).toStrictEqual([mockToken]);
 		});
 
 		it('should not filter by network', () => {

@@ -32,7 +32,7 @@
 
 <div style="--input-font-size: var(--text-base)" class="w-full">
 	<div
-		class="w-full rounded-lg bg-brand-subtle-10 p-4 pb-6 pt-4 text-sm md:p-6 md:text-base md:font-bold"
+		class="w-full rounded-lg bg-brand-subtle-10 p-4 pt-4 pb-6 text-sm md:p-6 md:text-base md:font-bold"
 	>
 		{$i18n.contact.fields.name}
 		<InputText

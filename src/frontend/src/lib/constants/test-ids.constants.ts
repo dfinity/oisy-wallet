@@ -293,12 +293,6 @@ export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button'
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
 
 // Agreements
-export const AGREEMENTS_MODAL = 'agreements-modal';
-export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
-export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
-export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
-	'agreements-modal-checkbox-license-agreement';
-export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
 export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 
@@ -315,5 +309,5 @@ export const STAKE_PROVIDER_LOGO = 'stake-provider-logo';
 export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 
 // PWA
-export const PWA_WARNING_BANNER_TEST_ID = 'pwa-warning-banner';
-export const PWA_WARNING_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-warning-banner-close-button';
+export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
+export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';

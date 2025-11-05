@@ -356,6 +356,32 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1043,6 +1069,7 @@
 				"title": "トークンの管理",
 				"title_nft": "",
 				"manage_list": "トークンの管理",
+				"manage_list_nft": "",
 				"list_settings": "リスト設定",
 				"import_token": "トークンをインポート",
 				"import_nft": "",
@@ -1108,6 +1135,8 @@
 			"title": "NFT",
 			"title_empty": "あなたのNFTがここに表示されます",
 			"description_empty": "まだNFTを受け取っていないようです",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "グループ化",
 			"as_plain_list": "リスト表示",
 			"by_collection": "コレクションでグループ化",
@@ -1626,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": "",
 			"updated_agreements_warning": ""
 		},
 		"error": {
@@ -1711,16 +1732,31 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": ""
 		}
 	},
 	"temporal": {

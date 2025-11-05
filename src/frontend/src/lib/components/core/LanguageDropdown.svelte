@@ -59,7 +59,7 @@
 							styleClass="py-1 rounded-md font-normal text-primary underline-none pl-0.5 min-w-28"
 							transparent
 						>
-							<span class="pt-0.75 w-[20px] text-brand-primary">
+							<span class="w-[20px] pt-0.75 text-brand-primary">
 								{#if $currentLanguage === langVal}
 									<IconCheck size="20" />
 								{/if}

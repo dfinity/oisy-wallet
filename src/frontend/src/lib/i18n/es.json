@@ -356,6 +356,32 @@
 					"text": "Hola, internet que se escribe solo",
 					"call_to_action": "Saber más"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1043,6 +1069,7 @@
 				"title": "Gestionar tokens",
 				"title_nft": "Gestionar colecciones de NFT",
 				"manage_list": "Gestionar tokens",
+				"manage_list_nft": "",
 				"list_settings": "Configuración de la lista",
 				"import_token": "Importar token",
 				"import_nft": "Importar colección de NFT",
@@ -1108,6 +1135,8 @@
 			"title": "NFTs",
 			"title_empty": "Tus NFTs aparecerán aquí",
 			"description_empty": "Parece que todavía no has recibido NFTs",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Agrupación",
 			"as_plain_list": "Mostrar como lista simple",
 			"by_collection": "Agrupar por colección",
@@ -1626,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Revisar Términos y Condiciones",
-			"review_updated_title": "Revisar Términos y Condiciones Actualizados",
-			"review_description": "Antes de que puedas usar OISY Wallet, debes revisar y aceptar nuestros Términos de Servicio y Política de Privacidad. Estos documentos explican las reglas de nuestro servicio y cómo protegemos tus datos.",
-			"review_updated_description": "Para continuar usando OISY Wallet, por favor revisa y acepta nuestros Términos de Servicio y Política de Privacidad actualizados. Estos cambios son importantes para mantener nuestro servicio seguro y en cumplimiento.",
-			"reject_warning": "Debes aceptar los Términos y Condiciones para continuar. No dudes en intentarlo de nuevo en cualquier momento.",
-			"i_have_accepted": "He leído y acepto los",
-			"i_have_accepted_updated": "He leído y acepto los actualizados",
-			"accept_and_continue": "Aceptar y continuar",
 			"updated_agreements_warning": "Hemos actualizado $agreements. Al usar $oisy_short, confirmas que has leído y aceptas las actualizaciones."
 		},
 		"error": {
@@ -1711,16 +1732,31 @@
 	"stake": {
 		"text": {
 			"stake": "",
+			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
 			"executing_transaction": "",
 			"unsupported_token_staking": "",
 			"provider": "",
+			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": ""
 		}
 	},
 	"temporal": {

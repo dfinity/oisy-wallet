@@ -13,8 +13,8 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { fungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -58,18 +58,15 @@
 	// Token list for enabling when filtering
 	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
 
-	const updateFilterList = ({
-		filter,
-		selectedNetwork
-	}: {
-		filter: string;
-		selectedNetwork?: Network;
-	}) => {
+	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
-				getDisabledOrModifiedTokens({ $allTokens, modifiedTokens, selectedNetwork })
+				getDisabledOrModifiedTokens({
+					tokens: $fungibleNetworkTokens,
+					modifiedTokens
+				})
 			)
 		});
 
@@ -95,7 +92,7 @@
 		await saveAllCustomTokens({ tokens: tokensToBeSaved, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
-		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
+		updateFilterList({ filter: $tokenListStore.filter });
 		saveLoading = false;
 	};
 
@@ -167,7 +164,7 @@
 		{/if}
 
 		{#if $tokenListStore.filter !== '' && enableMoreTokensList.length > 0}
-			<div class="mb-3 mt-6 flex flex-col gap-3">
+			<div class="mt-6 mb-3 flex flex-col gap-3">
 				<StickyHeader>
 					{#snippet header()}
 						<div class="flex items-center justify-between pb-4">

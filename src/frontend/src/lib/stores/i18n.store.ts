@@ -54,7 +54,9 @@ const initI18n = (): I18nStore => {
 		init: async () => {
 			const lang = get<Languages>({ key: 'lang' }) ?? getDefaultLang();
 
-			if (lang === getDefaultLang()) {
+			// English is the default one in case no language is set.
+			// Or either way is what most users would have as default in their machines.
+			if (lang === Languages.ENGLISH) {
 				saveLang(lang);
 				// No need to reload the store, store is already initialised with the default
 				return;

@@ -26,7 +26,7 @@ export const initDefaultTokensStore = <T extends Token>(): DefaultTokensStore<T>
 			? token.address
 			: isTokenErc20(token)
 				? token.address
-				: (token.id.description ?? '');
+				: `${token.id.description}`;
 
 	return {
 		set,

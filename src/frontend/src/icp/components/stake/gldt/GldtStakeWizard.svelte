@@ -18,7 +18,6 @@
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -53,7 +52,6 @@
 
 	const stake = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

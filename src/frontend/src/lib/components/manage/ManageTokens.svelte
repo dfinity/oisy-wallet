@@ -22,6 +22,7 @@
 	} from '$lib/stores/modal-tokens-list.store';
 	import type { ExchangesData } from '$lib/types/exchange';
 	import type { Token, TokenId } from '$lib/types/token';
+	import { isTokenToggleable } from '$lib/utils/token.utils';
 	import { pinEnabledTokensAtTop, sortTokens } from '$lib/utils/tokens.utils';
 
 	interface Props {
@@ -88,7 +89,7 @@
 		// because the exposed prop from the context is a derived and on update of the data the "enabled" gets reset
 		const tokensList = [...allTokensSorted];
 		const token = tokensList.find((t) => t.id === id);
-		if (nonNullish(token) && 'enabled' in token) {
+		if (nonNullish(token) && isTokenToggleable(token)) {
 			token.enabled = !token.enabled;
 			setTokens(tokensList);
 		}
@@ -149,7 +150,11 @@
 			</LogoButton>
 		{/snippet}
 		{#snippet toolbar()}
-			<Button colorStyle="secondary-light" disabled={$pseudoNetworkICPTestnet} onclick={onAddToken}
+			<Button
+				colorStyle="secondary-light"
+				disabled={$pseudoNetworkICPTestnet ||
+					(isNftsPage && nonNullish($selectedNetwork) && !$selectedNetwork.supportsNft)}
+				onclick={onAddToken}
 				><IconPlus />
 				{isNftsPage
 					? $i18n.tokens.manage.text.import_nft

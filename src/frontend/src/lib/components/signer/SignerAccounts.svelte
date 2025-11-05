@@ -1,8 +1,14 @@
 <script lang="ts">
 	import { isNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet, untrack } from 'svelte';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { SIGNER_CONTEXT_KEY, type SignerContext } from '$lib/stores/signer.store';
+
+	interface Props {
+		children: Snippet;
+	}
+
+	let { children }: Props = $props();
 
 	const {
 		accountsPrompt: { payload, reset: resetPrompt }
@@ -25,7 +31,11 @@
 		resetPrompt();
 	};
 
-	$: ($payload, (() => onAccountsPrompt())());
+	$effect(() => {
+		[$payload];
+
+		untrack(() => onAccountsPrompt());
+	});
 </script>
 
-<slot />
+{@render children()}
