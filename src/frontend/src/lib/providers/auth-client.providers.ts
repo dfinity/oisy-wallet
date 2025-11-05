@@ -1,5 +1,5 @@
 import type { Identity } from '@dfinity/agent';
-import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@dfinity/auth-client';
+import { AuthClient, IdbStorage, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { isNullish } from '@dfinity/utils';
 
 export class AuthClientProvider {
