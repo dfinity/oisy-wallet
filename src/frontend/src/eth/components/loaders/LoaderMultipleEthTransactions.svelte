@@ -38,7 +38,17 @@
 
 		loading = true;
 
-		const loader = batchLoadTransactions({ tokens });
+		// Even if it had a bit of complexity, we prefer to prioritise the tokens that have empty transaction store,
+		// because they are more likely the ones that are still not loaded.
+		// eslint-disable-next-line local-rules/prefer-object-params -- This is a sorting function, so the parameters will be provided not as an object but as separate arguments.
+		const sortedTokens = tokens.toSorted((a, b) => {
+			const aIsNull = isNullish($ethTransactionsStore?.[a.id]);
+			const bIsNull = isNullish($ethTransactionsStore?.[b.id]);
+
+			return Number(!aIsNull) - Number(!bIsNull);
+		});
+
+		const loader = batchLoadTransactions({ tokens: sortedTokens });
 
 		for await (const _ of loader) {
 			// We don't need to use the results
