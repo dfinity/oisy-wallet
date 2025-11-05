@@ -6,7 +6,7 @@ interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
 }
 
-export const sendWizardSteps = ({
+const sendWizardSteps = ({
 	i18n,
 	converting
 }: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
