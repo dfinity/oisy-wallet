@@ -39,4 +39,5 @@ updates:
       vitest-group:
         patterns:
           - 'vitest'
+          - 'vitest-mock-extended'
           - '@vitest/coverage-v8'
