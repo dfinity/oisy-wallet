@@ -6,6 +6,16 @@ interface SendWizardStepsParams extends WizardStepsParams {
 	converting?: boolean;
 }
 
+const sendWizardStepsFilterNetworks = ({
+	i18n
+}: SendWizardStepsParams): WizardSteps<WizardStepsSend> => [
+	{
+		name: WizardStepsSend.FILTER_NETWORKS,
+		title: i18n.send.text.select_network_filter
+	}
+];
+
+
 const sendWizardSteps = ({
 	i18n,
 	converting
@@ -43,10 +53,7 @@ export const allSendWizardSteps = (params: SendWizardStepsParams): WizardSteps<W
 		name: WizardStepsSend.TOKENS_LIST,
 		title: params.i18n.send.text.select_token
 	},
-	{
-		name: WizardStepsSend.FILTER_NETWORKS,
-		title: params.i18n.send.text.select_network_filter
-	},
+	...sendWizardStepsFilterNetworks(params),
 	...sendWizardStepsWithQrCodeScan(params)
 ];
 
@@ -74,9 +81,6 @@ export const allSendNftsWizardSteps = (
 		name: WizardStepsSend.NFTS_LIST,
 		title: params.i18n.send.text.select_nft
 	},
-	{
-		name: WizardStepsSend.FILTER_NETWORKS,
-		title: params.i18n.send.text.select_network_filter
-	},
+	...sendWizardStepsFilterNetworks(params),
 	...sendNftsWizardSteps(params)
 ];
