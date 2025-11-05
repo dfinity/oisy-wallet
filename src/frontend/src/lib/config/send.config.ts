@@ -15,7 +15,6 @@ const sendWizardStepsFilterNetworks = ({
 	}
 ];
 
-
 const sendWizardSteps = ({
 	i18n,
 	converting
