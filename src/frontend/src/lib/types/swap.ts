@@ -9,7 +9,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
 	DeltaPrice,

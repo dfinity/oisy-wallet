@@ -14,9 +14,9 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { Option } from '$lib/types/utils';
 import { getOptionalDerivationOrigin } from '$lib/utils/auth.utils';
 import { popupCenter } from '$lib/utils/window.utils';
-import type { Identity } from '@dfinity/agent';
-import { KEY_STORAGE_KEY, type AuthClient } from '@dfinity/auth-client';
-import type { ECDSAKeyIdentity } from '@dfinity/identity';
+import { KEY_STORAGE_KEY, type AuthClient } from '@icp-sdk/auth/client';
+import type { Identity } from '@icp-sdk/core/agent';
+import type { ECDSAKeyIdentity } from '@icp-sdk/core/identity';
 import { writable, type Readable } from 'svelte/store';
 
 export interface AuthStoreData {

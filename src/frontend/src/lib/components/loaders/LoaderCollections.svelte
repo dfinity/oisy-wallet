@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { isNullish, nonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import { get } from 'svelte/store';
 	import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 	import { NFTS_ENABLED } from '$env/nft.env';

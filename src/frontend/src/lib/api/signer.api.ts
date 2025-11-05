@@ -13,8 +13,8 @@ import type {
 	SignWithSchnorrParams
 } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: SignerCanister | undefined = undefined;
 

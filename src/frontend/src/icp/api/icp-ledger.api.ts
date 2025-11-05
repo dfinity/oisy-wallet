@@ -2,11 +2,11 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
 import { toCandidAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const transfer = async ({
 	identity,

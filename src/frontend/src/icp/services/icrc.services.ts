@@ -31,8 +31,6 @@ import type { OptionIdentity } from '$lib/types/identity';
 import type { TokenCategory } from '$lib/types/token';
 import { mapIcErrorMetadata } from '$lib/utils/error.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { AnonymousIdentity, type Identity } from '@dfinity/agent';
-import type { Principal } from '@dfinity/principal';
 import {
 	fromNullable,
 	isNullish,
@@ -41,6 +39,8 @@ import {
 	type QueryAndUpdateRequestParams,
 	type QueryAndUpdateStrategy
 } from '@dfinity/utils';
+import { AnonymousIdentity, type Identity } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const loadIcrcTokens = async ({ identity }: { identity: OptionIdentity }): Promise<void> => {

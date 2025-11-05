@@ -28,10 +28,10 @@ import {
 } from '$tests/mocks/user-experimental-features.mock';
 import { mockUserNetworks } from '$tests/mocks/user-networks.mock';
 import { mockDefinedUserAgreements, mockUserNetworksMap } from '$tests/mocks/user-profile.mock';
-import type { ActorSubclass } from '@dfinity/agent';
 import { mapIcrc2ApproveError } from '@dfinity/ledger-icp';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import type { ActorSubclass } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock(import('$lib/constants/app.constants'), async (importOriginal) => {
