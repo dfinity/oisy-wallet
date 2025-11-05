@@ -28,7 +28,6 @@
 		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS,
-		AI_ASSISTANT_SEND_TOKEN_SOURCE
 	} from '$lib/constants/analytics.constants';
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
