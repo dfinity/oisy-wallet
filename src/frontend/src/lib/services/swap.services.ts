@@ -157,7 +157,7 @@ export const fetchKongSwap = async ({
 		: undefined;
 
 	if (isSourceTokenIcrc2) {
-// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
 		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
 
 		const isApprovalNeeded = await checkNeedsApproval({
@@ -172,7 +172,7 @@ export const fetchKongSwap = async ({
 				identity,
 				ledgerCanisterId,
 				amount: amountWithFees,
-// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
 				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
 				spender: {
 					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
@@ -498,7 +498,7 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
-// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" 
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
 			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
 
 			const isApprovalNeeded = await checkNeedsApproval({
