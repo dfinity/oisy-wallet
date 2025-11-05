@@ -38,7 +38,14 @@
 
 		loading = true;
 
-		const loader = batchLoadTransactions({ tokens });
+		const sortedTokens = tokens.sort((a, b) => {
+			const aIsNull = isNullish($ethTransactionsStore?.[a.id]);
+			const bIsNull = isNullish($ethTransactionsStore?.[b.id]);
+
+			return Number(!aIsNull) - Number(!bIsNull);
+		});
+
+		const loader = batchLoadTransactions({ tokens: sortedTokens });
 
 		for await (const _ of loader) {
 			// We don't need to use the results
