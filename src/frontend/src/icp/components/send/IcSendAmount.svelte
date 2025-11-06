@@ -43,6 +43,7 @@
 	};
 
 	$effect(() => {
+        console.log('updateMintingAccountStatus');
 		updateMintingAccountStatus();
 	});
 

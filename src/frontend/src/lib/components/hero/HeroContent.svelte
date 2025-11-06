@@ -43,6 +43,10 @@
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
+    import {isUserMintingAccount} from "$icp/services/icrc-minting.services";
+    import type {IcToken} from "$icp/types/ic-token";
+    import {authIdentity} from "$lib/derived/auth.derived";
+    import {icrcAccount} from "$icp/derived/ic.derived";
 
 	let pageTokenUi = $derived(
 		nonNullish($pageToken)
@@ -74,8 +78,23 @@
 
 	let isNftsPage = $derived(isRouteNfts(page));
 
+    let isMintingAccount = $state(false);
+
+    const updateMintingAccountStatus = async () => {
+        isMintingAccount = await isUserMintingAccount({
+            identity:$authIdentity,
+            account: $icrcAccount,
+            token: $pageToken as IcToken
+        });
+    };
+
+    $effect(() => {
+        console.log('updateMintingAccountStatus 2');
+        updateMintingAccountStatus();
+    });
+
 	$effect(() => {
-		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+		outflowActionsDisabled.set(isTransactionsPage && !isMintingAccount && ($balanceZero || isNullish($balance)));
 	});
 
 	$effect(() => {
