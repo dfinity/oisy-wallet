@@ -1,12 +1,9 @@
-import type { Network } from '$lib/types/network';
 import type { Token, TokenId } from '$lib/types/token';
-import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { TokenUiOrGroupUi } from '$lib/types/token-ui-group';
-import { showTokenFilteredBySelectedNetwork } from '$lib/utils/network.utils';
-import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { isTokenUiGroup } from '$lib/utils/token-group.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { isTokenToggleable } from '$lib/utils/token.utils';
+import { nonNullish } from '@dfinity/utils';
 import type { SvelteMap } from 'svelte/reactivity';
 
 const getFilterCondition = ({ filter, token }: { filter: string; token: TokenUi }): boolean =>
@@ -40,31 +37,17 @@ export const getFilteredTokenGroup = ({
 // then we return it as a valid TokenUiOrGroupUi since the displaying cards require that type
 // we also apply the same logic for filtering networks as in manage tokens modal
 export const getDisabledOrModifiedTokens = ({
-	$allTokens,
-	modifiedTokens,
-	selectedNetwork,
-	includeNonFungibleTokens = true
+	tokens,
+	modifiedTokens
 }: {
-	$allTokens: TokenToggleable<Token>[];
+	tokens: Token[];
 	modifiedTokens: SvelteMap<TokenId, Token>;
-	selectedNetwork?: Network;
-	includeNonFungibleTokens?: boolean;
 }): TokenUiOrGroupUi[] =>
-	($allTokens ?? []).reduce<TokenUiOrGroupUi[]>((acc, token) => {
+	tokens.reduce<TokenUiOrGroupUi[]>((acc, token) => {
+		const isEnabled = isTokenToggleable(token) && token.enabled;
 		const isModified = nonNullish(modifiedTokens.get(token.id));
-		if (
-			(!token.enabled || (token.enabled && isModified)) &&
-			showTokenFilteredBySelectedNetwork({
-				token,
-				$selectedNetwork: selectedNetwork,
-				$pseudoNetworkChainFusion: isNullish(selectedNetwork)
-			}) &&
-			includeNonFungibleTokens &&
-			!isTokenNonFungible(token)
-		) {
-			acc.push({
-				token: token as TokenUi
-			});
+		if (!isEnabled || isModified) {
+			acc.push({ token });
 		}
 		return acc;
 	}, []);

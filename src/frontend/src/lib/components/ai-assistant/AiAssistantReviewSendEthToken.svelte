@@ -167,11 +167,6 @@
 			metadata: sharedTrackingEventMetadata
 		});
 
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
-
 		if (isNullish($authIdentity)) {
 			return;
 		}
@@ -223,6 +218,14 @@
 			});
 			return;
 		}
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
 
 		try {
 			loading = true;

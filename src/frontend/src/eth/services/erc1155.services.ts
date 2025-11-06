@@ -150,7 +150,7 @@ const loadCustomTokensWithMetadata = async (
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
-						symbol: tokenAddress,
+						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
 						decimals: 0, // Erc1155 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 						standard: 'erc1155' as const,
 						category: 'custom' as const,
@@ -166,9 +166,22 @@ const loadCustomTokensWithMetadata = async (
 			}
 		);
 
-	const customTokens = await Promise.all(customTokenPromises);
+	const customTokens = await Promise.allSettled(customTokenPromises);
 
-	return customTokens.filter(nonNullish);
+	return customTokens.reduce<Erc1155CustomToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		if (result.status === 'rejected') {
+			toastsError({
+				msg: { text: get(i18n).init.error.erc1155_custom_tokens },
+				err: result.reason
+			});
+		}
+
+		return acc;
+	}, []);
 };
 
 const loadCustomTokenData = ({

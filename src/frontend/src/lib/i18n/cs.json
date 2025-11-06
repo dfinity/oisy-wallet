@@ -1069,6 +1069,7 @@
 				"title": "Spravovat tokeny",
 				"title_nft": "",
 				"manage_list": "Spravovat tokeny",
+				"manage_list_nft": "",
 				"list_settings": "Nastavení seznamu",
 				"import_token": "Importovat token",
 				"import_nft": "",
@@ -1654,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Přečtěte si smluvní podmínky",
-			"review_updated_title": "Prohlédněte si aktualizované smluvní podmínky",
-			"review_description": "Než budete moci používat peněženku OISY, musíte si přečíst a souhlasit s našimi Podmínkami služby a Zásadami ochrany osobních údajů. Tyto dokumenty vysvětlují pravidla naší služby a to, jak chráníme vaše data.",
-			"review_updated_description": "Chcete-li nadále používat peněženku OISY, přečtěte si prosím a souhlaste s našimi aktualizovanými Podmínkami služby a Zásadami ochrany osobních údajů. Tyto změny jsou důležité pro zajištění bezpečnosti a souladu našich služeb s předpisy.",
-			"reject_warning": "Pro pokračování musíte přijmout Smluvní podmínky. Neváhejte to kdykoli zkusit znovu.",
-			"i_have_accepted": "Přečetl(a) jsem si a souhlasím s",
-			"i_have_accepted_updated": "Přečetl(a) jsem si a souhlasím s aktualizovanými",
-			"accept_and_continue": "Přijmout a pokračovat",
 			"updated_agreements_warning": "Aktualizovali jsme $agreements. Používáním $oisy_short potvrzujete, že jste si přečetli aktualizace a souhlasíte s nimi."
 		},
 		"error": {
@@ -1740,6 +1733,8 @@
 		"text": {
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1747,10 +1742,26 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

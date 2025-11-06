@@ -2,7 +2,6 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { type Component, type Snippet, untrack } from 'svelte';
 	import { alchemyProviders } from '$eth/providers/alchemy.providers';
-	import { isTokenErc721 } from '$eth/utils/erc721.utils';
 	import ContactWithAvatar from '$lib/components/contact/ContactWithAvatar.svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
@@ -162,7 +161,7 @@
 			{/snippet}
 
 			{#snippet amount()}
-				{#if nonNullish(displayAmount) && !isTokenErc721(token)}
+				{#if nonNullish(displayAmount)}
 					{#if $isPrivacyMode}
 						<IconDots />
 					{:else}

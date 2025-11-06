@@ -9,7 +9,7 @@ import { toNullable } from '@dfinity/utils';
 export const stakePositionMockResponse = {
 	staked: 10000n,
 	dissolve_delay: {
-		secs: 100n,
+		secs: 10000000000n,
 		nanos: 1000
 	} as Duration,
 	claimable_rewards: toNullable([{ ICP: null }, 100n]),
