@@ -1,12 +1,12 @@
-import { loadIdentity } from '$lib/api/auth-client.api';
+import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
 	PostMessageDataError,
 	PostMessageResponse,
 	PostMessageResponseStatus
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
-import type { Identity } from '@dfinity/agent';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface SchedulerParams<T> {
 	job: (params: SchedulerJobData<T>) => Promise<void>;
@@ -44,7 +44,7 @@ export class SchedulerTimer {
 			return;
 		}
 
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We do nothing if no identity
@@ -82,7 +82,7 @@ export class SchedulerTimer {
 	}
 
 	async trigger<T>(params: SchedulerParams<T>) {
-		const identity: Identity | undefined = await loadIdentity();
+		const identity = await AuthClientProvider.getInstance().loadIdentity();
 
 		if (isNullish(identity)) {
 			// We cannot execute without an identity

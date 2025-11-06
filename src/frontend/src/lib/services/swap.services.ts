@@ -9,7 +9,8 @@ import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
 import { setCustomToken as setCustomIcrcToken } from '$icp-eth/services/custom-token.services';
 import { approve } from '$icp/api/icrc-ledger.api';
 import { sendIcp, sendIcrc } from '$icp/services/ic-send.services';
-import { loadCustomTokens } from '$icp/services/icrc.services';
+import { hasSufficientIcrcAllowance, loadCustomTokens } from '$icp/services/icrc.services';
+import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { IcToken, IcTokenWithIcrc2Supported } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { isIcrcTokenSupportIcrc2, isTokenIcrc } from '$icp/utils/icrc.utils';
@@ -27,6 +28,7 @@ import { kongSwap, kongTokens } from '$lib/api/kong_backend.api';
 import { signPrehash } from '$lib/api/signer.api';
 import {
 	KONG_BACKEND_CANISTER_ID,
+	NANO_SECONDS_IN_HALF_MINUTE,
 	NANO_SECONDS_IN_MINUTE,
 	ZERO
 } from '$lib/constants/app.constants';
@@ -79,9 +81,9 @@ import {
 	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import {
 	constructSimpleSDK,
 	type DeltaAuction,
@@ -89,6 +91,33 @@ import {
 	type OptimalRate
 } from '@velora-dex/sdk';
 import { get } from 'svelte/store';
+
+const checkNeedsApproval = async ({
+	identity,
+	ledgerCanisterId,
+	amount,
+	spender
+}: {
+	identity: Identity;
+	ledgerCanisterId: LedgerCanisterIdText;
+	amount: bigint;
+	spender: Principal;
+}): Promise<boolean> => {
+	try {
+		const isAllowanceSufficient = await hasSufficientIcrcAllowance({
+			identity,
+			ledgerCanisterId,
+			owner: identity.getPrincipal(),
+			spender,
+			amount,
+			allowanceBuffer: NANO_SECONDS_IN_HALF_MINUTE
+		});
+
+		return !isAllowanceSufficient;
+	} catch (_: unknown) {
+		return true;
+	}
+};
 
 export const fetchKongSwap = async ({
 	identity,
@@ -127,17 +156,30 @@ export const fetchKongSwap = async ({
 				})
 		: undefined;
 
-	isSourceTokenIcrc2 &&
-		(await approve({
+	if (isSourceTokenIcrc2) {
+		// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+		const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+		const isApprovalNeeded = await checkNeedsApproval({
 			identity,
 			ledgerCanisterId,
-			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-			amount: parsedSwapAmount + sourceTokenFee * 2n,
-			expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-			spender: {
-				owner: Principal.from(KONG_BACKEND_CANISTER_ID)
-			}
-		}));
+			amount: amountWithFees,
+			spender: Principal.from(KONG_BACKEND_CANISTER_ID)
+		});
+
+		if (isApprovalNeeded) {
+			await approve({
+				identity,
+				ledgerCanisterId,
+				amount: amountWithFees,
+				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+				spender: {
+					owner: Principal.from(KONG_BACKEND_CANISTER_ID)
+				}
+			});
+		}
+	}
 
 	await kongSwap({
 		identity,
@@ -456,15 +498,27 @@ export const fetchIcpSwap = async ({
 				fee: sourceTokenFee
 			});
 		} else {
-			await approve({
+			// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer"
+			const amountWithFees = parsedSwapAmount + sourceTokenFee * 2n;
+
+			const isApprovalNeeded = await checkNeedsApproval({
 				identity,
 				ledgerCanisterId: sourceLedgerCanisterId,
-				// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
-				amount: parsedSwapAmount + sourceTokenFee * 2n,
-				// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
-				expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
-				spender: { owner: pool.canisterId }
+				amount: amountWithFees,
+				spender: pool.canisterId
 			});
+
+			if (isApprovalNeeded) {
+				await approve({
+					identity,
+					ledgerCanisterId: sourceLedgerCanisterId,
+					// for icrc2 tokens, we need to double sourceTokenFee to cover "approve" and "transfer" fees
+					amount: parsedSwapAmount + sourceTokenFee * 2n,
+					// Sets approve expiration to 5 minutes ahead to allow enough time for the full swap flow
+					expiresAt: nowInBigIntNanoSeconds() + 5n * NANO_SECONDS_IN_MINUTE,
+					spender: { owner: pool.canisterId }
+				});
+			}
 
 			await depositFrom({
 				identity,
@@ -929,10 +983,12 @@ export const fetchVeloraDeltaSwap = async ({
 			identity
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder({
 			...deltaOrderBaseParams,
 			deadline,
-			nonce: Number(nonce),
+			nonce,
 			permit: encodedPermit
 		});
 	} else {
@@ -951,12 +1007,12 @@ export const fetchVeloraDeltaSwap = async ({
 			progressSteps: ProgressStepsSwap
 		});
 
+		progress(ProgressStepsSwap.SWAP);
+
 		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
 	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
-
-	progress(ProgressStepsSwap.SWAP);
 
 	const signature = await signPrehash({
 		hash,

@@ -13,7 +13,7 @@ import type * as z from 'zod';
 
 export type NftId = z.infer<typeof NftIdSchema>;
 
-export type NftAttributes = z.infer<typeof NftAttributeSchema>;
+export type NftAttribute = z.infer<typeof NftAttributeSchema>;
 
 export type NftMetadata = z.infer<typeof NftMetadataSchema>;
 

@@ -5,6 +5,7 @@
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { bottomSheetOpenStore } from '$lib/stores/ui.store';
 
 	interface Props {
 		visible: boolean;
@@ -13,6 +14,10 @@
 	}
 
 	let { visible = $bindable(), content, footer }: Props = $props();
+
+	$effect(() => {
+		bottomSheetOpenStore.set(visible);
+	});
 </script>
 
 {#if visible}

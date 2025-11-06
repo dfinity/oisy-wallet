@@ -7,7 +7,7 @@ export const NftIdSchema = z.string().brand<'NftId'>();
 
 export const NftAttributeSchema = z.object({
 	traitType: z.string(),
-	value: z.string()
+	value: z.string().optional()
 });
 
 export const NftMetadataSchema = z.object({

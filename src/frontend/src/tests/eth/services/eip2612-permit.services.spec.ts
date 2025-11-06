@@ -5,7 +5,7 @@ import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { EthAddress } from '$eth/types/address';
 import * as signerApi from '$lib/api/signer.api';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { Contract } from 'ethers/contract';
 import { Signature } from 'ethers/crypto';
 import { TypedDataEncoder } from 'ethers/hash';
@@ -82,8 +82,10 @@ describe('EIP2612 Permit Services', () => {
 	describe('fetchPermitMetadata', () => {
 		it('should fetch metadata with nonce from contract', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 			const mockContract = {
-				nonces: mockNonces
+				nonces: mockNonces,
+				version: mockVersionFn
 			};
 
 			vi.mocked(Contract).mockImplementation(() => mockContract as unknown as Contract);
@@ -108,11 +110,13 @@ describe('EIP2612 Permit Services', () => {
 		it('should use custom deadline if provided', async () => {
 			const customDeadline = 9999999999;
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -139,11 +143,13 @@ describe('EIP2612 Permit Services', () => {
 
 		it('should return metadata with correct structure', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -172,11 +178,13 @@ describe('EIP2612 Permit Services', () => {
 	describe('createEIP2612TypedData', () => {
 		it('should create correct domain structure', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -200,7 +208,7 @@ describe('EIP2612 Permit Services', () => {
 			expect(TypedDataEncoder.hash).toHaveBeenCalledWith(
 				expect.objectContaining({
 					name: mockValidErc20Token.name,
-					version: '1',
+					version: '2',
 					chainId: mockChainId,
 					verifyingContract: mockValidErc20Token.address
 				}),
@@ -211,11 +219,13 @@ describe('EIP2612 Permit Services', () => {
 
 		it('should create correct values structure', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -253,11 +263,13 @@ describe('EIP2612 Permit Services', () => {
 	describe('createPermitHash', () => {
 		it('should initialize InfuraProvider with correct parameters', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -286,11 +298,13 @@ describe('EIP2612 Permit Services', () => {
 
 		it('should initialize Contract with correct parameters', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -316,11 +330,13 @@ describe('EIP2612 Permit Services', () => {
 
 		it('should create hash using TypedDataEncoder', async () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -348,11 +364,13 @@ describe('EIP2612 Permit Services', () => {
 	describe('createPermit', () => {
 		beforeEach(() => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
 
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -507,10 +525,13 @@ describe('EIP2612 Permit Services', () => {
 	describe('error handling', () => {
 		it('should throw error when nonces call fails', async () => {
 			const mockError = new Error('Contract call failed');
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
+
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: vi.fn().mockRejectedValue(mockError)
+						nonces: vi.fn().mockRejectedValue(mockError),
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);
@@ -530,10 +551,13 @@ describe('EIP2612 Permit Services', () => {
 			const mockNonces = vi.fn().mockResolvedValue(mockNonce);
 			const signError = new Error('Signing failed');
 
+			const mockVersionFn = vi.fn().mockResolvedValue('2');
+
 			vi.mocked(Contract).mockImplementation(
 				() =>
 					({
-						nonces: mockNonces
+						nonces: mockNonces,
+						version: mockVersionFn
 					}) as unknown as Contract
 			);
 			vi.mocked(InfuraProvider).mockImplementation(() => ({}) as unknown as InfuraProvider);

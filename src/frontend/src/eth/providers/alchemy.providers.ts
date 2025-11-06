@@ -11,9 +11,10 @@ import type { Erc721Metadata } from '$eth/types/erc721';
 import { i18n } from '$lib/stores/i18n.store';
 import type { WebSocketListener } from '$lib/types/listener';
 import type { NetworkId } from '$lib/types/network';
-import type { Nft, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
+import type { Nft, NftAttribute, NftId, NonFungibleToken, OwnedContract } from '$lib/types/nft';
 import type { TokenStandard } from '$lib/types/token';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
+import type { Option } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { getMediaStatus, mapTokenToCollection } from '$lib/utils/nfts.utils';
@@ -138,13 +139,44 @@ export class AlchemyProvider {
 		});
 	}
 
+	private mapAttributes = (
+		attributes:
+			| {
+					trait_type: string;
+					value: Option<string | number>;
+			  }[]
+			| Record<string, Option<string | number>>
+			| undefined
+			| null
+	): NftAttribute[] => {
+		if (isNullish(attributes)) {
+			return [];
+		}
+
+		if (Array.isArray(attributes)) {
+			return attributes.map(({ trait_type: traitType, value }) => ({
+				traitType,
+				...(nonNullish(value) && { value: value.toString() })
+			}));
+		}
+
+		if (typeof attributes === 'object') {
+			return Object.entries(attributes).map(([traitType, value]) => ({
+				traitType,
+				...(nonNullish(value) && { value: value.toString() })
+			}));
+		}
+
+		return [];
+	};
+
 	private mapNftFromRpc = async ({
 		nft: {
 			tokenId,
 			name,
 			description,
 			raw: {
-				metadata: { attributes: untypedAttributes }
+				metadata: { attributes }
 			},
 			image,
 			acquiredAt,
@@ -156,17 +188,7 @@ export class AlchemyProvider {
 		nft: Omit<OwnedNft, 'balance'> & Partial<Pick<OwnedNft, 'balance'>>;
 		token: NonFungibleToken;
 	}): Promise<Nft> => {
-		const attributes = untypedAttributes as {
-			trait_type: string;
-			value: string;
-		}[];
-
-		const mappedAttributes = nonNullish(attributes)
-			? attributes.map(({ trait_type: traitType, value }) => ({
-					traitType,
-					value: value.toString()
-				}))
-			: [];
+		const mappedAttributes = this.mapAttributes(attributes);
 
 		const mediaStatus = await getMediaStatus(image?.originalUrl);
 

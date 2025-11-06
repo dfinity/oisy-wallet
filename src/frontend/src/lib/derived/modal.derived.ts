@@ -5,6 +5,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import type { ManageTokensData } from '$lib/types/manage-tokens';
 import type { Nft, NftCollection } from '$lib/types/nft';
 import type { RewardStateData, VipRewardStateData, WelcomeData } from '$lib/types/reward';
+import type { ClaimStakingRewardParams } from '$lib/types/stake';
 import type { NavigationTarget } from '@sveltejs/kit';
 import { derived, type Readable } from 'svelte/store';
 
@@ -56,6 +57,16 @@ export const modalGldtUnstake: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'gldt-unstake'
 );
+export const modalGldtClaimStakingReward: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'gldt-claim-staking-reward'
+);
+export const modalGldtClaimStakingRewardData: Readable<ClaimStakingRewardParams | undefined> =
+	derived(modalStore, ($modalStore) =>
+		$modalStore?.type === 'gldt-claim-staking-reward'
+			? ($modalStore?.data as ClaimStakingRewardParams)
+			: undefined
+	);
 export const modalSwap: Readable<boolean> = derived(
 	modalStore,
 	($modalStore) => $modalStore?.type === 'swap'
