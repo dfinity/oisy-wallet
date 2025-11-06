@@ -1756,7 +1756,8 @@
 			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
 			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
-			"amount_to_receive": "Amount to receive"
+			"amount_to_receive": "Amount to receive",
+			"claim_reward": "Claim reward"
 		}
 	},
 	"temporal": {

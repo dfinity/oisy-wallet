@@ -1411,6 +1411,7 @@ interface I18nStake {
 		delayed_dissolve_info: string;
 		immediate_dissolve_terms: string;
 		amount_to_receive: string;
+		claim_reward: string;
 	};
 }
 
