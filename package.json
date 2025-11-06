@@ -85,7 +85,7 @@
 		"@solana-program/system": "^0.9.0",
 		"@solana-program/token": "^0.7.0",
 		"@solana-program/token-2022": "^0.6.0",
-		"@solana/kit": "^4.0.0",
+		"@solana/kit": "^5.0.0",
 		"@velora-dex/sdk": "^9.0.0",
 		"@walletconnect/auth-client": "^2.1.2",
 		"alchemy-sdk": "^3.6.5",
