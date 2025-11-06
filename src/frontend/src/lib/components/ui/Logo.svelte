@@ -32,11 +32,10 @@
 </script>
 
 <div
-	style={`width: ${sizePx}; height: ${sizePx}; transition: opacity 0.15s ease-in;`}
+	style={`width: ${sizePx}; height: ${sizePx};`}
 	class="flex items-center justify-center overflow-hidden ring-primary"
 	class:bg-off-white={color === 'off-white' && !isReady}
 	class:bg-white={color === 'white' && !isReady}
-	class:opacity-10={!isReady}
 	class:ring-2={ring}
 	class:rounded-full={circle}
 	class:rounded-lg={!circle}

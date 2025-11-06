@@ -132,11 +132,7 @@
 	<TokensSkeletons {loading}>
 		<div class="flex flex-col gap-3" class:mb-12={filteredTokens?.length > 0}>
 			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
-				<div
-					class="overflow-hidden rounded-xl"
-					onanimationend={handleAnimationEnd}
-					onanimationstart={handleAnimationStart}
-				>
+				<div class="overflow-hidden rounded-xl">
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
 
@@ -144,7 +140,7 @@
 					{:else}
 						{@const { token } = tokenOrGroup}
 
-						<div class="transition duration-300 hover:bg-primary">
+						<div class="hover:bg-primary">
 							<TokenCard data={token} onClick={() => goto(transactionsUrl({ token }))} />
 						</div>
 					{/if}
@@ -188,7 +184,7 @@
 							onanimationend={handleAnimationEnd}
 							onanimationstart={handleAnimationStart}
 						>
-							<div class="transition duration-300 hover:bg-primary">
+							<div class="hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}
 									<TokenCard data={tokenOrGroup.token} {onToggle} />
 								{/if}

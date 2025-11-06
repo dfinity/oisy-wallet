@@ -16,7 +16,7 @@
 		<SkeletonCards rows={5} />
 	</div>
 {:else}
-	<div in:fade>
+	<div>
 		{@render children()}
 	</div>
 {/if}
