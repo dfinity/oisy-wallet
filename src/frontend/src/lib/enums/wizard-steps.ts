@@ -87,3 +87,8 @@ export enum WizardStepsUnstake {
 	REVIEW = 'Review',
 	UNSTAKING = 'Unstaking'
 }
+
+export enum WizardStepsClaimStakingReward {
+	REVIEW = 'Review',
+	CLAIMING = 'Claiming'
+}
