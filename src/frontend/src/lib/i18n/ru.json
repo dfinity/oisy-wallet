@@ -1757,7 +1757,11 @@
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
 			"amount_to_receive": "",
-			"claim_reward": ""
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {
