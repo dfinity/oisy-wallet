@@ -132,14 +132,14 @@
 	class:to-trump-100={isTrumpToken}
 >
 	{#if isTransactionsPage}
-		<div class="flex w-full flex-col gap-6" in:slide={SLIDE_PARAMS}>
+		<div class="flex w-full flex-col gap-6">
 			<div class="grid w-full grid-cols-[1fr_auto_1fr] flex-row items-center justify-between">
 				<Back color="current" onlyArrow />
 
 				<div>
 					<div class="my-0.5 flex items-center justify-center">
 						{#if nonNullish($pageToken)}
-							<div in:fade>
+							<div>
 								<TokenLogo badge={{ type: 'network' }} data={$pageToken} ring />
 							</div>
 						{:else}
@@ -154,12 +154,12 @@
 			<Balance token={pageTokenUi} />
 		</div>
 	{:else}
-		<div in:slide={SLIDE_PARAMS}>
+		<div>
 			<ExchangeBalance hideBalance={$isPrivacyMode} />
 		</div>
 	{/if}
 
-	<div class="flex w-full justify-center text-left" in:slide|local={SLIDE_PARAMS}>
+	<div class="flex w-full justify-center text-left">
 		<Actions />
 	</div>
 
