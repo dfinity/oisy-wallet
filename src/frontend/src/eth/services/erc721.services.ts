@@ -165,9 +165,22 @@ const loadCustomTokensWithMetadata = async (
 			}
 		);
 
-	const customTokens = await Promise.all(customTokenPromises);
+	const customTokens = await Promise.allSettled(customTokenPromises);
 
-	return customTokens.filter(nonNullish);
+	return customTokens.reduce<Erc721CustomToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		if (result.status === 'rejected' && params.certified) {
+			toastsError({
+				msg: { text: get(i18n).init.error.erc721_custom_tokens },
+				err: result.reason
+			});
+		}
+
+		return acc;
+	}, []);
 };
 
 const loadCustomTokenData = ({
