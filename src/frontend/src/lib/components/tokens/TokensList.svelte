@@ -134,11 +134,8 @@
 			{#each filteredTokens as tokenOrGroup (getUiKey(tokenOrGroup))}
 				<div
 					class="overflow-hidden rounded-xl"
-					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
-					transition:fade
-					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
 						{@const { group: tokenGroup } = tokenOrGroup}
@@ -188,11 +185,8 @@
 					{#each enableMoreTokensList as tokenOrGroup (getUiKey(tokenOrGroup))}
 						<div
 							class="overflow-hidden rounded-xl"
-							class:pointer-events-none={animating}
 							onanimationend={handleAnimationEnd}
 							onanimationstart={handleAnimationStart}
-							transition:fade
-							animate:flip={flipParams}
 						>
 							<div class="transition duration-300 hover:bg-primary">
 								{#if !isTokenUiGroup(tokenOrGroup)}

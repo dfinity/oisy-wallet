@@ -42,7 +42,7 @@
 </script>
 
 {#if nonNullish(collection)}
-	<div class="my-5 flex flex-col rounded-lg bg-primary p-5" in:fade>
+	<div class="my-5 flex flex-col rounded-lg bg-primary p-5">
 		<div class="mb-6 flex flex-row justify-between gap-3">
 			<div class="flex flex-col items-start gap-3">
 				<h5>{collection.name}</h5>

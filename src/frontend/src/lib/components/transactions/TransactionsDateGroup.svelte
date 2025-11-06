@@ -29,7 +29,7 @@
 			{#each transactions as transactionUi, index (`${transactionUi.transaction.id}-${transactionUi.token.id.description}-${index}`)}
 				{@const { component, token, transaction } = transactionUi}
 
-				<div in:slide={SLIDE_DURATION}>
+				<div>
 					{#if component === 'bitcoin'}
 						<BtcTransaction iconType="token" {token} {transaction} />
 					{:else if component === 'ethereum'}

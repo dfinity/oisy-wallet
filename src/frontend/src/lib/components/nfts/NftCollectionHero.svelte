@@ -38,7 +38,7 @@
 	const bannerUrl = $derived(nonNullish(firstNft) ? firstNft.collection.bannerImageUrl : undefined);
 </script>
 
-<div class="relative overflow-hidden rounded-xl" in:slide>
+<div class="relative overflow-hidden rounded-xl">
 	<div class="flex h-64 w-full">
 		<NftDisplayGuard
 			location={{

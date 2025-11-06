@@ -57,7 +57,7 @@
 	});
 </script>
 
-<div class="relative overflow-hidden rounded-xl" in:fade>
+<div class="relative overflow-hidden rounded-xl">
 	<div class="relative h-64 w-full overflow-hidden">
 		<div class="absolute h-full w-full">
 			<NftDisplayGuard

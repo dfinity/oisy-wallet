@@ -45,6 +45,7 @@
 		token.set(nftsCollectionRoute ? ($pageNonFungibleToken ?? $pageToken) : $pageToken); // we could be on the nfts page without a pageNonFungibleToken set
 	});
 
+	/*
 	// Source: https://svelte.dev/blog/view-transitions
 	onNavigate((navigation) => {
 		if (isNullish(document.startViewTransition)) {
@@ -58,6 +59,7 @@
 			});
 		});
 	});
+	 */
 </script>
 
 {#if $isAuthLocked}
@@ -78,7 +80,7 @@
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
-									<div transition:fade>
+									<div>
 										<DappsCarousel />
 									</div>
 								</Responsive>
