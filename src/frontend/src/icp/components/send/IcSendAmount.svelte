@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext } from 'svelte';
+    import {getContext, untrack} from 'svelte';
 	import { icrcAccount } from '$icp/derived/ic.derived';
 	import { isUserMintingAccount } from '$icp/services/icrc-minting.services';
 	import { IcAmountAssertionError } from '$icp/types/ic-send';
@@ -43,8 +43,10 @@
 	};
 
 	$effect(() => {
-        console.log('updateMintingAccountStatus');
-		updateMintingAccountStatus();
+        [$authIdentity, $icrcAccount, $sendToken];
+
+		console.log('updateMintingAccountStatus');
+        untrack(() => updateMintingAccountStatus());
 	});
 
 	const customValidate = (userAmount: bigint): Error | undefined => {
