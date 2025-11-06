@@ -162,6 +162,7 @@ export const MILLISECONDS_IN_DAY = SECONDS_IN_DAY * MILLISECONDS_IN_SECOND;
 export const NANO_SECONDS_IN_MILLISECOND = 1_000_000n;
 export const NANO_SECONDS_IN_SECOND = NANO_SECONDS_IN_MILLISECOND * 1_000n;
 export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
+export const NANO_SECONDS_IN_HALF_MINUTE = NANO_SECONDS_IN_SECOND * 30n;
 
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
