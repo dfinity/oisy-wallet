@@ -1411,7 +1411,11 @@ interface I18nStake {
 		delayed_dissolve_info: string;
 		immediate_dissolve_terms: string;
 		amount_to_receive: string;
+		unclaimed_rewards: string;
 		claim_reward: string;
+		claim_rewards: string;
+		claim_now: string;
+		claiming: string;
 	};
 }
 
