@@ -227,3 +227,8 @@ export interface CheckDeltaOrderStatusParams {
 	timeoutMs?: number;
 	intervalMs?: number;
 }
+
+export interface DeltaSwapResponse {
+	delta: DeltaPrice | BridgePrice;
+	deltaAddress: string;
+}
