@@ -537,12 +537,14 @@ describe('infura-erc20.providers', () => {
 			it('should return true when contract supports permit (both nonces and DOMAIN_SEPARATOR succeed)', async () => {
 				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
 				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				vi.mocked(Contract).mockImplementation(
 					() =>
 						({
 							nonces: mockNonces,
-							DOMAIN_SEPARATOR: mockDomainSeparator
+							DOMAIN_SEPARATOR: mockDomainSeparator,
+							version: mockVersion
 						}) as unknown as Contract
 				);
 
@@ -560,12 +562,14 @@ describe('infura-erc20.providers', () => {
 			it('should return false when nonces method throws error', async () => {
 				const mockNonces = vi.fn().mockRejectedValue(new Error('Method not found'));
 				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				vi.mocked(Contract).mockImplementation(
 					() =>
 						({
 							nonces: mockNonces,
-							DOMAIN_SEPARATOR: mockDomainSeparator
+							DOMAIN_SEPARATOR: mockDomainSeparator,
+							version: mockVersion
 						}) as unknown as Contract
 				);
 
@@ -582,12 +586,14 @@ describe('infura-erc20.providers', () => {
 			it('should return false when DOMAIN_SEPARATOR method throws error', async () => {
 				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
 				const mockDomainSeparator = vi.fn().mockRejectedValue(new Error('Method not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				vi.mocked(Contract).mockImplementation(
 					() =>
 						({
 							nonces: mockNonces,
-							DOMAIN_SEPARATOR: mockDomainSeparator
+							DOMAIN_SEPARATOR: mockDomainSeparator,
+							version: mockVersion
 						}) as unknown as Contract
 				);
 
@@ -606,12 +612,14 @@ describe('infura-erc20.providers', () => {
 				const mockDomainSeparator = vi
 					.fn()
 					.mockRejectedValue(new Error('DOMAIN_SEPARATOR not found'));
+				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				vi.mocked(Contract).mockImplementation(
 					() =>
 						({
 							nonces: mockNonces,
-							DOMAIN_SEPARATOR: mockDomainSeparator
+							DOMAIN_SEPARATOR: mockDomainSeparator,
+							version: mockVersion
 						}) as unknown as Contract
 				);
 
@@ -627,12 +635,14 @@ describe('infura-erc20.providers', () => {
 			it('should use ERC20_PERMIT_ABI for contract instantiation', async () => {
 				const mockNonces = vi.fn().mockResolvedValue(BigInt(0));
 				const mockDomainSeparator = vi.fn().mockResolvedValue('0xabcd...');
+				const mockVersion = vi.fn().mockResolvedValue('2');
 
 				vi.mocked(Contract).mockImplementation(
 					() =>
 						({
 							nonces: mockNonces,
-							DOMAIN_SEPARATOR: mockDomainSeparator
+							DOMAIN_SEPARATOR: mockDomainSeparator,
+							version: mockVersion
 						}) as unknown as Contract
 				);
 

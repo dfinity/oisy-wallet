@@ -143,20 +143,13 @@ const loadCustomTokensWithMetadata = async (
 					return;
 				}
 
-				const { symbol } = metadata;
-
-				assertNonNullish(
-					symbol,
-					`Inconsistency in token data: no symbol found for token ${tokenAddress}`
-				);
-
 				return {
 					...{
-						id: parseCustomTokenId({ identifier: symbol, chainId: network.chainId }),
+						id: parseCustomTokenId({ identifier: tokenAddress, chainId: network.chainId }),
 						name: tokenAddress,
 						address: tokenAddress,
 						network,
-						symbol,
+						symbol: metadata.symbol ?? '', // The symbol is used with the amount, no issue with having it empty for NFTs
 						decimals: 0, // Erc721 contracts don't have decimals, but to avoid unexpected behavior, we set it to 0
 						standard: 'erc721' as const,
 						category: 'custom' as const,
@@ -172,9 +165,22 @@ const loadCustomTokensWithMetadata = async (
 			}
 		);
 
-	const customTokens = await Promise.all(customTokenPromises);
+	const customTokens = await Promise.allSettled(customTokenPromises);
 
-	return customTokens.filter(nonNullish);
+	return customTokens.reduce<Erc721CustomToken[]>((acc, result) => {
+		if (result.status === 'fulfilled' && nonNullish(result.value)) {
+			acc.push(result.value);
+		}
+
+		if (result.status === 'rejected' && params.certified) {
+			toastsError({
+				msg: { text: get(i18n).init.error.erc721_custom_tokens },
+				err: result.reason
+			});
+		}
+
+		return acc;
+	}, []);
 };
 
 const loadCustomTokenData = ({

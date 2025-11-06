@@ -377,6 +377,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1064,6 +1069,7 @@
 				"title": "Gérer les tokens",
 				"title_nft": "",
 				"manage_list": "Gérer les tokens",
+				"manage_list_nft": "",
 				"list_settings": "Paramètres de la liste",
 				"import_token": "Importer un token",
 				"import_nft": "",
@@ -1129,6 +1135,8 @@
 			"title": "NFT",
 			"title_empty": "Vos NFT apparaîtront ici",
 			"description_empty": "Il semble que vous n'ayez pas encore reçu de NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Groupement",
 			"as_plain_list": "Afficher comme liste simple",
 			"by_collection": "Grouper par collection",
@@ -1647,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Consulter les conditions générales",
-			"review_updated_title": "Consulter les conditions générales mises à jour",
-			"review_description": "Avant d'utiliser OISY Wallet, vous devez lire et accepter nos Conditions d'utilisation et notre Politique de confidentialité. Ces documents expliquent les règles de notre service et la manière dont nous protégeons vos données.",
-			"review_updated_description": "Pour continuer à utiliser OISY Wallet, veuillez consulter et accepter nos Conditions d'utilisation et notre Politique de confidentialité mises à jour. Ces modifications sont importantes pour garantir la sécurité et la conformité de notre service.",
-			"reject_warning": "Vous devez accepter les conditions générales pour continuer. N'hésitez pas à réessayer à tout moment.",
-			"i_have_accepted": "J'ai lu et j'accepte les",
-			"i_have_accepted_updated": "J'ai lu et j'accepte les mises à jour",
-			"accept_and_continue": "Accepter et continuer",
 			"updated_agreements_warning": "Nous avons mis à jour $agreements. En utilisant $oisy_short, vous confirmez avoir lu et accepté les mises à jour."
 		},
 		"error": {
@@ -1733,6 +1733,8 @@
 		"text": {
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1740,10 +1742,26 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

@@ -377,6 +377,11 @@
 				"name": "cyql.io",
 				"one_liner": "THE Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer.",
 				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
+			},
+			"icpanda_message": {
+				"name": "dMsg.net",
+				"one_liner": "Decentralized alternative to Signal.",
+				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			}
 		}
 	},
@@ -1064,6 +1069,7 @@
 				"title": "Manage tokens",
 				"title_nft": "Manage NFT collections",
 				"manage_list": "Manage tokens",
+				"manage_list_nft": "Manage NFTs",
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"import_nft": "Import NFT collection",
@@ -1129,6 +1135,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
+			"title_not_supported": "NFTs are not yet supported on the selected network",
+			"description_not_supported": "Please do not send NTFs to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",
@@ -1647,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Review Terms & Conditions",
-			"review_updated_title": "Review Updated Terms & Conditions",
-			"review_description": "Before you can use OISY Wallet, you must review and agree to our Terms of Service and Privacy Policy. These documents explain the rules of our service and how we protect your data.",
-			"review_updated_description": "To continue using OISY Wallet, please review and agree to our updated Terms of Service and Privacy Policy. These changes are important for keeping our service secure and compliant.",
-			"reject_warning": "You must accept the Terms and Conditions to proceed. Feel free to try again anytime.",
-			"i_have_accepted": "I have read and agree to the",
-			"i_have_accepted_updated": "I have read and agree to the updated",
-			"accept_and_continue": "Accept and continue",
 			"updated_agreements_warning": "We have updated $agreements. By using $oisy_short, you confirm that you have read and agree to the updates."
 		},
 		"error": {
@@ -1733,6 +1733,8 @@
 		"text": {
 			"stake": "Stake $token_symbol",
 			"unstake": "Unstake",
+			"unstaking": "Unstaking...",
+			"unstake_token": "Unstake $token_symbol",
 			"enable_token_text": "You need to enable $token_symbol",
 			"enable_token_button": "Enable $token_symbol",
 			"review": "Review transaction",
@@ -1740,10 +1742,26 @@
 			"unsupported_token_staking": "Staking for the selected token is not supported.",
 			"provider": "Staking terms provided by $provider",
 			"earning_potential": "Earning potential",
+			"active_earning": "Active earning",
+			"active_earning_per_year": "$amount/year",
 			"visit_provider": "Visit website",
 			"current_apy": "Current APY $apy%",
 			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
-			"stake_review_subtitle": "You stake"
+			"stake_review_subtitle": "You stake",
+			"unstake_review_subtitle": "You unstake",
+			"delayed_dissolve": "Receive with a delay",
+			"immediate_dissolve": "Receive immediately",
+			"included_token_fee": "Included network fee",
+			"included_dissolve_fee": "Included unlock fee",
+			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
+			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
+			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
+			"amount_to_receive": "Amount to receive",
+			"unclaimed_rewards": "Unclaimed rewards",
+			"claim_reward": "Claim reward",
+			"claim_rewards": "Claim rewards",
+			"claim_now": "Claim now",
+			"claiming": "Claiming..."
 		}
 	},
 	"temporal": {

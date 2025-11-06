@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { Principal } from '@dfinity/principal';
 	import { isNullish } from '@dfinity/utils';
+	import { Principal } from '@icp-sdk/core/principal';
 	import { getContext } from 'svelte';
 	import GldtStakeForm from '$icp/components/stake/gldt/GldtStakeForm.svelte';
 	import GldtStakeReview from '$icp/components/stake/gldt/GldtStakeReview.svelte';
@@ -18,7 +18,6 @@
 	import { ProgressStepsStake } from '$lib/enums/progress-steps';
 	import { WizardStepsStake } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -53,7 +52,6 @@
 
 	const stake = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 

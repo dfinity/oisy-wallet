@@ -1,7 +1,7 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
+import * as authBroadcastServices from '$lib/providers/auth-broadcast.providers';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
-import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 import { authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';

@@ -16,7 +16,12 @@ import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+import {
+	icTokenIcrcCustomToken,
+	isTokenDip20,
+	isTokenIc,
+	isTokenIcrc
+} from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -33,7 +38,7 @@ import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { calculateTokenUsdBalance, filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
@@ -199,7 +204,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  * @returns The list of "enabled" tokens.
  */
 export const filterEnabledTokens = <T extends Token>([$tokens]: [$tokens: T[]]): T[] =>
-	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
+	$tokens.filter(filterEnabledToken);
 
 /** Pins enabled tokens at the top of the list, preserving the order of the parts.
  *
@@ -249,7 +254,7 @@ export const filterTokens = <T extends Token>({
 			});
 		}
 
-		if (isTokenIcrc(token)) {
+		if (isTokenIc(token)) {
 			const { ledgerCanisterId, indexCanisterId } = token;
 
 			return (

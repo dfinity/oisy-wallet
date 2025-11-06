@@ -5,8 +5,8 @@
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconShield from '$lib/components/icons/IconShield.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import SignerOrigin from '$lib/components/signer/SignerOrigin.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';

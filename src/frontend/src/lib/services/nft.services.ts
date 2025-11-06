@@ -64,10 +64,11 @@ export const loadNftsByNetwork = async ({
 	for (const batch of batches) {
 		try {
 			nfts.push(...(await getNftsByOwner({ address: walletAddress, tokens: batch })));
-		} catch (_: unknown) {
+		} catch (err: unknown) {
 			const tokenAddresses = batch.map((token) => token.address);
 			console.warn(
-				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`
+				`Failed to load NFTs for tokens: ${tokenAddresses} on network: ${networkId.toString()}.`,
+				err
 			);
 		}
 	}

@@ -1,7 +1,7 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 
-describe('auth-broadcast.services', () => {
+describe('auth-broadcast.providers', () => {
 	describe('AuthBroadcastChannel', () => {
 		let bc: AuthBroadcastChannel;
 
