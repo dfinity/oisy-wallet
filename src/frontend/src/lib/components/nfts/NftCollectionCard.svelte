@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { goto } from '$app/navigation';
+	import IconAlertOctagon from '$lib/components/icons/lucide/IconAlertOctagon.svelte';
+	import IconEyeOff from '$lib/components/icons/lucide/IconEyeOff.svelte';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
 	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import BgImg from '$lib/components/ui/BgImg.svelte';
@@ -22,11 +24,13 @@
 
 	interface Props {
 		collection: NftCollectionUi;
+		isHidden?: boolean;
+		isSpam?: boolean;
 		disabled?: boolean;
 		testId?: string;
 	}
 
-	const { collection, disabled, testId }: Props = $props();
+	const { collection, isHidden, isSpam, disabled, testId }: Props = $props();
 
 	const collectionNfts = $derived(
 		filterSortByCollection({
@@ -54,6 +58,10 @@
 			}
 		});
 
+		if (collection.nfts.length === 1) {
+			goto(nftsUrl({ nft: collection.nfts[0] }));
+			return;
+		}
 		goto(nftsUrl({ collection: collection.collection }));
 	};
 </script>
@@ -110,6 +118,18 @@
 				testId={`${testId}-network`}
 			/>
 		</span>
+
+		{#if isHidden}
+			<div class="absolute top-2 left-2 invert dark:invert-0">
+				<IconEyeOff size="24" />
+			</div>
+		{/if}
+
+		{#if isSpam}
+			<div class="absolute top-2 left-2 text-warning-primary">
+				<IconAlertOctagon size="24" />
+			</div>
+		{/if}
 	</span>
 
 	<span class="flex w-full flex-col gap-1 px-2 pb-2">

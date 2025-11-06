@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { IconExpandMore } from '@dfinity/gix-components';
-	import { nonNullish, notEmptyString } from '@dfinity/utils';
+	import { notEmptyString } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import NftCard from '$lib/components/nfts/NftCard.svelte';
 	import NftList from '$lib/components/nfts/NftList.svelte';
 	import EmptyState from '$lib/components/ui/EmptyState.svelte';
 	import InputSearch from '$lib/components/ui/InputSearch.svelte';
+	import { CustomTokenSection } from '$lib/enums/custom-token-section';
 	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -27,15 +28,16 @@
 
 	let filter = $state('');
 
-	const filteredByInput: Nft[] = $derived(
+	const filteredByInputAndSection: Nft[] = $derived(
 		($nftStore ?? []).filter(
-			(nft) => nft?.name?.toLowerCase().includes(filter.toLowerCase()) ?? false
+			(nft) =>
+				nft?.name?.toLowerCase().includes(filter.toLowerCase()) &&
+				nft?.collection?.section !== CustomTokenSection.SPAM &&
+				nft?.collection?.section !== CustomTokenSection.HIDDEN
 		)
 	);
 	const filtered: Nft[] = $derived(
-		nonNullish($filterNetwork)
-			? findNftsByNetwork({ nfts: filteredByInput, networkId: $filterNetwork.id })
-			: filteredByInput
+		findNftsByNetwork({ nfts: filteredByInputAndSection, networkId: $filterNetwork?.id })
 	);
 
 	let noNftsMatch = $derived(filtered.length === 0);

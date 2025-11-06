@@ -15,14 +15,16 @@
 	} from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
+	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
-	import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
 	import { authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
 		children: Snippet;
@@ -145,6 +147,32 @@
 	};
 
 	onMount(openBc);
+
+	let scrollY = 0;
+
+	const lockBodyScroll = () => {
+		({ scrollY } = window);
+		document.body.style.position = 'fixed';
+		document.body.style.top = `-${scrollY}px`;
+		document.body.style.width = '100%';
+	};
+
+	const unlockBodyScroll = () => {
+		document.body.style.position = '';
+		document.body.style.top = '';
+		document.body.style.width = '';
+		window.scrollTo(0, scrollY);
+	};
+
+	$effect(() => {
+		if (isIos()) {
+			if (nonNullish($modalStore?.type)) {
+				lockBodyScroll();
+			} else {
+				unlockBodyScroll();
+			}
+		}
+	});
 </script>
 
 <svelte:window onstorage={syncAuthStore} />

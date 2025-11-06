@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { assertNonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import HideTokenModal from '$lib/components/tokens/HideTokenModal.svelte';

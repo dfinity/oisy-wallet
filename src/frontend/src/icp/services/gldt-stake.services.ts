@@ -4,10 +4,10 @@ import { approve } from '$icp/api/icrc-ledger.api';
 import type { IcToken } from '$icp/types/ic-token';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { GLDT_STAKE_CANISTER_ID, NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
-import { ProgressStepsStake } from '$lib/enums/progress-steps';
+import { ProgressStepsStake, ProgressStepsUnstake } from '$lib/enums/progress-steps';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const stakeGldt = async ({
 	identity,
@@ -45,6 +45,41 @@ export const stakeGldt = async ({
 	stakeCompleted();
 
 	progress?.(ProgressStepsStake.UPDATE_UI);
+
+	await waitAndTriggerWallet();
+
+	return response;
+};
+
+export const unstakeGldt = async ({
+	identity,
+	amount,
+	progress,
+	dissolveInstantly,
+	totalStakedAmount,
+	unstakeCompleted
+}: {
+	identity: Identity;
+	amount: bigint;
+	dissolveInstantly: boolean;
+	totalStakedAmount: bigint;
+	unstakeCompleted: () => void;
+	progress?: (step: ProgressStepsUnstake) => void;
+}): Promise<StakePositionResponse | undefined> => {
+	progress?.(ProgressStepsUnstake.UNSTAKE);
+
+	// TODO: replace "fraction" with "amount" when the gldt_stake canister allows that
+	const fraction = Math.round(Number((amount * 100n) / totalStakedAmount));
+	const response = await manageStakePosition({
+		identity,
+		positionParams: dissolveInstantly
+			? { DissolveInstantly: { fraction } }
+			: { StartDissolving: { fraction } }
+	});
+
+	unstakeCompleted();
+
+	progress?.(ProgressStepsUnstake.UPDATE_UI);
 
 	await waitAndTriggerWallet();
 

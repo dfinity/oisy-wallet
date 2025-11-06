@@ -356,6 +356,32 @@
 					"text": "Меняйте токены на DEX",
 					"call_to_action": "Попробовать KongSwap"
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1043,6 +1069,7 @@
 				"title": "Управление токенами",
 				"title_nft": "Управление NFT",
 				"manage_list": "Управление токенами",
+				"manage_list_nft": "",
 				"list_settings": "Настройки списка",
 				"import_token": "Добавить",
 				"import_nft": "Добавить NFT",
@@ -1108,6 +1135,8 @@
 			"title": "NFT",
 			"title_empty": "Ваши NFT появятся здесь",
 			"description_empty": "Похоже, вы еще не получали NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Группировка",
 			"as_plain_list": "Простой список",
 			"by_collection": "По коллекции",
@@ -1626,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Ознакомьтесь с Условиями использования",
-			"review_updated_title": "Ознакомьтесь с обновленными Условиями использования",
-			"review_description": "Прежде чем вы сможете использовать OISY Wallet, вам необходимо ознакомиться с нашими Условиями обслуживания и Политикой конфиденциальности и принять их. В этих документах объясняются правила нашего сервиса и то, как мы защищаем ваши данные.",
-			"review_updated_description": "Чтобы продолжить использование OISY Wallet, пожалуйста, ознакомьтесь с нашими обновленными Условиями обслуживания и Политикой конфиденциальности и примите их. Эти изменения важны для обеспечения безопасности и соответствия нашего сервиса требованиям.",
-			"reject_warning": "Для продолжения необходимо принять Условия использования. Вы можете повторить попытку в любое время.",
-			"i_have_accepted": "Я прочитал(а) и согласен(на) с",
-			"i_have_accepted_updated": "Я прочитал(а) и согласен(на) с обновленными",
-			"accept_and_continue": "Принять и продолжить",
 			"updated_agreements_warning": "Предупреждение об обновленном соглашении"
 		},
 		"error": {
@@ -1712,6 +1733,8 @@
 		"text": {
 			"stake": "Стейкинг",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "Включить токен",
 			"enable_token_button": "Включить токен",
 			"review": "Проверить",
@@ -1719,10 +1742,21 @@
 			"unsupported_token_staking": "Стейкинг не поддерживается для этого токена",
 			"provider": "Провайдер",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
 			"current_apy_info": "Информация о текущем APY",
-			"stake_review_subtitle": "Подзаголовок проверки стейкинга"
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": ""
 		}
 	},
 	"temporal": {

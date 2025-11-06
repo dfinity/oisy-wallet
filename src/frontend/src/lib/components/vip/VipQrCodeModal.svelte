@@ -2,8 +2,8 @@
 	import { Modal, QRCode } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount } from 'svelte';
-	import IconAstronautHelmet from '$lib/components/icons/IconAstronautHelmet.svelte';
 	import IconBinanceYellow from '$lib/components/icons/IconBinanceYellow.svelte';
+	import IconAstronautHelmet from '$lib/components/icons/icon-astronaut/IconAstronautHelmet.svelte';
 	import ReceiveCopy from '$lib/components/receive/ReceiveCopy.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import ButtonCloseModal from '$lib/components/ui/ButtonCloseModal.svelte';

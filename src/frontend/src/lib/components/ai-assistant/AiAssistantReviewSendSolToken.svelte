@@ -158,18 +158,14 @@
 
 	const send = async () => {
 		const sharedTrackingEventMetadata = {
-			token: $sendTokenSymbol
+			token: $sendTokenSymbol,
+			network: `${$sendTokenNetworkId.description}`
 		};
 
 		trackEvent({
 			name: AI_ASSISTANT_REVIEW_SEND_TOOL_CONFIRMATION,
 			metadata: sharedTrackingEventMetadata
 		});
-
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
 
 		if (isNullish($authIdentity)) {
 			return;
@@ -205,6 +201,16 @@
 			});
 			return;
 		}
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			...(nonNullish($prioritizationFeeStore)
+				? { prioritizationFee: $prioritizationFeeStore.toString() }
+				: {}),
+			...(nonNullish($ataFeeStore) ? { ataFee: $ataFeeStore.toString() } : {}),
+			...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+		};
 
 		try {
 			loading = true;

@@ -22,8 +22,8 @@ import {
 } from '$tests/mocks/erc20-tokens.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import * as idbKeyval from 'idb-keyval';
 import { createStore } from 'idb-keyval';
 

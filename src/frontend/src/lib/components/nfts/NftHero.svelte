@@ -11,12 +11,13 @@
 	import ExpandText from '$lib/components/ui/ExpandText.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import SkeletonText from '$lib/components/ui/SkeletonText.svelte';
-	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { PLAUSIBLE_EVENT_SOURCES } from '$lib/enums/plausible';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store.js';
+	import { userSelectedNetworkStore } from '$lib/stores/settings.store';
 	import type { Nft, NonFungibleToken } from '$lib/types/nft';
 	import { nftsUrl } from '$lib/utils/nav.utils';
+	import { parseNetworkId } from '$lib/validation/network.validation.js';
 
 	interface Props {
 		token?: NonFungibleToken;
@@ -26,7 +27,16 @@
 	const { token, nft }: Props = $props();
 
 	const breadcrumbItems = $derived.by(() => {
-		let breadcrumbs = [{ label: $i18n.navigation.text.tokens, url: AppPath.Nfts as string }];
+		let breadcrumbs = [
+			{
+				label: $i18n.navigation.text.tokens,
+				url: nftsUrl({
+					originSelectedNetwork: nonNullish($userSelectedNetworkStore)
+						? parseNetworkId($userSelectedNetworkStore)
+						: undefined
+				})
+			}
+		];
 		if (nonNullish(nft) && nonNullish(nft.collection.name)) {
 			breadcrumbs = [
 				...breadcrumbs,

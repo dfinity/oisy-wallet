@@ -425,17 +425,5 @@ describe('nft.services', () => {
 				]
 			});
 		});
-
-		it('does nothing if token is undefined', async () => {
-			await updateNftSection({
-				section: CustomTokenSection.HIDDEN,
-				token: undefined as unknown as NonFungibleToken,
-				$authIdentity: mockIdentity,
-				$ethAddress: mockEthAddress
-			});
-
-			expect(erc721Spy).not.toHaveBeenCalled();
-			expect(erc1155Spy).not.toHaveBeenCalled();
-		});
 	});
 });

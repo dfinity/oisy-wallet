@@ -23,6 +23,7 @@ export const BSC_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 56n,
 	icon: bscMainnetIcon,
 	explorerUrl: BSC_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'bnb',
 		alchemy: 'bnb',
@@ -44,6 +45,7 @@ export const BSC_TESTNET_NETWORK: EthereumNetwork = {
 	chainId: 97n,
 	icon: bscTestnetIcon,
 	explorerUrl: BSC_TESTNET_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'bnbt',
 		alchemy: 'bnbt',

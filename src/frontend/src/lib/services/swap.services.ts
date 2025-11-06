@@ -1,4 +1,5 @@
 import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import { approve as approveToken, erc20ContractAllowance } from '$eth/services/send.services';
 import { swap } from '$eth/services/swap.services';
 import type { EthAddress } from '$eth/types/address';
@@ -78,9 +79,9 @@ import {
 	mapVeloraSwapResult
 } from '$lib/utils/swap.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
-import { Principal } from '@dfinity/principal';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 import {
 	constructSimpleSDK,
 	type DeltaAuction,
@@ -870,11 +871,11 @@ export const fetchVeloraDeltaSwap = async ({
 	destinationToken,
 	swapAmount,
 	sourceNetwork,
-	receiveAmount,
 	slippageValue,
 	destinationNetwork,
 	userAddress,
 	gas,
+	isGasless,
 	maxFeePerGas,
 	maxPriorityFeePerGas,
 	swapDetails
@@ -892,7 +893,11 @@ export const fetchVeloraDeltaSwap = async ({
 	const deltaContract = await sdk.delta.getDeltaContract();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		// According to Velora's documentation, we must provide `destAmount` as the value after slippage.
+		// Additionally, as confirmed with Velora, we cannot use a formatted token value with decimals when creating a Delta order.
+		// Instead, we should use the raw `destAmount` value returned in the quote response (`swapDetails.destAmount`).
+		// Therefore, when creating a Delta order, always use the `destAmount` from `swapDetails`.
+		quoteAmount: BigInt(swapDetails.destAmount),
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -900,33 +905,58 @@ export const fetchVeloraDeltaSwap = async ({
 		return;
 	}
 
-	await approveToken({
-		token: sourceToken,
-		from: userAddress,
-		to: deltaContract,
-		amount: parsedSwapAmount,
-		sourceNetwork,
-		identity,
-		gas,
-		maxFeePerGas,
-		shouldSwapWithApproval: true,
-		maxPriorityFeePerGas,
-		progress,
-		progressSteps: ProgressStepsSwap
-	});
+	let signableOrderData;
 
-	progress(ProgressStepsSwap.SWAP);
-
-	const signableOrderData = await sdk.delta.buildDeltaOrder({
+	const deltaOrderBaseParams = {
 		deltaPrice: swapDetails as DeltaPrice,
 		owner: userAddress,
 		srcToken: sourceToken.address,
 		destToken: destinationToken.address,
-		srcAmount: `${parsedSwapAmount}`,
+		srcAmount: parsedSwapAmount.toString(),
 		destAmount: `${slippageMinimum}`,
 		destChainId: Number(destinationNetwork.chainId),
 		partner: OISY_URL_HOSTNAME
-	});
+	};
+
+	if (isGasless) {
+		progress(ProgressStepsSwap.APPROVE);
+
+		const { nonce, deadline, encodedPermit } = await createPermit({
+			token: sourceToken,
+			userAddress,
+			spender: deltaContract,
+			value: parsedSwapAmount.toString(),
+			identity
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder({
+			...deltaOrderBaseParams,
+			deadline,
+			nonce,
+			permit: encodedPermit
+		});
+	} else {
+		await approveToken({
+			token: sourceToken,
+			from: userAddress,
+			to: deltaContract,
+			amount: parsedSwapAmount,
+			sourceNetwork,
+			identity,
+			gas,
+			maxFeePerGas,
+			shouldSwapWithApproval: true,
+			maxPriorityFeePerGas,
+			progress,
+			progressSteps: ProgressStepsSwap
+		});
+
+		progress(ProgressStepsSwap.SWAP);
+
+		signableOrderData = await sdk.delta.buildDeltaOrder(deltaOrderBaseParams);
+	}
 
 	const hash = getSignParamsEIP712(signableOrderData);
 

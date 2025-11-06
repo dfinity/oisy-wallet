@@ -356,6 +356,32 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1043,6 +1069,7 @@
 				"title": "管理代币",
 				"title_nft": "",
 				"manage_list": "管理代币",
+				"manage_list_nft": "",
 				"list_settings": "列表设置",
 				"import_token": "导入代币",
 				"import_nft": "",
@@ -1108,6 +1135,8 @@
 			"title": "标题",
 			"title_empty": "标题为空",
 			"description_empty": "描述为空",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "分组",
 			"as_plain_list": "以普通列表显示",
 			"by_collection": "按合集分组",
@@ -1626,14 +1655,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "查看条款与条件",
-			"review_updated_title": "查看更新后的条款与条件",
-			"review_description": "在使用 OISY 钱包之前，你必须查看并同意我们的服务条款和隐私政策。这些文件解释了我们的服务规则以及我们如何保护你的数据。",
-			"review_updated_description": "要继续使用 OISY 钱包，请查看并同意我们更新后的服务条款和隐私政策。这些更改对于保持我们的服务安全和合规非常重要。",
-			"reject_warning": "你必须接受条款与条件才能继续。你可以随时再次尝试。",
-			"i_have_accepted": "我已阅读并同意",
-			"i_have_accepted_updated": "我已阅读并同意更新后的",
-			"accept_and_continue": "接受并继续",
 			"updated_agreements_warning": "我们已更新$agreements。使用$oisy_short即表示您确认已阅读并同意更新内容。"
 		},
 		"error": {
@@ -1712,6 +1733,8 @@
 		"text": {
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1719,10 +1742,21 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": ""
 		}
 	},
 	"temporal": {

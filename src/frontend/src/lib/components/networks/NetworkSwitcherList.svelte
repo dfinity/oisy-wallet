@@ -14,19 +14,19 @@
 
 	interface Props {
 		selectedNetworkId?: NetworkId;
-		delayOnNetworkSelect?: boolean;
 		labelsSize?: LabelSize;
 		supportedNetworks?: NetworkType[];
 		allNetworksEnabled?: boolean;
+		showTestnets?: boolean;
 		onSelected?: (networkId: OptionNetworkId) => void;
 	}
 
 	let {
 		selectedNetworkId,
-		delayOnNetworkSelect = true,
 		labelsSize = 'md',
 		supportedNetworks,
 		allNetworksEnabled = true,
+		showTestnets = true,
 		onSelected
 	}: Props = $props();
 
@@ -42,7 +42,6 @@
 
 {#if allNetworksEnabled}
 	<NetworkButton
-		{delayOnNetworkSelect}
 		{labelsSize}
 		{onSelected}
 		{selectedNetworkId}
@@ -53,18 +52,12 @@
 <ul class="flex list-none flex-col">
 	{#each enabledNetworks as network (network.id)}
 		<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-			><MainnetNetwork
-				{delayOnNetworkSelect}
-				{labelsSize}
-				{network}
-				{onSelected}
-				{selectedNetworkId}
-			/></li
+			><MainnetNetwork {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 		>
 	{/each}
 </ul>
 
-{#if $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
+{#if showTestnets && $testnetsEnabled && $networksTestnets.length && isNullish(supportedNetworks)}
 	<span class="mt-6 mb-3 flex px-3 font-bold" transition:slide={SLIDE_EASING}
 		>{$i18n.networks.test_networks}</span
 	>
@@ -72,13 +65,7 @@
 	<ul class="flex list-none flex-col" transition:slide={SLIDE_EASING}>
 		{#each $networksTestnets as network (network.id)}
 			<li class="logo-button-list-item" transition:slide={SLIDE_EASING}
-				><Network
-					{delayOnNetworkSelect}
-					{labelsSize}
-					{network}
-					{onSelected}
-					{selectedNetworkId}
-				/></li
+				><Network {labelsSize} {network} {onSelected} {selectedNetworkId} /></li
 			>
 		{/each}
 	</ul>

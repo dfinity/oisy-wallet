@@ -1,6 +1,6 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
-import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -145,7 +145,7 @@ export const AUTH_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
-// ICP Index has not been upgraded yet so right now for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
+// ICP Index has not been upgraded yet, so right now for ICP it is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
 export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
@@ -171,7 +171,8 @@ export const EIGHT_DECIMALS = 8;
 export const ZERO = 0n;
 
 // NFTs
-export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
+export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
+export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
