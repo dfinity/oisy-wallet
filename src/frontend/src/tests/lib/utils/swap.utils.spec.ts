@@ -16,7 +16,13 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { SwapErrorCodes, SwapProvider, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import {
+	SwapErrorCodes,
+	SwapProvider,
+	VeloraSwapTypes,
+	type DeltaSwapResponse,
+	type ICPSwapResult
+} from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
@@ -38,7 +44,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Bridge, OptimalRate, SwapSide } from '@velora-dex/sdk';
-import type { QuoteWithDeltaPriceAndBridgePrice } from '@velora-dex/sdk/dist/methods/quote/getQuote';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -330,7 +335,7 @@ describe('swap utils', () => {
 
 	describe('mapVeloraSwapResult', () => {
 		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
-			const mockDeltaSwap: QuoteWithDeltaPriceAndBridgePrice = {
+			const mockDeltaSwap: DeltaSwapResponse = {
 				delta: {
 					srcToken: '0x123',
 					destToken: '0x456',
@@ -361,7 +366,7 @@ describe('swap utils', () => {
 		});
 
 		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: QuoteWithDeltaPriceAndBridgePrice = {
+			const mockBridgeSwap: DeltaSwapResponse = {
 				delta: {
 					srcToken: '0x123',
 					destToken: '0x456',
