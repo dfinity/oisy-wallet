@@ -178,7 +178,7 @@
 <svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
-	<div in:fade>
+	<div class="text-brand-primary" in:fade>
 		<Spinner />
 	</div>
 {:then _}
