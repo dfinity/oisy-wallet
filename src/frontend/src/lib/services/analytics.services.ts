@@ -28,6 +28,7 @@ export const initPlausibleAnalytics = async () => {
 			domain: PLAUSIBLE_DOMAIN
 		});
 	} catch (_: unknown) {
+		console.warn('An unexpected error occurred during initialization.');
 		plausibleTracker = null;
 	}
 };
