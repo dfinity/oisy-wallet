@@ -110,20 +110,25 @@
 
 		<style>
 			#app-spinner {
+					--spinner-size: 30px;
+
           width: 30px;
           height: 30px;
           border: 3px solid rgb(0, 102, 255);
           border-top-color: transparent;
           border-radius: 50%;
-          animation: spin 0.8s linear infinite;
+          animation: spin 0.75s ease-in-out 40; /* limit to 40*0.75 to avoid gpu leaks, shouldnt take longer than 30s */
           position: absolute;
           top: 50%;
           left: 50%;
-          transform: translate(-50%, -50%);
+					transform: rotate(0deg);
+          margin-left: -15px;
+          margin-top: -15px;
+          box-sizing: border-box;
       }
 
       @keyframes spin {
-          to { transform: translate(-50%, -50%) rotate(360deg); }
+          to { transform: rotate(360deg); }
       }
 
 			#app-background-container {
@@ -199,6 +204,8 @@
 				 aria-hidden="true"
 				 data-tid="spinner"
 		></div>
+
+		<div id="app-spinner-tst"></div>
 
 		<!-- SCRIPT_LOADER -->
 	</body>
