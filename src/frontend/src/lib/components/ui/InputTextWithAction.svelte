@@ -41,7 +41,6 @@
 	spellcheck={false}
 	{testId}
 	bind:value
-	on:nnsInput
 	on:blur
 	on:focus
 	bind:inputElement
