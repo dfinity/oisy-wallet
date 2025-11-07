@@ -152,11 +152,11 @@
 	"testOISY.P": {
 		"ledgerCanisterId": "ap6gq-taaaa-aaaae-acsaq-cai",
 		"indexCanisterId": "x3qir-tyaaa-aaaae-acr6a-cai",
-		"fee": {
-			"__bigint__": "100000"
-		},
 		"decimals": 8,
 		"name": "Test OISY Points",
-		"symbol": "testOISY.p"
+		"symbol": "testOISY.p",
+		"fee": {
+			"__bigint__": "100000"
+		}
 	}
 }
