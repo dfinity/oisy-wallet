@@ -123,7 +123,6 @@
 			bind:value={destination}
 			on:focus={onFocus}
 			on:blur={onBlur}
-			on:nnsInput
 			bind:inputElement
 		>
 			{#snippet innerEnd()}

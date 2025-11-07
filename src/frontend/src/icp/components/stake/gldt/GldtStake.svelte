@@ -6,6 +6,7 @@
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
 	import GldtStakeEarnCard from '$icp/components/stake/gldt/GldtStakeEarnCard.svelte';
 	import GldtStakePositionCard from '$icp/components/stake/gldt/GldtStakePositionCard.svelte';
+	import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 	import { enabledIcrcTokens } from '$icp/derived/icrc.derived';
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
@@ -64,5 +65,9 @@
 	<div class="flex justify-between gap-4">
 		<GldtStakeEarnCard {gldtToken} />
 		<GldtStakePositionCard {gldtToken} />
+	</div>
+
+	<div class="my-8">
+		<GldtStakeRewards />
 	</div>
 </GldtStakeContext>
