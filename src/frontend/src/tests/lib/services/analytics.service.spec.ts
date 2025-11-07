@@ -2,8 +2,10 @@ const trackMock = vi.fn();
 const initMock = vi.fn();
 
 vi.mock('$lib/services/analytics-wrapper', () => ({
-	init: initMock,
-	track: trackMock
+	loadPlausibleTracker: vi.fn(() => ({
+		init: initMock,
+		track: trackMock
+	}))
 }));
 
 vi.mock('$app/environment', () => ({
@@ -48,6 +50,41 @@ describe('plausible analytics service', () => {
 	it('should NOT initialize if browser is false', async () => {
 		vi.doMock('$app/environment', () => ({
 			browser: false
+		}));
+
+		vi.resetModules();
+
+		const { initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		expect(initMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT track if not initialized', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: true,
+			PLAUSIBLE_DOMAIN: null
+		}));
+
+		vi.resetModules();
+
+		const { trackEvent, initPlausibleAnalytics } = await import('$lib/services/analytics.services');
+
+		await initPlausibleAnalytics();
+
+		trackEvent({
+			name: 'test_event',
+			metadata: { key: 'value' }
+		});
+
+		expect(trackMock).not.toHaveBeenCalled();
+	});
+
+	it('should NOT initialize if PLAUSIBLE_ENABLED is false', async () => {
+		vi.doMock('$env/plausible.env', () => ({
+			PLAUSIBLE_ENABLED: false,
+			PLAUSIBLE_DOMAIN: 'test.com'
 		}));
 
 		vi.resetModules();

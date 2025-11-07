@@ -1,18 +1,19 @@
+import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
-import { NOT_BROWSER } from '$lib/constants/app.constants';
-import type * as PlausibleTrackerType from '$lib/services/analytics-wrapper';
+import { loadPlausibleTracker } from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
+import type { init, track } from '@plausible-analytics/tracker';
 
-let plausibleTracker: typeof PlausibleTrackerType | undefined = undefined;
+let plausibleTracker: { init: typeof init; track: typeof track } | undefined = undefined;
 let plausibleTrackerIsInitialized = false;
 
 export const initPlausibleAnalytics = async () => {
 	if (
 		!PLAUSIBLE_ENABLED ||
 		isNullish(PLAUSIBLE_DOMAIN) ||
-		NOT_BROWSER ||
-		(nonNullish(plausibleTracker) && plausibleTrackerIsInitialized)
+		!browser ||
+		plausibleTrackerIsInitialized
 	) {
 		return;
 	}
@@ -23,7 +24,7 @@ export const initPlausibleAnalytics = async () => {
 	// Important: This library only works in browser environments. The `init` and `track`
 	// functions rely on browser APIs, so they should only be initialized and called on the client side.
 	try {
-		plausibleTracker = await import('$lib/services/analytics-wrapper');
+		plausibleTracker = await loadPlausibleTracker();
 
 		plausibleTracker.init({
 			domain: PLAUSIBLE_DOMAIN

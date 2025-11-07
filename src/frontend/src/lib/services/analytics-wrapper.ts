@@ -1,1 +1,1 @@
-export { init, track } from '@plausible-analytics/tracker';
+export const loadPlausibleTracker = async () => await import('@plausible-analytics/tracker');
