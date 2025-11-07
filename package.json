@@ -67,7 +67,7 @@
 	"dependencies": {
 		"@dfinity/ckbtc": "^5.0.0",
 		"@dfinity/cketh": "^5.0.0",
-		"@dfinity/gix-components": "^9.0.0-next-2025-10-22",
+		"@dfinity/gix-components": "^9.0.0",
 		"@dfinity/ledger-icp": "^7.0.0",
 		"@dfinity/ledger-icrc": "^5.0.0",
 		"@dfinity/oisy-wallet-signer": "^2.0.0",
