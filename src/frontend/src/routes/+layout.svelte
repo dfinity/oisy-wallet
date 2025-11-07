@@ -107,7 +107,18 @@
 		}
 
 		const spinner = document.querySelector('body > #app-spinner');
-		spinner?.remove();
+
+		// Due to an issue in mobile safari we cleanly detach all running animations and request an animation frame to be sure all animations are halted to safely remove the dom element
+		if (nonNullish(spinner) && spinner instanceof HTMLElement) {
+			// stop animation first
+			spinner.style.animation = 'none';
+			spinner.style.transition = 'none';
+
+			// let the browser flush compositing state
+			requestAnimationFrame(() => {
+				spinner.remove();
+			});
+		}
 	});
 
 	const handleBroadcastLoginSuccess = async () => {
@@ -178,7 +189,7 @@
 <svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
-	<div in:fade>
+	<div class="text-brand-primary" in:fade>
 		<Spinner />
 	</div>
 {:then _}
