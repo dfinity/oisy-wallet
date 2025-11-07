@@ -1,17 +1,18 @@
-import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import { NOT_BROWSER } from '$lib/constants/app.constants';
 import type * as PlausibleTrackerType from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
 let plausibleTracker: typeof PlausibleTrackerType | undefined = undefined;
+let plausibleTrackerIsInitialized = false;
 
 export const initPlausibleAnalytics = async () => {
 	if (
 		!PLAUSIBLE_ENABLED ||
 		isNullish(PLAUSIBLE_DOMAIN) ||
-		!browser ||
-		nonNullish(plausibleTracker)
+		NOT_BROWSER ||
+		(nonNullish(plausibleTracker) && plausibleTrackerIsInitialized)
 	) {
 		return;
 	}
@@ -27,9 +28,11 @@ export const initPlausibleAnalytics = async () => {
 		plausibleTracker.init({
 			domain: PLAUSIBLE_DOMAIN
 		});
+		plausibleTrackerIsInitialized = true;
 	} catch (_: unknown) {
 		console.warn('An unexpected error occurred during initialization.');
 		plausibleTracker = undefined;
+		plausibleTrackerIsInitialized = false;
 	}
 };
 
@@ -42,7 +45,7 @@ export const trackEvent = ({ name, metadata, warning }: TrackEventParams) => {
 	 * TODO: Once testing is complete and Plausible should only run in production,
 	 * replace the `PLAUSIBLE_ENABLED` check with a `PROD` check and remove the feature flag.
 	 */
-	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker)) {
+	if (PLAUSIBLE_ENABLED && nonNullish(plausibleTracker) && plausibleTrackerIsInitialized) {
 		// Important: This library only works in browser environments. The `init` and `track`
 		// functions rely on browser APIs, so they should only be initialized and called on the client side.
 

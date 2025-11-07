@@ -1,3 +1,4 @@
+import { browser } from '$app/environment';
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
 import { nonNullish } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
@@ -219,3 +220,5 @@ export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
 
 // NFT max filesize limit (10MB)
 export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;
+
+export const NOT_BROWSER = !browser;
