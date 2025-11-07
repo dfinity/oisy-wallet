@@ -22,7 +22,7 @@ export const initPlausibleAnalytics = async () => {
 	// Important: This library only works in browser environments. The `init` and `track`
 	// functions rely on browser APIs, so they should only be initialized and called on the client side.
 	try {
-		const plausibleTracker = await import('@plausible-analytics/tracker');
+		plausibleTracker = await import('@plausible-analytics/tracker');
 
 		plausibleTracker.init({
 			domain: PLAUSIBLE_DOMAIN
