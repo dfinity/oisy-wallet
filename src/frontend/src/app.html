@@ -110,26 +110,28 @@
 
 		<style>
 			#app-spinner {
-					--spinner-size: 30px;
+				--spinner-size: 30px;
 
-          width: 30px;
-          height: 30px;
-          border: 3px solid rgb(0, 102, 255);
-          border-top-color: transparent;
-          border-radius: 50%;
-          animation: spin 0.75s ease-in-out 40; /* limit to 40*0.75 to avoid gpu leaks, shouldnt take longer than 30s */
-          position: absolute;
-          top: 50%;
-          left: 50%;
-					transform: rotate(0deg);
-          margin-left: -15px;
-          margin-top: -15px;
-          box-sizing: border-box;
-      }
+				width: 30px;
+				height: 30px;
+				border: 3px solid rgb(0, 102, 255);
+				border-top-color: transparent;
+				border-radius: 50%;
+				animation: spin 0.75s ease-in-out 40; /* limit to 40*0.75 to avoid gpu leaks, shouldnt take longer than 30s */
+				position: absolute;
+				top: 50%;
+				left: 50%;
+				transform: rotate(0deg);
+				margin-left: -15px;
+				margin-top: -15px;
+				box-sizing: border-box;
+			}
 
-      @keyframes spin {
-          to { transform: rotate(360deg); }
-      }
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
 
 			#app-background-container {
 				contain: paint;
@@ -200,10 +202,7 @@
 		<!-- All resources required to boot the dapp can take some times to be downloaded on the IC. -->
 		<!-- That's why we are displaying a spinner while the dapp is starting. -->
 		<!-- Spinner which is then removed as soon as the authentication is initialized (regardless if sign-in or sign-out) -->
-		<div id="app-spinner"
-				 aria-hidden="true"
-				 data-tid="spinner"
-		></div>
+		<div id="app-spinner" aria-hidden="true" data-tid="spinner"></div>
 
 		<!-- SCRIPT_LOADER -->
 	</body>
