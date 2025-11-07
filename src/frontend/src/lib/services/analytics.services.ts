@@ -1,10 +1,10 @@
 import { browser } from '$app/environment';
 import { PLAUSIBLE_DOMAIN, PLAUSIBLE_ENABLED } from '$env/plausible.env';
+import type * as PlausibleTrackerType from '$lib/services/analytics-wrapper';
 import type { TrackEventParams } from '$lib/types/analytics';
 import { isNullish, nonNullish } from '@dfinity/utils';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-imports
-let plausibleTracker: typeof import('@plausible-analytics/tracker') | null = null;
+let plausibleTracker: typeof PlausibleTrackerType | undefined = undefined;
 
 export const initPlausibleAnalytics = async () => {
 	if (
@@ -22,14 +22,14 @@ export const initPlausibleAnalytics = async () => {
 	// Important: This library only works in browser environments. The `init` and `track`
 	// functions rely on browser APIs, so they should only be initialized and called on the client side.
 	try {
-		plausibleTracker = await import('@plausible-analytics/tracker');
+		plausibleTracker = await import('$lib/services/analytics-wrapper');
 
 		plausibleTracker.init({
 			domain: PLAUSIBLE_DOMAIN
 		});
 	} catch (_: unknown) {
 		console.warn('An unexpected error occurred during initialization.');
-		plausibleTracker = null;
+		plausibleTracker = undefined;
 	}
 };
 
