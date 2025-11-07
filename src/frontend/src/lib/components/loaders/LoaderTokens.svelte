@@ -5,9 +5,14 @@
 	import { erc1155CustomTokensNotInitialized } from '$eth/derived/erc1155.derived';
 	import { erc20UserTokensNotInitialized } from '$eth/derived/erc20.derived';
 	import { erc721CustomTokensNotInitialized } from '$eth/derived/erc721.derived';
+	import {
+		enabledEthereumNetworks,
+		enabledEthereumNetworksChainIds
+	} from '$eth/derived/networks.derived';
 	import { loadErc1155Tokens } from '$eth/services/erc1155.services';
 	import { loadErc20Tokens } from '$eth/services/erc20.services';
 	import { loadErc721Tokens } from '$eth/services/erc721.services';
+	import { enabledEvmNetworks, enabledEvmNetworksChainIds } from '$evm/derived/networks.derived';
 	import { loadIcrcTokens } from '$icp/services/icrc.services';
 	import LoaderCollections from '$lib/components/loaders/LoaderCollections.svelte';
 	import LoaderNfts from '$lib/components/loaders/LoaderNfts.svelte';
@@ -63,21 +68,26 @@
 		(loadSplMainnet || loadSplDevnet || loadSplLocal) && $splCustomTokensNotInitialized
 	);
 
+	let ercNetworkChainIds = $derived([
+		...$enabledEthereumNetworksChainIds,
+		...$enabledEvmNetworksChainIds
+	]);
+
 	$effect(() => {
 		if (loadErc20) {
-			loadErc20Tokens({ identity: $authIdentity });
+			loadErc20Tokens({ identity: $authIdentity, networkChainIds: ercNetworkChainIds });
 		}
 	});
 
 	$effect(() => {
 		if (loadErc721) {
-			loadErc721Tokens({ identity: $authIdentity });
+			loadErc721Tokens({ identity: $authIdentity, networkChainIds: ercNetworkChainIds });
 		}
 	});
 
 	$effect(() => {
 		if (loadErc1155) {
-			loadErc1155Tokens({ identity: $authIdentity });
+			loadErc1155Tokens({ identity: $authIdentity, networkChainIds: ercNetworkChainIds });
 		}
 	});
 

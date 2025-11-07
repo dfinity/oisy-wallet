@@ -22,7 +22,7 @@ import type { Erc20ContractAddress } from '$eth/types/address';
 import type { Erc20Contract, Erc20Metadata, Erc20Token } from '$eth/types/erc20';
 import type { Erc20CustomToken } from '$eth/types/erc20-custom-token';
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
-import type { EthereumNetwork } from '$eth/types/network';
+import type { EthereumChainId, EthereumNetwork } from '$eth/types/network';
 import { mapErc20Icon, mapErc20Token, mapErc20UserToken } from '$eth/utils/erc20.utils';
 import { listUserTokens } from '$lib/api/backend.api';
 import { getIdbEthTokensDeprecated, setIdbEthTokensDeprecated } from '$lib/api/idb-tokens.api';
@@ -46,14 +46,16 @@ import {
 import { get } from 'svelte/store';
 
 export const loadErc20Tokens = async ({
-	identity
+	identity,
+	networkChainIds
 }: {
 	identity: OptionIdentity;
+	networkChainIds: EthereumChainId[];
 }): Promise<void> => {
 	await Promise.all([
 		loadDefaultErc20Tokens(),
-		loadErc20UserTokens({ identity, useCache: true }),
-		loadCustomTokens({ identity, useCache: true })
+		loadErc20UserTokens({ identity, networkChainIds, useCache: true }),
+		loadCustomTokens({ identity, networkChainIds, useCache: true })
 	]);
 };
 
@@ -98,10 +100,11 @@ const loadDefaultErc20Tokens = async (): Promise<ResultSuccess> => {
 
 export const loadCustomTokens = ({
 	identity,
+	networkChainIds,
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc20CustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, networkChainIds, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc20CustomTokensStore.resetAll();
@@ -117,10 +120,11 @@ export const loadCustomTokens = ({
 // TODO: UserToken is deprecated - remove this when the migration to CustomToken is complete
 export const loadErc20UserTokens = ({
 	identity,
+	networkChainIds,
 	useCache = false
 }: Omit<LoadUserTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc20UserToken[]>({
-		request: (params) => loadUserTokens({ ...params, useCache }),
+		request: (params) => loadUserTokens({ ...params, networkChainIds, useCache }),
 		onLoad: loadUserTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc20UserTokensStore.resetAll();
@@ -177,10 +181,13 @@ const loadNetworkUserTokens = async ({
 	});
 };
 
-const loadErc20CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
+const loadErc20CustomTokens = async ({
+	networkChainIds,
+	...params
+}: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'Erc20' in token
+		filterTokens: ({ token }) => 'Erc20' in token && networkChainIds.includes(token.Erc20.chain_id)
 	});
 
 const loadCustomTokensWithMetadata = async (

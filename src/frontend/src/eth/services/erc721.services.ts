@@ -6,6 +6,7 @@ import { infuraErc721Providers } from '$eth/providers/infura-erc721.providers';
 import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store';
 import type { Erc721ContractAddress } from '$eth/types/erc721';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
+import type { EthereumChainId } from '$eth/types/network';
 import {
 	PLAUSIBLE_EVENTS,
 	PLAUSIBLE_EVENT_CONTEXTS,
@@ -42,19 +43,22 @@ export const isInterfaceErc721 = async ({
 };
 
 export const loadErc721Tokens = async ({
-	identity
+	identity,
+	networkChainIds
 }: {
 	identity: OptionIdentity;
+	networkChainIds: EthereumChainId[];
 }): Promise<void> => {
-	await Promise.all([loadCustomTokens({ identity, useCache: true })]);
+	await Promise.all([loadCustomTokens({ identity, networkChainIds, useCache: true })]);
 };
 
 export const loadCustomTokens = ({
 	identity,
+	networkChainIds,
 	useCache = false
 }: Omit<LoadCustomTokenParams, 'certified'>): Promise<void> =>
 	queryAndUpdate<Erc721CustomToken[]>({
-		request: (params) => loadCustomTokensWithMetadata({ ...params, useCache }),
+		request: (params) => loadCustomTokensWithMetadata({ ...params, networkChainIds, useCache }),
 		onLoad: loadCustomTokenData,
 		onUpdateError: ({ error: err }) => {
 			erc721CustomTokensStore.resetAll();
@@ -67,10 +71,14 @@ export const loadCustomTokens = ({
 		identity
 	});
 
-const loadErc721CustomTokens = async (params: LoadCustomTokenParams): Promise<CustomToken[]> =>
+const loadErc721CustomTokens = async ({
+	networkChainIds,
+	...params
+}: LoadCustomTokenParams): Promise<CustomToken[]> =>
 	await loadNetworkCustomTokens({
 		...params,
-		filterTokens: ({ token }) => 'Erc721' in token
+		filterTokens: ({ token }) =>
+			'Erc721' in token && networkChainIds.includes(token.Erc721.chain_id)
 	});
 
 const safeLoadMetadata = async ({
