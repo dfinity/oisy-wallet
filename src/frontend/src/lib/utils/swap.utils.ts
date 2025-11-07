@@ -19,6 +19,7 @@ import type { OisyDappDescription } from '$lib/types/dapp-description';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
+	type DeltaSwapResponse,
 	type FormatSlippageParams,
 	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
@@ -34,7 +35,6 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { OptimalRate } from '@velora-dex/sdk';
-import type { QuoteWithDeltaPriceAndBridgePrice } from '@velora-dex/sdk/dist/methods/quote/getQuote';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -171,7 +171,7 @@ export const formatReceiveOutMinimum = ({
 	});
 };
 
-export const mapVeloraSwapResult = (swap: QuoteWithDeltaPriceAndBridgePrice): SwapMappedResult => ({
+export const mapVeloraSwapResult = (swap: DeltaSwapResponse): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount:
 		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).

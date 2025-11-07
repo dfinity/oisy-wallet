@@ -46,7 +46,7 @@
 	);
 </script>
 
-<StakeReview {amount} disabled={invalid} {onBack} onStake={onUnstake}>
+<StakeReview {amount} disabled={invalid} {onBack} onConfirm={onUnstake}>
 	{#snippet subtitle()}
 		{$i18n.stake.text.unstake_review_subtitle}
 	{/snippet}

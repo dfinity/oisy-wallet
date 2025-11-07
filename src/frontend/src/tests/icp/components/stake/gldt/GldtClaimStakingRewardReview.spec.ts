@@ -1,22 +1,21 @@
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
-import StakeReview from '$lib/components/stake/StakeReview.svelte';
+import GldtClaimStakingRewardReview from '$icp/components/stake/gldt/GldtClaimStakingRewardReview.svelte';
 import { STAKE_REVIEW_FORM_BUTTON } from '$lib/constants/test-ids.constants';
 import { SEND_CONTEXT_KEY, initSendContext, type SendContext } from '$lib/stores/send.store';
 import { render } from '@testing-library/svelte';
 
-describe('StakeReview', () => {
+describe('GldtClaimStakingRewardReview', () => {
 	const mockContext = () =>
 		new Map<symbol, SendContext>([[SEND_CONTEXT_KEY, initSendContext({ token: ICP_TOKEN })]]);
 
 	const props = {
-		amount: 0.01,
-		disabled: false,
-		onConfirm: () => {},
-		onBack: () => {}
+		rewardAmount: 0.01,
+		onClose: () => {},
+		onClaimReward: () => {}
 	};
 
-	it('should keep the next button clickable if all requirements are met', () => {
-		const { getByTestId } = render(StakeReview, {
+	it('should keep the next button clickable', () => {
+		const { getByTestId } = render(GldtClaimStakingRewardReview, {
 			props,
 			context: mockContext()
 		});
@@ -24,15 +23,12 @@ describe('StakeReview', () => {
 		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).not.toHaveAttribute('disabled');
 	});
 
-	it('should disable the next button clickable if amount is incorrect', () => {
-		const { getByTestId } = render(StakeReview, {
-			props: {
-				...props,
-				disabled: true
-			},
+	it('should display correct network name', () => {
+		const { getByText } = render(GldtClaimStakingRewardReview, {
+			props,
 			context: mockContext()
 		});
 
-		expect(getByTestId(STAKE_REVIEW_FORM_BUTTON)).toHaveAttribute('disabled');
+		expect(getByText(ICP_TOKEN.network.name)).toBeInTheDocument();
 	});
 });
