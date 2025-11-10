@@ -122,7 +122,6 @@
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {

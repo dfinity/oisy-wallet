@@ -122,7 +122,6 @@
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
