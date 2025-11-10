@@ -248,7 +248,7 @@ export const send = async ({
 		...rest
 	});
 
-	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
 
 	const transactionSent = await sendTransaction({
@@ -459,7 +459,7 @@ const checkExistingApproval = async ({
 		return 'existingApprovalIsEnough';
 	}
 
-	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
+	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first before approving the new amount.
 	if (preApprovedAmount > ZERO) {
 		await resetExistingApprovalToZero({
 			...rest,
@@ -521,7 +521,7 @@ export const approve = async ({
 		return { transactionNeededApproval: false, nonce };
 	}
 
-	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
+	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't, and it's non-null, we reset it to zero.
 	const approvalCheckResult = await checkExistingApproval({
 		token,
 		from,
@@ -538,7 +538,7 @@ export const approve = async ({
 		return { transactionNeededApproval: false, nonce };
 	}
 
-	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceApproval = approvalCheckResult === 'approvalNeededReset' ? nonce + 1 : nonce;
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
