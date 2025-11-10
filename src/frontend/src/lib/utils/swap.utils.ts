@@ -257,6 +257,10 @@ export const calculateValueDifference = ({
 			? Number(swapAmount) * sourceTokenExchangeRate
 			: undefined;
 
+	if (isNullish(paidValue) || paidValue === 0) {
+		return;
+	}
+
 	const receivedValue =
 		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
 			? receiveAmount * destinationTokenExchangeRate
@@ -265,6 +269,4 @@ export const calculateValueDifference = ({
 	if (nonNullish(paidValue) && nonNullish(receivedValue) && paidValue !== 0) {
 		return ((receivedValue - paidValue) / paidValue) * 100;
 	}
-
-	return undefined;
 };
