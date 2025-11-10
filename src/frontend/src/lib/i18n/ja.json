@@ -968,7 +968,8 @@
 			"manually_withdraw_success": "前回の失敗したスワップのトークンは正常に出金されました。再度スワップを試すか、スワッププロバイダーを変更してください。",
 			"manually_withdraw_failed": "資金の出金に失敗しました。<br>もう一度試すか、以下に従ってください",
 			"swap_sucess_withdraw_failed": "スワップは完了しましたが、トークンを自動的に出金できませんでした。下の出金ボタンをクリックして手動で引き出すか、<br>以下に従ってください",
-			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。"
+			"swap_sucess_manually_withdraw_success": "前回のスワップのトークンは正常に出金されました。このモーダルを閉じることができます。",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {

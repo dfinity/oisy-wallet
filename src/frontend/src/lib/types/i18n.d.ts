@@ -778,6 +778,7 @@ interface I18nSwap {
 		manually_withdraw_failed: string;
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
+		swap_slippage_exceeded_exchange_rate: string;
 	};
 }
 
