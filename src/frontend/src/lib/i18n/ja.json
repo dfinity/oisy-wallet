@@ -122,7 +122,6 @@
 			"preview": "ログイン後の $oisy_name（PC・モバイル）プレビュー"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {

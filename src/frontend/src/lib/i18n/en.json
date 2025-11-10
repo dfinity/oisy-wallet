@@ -122,7 +122,6 @@
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"message": {
-			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab.",
 			"session_locked": "Your session was locked in another tab."
 		},
 		"warning": {
