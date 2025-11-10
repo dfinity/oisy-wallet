@@ -19,7 +19,7 @@
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -122,20 +122,13 @@
 	});
 
 	const handleBroadcastLoginSuccess = async () => {
-		const wasPreviouslyAuthenticated = $authSignedIn;
-
-		await authStore.forceSync();
+		authLoggedInAnotherTabStore.set(true);
 
 		if ($authNotSignedIn) {
-			return;
+			return
 		}
 
-		if (!wasPreviouslyAuthenticated) {
-			toastsShow({
-				text: $i18n.auth.message.refreshed_authentication,
-				level: 'success'
-			});
-		}
+		await authStore.forceSync();
 
 		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
 	};
