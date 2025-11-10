@@ -34,13 +34,18 @@ export const loadMetadata = async (
 
 export const getIndexPrincipal = async (
 	ledgerCanisterId: LedgerCanisterIdText
-): Promise<Principal> => {
+): Promise<Principal | undefined> => {
 	const { getIndexPrincipal } = IcrcLedgerCanister.create({
 		agent,
 		canisterId: Principal.from(ledgerCanisterId)
 	});
 
-	return await getIndexPrincipal({ certified: true });
+	try {
+		return await getIndexPrincipal({ certified: true });
+	} catch (_: unknown) {
+		// This method is just to get the index principal if the token supports the method `icrc106_get_index_principal`.
+		// So if it fails, we do not really care and consider it as not supported.
+	}
 };
 
 export const saveLogo = ({
