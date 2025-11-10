@@ -122,7 +122,6 @@
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
 		},
 		"message": {
-			"refreshed_authentication": "Esta página se actualizó para reflejar el inicio de sesión realizado en otra pestaña.",
 			"session_locked": "Tu sesión fue bloqueada."
 		},
 		"warning": {
