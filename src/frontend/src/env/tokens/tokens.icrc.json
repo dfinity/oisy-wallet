@@ -141,7 +141,6 @@
 	},
 	"TICRC1": {
 		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
-		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
 		"decimals": 8,
 		"name": "TEST ICRC1",
 		"symbol": "TICRC1",
