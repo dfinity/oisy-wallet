@@ -2,12 +2,10 @@ import type { EnvIcrcTokenMetadataWithIcon } from '$env/types/env-icrc-token';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import {
 	IcrcLedgerCanister,
-	fromCandidAccount,
 	mapTokenMetadata,
-	type IcrcAccount,
 	type IcrcTokenMetadataResponse
 } from '@dfinity/ledger-icrc';
-import { createAgent, fromDefinedNullable } from '@dfinity/utils';
+import { createAgent } from '@dfinity/utils';
 import { AnonymousIdentity, type HttpAgent } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { closeSync, openSync, writeSync } from 'node:fs';
@@ -36,15 +34,13 @@ export const loadMetadata = async (
 
 export const getIndexPrincipal = async (
 	ledgerCanisterId: LedgerCanisterIdText
-): Promise<IcrcAccount | undefined> => {
-	const { getMintingAccount } = IcrcLedgerCanister.create({
+): Promise<Principal> => {
+	const { getIndexPrincipal } = IcrcLedgerCanister.create({
 		agent,
 		canisterId: Principal.from(ledgerCanisterId)
 	});
 
-	const account = await getMintingAccount({ certified: true });
-
-	return fromCandidAccount(fromDefinedNullable(account));
+	return await getIndexPrincipal({ certified: true });
 };
 
 export const saveLogo = ({
