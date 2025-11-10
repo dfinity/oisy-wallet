@@ -1,25 +1,25 @@
 <script lang="ts">
+	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import SwapFees from '$lib/components/swap/SwapFees.svelte';
 	import SwapForm from '$lib/components/swap/SwapForm.svelte';
 	import SwapProvider from '$lib/components/swap/SwapProvider.svelte';
-	import { SwapProvider as SwapProviderType } from '$lib/types/swap';
 	import Hr from '$lib/components/ui/Hr.svelte';
+	import MessageBox from '$lib/components/ui/MessageBox.svelte';
 	import { ZERO } from '$lib/constants/app.constants';
-	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
-	import type { OptionAmount } from '$lib/types/send';
-	import type { TokenActionErrorType } from '$lib/types/token-action';
-	import { validateUserAmount } from '$lib/utils/user-amount.utils';
-	import { calculateValueDifference } from '$lib/utils/swap.utils';
+	import { i18n } from '$lib/stores/i18n.store';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
 		type SwapAmountsContext as SwapAmountsContextType
 	} from '$lib/stores/swap-amounts.store';
-	import MessageBox from '$lib/components/ui/MessageBox.svelte';
+	import { SWAP_CONTEXT_KEY, type SwapContext } from '$lib/stores/swap.store';
+	import type { OptionAmount } from '$lib/types/send';
+	import { SwapProvider as SwapProviderType } from '$lib/types/swap';
+	import type { TokenActionErrorType } from '$lib/types/token-action';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { Html } from '@dfinity/gix-components';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { calculateValueDifference } from '$lib/utils/swap.utils';
+	import { validateUserAmount } from '$lib/utils/user-amount.utils';
 
 	interface Props {
 		swapAmount: OptionAmount;
@@ -93,12 +93,12 @@
 <SwapForm
 	{errorType}
 	fee={totalFee}
+	{isSlippageExceeded}
 	{isSwapAmountsLoading}
 	{onClose}
 	onCustomValidate={customValidate}
 	{onNext}
 	{onShowTokensList}
-	{isSlippageExceeded}
 	bind:swapAmount
 	bind:receiveAmount
 	bind:slippageValue
