@@ -116,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string; session_locked: string };
+	message: { session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -778,6 +778,7 @@ interface I18nSwap {
 		manually_withdraw_failed: string;
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
+		swap_slippage_exceeded_exchange_rate: string;
 	};
 }
 
@@ -1411,6 +1412,11 @@ interface I18nStake {
 		delayed_dissolve_info: string;
 		immediate_dissolve_terms: string;
 		amount_to_receive: string;
+		unclaimed_rewards: string;
+		claim_reward: string;
+		claim_rewards: string;
+		claim_now: string;
+		claiming: string;
 	};
 }
 

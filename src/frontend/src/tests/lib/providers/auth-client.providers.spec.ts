@@ -1,6 +1,6 @@
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { AuthClient, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@dfinity/auth-client';
+import { AuthClient, KEY_STORAGE_DELEGATION, KEY_STORAGE_KEY } from '@icp-sdk/auth/client';
 import { mock } from 'vitest-mock-extended';
 
 describe('auth-client.providers', () => {

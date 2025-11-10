@@ -11,9 +11,9 @@ import { getCurrentBtcFeePercentiles } from '$lib/api/backend.api';
 import { ZERO } from '$lib/constants/app.constants';
 import type { Amount } from '$lib/types/send';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
-import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 
 export interface BtcReviewServiceParams {
 	identity: Identity;

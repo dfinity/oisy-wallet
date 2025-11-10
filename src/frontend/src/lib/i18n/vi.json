@@ -122,7 +122,6 @@
 			"preview": "Xem trước $oisy_name sau khi đăng nhập, cả trên máy tính và thiết bị di động"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
-			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này."
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
-			"amount_to_receive": ""
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

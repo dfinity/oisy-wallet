@@ -122,7 +122,6 @@
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"message": {
-			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab.",
 			"session_locked": "Your session was locked in another tab."
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "The tokens from your previous failed swap were successfully withdrawn. You can try the swap again or change the swap provider.",
 			"manually_withdraw_failed": "Withdrawing your funds failed. <br> Please try again or follow",
 			"swap_sucess_withdraw_failed": "The swap completed, but your tokens could not be automatically withdrawn. Click the Withdraw button below to withdraw them manually.<br> Or follow",
-			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal."
+			"swap_sucess_manually_withdraw_success": "The tokens from your previous swap were successfully withdrawn. You can now close this modal.",
+			"swap_slippage_exceeded_exchange_rate": "The value difference of this trade ($valueDifference%) is outside your slippage tolerance of $maxSlippage%. Please adjust the max slippage before you swap."
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
 			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
 			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
-			"amount_to_receive": "Amount to receive"
+			"amount_to_receive": "Amount to receive",
+			"unclaimed_rewards": "Unclaimed rewards",
+			"claim_reward": "Claim reward",
+			"claim_rewards": "Claim rewards",
+			"claim_now": "Claim now",
+			"claiming": "Claiming..."
 		}
 	},
 	"temporal": {

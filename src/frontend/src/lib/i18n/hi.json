@@ -122,7 +122,6 @@
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "आपके पिछले असफल स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। आप स्वैप को फिर से आज़मा सकते हैं या स्वैप प्रदाता बदल सकते हैं।",
 			"manually_withdraw_failed": "आपके फंड निकालने में विफल रहा। <br> कृपया पुनः प्रयास करें या अनुसरण करें",
 			"swap_sucess_withdraw_failed": "स्वैप पूरा हो गया, लेकिन आपके टोकन स्वचालित रूप से वापस नहीं लिए जा सके। उन्हें मैन्युअल रूप से वापस लेने के लिए नीचे दिए गए निकालें बटन पर क्लिक करें।<br> या अनुसरण करें",
-			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।"
+			"swap_sucess_manually_withdraw_success": "आपके पिछले स्वैप से टोकन सफलतापूर्वक वापस ले लिए गए थे। अब आप इस मोडल को बंद कर सकते हैं।",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
-			"amount_to_receive": ""
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

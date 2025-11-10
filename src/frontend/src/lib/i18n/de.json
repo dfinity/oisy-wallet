@@ -122,7 +122,6 @@
 			"preview": "Vorschau von $oisy_name nach Anmeldung, sowohl auf Desktop als auch mobil"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "Die Token deines vorherigen fehlgeschlagenen Tauschs wurden erfolgreich zurückgeholt. Du kannst den Tausch erneut versuchen, oder den Tausch Provider wechseln.",
 			"manually_withdraw_failed": "Das Zuruckholen deiner Token ist fehlgeschlagen. <br> Bitte versuche es erneut, oder folge ",
 			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
-			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen."
+			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen.",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
-			"amount_to_receive": ""
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

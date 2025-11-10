@@ -13,17 +13,17 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
@@ -107,24 +107,28 @@
 		}
 
 		const spinner = document.querySelector('body > #app-spinner');
-		spinner?.remove();
+
+		// Due to an issue in mobile safari we cleanly detach all running animations and request an animation frame to be sure all animations are halted to safely remove the dom element
+		if (nonNullish(spinner) && spinner instanceof HTMLElement) {
+			// stop animation first
+			spinner.style.animation = 'none';
+			spinner.style.transition = 'none';
+
+			// let the browser flush compositing state
+			requestAnimationFrame(() => {
+				spinner.remove();
+			});
+		}
 	});
 
 	const handleBroadcastLoginSuccess = async () => {
-		const wasPreviouslyAuthenticated = $authSignedIn;
-
-		await authStore.forceSync();
+		authLoggedInAnotherTabStore.set(true);
 
 		if ($authNotSignedIn) {
 			return;
 		}
 
-		if (!wasPreviouslyAuthenticated) {
-			toastsShow({
-				text: $i18n.auth.message.refreshed_authentication,
-				level: 'success'
-			});
-		}
+		await authStore.forceSync();
 
 		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
 	};
@@ -178,7 +182,7 @@
 <svelte:window onstorage={syncAuthStore} />
 
 {#await init()}
-	<div in:fade>
+	<div class="text-brand-primary" in:fade>
 		<Spinner />
 	</div>
 {:then _}

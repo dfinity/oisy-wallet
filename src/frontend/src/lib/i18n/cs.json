@@ -122,7 +122,6 @@
 			"preview": "Náhled $oisy_name po přihlášení, na počítači i mobilu"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "Tokeny z vašeho předchozího neúspěšného swapu byly úspěšně vybrány. Můžete zkusit swap znovu nebo změnit poskytovatele swapu.",
 			"manually_withdraw_failed": "Výběr vašich finančních prostředků selhal.<br>Zkuste to prosím znovu nebo sledujte ",
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
-			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít."
+			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
-			"amount_to_receive": ""
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

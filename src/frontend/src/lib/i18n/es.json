@@ -122,7 +122,6 @@
 			"preview": "Vista previa de $oisy_name una vez iniciada la sesión, tanto en escritorio como en móvil"
 		},
 		"message": {
-			"refreshed_authentication": "Esta página se actualizó para reflejar el inicio de sesión realizado en otra pestaña.",
 			"session_locked": "Tu sesión fue bloqueada."
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "Los tokens de tu intercambio fallido anterior fueron retirados con éxito. Puedes intentar el intercambio de nuevo o cambiar el proveedor de intercambio.",
 			"manually_withdraw_failed": "El retiro de tus fondos falló. <br> Por favor, inténtalo de nuevo o sigue",
 			"swap_sucess_withdraw_failed": "El intercambio se completó, pero tus tokens no pudieron ser retirados automáticamente. Haz clic en el botón de Retirar a continuación para retirarlos manualmente.<br> O sigue",
-			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal."
+			"swap_sucess_manually_withdraw_success": "Los tokens de tu intercambio anterior fueron retirados con éxito. Ahora puedes cerrar este modal.",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1756,7 +1756,12 @@
 			"delayed_dissolve_terms": "",
 			"delayed_dissolve_info": "",
 			"immediate_dissolve_terms": "",
-			"amount_to_receive": ""
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

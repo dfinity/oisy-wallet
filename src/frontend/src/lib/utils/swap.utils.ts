@@ -16,9 +16,11 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
+	type DeltaSwapResponse,
 	type FormatSlippageParams,
 	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
@@ -34,7 +36,6 @@ import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import type { OptimalRate } from '@velora-dex/sdk';
-import type { QuoteWithDeltaPriceAndBridgePrice } from '@velora-dex/sdk/dist/methods/quote/getQuote';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -171,7 +172,7 @@ export const formatReceiveOutMinimum = ({
 	});
 };
 
-export const mapVeloraSwapResult = (swap: QuoteWithDeltaPriceAndBridgePrice): SwapMappedResult => ({
+export const mapVeloraSwapResult = (swap: DeltaSwapResponse): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
 	receiveAmount:
 		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).
@@ -238,4 +239,36 @@ export const findSwapProvider = (
 			...swapProviderDetails
 		};
 	}
+};
+
+export const calculateValueDifference = ({
+	swapAmount,
+	receiveAmount,
+	sourceTokenExchangeRate,
+	destinationTokenExchangeRate
+}: {
+	swapAmount: OptionAmount;
+	receiveAmount?: number;
+	sourceTokenExchangeRate?: number;
+	destinationTokenExchangeRate?: number;
+}): number | undefined => {
+	const paidValue =
+		nonNullish(swapAmount) && nonNullish(sourceTokenExchangeRate)
+			? Number(swapAmount) * sourceTokenExchangeRate
+			: undefined;
+
+	if (isNullish(paidValue) || paidValue === 0) {
+		return;
+	}
+
+	const receivedValue =
+		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
+			? receiveAmount * destinationTokenExchangeRate
+			: undefined;
+
+	if (isNullish(receivedValue)) {
+		return;
+	}
+
+	return ((receivedValue - paidValue) / paidValue) * 100;
 };
