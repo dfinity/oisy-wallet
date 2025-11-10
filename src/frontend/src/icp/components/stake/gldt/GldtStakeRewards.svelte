@@ -56,7 +56,7 @@
 {#if nonNullish($gldtStakeStore?.position)}
 	<StakeContentSection>
 		{#snippet title()}
-			{$i18n.stake.text.unclaimed_rewards}
+			<h4>{$i18n.stake.text.unclaimed_rewards}</h4>
 		{/snippet}
 
 		{#snippet content()}
