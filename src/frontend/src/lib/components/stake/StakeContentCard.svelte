@@ -9,8 +9,9 @@
 	let { content, buttons }: Props = $props();
 </script>
 
-<!-- TODO: add styling according to the designs -->
-<div class="flex w-1/2 flex-col items-center justify-between rounded-xl bg-secondary p-4">
+<div
+	class="flex w-full flex-col items-center justify-between rounded-xl border border-solid border-disabled bg-secondary p-4 sm:w-1/2"
+>
 	<div class="mb-8 flex flex-col justify-center gap-2 text-center">
 		{@render content()}
 	</div>
