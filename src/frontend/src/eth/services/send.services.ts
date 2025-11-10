@@ -6,6 +6,7 @@ import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.provide
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
+import { prepare } from '$eth/services/prepare.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
 	CkEthPopulateTransaction,
@@ -230,43 +231,6 @@ const erc20ContractPrepareApprove = async ({
 	});
 };
 
-const prepare = ({
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
-	gas,
-	chainId: chain_id,
-	data,
-	to,
-	amount
-}: Omit<TransferParams, 'amount' | 'from'> &
-	NetworkChainId & {
-		nonce: number;
-		gas: bigint;
-		amount: bigint;
-	}): EthSignTransactionRequest => {
-	if (isNullish(data)) {
-		const {
-			send: {
-				error: { erc20_data_undefined }
-			}
-		} = get(i18n);
-
-		throw new Error(erc20_data_undefined);
-	}
-
-	return {
-		to,
-		chain_id,
-		nonce: BigInt(nonce),
-		gas,
-		max_fee_per_gas,
-		max_priority_fee_per_gas,
-		value: amount,
-		data: [data]
-	};
-};
-
 export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
@@ -284,7 +248,7 @@ export const send = async ({
 		...rest
 	});
 
-	// If we approved a transaction - as for example in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
 
 	const transactionSent = await sendTransaction({
@@ -495,7 +459,7 @@ const checkExistingApproval = async ({
 		return 'existingApprovalIsEnough';
 	}
 
-	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first, before approving the new amount.
+	// If the existing pre-approved amount is not enough but non-null, we need to reset the allowance first before approving the new amount.
 	if (preApprovedAmount > ZERO) {
 		await resetExistingApprovalToZero({
 			...rest,
@@ -557,7 +521,7 @@ export const approve = async ({
 		return { transactionNeededApproval: false, nonce };
 	}
 
-	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't and it's non-null, we reset it to zero.
+	// We check if the existing approval (either null or non-null) is enough for the required amount. If it isn't, and it's non-null, we reset it to zero.
 	const approvalCheckResult = await checkExistingApproval({
 		token,
 		from,
@@ -574,7 +538,7 @@ export const approve = async ({
 		return { transactionNeededApproval: false, nonce };
 	}
 
-	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we obtained.
+	// If we needed to reset the allowance (the pre-approved amount was not enough and not zero), we need to increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
 	const nonceApproval = approvalCheckResult === 'approvalNeededReset' ? nonce + 1 : nonce;
 
 	const { success: transactionApproved, hash } = await prepareAndSignApproval({
