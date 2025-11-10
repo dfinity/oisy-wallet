@@ -1731,6 +1731,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "$provider Staking",
+			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
 			"stake": "Stake $token_symbol",
 			"unstake": "Unstake",
 			"unstaking": "Unstaking...",
@@ -1746,6 +1748,7 @@
 			"active_earning_per_year": "$amount/year",
 			"visit_provider": "Visit website",
 			"current_apy": "Current APY $apy%",
+			"current_apy_label": "Current APY",
 			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
 			"stake_review_subtitle": "You stake",
 			"unstake_review_subtitle": "You unstake",

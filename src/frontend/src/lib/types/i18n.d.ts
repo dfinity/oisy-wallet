@@ -1386,6 +1386,8 @@ interface I18nEarning {
 
 interface I18nStake {
 	text: {
+		stake_page_title: string;
+		gldt_stake_page_description: string;
 		stake: string;
 		unstake: string;
 		unstaking: string;
@@ -1401,6 +1403,7 @@ interface I18nStake {
 		active_earning_per_year: string;
 		visit_provider: string;
 		current_apy: string;
+		current_apy_label: string;
 		current_apy_info: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
