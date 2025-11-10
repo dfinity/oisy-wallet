@@ -132,7 +132,7 @@ describe('approve.services', () => {
 			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
 		});
 
-		it('should return early if it should not sawp with approval', async () => {
+		it('should return early if it should not swap with approval', async () => {
 			const result = await approve({ ...mockParams, shouldSwapWithApproval: false });
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
