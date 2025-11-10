@@ -6,6 +6,7 @@ import { infuraErc20IcpProviders } from '$eth/providers/infura-erc20-icp.provide
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { processTransactionSent } from '$eth/services/eth-transaction.services';
+import { prepare } from '$eth/services/prepare.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
 	CkEthPopulateTransaction,
@@ -228,43 +229,6 @@ const erc20ContractPrepareApprove = async ({
 		amount: ZERO,
 		...rest
 	});
-};
-
-const prepare = ({
-	maxPriorityFeePerGas: max_priority_fee_per_gas,
-	maxFeePerGas: max_fee_per_gas,
-	nonce,
-	gas,
-	chainId: chain_id,
-	data,
-	to,
-	amount
-}: Omit<TransferParams, 'amount' | 'from'> &
-	NetworkChainId & {
-		nonce: number;
-		gas: bigint;
-		amount: bigint;
-	}): EthSignTransactionRequest => {
-	if (isNullish(data)) {
-		const {
-			send: {
-				error: { erc20_data_undefined }
-			}
-		} = get(i18n);
-
-		throw new Error(erc20_data_undefined);
-	}
-
-	return {
-		to,
-		chain_id,
-		nonce: BigInt(nonce),
-		gas,
-		max_fee_per_gas,
-		max_priority_fee_per_gas,
-		value: amount,
-		data: [data]
-	};
 };
 
 export const send = async ({

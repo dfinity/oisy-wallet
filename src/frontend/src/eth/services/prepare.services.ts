@@ -2,7 +2,7 @@ import type { EthSignTransactionRequest } from '$declarations/signer/declaration
 import type { NetworkChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { TransferParams } from '$lib/types/send';
-import { isNullish } from '@dfinity/utils';
+import { isNullish, toNullable } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
 export const prepare = ({
@@ -38,6 +38,6 @@ export const prepare = ({
 		max_fee_per_gas,
 		max_priority_fee_per_gas,
 		value: amount,
-		data: [data]
+		data: toNullable(data)
 	};
 };
