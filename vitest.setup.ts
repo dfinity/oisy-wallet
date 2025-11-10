@@ -67,6 +67,13 @@ vi.mock(import('$lib/actors/agents.ic'), async (importOriginal) => {
 	};
 });
 
+vi.mock('$lib/services/analytics-wrapper', () => ({
+	loadPlausibleTracker: vi.fn(() => ({
+		init: vi.fn(),
+		track: vi.fn()
+	}))
+}));
+
 vi.mock('ethers/providers', () => {
 	const provider = vi.fn();
 
