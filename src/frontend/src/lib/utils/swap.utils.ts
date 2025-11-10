@@ -16,6 +16,7 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
@@ -238,4 +239,32 @@ export const findSwapProvider = (
 			...swapProviderDetails
 		};
 	}
+};
+
+export const calculateValueDifference = ({
+	swapAmount,
+	receiveAmount,
+	sourceTokenExchangeRate,
+	destinationTokenExchangeRate
+}: {
+	swapAmount: OptionAmount;
+	receiveAmount?: number;
+	sourceTokenExchangeRate?: number;
+	destinationTokenExchangeRate?: number;
+}): number | undefined => {
+	const paidValue =
+		nonNullish(swapAmount) && nonNullish(sourceTokenExchangeRate)
+			? Number(swapAmount) * sourceTokenExchangeRate
+			: undefined;
+
+	const receivedValue =
+		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
+			? receiveAmount * destinationTokenExchangeRate
+			: undefined;
+
+	if (nonNullish(paidValue) && nonNullish(receivedValue) && paidValue !== 0) {
+		return ((receivedValue - paidValue) / paidValue) * 100;
+	}
+
+	return undefined;
 };
