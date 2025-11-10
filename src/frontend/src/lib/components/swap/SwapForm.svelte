@@ -118,7 +118,7 @@
 			isNullish(fee) ||
 			swapAmountsLoading ||
 			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE) ||
-			(nonNullish(isSlippageExceeded) && isSlippageExceeded)
+			isSlippageExceeded
 	);
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
