@@ -1,6 +1,14 @@
 import { ICP_SYMBOL } from '$env/tokens/tokens.icp.env';
-import { stakeWizardSteps, unstakeWizardSteps } from '$lib/config/stake.config';
-import { WizardStepsStake, WizardStepsUnstake } from '$lib/enums/wizard-steps';
+import {
+	claimStakingRewardWizardSteps,
+	stakeWizardSteps,
+	unstakeWizardSteps
+} from '$lib/config/stake.config';
+import {
+	WizardStepsClaimStakingReward,
+	WizardStepsStake,
+	WizardStepsUnstake
+} from '$lib/enums/wizard-steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import en from '$tests/mocks/i18n.mock';
 
@@ -55,6 +63,27 @@ describe('stake.config', () => {
 				},
 				{
 					name: WizardStepsUnstake.UNSTAKING,
+					title: en.stake.text.executing_transaction
+				}
+			]);
+		});
+	});
+
+	describe('claimStakingRewardWizardSteps', () => {
+		const mockParams = {
+			i18n: en
+		};
+
+		it('should return the correct steps with expected text and state', () => {
+			const steps = claimStakingRewardWizardSteps(mockParams);
+
+			expect(steps).toStrictEqual([
+				{
+					name: WizardStepsClaimStakingReward.REVIEW,
+					title: en.stake.text.claim_rewards
+				},
+				{
+					name: WizardStepsClaimStakingReward.CLAIMING,
 					title: en.stake.text.executing_transaction
 				}
 			]);
