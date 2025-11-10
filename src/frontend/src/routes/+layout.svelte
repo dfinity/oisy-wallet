@@ -13,7 +13,7 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
@@ -23,7 +23,7 @@
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
+	import { toastsError } from '$lib/stores/toasts.store';
 	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
@@ -125,7 +125,7 @@
 		authLoggedInAnotherTabStore.set(true);
 
 		if ($authNotSignedIn) {
-			return
+			return;
 		}
 
 		await authStore.forceSync();
