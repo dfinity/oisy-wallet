@@ -332,7 +332,7 @@ describe('approve.services', () => {
 			expect(mockProgress).toHaveBeenNthCalledWith(4, ProgressStepsSend.APPROVE);
 		});
 
-		it('should use the destination address instead of the helper contract if it should sawp with approval', async () => {
+		it('should use the destination address instead of the helper contract if it should swap with approval', async () => {
 			allowanceSpy.mockResolvedValueOnce(ZERO);
 
 			const result = await approve({
