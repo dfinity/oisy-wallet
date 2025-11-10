@@ -122,7 +122,6 @@
 			"preview": "Aperçu de $oisy_name une fois connecté, sur ordinateur et mobile"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {

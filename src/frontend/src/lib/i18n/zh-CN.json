@@ -122,7 +122,6 @@
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
