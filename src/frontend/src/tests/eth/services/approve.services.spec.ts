@@ -182,7 +182,7 @@ describe('approve.services', () => {
 			}
 		);
 
-		it('should return early if destination is  the helper contract', async () => {
+		it('should return early if destination is the helper contract', async () => {
 			const result = await approve({ ...mockParams, to: mockEthAddress2 });
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
