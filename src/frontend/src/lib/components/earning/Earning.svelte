@@ -5,9 +5,12 @@
 	import PageTitle from '$lib/components/ui/PageTitle.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
 	import { i18n } from '$lib/stores/i18n.store.js';
+	import EarningHeader from '$lib/components/earning/EarningHeader.svelte';
 </script>
 
 <div class="flex flex-col">
+	<EarningHeader />
+
 	<PageTitle>{$i18n.earning.text.title}</PageTitle>
 
 	<!-- Todo: refactor this once the design is clear -->
