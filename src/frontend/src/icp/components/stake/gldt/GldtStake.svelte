@@ -33,6 +33,10 @@
 	});
 
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
+
+	$effect(() => {
+		console.log(JSON.stringify(gldtToken));
+	});
 </script>
 
 <GldtStakeContext>
