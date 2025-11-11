@@ -8,7 +8,7 @@ import type * as z from 'zod';
 // This causes the `authClient` to be unable to correctly sign calls, raising Trust Errors.
 // To mitigate this, we use a `BroadcastChannel` to notify other tabs when a login has occurred, so that they can sync their `authClient` object.
 export class AuthBroadcastChannel {
-	static #instance: AuthBroadcastChannel | undefined;
+	static #instance: AuthBroadcastChannel | null;
 
 	readonly #bc: BroadcastChannel;
 	readonly #emitterId: string;
@@ -43,7 +43,7 @@ export class AuthBroadcastChannel {
 
 	destroy = () => {
 		this.#bc.close();
-		AuthBroadcastChannel.#instance = undefined;
+		AuthBroadcastChannel.#instance = null;
 	};
 
 	postLoginSuccess = () => {
