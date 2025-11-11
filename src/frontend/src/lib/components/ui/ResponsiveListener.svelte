@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { debounce } from '@dfinity/utils';
 	import { untrack } from 'svelte';
 	import { screensStore } from '$lib/stores/screens.store';
 	import { AVAILABLE_SCREENS, getActiveScreen } from '$lib/utils/screens.utils';
@@ -15,12 +14,10 @@
 		screensStore.set(activeScreen);
 	};
 
-	const debounceUpdateWidth = debounce(updateWidth);
-
 	$effect(() => {
 		[innerWidth];
 
-		untrack(() => debounceUpdateWidth());
+		untrack(() => updateWidth());
 	});
 </script>
 

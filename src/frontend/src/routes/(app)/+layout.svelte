@@ -78,9 +78,7 @@
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
-									<div transition:fade>
-										<DappsCarousel />
-									</div>
+										<DappsCarousel styleClass="hidden xl:block" />
 								</Responsive>
 							{/if}
 						</NavigationMenu>
