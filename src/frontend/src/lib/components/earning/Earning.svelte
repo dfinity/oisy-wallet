@@ -24,25 +24,33 @@
 	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import { nonNullish } from '@dfinity/utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { goto } from '$app/navigation';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
-	const cardsData: Record<string, { [key in EarningCardFields]?: string | number | bigint }> =
-		$derived({
-			'gldt-staking': {
-				apy: $gldtStakeStore?.apy ?? 0,
-				currentStaked: $gldtStakeStore?.position?.staked ?? 0,
-				terms: $i18n.earning.cards.terms.flexible
-			}
-		});
+	const cardsData: Record<
+		string,
+		{ [key in EarningCardFields]?: string | number | bigint } & { action: () => Promise<void> }
+	> = $derived({
+		sprinkles: {
+			action: () => goto(AppPath.EarningRewards)
+		},
+		'gldt-staking': {
+			apy: $gldtStakeStore?.apy ?? 0,
+			currentStaked: $gldtStakeStore?.position?.staked ?? 0,
+			terms: $i18n.earning.terms.flexible,
+			action: () => goto(AppPath.EarningGold)
+		}
+	});
 
 	$effect(() => {
 		console.log(cardsData);
 	});
 
-	const { getCampaignEligibility, store } = getContext<RewardEligibilityContext>(
+	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
@@ -61,47 +69,6 @@
 </script>
 
 <div class="flex flex-col">
-	<PageTitle>{$i18n.earning.text.title}</PageTitle>
-
-	<!-- Todo: refactor this once the design is clear -->
-	<!-- we know we want to show these 3 cards, thats why the translations have been added already -->
-
-	<div class="grid grid-cols-3 gap-3">
-		<EarningCategoryCard appPath={AppPath.EarningGold}>
-			{#snippet icon()}
-				<IconCrypto />
-			{/snippet}
-			{#snippet title()}
-				{$i18n.earning.cards.gold_title}
-			{/snippet}
-			{#snippet description()}
-				{$i18n.earning.cards.gold_description}
-			{/snippet}
-		</EarningCategoryCard>
-		<EarningCategoryCard appPath={AppPath.EarningRewards}>
-			{#snippet icon()}
-				<IconGift />
-			{/snippet}
-			{#snippet title()}
-				{$i18n.earning.cards.sprinkles_title}
-			{/snippet}
-			{#snippet description()}
-				{$i18n.earning.cards.sprinkles_description}
-			{/snippet}
-		</EarningCategoryCard>
-		<EarningCategoryCard disabled>
-			{#snippet icon()}
-				<IconCrypto />
-			{/snippet}
-			{#snippet title()}
-				{$i18n.earning.cards.stablecoins_title}
-			{/snippet}
-			{#snippet description()}
-				{$i18n.earning.cards.stablecoins_description}
-			{/snippet}
-		</EarningCategoryCard>
-	</div>
-
 	<StakeContentSection>
 		{#snippet title()}
 			Earning opportunities
@@ -142,7 +109,11 @@
 							{/if}
 						{/snippet}
 						{#snippet button()}
-							<Button colorStyle="success" fullWidth paddingSmall>Stake GLDT</Button>
+							<Button
+								colorStyle={card.id === currentReward?.id ? 'primary' : 'success'}
+								fullWidth
+								paddingSmall>{resolveText({ i18n: $i18n, path: card.actionText })}</Button
+							>
 						{/snippet}
 					</EarningOpportunityCard>
 				{/each}

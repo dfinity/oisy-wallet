@@ -6,5 +6,6 @@ export const EarningCardsSchema = z.object({
 	title: z.string(),
 	description: z.string(),
 	logo: z.string(),
-	fields: z.array(z.enum(EarningCardFields))
+	fields: z.array(z.enum(EarningCardFields)),
+	actionText: z.string()
 });

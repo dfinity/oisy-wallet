@@ -1721,16 +1721,24 @@
 			"title": "Earn"
 		},
 		"cards": {
-			"gold_title": "Gold",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Coming soon",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY Rewards",
-            "terms": {
-              "flexible": "Flexible"
-            }
-		}
+          "gldt": {
+            "title": "GLDT Staking",
+            "description": "Stake GLDT tokens to earn rewards backed by physical gold",
+            "action": "Stake GLDT"
+          },
+          "sprinkles": {
+            "title": "OISY Sprinkles",
+            "description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
+            "action": "Check status"
+          },
+          "stablecoins": {
+            "title": "Stablecoins",
+            "description": "Coming soon"
+          }
+		},
+      "terms": {
+        "flexible": "Flexible"
+      }
 	},
 	"stake": {
 		"text": {
