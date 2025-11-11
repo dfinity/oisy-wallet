@@ -31,11 +31,13 @@
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
+	const LATEST_REWARDS_CAMPAIGN = 'sprinkles_s1e5';
+
 	const cardsData: Record<
 		string,
 		{ [key in EarningCardFields]?: string | number | bigint } & { action: () => Promise<void> }
 	> = $derived({
-		sprinkles: {
+		[LATEST_REWARDS_CAMPAIGN]: {
 			action: () => goto(AppPath.EarningRewards)
 		},
 		'gldt-staking': {
@@ -54,7 +56,7 @@
 		REWARD_ELIGIBILITY_CONTEXT_KEY
 	);
 
-	const currentReward = $derived(rewardCampaigns.find((r) => r.id === 'sprinkles_s1e5'));
+	const currentReward = $derived(rewardCampaigns.find((r) => r.id === LATEST_REWARDS_CAMPAIGN));
 	const campaignEligibility = $derived(
 		currentReward ? getCampaignEligibility(currentReward.id) : undefined
 	);
@@ -74,7 +76,7 @@
 			Earning opportunities
 		{/snippet}
 		{#snippet content()}
-			<div class="flex flex-col gap-3 md:flex-row">
+			<div class="flex grid grid-cols-2 gap-3 md:flex-row">
 				{#each earningCards as card}
 					<EarningOpportunityCard>
 						{#snippet logo()}
@@ -84,10 +86,10 @@
 							Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
 						{/snippet}
 						{#snippet title()}
-							{card.title}
+							{resolveText({ i18n: $i18n, path: card.title })}
 						{/snippet}
 						{#snippet description()}
-							<p>{card.description}</p>
+							<p>{resolveText({ i18n: $i18n, path: card.description })}</p>
 
 							{#if nonNullish(currentReward) && card.id === currentReward.id}
 								<RewardsRequirements
@@ -98,11 +100,21 @@
 									reward={currentReward}
 								/>
 							{:else}
-								<List condensed itemStyleClass="flex-col md:flex-col">
+								<List condensed itemStyleClass="flex-col md:flex-row">
 									{#each card.fields as cardField}
 										<ListItem>
-											<span class={listItemStyles}>{`earning.card_fields.${cardField}`}</span>
-											<span class={listItemStyles}>{cardsData[card.id][cardField]}</span>
+											<span class={listItemStyles}
+												>{resolveText({
+													i18n: $i18n,
+													path: `earning.card_fields.${cardField}`
+												})}</span
+											>
+											<span class={listItemStyles}
+												>{resolveText({
+													i18n: $i18n,
+													path: cardsData[card.id][cardField] + ''
+												})}</span
+											>
 										</ListItem>
 									{/each}
 								</List>
@@ -110,6 +122,7 @@
 						{/snippet}
 						{#snippet button()}
 							<Button
+								onclick={cardsData[card.id].action}
 								colorStyle={card.id === currentReward?.id ? 'primary' : 'success'}
 								fullWidth
 								paddingSmall>{resolveText({ i18n: $i18n, path: card.actionText })}</Button
