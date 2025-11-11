@@ -22,6 +22,10 @@
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
 
+	BigInt.prototype.toJSON = function () {
+		return `${Number(this)}n`;
+	};
+
 	let fromRoute = $state<NavigationTarget | null>(null);
 
 	afterNavigate(({ from }) => {
