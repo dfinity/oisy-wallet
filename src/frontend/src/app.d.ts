@@ -16,3 +16,13 @@ declare const VITE_DFX_NETWORK: string;
 
 declare const VITE_GIT_COMMIT_HASH: string;
 declare const VITE_GIT_BRANCH_NAME: string;
+
+declare global {
+	interface BigInt {
+		toJSON(): Number;
+	}
+}
+
+BigInt.prototype.toJSON = function () {
+	return `${Number(this)}n`;
+};

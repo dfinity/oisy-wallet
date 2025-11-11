@@ -5,13 +5,3 @@ declare global {
 		ethereum: MetamaskProvider;
 	}
 }
-
-declare global {
-	interface BigInt {
-		toJSON(): Number;
-	}
-}
-
-BigInt.prototype.toJSON = function () {
-	return `${Number(this)}n`;
-};
