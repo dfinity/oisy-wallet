@@ -1736,6 +1736,13 @@
             "description": "Coming soon"
           }
 		},
+      "card_fields": {
+        "apy": "APY",
+        "currentStaked": "Staked",
+        "currentEarning": "Currently earned",
+        "earningPotential": "Max. earning potential",
+        "terms": "Terms"
+      },
       "terms": {
         "flexible": "Flexible"
       }

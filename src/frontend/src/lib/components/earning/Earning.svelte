@@ -101,7 +101,7 @@
 								<List condensed itemStyleClass="flex-col md:flex-col">
 									{#each card.fields as cardField}
 										<ListItem>
-											<span class={listItemStyles}>{`earning.card.fields.${cardField}`}</span>
+											<span class={listItemStyles}>{`earning.card_fields.${cardField}`}</span>
 											<span class={listItemStyles}>{cardsData[card.id][cardField]}</span>
 										</ListItem>
 									{/each}
