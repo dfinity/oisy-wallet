@@ -79,7 +79,7 @@
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
 									<div transition:fade>
-										<DappsCarousel />
+										<DappsCarousel styleClass="hidden xl:block" />
 									</div>
 								</Responsive>
 							{/if}
