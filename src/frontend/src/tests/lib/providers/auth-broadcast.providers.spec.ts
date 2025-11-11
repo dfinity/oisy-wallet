@@ -79,7 +79,7 @@ describe('auth-broadcast.providers', () => {
 
 				newBc.postMessage({
 					...loginSuccessMessage,
-					emitterId: bc.__test__only__emitted_id__
+					emitterId: bc.__test__only__emitter_id__
 				});
 
 				expect(mockHandler).not.toHaveBeenCalled();
@@ -143,7 +143,7 @@ describe('auth-broadcast.providers', () => {
 
 				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					...loginSuccessMessage,
-					emitterId: bc.__test__only__emitted_id__
+					emitterId: bc.__test__only__emitter_id__
 				});
 			});
 		});
