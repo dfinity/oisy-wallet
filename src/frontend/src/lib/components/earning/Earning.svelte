@@ -87,6 +87,7 @@
 						{#snippet badge()}
 							{#if nonNullish(currentReward) && card.id === currentReward.id}
 								<span class="mr-2"><IconCalendarDays size="14" /></span>
+								{$i18n.rewards.text.active_date}
 								{formatToShortDateString({ date: currentReward.endDate, i18n: $i18n }) +
 									' ' +
 									currentReward.endDate.getDate()}
