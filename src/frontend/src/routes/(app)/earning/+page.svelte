@@ -7,12 +7,15 @@
 		type GldtStakeContext as GldtStakeContextType,
 		initGldtStakeStore
 	} from '$icp/stores/gldt-stake.store';
+	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
 
 	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
 		store: initGldtStakeStore()
 	});
 </script>
 
-<GldtStakeContext>
-	<Earning />
-</GldtStakeContext>
+<RewardsEligibilityContext>
+	<GldtStakeContext>
+		<Earning />
+	</GldtStakeContext>
+</RewardsEligibilityContext>

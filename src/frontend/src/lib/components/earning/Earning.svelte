@@ -15,6 +15,15 @@
 	import { EarningCardFields } from '$env/types/env.earning-cards';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import { getContext } from 'svelte';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
+	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
+	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
+	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import { nonNullish } from '@dfinity/utils';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
@@ -32,6 +41,23 @@
 	$effect(() => {
 		console.log(cardsData);
 	});
+
+	const { getCampaignEligibility, store } = getContext<RewardEligibilityContext>(
+		REWARD_ELIGIBILITY_CONTEXT_KEY
+	);
+
+	const currentReward = $derived(rewardCampaigns.find((r) => r.id === 'sprinkles_s1e5'));
+	const campaignEligibility = $derived(
+		currentReward ? getCampaignEligibility(currentReward.id) : undefined
+	);
+	const isEligible = $derived($campaignEligibility?.eligible ?? false);
+	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
+	const networkBonusMultiplier = $derived(
+		normalizeNetworkMultiplier(
+			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
+		)
+	);
+	const criteria = $derived($campaignEligibility?.criteria ?? []);
 </script>
 
 <div class="flex flex-col">
@@ -96,8 +122,14 @@
 						{#snippet description()}
 							<p>{card.description}</p>
 
-							{#if card.id === 'oisy-sprinkles'}
-								<span>exception</span>
+							{#if nonNullish(currentReward) && card.id === currentReward.id}
+								<RewardsRequirements
+									{criteria}
+									{hasNetworkBonus}
+									{isEligible}
+									{networkBonusMultiplier}
+									reward={currentReward}
+								/>
 							{:else}
 								<List condensed itemStyleClass="flex-col md:flex-col">
 									{#each card.fields as cardField}
