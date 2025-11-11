@@ -71,11 +71,13 @@ export const stakeProvidersConfig: Record<
 		name: string;
 		logo: string;
 		url: string;
+		pageDescriptionKey: string;
 	}
 > = {
 	[StakeProvider.GLDT]: {
 		name: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
-		url: 'https://app.gldt.org/earn/'
+		url: 'https://app.gldt.org/earn/',
+		pageDescriptionKey: 'stake.text.gldt_stake_page_description'
 	}
 };
