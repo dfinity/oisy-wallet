@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { NavigationTarget } from '@sveltejs/kit';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 	import { afterNavigate, goto } from '$app/navigation';
 	import { EARNING_ENABLED } from '$env/earning';
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
@@ -21,6 +21,12 @@
 	import { networkId } from '$lib/derived/network.derived';
 	import { StakeProvider } from '$lib/types/stake';
 	import { networkUrl } from '$lib/utils/nav.utils';
+	import { GldtToken } from './gldtToken';
+	import { balancesStore } from '$lib/stores/balances.store';
+
+	BigInt.prototype.toJSON = function () {
+		return `${Number(this)}n`;
+	};
 
 	let fromRoute = $state<NavigationTarget | null>(null);
 
@@ -32,7 +38,11 @@
 		store: initGldtStakeStore()
 	});
 
-	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
+	let gldtToken = $derived(GldtToken /*$enabledIcrcTokens.find(isGLDTToken)*/);
+
+	onMount(() => {
+		balancesStore.set({ id: gldtToken.id, data: { data: 40000000000n, certified: true } });
+	});
 </script>
 
 <GldtStakeContext>
