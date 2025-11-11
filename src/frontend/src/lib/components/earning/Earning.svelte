@@ -26,6 +26,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { goto } from '$app/navigation';
+	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
+	import { formatToShortDateString } from '$lib/utils/format.utils';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
@@ -83,7 +85,14 @@
 							<Logo src={card.logo} size="lg" />
 						{/snippet}
 						{#snippet badge()}
-							Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
+							{#if nonNullish(currentReward) && card.id === currentReward.id}
+								<span class="mr-2"><IconCalendarDays size="14" /></span>
+								{formatToShortDateString({ date: currentReward.endDate, i18n: $i18n }) +
+									' ' +
+									currentReward.endDate.getDate()}
+							{:else}
+								Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
+							{/if}
 						{/snippet}
 						{#snippet title()}
 							{resolveText({ i18n: $i18n, path: card.title })}
