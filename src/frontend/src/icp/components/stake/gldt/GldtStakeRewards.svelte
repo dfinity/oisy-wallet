@@ -51,6 +51,10 @@
 
 		debounceLoadMissingExchanges();
 	});
+
+	$effect(() => {
+		console.log($gldtStakeStore);
+	});
 </script>
 
 {#if nonNullish($gldtStakeStore?.position)}

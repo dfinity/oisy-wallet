@@ -8,16 +8,30 @@
 	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
-	import { GLDX_TOKEN } from '$env/tokens/tokens-spl/tokens.gldx.env';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
-	import { tokens } from '$lib/derived/tokens.derived';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import { earningCards } from '$env/earning-cards.env';
+	import { EarningCardFields } from '$env/types/env.earning-cards';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+	import { getContext } from 'svelte';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
-	const gldt = $derived($tokens.find(isGLDTToken));
+	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
+
+	const cardsData: Record<string, { [key in EarningCardFields]?: string | number | bigint }> =
+		$derived({
+			'gldt-staking': {
+				apy: $gldtStakeStore?.apy ?? 0,
+				currentStaked: $gldtStakeStore?.position?.staked ?? 0,
+				terms: $i18n.earning.cards.terms.flexible
+			}
+		});
+
+	$effect(() => {
+		console.log(cardsData);
+	});
 </script>
 
 <div class="flex flex-col">
@@ -68,61 +82,38 @@
 		{/snippet}
 		{#snippet content()}
 			<div class="flex flex-col gap-3 md:flex-row">
-				<EarningOpportunityCard>
-					{#snippet logo()}
-						{#if gldt}
-							<Logo src={gldt.icon} size="lg" />
-						{/if}
-					{/snippet}
-					{#snippet badge()}
-						Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
-					{/snippet}
-					{#snippet title()}
-						GLDT Staking
-					{/snippet}
-					{#snippet description()}
-						<p>Stake Gldt tokens to earn rewards backed by physical gold</p>
+				{#each earningCards as card}
+					<EarningOpportunityCard>
+						{#snippet logo()}
+							<Logo src={card.logo} size="lg" />
+						{/snippet}
+						{#snippet badge()}
+							Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
+						{/snippet}
+						{#snippet title()}
+							{card.title}
+						{/snippet}
+						{#snippet description()}
+							<p>{card.description}</p>
 
-						<List condensed itemStyleClass="flex-col md:flex-col">
-							<ListItem>
-								<span class={listItemStyles}>APY</span>
-								<span class={listItemStyles}>8.5%</span>
-							</ListItem>
-						</List>
-					{/snippet}
-					{#snippet button()}
-						<Button colorStyle="primary" fullWidth paddingSmall>Stake GLDT</Button>
-					{/snippet}
-				</EarningOpportunityCard>
-				<EarningOpportunityCard>
-					{#snippet logo()}
-						<Logo src={GLDX_TOKEN.icon} size="lg" />
-					{/snippet}
-					{#snippet badge()}
-						Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
-					{/snippet}
-					{#snippet title()}
-						GLDT Staking
-					{/snippet}
-					{#snippet description()}
-						<p>Stake Gldt tokens to earn rewards backed by physical gold</p>
-						<p>Stake Gldt tokens to earn rewards backed by physical gold</p>
-
-						<List condensed itemStyleClass="flex-col md:flex-col">
-							<ListItem>
-								<span class={listItemStyles}>APY</span>
-								<span class={listItemStyles}>8.5%</span>
-							</ListItem>
-							<ListItem>
-								<span class={listItemStyles}>Staked</span>
-								<span class={listItemStyles}>99.8 GLDT</span>
-							</ListItem>
-						</List>
-					{/snippet}
-					{#snippet button()}
-						<Button colorStyle="success" fullWidth paddingSmall>Stake GLDT</Button>
-					{/snippet}
-				</EarningOpportunityCard>
+							{#if card.id === 'oisy-sprinkles'}
+								<span>exception</span>
+							{:else}
+								<List condensed itemStyleClass="flex-col md:flex-col">
+									{#each card.fields as cardField}
+										<ListItem>
+											<span class={listItemStyles}>{`earning.card.fields.${cardField}`}</span>
+											<span class={listItemStyles}>{cardsData[card.id][cardField]}</span>
+										</ListItem>
+									{/each}
+								</List>
+							{/if}
+						{/snippet}
+						{#snippet button()}
+							<Button colorStyle="success" fullWidth paddingSmall>Stake GLDT</Button>
+						{/snippet}
+					</EarningOpportunityCard>
+				{/each}
 			</div>
 		{/snippet}
 	</StakeContentSection>
