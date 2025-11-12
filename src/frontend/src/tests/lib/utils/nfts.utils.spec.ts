@@ -19,6 +19,7 @@ import {
 	findNonFungibleToken,
 	getEnabledNfts,
 	getMediaStatus,
+	getMediaStatusOrCache,
 	getNftCollectionUi,
 	mapTokenToCollection,
 	parseMetadataResourceUrl
@@ -867,6 +868,52 @@ describe('nfts.utils', () => {
 			expect(global.fetch).toHaveBeenCalledExactlyOnceWith('https://ipfs.io/ipfs/ipfs-image-url', {
 				method: 'HEAD'
 			});
+		});
+	});
+
+	describe('getMediaStatusOrCache', () => {
+		const mockUrl = 'https://example.com/image.png';
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT - 100).toString()
+								: null
+				}
+			});
+		});
+
+		it('should fetch and cache value if not available', async () => {
+			const result = await getMediaStatusOrCache(mockUrl);
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).toHaveBeenCalledExactlyOnceWith(mockUrl, { method: 'HEAD' });
+		});
+
+		it('should return cached value if available', async () => {
+			global.fetch = vi.fn().mockResolvedValueOnce({
+				headers: {
+					get: (h: string) =>
+						h === 'Content-Type'
+							? 'image/png'
+							: h === 'Content-Length'
+								? (NFT_MAX_FILESIZE_LIMIT + 100).toString() // Should have returned FILESIZE_LIMIT_EXCEEDED
+								: null
+				}
+			});
+
+			const result = await getMediaStatusOrCache(mockUrl);
+
+			expect(result).toBe(NftMediaStatusEnum.OK);
+
+			expect(global.fetch).not.toHaveBeenCalled();
 		});
 	});
 });
