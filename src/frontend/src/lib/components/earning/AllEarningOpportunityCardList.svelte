@@ -48,7 +48,9 @@
 			action: () => goto(AppPath.EarningRewards)
 		},
 		'gldt-staking': {
-			[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy) ? `${$gldtStakeStore.apy}%` : '-',
+			[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy)
+				? `${$gldtStakeStore.apy.toFixed(2)}%`
+				: '-',
 			[EarningCardFields.CURRENT_STAKED]: nonNullish(gldtToken)
 				? `${formatToken({
 						value: $gldtStakeStore?.position?.staked ?? ZERO,
