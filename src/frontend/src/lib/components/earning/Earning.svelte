@@ -142,7 +142,7 @@
 											>
 											<span class="font-bold">
 												{#if cardField === EarningCardFields.CURRENT_EARNING || cardField === EarningCardFields.EARNING_POTENTIAL}
-													{#if Number(cardsData[card.id][cardField]) > 0}
+													{#if nonNullish(cardsData[card.id][cardField])}
 														<EarningYearlyAmount
 															value={Number(cardsData[card.id][cardField])}
 															formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
