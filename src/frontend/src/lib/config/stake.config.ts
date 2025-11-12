@@ -1,4 +1,8 @@
-import { WizardStepsStake, WizardStepsUnstake } from '$lib/enums/wizard-steps';
+import {
+	WizardStepsClaimStakingReward,
+	WizardStepsStake,
+	WizardStepsUnstake
+} from '$lib/enums/wizard-steps';
 import { StakeProvider } from '$lib/types/stake';
 import type { WizardStepsParams } from '$lib/types/steps';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
@@ -48,17 +52,32 @@ export const unstakeWizardSteps = ({
 	}
 ];
 
+export const claimStakingRewardWizardSteps = ({
+	i18n
+}: WizardStepsParams): WizardSteps<WizardStepsClaimStakingReward> => [
+	{
+		name: WizardStepsClaimStakingReward.REVIEW,
+		title: i18n.stake.text.claim_rewards
+	},
+	{
+		name: WizardStepsClaimStakingReward.CLAIMING,
+		title: i18n.stake.text.executing_transaction
+	}
+];
+
 export const stakeProvidersConfig: Record<
 	StakeProvider,
 	{
 		name: string;
 		logo: string;
 		url: string;
+		pageDescriptionKey: string;
 	}
 > = {
 	[StakeProvider.GLDT]: {
 		name: 'Gold DAO',
 		logo: '/images/dapps/gold-dao-logo.svg',
-		url: 'https://app.gldt.org/earn/'
+		url: 'https://app.gldt.org/earn/',
+		pageDescriptionKey: 'stake.text.gldt_stake_page_description'
 	}
 };

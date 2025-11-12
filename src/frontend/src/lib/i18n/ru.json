@@ -122,7 +122,6 @@
 			"preview": "Предварительный просмотр $oisy_name после входа в систему, как на настольном компьютере, так и на мобильном устройстве"
 		},
 		"message": {
-			"refreshed_authentication": "Сессия обновлена",
 			"session_locked": "Сессия заблокирована"
 		},
 		"warning": {
@@ -969,7 +968,8 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
+			"swap_slippage_exceeded_exchange_rate": ""
 		}
 	},
 	"buy": {
@@ -1731,6 +1731,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "Стейкинг",
 			"unstake": "",
 			"unstaking": "",
@@ -1746,6 +1748,7 @@
 			"active_earning_per_year": "",
 			"visit_provider": "Посетить провайдера",
 			"current_apy": "Текущий APY",
+			"current_apy_label": "",
 			"current_apy_info": "Информация о текущем APY",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",

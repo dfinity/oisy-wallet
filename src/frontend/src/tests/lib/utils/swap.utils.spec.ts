@@ -26,6 +26,7 @@ import {
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	calculateValueDifference,
 	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
@@ -575,6 +576,141 @@ describe('swap utils', () => {
 
 		it('should return undefined if dapp is not found', () => {
 			const result = findSwapProvider('test');
+
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('calculateValueDifference', () => {
+		it('should return positive percentage when received value is higher than paid', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 110,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(10);
+		});
+
+		it('should return negative percentage when received value is lower than paid', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 90,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(-10);
+		});
+
+		it('should return zero when paid and received values are equal', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(0);
+		});
+
+		it('should calculate correctly with different exchange rates', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 50,
+				sourceTokenExchangeRate: 2, // paid value = 200
+				destinationTokenExchangeRate: 3 // received value = 150
+			});
+
+			// (150 - 200) / 200 * 100 = -25
+			expect(result).toBe(-25);
+		});
+
+		it('should return undefined when swapAmount is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: undefined,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when receiveAmount is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: undefined,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when sourceTokenExchangeRate is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when destinationTokenExchangeRate is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: undefined
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when paid value is zero', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 0, // paid value will be 0
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle string swapAmount correctly', () => {
+			const result = calculateValueDifference({
+				swapAmount: '100',
+				receiveAmount: 110,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(10);
+		});
+
+		it('should calculate high precision percentages correctly', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100.5,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(0.5);
+		});
+
+		it('should return undefined when all values are undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: undefined,
+				receiveAmount: undefined,
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: undefined
+			});
 
 			expect(result).toBeUndefined();
 		});

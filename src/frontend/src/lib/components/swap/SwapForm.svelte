@@ -40,12 +40,14 @@
 		slippageValue: OptionAmount;
 		isSwapAmountsLoading: boolean;
 		swapDetails?: Snippet;
+		swapAdditionalInfo?: Snippet;
 		errorType?: TokenActionErrorType;
 		onCustomValidate: (userAmount: bigint) => TokenActionErrorType;
 		fee?: bigint;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
 		onClose: () => void;
 		onNext: () => void;
+		isSlippageExceeded?: boolean;
 	}
 
 	let {
@@ -54,12 +56,14 @@
 		slippageValue = $bindable(),
 		isSwapAmountsLoading,
 		swapDetails,
+		swapAdditionalInfo,
 		errorType = $bindable(),
 		onCustomValidate,
 		fee,
 		onShowTokensList,
 		onClose,
-		onNext
+		onNext,
+		isSlippageExceeded
 	}: Props = $props();
 
 	const {
@@ -113,7 +117,8 @@
 			isNullish(receiveAmount) ||
 			isNullish(fee) ||
 			swapAmountsLoading ||
-			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE)
+			(nonNullish(slippageValue) && Number(slippageValue) >= SWAP_SLIPPAGE_INVALID_VALUE) ||
+			isSlippageExceeded
 	);
 
 	let isCrossChainNetworks = $derived($sourceToken?.network.id !== $destinationToken?.network.id);
@@ -261,6 +266,8 @@
 				: SWAP_SLIPPAGE_VELORA_INVALID_VALUE}
 			bind:slippageValue
 		/>
+
+		{@render swapAdditionalInfo?.()}
 
 		{@render swapDetails?.()}
 	</div>

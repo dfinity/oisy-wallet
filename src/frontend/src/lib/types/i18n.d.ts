@@ -116,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string; session_locked: string };
+	message: { session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -778,6 +778,7 @@ interface I18nSwap {
 		manually_withdraw_failed: string;
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
+		swap_slippage_exceeded_exchange_rate: string;
 	};
 }
 
@@ -1385,6 +1386,8 @@ interface I18nEarning {
 
 interface I18nStake {
 	text: {
+		stake_page_title: string;
+		gldt_stake_page_description: string;
 		stake: string;
 		unstake: string;
 		unstaking: string;
@@ -1400,6 +1403,7 @@ interface I18nStake {
 		active_earning_per_year: string;
 		visit_provider: string;
 		current_apy: string;
+		current_apy_label: string;
 		current_apy_info: string;
 		stake_review_subtitle: string;
 		unstake_review_subtitle: string;
