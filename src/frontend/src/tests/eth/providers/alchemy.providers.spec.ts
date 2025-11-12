@@ -23,7 +23,6 @@ import {
 	type Nft as AlchemyNft,
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
-import { SvelteMap } from 'svelte/reactivity';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
@@ -331,6 +330,9 @@ describe('alchemy.providers', () => {
 
 		beforeEach(() => {
 			vi.clearAllMocks();
+
+			vi.spyOn(SvelteMap.prototype, 'get').mockReturnValue(undefined); // invalidate cache
+
 			global.fetch = vi.fn().mockResolvedValue({
 				headers: {
 					get: () => null
