@@ -128,6 +128,7 @@
 									{isEligible}
 									{networkBonusMultiplier}
 									reward={currentReward}
+									type="earnings-card"
 								/>
 							{:else}
 								<List condensed itemStyleClass="flex-col md:flex-row">
@@ -144,7 +145,8 @@
 													{#if Number(cardsData[card.id][cardField]) > 0}
 														<EarningYearlyAmount
 															value={Number(cardsData[card.id][cardField])}
-															formatPositiveAmount
+															formatPositiveAmount={cardField ===
+																EarningCardFields.EARNING_POTENTIAL}
 															showPlusSign
 														/>
 													{:else}
