@@ -20,16 +20,23 @@
 		type RewardEligibilityContext
 	} from '$lib/stores/reward.store';
 	import { isEndedCampaign, normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
-	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT, ZERO } from '$lib/constants/app.constants';
 	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import { nonNullish } from '@dfinity/utils';
-	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import { replacePlaceholders, resolveText } from '$lib/utils/i18n.utils.js';
 	import { goto } from '$app/navigation';
 	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
-	import { formatToShortDateString } from '$lib/utils/format.utils';
+	import { formatCurrency, formatToShortDateString } from '$lib/utils/format.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 	import { enabledFungibleTokensUi } from '$lib/derived/tokens.derived';
+	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
+	import { exchanges } from '$lib/derived/exchange.derived';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
+	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { currentLanguage } from '$lib/derived/i18n.derived';
+	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
+	import { formatToken } from '$lib/utils/format.utils.js';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
@@ -39,19 +46,47 @@
 
 	let totalUsdBalance = $derived(sumTokensUiUsdBalance($enabledFungibleTokensUi));
 
+	let gldtToken = $derived($enabledFungibleTokensUi.find(isGLDTToken));
+
+	const getFormattedYearlyAmount = (amount?: number) =>
+		nonNullish(amount)
+			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
+					$amount: `${formatCurrency({
+						value: amount,
+						currency: $currentCurrency,
+						exchangeRate: $currencyExchangeStore,
+						language: $currentLanguage
+					})}`
+				})
+			: undefined;
+
 	const cardsData: Record<
 		string,
-		{ [key in EarningCardFields]?: string | number | bigint } & { action: () => Promise<void> }
+		{ [key in EarningCardFields]?: string } & { action: () => Promise<void> }
 	> = $derived({
 		[LATEST_REWARDS_CAMPAIGN]: {
 			action: () => goto(AppPath.EarningRewards)
 		},
 		'gldt-staking': {
-			[EarningCardFields.APY]: $gldtStakeStore?.apy ?? 0,
-			[EarningCardFields.CURRENT_STAKED]: $gldtStakeStore?.position?.staked ?? 0,
-			[EarningCardFields.EARNING_POTENTIAL]:
-				(($gldtStakeStore?.position?.staked ?? 0n) * BigInt($gldtStakeStore?.apy ?? 0)) / 100n,
-			[EarningCardFields.CURRENT_EARNING]: (totalUsdBalance * ($gldtStakeStore?.apy ?? 0)) / 100,
+			[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy) ? `${$gldtStakeStore.apy}%` : '-',
+			[EarningCardFields.CURRENT_STAKED]: nonNullish(gldtToken)
+				? `${formatToken({
+						value: $gldtStakeStore?.position?.staked ?? ZERO,
+						unitName: gldtToken.decimals
+					})} ${gldtToken.symbol}`
+				: '-',
+			[EarningCardFields.EARNING_POTENTIAL]: getFormattedYearlyAmount(
+				(totalUsdBalance * ($gldtStakeStore?.apy ?? 0)) / 100
+			),
+			[EarningCardFields.CURRENT_EARNING]: nonNullish(gldtToken)
+				? (getFormattedYearlyAmount(
+						calculateTokenUsdAmount({
+							amount: $gldtStakeStore?.position?.staked,
+							token: gldtToken,
+							$exchanges
+						})
+					) ?? '-')
+				: '-',
 			[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
 			action: () => goto(AppPath.EarningGold)
 		}
@@ -100,7 +135,7 @@
 									currentReward.endDate.getDate()}
 							{:else}
 								Current APY <span class="ml-1 font-bold text-success-primary"
-									>{cardsData[card.id].apy}%</span
+									>{cardsData[card.id].apy}</span
 								>
 							{/if}
 						{/snippet}
@@ -128,12 +163,18 @@
 													path: `earning.card_fields.${cardField}`
 												})}</span
 											>
-											<span class={listItemStyles}
-												>{resolveText({
-													i18n: $i18n,
-													path: cardsData[card.id][cardField] + ''
-												})}</span
+											<span
+												class={listItemStyles}
+												class:text-success-primary={cardField === EarningCardFields.CURRENT_EARNING}
+												class:text-brand-primary={cardField === EarningCardFields.EARNING_POTENTIAL}
 											>
+												{nonNullish(cardsData[card.id][cardField])
+													? resolveText({
+															i18n: $i18n,
+															path: cardsData[card.id][cardField] ?? ''
+														})
+													: '-'}
+											</span>
 										</ListItem>
 									{/each}
 								</List>
