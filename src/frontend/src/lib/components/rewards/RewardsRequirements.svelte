@@ -17,7 +17,7 @@
 		networkBonusMultiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		criteria: CampaignCriterion[];
 		reward: RewardCampaignDescription;
-		type: 'default' | 'earnings-card';
+		type?: 'default' | 'earnings-card';
 	}
 
 	let {
@@ -38,9 +38,11 @@
 		class:flex-row={!hasNetworkBonus}
 		class:items-center={!hasNetworkBonus}
 	>
-		<span class="text-base font-semibold">
-			{$i18n.rewards.requirements.requirements_title}
-		</span>
+		{#if type !== 'earnings-card'}
+			<span class="text-base font-semibold">
+				{$i18n.rewards.requirements.requirements_title}
+			</span>
+		{/if}
 
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
 			<EligibilityBadge {isEligible} textSize={type === 'earnings-card' ? 'xs' : 'sm'} />
