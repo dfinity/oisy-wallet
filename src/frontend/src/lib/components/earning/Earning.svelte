@@ -145,8 +145,7 @@
 													{#if Number(cardsData[card.id][cardField]) > 0}
 														<EarningYearlyAmount
 															value={Number(cardsData[card.id][cardField])}
-															formatPositiveAmount={cardField ===
-																EarningCardFields.EARNING_POTENTIAL}
+															formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
 															showPlusSign
 														/>
 													{:else}
