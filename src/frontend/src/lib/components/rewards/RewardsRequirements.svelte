@@ -17,9 +17,17 @@
 		networkBonusMultiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		criteria: CampaignCriterion[];
 		reward: RewardCampaignDescription;
+		type: 'default' | 'earnings-card';
 	}
 
-	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria, reward }: Props = $props();
+	let {
+		isEligible,
+		hasNetworkBonus,
+		networkBonusMultiplier,
+		criteria,
+		reward,
+		type = 'default'
+	}: Props = $props();
 
 	let infoExpanded = $state(false);
 </script>
@@ -35,10 +43,14 @@
 		</span>
 
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
-			<EligibilityBadge {isEligible} />
+			<EligibilityBadge {isEligible} textSize={type === 'earnings-card' ? 'xs' : 'sm'} />
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
-				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
+				<NetworkBonusImage
+					disabled={!isEligible}
+					multiplier={networkBonusMultiplier}
+					size={type === 'earnings-card' ? 220 : undefined}
+				/>
 
 				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
 					<IconHelp size="18" />
@@ -60,7 +72,7 @@
 
 	<ul class="list-none">
 		{#each criteria as criterion, i (criterion)}
-			<li class="flex gap-2 pt-1">
+			<li class="flex gap-2 pt-1" class:truncate={type === 'earnings-card'}>
 				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
 			</li>
 		{/each}
