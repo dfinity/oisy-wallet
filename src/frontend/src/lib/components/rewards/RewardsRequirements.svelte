@@ -72,8 +72,12 @@
 
 	<ul class="list-none">
 		{#each criteria as criterion, i (criterion)}
-			<li class="flex gap-2 pt-1" class:truncate={type === 'earnings-card'}>
-				<RewardRequirement {criterion} testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`} />
+			<li class="flex gap-2 pt-1">
+				<RewardRequirement
+					{criterion}
+					testId={`${REWARDS_REQUIREMENTS_STATUS}-${i}`}
+					truncate={type === 'earnings-card'}
+				/>
 			</li>
 		{/each}
 	</ul>
