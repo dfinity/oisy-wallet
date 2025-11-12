@@ -76,7 +76,7 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
-								<Responsive up="xl">
+								<Responsive up="1.5xl">
 									<DappsCarousel />
 								</Responsive>
 							{/if}
