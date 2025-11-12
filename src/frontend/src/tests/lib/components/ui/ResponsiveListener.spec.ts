@@ -5,14 +5,6 @@ import { AVAILABLE_SCREENS, MIN_SCREEN } from '$lib/utils/screens.utils';
 import { render } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
-vi.mock('@dfinity/utils', async () => {
-	const actual = await vi.importActual('@dfinity/utils');
-	return {
-		...actual,
-		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
-	};
-});
-
 describe('ResponsiveListener', () => {
 	const interval = 10_000;
 
