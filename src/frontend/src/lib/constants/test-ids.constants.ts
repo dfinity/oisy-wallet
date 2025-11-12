@@ -84,6 +84,8 @@ export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
+export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
+
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
 
