@@ -38,8 +38,6 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { formatToken } from '$lib/utils/format.utils.js';
 
-	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
-
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	const LATEST_REWARDS_CAMPAIGN = 'sprinkles_s1e5';
@@ -157,14 +155,16 @@
 								<List condensed itemStyleClass="flex-col md:flex-row">
 									{#each card.fields as cardField}
 										<ListItem>
-											<span class={listItemStyles}
+											<span class="text-tertiary"
 												>{resolveText({
 													i18n: $i18n,
 													path: `earning.card_fields.${cardField}`
 												})}</span
 											>
 											<span
-												class={listItemStyles}
+												class="font-bold"
+												class:text-tertiary={cardField !== EarningCardFields.CURRENT_EARNING &&
+													cardField !== EarningCardFields.EARNING_POTENTIAL}
 												class:text-success-primary={cardField === EarningCardFields.CURRENT_EARNING}
 												class:text-brand-primary={cardField === EarningCardFields.EARNING_POTENTIAL}
 											>
