@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
@@ -78,9 +77,7 @@
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
 								<Responsive up="xl">
-									<div transition:fade>
 										<DappsCarousel styleClass="hidden xl:block" />
-									</div>
 								</Responsive>
 							{/if}
 						</NavigationMenu>
