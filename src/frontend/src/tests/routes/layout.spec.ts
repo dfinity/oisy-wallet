@@ -1,5 +1,4 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
-import * as authBroadcastServices from '$lib/providers/auth-broadcast.providers';
 import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
 import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
@@ -62,9 +61,13 @@ describe('App Layout', () => {
 	});
 
 	describe('when handling AuthBroadcastChannel', () => {
-		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		let bc: AuthBroadcastChannel;
 
-		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = {
+			msg: AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS,
+			emitterId: window.crypto.randomUUID()
+		};
 
 		const mockChannels = new Map<string, BroadcastChannel>();
 
@@ -102,10 +105,13 @@ describe('App Layout', () => {
 				})
 			);
 
+			bc = AuthBroadcastChannel.getInstance();
+
 			authLoggedInAnotherTabStore.set(false);
 		});
 
 		afterEach(() => {
+			bc.destroy();
 			vi.unstubAllGlobals();
 		});
 
@@ -138,10 +144,9 @@ describe('App Layout', () => {
 		it('should initialize a channel for auth synchronization', () => {
 			const spy = vi.fn();
 
-			vi.spyOn(authBroadcastServices, 'AuthBroadcastChannel').mockReturnValueOnce({
-				onLoginSuccess: spy,
-				close: vi.fn()
-			} as unknown as AuthBroadcastChannel);
+			const service = AuthBroadcastChannel.getInstance();
+			vi.spyOn(service, 'onLoginSuccess').mockImplementation(spy);
+			vi.spyOn(service, 'destroy').mockImplementation(vi.fn());
 
 			expect(spy).not.toHaveBeenCalled();
 
