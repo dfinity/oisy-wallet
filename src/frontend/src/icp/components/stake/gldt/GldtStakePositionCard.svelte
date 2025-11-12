@@ -2,6 +2,7 @@
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { icrcCustomTokensInitialized } from '$icp/derived/icrc.derived';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import type { IcToken } from '$icp/types/ic-token';
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
@@ -79,12 +80,14 @@
 				</span>
 			{/if}
 
-			{#if nonNullish(gldtToken)}
+			{#if $icrcCustomTokensInitialized}
 				<span class="text-tertiary" in:fade>
-					{formatToken({
-						value: stakedAmount,
-						unitName: gldtToken.decimals
-					})}
+					{stakedAmount > ZERO && nonNullish(gldtToken)
+						? formatToken({
+								value: stakedAmount,
+								unitName: gldtToken.decimals
+							})
+						: 0}
 					{gldtTokenSymbol}
 				</span>
 			{:else}
