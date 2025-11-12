@@ -1392,7 +1392,6 @@
 			"token_needs_enabling": "Le token doit être activé pour visualiser l'historique des transactions."
 		},
 		"error": {
-			"loading_transactions": "Erreur lors du chargement des transactions.",
 			"loading_transactions_symbol": "Erreur lors du chargement des transactions de $symbol.",
 			"uncertified_transactions_removed": "Plusieurs transactions non certifiées ont été identifiées et par la suite supprimées des listes affichées.",
 			"loading_pending_ck_ethereum_transactions": "Quelque chose s'est mal passé lors de la récupération des transactions en attente de $network.",
