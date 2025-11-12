@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -167,14 +168,23 @@ describe('swap utils', () => {
 			receiveAmount: 1000n
 		};
 
+		const mockDestToken: IcToken = {
+			...mockValidIcToken,
+			fee: 10n
+		};
+
 		it('should return mapped result with valid numeric slippage as string', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '0.5' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: '0.5',
+				destToken: mockDestToken
+			});
 
 			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
-			expect(result.receiveAmount).toBe(1000n);
+			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.5 })
 			);
@@ -182,17 +192,26 @@ describe('swap utils', () => {
 		});
 
 		it('should return mapped result with numeric slippage', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 0.3 });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: 0.3,
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
+			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.3 })
 			);
 		});
 
 		it('should fallback to default slippage if value is NaN', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 'string' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: 'string',
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
@@ -205,7 +224,11 @@ describe('swap utils', () => {
 		});
 
 		it('should fallback to default slippage if empty string is passed', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: '',
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
@@ -215,6 +238,36 @@ describe('swap utils', () => {
 					slippagePercentage: SWAP_DEFAULT_SLIPPAGE_VALUE
 				})
 			);
+		});
+
+		it('should return 0 when receiveAmount is less than transfer fee', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 5n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: 10n }
+			});
+
+			expect(result.receiveAmount).toBe(ZERO);
+		});
+
+		it('should calculate NET amount correctly for typical swap', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 1000000n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: 10000n }
+			});
+
+			expect(result.receiveAmount).toBe(990000n);
+		});
+
+		it('should handle zero transfer fee', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 1000n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: ZERO }
+			});
+
+			expect(result.receiveAmount).toBe(1000n);
 		});
 	});
 

@@ -95,11 +95,11 @@ export const mapIcpSwapResult = ({
 }): SwapMappedResult => {
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
-	const calulatedReceiveAmountNet = swap.receiveAmount - destToken.fee;
+	const receiveAmountNet = swap.receiveAmount - destToken.fee;
 
 	return {
 		provider: SwapProvider.ICP_SWAP,
-		receiveAmount: calulatedReceiveAmountNet > 0 ? calulatedReceiveAmountNet : BigInt(0),
+		receiveAmount: receiveAmountNet > 0 ? receiveAmountNet : ZERO,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
 			slippagePercentage
