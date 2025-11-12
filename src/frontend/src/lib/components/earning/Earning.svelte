@@ -92,7 +92,9 @@
 									' ' +
 									currentReward.endDate.getDate()}
 							{:else}
-								Current APY <span class="ml-1 font-bold text-success-primary">8.5%</span>
+								Current APY <span class="ml-1 font-bold text-success-primary"
+									>{cardsData[card.id].apy}%</span
+								>
 							{/if}
 						{/snippet}
 						{#snippet title()}
