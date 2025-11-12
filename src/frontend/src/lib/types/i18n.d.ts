@@ -1167,7 +1167,6 @@ interface I18nTransactions {
 		token_needs_enabling: string;
 	};
 	error: {
-		loading_transactions: string;
 		loading_transactions_symbol: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;
