@@ -1721,31 +1721,31 @@
 			"title": "Earn"
 		},
 		"cards": {
-          "gldt": {
-            "title": "GLDT Staking",
-            "description": "Stake GLDT tokens to earn rewards backed by physical gold",
-            "action": "Stake GLDT"
-          },
-          "sprinkles": {
-            "title": "OISY Sprinkles",
-            "description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
-            "action": "Check status"
-          },
-          "stablecoins": {
-            "title": "Stablecoins",
-            "description": "Coming soon"
-          }
+			"gldt": {
+				"title": "GLDT Staking",
+				"description": "Stake GLDT tokens to earn rewards backed by physical gold",
+				"action": "Stake GLDT"
+			},
+			"sprinkles": {
+				"title": "OISY Sprinkles",
+				"description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
+				"action": "Check status"
+			},
+			"stablecoins": {
+				"title": "Stablecoins",
+				"description": "Coming soon"
+			}
 		},
-      "card_fields": {
-        "apy": "APY",
-        "currentStaked": "Staked",
-        "currentEarning": "Currently earned",
-        "earningPotential": "Max. earning potential",
-        "terms": "Terms"
-      },
-      "terms": {
-        "flexible": "Flexible"
-      }
+		"card_fields": {
+			"apy": "APY",
+			"currentStaked": "Staked",
+			"currentEarning": "Currently earned",
+			"earningPotential": "Max. earning potential",
+			"terms": "Terms"
+		},
+		"terms": {
+			"flexible": "Flexible"
+		}
 	},
 	"stake": {
 		"text": {

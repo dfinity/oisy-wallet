@@ -1721,12 +1721,30 @@
 			"title": ""
 		},
 		"cards": {
-			"gold_title": "",
-			"gold_description": "",
-			"stablecoins_title": "",
-			"stablecoins_description": "",
-			"sprinkles_title": "",
-			"sprinkles_description": ""
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"stablecoins": {
+				"title": "",
+				"description": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

@@ -1721,12 +1721,30 @@
 			"title": "Guadagna"
 		},
 		"cards": {
-			"gold_title": "Oro",
-			"gold_description": "Staking di GLDT",
-			"stablecoins_title": "Stablecoin",
-			"stablecoins_description": "Prossimamente",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Ricompense OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"stablecoins": {
+				"title": "",
+				"description": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

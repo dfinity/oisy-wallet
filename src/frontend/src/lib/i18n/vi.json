@@ -1721,12 +1721,30 @@
 			"title": "Kiếm tiền"
 		},
 		"cards": {
-			"gold_title": "Vàng",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Sắp ra mắt",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Phần thưởng OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"stablecoins": {
+				"title": "",
+				"description": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

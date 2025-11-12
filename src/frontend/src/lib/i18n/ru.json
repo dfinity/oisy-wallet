@@ -1721,12 +1721,30 @@
 			"title": "Заработать"
 		},
 		"cards": {
-			"gold_title": "GLDT",
-			"gold_description": "Стейкинг GLDT",
-			"stablecoins_title": "Стейблкоины",
-			"stablecoins_description": "Скоро",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Награды OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"stablecoins": {
+				"title": "",
+				"description": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

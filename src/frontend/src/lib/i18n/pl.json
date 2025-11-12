@@ -1721,12 +1721,30 @@
 			"title": "Zarabiaj"
 		},
 		"cards": {
-			"gold_title": "Złoto",
-			"gold_description": "Staking GLDT",
-			"stablecoins_title": "Stablecoiny",
-			"stablecoins_description": "Wkrótce",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Nagrody OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"stablecoins": {
+				"title": "",
+				"description": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
