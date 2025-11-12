@@ -28,12 +28,16 @@
 	import { goto } from '$app/navigation';
 	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 	import { formatToShortDateString } from '$lib/utils/format.utils';
+	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
+	import { enabledFungibleTokensUi } from '$lib/derived/tokens.derived';
 
 	const listItemStyles = 'first:text-tertiary last:text-primary last:font-bold';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	const LATEST_REWARDS_CAMPAIGN = 'sprinkles_s1e5';
+
+	let totalUsdBalance = $derived(sumTokensUiUsdBalance($enabledFungibleTokensUi));
 
 	const cardsData: Record<
 		string,
@@ -43,9 +47,12 @@
 			action: () => goto(AppPath.EarningRewards)
 		},
 		'gldt-staking': {
-			apy: $gldtStakeStore?.apy ?? 0,
-			currentStaked: $gldtStakeStore?.position?.staked ?? 0,
-			terms: $i18n.earning.terms.flexible,
+			[EarningCardFields.APY]: $gldtStakeStore?.apy ?? 0,
+			[EarningCardFields.CURRENT_STAKED]: $gldtStakeStore?.position?.staked ?? 0,
+			[EarningCardFields.EARNING_POTENTIAL]:
+				(($gldtStakeStore?.position?.staked ?? 0n) * BigInt($gldtStakeStore?.apy ?? 0)) / 100n,
+			[EarningCardFields.CURRENT_EARNING]: (totalUsdBalance * ($gldtStakeStore?.apy ?? 0)) / 100,
+			[EarningCardFields.TERMS]: $i18n.earning.terms.flexible,
 			action: () => goto(AppPath.EarningGold)
 		}
 	});
