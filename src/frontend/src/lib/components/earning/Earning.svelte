@@ -55,7 +55,9 @@
 						unitName: gldtToken.decimals
 					})} ${gldtToken.symbol}`
 				: '-',
-			[EarningCardFields.EARNING_POTENTIAL]: (totalUsdBalance * ($gldtStakeStore?.apy ?? 0)) / 100,
+			[EarningCardFields.EARNING_POTENTIAL]: nonNullish($gldtStakeStore?.apy)
+				? (totalUsdBalance * $gldtStakeStore.apy) / 100
+				: undefined,
 			[EarningCardFields.CURRENT_EARNING]: nonNullish(gldtToken)
 				? calculateTokenUsdAmount({
 						amount: $gldtStakeStore?.position?.staked,
