@@ -584,7 +584,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount: receiveAmount + destinationTokenFee,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
