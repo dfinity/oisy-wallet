@@ -51,7 +51,7 @@
 				<NetworkBonusImage
 					disabled={!isEligible}
 					multiplier={networkBonusMultiplier}
-					size={type === 'earnings-card' ? 220 : undefined}
+					size={type === 'earnings-card' ? 210 : undefined}
 				/>
 
 				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>

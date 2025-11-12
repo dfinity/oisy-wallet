@@ -131,7 +131,7 @@
 									type="earnings-card"
 								/>
 							{:else}
-								<List condensed itemStyleClass="flex-col md:flex-row">
+								<List condensed itemStyleClass="flex-col md:flex-row gap-2 whitespace-nowrap">
 									{#each card.fields as cardField}
 										<ListItem>
 											<span class="text-tertiary"
