@@ -23,6 +23,7 @@ import {
 	type Nft as AlchemyNft,
 	type OwnedNftsResponse
 } from 'alchemy-sdk';
+import { SvelteMap } from 'svelte/reactivity';
 
 vi.mock(import('alchemy-sdk'), async (importOriginal) => {
 	const actual = await importOriginal();
