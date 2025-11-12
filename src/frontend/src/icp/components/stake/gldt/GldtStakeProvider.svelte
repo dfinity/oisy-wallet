@@ -21,7 +21,7 @@
 			<div class="ml-3 w-full text-sm">
 				<div class="mb-1 font-bold">
 					{replacePlaceholders($i18n.stake.text.current_apy, {
-						$apy: `${$gldtStakeApyStore?.apy}`
+						$apy: `${($gldtStakeApyStore?.apy ?? 0).toFixed(2)}`
 					})}
 				</div>
 

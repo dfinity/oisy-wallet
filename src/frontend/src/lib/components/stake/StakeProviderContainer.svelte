@@ -53,7 +53,7 @@
 				in:fade
 			>
 				<span class="text-xs">{$i18n.stake.text.current_apy_label}</span>
-				<span class="text-sm font-bold text-success-primary">{currentApy}%</span>
+				<span class="text-sm font-bold text-success-primary">{currentApy.toFixed(2)}%</span>
 			</div>
 		{/if}
 	{/snippet}

@@ -36,7 +36,7 @@ describe('GldtStakeProvider', () => {
 		expect(container).toHaveTextContent(stakeProvidersConfig[StakeProviderType.GLDT].name);
 		expect(container).toHaveTextContent(
 			replacePlaceholders(en.stake.text.current_apy, {
-				$apy: `${apy}`
+				$apy: `${apy.toFixed(2)}`
 			})
 		);
 		expect(container).toHaveTextContent(
