@@ -93,7 +93,7 @@
 <div class="flex flex-col">
 	<StakeContentSection>
 		{#snippet title()}
-			Earning opportunities
+			<h4>Earning opportunities</h4>
 		{/snippet}
 		{#snippet content()}
 			<div class="flex grid grid-cols-2 gap-3 md:flex-row">
