@@ -13,6 +13,7 @@
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { OptionTokenUi } from '$lib/types/token-ui';
+	import { isIos } from '$lib/utils/device.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
@@ -42,7 +43,7 @@
 				/>
 			{/if}
 		{:else}
-			<span class:animate-pulse={$loading}>
+			<span class:animate-pulse={$loading && !isIos()}>
 				{#if $isPrivacyMode}
 					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}
