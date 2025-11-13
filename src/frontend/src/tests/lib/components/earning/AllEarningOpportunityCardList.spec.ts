@@ -9,7 +9,6 @@ import * as tokenFilter from '$icp-eth/utils/token.utils';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
 import * as formatUtils from '$lib/utils/format.utils';
-import * as i18nUtils from '$lib/utils/i18n.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
 
 import * as earningCardsEnv from '$env/earning-cards.env';
@@ -128,10 +127,6 @@ describe('AllEarningOpportunityCardList', () => {
 		vi.spyOn(tokenUtils, 'calculateTokenUsdAmount').mockReturnValue(123.45);
 		vi.spyOn(formatUtils, 'formatToken').mockReturnValue('10.00');
 		vi.spyOn(formatUtils, 'formatToShortDateString').mockReturnValue('Dec 31, 2024');
-		vi.spyOn(i18nUtils, 'resolveText').mockImplementation(({ path }) => path);
-		vi.spyOn(i18nUtils, 'replacePlaceholders').mockImplementation(
-			(s, map) => `${s}-${map.$amount}`
-		);
 
 		// mock navigation
 		vi.spyOn(navModule, 'goto').mockResolvedValue();
