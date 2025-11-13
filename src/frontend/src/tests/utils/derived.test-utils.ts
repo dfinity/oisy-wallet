@@ -28,12 +28,11 @@ const derivedModulesSol = import.meta.glob<DerivedModule>('$sol/derived/**/*.der
 	eager: true
 });
 
-const isReadable = (value: unknown): value is Readable<unknown> => (
-		typeof value === 'object' &&
-		value !== null &&
-		'subscribe' in value &&
-		typeof (value as { subscribe: unknown }).subscribe === 'function'
-	);
+const isReadable = (value: unknown): value is Readable<unknown> =>
+	typeof value === 'object' &&
+	value !== null &&
+	'subscribe' in value &&
+	typeof (value as { subscribe: unknown }).subscribe === 'function';
 
 const derivedList: Record<string, Readable<unknown>> = {};
 
