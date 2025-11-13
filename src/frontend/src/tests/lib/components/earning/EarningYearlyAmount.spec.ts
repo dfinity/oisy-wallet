@@ -73,7 +73,7 @@ describe('EarningYearlyAmount', () => {
 
 	it('renders nothing if value is null or undefined', () => {
 		const { container, rerender } = render(EarningYearlyAmount, {
-			value: undefined as unknown as number
+			value: undefined
 		});
 
 		expect(container.textContent?.trim()).toBe('');
