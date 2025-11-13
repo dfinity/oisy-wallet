@@ -18,9 +18,9 @@ import { EarningCardFields } from '$env/types/env.earning-cards';
 import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
+import type { Token } from '$lib/types/token';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
-
-// ---------- spies and mocks ----------
+import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 
 // ---------- mock contexts ----------
 const mockGldtStakeStore = {
@@ -69,7 +69,7 @@ beforeEach(() => {
 
 	vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 		{
-			id: 'sprinkles_s1e5',
+			id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
 			title: 'mock.rewards.title',
 			description: 'mock.rewards.description',
 			logo: '/images/rewards/oisy-reward-logo.svg',
@@ -92,56 +92,20 @@ beforeEach(() => {
 		}
 	]);
 
-	vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue([
-		{
-			id: 'sprinkles_s1e5',
-			title: 'rewards.campaigns.sprinkles_s1e5.title',
-			cardTitle: 'rewards.campaigns.sprinkles_s1e5.card_title',
-			oneLiner: 'rewards.campaigns.sprinkles_s1e5.one_liner',
-			participateTitle: 'rewards.campaigns.sprinkles_s1e5.participate_title',
-			description: 'rewards.campaigns.sprinkles_s1e5.description',
-			logo: '/images/rewards/oisy-reward-logo.svg',
-			cardBanner: '/images/rewards/oisy-episode-five-campaign.webp',
-			campaignHref: 'rewards.campaigns.sprinkles_s1e5.campaign_href',
-			learnMoreHref: 'https://docs.oisy.com/rewards/oisy-sprinkles',
-			startDate: new Date('2025-09-24T12:00:00.000Z'),
-			endDate: new Date('2030-12-18T12:00:00.000Z'),
-			welcome: {
-				title: 'rewards.campaigns.sprinkles_s1e5.welcome.title',
-				subtitle: 'rewards.campaigns.sprinkles_s1e5.welcome.subtitle',
-				description: 'rewards.campaigns.sprinkles_s1e5.welcome.description'
-			},
-			win: {
-				default: {
-					title: 'rewards.campaigns.sprinkles_s1e5.win.default.title',
-					banner: '/images/rewards/reward-received.svg',
-					description: 'rewards.campaigns.sprinkles_s1e5.win.default.description',
-					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.default.share_href'
-				},
-				jackpot: {
-					title: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.title',
-					banner: '/images/rewards/reward-jackpot-received.svg',
-					description: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.description',
-					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.share_href'
-				},
-				leaderboard: {
-					title: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.title',
-					banner: '/images/rewards/reward-jackpot-received.svg',
-					description: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.description',
-					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.share_href'
-				},
-				referral: {
-					title: 'rewards.campaigns.sprinkles_s1e5.win.referral.title',
-					banner: '/images/rewards/reward-received.svg',
-					description: 'rewards.campaigns.sprinkles_s1e5.win.referral.description',
-					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.referral.share_href'
-				}
-			}
-		}
-	]);
+	vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
+
+	const mockGldtToken = {
+		id: 'mock-gldt',
+		symbol: 'GLDT',
+		name: 'Gold DAO Token',
+		decimals: 8,
+		network: { id: 'mock-network', env: 'mainnet' },
+		address: '0xmock',
+		enabled: true
+	} as unknown as Token;
 
 	// mock derived stores
-	const enabledFungibleTokensUi = writable([]);
+	const enabledFungibleTokensUi = writable([mockGldtToken]);
 	const enabledMainnetFungibleTokensUsdBalance = readable(1000);
 
 	vi.spyOn(tokensDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
@@ -230,7 +194,6 @@ describe('AllEarningOpportunityCardList', () => {
 	it('renders the current earning USD value correctly', () => {
 		render(AllEarningOpportunityCardList, { context: mockContexts });
 
-		// Should show the formatted yearly earning via <EarningYearlyAmount>
 		// Our mock of calculateTokenUsdAmount returns 123.45, so formatted as $123.45
 		expect(screen.getByText(/\$123\.45/)).toBeInTheDocument();
 	});
