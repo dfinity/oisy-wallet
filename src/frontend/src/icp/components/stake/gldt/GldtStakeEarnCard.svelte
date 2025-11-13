@@ -51,6 +51,8 @@
 		nonNullish(gldtToken) ? ($exchanges?.[gldtToken.id]?.usd ?? 0) : 0
 	);
 
+	let gldtStakeButtonDisabled = $derived(gldtTokenBalance - (gldtToken?.fee ?? ZERO) * 2n <= ZERO);
+
 	let totalUsdBalance = $derived(sumTokensUiUsdBalance($enabledFungibleTokensUi));
 
 	let potentialGldtTokenBalance = $derived(
@@ -136,7 +138,7 @@
 		{#if nonNullish(gldtToken)}
 			<ButtonWithModal isOpen={$modalGldtStake} onOpen={modalStore.openGldtStake}>
 				{#snippet button(onclick)}
-					<Button disabled={gldtTokenBalance === ZERO} fullWidth {onclick}>
+					<Button disabled={gldtStakeButtonDisabled} fullWidth {onclick}>
 						{replacePlaceholders($i18n.stake.text.stake, {
 							$token_symbol: gldtTokenSymbol
 						})}

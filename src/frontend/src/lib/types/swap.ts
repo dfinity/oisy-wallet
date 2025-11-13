@@ -109,6 +109,7 @@ interface KongQuoteParams {
 interface IcpQuoteParams {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }
 
 interface SwapQuoteParams {

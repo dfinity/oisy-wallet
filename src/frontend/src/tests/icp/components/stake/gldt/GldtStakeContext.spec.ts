@@ -18,8 +18,6 @@ import { render, waitFor } from '@testing-library/svelte';
 import { readable } from 'svelte/store';
 
 describe('GldtStakeContext', () => {
-	const parsedMockApy = Math.round(dailyAnalyticsMockResponse.apy * 100) / 100;
-
 	const mockContext = (store: GldtStakeStore) => new Map([[GLDT_STAKE_CONTEXT_KEY, { store }]]);
 	const mockGetDailyAnalytics = () =>
 		vi.spyOn(gldtStakeApi, 'getDailyAnalytics').mockResolvedValue(dailyAnalyticsMockResponse);
@@ -57,7 +55,7 @@ describe('GldtStakeContext', () => {
 			expect(getPositionSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity
 			});
-			expect(setApySpy).toHaveBeenCalledExactlyOnceWith(parsedMockApy);
+			expect(setApySpy).toHaveBeenCalledExactlyOnceWith(dailyAnalyticsMockResponse.apy);
 			expect(setPositionSpy).toHaveBeenCalledExactlyOnceWith(stakePositionMockResponse);
 		});
 	});
