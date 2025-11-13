@@ -91,7 +91,7 @@
 </script>
 
 <div class="mt-5 flex grid grid-cols-2 gap-3 md:flex-row">
-	{#each earningCards as card}
+	{#each earningCards as card, i (`${card.id}-${i}`)}
 		<EarningOpportunityCard>
 			{#snippet logo()}
 				<Logo src={card.logo} size="lg" />
@@ -123,7 +123,7 @@
 					/>
 				{:else}
 					<List condensed itemStyleClass="flex-col md:flex-row gap-2 whitespace-nowrap text-xs">
-						{#each card.fields as cardField}
+						{#each card.fields as cardField, i (`${cardField}-${i}`)}
 							<ListItem>
 								<span class="text-tertiary"
 									>{resolveText({
