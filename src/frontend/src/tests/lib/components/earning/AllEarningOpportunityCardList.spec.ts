@@ -24,7 +24,7 @@ import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 
 // mock contexts
 const mockGldtStakeStore = {
-	subscribe: (fn: (v: any) => void) => {
+	subscribe: (fn: (v: unknown) => void) => {
 		fn({ apy: 5, position: { staked: 10 } });
 		return () => {};
 	},
@@ -64,77 +64,79 @@ const mockRewardEligibilityContext = {
 		})
 };
 
-beforeEach(() => {
-	vi.restoreAllMocks();
-
-	vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
-		{
-			id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
-			title: 'mock.rewards.title',
-			description: 'mock.rewards.description',
-			logo: '/images/rewards/oisy-reward-logo.svg',
-			fields: [],
-			actionText: 'mock.rewards.action'
-		},
-		{
-			id: 'gldt-staking',
-			title: 'mock.gldt.title',
-			description: 'mock.gldt.description',
-			logo: '/mock/logo.svg',
-			fields: [
-				EarningCardFields.APY,
-				EarningCardFields.CURRENT_STAKED,
-				EarningCardFields.CURRENT_EARNING,
-				EarningCardFields.EARNING_POTENTIAL,
-				EarningCardFields.TERMS
-			],
-			actionText: 'mock.gldt.action'
-		}
-	]);
-
-	vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
-
-	const mockGldtToken = {
-		id: 'mock-gldt',
-		symbol: 'GLDT',
-		name: 'Gold DAO Token',
-		decimals: 8,
-		network: { id: 'mock-network', env: 'mainnet' },
-		address: '0xmock',
-		enabled: true
-	} as unknown as Token;
-
-	// mock derived stores
-	const enabledFungibleTokensUi = writable([mockGldtToken]);
-	const enabledMainnetFungibleTokensUsdBalance = readable(1000);
-
-	vi.spyOn(tokensDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
-		enabledFungibleTokensUi
-	);
-	vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
-		enabledMainnetFungibleTokensUsdBalance
-	);
-
-	vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(readable({}));
-
-	// mock utils
-	vi.spyOn(tokenFilter, 'isGLDTToken').mockReturnValue(true);
-	vi.spyOn(tokenUtils, 'calculateTokenUsdAmount').mockReturnValue(123.45);
-	vi.spyOn(formatUtils, 'formatToken').mockReturnValue('10.00');
-	vi.spyOn(formatUtils, 'formatToShortDateString').mockReturnValue('Dec 31, 2024');
-	vi.spyOn(i18nUtils, 'resolveText').mockImplementation(({ path }) => path);
-	vi.spyOn(i18nUtils, 'replacePlaceholders').mockImplementation((s, map) => `${s}-${map.$amount}`);
-
-	// mock navigation
-	vi.spyOn(navModule, 'goto').mockResolvedValue();
-});
-
 const mockContexts = new Map<symbol, unknown>([
 	[GLDT_STAKE_CONTEXT_KEY, mockGldtStakeContext],
 	[REWARD_ELIGIBILITY_CONTEXT_KEY, mockRewardEligibilityContext]
 ]);
 
 describe('AllEarningOpportunityCardList', () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+
+		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
+			{
+				id: mockRewardCampaigns[mockRewardCampaigns.length - 1].id,
+				title: 'mock.rewards.title',
+				description: 'mock.rewards.description',
+				logo: '/images/rewards/oisy-reward-logo.svg',
+				fields: [],
+				actionText: 'mock.rewards.action'
+			},
+			{
+				id: 'gldt-staking',
+				title: 'mock.gldt.title',
+				description: 'mock.gldt.description',
+				logo: '/mock/logo.svg',
+				fields: [
+					EarningCardFields.APY,
+					EarningCardFields.CURRENT_STAKED,
+					EarningCardFields.CURRENT_EARNING,
+					EarningCardFields.EARNING_POTENTIAL,
+					EarningCardFields.TERMS
+				],
+				actionText: 'mock.gldt.action'
+			}
+		]);
+
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue(mockRewardCampaigns);
+
+		const mockGldtToken = {
+			id: 'mock-gldt',
+			symbol: 'GLDT',
+			name: 'Gold DAO Token',
+			decimals: 8,
+			network: { id: 'mock-network', env: 'mainnet' },
+			address: '0xmock',
+			enabled: true
+		} as unknown as Token;
+
+		// mock derived stores
+		const enabledFungibleTokensUi = writable([mockGldtToken]);
+		const enabledMainnetFungibleTokensUsdBalance = readable(1000);
+
+		vi.spyOn(tokensDerived, 'enabledFungibleTokensUi', 'get').mockReturnValue(
+			enabledFungibleTokensUi
+		);
+		vi.spyOn(tokensDerived, 'enabledMainnetFungibleTokensUsdBalance', 'get').mockReturnValue(
+			enabledMainnetFungibleTokensUsdBalance
+		);
+
+		vi.spyOn(exchangeDerived, 'exchanges', 'get').mockReturnValue(readable({}));
+
+		// mock utils
+		vi.spyOn(tokenFilter, 'isGLDTToken').mockReturnValue(true);
+		vi.spyOn(tokenUtils, 'calculateTokenUsdAmount').mockReturnValue(123.45);
+		vi.spyOn(formatUtils, 'formatToken').mockReturnValue('10.00');
+		vi.spyOn(formatUtils, 'formatToShortDateString').mockReturnValue('Dec 31, 2024');
+		vi.spyOn(i18nUtils, 'resolveText').mockImplementation(({ path }) => path);
+		vi.spyOn(i18nUtils, 'replacePlaceholders').mockImplementation(
+			(s, map) => `${s}-${map.$amount}`
+		);
+
+		// mock navigation
+		vi.spyOn(navModule, 'goto').mockResolvedValue();
+	});
+
 	it('renders earning cards', () => {
 		render(AllEarningOpportunityCardList, { context: mockContexts });
 
