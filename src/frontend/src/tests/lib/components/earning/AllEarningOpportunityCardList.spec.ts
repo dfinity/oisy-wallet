@@ -22,7 +22,7 @@ import type { Token } from '$lib/types/token';
 import { formatStakeApyNumber } from '$lib/utils/format.utils';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
 
-// ---------- mock contexts ----------
+// mock contexts
 const mockGldtStakeStore = {
 	subscribe: (fn: (v: any) => void) => {
 		fn({ apy: 5, position: { staked: 10 } });
