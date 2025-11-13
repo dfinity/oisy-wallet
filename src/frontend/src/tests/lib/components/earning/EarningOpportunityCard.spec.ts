@@ -3,7 +3,6 @@ import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, screen } from '@testing-library/svelte';
 
-
 describe('EarningOpportunityCard', () => {
 	const props = {
 		logo: createMockSnippet('logo'),
