@@ -376,7 +376,11 @@ const fetchSwapAmountsICP = async ({
 				mapped = provider.mapQuoteResult({ swap, tokens });
 			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
-				mapped = provider.mapQuoteResult({ swap, slippage });
+				mapped = provider.mapQuoteResult({
+					swap,
+					slippage,
+					destToken: destinationToken as IcToken
+				});
 			}
 
 			if (nonNullish(mapped)) {
@@ -453,7 +457,7 @@ export const fetchIcpSwap = async ({
 	const poolCanisterId = pool.canisterId.toString();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		quoteAmount: receiveAmount + destinationTokenFee,
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -584,7 +588,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount: receiveAmount + destinationTokenFee,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {
