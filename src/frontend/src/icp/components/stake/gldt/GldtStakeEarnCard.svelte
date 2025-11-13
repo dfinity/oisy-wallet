@@ -19,7 +19,7 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { modalGldtStake } from '$lib/derived/modal.derived';
-	import { enabledFungibleTokensUi } from '$lib/derived/tokens.derived';
+	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
 	import { nullishSignOut } from '$lib/services/auth.services';
 	import { autoLoadSingleToken } from '$lib/services/token.services';
 	import { balancesStore } from '$lib/stores/balances.store';
@@ -29,7 +29,6 @@
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { getTokenDisplaySymbol } from '$lib/utils/token.utils';
-	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
 
 	interface Props {
 		gldtToken?: IcToken;
@@ -53,11 +52,9 @@
 
 	let gldtStakeButtonDisabled = $derived(gldtTokenBalance - (gldtToken?.fee ?? ZERO) * 2n <= ZERO);
 
-	let totalUsdBalance = $derived(sumTokensUiUsdBalance($enabledFungibleTokensUi));
-
 	let potentialGldtTokenBalance = $derived(
-		gldtTokenExchangeRate > 0 && totalUsdBalance > 0
-			? Math.round(totalUsdBalance / gldtTokenExchangeRate)
+		gldtTokenExchangeRate > 0 && $enabledMainnetFungibleTokensUsdBalance > 0
+			? Math.round($enabledMainnetFungibleTokensUsdBalance / gldtTokenExchangeRate)
 			: 0
 	);
 
@@ -85,14 +82,14 @@
 
 		<div
 			class="my-1 text-lg font-bold sm:text-xl"
-			class:text-brand-primary-alt={totalUsdBalance > 0}
-			class:text-tertiary={totalUsdBalance === 0}
+			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
+			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
 		>
-			{`${totalUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
+			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && currentApy > 0 ? '+' : ''}`}{replacePlaceholders(
 				$i18n.stake.text.active_earning_per_year,
 				{
 					$amount: `${formatCurrency({
-						value: (totalUsdBalance * currentApy) / 100,
+						value: ($enabledMainnetFungibleTokensUsdBalance * currentApy) / 100,
 						currency: $currentCurrency,
 						exchangeRate: $currencyExchangeStore,
 						language: $currentLanguage
@@ -103,10 +100,10 @@
 
 		{#if $icrcCustomTokensNotInitialized || nonNullish(gldtToken)}
 			<div class="flex justify-center gap-2 text-sm sm:text-base">
-				{#if totalUsdBalance > 0}
+				{#if $enabledMainnetFungibleTokensUsdBalance > 0}
 					<span class="font-bold">
 						{formatCurrency({
-							value: totalUsdBalance,
+							value: $enabledMainnetFungibleTokensUsdBalance,
 							currency: $currentCurrency,
 							exchangeRate: $currencyExchangeStore,
 							language: $currentLanguage
