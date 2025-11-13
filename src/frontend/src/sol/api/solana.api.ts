@@ -251,6 +251,7 @@ const extractTokenMetadataExtension = (
 		return {};
 	}
 
+	// TODO: Among the metadata there is the URI that could provide a logo too, basically replacing the method `getSplMetadata`
 	const {
 		state: { symbol, name }
 	} = tokenMetadataExtension as { state: { symbol?: string; name?: string } };
