@@ -30,7 +30,7 @@
 	);
 </script>
 
-{#if nonNullish(yearlyAmount)}
+{#if nonNullish(yearlyAmount) && nonNullish(value)}
 	<span
 		class:text-brand-primary={!formatPositiveAmount}
 		class:text-success-primary={formatPositiveAmount && value > 0}
