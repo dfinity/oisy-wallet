@@ -1,31 +1,3 @@
-vi.mock('$env/earning-cards.json', () => ({}));
-vi.mock('$env/reward-campaigns.json', () => ({}));
-
-vi.mock('$env/earning-cards.env', () => ({
-	earningCards: [
-		{
-			id: 'gldt-staking',
-			title: 'earning.cards.gldt.title',
-			description: 'earning.cards.gldt.description',
-			logo: '/mock/logo.svg',
-			fields: ['apy', 'currentStaked', 'currentEarning', 'earningPotential', 'terms'],
-			actionText: 'earning.cards.gldt.action'
-		}
-	]
-}));
-
-vi.mock('$env/reward-campaigns.env', () => ({
-	rewardCampaigns: [
-		{
-			id: 'reward1',
-			endDate: new Date('2024-12-31'),
-			probabilityMultiplierEnabled: true,
-			probabilityMultiplier: 1.2,
-			criteria: []
-		}
-	]
-}));
-
 import { render, screen } from '@testing-library/svelte';
 import { setContext } from 'svelte';
 import { readable, writable } from 'svelte/store';
@@ -43,10 +15,79 @@ import * as formatUtils from '$lib/utils/format.utils';
 import * as i18nUtils from '$lib/utils/i18n.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
 
+import * as earningCardsEnv from '$env/earning-cards.env';
+import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
+import { EarningCardFields } from '$env/types/env.earning-cards';
+
 // ---------- spies and mocks ----------
 
 beforeEach(() => {
 	vi.restoreAllMocks();
+
+	vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
+		{
+			id: 'gldt-staking',
+			title: 'earning.cards.gldt.title',
+			description: 'earning.cards.gldt.description',
+			logo: '/mock/logo.svg',
+			fields: [
+				EarningCardFields.APY,
+				EarningCardFields.CURRENT_STAKED,
+				EarningCardFields.CURRENT_EARNING,
+				EarningCardFields.EARNING_POTENTIAL,
+				EarningCardFields.TERMS
+			],
+			actionText: 'earning.cards.gldt.action'
+		}
+	]);
+
+	vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue([
+		{
+			id: 'sprinkles_s1e5',
+			title: 'rewards.campaigns.sprinkles_s1e5.title',
+			cardTitle: 'rewards.campaigns.sprinkles_s1e5.card_title',
+			oneLiner: 'rewards.campaigns.sprinkles_s1e5.one_liner',
+			participateTitle: 'rewards.campaigns.sprinkles_s1e5.participate_title',
+			description: 'rewards.campaigns.sprinkles_s1e5.description',
+			logo: '/images/rewards/oisy-reward-logo.svg',
+			cardBanner: '/images/rewards/oisy-episode-five-campaign.webp',
+			campaignHref: 'rewards.campaigns.sprinkles_s1e5.campaign_href',
+			learnMoreHref: 'https://docs.oisy.com/rewards/oisy-sprinkles',
+			startDate: new Date('2025-09-24T12:00:00.000Z'),
+			endDate: new Date('2030-12-18T12:00:00.000Z'),
+			welcome: {
+				title: 'rewards.campaigns.sprinkles_s1e5.welcome.title',
+				subtitle: 'rewards.campaigns.sprinkles_s1e5.welcome.subtitle',
+				description: 'rewards.campaigns.sprinkles_s1e5.welcome.description'
+			},
+			win: {
+				default: {
+					title: 'rewards.campaigns.sprinkles_s1e5.win.default.title',
+					banner: '/images/rewards/reward-received.svg',
+					description: 'rewards.campaigns.sprinkles_s1e5.win.default.description',
+					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.default.share_href'
+				},
+				jackpot: {
+					title: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.title',
+					banner: '/images/rewards/reward-jackpot-received.svg',
+					description: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.description',
+					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.jackpot.share_href'
+				},
+				leaderboard: {
+					title: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.title',
+					banner: '/images/rewards/reward-jackpot-received.svg',
+					description: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.description',
+					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.leaderboard.share_href'
+				},
+				referral: {
+					title: 'rewards.campaigns.sprinkles_s1e5.win.referral.title',
+					banner: '/images/rewards/reward-received.svg',
+					description: 'rewards.campaigns.sprinkles_s1e5.win.referral.description',
+					shareHref: 'rewards.campaigns.sprinkles_s1e5.win.referral.share_href'
+				}
+			}
+		}
+	]);
 
 	// mock derived stores
 	const enabledFungibleTokensUi = writable([]);
