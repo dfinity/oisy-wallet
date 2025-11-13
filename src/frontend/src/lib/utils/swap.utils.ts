@@ -5,6 +5,7 @@ import type {
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -85,16 +86,20 @@ export const getKongIcTokenIdentifier = (token: Token): string =>
 
 export const mapIcpSwapResult = ({
 	swap,
-	slippage
+	slippage,
+	destToken
 }: {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }): SwapMappedResult => {
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
+	const receiveAmountNet = swap.receiveAmount - destToken.fee;
+
 	return {
 		provider: SwapProvider.ICP_SWAP,
-		receiveAmount: swap.receiveAmount,
+		receiveAmount: receiveAmountNet > 0 ? receiveAmountNet : ZERO,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
 			slippagePercentage

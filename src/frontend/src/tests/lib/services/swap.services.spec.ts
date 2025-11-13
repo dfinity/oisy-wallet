@@ -131,7 +131,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -157,7 +157,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should make a call oly to icpSwap if icrc2 is false', async () => {
@@ -196,7 +198,7 @@ describe('swap.services', () => {
 				slippage: 0.5
 			} as SwapAmountsReply;
 			const icpSwapResponse = {
-				receiveAmount: 975
+				receiveAmount: 975n
 			} as unknown as ICPSwapAmountReply;
 
 			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
@@ -224,7 +226,9 @@ describe('swap.services', () => {
 			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
 			expect(icpSwapResult).toBeDefined();
-			expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
 		it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
