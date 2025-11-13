@@ -94,7 +94,7 @@
 	{#each earningCards as card, i (`${card.id}-${i}`)}
 		<EarningOpportunityCard>
 			{#snippet logo()}
-				<Logo src={card.logo} size="lg" />
+				<Logo size="lg" src={card.logo} />
 			{/snippet}
 			{#snippet badge()}
 				{#if nonNullish(currentReward) && card.id === currentReward.id}
@@ -135,9 +135,9 @@
 									{#if cardField === EarningCardFields.CURRENT_EARNING || cardField === EarningCardFields.EARNING_POTENTIAL}
 										{#if nonNullish(cardsData[card.id][cardField])}
 											<EarningYearlyAmount
-												value={Number(cardsData[card.id][cardField])}
 												formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
 												showPlusSign
+												value={Number(cardsData[card.id][cardField])}
 											/>
 										{:else}
 											-
@@ -158,9 +158,9 @@
 			{/snippet}
 			{#snippet button()}
 				<Button
-					onclick={cardsData[card.id].action}
 					colorStyle={card.id === currentReward?.id ? 'primary' : 'success'}
 					fullWidth
+					onclick={cardsData[card.id].action}
 					paddingSmall>{resolveText({ i18n: $i18n, path: card.actionText })}</Button
 				>
 			{/snippet}
