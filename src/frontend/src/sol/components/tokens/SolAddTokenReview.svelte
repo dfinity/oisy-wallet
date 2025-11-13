@@ -73,7 +73,7 @@
 				name: infoName
 			} = await getTokenInfo({ address: tokenAddress, network: solNetwork });
 
-			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork })
+			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
 			const symbol = infoSymbol ?? splMetadata?.symbol;
 			const name = infoName ?? splMetadata?.name;
