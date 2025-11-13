@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/svelte';
 import { get, readable, writable } from 'svelte/store';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
 
@@ -172,6 +171,7 @@ describe('AllEarningOpportunityCardList', () => {
 		for (const btn of buttons) {
 			await btn.click();
 		}
+
 		expect(navModule.goto).toHaveBeenCalledTimes(2);
 	});
 
