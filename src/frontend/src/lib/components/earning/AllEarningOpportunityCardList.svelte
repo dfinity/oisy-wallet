@@ -30,7 +30,7 @@
 	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
-	import { formatToken } from '$lib/utils/format.utils.js';
+	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils.js';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
@@ -49,7 +49,7 @@
 		},
 		'gldt-staking': {
 			[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy)
-				? `${$gldtStakeStore.apy.toFixed(2)}%`
+				? `${formatStakeApyNumber($gldtStakeStore.apy)}%`
 				: '-',
 			[EarningCardFields.CURRENT_STAKED]: nonNullish(gldtToken)
 				? `${formatToken({
@@ -102,9 +102,8 @@
 					{$i18n.rewards.text.active_date}
 					{`${formatToShortDateString({ date: currentReward.endDate, i18n: $i18n })} ${currentReward.endDate.getDate()}`}
 				{:else}
-					Current APY <span class="ml-1 font-bold text-success-primary"
-						>{cardsData[card.id].apy}</span
-					>
+					{$i18n.stake.text.current_apy_label}
+					<span class="ml-1 font-bold text-success-primary">{cardsData[card.id].apy}</span>
 				{/if}
 			{/snippet}
 			{#snippet title()}

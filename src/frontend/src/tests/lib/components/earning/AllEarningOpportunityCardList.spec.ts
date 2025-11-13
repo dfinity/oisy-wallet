@@ -1,16 +1,13 @@
 import { render, screen } from '@testing-library/svelte';
-import { setContext } from 'svelte';
-import { readable, writable } from 'svelte/store';
+import { get, readable, writable } from 'svelte/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
 
 import * as navModule from '$app/navigation';
 import * as tokenFilter from '$icp-eth/utils/token.utils';
-import * as gldtStakeStoreModule from '$icp/stores/gldt-stake.store';
 import * as exchangeDerived from '$lib/derived/exchange.derived';
 import * as tokensDerived from '$lib/derived/tokens.derived';
-import * as rewardStoreModule from '$lib/stores/reward.store';
 import * as formatUtils from '$lib/utils/format.utils';
 import * as i18nUtils from '$lib/utils/i18n.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
@@ -18,17 +15,71 @@ import * as tokenUtils from '$lib/utils/token.utils';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
 import { EarningCardFields } from '$env/types/env.earning-cards';
+import { GLDT_STAKE_CONTEXT_KEY } from '$icp/stores/gldt-stake.store';
+import { i18n } from '$lib/stores/i18n.store';
+import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
+import { formatStakeApyNumber } from '$lib/utils/format.utils';
 
 // ---------- spies and mocks ----------
+
+// ---------- mock contexts ----------
+const mockGldtStakeStore = {
+	subscribe: (fn: (v: any) => void) => {
+		fn({ apy: 5, position: { staked: 10 } });
+		return () => {};
+	},
+	setApy: vi.fn(),
+	resetApy: vi.fn(),
+	setPosition: vi.fn(),
+	resetPosition: vi.fn(),
+	reset: vi.fn()
+};
+
+const mockGldtStakeContext = { store: mockGldtStakeStore };
+
+const mockRewardEligibilityStore = writable({
+	campaignEligibilities: [
+		{
+			campaignId: 'sprinkles_s1e5',
+			eligible: true,
+			probabilityMultiplierEnabled: true,
+			probabilityMultiplier: 1.2,
+			criteria: ['criterion1']
+		}
+	]
+});
+
+const mockRewardEligibilityContext = {
+	store: {
+		subscribe: mockRewardEligibilityStore.subscribe,
+		setCampaignEligibilities: vi.fn()
+	},
+	getCampaignEligibility: (id: string) =>
+		writable({
+			campaignId: id,
+			eligible: true,
+			probabilityMultiplierEnabled: true,
+			probabilityMultiplier: 1.2,
+			criteria: ['criterion1']
+		})
+};
 
 beforeEach(() => {
 	vi.restoreAllMocks();
 
 	vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
 		{
+			id: 'sprinkles_s1e5',
+			title: 'mock.rewards.title',
+			description: 'mock.rewards.description',
+			logo: '/images/rewards/oisy-reward-logo.svg',
+			fields: [],
+			actionText: 'mock.rewards.action'
+		},
+		{
 			id: 'gldt-staking',
-			title: 'earning.cards.gldt.title',
-			description: 'earning.cards.gldt.description',
+			title: 'mock.gldt.title',
+			description: 'mock.gldt.description',
 			logo: '/mock/logo.svg',
 			fields: [
 				EarningCardFields.APY,
@@ -37,7 +88,7 @@ beforeEach(() => {
 				EarningCardFields.EARNING_POTENTIAL,
 				EarningCardFields.TERMS
 			],
-			actionText: 'earning.cards.gldt.action'
+			actionText: 'mock.gldt.action'
 		}
 	]);
 
@@ -112,80 +163,83 @@ beforeEach(() => {
 
 	// mock navigation
 	vi.spyOn(navModule, 'goto').mockResolvedValue();
-
-	// ---------- mock contexts ----------
-	const mockGldtStakeStore = {
-		subscribe: (fn: (v: any) => void) => {
-			fn({ apy: 5, position: { staked: 10 } });
-			return () => {};
-		},
-		setApy: vi.fn(),
-		resetApy: vi.fn(),
-		setPosition: vi.fn(),
-		resetPosition: vi.fn(),
-		reset: vi.fn()
-	};
-
-	const mockRewardEligibilityStore = writable({
-		campaignEligibilities: [
-			{
-				campaignId: 'reward1',
-				eligible: true,
-				probabilityMultiplierEnabled: true,
-				probabilityMultiplier: 1.2,
-				criteria: ['criterion1']
-			}
-		]
-	});
-
-	const mockRewardEligibilityContext = {
-		store: {
-			subscribe: mockRewardEligibilityStore.subscribe,
-			setCampaignEligibilities: vi.fn()
-		},
-		getCampaignEligibility: (id: string) =>
-			writable({
-				campaignId: id,
-				eligible: true,
-				probabilityMultiplierEnabled: true,
-				probabilityMultiplier: 1.2,
-				criteria: ['criterion1']
-			})
-	};
-
-	setContext(gldtStakeStoreModule.GLDT_STAKE_CONTEXT_KEY, { store: mockGldtStakeStore });
-	setContext(rewardStoreModule.REWARD_ELIGIBILITY_CONTEXT_KEY, mockRewardEligibilityContext);
 });
 
-// ---------- tests ----------
+const mockContexts = new Map<symbol, unknown>([
+	[GLDT_STAKE_CONTEXT_KEY, mockGldtStakeContext],
+	[REWARD_ELIGIBILITY_CONTEXT_KEY, mockRewardEligibilityContext]
+]);
 
 describe('AllEarningOpportunityCardList', () => {
 	it('renders earning cards', () => {
-		render(AllEarningOpportunityCardList);
-		expect(screen.getByText('mock.title')).toBeInTheDocument();
-		expect(screen.getByText('mock.desc')).toBeInTheDocument();
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		expect(screen.getByText('mock.rewards.title')).toBeInTheDocument();
+		expect(screen.getByText('mock.rewards.description')).toBeInTheDocument();
+		expect(screen.getByText('mock.gldt.title')).toBeInTheDocument();
+		expect(screen.getByText('mock.gldt.description')).toBeInTheDocument();
 	});
 
-	it('renders the button with correct text', () => {
-		render(AllEarningOpportunityCardList);
-		expect(screen.getByRole('button')).toHaveTextContent('mock.action');
+	it('renders all card buttons with correct text', () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		const buttons = screen
+			.getAllByRole('button')
+			.filter((btn) => btn.getAttribute('type') === 'submit');
+
+		expect(buttons).toHaveLength(2);
+		expect(buttons[0]).toHaveTextContent('mock.rewards.action');
+		expect(buttons[1]).toHaveTextContent('mock.gldt.action');
 	});
 
 	it('displays current APY correctly when GLDT staking data is available', () => {
-		render(AllEarningOpportunityCardList);
-		expect(screen.getByText(/Current APY/i)).toBeInTheDocument();
-		expect(screen.getByText('5.00%')).toBeInTheDocument();
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		expect(screen.getByText(get(i18n).stake.text.current_apy_label)).toBeInTheDocument();
+		expect(screen.getAllByText(`${formatStakeApyNumber(5)}%`)).toHaveLength(2);
 	});
 
-	it('calls goto when the card button is clicked', async () => {
-		render(AllEarningOpportunityCardList);
-		const btn = screen.getByRole('button');
-		await btn.click();
-		expect(navModule.goto).toHaveBeenCalledTimes(1);
+	it('calls goto when a card action button is clicked', async () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		const buttons = screen
+			.getAllByRole('button')
+			.filter((btn) => btn.getAttribute('type') === 'submit');
+
+		expect(buttons).toHaveLength(2);
+
+		for (const btn of buttons) {
+			await btn.click();
+		}
+		expect(navModule.goto).toHaveBeenCalledTimes(2);
 	});
 
-	it('renders reward date text', () => {
-		render(AllEarningOpportunityCardList);
+	it('renders reward date text for the active reward card', () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
 		expect(screen.getByText(/Dec 31, 2024/)).toBeInTheDocument();
+	});
+
+	it('renders the current staked amount correctly', () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		// Should show the formatted staked token amount (mocked as "10.00")
+		expect(screen.getByText(/10\.00/)).toBeInTheDocument();
+	});
+
+	it('renders the current earning USD value correctly', () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		// Should show the formatted yearly earning via <EarningYearlyAmount>
+		// Our mock of calculateTokenUsdAmount returns 123.45, so formatted as $123.45
+		expect(screen.getByText(/\$123\.45/)).toBeInTheDocument();
+	});
+
+	it('renders earning potential field correctly', () => {
+		render(AllEarningOpportunityCardList, { context: mockContexts });
+
+		// Since APY = 5 and enabledMainnetFungibleTokensUsdBalance = 1000
+		// earningPotential = 1000 * 5 / 100 = 50 -> formatted by EarningYearlyAmount
+		expect(screen.getByText(/\$50\.00/)).toBeInTheDocument();
 	});
 });
