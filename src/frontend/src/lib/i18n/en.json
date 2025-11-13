@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Earn"
+			"title": "Earn",
+            ""
 		},
 		"cards": {
 			"gold_title": "Gold",
@@ -1724,7 +1725,27 @@
 			"stablecoins_title": "Stablecoins",
 			"stablecoins_description": "Coming soon",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY Rewards"
+			"sprinkles_description": "OISY Rewards",
+          "gldt": {
+            "title": "GLDT Staking",
+            "description": "Stake GLDT tokens to earn rewards backed by physical gold",
+            "action": "Stake GLDT"
+          },
+          "sprinkles": {
+            "title": "OISY Sprinkles",
+            "description": "Use OISY and EARN! Ep. 5 is live \uD83C\uDF89",
+            "action": "Check status"
+          }
+        },
+      "card_fields": {
+        "apy": "APY",
+        "currentStaked": "Staked",
+        "currentEarning": "Actively earning",
+        "earningPotential": "Max. earning potential",
+        "terms": "Terms"
+      },
+      "terms": {
+        "flexible": "Flexible"
 		}
 	},
 	"stake": {
