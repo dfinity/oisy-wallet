@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
+	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -24,7 +24,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
 		children: Snippet;
@@ -169,7 +168,7 @@
 	};
 
 	$effect(() => {
-		if (isIos()) {
+		if (isIOS()) {
 			if (nonNullish($modalStore?.type)) {
 				lockBodyScroll();
 			} else {
