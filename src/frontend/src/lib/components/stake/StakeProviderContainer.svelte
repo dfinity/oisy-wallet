@@ -8,6 +8,7 @@
 	import { STAKE_PROVIDER_LOGO } from '$lib/constants/test-ids.constants';
 	import { i18n } from '$lib/stores/i18n.store';
 	import type { StakeProvider } from '$lib/types/stake';
+	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { resolveText, replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
@@ -53,7 +54,9 @@
 				in:fade
 			>
 				<span class="text-xs">{$i18n.stake.text.current_apy_label}</span>
-				<span class="text-sm font-bold text-success-primary">{currentApy.toFixed(2)}%</span>
+				<span class="text-sm font-bold text-success-primary">
+					{formatStakeApyNumber(currentApy)}%
+				</span>
 			</div>
 		{/if}
 	{/snippet}

@@ -6,6 +6,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { StakeProvider as StakeProviderType } from '$lib/types/stake';
+	import { formatStakeApyNumber } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	const { sendTokenSymbol } = getContext<SendContext>(SEND_CONTEXT_KEY);
@@ -21,7 +22,7 @@
 			<div class="ml-3 w-full text-sm">
 				<div class="mb-1 font-bold">
 					{replacePlaceholders($i18n.stake.text.current_apy, {
-						$apy: `${($gldtStakeApyStore?.apy ?? 0).toFixed(2)}`
+						$apy: formatStakeApyNumber($gldtStakeApyStore?.apy ?? 0)
 					})}
 				</div>
 
