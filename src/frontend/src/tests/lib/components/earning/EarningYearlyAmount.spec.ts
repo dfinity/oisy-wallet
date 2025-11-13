@@ -59,6 +59,7 @@ describe('EarningYearlyAmount', () => {
 		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: true });
 
 		const span = container.querySelector('span');
+
 		expect(span).toHaveClass('text-success-primary');
 	});
 
@@ -66,14 +67,19 @@ describe('EarningYearlyAmount', () => {
 		const { container } = render(EarningYearlyAmount, { value: 5, formatPositiveAmount: false });
 
 		const span = container.querySelector('span');
+
 		expect(span).toHaveClass('text-brand-primary');
 	});
 
 	it('renders nothing if value is null or undefined', () => {
-		const { container, rerender } = render(EarningYearlyAmount, { value: undefined as any });
+		const { container, rerender } = render(EarningYearlyAmount, {
+			value: undefined as unknown as number
+		});
+
 		expect(container.textContent?.trim()).toBe('');
 
-		rerender({ value: null as any });
+		rerender({ value: null as unknown as number });
+
 		expect(container.textContent?.trim()).toBe('');
 	});
 });

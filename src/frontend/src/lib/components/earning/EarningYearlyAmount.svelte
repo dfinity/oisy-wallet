@@ -34,10 +34,12 @@
 	);
 </script>
 
-<span
-	class:text-success-primary={formatPositiveAmount && value > 0}
-	class:text-brand-primary={!formatPositiveAmount}
-	in:fade
->
-	{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
-</span>
+{#if nonNullish(yearlyAmount)}
+	<span
+		class:text-success-primary={formatPositiveAmount && value > 0}
+		class:text-brand-primary={!formatPositiveAmount}
+		in:fade
+	>
+		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
+	</span>
+{/if}
