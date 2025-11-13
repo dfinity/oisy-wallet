@@ -9,7 +9,7 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		value: number;
+		value?: number;
 		showPlusSign?: boolean;
 		formatPositiveAmount?: boolean;
 	}
