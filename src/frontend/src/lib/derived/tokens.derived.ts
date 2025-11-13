@@ -26,7 +26,8 @@ import { isTokenFungible } from '$lib/utils/nft.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import {
 	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -218,5 +219,13 @@ export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
 				$balances,
 				$exchanges
 			})
+		)
+);
+
+export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
+	[enabledFungibleTokensUi],
+	([$enabledFungibleTokensUi]) =>
+		sumTokensUiUsdBalance(
+			$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
 		)
 );

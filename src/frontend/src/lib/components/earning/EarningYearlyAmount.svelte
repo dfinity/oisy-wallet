@@ -1,19 +1,15 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
-	import {
-		type EarningCardFields,
-		EarningCardFields as EarningCardFieldsEnum
-	} from '$env/types/env.earning-cards';
 	import { nonNullish } from '@dfinity/utils';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { formatCurrency } from '$lib/utils/format.utils';
-	import { i18n } from '$lib/stores/i18n.store';
+	import { fade } from 'svelte/transition';
+	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
-	import { currentCurrency } from '$lib/derived/currency.derived';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { formatCurrency } from '$lib/utils/format.utils';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
-		value: number;
+		value?: number;
 		showPlusSign?: boolean;
 		formatPositiveAmount?: boolean;
 	}
@@ -34,10 +30,12 @@
 	);
 </script>
 
-<span
-	class:text-success-primary={formatPositiveAmount && value > 0}
-	class:text-brand-primary={!formatPositiveAmount}
-	in:fade
->
-	{showPlusSign && '+'}{yearlyAmount}
-</span>
+{#if nonNullish(yearlyAmount) && nonNullish(value)}
+	<span
+		class:text-brand-primary={!formatPositiveAmount}
+		class:text-success-primary={formatPositiveAmount && value > 0}
+		in:fade
+	>
+		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
+	</span>
+{/if}

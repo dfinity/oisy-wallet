@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "手动取款成功",
 			"manually_withdraw_failed": "手动取款失败",
 			"swap_sucess_withdraw_failed": "兑换成功，取款失败",
-			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "兑换成功，手动取款成功"
 		}
 	},
 	"buy": {
