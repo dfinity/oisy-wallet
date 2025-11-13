@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Die Token deines vorherigen fehlgeschlagenen Tauschs wurden erfolgreich zurückgeholt. Du kannst den Tausch erneut versuchen, oder den Tausch Provider wechseln.",
 			"manually_withdraw_failed": "Das Zuruckholen deiner Token ist fehlgeschlagen. <br> Bitte versuche es erneut, oder folge ",
 			"swap_sucess_withdraw_failed": "Der Tausch war erfolgreich, aber deine Token konnten nicht automatisch zurückgeholt werden. Drücke unten den Abheben Knopf um die manuell abzuheben.<br> Oder folge ",
-			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen.",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "Die Token deines vorherigen Tauschs wurden erfolgeich zurückgeholt. Die kannst dieses Fenster jetzt schliessen."
 		}
 	},
 	"buy": {

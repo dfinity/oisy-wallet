@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
 		}
 	},
 	"buy": {
