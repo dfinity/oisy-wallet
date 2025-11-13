@@ -117,6 +117,8 @@
 
 	let ios = $derived(isIos());
 
+	let fadeParams = $derived(ios ? { duration: 0 } : undefined);
+
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
@@ -137,7 +139,7 @@
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
-					transition:fade
+					transition:fade={fadeParams}
 					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
@@ -191,7 +193,7 @@
 							class:pointer-events-none={animating}
 							onanimationend={handleAnimationEnd}
 							onanimationstart={handleAnimationStart}
-							transition:fade
+							transition:fade={fadeParams}
 							animate:flip={flipParams}
 						>
 							<div class="transition duration-300 hover:bg-primary">
