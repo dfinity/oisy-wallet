@@ -1716,8 +1716,7 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Earn",
-            ""
+			"title": "Earn"
 		},
 		"cards": {
 			"gold_title": "Gold",
@@ -1746,7 +1745,7 @@
       },
       "terms": {
         "flexible": "Flexible"
-		}
+      }
 	},
 	"stake": {
 		"text": {
