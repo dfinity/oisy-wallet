@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "Stablecoins",
 			"stablecoins_description": "Kommt bald",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY Rewards"
+			"sprinkles_description": "OISY Rewards",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

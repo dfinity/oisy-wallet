@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "Стейблкоины",
 			"stablecoins_description": "Скоро",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Награды OISY"
+			"sprinkles_description": "Награды OISY",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
