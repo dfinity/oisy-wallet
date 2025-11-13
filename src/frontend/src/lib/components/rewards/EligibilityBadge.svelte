@@ -8,10 +8,9 @@
 	interface Props {
 		testId?: string;
 		isEligible?: boolean;
-		textSize?: 'xs' | 'sm';
 	}
 
-	let { testId, isEligible = false, textSize = 'sm' }: Props = $props();
+	let { testId, isEligible = false }: Props = $props();
 </script>
 
 <span class="inline-flex">
@@ -20,11 +19,7 @@
 		testId={nonNullish(testId) ? `${testId}-badge` : undefined}
 		variant={isEligible ? 'eligible' : 'not-eligible'}
 	>
-		<div
-			class="flex items-center gap-1.5"
-			class:text-sm={textSize === 'sm'}
-			class:text-xs={textSize === 'xs'}
-		>
+		<div class="flex items-center gap-1.5">
 			{#if isEligible}
 				<IconCircleCheck size="14" />
 				{$i18n.rewards.text.youre_eligible}

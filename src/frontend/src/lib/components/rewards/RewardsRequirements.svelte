@@ -45,7 +45,9 @@
 		{/if}
 
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
-			<EligibilityBadge {isEligible} textSize={type === 'earnings-card' ? 'xs' : 'sm'} />
+			<span class:text-sm={type === 'default'} class:text-xs={type === 'earnings-card'}>
+				<EligibilityBadge {isEligible} />
+			</span>
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
 				<NetworkBonusImage
