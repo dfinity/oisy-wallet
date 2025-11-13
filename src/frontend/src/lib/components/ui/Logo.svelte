@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import IconRandom from '$lib/components/icons/IconRandom.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
 	import type { LogoSize } from '$lib/types/components';
-	import { isIos } from '$lib/utils/device.utils';
 
 	interface Props {
 		src?: string;
@@ -31,7 +31,7 @@
 	let loadingError: boolean | undefined = $state();
 	let isReady = $derived((nonNullish(src) && nonNullish(loadingError)) || isNullish(src));
 
-	let ios = $derived(isIos());
+	let ios = $derived(isIOS());
 </script>
 
 <div
