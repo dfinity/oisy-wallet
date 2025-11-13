@@ -1,5 +1,6 @@
 import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
+import { assertNonNullish } from '@dfinity/utils';
 import { render, screen } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
 
@@ -38,7 +39,9 @@ describe('EarningOpportunityCard', () => {
 
 		expect(headerRow).toBeTruthy();
 
-		expect(headerRow!.querySelector('[data-tid="logo"]')).not.toBeNull();
-		expect(headerRow!.querySelector('[data-tid="badge"]')).not.toBeNull();
+		assertNonNullish(headerRow);
+
+		expect(headerRow.querySelector('[data-tid="logo"]')).not.toBeNull();
+		expect(headerRow.querySelector('[data-tid="badge"]')).not.toBeNull();
 	});
 });
