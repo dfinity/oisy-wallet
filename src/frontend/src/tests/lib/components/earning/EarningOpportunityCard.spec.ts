@@ -2,7 +2,7 @@ import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCa
 import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { assertNonNullish } from '@dfinity/utils';
 import { render, screen } from '@testing-library/svelte';
-import { describe, expect, it } from 'vitest';
+
 
 describe('EarningOpportunityCard', () => {
 	const props = {
