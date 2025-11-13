@@ -86,7 +86,7 @@ describe('SwapIcpForm', () => {
 		});
 
 		expect(
-			container.textContent?.includes('fee') || container.querySelector('[class*="fee"]')
+			container.textContent?.includes('fee') ?? container.querySelector('[class*="fee"]')
 		).toBeTruthy();
 	});
 
@@ -201,7 +201,7 @@ describe('SwapIcpForm', () => {
 		expect(container).toBeInTheDocument();
 	});
 
-	it('should call onShowProviderList when clicking provider button', async () => {
+	it('should call onShowProviderList when clicking provider button', () => {
 		const onShowProviderList = vi.fn();
 
 		const { container } = render(SwapIcpForm, {
