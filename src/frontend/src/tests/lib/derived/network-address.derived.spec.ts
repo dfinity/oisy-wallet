@@ -1,8 +1,11 @@
+import { BASE_NETWORK } from '$env/networks/networks-evm/networks.evm.base.env';
+import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.polygon.env';
 import {
 	BTC_MAINNET_NETWORK,
 	BTC_REGTEST_NETWORK,
 	BTC_TESTNET_NETWORK
 } from '$env/networks/networks.btc.env';
+import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import {
 	SOLANA_DEVNET_NETWORK,
 	SOLANA_LOCAL_NETWORK,
@@ -106,6 +109,22 @@ describe('network-address.derived', () => {
 				expectedStore: mockBtcRegtestAddressWithCertified
 			},
 			{
+				network: ETHEREUM_NETWORK,
+				expectedStore: mockEthAddressWithCertified
+			},
+			{
+				network: SEPOLIA_NETWORK,
+				expectedStore: mockEthAddressWithCertified
+			},
+			{
+				network: BASE_NETWORK,
+				expectedStore: mockEthAddressWithCertified
+			},
+			{
+				network: POLYGON_AMOY_NETWORK,
+				expectedStore: mockEthAddressWithCertified
+			},
+			{
 				network: SOLANA_MAINNET_NETWORK,
 				expectedStore: mockSolMainnetAddressWithCertified
 			},
@@ -118,7 +137,7 @@ describe('network-address.derived', () => {
 				expectedStore: mockSolLocalnetAddressWithCertified
 			}
 		])(
-			'returns $network.name address store when network is $network.name',
+			'should return $network.id.description address store when network is $network.name',
 			({ network: { id: networkId }, expectedStore }) => {
 				mockPage.mock({ network: networkId.description });
 
@@ -139,12 +158,15 @@ describe('network-address.derived', () => {
 				network: 'ETH',
 				expectedAddress: mockEthAddress
 			}
-		])('returns $network address when network is $network', ({ network, expectedAddress }) => {
-			mockPage.mock({ network });
+		])(
+			'should return $network address when network is $network',
+			({ network, expectedAddress }) => {
+				mockPage.mock({ network });
 
-			const actualAddress = get(networkAddress);
+				const actualAddress = get(networkAddress);
 
-			expect(actualAddress).toBe(expectedAddress);
-		});
+				expect(actualAddress).toBe(expectedAddress);
+			}
+		);
 	});
 });
