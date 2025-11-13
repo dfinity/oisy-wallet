@@ -143,6 +143,7 @@ export const fetchKongSwap = async ({
 		amount: parsedSwapAmount,
 		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
 	};
+	const parsedSlippageValue = Number(slippageValue);
 
 	const txBlockIndex = !isSourceTokenIcrc2
 		? isTokenIcrc(sourceToken)
@@ -186,8 +187,11 @@ export const fetchKongSwap = async ({
 		sourceToken,
 		destinationToken,
 		sendAmount: parsedSwapAmount,
-		receiveAmount,
-		maxSlippage: Number(slippageValue),
+		maxSlippage: parsedSlippageValue,
+		receiveAmount: calculateSlippage({
+			quoteAmount: receiveAmount,
+			slippagePercentage: parsedSlippageValue
+		}),
 		...(nonNullish(txBlockIndex) ? { payTransactionId: { BlockIndex: txBlockIndex } } : {})
 	});
 
