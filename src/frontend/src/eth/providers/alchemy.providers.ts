@@ -17,7 +17,7 @@ import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
 import type { Option } from '$lib/types/utils';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
-import { getMediaStatus, mapTokenToCollection } from '$lib/utils/nfts.utils';
+import { getMediaStatusOrCache, mapTokenToCollection } from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 import {
@@ -190,9 +190,9 @@ export class AlchemyProvider {
 	}): Promise<Nft> => {
 		const mappedAttributes = this.mapAttributes(attributes);
 
-		const mediaStatus = await getMediaStatus(image?.originalUrl);
+		const mediaStatus = await getMediaStatusOrCache(image?.originalUrl);
 
-		const bannerMediaStatus = await getMediaStatus(openSeaMetadata?.bannerImageUrl);
+		const bannerMediaStatus = await getMediaStatusOrCache(openSeaMetadata?.bannerImageUrl);
 
 		return {
 			id: parseNftId(tokenId),

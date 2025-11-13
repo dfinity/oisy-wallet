@@ -8,6 +8,7 @@ import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } fro
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
@@ -340,4 +341,26 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 	}
 
 	return NftMediaStatusEnum.OK;
+};
+
+// The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
+// Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
+const mediaStatusCache = new SvelteMap<string, NftMediaStatusEnum>();
+
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	const cachedStatus = mediaStatusCache.get(mediaUrl);
+
+	if (nonNullish(cachedStatus)) {
+		return cachedStatus;
+	}
+
+	const status = await getMediaStatus(mediaUrl);
+
+	mediaStatusCache.set(mediaUrl, status);
+
+	return status;
 };

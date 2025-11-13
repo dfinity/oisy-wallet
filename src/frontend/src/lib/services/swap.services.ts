@@ -143,6 +143,7 @@ export const fetchKongSwap = async ({
 		amount: parsedSwapAmount,
 		to: Principal.fromText(KONG_BACKEND_CANISTER_ID).toString()
 	};
+	const parsedSlippageValue = Number(slippageValue);
 
 	const txBlockIndex = !isSourceTokenIcrc2
 		? isTokenIcrc(sourceToken)
@@ -186,8 +187,11 @@ export const fetchKongSwap = async ({
 		sourceToken,
 		destinationToken,
 		sendAmount: parsedSwapAmount,
-		receiveAmount,
-		maxSlippage: Number(slippageValue),
+		maxSlippage: parsedSlippageValue,
+		receiveAmount: calculateSlippage({
+			quoteAmount: receiveAmount,
+			slippagePercentage: parsedSlippageValue
+		}),
 		...(nonNullish(txBlockIndex) ? { payTransactionId: { BlockIndex: txBlockIndex } } : {})
 	});
 
@@ -372,7 +376,11 @@ const fetchSwapAmountsICP = async ({
 				mapped = provider.mapQuoteResult({ swap, tokens });
 			} else if (provider.key === SwapProvider.ICP_SWAP && isSourceTokenIcrc2) {
 				const swap = result.value as ICPSwapResult;
-				mapped = provider.mapQuoteResult({ swap, slippage });
+				mapped = provider.mapQuoteResult({
+					swap,
+					slippage,
+					destToken: destinationToken as IcToken
+				});
 			}
 
 			if (nonNullish(mapped)) {
@@ -449,7 +457,7 @@ export const fetchIcpSwap = async ({
 	const poolCanisterId = pool.canisterId.toString();
 
 	const slippageMinimum = calculateSlippage({
-		quoteAmount: receiveAmount,
+		quoteAmount: receiveAmount + destinationTokenFee,
 		slippagePercentage: Number(slippageValue)
 	});
 
@@ -580,7 +588,7 @@ export const fetchIcpSwap = async ({
 			identity,
 			canisterId: poolCanisterId,
 			token: destinationLedgerCanisterId,
-			amount: receiveAmount,
+			amount: receiveAmount + destinationTokenFee,
 			fee: destinationTokenFee
 		});
 	} catch (_: unknown) {

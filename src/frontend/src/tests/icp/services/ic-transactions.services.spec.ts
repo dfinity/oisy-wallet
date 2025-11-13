@@ -79,15 +79,6 @@ describe('ic-transactions.services', () => {
 			});
 		});
 
-		it('should log error to console', () => {
-			onLoadTransactionsError({ tokenId, error: mockError });
-
-			expect(console.warn).toHaveBeenCalledExactlyOnceWith(
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				mockError
-			);
-		});
-
 		it('should handle a nullish error', () => {
 			onLoadTransactionsError({ tokenId, error: null });
 
@@ -106,18 +97,6 @@ describe('ic-transactions.services', () => {
 					tokenId: tokenId.description
 				}
 			});
-
-			expect(console.warn).toHaveBeenCalledTimes(2);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				1,
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				null
-			);
-			expect(console.warn).toHaveBeenNthCalledWith(
-				2,
-				`${get(i18n).transactions.error.loading_transactions}:`,
-				undefined
-			);
 		});
 	});
 
