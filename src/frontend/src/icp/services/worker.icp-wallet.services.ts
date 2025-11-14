@@ -3,6 +3,7 @@ import {
 	onLoadTransactionsError,
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
+import type { IndexCanisterIdText } from '$icp/types/canister';
 import type { IcToken } from '$icp/types/ic-token';
 import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
@@ -14,12 +15,13 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import { assertNonNullish } from '@dfinity/utils';
 
 export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
 		worker: WorkerData,
 		tokenId: TokenId,
-		private readonly indexCanisterId: IcToken['indexCanisterId']
+		private readonly indexCanisterId: IndexCanisterIdText
 	) {
 		super(worker);
 
@@ -64,6 +66,10 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 		id: tokenId,
 		network: { id: networkId }
 	}: IcToken): Promise<IcpWalletWorker> {
+		// We typically have ICP-standard tokens only with index canister ID.
+		// In the case of ICP-token without index canister ID, we cannot sync the wallet properly.
+		assertNonNullish(indexCanisterId, 'Index Canister ID is required for ICP Wallet Worker');
+
 		await syncWalletFromCache({ tokenId, networkId });
 
 		const worker = await AppWorker.getInstance();
