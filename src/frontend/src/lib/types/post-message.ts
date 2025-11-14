@@ -1,5 +1,6 @@
 import type {
 	POST_MESSAGE_REQUESTS,
+	PostMessageCommonSchema,
 	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
 	PostMessageDataRequestDip20Schema,
@@ -95,6 +96,8 @@ export type PostMessageDataResponsePowProtectorProgress = z.infer<
 export type PostMessageDataResponsePowProtectorNextAllowance = z.infer<
 	typeof PostMessageDataResponsePowProtectorNextAllowanceSchema
 >;
+
+export type PostMessageCommon = z.infer<typeof PostMessageCommonSchema>;
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponseLoose> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
