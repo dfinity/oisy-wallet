@@ -232,11 +232,19 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 		nextAllowanceMs: z.custom<bigint>().optional()
 	});
 
+const PostMessageCommonSchema = z.object({
+	ref: z.string().optional()
+});
+
 export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 	z.union([
 		z.object({
+			...PostMessageCommonSchema.shape,
 			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
 			data: z.strictObject(dataSchema).shape.optional()
 		}),
-		PostMessageDataErrorSchema
+		z.object({
+			...PostMessageCommonSchema.shape,
+			...PostMessageDataErrorSchema.shape
+		})
 	]);
