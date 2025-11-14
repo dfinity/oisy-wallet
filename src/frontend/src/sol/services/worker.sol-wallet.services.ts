@@ -100,10 +100,10 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'startSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 
 	stop = () => {
@@ -111,9 +111,9 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'triggerSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 }

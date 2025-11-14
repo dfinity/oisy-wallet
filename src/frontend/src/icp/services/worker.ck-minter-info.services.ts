@@ -120,12 +120,12 @@ export class CkMinterInfoWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: `start${this.postMessageKey}MinterInfoTimer`,
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 
 	stop = () => {
@@ -133,11 +133,11 @@ export class CkMinterInfoWorker extends AppWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: `trigger${this.postMessageKey}MinterInfoTimer`,
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 }

@@ -84,12 +84,12 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
 			msg: 'startIcpWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcp>);
+		});
 	};
 
 	stop = () => {
@@ -97,11 +97,11 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcp>>({
 			msg: 'triggerIcpWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcp>);
+		});
 	};
 }

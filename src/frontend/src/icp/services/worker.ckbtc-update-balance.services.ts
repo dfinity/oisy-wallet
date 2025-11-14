@@ -87,14 +87,14 @@ export class CkBTCUpdateBalanceWorker extends AppWorker {
 		// We can imperatively get the address because the worker fetches it, and we only provide it to reduce the number of calls. By doing so, we can adhere to our standard component abstraction for interacting with workers.
 		const btcAddress = get(btcAddressStore)?.[this.tokenId]?.data;
 
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>>({
 			msg: 'startCkBTCUpdateBalanceTimer',
 			data: {
 				minterCanisterId: this.minterCanisterId,
 				btcAddress,
 				bitcoinNetwork: isNetworkIdBTCMainnet(this.twinToken?.network.id) ? 'mainnet' : 'testnet'
 			}
-		} as PostMessage<PostMessageDataRequestIcCkBTCUpdateBalance>);
+		});
 	};
 
 	stop = () => {

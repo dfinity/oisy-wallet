@@ -79,12 +79,12 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'startDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 
 	stop = () => {
@@ -92,11 +92,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'triggerDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 }

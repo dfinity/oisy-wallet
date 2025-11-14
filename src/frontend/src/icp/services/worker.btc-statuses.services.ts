@@ -62,12 +62,12 @@ export class BtcStatusesWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: 'startBtcStatusesTimer',
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 
 	stop = () => {
@@ -75,11 +75,11 @@ export class BtcStatusesWorker extends AppWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
 			msg: 'triggerBtcStatusesTimer',
 			data: {
 				minterCanisterId: this.minterCanisterId
 			}
-		} as PostMessage<PostMessageDataRequestIcCk>);
+		});
 	};
 }

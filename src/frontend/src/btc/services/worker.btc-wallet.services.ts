@@ -109,10 +109,10 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestBtc>>({
 			msg: 'startBtcWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestBtc>);
+		});
 	};
 
 	stop = () => {
@@ -120,9 +120,9 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestBtc>>({
 			msg: 'triggerBtcWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestBtc>);
+		});
 	};
 }

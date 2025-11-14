@@ -60,14 +60,14 @@ export class PowProtectorWorker extends AppWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'startPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
 			msg: 'triggerPowProtectionTimer'
-		} as PostMessage<PostMessageDataRequest>);
+		});
 	};
 }

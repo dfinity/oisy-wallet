@@ -107,14 +107,14 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'startIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 
 	stop = () => {
@@ -122,13 +122,13 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestIcrc>>({
 			msg: 'triggerIcrcWalletTimer',
 			data: {
 				indexCanisterId: this.indexCanisterId,
 				ledgerCanisterId: this.ledgerCanisterId,
 				env: this.env
 			}
-		} as PostMessage<PostMessageDataRequestIcrc>);
+		});
 	};
 }
