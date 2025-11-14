@@ -1,9 +1,16 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
-import type { WorkerData, WorkerListener, WorkerPostMessageData } from '$lib/types/worker';
+import type {
+	WithoutWorkerId,
+	WorkerData,
+	WorkerId,
+	WorkerListener,
+	WorkerPostMessageData
+} from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
+	readonly #workerId: WorkerId;
 	readonly #queue: WorkerQueue;
 
 	static #singletonWorker?: Worker;
@@ -12,6 +19,7 @@ export abstract class AppWorker {
 		const { worker } = workerData;
 
 		this.#worker = worker;
+		this.#workerId = crypto.randomUUID();
 		this.#queue = new WorkerQueue(worker);
 	}
 
@@ -40,9 +48,9 @@ export abstract class AppWorker {
 		this.#worker.onmessage = listener;
 	};
 
-	protected postMessage = <T>(data: T) => {
+	protected postMessage = <T>(data: WithoutWorkerId<T>) => {
 		// Route via queue to enforce back-pressure
-		this.#queue.send(data);
+		this.#queue.send({ ...data, workerId: this.#workerId });
 	};
 
 	terminate = () => {
