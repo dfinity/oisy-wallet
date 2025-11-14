@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
+	import { isIOS, Spinner, SystemThemeListener, Toasts } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -13,18 +13,17 @@
 		TRACK_SYNC_AUTH_ERROR_COUNT,
 		TRACK_SYNC_AUTH_NOT_AUTHENTICATED_COUNT
 	} from '$lib/constants/analytics.constants';
-	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
+	import { authNotSignedIn } from '$lib/derived/auth.derived';
 	import { isLocked } from '$lib/derived/locked.derived';
 	import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 	import { initPlausibleAnalytics, trackEvent } from '$lib/services/analytics.services';
 	import { displayAndCleanLogoutMsg } from '$lib/services/auth.services';
 	import { AuthWorker } from '$lib/services/worker.auth.services';
-	import { authStore } from '$lib/stores/auth.store';
+	import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 	import '$lib/styles/global.scss';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
-	import { isIos } from '$lib/utils/device.utils';
+	import { toastsError } from '$lib/stores/toasts.store';
 
 	interface Props {
 		children: Snippet;
@@ -122,32 +121,25 @@
 	});
 
 	const handleBroadcastLoginSuccess = async () => {
-		const wasPreviouslyAuthenticated = $authSignedIn;
-
-		await authStore.forceSync();
+		authLoggedInAnotherTabStore.set(true);
 
 		if ($authNotSignedIn) {
 			return;
 		}
 
-		if (!wasPreviouslyAuthenticated) {
-			toastsShow({
-				text: $i18n.auth.message.refreshed_authentication,
-				level: 'success'
-			});
-		}
+		await authStore.forceSync();
 
 		// TODO: add a warning banner for the hedge case in which the tab was already logged in and now is refreshed with another identity
 	};
 
 	const openBc = () => {
 		try {
-			const bc = new AuthBroadcastChannel();
+			const bc = AuthBroadcastChannel.getInstance();
 
 			bc.onLoginSuccess(handleBroadcastLoginSuccess);
 
 			return () => {
-				bc?.close();
+				bc?.destroy();
 			};
 		} catch (err: unknown) {
 			// We don't really care if the broadcast channel fails to open or if it fails to set the message handler.
@@ -176,7 +168,7 @@
 	};
 
 	$effect(() => {
-		if (isIos()) {
+		if (isIOS()) {
 			if (nonNullish($modalStore?.type)) {
 				lockBodyScroll();
 			} else {

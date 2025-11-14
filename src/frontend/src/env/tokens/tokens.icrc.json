@@ -154,7 +154,7 @@
 		"indexCanisterId": "x3qir-tyaaa-aaaae-acr6a-cai",
 		"decimals": 8,
 		"name": "Test OISY Points",
-		"symbol": "testOISY.p",
+		"symbol": "testOISY",
 		"fee": {
 			"__bigint__": "100000"
 		}

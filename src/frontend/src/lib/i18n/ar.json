@@ -122,7 +122,6 @@
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "يجب تمكين التوكن لعرض سجل المعاملات."
 		},
 		"error": {
-			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
@@ -1731,6 +1729,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
 			"unstaking": "",
@@ -1746,6 +1746,7 @@
 			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",

@@ -12,6 +12,8 @@
 		testId?: string;
 		autofocus?: boolean;
 		inputElement?: HTMLInputElement;
+		onBlur?: () => void;
+		onFocus?: () => void;
 	}
 
 	let {
@@ -22,7 +24,9 @@
 		required = true,
 		testId,
 		autofocus = false,
-		inputElement = $bindable()
+		inputElement = $bindable(),
+		onBlur,
+		onFocus
 	}: Props = $props();
 
 	onMount(() => {
@@ -35,15 +39,14 @@
 <Input
 	{name}
 	autocomplete="off"
+	{innerEnd}
 	inputType="text"
+	{onBlur}
+	{onFocus}
 	{placeholder}
 	{required}
 	spellcheck={false}
 	{testId}
 	bind:value
-	on:blur
-	on:focus
 	bind:inputElement
->
-	<svelte:fragment slot="inner-end">{@render innerEnd?.()}</svelte:fragment>
-</Input>
+/>

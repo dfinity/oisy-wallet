@@ -6,7 +6,10 @@ describe('auth-broadcast.providers', () => {
 		let bc: AuthBroadcastChannel;
 
 		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
-		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+		const loginSuccessMessage = {
+			msg: AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS,
+			emitterId: window.crypto.randomUUID()
+		};
 
 		const postMessageSpy = vi.fn();
 		const closeSpy = vi.fn();
@@ -47,13 +50,13 @@ describe('auth-broadcast.providers', () => {
 				})
 			);
 
-			bc = new AuthBroadcastChannel();
+			bc = AuthBroadcastChannel.getInstance();
 
 			bc.onLoginSuccess(mockHandler);
 		});
 
 		afterEach(() => {
-			bc.close();
+			bc.destroy();
 
 			vi.unstubAllGlobals();
 		});
@@ -71,7 +74,29 @@ describe('auth-broadcast.providers', () => {
 				expect(mockHandler).toHaveBeenCalledExactlyOnceWith();
 			});
 
-			it('should not call handler for different messages', () => {
+			it('should not call handler for totally different messages', () => {
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage({
+					...loginSuccessMessage,
+					emitterId: bc.__test__only__emitter_id__
+				});
+
+				expect(mockHandler).not.toHaveBeenCalled();
+			});
+
+			it('should not call handler for same emitter ID if not supported message', () => {
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage({
+					...loginSuccessMessage,
+					msg: 'someOtherMessage'
+				});
+
+				expect(mockHandler).not.toHaveBeenCalled();
+			});
+
+			it('should not call handler for different messages payload', () => {
 				const newBc = new BroadcastChannel(channelName);
 
 				newBc.postMessage('someOtherMessage');
@@ -92,13 +117,13 @@ describe('auth-broadcast.providers', () => {
 
 		describe('close', () => {
 			it('should close the BroadcastChannel', () => {
-				bc.close();
+				bc.destroy();
 
 				expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 			});
 
 			it('should not close all the BroadcastChannel', () => {
-				bc.close();
+				bc.destroy();
 
 				expect(closeSpy).toHaveBeenCalledExactlyOnceWith();
 
@@ -116,7 +141,10 @@ describe('auth-broadcast.providers', () => {
 			it('should post a login success message', () => {
 				bc.postLoginSuccess();
 
-				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith(loginSuccessMessage);
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					...loginSuccessMessage,
+					emitterId: bc.__test__only__emitter_id__
+				});
 			});
 		});
 	});
