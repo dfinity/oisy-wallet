@@ -1,37 +1,40 @@
 <script lang="ts">
-	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { i18n } from '$lib/stores/i18n.store.js';
-	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { earningCards } from '$env/earning-cards.env';
-	import { EarningCardFields } from '$env/types/env.earning-cards';
-	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
 	import { getContext } from 'svelte';
-	import {
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from '$lib/stores/reward.store';
-	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
-	import { NETWORK_BONUS_MULTIPLIER_DEFAULT, ZERO } from '$lib/constants/app.constants';
-	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
-	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import { nonNullish } from '@dfinity/utils';
-	import { resolveText } from '$lib/utils/i18n.utils.js';
 	import { goto } from '$app/navigation';
-	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
-	import { formatToShortDateString } from '$lib/utils/format.utils';
+	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { NETWORK_BONUS_MULTIPLIER_DEFAULT, ZERO } from '$lib/constants/app.constants';
+	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
+	import { resolveText } from '$lib/utils/i18n.utils.js';
+	import {
+		formatStakeApyNumber,
+		formatToken,
+		formatToShortDateString
+	} from '$lib/utils/format.utils';
+	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
+	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import {
 		enabledFungibleTokensUi,
 		enabledMainnetFungibleTokensUsdBalance
 	} from '$lib/derived/tokens.derived';
-	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 	import { exchanges } from '$lib/derived/exchange.derived';
-	import { isGLDTToken } from '$icp-eth/utils/token.utils';
-	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils.js';
+	import { i18n } from '$lib/stores/i18n.store.js';
+	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
+	import { earningCards } from '$env/earning-cards.env';
+	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import { EarningCardFields } from '$env/types/env.earning-cards';
+	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
+	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import List from '$lib/components/common/List.svelte';
+	import ListItem from '$lib/components/common/ListItem.svelte';
+	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
