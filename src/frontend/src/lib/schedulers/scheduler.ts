@@ -1,6 +1,5 @@
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
-	PostMessageDataRequest,
 	PostMessageDataResponseLoose,
 	PostMessageResponseStatus,
 	PostMessageScheduler
@@ -125,9 +124,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T extends PostMessageDataResponseLoose>(
-		data: PostMessageScheduler<T>
-	) {
+	postMsg<T extends PostMessageDataResponseLoose>(data: PostMessageScheduler<T>) {
 		if (this.isIdle()) {
 			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;
