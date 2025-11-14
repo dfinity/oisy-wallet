@@ -125,7 +125,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
+	postMsg<T extends PostMessageDataResponseLoose>(
 		data: PostMessageScheduler<T>
 	) {
 		if (this.isIdle()) {
