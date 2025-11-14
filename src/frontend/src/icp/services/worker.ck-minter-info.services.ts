@@ -11,7 +11,7 @@ import {
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type { IcCkMetadata } from '$icp/types/ic-token';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCk,
@@ -21,6 +21,7 @@ import type {
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 
 interface CkMinterInfoWorkerCallbacks {
 	postMessageKey: 'CkBtc' | 'CkEth';
