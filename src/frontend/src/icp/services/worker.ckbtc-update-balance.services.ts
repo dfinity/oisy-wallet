@@ -5,7 +5,7 @@ import {
 } from '$icp/services/ckbtc-listener.services';
 import { btcAddressStore } from '$icp/stores/btc.store';
 import type { IcCkWorkerParams } from '$icp/types/ck-listener';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCkBTCUpdateBalance,
@@ -14,6 +14,7 @@ import type {
 	PostMessageSyncState
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import { emit } from '$lib/utils/events.utils';
 import { isNetworkIdBTCMainnet } from '$lib/utils/network.utils';
 import { get } from 'svelte/store';

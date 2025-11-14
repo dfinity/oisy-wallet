@@ -1,4 +1,4 @@
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -7,6 +7,7 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import {
 	syncWallet,

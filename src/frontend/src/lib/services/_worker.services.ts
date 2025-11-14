@@ -1,15 +1,6 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
-import type {
-	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataResponseLoose
-} from '$lib/types/post-message';
+import type { WorkerData, WorkerListener, WorkerPostMessageData } from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
-
-export interface WorkerData {
-	worker: Worker;
-	isSingleton: boolean;
-}
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
@@ -45,10 +36,8 @@ export abstract class AppWorker {
 		return { worker, isSingleton: asSingleton };
 	};
 
-	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
-		fn: (ev: MessageEvent<PostMessage<T>>) => void
-	) => {
-		this.#worker.onmessage = fn;
+	protected setOnMessage = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#worker.onmessage = listener;
 	};
 
 	protected postMessage = <T>(data: T) => {
