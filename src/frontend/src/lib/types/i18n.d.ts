@@ -778,7 +778,6 @@ interface I18nSwap {
 		manually_withdraw_failed: string;
 		swap_sucess_withdraw_failed: string;
 		swap_sucess_manually_withdraw_success: string;
-		swap_slippage_exceeded_exchange_rate: string;
 	};
 }
 
@@ -1167,7 +1166,6 @@ interface I18nTransactions {
 		token_needs_enabling: string;
 	};
 	error: {
-		loading_transactions: string;
 		loading_transactions_symbol: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;

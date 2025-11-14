@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "",
 			"manually_withdraw_failed": "",
 			"swap_sucess_withdraw_failed": "",
-			"swap_sucess_manually_withdraw_success": "",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": ""
 		}
 	},
 	"buy": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "Il token deve essere abilitato per visualizzare la cronologia delle transazioni."
 		},
 		"error": {
-			"loading_transactions": "Errore durante il caricamento delle transazioni.",
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",
 			"uncertified_transactions_removed": "Diverse transazioni non certificate sono state identificate e successivamente rimosse dagli elenchi visualizzati.",
 			"loading_pending_ck_ethereum_transactions": "Qualcosa è andato storto durante il recupero delle transazioni in sospeso di $network.",

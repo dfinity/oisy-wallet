@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Os tokens de sua troca anterior com falha foram retirados com sucesso. Você pode tentar a troca novamente ou alterar o provedor de troca.",
 			"manually_withdraw_failed": "Levantamento manual falhou",
 			"swap_sucess_withdraw_failed": "A retirada de seus fundos falhou.<br> Por favor, tente novamente ou siga ",
-			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga"
 		}
 	},
 	"buy": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "O token precisa de ser habilitado para visualizar o histórico de transações."
 		},
 		"error": {
-			"loading_transactions": "Erro ao carregar as transações.",
 			"loading_transactions_symbol": "Erro ao carregar as transações $symbol.",
 			"uncertified_transactions_removed": "Várias transações não certificadas foram identificadas e subsequentemente removidas das listas exibidas.",
 			"loading_pending_ck_ethereum_transactions": "Algo deu errado ao buscar as transações pendentes de $network.",

@@ -65,9 +65,13 @@ describe('App Layout', () => {
 	});
 
 	describe('when handling AuthBroadcastChannel', () => {
-		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		let bc: AuthBroadcastChannel;
 
-		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = {
+			msg: AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS,
+			emitterId: window.crypto.randomUUID()
+		};
 
 		const mockChannels = new Map<string, BroadcastChannel>();
 
@@ -105,10 +109,13 @@ describe('App Layout', () => {
 				})
 			);
 
+			bc = AuthBroadcastChannel.getInstance();
+
 			authLoggedInAnotherTabStore.set(false);
 		});
 
 		afterEach(() => {
+			bc.destroy();
 			vi.unstubAllGlobals();
 		});
 
@@ -143,7 +150,9 @@ describe('App Layout', () => {
 				.spyOn(AuthBroadcastChannel.prototype, 'onLoginSuccess')
 				.mockImplementationOnce(vi.fn());
 
-			vi.spyOn(AuthBroadcastChannel.prototype, 'close').mockImplementationOnce(vi.fn());
+			const service = AuthBroadcastChannel.getInstance();
+			vi.spyOn(service, 'onLoginSuccess').mockImplementation(spy);
+			vi.spyOn(service, 'destroy').mockImplementation(vi.fn());
 
 			expect(spy).not.toHaveBeenCalled();
 

@@ -1,17 +1,15 @@
 import { SUPPORTED_NETWORKS } from '$env/networks/networks.env';
 import {
-	networkAddress,
 	selectedNetworkNftSupported,
 	selectedNetworkNftUnsupported
 } from '$lib/derived/network.derived';
 import { ethAddressStore } from '$lib/stores/address.store';
 import { authStore } from '$lib/stores/auth.store';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
-import { mockIcrcAccount, mockIdentity } from '$tests/mocks/identity.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
 import { get } from 'svelte/store';
 
 describe('network.derived', () => {
@@ -27,27 +25,6 @@ describe('network.derived', () => {
 		data: mockEthAddress,
 		certified: true
 	};
-
-	const expectedIcrcAddress = encodeIcrcAccount(mockIcrcAccount);
-
-	describe('networkAddress', () => {
-		test.each([
-			{
-				network: 'ICP',
-				expectedAddress: expectedIcrcAddress
-			},
-			{
-				network: 'ETH',
-				expectedAddress: mockEthAddress
-			}
-		])('returns $network address when network is $network', ({ network, expectedAddress }) => {
-			mockPage.mock({ network });
-
-			const actualAddress = get(networkAddress);
-
-			expect(actualAddress).toBe(expectedAddress);
-		});
-	});
 
 	describe('selectedNetworkNftSupported', () => {
 		const networksThatUSupportNfts = SUPPORTED_NETWORKS.filter(({ supportsNft }) => supportsNft);

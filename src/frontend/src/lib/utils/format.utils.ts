@@ -260,3 +260,19 @@ export const formatCurrency = ({
 
 	return formatted;
 };
+
+export const formatStakeApyNumber = (apy: number): string => {
+	if (apy >= 100) {
+		return `${Math.round(apy)}`;
+	}
+
+	if (apy >= 10) {
+		return (Math.round(apy * 10) / 10).toFixed(1);
+	}
+
+	if (apy > 0) {
+		return (Math.round(apy * 100) / 100).toFixed(2);
+	}
+
+	return '0';
+};

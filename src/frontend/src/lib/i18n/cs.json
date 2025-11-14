@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Tokeny z vašeho předchozího neúspěšného swapu byly úspěšně vybrány. Můžete zkusit swap znovu nebo změnit poskytovatele swapu.",
 			"manually_withdraw_failed": "Výběr vašich finančních prostředků selhal.<br>Zkuste to prosím znovu nebo sledujte ",
 			"swap_sucess_withdraw_failed": "Výměna byla dokončena, ale vaše tokeny nemohly být automaticky vybrány. Klikněte na tlačítko Vybrat níže a vyberte je ručně.<br>Nebo následujte ",
-			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít.",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "Tokeny z vaší předchozí výměny byly úspěšně vybrány. Nyní můžete toto modální okno zavřít."
 		}
 	},
 	"buy": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "Pro zobrazení historie transakcí je třeba povolit token."
 		},
 		"error": {
-			"loading_transactions": "Chyba při načítání transakcí.",
 			"loading_transactions_symbol": "Chyba při načítání transakcí $symbol.",
 			"uncertified_transactions_removed": "Bylo identifikováno několik necertifikovaných transakcí, které byly následně odstraněny ze zobrazených seznamů.",
 			"loading_pending_ck_ethereum_transactions": "Při načítání nevyřízených transakcí $network se něco pokazilo.",

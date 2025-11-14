@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Вывод прошел успешно",
 			"manually_withdraw_failed": "Вывод не удался",
 			"swap_sucess_withdraw_failed": "Обмен прошел, но вывод не удался",
-			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "Обмен и вывод прошли успешно"
 		}
 	},
 	"buy": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "Чтобы просмотреть историю транзакций токен должен быть активен."
 		},
 		"error": {
-			"loading_transactions": "Ошибка при загрузке транзакций.",
 			"loading_transactions_symbol": "Ошибка при загрузке транзакций $symbol.",
 			"uncertified_transactions_removed": "Были идентифицированы несколько несертифицированных транзакций, которые впоследствии были удалены из отображаемых списков.",
 			"loading_pending_ck_ethereum_transactions": "Что-то пошло не так при получении ожидающих транзакций $network.",

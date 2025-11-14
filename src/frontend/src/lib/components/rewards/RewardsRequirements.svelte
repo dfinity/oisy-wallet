@@ -17,9 +17,17 @@
 		networkBonusMultiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		criteria: CampaignCriterion[];
 		reward: RewardCampaignDescription;
+		type?: 'default' | 'earnings-card';
 	}
 
-	let { isEligible, hasNetworkBonus, networkBonusMultiplier, criteria, reward }: Props = $props();
+	let {
+		isEligible,
+		hasNetworkBonus,
+		networkBonusMultiplier,
+		criteria,
+		reward,
+		type = 'default'
+	}: Props = $props();
 
 	let infoExpanded = $state(false);
 </script>
@@ -30,15 +38,23 @@
 		class:flex-row={!hasNetworkBonus}
 		class:items-center={!hasNetworkBonus}
 	>
-		<span class="text-base font-semibold">
-			{$i18n.rewards.requirements.requirements_title}
-		</span>
+		{#if type !== 'earnings-card'}
+			<span class="text-base font-semibold">
+				{$i18n.rewards.requirements.requirements_title}
+			</span>
+		{/if}
 
 		<div class="flex flex-wrap gap-2.5" class:pl-3={!hasNetworkBonus}>
-			<EligibilityBadge {isEligible} />
+			<span class:text-sm={type === 'default'} class:text-xs={type === 'earnings-card'}>
+				<EligibilityBadge {isEligible} />
+			</span>
 
 			{#if hasNetworkBonus && nonNullish(networkBonusMultiplier)}
-				<NetworkBonusImage disabled={!isEligible} multiplier={networkBonusMultiplier} />
+				<NetworkBonusImage
+					disabled={!isEligible}
+					multiplier={networkBonusMultiplier}
+					size={type === 'earnings-card' ? 210 : undefined}
+				/>
 
 				<button class="p-0.5 text-tertiary" onclick={() => (infoExpanded = !infoExpanded)}>
 					<IconHelp size="18" />

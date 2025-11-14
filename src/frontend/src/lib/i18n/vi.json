@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Token từ giao dịch hoán đổi không thành công trước đó của bạn đã được rút thành công. Bạn có thể thử lại giao dịch hoán đổi hoặc đổi nhà cung cấp dịch vụ hoán đổi.",
 			"manually_withdraw_failed": "Rút tiền của bạn không thành công.<br> Vui lòng thử lại hoặc làm theo",
 			"swap_sucess_withdraw_failed": "Giao dịch hoán đổi đã hoàn tất, nhưng token của bạn không thể tự động rút. Nhấp vào nút 'Rút tiền' bên dưới để rút tiền thủ công.<br> Hoặc làm theo",
-			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này.",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "Token từ giao dịch hoán đổi trước đó của bạn đã được rút thành công. Bây giờ bạn có thể đóng hộp thoại này."
 		}
 	},
 	"buy": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "Token cần được bật để xem lịch sử giao dịch."
 		},
 		"error": {
-			"loading_transactions": "Lỗi khi tải các giao dịch.",
 			"loading_transactions_symbol": "Lỗi khi tải các giao dịch $symbol.",
 			"uncertified_transactions_removed": "Một số giao dịch chưa được chứng nhận đã được xác định và sau đó bị xóa khỏi danh sách hiển thị.",
 			"loading_pending_ck_ethereum_transactions": "Đã xảy ra lỗi trong khi tìm nạp các giao dịch $network đang chờ xử lý.",
