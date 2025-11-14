@@ -122,7 +122,6 @@
 			"preview": "$oisy_name 登录后的桌面和移动端预览图"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "需启用该代币才能查看交易历史。"
 		},
 		"error": {
-			"loading_transactions": "加载交易记录时出错。",
 			"loading_transactions_symbol": "加载 $symbol 的交易记录时出错。",
 			"uncertified_transactions_removed": "检测到一些未经认证的交易，已从显示列表中移除。",
 			"loading_pending_ck_ethereum_transactions": "获取 $network 待处理交易时发生错误。",
@@ -1731,6 +1729,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
 			"unstaking": "",
@@ -1746,6 +1746,7 @@
 			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",

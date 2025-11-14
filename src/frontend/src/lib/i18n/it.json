@@ -122,7 +122,6 @@
 			"preview": "Anteprima di $oisy_name una volta effettuato l'accesso, sia su desktop che su mobile"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "Il token deve essere abilitato per visualizzare la cronologia delle transazioni."
 		},
 		"error": {
-			"loading_transactions": "Errore durante il caricamento delle transazioni.",
 			"loading_transactions_symbol": "Errore durante il caricamento delle transazioni di $symbol.",
 			"uncertified_transactions_removed": "Diverse transazioni non certificate sono state identificate e successivamente rimosse dagli elenchi visualizzati.",
 			"loading_pending_ck_ethereum_transactions": "Qualcosa è andato storto durante il recupero delle transazioni in sospeso di $network.",
@@ -1731,6 +1729,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
 			"unstaking": "",
@@ -1746,6 +1746,7 @@
 			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",

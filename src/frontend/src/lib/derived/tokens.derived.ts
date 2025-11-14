@@ -21,10 +21,13 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenUi } from '$lib/types/token-ui';
 import { isTokenFungible } from '$lib/utils/nft.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import {
 	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
@@ -203,3 +206,26 @@ export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdB
 			$exchanges
 		})
 	);
+
+/**
+ * All user-enabled fungible tokens with financial data.
+ */
+export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
+	[enabledFungibleTokens, balancesStore, exchanges],
+	([$enabledFungibleTokens, $balances, $exchanges]) =>
+		$enabledFungibleTokens.map((token) =>
+			mapTokenUi({
+				token,
+				$balances,
+				$exchanges
+			})
+		)
+);
+
+export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
+	[enabledFungibleTokensUi],
+	([$enabledFungibleTokensUi]) =>
+		sumTokensUiUsdBalance(
+			$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
+		)
+);

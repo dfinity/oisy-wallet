@@ -122,7 +122,6 @@
 			"preview": "साइन इन करने के बाद $oisy_name का पूर्वावलोकन, डेस्कटॉप और मोबाइल दोनों पर"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -1392,7 +1391,6 @@
 			"token_needs_enabling": "लेनदेन इतिहास देखने के लिए टोकन को सक्षम करने की आवश्यकता है।"
 		},
 		"error": {
-			"loading_transactions": "लेनदेन लोड करते समय त्रुटि।",
 			"loading_transactions_symbol": "$symbol लेनदेन लोड करते समय त्रुटि।",
 			"uncertified_transactions_removed": "कई अप्रमाणित लेनदेन की पहचान की गई और बाद में प्रदर्शित सूचियों से हटा दिया गया।",
 			"loading_pending_ck_ethereum_transactions": "लंबित $network लेनदेन लाते समय कुछ गलत हो गया।",
@@ -1731,6 +1729,8 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
 			"unstaking": "",
@@ -1746,6 +1746,7 @@
 			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
 			"stake_review_subtitle": "",
 			"unstake_review_subtitle": "",
