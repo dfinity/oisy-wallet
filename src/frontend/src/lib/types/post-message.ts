@@ -1,5 +1,4 @@
 import type {
-	inferPostMessageSchedulerSchema,
 	POST_MESSAGE_REQUESTS,
 	PostMessageDataErrorSchema,
 	PostMessageDataRequestBtcSchema,
@@ -26,6 +25,7 @@ import type {
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
+	inferPostMessageSchedulerSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
