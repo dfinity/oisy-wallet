@@ -3,7 +3,6 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterApiFunctionParams, CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import type { Identity } from '@dfinity/agent';
 import {
 	IcrcLedgerCanister,
 	fromCandidAccount,
@@ -17,8 +16,9 @@ import {
 	type IcrcTokenMetadataResponse,
 	type IcrcTokens
 } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, fromDefinedNullable, type QueryParams } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
+import { Principal } from '@icp-sdk/core/principal';
 
 /**
  * Retrieves metadata for the ICRC token.

@@ -2,14 +2,14 @@
 	import { getContext } from 'svelte';
 	import IcReviewNetwork from '$icp/components/send/IcReviewNetwork.svelte';
 	import GldtStakeFees from '$icp/components/stake/gldt/GldtStakeFees.svelte';
-	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
+	import GldtStakeProvider from '$icp/components/stake/gldt/GldtStakeProvider.svelte';
 	import { isInvalidDestinationIc } from '$icp/utils/ic-send.utils';
-	import StakeProvider from '$lib/components/stake/StakeProvider.svelte';
+	import SendReviewDestination from '$lib/components/send/SendReviewDestination.svelte';
 	import StakeReview from '$lib/components/stake/StakeReview.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Address } from '$lib/types/address';
 	import type { OptionAmount } from '$lib/types/send';
-	import { StakeProvider as StakeProviderType } from '$lib/types/stake';
 	import { invalidAmount } from '$lib/utils/input.utils';
 
 	interface Props {
@@ -19,24 +19,32 @@
 		onStake: () => void;
 	}
 
-	let { destination = '', amount, onBack, onStake }: Props = $props();
+	let { destination: address = '', amount, onBack, onStake }: Props = $props();
 
 	const { sendTokenStandard } = getContext<SendContext>(SEND_CONTEXT_KEY);
-
-	const { store: gldtStakeApyStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
 	// Should never happen given that the same checks are performed on previous wizard step
 	let invalid = $derived(
 		isInvalidDestinationIc({
-			destination,
+			destination: address,
 			tokenStandard: $sendTokenStandard
 		}) || invalidAmount(amount)
 	);
 </script>
 
-<StakeReview {amount} {destination} disabled={invalid} {onBack} {onStake}>
+<StakeReview {amount} disabled={invalid} {onBack} onConfirm={onStake}>
+	{#snippet subtitle()}
+		{$i18n.stake.text.stake_review_subtitle}
+	{/snippet}
+
+	{#snippet destination()}
+		<div class="mb-4">
+			<SendReviewDestination destination={address} />
+		</div>
+	{/snippet}
+
 	{#snippet provider()}
-		<StakeProvider currentApy={$gldtStakeApyStore?.apy} provider={StakeProviderType.GLDT} />
+		<GldtStakeProvider />
 	{/snippet}
 
 	{#snippet network()}

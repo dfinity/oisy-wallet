@@ -21,15 +21,19 @@ import { balancesStore } from '$lib/stores/balances.store';
 import type { NonFungibleToken } from '$lib/types/nft';
 import type { Token, TokenToPin } from '$lib/types/token';
 import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
+import type { TokenUi } from '$lib/types/token-ui';
 import { isTokenFungible } from '$lib/utils/nft.utils';
+import { mapTokenUi } from '$lib/utils/token.utils';
 import {
 	filterEnabledTokens,
-	sumMainnetTokensUsdBalancesPerNetwork
+	sumMainnetTokensUsdBalancesPerNetwork,
+	sumTokensUiUsdBalance
 } from '$lib/utils/tokens.utils';
 import { splTokens } from '$sol/derived/spl.derived';
 import { enabledSolanaTokens } from '$sol/derived/tokens.derived';
 import type { SplToken } from '$sol/types/spl';
 import { isTokenSpl } from '$sol/utils/spl.utils';
+import { isNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 export const tokens: Readable<Token[]> = derived(
@@ -125,10 +129,46 @@ export const enabledNonFungibleTokens: Readable<NonFungibleToken[]> = derived(
 	filterEnabledTokens
 );
 
+const enabledNonFungibleTokensBySection: Readable<
+	Record<CustomTokenSection | 'null', NonFungibleToken[]>
+> = derived([enabledNonFungibleTokens], ([$enabledNonFungibleTokens]) =>
+	$enabledNonFungibleTokens.reduce<Record<CustomTokenSection | 'null', NonFungibleToken[]>>(
+		(acc, token) => {
+			const { section } = token;
+
+			const key = isNullish(section) ? 'null' : section;
+
+			(acc[key] ??= []).push(token);
+
+			return acc;
+		},
+		{} as Record<CustomTokenSection | 'null', NonFungibleToken[]>
+	)
+);
+
+export const enabledNonFungibleTokensWithoutSection: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) => $enabledNonFungibleTokensBySection['null'] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionHidden: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.HIDDEN] ?? []
+);
+
+export const enabledNonFungibleTokensBySectionSpam: Readable<NonFungibleToken[]> = derived(
+	[enabledNonFungibleTokensBySection],
+	([$enabledNonFungibleTokensBySection]) =>
+		$enabledNonFungibleTokensBySection[CustomTokenSection.SPAM] ?? []
+);
+
 export const enabledNonFungibleTokensWithoutSpam: Readable<NonFungibleToken[]> = derived(
-	[enabledNonFungibleTokens],
-	([$enabledNonFungibleTokens]) =>
-		$enabledNonFungibleTokens.filter(({ section }) => section != CustomTokenSection.SPAM)
+	[enabledNonFungibleTokensWithoutSection, enabledNonFungibleTokensBySectionHidden],
+	([$enabledNonFungibleTokensWithoutSection, $enabledNonFungibleTokensBySectionHidden]) => [
+		...$enabledNonFungibleTokensWithoutSection,
+		...$enabledNonFungibleTokensBySectionHidden
+	]
 );
 
 /**
@@ -166,3 +206,26 @@ export const enabledMainnetTokensUsdBalancesPerNetwork: Readable<TokensTotalUsdB
 			$exchanges
 		})
 	);
+
+/**
+ * All user-enabled fungible tokens with financial data.
+ */
+export const enabledFungibleTokensUi: Readable<TokenUi[]> = derived(
+	[enabledFungibleTokens, balancesStore, exchanges],
+	([$enabledFungibleTokens, $balances, $exchanges]) =>
+		$enabledFungibleTokens.map((token) =>
+			mapTokenUi({
+				token,
+				$balances,
+				$exchanges
+			})
+		)
+);
+
+export const enabledMainnetFungibleTokensUsdBalance: Readable<number> = derived(
+	[enabledFungibleTokensUi],
+	([$enabledFungibleTokensUi]) =>
+		sumTokensUiUsdBalance(
+			$enabledFungibleTokensUi.filter(({ network: { env } }) => env !== 'testnet')
+		)
+);

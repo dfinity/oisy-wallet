@@ -122,7 +122,6 @@
 			"preview": "Podgląd $oisy_name po zalogowaniu, zarówno na komputerze stacjonarnym, jak i telefonie"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -361,6 +360,26 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -1049,6 +1068,7 @@
 				"title": "Zarządzaj tokenami",
 				"title_nft": "",
 				"manage_list": "Zarządzaj tokenami",
+				"manage_list_nft": "",
 				"list_settings": "Ustawienia listy",
 				"import_token": "Importuj token",
 				"import_nft": "",
@@ -1114,6 +1134,8 @@
 			"title": "NFT",
 			"title_empty": "Twoje NFT pojawią się tutaj",
 			"description_empty": "Wygląda na to, że nie otrzymałeś jeszcze żadnych NFT",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "Grupowanie",
 			"as_plain_list": "Pokaż jako zwykłą listę",
 			"by_collection": "Grupuj według kolekcji",
@@ -1369,7 +1391,6 @@
 			"token_needs_enabling": "Token musi być włączony, aby wyświetlić historię transakcji."
 		},
 		"error": {
-			"loading_transactions": "Błąd podczas ładowania transakcji.",
 			"loading_transactions_symbol": "Błąd podczas ładowania transakcji $symbol.",
 			"uncertified_transactions_removed": "Zidentyfikowano kilka niecertyfikowanych transakcji, które następnie usunięto z wyświetlanych list.",
 			"loading_pending_ck_ethereum_transactions": "Coś poszło nie tak podczas pobierania oczekujących transakcji $network.",
@@ -1632,14 +1653,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Przejrzyj warunki korzystania z usługi",
-			"review_updated_title": "Przejrzyj zaktualizowane warunki korzystania z usługi",
-			"review_description": "Zanim zaczniesz korzystać z Portfela OISY, musisz zapoznać się z naszymi Warunkami korzystania z usługi i Polityką prywatności oraz je zaakceptować. Dokumenty te wyjaśniają zasady korzystania z naszej usługi i sposób, w jaki chronimy Twoje dane.",
-			"review_updated_description": "Aby nadal korzystać z Portfela OISY, zapoznaj się z naszymi zaktualizowanymi Warunkami korzystania z usługi i Polityką prywatności oraz zaakceptuj je. Zmiany te są ważne dla zapewnienia bezpieczeństwa i zgodności naszych usług z przepisami.",
-			"reject_warning": "Aby kontynuować, musisz zaakceptować Regulamin. Możesz spróbować ponownie w dowolnym momencie.",
-			"i_have_accepted": "Przeczytałem i akceptuję",
-			"i_have_accepted_updated": "Przeczytałem i akceptuję zaktualizowane",
-			"accept_and_continue": "Zaakceptuj i kontynuuj",
 			"updated_agreements_warning": "Zaktualizowaliśmy $agreements. Korzystając z $oisy_short, potwierdzasz, że przeczytałeś(-aś) i akceptujesz aktualizacje."
 		},
 		"error": {
@@ -1716,8 +1729,12 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1725,10 +1742,27 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

@@ -122,7 +122,7 @@
 	{#if nonNullish(nft)}
 		<ListItem>
 			<span class="flex whitespace-nowrap text-tertiary">{$i18n.nfts.text.received_at}</span>
-			{#if nonNullish(nft?.acquiredAt)}
+			{#if nonNullish(nft?.acquiredAt) && nft?.acquiredAt.getTime() > 0}
 				<output
 					>{formatSecondsToDate({
 						seconds: nft.acquiredAt.getTime() / 1000,
@@ -130,9 +130,7 @@
 					})}</output
 				>
 			{:else}
-				<span class="min-w-12">
-					<SkeletonText />
-				</span>
+				<output>&ndash;</output>
 			{/if}
 		</ListItem>
 		<ListItem>
@@ -170,11 +168,11 @@
 	{#if nonNullish(nft?.attributes) && nft.attributes.length > 0}
 		<ListItem styleClass="text-tertiary">{$i18n.nfts.text.item_traits}</ListItem>
 		<div class="mt-2 flex flex-wrap gap-2">
-			{#each nft.attributes as trait, index (trait.value + index)}
+			{#each nft.attributes as trait, index (trait.traitType + index)}
 				<div class="flex">
 					<Badge variant="nft-trait"
 						><span class="font-normal text-tertiary">{trait.traitType}</span><br /><span
-							class="font-bold text-primary">{trait.value}</span
+							class="font-bold text-primary">{trait.value ?? ''}</span
 						></Badge
 					>
 				</div>

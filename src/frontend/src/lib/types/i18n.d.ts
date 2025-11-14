@@ -116,7 +116,7 @@ interface I18nAuth {
 		advanced_cryptography: string;
 	};
 	alt: { preview: string };
-	message: { refreshed_authentication: string; session_locked: string };
+	message: { session_locked: string };
 	warning: { not_signed_in: string; session_expired: string; reload_and_retry: string };
 	error: {
 		no_internet_identity: string;
@@ -267,6 +267,10 @@ interface I18nDapps {
 			carousel: { text: string; call_to_action: string };
 		};
 		beam: { name: string; one_liner: string; call_to_action: string; description: string };
+		axie_infinity: { name: string; one_liner: string; description: string };
+		mobox: { name: string; one_liner: string; description: string };
+		cyql: { name: string; one_liner: string; description: string };
+		icpanda_message: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -864,6 +868,7 @@ interface I18nTokens {
 			title: string;
 			title_nft: string;
 			manage_list: string;
+			manage_list_nft: string;
 			list_settings: string;
 			import_token: string;
 			import_nft: string;
@@ -915,6 +920,8 @@ interface I18nNfts {
 		title: string;
 		title_empty: string;
 		description_empty: string;
+		title_not_supported: string;
+		description_not_supported: string;
 		grouping: string;
 		as_plain_list: string;
 		by_collection: string;
@@ -1159,7 +1166,6 @@ interface I18nTransactions {
 		token_needs_enabling: string;
 	};
 	error: {
-		loading_transactions: string;
 		loading_transactions_symbol: string;
 		uncertified_transactions_removed: string;
 		loading_pending_ck_ethereum_transactions: string;
@@ -1323,17 +1329,7 @@ interface I18nCarousel {
 }
 
 interface I18nAgreements {
-	text: {
-		review_title: string;
-		review_updated_title: string;
-		review_description: string;
-		review_updated_description: string;
-		reject_warning: string;
-		i_have_accepted: string;
-		i_have_accepted_updated: string;
-		accept_and_continue: string;
-		updated_agreements_warning: string;
-	};
+	text: { updated_agreements_warning: string };
 	error: { cannot_update_user_agreements: string };
 }
 
@@ -1388,8 +1384,12 @@ interface I18nEarning {
 
 interface I18nStake {
 	text: {
+		stake_page_title: string;
+		gldt_stake_page_description: string;
 		stake: string;
 		unstake: string;
+		unstaking: string;
+		unstake_token: string;
 		enable_token_text: string;
 		enable_token_button: string;
 		review: string;
@@ -1397,10 +1397,27 @@ interface I18nStake {
 		unsupported_token_staking: string;
 		provider: string;
 		earning_potential: string;
+		active_earning: string;
+		active_earning_per_year: string;
 		visit_provider: string;
 		current_apy: string;
+		current_apy_label: string;
 		current_apy_info: string;
 		stake_review_subtitle: string;
+		unstake_review_subtitle: string;
+		delayed_dissolve: string;
+		immediate_dissolve: string;
+		included_token_fee: string;
+		included_dissolve_fee: string;
+		delayed_dissolve_terms: string;
+		delayed_dissolve_info: string;
+		immediate_dissolve_terms: string;
+		amount_to_receive: string;
+		unclaimed_rewards: string;
+		claim_reward: string;
+		claim_rewards: string;
+		claim_now: string;
+		claiming: string;
 	};
 }
 

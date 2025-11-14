@@ -84,6 +84,8 @@ export const SEND_FORM_NEXT_BUTTON = 'send-form-next-button';
 export const SEND_FORM_DESTINATION_NEXT_BUTTON = 'send-form-destination-next-button';
 export const REVIEW_FORM_SEND_BUTTON = 'review-form-send-button';
 
+export const BUY_TOKENS_MODAL_OPEN_BUTTON = 'buy-tokens-modal-open-button';
+
 export const SETTINGS_ADDRESS_LABEL = 'settings-address-label';
 export const SETTINGS_ACTIVE_NETWORKS_EDIT_BUTTON = 'settings-active-networks-edit-button';
 
@@ -293,12 +295,6 @@ export const AI_ASSISTANT_SEND_TOKENS_BUTTON = 'ai-assistant-send-tokens-button'
 export const AI_ASSISTANT_SEND_TOKENS_SUCCESS_MESSAGE = 'ai-assistant-send-tokens-success-message';
 
 // Agreements
-export const AGREEMENTS_MODAL = 'agreements-modal';
-export const AGREEMENTS_MODAL_CHECKBOX_TERMS_OF_USE = 'agreements-modal-checkbox-terms-of-use';
-export const AGREEMENTS_MODAL_CHECKBOX_PRIVACY_POLICY = 'agreements-modal-checkbox-privacy-policy';
-export const AGREEMENTS_MODAL_CHECKBOX_LICENSE_AGREEMENT =
-	'agreements-modal-checkbox-license-agreement';
-export const AGREEMENTS_MODAL_ACCEPT_BUTTON = 'agreements-modal-accept-button';
 export const AGREEMENTS_WARNING_BANNER = 'agreements-warning-banner';
 export const AGREEMENTS_WARNING_BANNER_CLOSE_BUTTON = 'agreements-warning-banner-close-button';
 

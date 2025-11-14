@@ -1,16 +1,15 @@
 import { OISY_URL } from '$lib/constants/oisy.constants';
+import { AuthBroadcastChannel } from '$lib/providers/auth-broadcast.providers';
 import * as analytics from '$lib/services/analytics.services';
-import * as authBroadcastServices from '$lib/services/auth-broadcast.services';
-import { AuthBroadcastChannel } from '$lib/services/auth-broadcast.services';
-import { authStore } from '$lib/stores/auth.store';
+import { authLoggedInAnotherTabStore, authStore } from '$lib/stores/auth.store';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import { toastsShow } from '$lib/stores/toasts.store';
 import App from '$routes/+layout.svelte';
 import { mockAuthSignedIn } from '$tests/mocks/auth.mock';
-import { default as en } from '$tests/mocks/i18n.mock';
 import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render, waitFor } from '@testing-library/svelte';
+import { get } from 'svelte/store';
 
 vi.mock('$lib/services/worker.auth.services', () => ({
 	AuthWorker: {
@@ -62,9 +61,13 @@ describe('App Layout', () => {
 	});
 
 	describe('when handling AuthBroadcastChannel', () => {
-		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		let bc: AuthBroadcastChannel;
 
-		const loginSuccessMessage = AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS;
+		const channelName = AuthBroadcastChannel.CHANNEL_NAME;
+		const loginSuccessMessage = {
+			msg: AuthBroadcastChannel.MESSAGE_LOGIN_SUCCESS,
+			emitterId: window.crypto.randomUUID()
+		};
 
 		const mockChannels = new Map<string, BroadcastChannel>();
 
@@ -101,9 +104,14 @@ describe('App Layout', () => {
 					return channel;
 				})
 			);
+
+			bc = AuthBroadcastChannel.getInstance();
+
+			authLoggedInAnotherTabStore.set(false);
 		});
 
 		afterEach(() => {
+			bc.destroy();
 			vi.unstubAllGlobals();
 		});
 
@@ -118,7 +126,7 @@ describe('App Layout', () => {
 
 			newBc.postMessage(loginSuccessMessage);
 
-			expect(spy).toHaveBeenCalledExactlyOnceWith();
+			expect(spy).not.toHaveBeenCalled();
 
 			expect(broadcastChannelCloseSpy).not.toHaveBeenCalled();
 
@@ -130,16 +138,15 @@ describe('App Layout', () => {
 
 			newBc.postMessage(loginSuccessMessage);
 
-			expect(spy).toHaveBeenCalledExactlyOnceWith();
+			expect(spy).not.toHaveBeenCalled();
 		});
 
 		it('should initialize a channel for auth synchronization', () => {
 			const spy = vi.fn();
 
-			vi.spyOn(authBroadcastServices, 'AuthBroadcastChannel').mockReturnValueOnce({
-				onLoginSuccess: spy,
-				close: vi.fn()
-			} as unknown as AuthBroadcastChannel);
+			const service = AuthBroadcastChannel.getInstance();
+			vi.spyOn(service, 'onLoginSuccess').mockImplementation(spy);
+			vi.spyOn(service, 'destroy').mockImplementation(vi.fn());
 
 			expect(spy).not.toHaveBeenCalled();
 
@@ -155,8 +162,8 @@ describe('App Layout', () => {
 				vi.spyOn(toastsStore, 'toastsShow');
 			});
 
-			it('should trigger the forced re-synchronization', () => {
-				mockAuthSignedIn(false);
+			it('should trigger the forced re-synchronization if already logged in', () => {
+				mockAuthSignedIn(true);
 
 				const spy = vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
 					mockAuthSignedIn();
@@ -175,10 +182,10 @@ describe('App Layout', () => {
 				expect(spy).toHaveBeenCalledExactlyOnceWith();
 			});
 
-			it('should show a toast if the page was logged out before the re-synchronization', async () => {
+			it('should not trigger the forced re-synchronization if not logged in', () => {
 				mockAuthSignedIn(false);
 
-				vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
+				const spy = vi.spyOn(authStore, 'forceSync').mockImplementationOnce(async () => {
 					mockAuthSignedIn();
 
 					await Promise.resolve();
@@ -186,16 +193,13 @@ describe('App Layout', () => {
 
 				render(App, { children: mockSnippet });
 
+				spy.mockClear();
+
 				const newBc = new BroadcastChannel(channelName);
 
 				newBc.postMessage(loginSuccessMessage);
 
-				await waitFor(() => {
-					expect(toastsShow).toHaveBeenCalledExactlyOnceWith({
-						text: en.auth.message.refreshed_authentication,
-						level: 'success'
-					});
-				});
+				expect(spy).not.toHaveBeenCalled();
 			});
 
 			it('should do nothing if after the re-synchronization it is logged out', async () => {
@@ -209,6 +213,20 @@ describe('App Layout', () => {
 
 				await waitFor(() => {
 					expect(toastsShow).not.toHaveBeenCalled();
+				});
+			});
+
+			it('should set the authLoggedInAnotherTabStore to true', async () => {
+				mockAuthSignedIn(false);
+
+				render(App, { children: mockSnippet });
+
+				const newBc = new BroadcastChannel(channelName);
+
+				newBc.postMessage(loginSuccessMessage);
+
+				await waitFor(() => {
+					expect(get(authLoggedInAnotherTabStore)).toBeTruthy();
 				});
 			});
 		});

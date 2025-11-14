@@ -1,3 +1,4 @@
+import { CustomTokenSection } from '$lib/enums/custom-token-section';
 import { NetworkAppMetadataSchema, NetworkSchema } from '$lib/schema/network.schema';
 import { TokenSchema } from '$lib/schema/token.schema';
 import * as z from 'zod';
@@ -6,7 +7,7 @@ export const NftIdSchema = z.string().brand<'NftId'>();
 
 export const NftAttributeSchema = z.object({
 	traitType: z.string(),
-	value: z.string()
+	value: z.string().optional()
 });
 
 export const NftMetadataSchema = z.object({
@@ -39,7 +40,8 @@ export const NftCollectionSchema = z.object({
 	description: z.string().optional(),
 	network: NftNetworkSchema,
 	newestAcquiredAt: z.date().optional(),
-	allowExternalContentSource: z.boolean().optional()
+	allowExternalContentSource: z.boolean().optional(),
+	section: z.enum(CustomTokenSection).optional()
 });
 
 export const NftSchema = z.object({

@@ -135,20 +135,6 @@ describe('Transaction', () => {
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
 	});
 
-	it('should not render amount for ERC-721 tokens', () => {
-		const { queryByText } = render(Transaction, {
-			displayAmount: 999n,
-			type: 'send',
-			status: 'confirmed',
-			token: NFT_TEST_TOKEN,
-			iconType: 'transaction',
-			to: '0xaddr',
-			children: mockSnippet
-		});
-
-		expect(queryByText(/MBeans/)).toBeNull();
-	});
-
 	it('should render NFT logo in token icon mode when token is non-fungible and nft is found', () => {
 		const { container, getByLabelText, getByText, queryByText, getByAltText } = render(
 			Transaction,

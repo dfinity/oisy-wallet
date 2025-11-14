@@ -3,11 +3,12 @@ import { NFT_MAX_FILESIZE_LIMIT } from '$lib/constants/app.constants';
 import { NftCollectionSchema, NftMediaStatusEnum } from '$lib/schema/nft.schema';
 import type { NftSortingType } from '$lib/stores/settings.store';
 import type { NftError } from '$lib/types/errors';
-import type { NetworkId } from '$lib/types/network';
+import type { NetworkId, OptionNetworkId } from '$lib/types/network';
 import type { Nft, NftCollection, NftCollectionUi, NftId, NonFungibleToken } from '$lib/types/nft';
 import { areAddressesEqual } from '$lib/utils/address.utils';
 import { UrlSchema } from '$lib/validation/url.validation';
 import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+import { SvelteMap } from 'svelte/reactivity';
 
 export const findNft = ({
 	nfts,
@@ -43,8 +44,11 @@ export const findNftsByNetwork = ({
 	networkId
 }: {
 	nfts: Nft[];
-	networkId: NetworkId;
-}): Nft[] => nfts.filter((nft) => nft.collection.network.id === networkId);
+	networkId: OptionNetworkId;
+}): Nft[] =>
+	nonNullish(networkId)
+		? nfts.filter((nft) => nft.collection.network.id === networkId)
+		: nfts.filter((nft) => nft.collection.network.env !== 'testnet');
 
 export const findNewNftIds = ({
 	nfts,
@@ -55,48 +59,6 @@ export const findNewNftIds = ({
 	token: NonFungibleToken;
 	inventory: NftId[];
 }): NftId[] => inventory.filter((tokenId) => isNullish(findNft({ nfts, token, tokenId })));
-
-export const findRemovedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: NftId[];
-}): Nft[] =>
-	nfts.filter(
-		(nft) =>
-			nft.collection.network === token.network &&
-			nft.collection.address === token.address &&
-			isNullish(inventory.find((nftId) => nftId === nft.id))
-	);
-
-export const getUpdatedNfts = ({
-	nfts,
-	token,
-	inventory
-}: {
-	nfts: Nft[];
-	token: NonFungibleToken;
-	inventory: Nft[];
-}): Nft[] =>
-	(nfts ?? []).reduce<Nft[]>((acc, nft) => {
-		if (nft.collection.address !== token.address || nft.collection.network !== token.network) {
-			return acc;
-		}
-
-		const ownedNft = inventory.find((ownedNft) => ownedNft.id === nft.id);
-
-		if (nonNullish(ownedNft) && nft.balance !== ownedNft.balance) {
-			acc.push({
-				...nft,
-				balance: ownedNft.balance
-			});
-		}
-
-		return acc;
-	}, []);
 
 const adaptMetadataResourceUrl = (url: URL): URL | undefined => {
 	const IPFS_PROTOCOL = 'ipfs:';
@@ -139,6 +101,7 @@ export const mapTokenToCollection = (token: NonFungibleToken): NftCollection =>
 		id: token.id,
 		network: token.network,
 		standard: token.standard,
+		section: token.section,
 		...(notEmptyString(token.symbol) && { symbol: token.symbol }),
 		...(notEmptyString(token.name) && { name: token.name }),
 		...(notEmptyString(token.description) && { description: token.description }),
@@ -378,4 +341,26 @@ export const getMediaStatus = async (mediaUrl?: string): Promise<NftMediaStatusE
 	}
 
 	return NftMediaStatusEnum.OK;
+};
+
+// The CORS policy raises an error everytime we try to access the media URL, so we cache the result to avoid making the same request multiple times.
+// Unfortunately, the CORS errors cannot be removed from the browser: https://stackoverflow.com/questions/52807184/how-to-hide-console-status-error-message-while-fetching-in-react-js
+const mediaStatusCache = new SvelteMap<string, NftMediaStatusEnum>();
+
+export const getMediaStatusOrCache = async (mediaUrl?: string): Promise<NftMediaStatusEnum> => {
+	if (isNullish(mediaUrl)) {
+		return NftMediaStatusEnum.INVALID_DATA;
+	}
+
+	const cachedStatus = mediaStatusCache.get(mediaUrl);
+
+	if (nonNullish(cachedStatus)) {
+		return cachedStatus;
+	}
+
+	const status = await getMediaStatus(mediaUrl);
+
+	mediaStatusCache.set(mediaUrl, status);
+
+	return status;
 };

@@ -14,8 +14,8 @@
 	import TokensSkeletons from '$lib/components/tokens/TokensSkeletons.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import StickyHeader from '$lib/components/ui/StickyHeader.svelte';
-	import { allTokens } from '$lib/derived/all-tokens.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
+	import { fungibleNetworkTokens } from '$lib/derived/network-tokens.derived';
 	import { selectedNetwork } from '$lib/derived/network.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { tokenListStore } from '$lib/stores/token-list.store';
@@ -58,18 +58,15 @@
 	// Token list for enabling when filtering
 	let enableMoreTokensList: TokenUiOrGroupUi[] = $state([]);
 
-	const updateFilterList = ({
-		filter,
-		selectedNetwork
-	}: {
-		filter: string;
-		selectedNetwork?: Network;
-	}) => {
+	const updateFilterList = ({ filter }: { filter: string }) => {
 		// Sort alphabetically and apply filter
 		enableMoreTokensList = getFilteredTokenList({
 			filter,
 			list: sortTokenOrGroupUi(
-				getDisabledOrModifiedTokens({ $allTokens, modifiedTokens, selectedNetwork })
+				getDisabledOrModifiedTokens({
+					tokens: $fungibleNetworkTokens,
+					modifiedTokens
+				})
 			)
 		});
 
@@ -95,7 +92,7 @@
 		await saveAllCustomTokens({ tokens: tokensToBeSaved, $authIdentity, $i18n });
 
 		// we need to update the filter list after a save to ensure the tokens got the newest backend "version"
-		updateFilterList({ filter: $tokenListStore.filter, selectedNetwork: $selectedNetwork });
+		updateFilterList({ filter: $tokenListStore.filter });
 		saveLoading = false;
 	};
 
@@ -120,6 +117,8 @@
 
 	let ios = $derived(isIOS());
 
+	let fadeParams = $derived(ios ? { duration: 0 } : undefined);
+
 	let flipParams = $derived({ duration: ios ? 0 : 250 });
 
 	const tokenKey = ({ id: tokenId, network: { id: networkId } }: TokenUi): string =>
@@ -140,7 +139,7 @@
 					class:pointer-events-none={animating}
 					onanimationend={handleAnimationEnd}
 					onanimationstart={handleAnimationStart}
-					transition:fade
+					transition:fade={fadeParams}
 					animate:flip={flipParams}
 				>
 					{#if isTokenUiGroup(tokenOrGroup)}
@@ -194,7 +193,7 @@
 							class:pointer-events-none={animating}
 							onanimationend={handleAnimationEnd}
 							onanimationstart={handleAnimationStart}
-							transition:fade
+							transition:fade={fadeParams}
 							animate:flip={flipParams}
 						>
 							<div class="transition duration-300 hover:bg-primary">

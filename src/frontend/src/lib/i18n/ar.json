@@ -122,7 +122,6 @@
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -361,6 +360,26 @@
 				"name": "",
 				"one_liner": "",
 				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
 				"description": ""
 			}
 		}
@@ -1049,6 +1068,7 @@
 				"title": "إدارة التوكنات",
 				"title_nft": "",
 				"manage_list": "إدارة التوكنات",
+				"manage_list_nft": "",
 				"list_settings": "إعدادات القائمة",
 				"import_token": "استيراد توكن",
 				"import_nft": "",
@@ -1114,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "",
 			"as_plain_list": "",
 			"by_collection": "",
@@ -1369,7 +1391,6 @@
 			"token_needs_enabling": "يجب تمكين التوكن لعرض سجل المعاملات."
 		},
 		"error": {
-			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
@@ -1632,14 +1653,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": "",
 			"updated_agreements_warning": ""
 		},
 		"error": {
@@ -1716,8 +1729,12 @@
 	},
 	"stake": {
 		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
 			"stake": "",
 			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
 			"enable_token_text": "",
 			"enable_token_button": "",
 			"review": "",
@@ -1725,10 +1742,27 @@
 			"unsupported_token_staking": "",
 			"provider": "",
 			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
 			"visit_provider": "",
 			"current_apy": "",
+			"current_apy_label": "",
 			"current_apy_info": "",
-			"stake_review_subtitle": ""
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

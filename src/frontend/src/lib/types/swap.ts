@@ -9,7 +9,7 @@ import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
 	DeltaPrice,
@@ -109,6 +109,7 @@ interface KongQuoteParams {
 interface IcpQuoteParams {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }
 
 interface SwapQuoteParams {
@@ -217,6 +218,7 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	destinationNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 	swapDetails: VeloraSwapDetails;
+	isGasless: boolean;
 }
 
 export interface CheckDeltaOrderStatusParams {
@@ -225,4 +227,9 @@ export interface CheckDeltaOrderStatusParams {
 	onExecuted?: () => void;
 	timeoutMs?: number;
 	intervalMs?: number;
+}
+
+export interface DeltaSwapResponse {
+	delta: DeltaPrice | BridgePrice;
+	deltaAddress: string;
 }

@@ -123,5 +123,23 @@ describe('network.schema', () => {
 
 			expect(() => NetworkSchema.parse(invalidNetwork)).toThrow();
 		});
+
+		it('should accept supportsNft value as true', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: true });
+
+			expect(result.supportsNft).toBeTruthy();
+		});
+
+		it('should accept supportsNft value as false', () => {
+			const result = NetworkSchema.parse({ ...validNetwork, supportsNft: false });
+
+			expect(result.supportsNft).toBeFalsy();
+		});
+
+		it('supportsNft value should be optional and undefined when not provided', () => {
+			const result = NetworkSchema.parse(validNetwork);
+
+			expect(result.supportsNft).toBeUndefined();
+		});
 	});
 });

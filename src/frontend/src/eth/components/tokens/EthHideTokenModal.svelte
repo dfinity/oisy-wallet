@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Identity } from '@dfinity/agent';
 	import { assertNonNullish } from '@dfinity/utils';
+	import type { Identity } from '@icp-sdk/core/agent';
 	import type { NavigationTarget } from '@sveltejs/kit';
 	import { onMount } from 'svelte';
 	import { loadErc20UserTokens } from '$eth/services/erc20.services';

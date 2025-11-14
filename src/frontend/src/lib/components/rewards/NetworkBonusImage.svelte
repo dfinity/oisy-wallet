@@ -4,13 +4,14 @@
 	interface Props {
 		multiplier: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 		disabled?: boolean;
+		size?: number;
 	}
 
-	let { multiplier, disabled = false }: Props = $props();
+	let { multiplier, disabled = false, size = 245 }: Props = $props();
 </script>
 
 <div data-tid={REWARDS_NETWORK_MULTIPLIER_IMAGE}>
-	<svg fill="none" height="28" viewBox="0 0 245 28" width="245" xmlns="http://www.w3.org/2000/svg">
+	<svg fill="none" height="28" viewBox="0 0 245 28" width={size} xmlns="http://www.w3.org/2000/svg">
 		<path
 			d="M0 14C0 6.26801 6.26801 0 14 0H230.937C238.669 0 244.937 6.26801 244.937 14C244.937 21.732 238.669 28 230.937 28H14C6.26802 28 0 21.732 0 14Z"
 			fill={disabled ? 'black' : 'url(#paint0_linear_17618_27124)'}

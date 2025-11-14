@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
@@ -68,6 +67,7 @@
 			class="relative flex flex-col pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
+			class:overflow-x-hidden={$authNotSignedIn}
 		>
 			<Header />
 
@@ -76,10 +76,8 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
-								<Responsive up="xl">
-									<div class="hidden xl:block" transition:fade>
-										<DappsCarousel />
-									</div>
+								<Responsive up="1.5xl">
+									<DappsCarousel />
 								</Responsive>
 							{/if}
 						</NavigationMenu>
@@ -95,7 +93,7 @@
 				</SplitPane>
 
 				{#if !$aiAssistantConsoleOpen}
-					<div class="fixed right-4 bottom-16 z-3 block">
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
 				{/if}

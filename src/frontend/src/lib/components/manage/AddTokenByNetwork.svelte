@@ -27,9 +27,16 @@
 		tokenData: Partial<AddTokenData>;
 		onBack: () => void;
 		onNext: () => void;
+		isNftsPage?: boolean;
 	}
 
-	let { network = $bindable(), tokenData = $bindable(), onBack, onNext }: Props = $props();
+	let {
+		network = $bindable(),
+		tokenData = $bindable(),
+		onBack,
+		onNext,
+		isNftsPage = false
+	}: Props = $props();
 
 	let networkName = $state<string | undefined>(network?.name);
 
@@ -91,7 +98,7 @@
 	// filter out BTC networks - they do not have custom tokens
 	let availableNetworks = $derived(
 		($selectedNetwork?.env === 'testnet' ? $networks : $networksMainnets).filter(
-			({ id }) => !isNetworkIdBitcoin(id)
+			({ id, supportsNft }) => !isNetworkIdBitcoin(id) && (!isNftsPage || supportsNft)
 		)
 	);
 </script>

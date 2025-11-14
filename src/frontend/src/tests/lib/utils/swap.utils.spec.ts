@@ -6,6 +6,7 @@ import { BTC_MAINNET_TOKEN } from '$env/tokens/tokens.btc.env';
 import { ETHEREUM_TOKEN } from '$env/tokens/tokens.eth.env';
 import { ICP_SYMBOL, ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import type { Erc20Token } from '$eth/types/erc20';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { ZERO } from '$lib/constants/app.constants';
 import {
@@ -16,10 +17,17 @@ import {
 	VELORA_SWAP_PROVIDER
 } from '$lib/constants/swap.constants';
 import { SwapError } from '$lib/services/swap-errors.services';
-import { SwapErrorCodes, SwapProvider, VeloraSwapTypes, type ICPSwapResult } from '$lib/types/swap';
+import {
+	SwapErrorCodes,
+	SwapProvider,
+	VeloraSwapTypes,
+	type DeltaSwapResponse,
+	type ICPSwapResult
+} from '$lib/types/swap';
 import { formatToken } from '$lib/utils/format.utils';
 import {
 	calculateSlippage,
+	calculateValueDifference,
 	findSwapProvider,
 	formatReceiveOutMinimum,
 	geSwapEthTokenAddress,
@@ -38,7 +46,6 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockTokens } from '$tests/mocks/tokens.mock';
 import type { Bridge, OptimalRate, SwapSide } from '@velora-dex/sdk';
-import type { QuoteWithDeltaPriceAndBridgePrice } from '@velora-dex/sdk/dist/methods/quote/getQuote';
 
 describe('swap utils', () => {
 	const ICP_LP_FEE = 4271n;
@@ -161,14 +168,23 @@ describe('swap utils', () => {
 			receiveAmount: 1000n
 		};
 
+		const mockDestToken: IcToken = {
+			...mockValidIcToken,
+			fee: 10n
+		};
+
 		it('should return mapped result with valid numeric slippage as string', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '0.5' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: '0.5',
+				destToken: mockDestToken
+			});
 
 			expect(result.provider).toBe(ICP_SWAP_PROVIDER);
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
-			expect(result.receiveAmount).toBe(1000n);
+			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.5 })
 			);
@@ -176,17 +192,26 @@ describe('swap utils', () => {
 		});
 
 		it('should return mapped result with numeric slippage', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 0.3 });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: 0.3,
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
+			expect(result.receiveAmount).toBe(990n);
 			expect(result.receiveOutMinimum).toBe(
 				calculateSlippage({ quoteAmount: 1000n, slippagePercentage: 0.3 })
 			);
 		});
 
 		it('should fallback to default slippage if value is NaN', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: 'string' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: 'string',
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
@@ -199,7 +224,11 @@ describe('swap utils', () => {
 		});
 
 		it('should fallback to default slippage if empty string is passed', () => {
-			const result = mapIcpSwapResult({ swap: baseSwap, slippage: '' });
+			const result = mapIcpSwapResult({
+				swap: baseSwap,
+				slippage: '',
+				destToken: mockDestToken
+			});
 
 			assert(result.provider === ICP_SWAP_PROVIDER);
 
@@ -209,6 +238,36 @@ describe('swap utils', () => {
 					slippagePercentage: SWAP_DEFAULT_SLIPPAGE_VALUE
 				})
 			);
+		});
+
+		it('should return 0 when receiveAmount is less than transfer fee', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 5n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: 10n }
+			});
+
+			expect(result.receiveAmount).toBe(ZERO);
+		});
+
+		it('should calculate NET amount correctly for typical swap', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 1000000n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: 10000n }
+			});
+
+			expect(result.receiveAmount).toBe(990000n);
+		});
+
+		it('should handle zero transfer fee', () => {
+			const result = mapIcpSwapResult({
+				swap: { receiveAmount: 1000n },
+				slippage: '0.5',
+				destToken: { ...mockDestToken, fee: ZERO }
+			});
+
+			expect(result.receiveAmount).toBe(1000n);
 		});
 	});
 
@@ -330,7 +389,7 @@ describe('swap utils', () => {
 
 	describe('mapVeloraSwapResult', () => {
 		it('should map DeltaPrice swap result correctly (without bridgeInfo)', () => {
-			const mockDeltaSwap: QuoteWithDeltaPriceAndBridgePrice = {
+			const mockDeltaSwap: DeltaSwapResponse = {
 				delta: {
 					srcToken: '0x123',
 					destToken: '0x456',
@@ -361,7 +420,7 @@ describe('swap utils', () => {
 		});
 
 		it('should map BridgePrice swap result correctly (with bridgeInfo)', () => {
-			const mockBridgeSwap: QuoteWithDeltaPriceAndBridgePrice = {
+			const mockBridgeSwap: DeltaSwapResponse = {
 				delta: {
 					srcToken: '0x123',
 					destToken: '0x456',
@@ -570,6 +629,141 @@ describe('swap utils', () => {
 
 		it('should return undefined if dapp is not found', () => {
 			const result = findSwapProvider('test');
+
+			expect(result).toBeUndefined();
+		});
+	});
+
+	describe('calculateValueDifference', () => {
+		it('should return positive percentage when received value is higher than paid', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 110,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(10);
+		});
+
+		it('should return negative percentage when received value is lower than paid', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 90,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(-10);
+		});
+
+		it('should return zero when paid and received values are equal', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(0);
+		});
+
+		it('should calculate correctly with different exchange rates', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 50,
+				sourceTokenExchangeRate: 2, // paid value = 200
+				destinationTokenExchangeRate: 3 // received value = 150
+			});
+
+			// (150 - 200) / 200 * 100 = -25
+			expect(result).toBe(-25);
+		});
+
+		it('should return undefined when swapAmount is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: undefined,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when receiveAmount is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: undefined,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when sourceTokenExchangeRate is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when destinationTokenExchangeRate is undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: undefined
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should return undefined when paid value is zero', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100,
+				sourceTokenExchangeRate: 0, // paid value will be 0
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBeUndefined();
+		});
+
+		it('should handle string swapAmount correctly', () => {
+			const result = calculateValueDifference({
+				swapAmount: '100',
+				receiveAmount: 110,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(10);
+		});
+
+		it('should calculate high precision percentages correctly', () => {
+			const result = calculateValueDifference({
+				swapAmount: 100,
+				receiveAmount: 100.5,
+				sourceTokenExchangeRate: 1,
+				destinationTokenExchangeRate: 1
+			});
+
+			expect(result).toBe(0.5);
+		});
+
+		it('should return undefined when all values are undefined', () => {
+			const result = calculateValueDifference({
+				swapAmount: undefined,
+				receiveAmount: undefined,
+				sourceTokenExchangeRate: undefined,
+				destinationTokenExchangeRate: undefined
+			});
 
 			expect(result).toBeUndefined();
 		});

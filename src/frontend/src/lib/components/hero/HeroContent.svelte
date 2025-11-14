@@ -33,13 +33,14 @@
 		networkICP,
 		networkSolana,
 		pseudoNetworkChainFusion,
-		networkArbitrum
+		networkArbitrum,
+		selectedNetworkNftUnsupported
 	} from '$lib/derived/network.derived';
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { isPrivacyMode } from '$lib/derived/settings.derived';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { type HeroContext, initHeroContext, HERO_CONTEXT_KEY } from '$lib/stores/hero.store';
-	import { isRouteTransactions } from '$lib/utils/nav.utils';
+	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import { mapTokenUi } from '$lib/utils/token.utils';
 	import { isTrumpToken as isTrumpTokenUtil } from '$sol/utils/token.utils';
 
@@ -53,10 +54,11 @@
 			: undefined
 	);
 
-	const { loading, outflowActionsDisabled, ...rest } = initHeroContext();
+	const { loading, outflowActionsDisabled, inflowActionsDisabled, ...rest } = initHeroContext();
 	setContext<HeroContext>(HERO_CONTEXT_KEY, {
 		loading,
 		outflowActionsDisabled,
+		inflowActionsDisabled,
 		...rest
 	});
 
@@ -70,8 +72,14 @@
 
 	let isTransactionsPage = $derived(isRouteTransactions(page));
 
+	let isNftsPage = $derived(isRouteNfts(page));
+
 	$effect(() => {
 		outflowActionsDisabled.set(isTransactionsPage && ($balanceZero || isNullish($balance)));
+	});
+
+	$effect(() => {
+		inflowActionsDisabled.set(isNftsPage && $selectedNetworkNftUnsupported);
 	});
 
 	let isTrumpToken = $derived(nonNullish($pageToken) ? isTrumpTokenUtil($pageToken) : false);

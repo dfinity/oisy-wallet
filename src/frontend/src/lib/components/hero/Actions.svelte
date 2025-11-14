@@ -47,20 +47,21 @@
 	let isNftsPage = $derived(isRouteNfts(page));
 
 	let swapAction = $derived(
-		!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)
+		(!isTransactionsPage || (isTransactionsPage && !$networkSolana && !$networkBitcoin)) &&
+			!isNftsPage
 	);
 
 	let sendAction = $derived(!$allBalancesZero || isTransactionsPage);
 
-	let buyAction = $derived(!$networkICP || nonNullish($pageToken?.buy));
+	let buyAction = $derived((!$networkICP || nonNullish($pageToken?.buy)) && !isNftsPage);
 
 	// Temporary workaround: disable the Buy button for tokens that support both Swap and Convert.
 	// TODO: Remove once Swap/Convert are refactored and merged.
 	let tooManyButtons = $derived(
 		sendAction &&
 			swapAction &&
-			(convertErc20 || convertEth || convertCkBtc || convertBtc) &&
-			buyAction
+			isTransactionsPage &&
+			(convertErc20 || convertEth || convertCkBtc || convertBtc)
 	);
 </script>
 

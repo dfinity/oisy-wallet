@@ -23,6 +23,7 @@ export const POLYGON_MAINNET_NETWORK: EthereumNetwork = {
 	chainId: 137n,
 	icon: polygonMainnetIcon,
 	explorerUrl: POLYGON_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'matic',
 		alchemy: 'matic',
@@ -44,6 +45,7 @@ export const POLYGON_AMOY_NETWORK: EthereumNetwork = {
 	chainId: 80002n,
 	icon: polygonAmoyIcon,
 	explorerUrl: POLYGON_AMOY_EXPLORER_URL,
+	supportsNft: true,
 	providers: {
 		infura: 'matic-amoy',
 		alchemy: 'matic-amoy',
