@@ -1,4 +1,4 @@
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import { syncExchange } from '$lib/services/exchange.services';
 import { toastsError } from '$lib/stores/toasts.store';
 import type {
@@ -7,6 +7,7 @@ import type {
 	PostMessageDataResponseExchange,
 	PostMessageDataResponseExchangeError
 } from '$lib/types/post-message';
+import type { WorkerData } from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
 
 let errorMessages: { msg: string; timestamp: number }[] = [];
