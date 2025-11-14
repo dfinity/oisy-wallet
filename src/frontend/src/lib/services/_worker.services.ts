@@ -6,6 +6,7 @@ import type {
 	WorkerListener,
 	WorkerPostMessageData
 } from '$lib/types/worker';
+import type { WorkerData, WorkerListener, WorkerPostMessageData } from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
 
 export abstract class AppWorker {
