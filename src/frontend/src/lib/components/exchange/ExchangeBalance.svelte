@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -12,7 +13,6 @@
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { HERO_CONTEXT_KEY, type HeroContext } from '$lib/stores/hero.store';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { isIos } from '$lib/utils/device.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { setPrivacyMode } from '$lib/utils/privacy.utils';
 	import { sumTokensUiUsdBalance } from '$lib/utils/tokens.utils';
@@ -46,7 +46,7 @@
 				{balance}
 			{/if}
 		{:else}
-			<span class:animate-pulse={!isIos()}>
+			<span class:animate-pulse={!isIOS()}>
 				{#if hideBalance}
 					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}

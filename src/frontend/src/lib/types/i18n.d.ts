@@ -1387,6 +1387,8 @@ interface I18nStake {
 		stake_page_title: string;
 		gldt_stake_page_description: string;
 		stake: string;
+		stake_amount: string;
+		not_enough_to_stake: string;
 		unstake: string;
 		unstaking: string;
 		unstake_token: string;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -67,11 +67,18 @@
 		try {
 			const solNetwork = safeMapNetworkIdToNetwork(network.id);
 
-			const { decimals } = await getTokenInfo({ address: tokenAddress, network: solNetwork });
+			const {
+				decimals,
+				symbol: infoSymbol,
+				name: infoName
+			} = await getTokenInfo({ address: tokenAddress, network: solNetwork });
 
 			const splMetadata = await getSplMetadata({ address: tokenAddress, network: solNetwork });
 
-			if (isNullish(splMetadata?.symbol) || isNullish(splMetadata?.name)) {
+			const symbol = infoSymbol ?? splMetadata?.symbol;
+			const name = infoName ?? splMetadata?.name;
+
+			if (isNullish(symbol) || isNullish(name)) {
 				toastsError({
 					msg: { text: $i18n.tokens.error.incomplete_metadata }
 				});
@@ -80,7 +87,12 @@
 				return;
 			}
 
-			metadata = { ...hardenMetadata(splMetadata), decimals };
+			metadata = {
+				...(nonNullish(splMetadata) ? hardenMetadata(splMetadata) : {}),
+				decimals,
+				symbol,
+				name
+			};
 
 			if (
 				$splTokens?.find(

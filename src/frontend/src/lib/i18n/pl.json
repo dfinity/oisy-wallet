@@ -1732,6 +1732,8 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
 			"unstaking": "",
 			"unstake_token": "",
