@@ -936,7 +936,7 @@ describe('post-message.schema', () => {
 			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
 		});
 
-		it('should throw an error if msg is not a valid value from PostMessageRequestSchema or PostMessageResponseSchema', () => {
+		it('should throw an error if msg is not a valid value from PostMessageResponseSchema', () => {
 			const invalidPayload = {
 				msg: 'invalid_message',
 				data: validData
