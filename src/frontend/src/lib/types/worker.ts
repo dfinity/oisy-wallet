@@ -9,6 +9,10 @@ export interface WorkerData {
 	isSingleton: boolean;
 }
 
+export type WorkerId = string;
+
+export type WithoutWorkerId<T> = T extends { workerId: unknown } ? never : T;
+
 export type WorkerPostMessageData = PostMessageDataRequest | PostMessageDataResponseLoose;
 
 export type WorkerListener<T extends WorkerPostMessageData> = (
