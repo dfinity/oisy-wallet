@@ -22,7 +22,7 @@
 		try {
 			const { apy } = await getDailyAnalytics({ identity: $authIdentity });
 
-			gldtStakeStore.setApy(Math.round(apy * 100) / 100);
+			gldtStakeStore.setApy(apy);
 		} catch (_err: unknown) {
 			gldtStakeStore.resetApy();
 		}

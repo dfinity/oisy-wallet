@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -42,7 +43,7 @@
 				/>
 			{/if}
 		{:else}
-			<span class:animate-pulse={$loading}>
+			<span class:animate-pulse={$loading && !isIOS()}>
 				{#if $isPrivacyMode}
 					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}

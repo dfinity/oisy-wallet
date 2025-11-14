@@ -41,6 +41,7 @@ import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
 import * as appConstants from '$lib/constants/app.constants';
 import {
 	enabledFungibleTokensUi,
+	enabledMainnetFungibleTokensUsdBalance,
 	enabledNonFungibleTokensBySectionHidden,
 	enabledNonFungibleTokensBySectionSpam,
 	enabledNonFungibleTokensWithoutSection,
@@ -50,6 +51,8 @@ import {
 	tokens
 } from '$lib/derived/tokens.derived';
 import { CustomTokenSection } from '$lib/enums/custom-token-section';
+import { balancesStore } from '$lib/stores/balances.store';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { isTokenNonFungible } from '$lib/utils/nft.utils';
 import { mapTokenUi } from '$lib/utils/token.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
@@ -443,6 +446,31 @@ describe('tokens.derived', () => {
 
 		it('should not include NFTs', () => {
 			expect(get(enabledFungibleTokensUi).every(isTokenNonFungible)).toBeFalsy();
+		});
+	});
+
+	describe('enabledMainnetFungibleTokensUsdBalance', () => {
+		it('returns correct data', () => {
+			balancesStore.set({
+				id: ICP_TOKEN.id,
+				data: { data: 500000000000n, certified: true }
+			});
+			balancesStore.set({
+				id: BTC_MAINNET_TOKEN.id,
+				data: { data: 200000000000n, certified: true }
+			});
+			balancesStore.set({
+				id: ETHEREUM_TOKEN.id,
+				data: { data: 500000000000000n, certified: true }
+			});
+
+			exchangeStore.set([
+				{ ethereum: { usd: 1 } },
+				{ 'internet-computer': { usd: 20 } },
+				{ bitcoin: { usd: 5 } }
+			]);
+
+			expect(get(enabledMainnetFungibleTokensUsdBalance)).toEqual(110000.0005);
 		});
 	});
 });

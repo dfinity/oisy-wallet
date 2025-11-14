@@ -968,8 +968,7 @@
 			"manually_withdraw_success": "Os tokens de sua troca anterior com falha foram retirados com sucesso. Você pode tentar a troca novamente ou alterar o provedor de troca.",
 			"manually_withdraw_failed": "Levantamento manual falhou",
 			"swap_sucess_withdraw_failed": "A retirada de seus fundos falhou.<br> Por favor, tente novamente ou siga ",
-			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga",
-			"swap_slippage_exceeded_exchange_rate": ""
+			"swap_sucess_manually_withdraw_success": "A troca foi concluída, mas seus tokens não puderam ser retirados automaticamente. Clique no botão Retirar abaixo para retirá-los manualmente-<br> Ou siga"
 		}
 	},
 	"buy": {
