@@ -35,6 +35,12 @@ vi.mock('$lib/workers/workers?worker', () => ({
 	})
 }));
 
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
+
 describe('worker.pow-protection.services', () => {
 	describe('PowProtectorWorker', () => {
 		let worker: PowProtectorWorker;
@@ -52,27 +58,27 @@ describe('worker.pow-protection.services', () => {
 		it('should start the worker and send the correct start message', () => {
 			worker.start();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'startPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'startPowProtectionTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should trigger the worker and send the correct trigger message', () => {
 			worker.trigger();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'triggerPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'triggerPowProtectionTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should destroy the worker', () => {
 			worker.destroy();
 
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'stopPowProtectionTimer'
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopPowProtectionTimer',
+				workerId: mockId
 			});
 
 			expect(workerInstance.terminate).toHaveBeenCalledOnce();
