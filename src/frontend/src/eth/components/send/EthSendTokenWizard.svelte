@@ -309,6 +309,7 @@
 				maxFeePerGas,
 				maxPriorityFeePerGas,
 				gas,
+				customNonce,
 				sourceNetwork,
 				identity: $authIdentity,
 				minterInfo: $ckEthMinterInfoStore?.[nativeEthereumToken.id]
@@ -373,6 +374,7 @@
 				{onTokensList}
 				{selectedContact}
 				bind:destination
+				bind:customNonce
 				bind:amount
 				bind:customNonce
 			>
