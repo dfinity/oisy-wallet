@@ -64,9 +64,9 @@
 			return;
 		}
 
-		highestNonce = await getTransactionCount($ethAddress);
+		highestNonce = (await getTransactionCount($ethAddress)) - 1;
 
-		onChainNonce = await getTransactionCount2($ethAddress);
+		onChainNonce = (await getTransactionCount2($ethAddress)) - 1;
 	};
 
 	$effect(() => {
