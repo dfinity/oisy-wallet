@@ -375,7 +375,6 @@
 				bind:destination
 				bind:customNonce
 				bind:amount
-				bind:customNonce
 			>
 				{#snippet cancel()}
 					<ButtonBack onclick={back} />
