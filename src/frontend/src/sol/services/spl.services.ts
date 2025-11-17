@@ -140,10 +140,14 @@ const loadCustomTokensWithMetadata = async (
 
 			const metadata = await getSplMetadata({ address, network: solNetwork });
 
-			return [
-				...(await acc),
-				{ ...token, owner, ...rest, ...(nonNullish(metadata) ? hardenMetadata(metadata) : {}) }
-			];
+			const newToken: SplCustomToken = {
+				...token,
+				owner,
+				...rest,
+				...(nonNullish(metadata) ? hardenMetadata(metadata) : {})
+			};
+
+			return [...(await acc), newToken];
 		}, Promise.resolve([]));
 
 		return [...existingTokens, ...customTokens];
