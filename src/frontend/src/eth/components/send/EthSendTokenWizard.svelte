@@ -25,8 +25,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import InProgressWizard from '$lib/components/ui/InProgressWizard.svelte';
 	import {
-		TRACK_COUNT_ETH_NFT_SEND_ERROR,
-		TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+		TRACK_NFT_SEND,
 		TRACK_COUNT_ETH_SEND_ERROR,
 		TRACK_COUNT_ETH_SEND_SUCCESS
 	} from '$lib/constants/analytics.constants';
@@ -201,24 +200,29 @@
 			});
 
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_SUCCESS,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'success',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name
 				}
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
-				name: TRACK_COUNT_ETH_NFT_SEND_ERROR,
+				name: TRACK_NFT_SEND,
 				metadata: {
+					resultStatus: 'error',
 					token: $sendToken.symbol,
-					collection: nft.collection.name ?? nft.collection.address,
+					collection: nft.collection.name ?? '',
+					address: nft.collection.address,
 					tokenId: String(nft.id),
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
+					network: sourceNetwork.name,
+					error: (err as Error).message
 				}
 			});
 
@@ -283,6 +287,14 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
+
 		try {
 			await executeSend({
 				customNonce,
@@ -304,20 +316,14 @@
 
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_ETH_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol,
-					network: sourceNetwork.id.description ?? `${$sendToken.network.id.description}`
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			toastsError({
@@ -344,7 +350,8 @@
 	sendTokenId={$sendTokenId}
 	{sourceNetwork}
 >
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
+	{#key currentStep?.name}
+{#if currentStep?.name === WizardStepsSend.REVIEW}
 		<EthSendReview
 			{amount}
 			{destination}
@@ -374,4 +381,5 @@
 			{/snippet}
 		</EthSendForm>
 	{/if}
+	{/key}
 </EthFeeContext>

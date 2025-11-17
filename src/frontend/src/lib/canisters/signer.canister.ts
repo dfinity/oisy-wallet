@@ -1,3 +1,4 @@
+import type { BtcAddress } from '$btc/types/address';
 import type {
 	BitcoinNetwork,
 	EthAddressRequest,
@@ -7,9 +8,10 @@ import type {
 	GetBalanceRequest,
 	SendBtcResponse,
 	_SERVICE as SignerService
-} from '$declarations/signer/signer.did';
+} from '$declarations/signer/declarations/signer.did';
 import { idlFactory as idlCertifiedFactorySigner } from '$declarations/signer/signer.factory.certified.did';
 import { idlFactory as idlFactorySigner } from '$declarations/signer/signer.factory.did';
+import type { EthAddress } from '$eth/types/address';
 import { getAgent } from '$lib/actors/agents.ic';
 import { P2WPKH, SIGNER_PAYMENT_TYPE } from '$lib/canisters/signer.constants';
 import {
@@ -17,7 +19,6 @@ import {
 	mapSignerCanisterGetEthAddressError,
 	mapSignerCanisterSendBtcError
 } from '$lib/canisters/signer.errors';
-import type { BtcAddress, EthAddress } from '$lib/types/address';
 import type {
 	GetSchnorrPublicKeyParams,
 	SendBtcParams,

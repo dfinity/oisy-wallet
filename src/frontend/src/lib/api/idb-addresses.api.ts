@@ -1,4 +1,5 @@
 import { browser } from '$app/environment';
+import type { BtcAddress } from '$btc/types/address';
 import { ETHEREUM_NETWORK_SYMBOL } from '$env/networks/networks.eth.env';
 import {
 	SOLANA_DEVNET_NETWORK_SYMBOL,
@@ -6,15 +7,16 @@ import {
 	SOLANA_MAINNET_NETWORK_SYMBOL
 } from '$env/networks/networks.sol.env';
 import { BTC_MAINNET_SYMBOL, BTC_TESTNET_SYMBOL } from '$env/tokens/tokens.btc.env';
-import type { BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
+import type { EthAddress } from '$eth/types/address';
 import type {
 	IdbBtcAddress,
 	IdbEthAddress,
 	IdbSolAddress,
 	SetIdbAddressParams
 } from '$lib/types/idb-addresses';
-import type { Principal } from '@dfinity/principal';
+import type { SolAddress } from '$sol/types/address';
 import { isNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { clear, createStore, del, get, set, update, type UseStore } from 'idb-keyval';
 
 // There is no IndexedDB in SSG. Since this initialization occurs at the module's root, SvelteKit would encounter an error during the dapp bundling process, specifically a "ReferenceError [Error]: indexedDB is not defined". Therefore, the object for bundling on NodeJS side.

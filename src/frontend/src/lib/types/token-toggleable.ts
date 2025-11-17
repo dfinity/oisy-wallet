@@ -1,4 +1,4 @@
-import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
+import type { CustomToken, UserToken } from '$declarations/backend/declarations/backend.did';
 import type { CustomTokenSection } from '$lib/enums/custom-token-section';
 import type { Token } from '$lib/types/token';
 

@@ -4,6 +4,7 @@ import {
 } from '$env/networks/networks.cketh.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';
+import type { EthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isSupportedEthTokenId } from '$eth/utils/eth.utils';
 import { tokenAddressToHex } from '$eth/utils/token.utils';
@@ -17,10 +18,8 @@ import type { IcCkLinkedAssets, IcToken } from '$icp/types/ic-token';
 import type { IcTransactionUi } from '$icp/types/ic-transaction';
 import { TRACK_COUNT_ETH_PENDING_TRANSACTIONS_ERROR } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { EthAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { TransactionResponseWithBigInt } from '$lib/types/transaction';
@@ -124,7 +123,6 @@ const loadPendingTransactions = async ({
 	mapPendingTransaction: (params: MapCkEthereumPendingTransactionParams) => IcTransactionUi;
 } & IcCkLinkedAssets) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

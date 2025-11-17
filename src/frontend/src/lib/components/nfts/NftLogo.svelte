@@ -3,7 +3,7 @@
 	import type { Component } from 'svelte';
 	import noNftImage from '$lib/assets/nfts/no-nft-image.svg';
 	import NetworkLogo from '$lib/components/networks/NetworkLogo.svelte';
-	import NftImageConsent from '$lib/components/nfts/NftImageConsent.svelte';
+	import NftDisplayGuard from '$lib/components/nfts/NftDisplayGuard.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import RoundedIcon from '$lib/components/ui/RoundedIcon.svelte';
 	import { logoSizes } from '$lib/constants/components.constants';
@@ -39,9 +39,9 @@
 	} = $derived(nft);
 </script>
 
-<div class="bg-primary/80 relative rounded-xl">
+<div class="relative rounded-xl bg-primary/80">
 	<div style={`width: ${logoSizes[logoSize]}; height: ${logoSizes[logoSize]};`}>
-		<NftImageConsent {nft} type="nft-logo">
+		<NftDisplayGuard {nft} type="nft-logo">
 			<Logo
 				alt={replacePlaceholders($i18n.core.alt.logo, { $name: name ?? '' })}
 				circle={false}
@@ -51,7 +51,7 @@
 				src={imageUrl ?? noNftImage}
 				{testId}
 			/>
-		</NftImageConsent>
+		</NftDisplayGuard>
 	</div>
 
 	{#if nonNullish(badge) && badge?.type === 'network'}

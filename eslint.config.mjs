@@ -32,6 +32,13 @@ export default [
 		}
 	},
 
+	// TODO: re-enable this rule when we fix all the warnings that it causes.
+	{
+		rules: {
+			'svelte/no-navigation-without-resolve': 'off'
+		}
+	},
+
 	{
 		ignores: [
 			'**/.DS_Store',

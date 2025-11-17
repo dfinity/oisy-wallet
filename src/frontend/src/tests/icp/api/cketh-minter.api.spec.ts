@@ -13,8 +13,8 @@ import {
 	type RetrieveErc20Request,
 	type RetrieveEthRequest
 } from '@dfinity/cketh';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -51,8 +51,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawEth).toHaveBeenCalledOnce();
-			expect(canisterMock.withdrawEth).toHaveBeenCalledWith({
+			expect(canisterMock.withdrawEth).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				address: mockEthAddress
 			});
@@ -85,8 +84,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.withdrawErc20).toHaveBeenCalledOnce();
-			expect(canisterMock.withdrawErc20).toHaveBeenCalledWith({
+			expect(canisterMock.withdrawErc20).toHaveBeenCalledExactlyOnceWith({
 				amount,
 				address: mockEthAddress,
 				ledgerCanisterId: Principal.fromText(IC_CKETH_LEDGER_CANISTER_ID)
@@ -125,8 +123,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
 				ckErc20LedgerId,
 				certified: true
 			});
@@ -137,8 +134,9 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({ certified: true });
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
+				certified: true
+			});
 		});
 
 		it('successfully calls getMinterInfo endpoint as query', async () => {
@@ -146,8 +144,7 @@ describe('cketh-minter.api', () => {
 
 			expect(result).toEqual(expected);
 
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledOnce();
-			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledWith({
+			expect(canisterMock.eip1559TransactionPrice).toHaveBeenCalledExactlyOnceWith({
 				ckErc20LedgerId,
 				certified: false
 			});

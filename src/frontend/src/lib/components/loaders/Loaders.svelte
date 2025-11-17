@@ -6,11 +6,7 @@
 	import BalancesIdbSetter from '$lib/components/balances/BalancesIdbSetter.svelte';
 	import MultipleListeners from '$lib/components/core/MultipleListeners.svelte';
 	import ExchangeWorker from '$lib/components/exchange/ExchangeWorker.svelte';
-	import AddressGuard from '$lib/components/guard/AddressGuard.svelte';
-	import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
-	import RewardGuard from '$lib/components/guard/RewardGuard.svelte';
-	import ShortcutGuard from '$lib/components/guard/ShortcutGuard.svelte';
-	import UrlGuard from '$lib/components/guard/UrlGuard.svelte';
+	import Guards from '$lib/components/guard/Guards.svelte';
 	import Loader from '$lib/components/loaders/Loader.svelte';
 	import LoaderContacts from '$lib/components/loaders/LoaderContacts.svelte';
 	import LoaderMetamask from '$lib/components/loaders/LoaderMetamask.svelte';
@@ -31,43 +27,35 @@
 
 <LoaderUserProfile>
 	<PowProtector>
-		<AgreementsGuard>
-			<AddressGuard>
-				<Loader>
-					<LoaderTokens>
-						<UrlGuard>
-							<ShortcutGuard>
-								<RewardGuard>
-									<LoaderEthBalances>
-										<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
-											<LoaderMultipleEthTransactions>
-												<LoaderWallets>
-													<ExchangeWorker>
-														<LoaderMetamask>
-															<UserSnapshotWorker>
-																<LoaderContacts>
-																	<TransactionsIdbSetter>
-																		<BalancesIdbSetter>
-																			{@render children()}
-																		</BalancesIdbSetter>
-																	</TransactionsIdbSetter>
-																</LoaderContacts>
-															</UserSnapshotWorker>
-														</LoaderMetamask>
-													</ExchangeWorker>
-												</LoaderWallets>
-											</LoaderMultipleEthTransactions>
-										</MultipleListeners>
-									</LoaderEthBalances>
-								</RewardGuard>
-							</ShortcutGuard>
-						</UrlGuard>
-					</LoaderTokens>
-				</Loader>
-			</AddressGuard>
-		</AgreementsGuard>
+		<Loader>
+			<LoaderTokens>
+				<LoaderEthBalances>
+					<MultipleListeners tokens={$enabledFungibleNetworkTokens}>
+						<LoaderMultipleEthTransactions>
+							<LoaderWallets>
+								<ExchangeWorker>
+									<LoaderMetamask>
+										<UserSnapshotWorker>
+											<LoaderContacts>
+												<TransactionsIdbSetter>
+													<BalancesIdbSetter>
+														{@render children()}
+													</BalancesIdbSetter>
+												</TransactionsIdbSetter>
+											</LoaderContacts>
+										</UserSnapshotWorker>
+									</LoaderMetamask>
+								</ExchangeWorker>
+							</LoaderWallets>
+						</LoaderMultipleEthTransactions>
+					</MultipleListeners>
+				</LoaderEthBalances>
+			</LoaderTokens>
+		</Loader>
 	</PowProtector>
 </LoaderUserProfile>
+
+<Guards />
 
 <!-- This listener is kept outside of the Loaders tree to prevent slow page loading on localhost/e2e -->
 <CkBtcUpdateBalanceListener />

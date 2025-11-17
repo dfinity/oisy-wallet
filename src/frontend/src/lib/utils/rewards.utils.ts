@@ -1,9 +1,9 @@
-import type { CriterionEligibility, EligibilityReport } from '$declarations/rewards/rewards.did';
+import type {
+	CriterionEligibility,
+	EligibilityReport
+} from '$declarations/rewards/declarations/rewards.did';
 import type { RewardCampaignDescription } from '$env/types/env-reward';
-import { ZERO } from '$lib/constants/app.constants';
 import { RewardCriterionType } from '$lib/enums/reward-criterion-type';
-import { RewardType } from '$lib/enums/reward-type';
-import { getRewards } from '$lib/services/reward.services';
 import type {
 	CampaignCriterion,
 	CampaignEligibility,
@@ -12,68 +12,11 @@ import type {
 	MinTotalAssetsUsdCriterion,
 	MinTotalAssetsUsdInNetworkCriterion,
 	MinTransactionsCriterion,
-	MinTransactionsInNetworkCriterion,
-	RewardResponseInfo,
-	RewardResult
+	MinTransactionsInNetworkCriterion
 } from '$lib/types/reward';
-import type { Identity } from '@dfinity/agent';
-import { fromNullable, isNullish } from '@dfinity/utils';
+import { fromNullable } from '@dfinity/utils';
 
 export const INITIAL_REWARD_RESULT = 'initialRewardResult';
-
-export const loadRewardResult = async (identity: Identity): Promise<RewardResult> => {
-	const initialLoading: string | null = sessionStorage.getItem(INITIAL_REWARD_RESULT);
-	if (isNullish(initialLoading)) {
-		const { rewards, lastTimestamp } = await getRewards({ identity });
-		const newRewards: RewardResponseInfo[] = rewards.filter(
-			({ timestamp }) => timestamp >= lastTimestamp
-		);
-
-		sessionStorage.setItem(INITIAL_REWARD_RESULT, 'true');
-
-		if (newRewards.length > 0) {
-			const rewardType = getRewardType(newRewards);
-
-			return {
-				reward: getFirstReward({ rewards: newRewards, rewardType }),
-				lastTimestamp,
-				rewardType
-			};
-		}
-
-		if (lastTimestamp === ZERO) {
-			return { lastTimestamp };
-		}
-	}
-
-	return {};
-};
-
-const getRewardType = (rewards: RewardResponseInfo[]) => {
-	const priorityOrder = [
-		RewardType.LEADERBOARD,
-		RewardType.JACKPOT,
-		RewardType.REFERRER,
-		RewardType.REFEREE,
-		RewardType.REFERRAL,
-		RewardType.AIRDROP
-	];
-
-	const foundRewardType = priorityOrder.find((rewardType) =>
-		rewards.some(({ name }) => name === rewardType)
-	);
-
-	return foundRewardType ?? RewardType.AIRDROP;
-};
-
-const getFirstReward = ({
-	rewards,
-	rewardType
-}: {
-	rewards: RewardResponseInfo[];
-	rewardType: RewardType;
-}): RewardResponseInfo | undefined =>
-	rewards.find(({ name }) => name === rewardType) ?? rewards.at(0);
 
 export const isOngoingCampaign = ({ startDate, endDate }: { startDate: Date; endDate: Date }) => {
 	const currentDate = new Date(Date.now());

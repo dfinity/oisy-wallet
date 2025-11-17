@@ -61,7 +61,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 
@@ -71,7 +71,11 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledTimes(2);
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: en.wallet_connect.error.no_connection_opened }
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(2, {
 				msg: { text: en.wallet_connect.error.no_connection_opened }
 			});
 		});
@@ -84,7 +88,7 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForNull).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledExactlyOnceWith({
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 
@@ -95,7 +99,11 @@ describe('wallet-connect.services', () => {
 			});
 
 			expect(resultForUndefined).toEqual({ success: false });
-			expect(spyToastsError).toHaveBeenCalledWith({
+			expect(spyToastsError).toHaveBeenCalledTimes(2);
+			expect(spyToastsError).toHaveBeenNthCalledWith(1, {
+				msg: { text: en.wallet_connect.error.request_not_defined }
+			});
+			expect(spyToastsError).toHaveBeenNthCalledWith(2, {
 				msg: { text: en.wallet_connect.error.request_not_defined }
 			});
 		});

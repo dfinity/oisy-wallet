@@ -14,7 +14,7 @@
 {#if $authNotSignedIn}
 	<LandingPage />
 {:else}
-	<div class="md:block md:overflow-y-auto" in:fade>
+	<div in:fade>
 		{@render children?.()}
 	</div>
 {/if}

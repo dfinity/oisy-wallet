@@ -1,5 +1,5 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
-import type { PendingTransaction } from '$declarations/backend/backend.did';
+import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
 import { get } from 'svelte/store';
 
 const pendingTransactionMock1 = {

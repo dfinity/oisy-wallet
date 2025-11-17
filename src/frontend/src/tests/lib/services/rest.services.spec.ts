@@ -66,12 +66,13 @@ describe('rest.services', () => {
 			expect(result).toEqual(mockResult);
 
 			expect(mockRequest).toHaveBeenCalledTimes(3);
+
 			expect(mockOnRetry).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenNthCalledWith(1, {
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenNthCalledWith(2, {
 				error: new Error('Second attempt failed'),
 				retryCount: 1
 			});
@@ -126,8 +127,7 @@ describe('rest.services', () => {
 			expect(result).toEqual(mockResult);
 
 			expect(mockRequest).toHaveBeenCalledTimes(2);
-			expect(mockOnRetry).toHaveBeenCalledOnce();
-			expect(mockOnRetry).toHaveBeenCalledWith({
+			expect(mockOnRetry).toHaveBeenCalledExactlyOnceWith({
 				error: new Error('First attempt failed'),
 				retryCount: 0
 			});

@@ -1,6 +1,6 @@
 import { parseBoolEnvVar } from '$lib/utils/env.utils';
-import { Principal } from '@dfinity/principal';
 import { nonNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 export const APP_VERSION = VITE_APP_VERSION;
 
@@ -115,6 +115,14 @@ export const LLM_CANISTER_ID = LOCAL
 			? import.meta.env.VITE_BETA_LLM_CANISTER_ID
 			: import.meta.env.VITE_IC_LLM_CANISTER_ID;
 
+export const GLDT_STAKE_CANISTER_ID = LOCAL
+	? import.meta.env.VITE_LOCAL_GLDT_STAKE_CANISTER_ID
+	: STAGING
+		? import.meta.env.VITE_STAGING_GLDT_STAKE_CANISTER_ID
+		: BETA
+			? import.meta.env.VITE_BETA_GLDT_STAKE_CANISTER_ID
+			: import.meta.env.VITE_IC_GLDT_STAKE_CANISTER_ID;
+
 // How long the delegation identity should remain valid?
 // e.g. BigInt(60 * 60 * 1000 * 1000 * 1000) = 1 hour in nanoseconds
 export const AUTH_MAX_TIME_TO_LIVE = BigInt(60 * 60 * 1000 * 1000 * 1000);
@@ -137,7 +145,7 @@ export const AUTH_TIMER_INTERVAL = 1000;
 // From FI team:
 // On mainnet, the index runs its indexing function every second. The time to see a new transaction in the index is <=1 second plus the time required by the indexing function
 // (however)
-// ICP Index has not been upgraded yet so right now for ICP is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
+// ICP Index has not been upgraded yet, so right now for ICP it is variable between 0 and 2 seconds. Leo has changed the ckBTC and ckETH to run every second, and we want to change the ICP one too eventually. We just didn't get to work on it yet
 export const INDEX_RELOAD_DELAY = 2000;
 
 // Date and time
@@ -154,6 +162,7 @@ export const MILLISECONDS_IN_DAY = SECONDS_IN_DAY * MILLISECONDS_IN_SECOND;
 export const NANO_SECONDS_IN_MILLISECOND = 1_000_000n;
 export const NANO_SECONDS_IN_SECOND = NANO_SECONDS_IN_MILLISECOND * 1_000n;
 export const NANO_SECONDS_IN_MINUTE = NANO_SECONDS_IN_SECOND * 60n;
+export const NANO_SECONDS_IN_HALF_MINUTE = NANO_SECONDS_IN_SECOND * 30n;
 
 // For some use case we want to display some amount to a maximal number of decimals which is not related to the number of decimals of the selected token.
 // Just a value that looks good visually.
@@ -163,7 +172,8 @@ export const EIGHT_DECIMALS = 8;
 export const ZERO = 0n;
 
 // NFTs
-export const NFT_TIMER_INTERVAL_MILLIS = SECONDS_IN_MINUTE * 2 * 1000; // 2 minutes in milliseconds
+export const COLLECTION_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
+export const NFT_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 3) * 1000; // 20 seconds in milliseconds
 
 // Wallets
 export const WALLET_TIMER_INTERVAL_MILLIS = (SECONDS_IN_MINUTE / 2) * 1000; // 30 seconds in milliseconds
@@ -206,3 +216,6 @@ export const CONTACT_MAX_NAME_LENGTH = 100;
 
 // Network bonus multiplier
 export const NETWORK_BONUS_MULTIPLIER_DEFAULT = 1;
+
+// NFT max filesize limit (10MB)
+export const NFT_MAX_FILESIZE_LIMIT = 1024 * 1024 * 10;

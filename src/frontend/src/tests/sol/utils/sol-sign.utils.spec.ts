@@ -5,7 +5,7 @@ import type { SolanaNetworkType } from '$sol/types/network';
 import { createSigner } from '$sol/utils/sol-sign.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { mockSolAddress } from '$tests/mocks/sol.mock';
-import type { Transaction, TransactionWithLifetime } from '@solana/kit';
+import type { Transaction, TransactionWithinSizeLimit, TransactionWithLifetime } from '@solana/kit';
 import type { MockInstance } from 'vitest';
 
 describe('sol-sign.utils', () => {
@@ -14,9 +14,9 @@ describe('sol-sign.utils', () => {
 
 		const mockSignedBytes = [4, 5, 6];
 		const mockNetwork: SolanaNetworkType = 'mainnet';
-		const mockTransaction: Transaction & TransactionWithLifetime = {
+		const mockTransaction: Transaction & TransactionWithinSizeLimit & TransactionWithLifetime = {
 			messageBytes: new Uint8Array([1, 2, 3])
-		} as unknown as Transaction & TransactionWithLifetime;
+		} as unknown as Transaction & TransactionWithinSizeLimit & TransactionWithLifetime;
 
 		beforeEach(() => {
 			vi.clearAllMocks();

@@ -13,7 +13,6 @@
 	import { pageToken } from '$lib/derived/page-token.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionToken } from '$lib/types/token';
 	import { groupTransactionsByDate, mapTransactionModalData } from '$lib/utils/transaction.utils';
 	import SolTokenModal from '$sol/components/tokens/SolTokenModal.svelte';
 	import SolTransactionModal from '$sol/components/transactions/SolTransactionModal.svelte';
@@ -22,15 +21,12 @@
 	import { solTransactions } from '$sol/derived/sol-transactions.derived';
 	import type { SolTransactionUi } from '$sol/types/sol-transaction';
 
-	let selectedTransaction = $state<SolTransactionUi | undefined>();
-	let selectedToken = $state<OptionToken>();
-	$effect(() => {
-		({ transaction: selectedTransaction, token: selectedToken } =
-			mapTransactionModalData<SolTransactionUi>({
-				$modalOpen: $modalSolTransaction,
-				$modalStore
-			}));
-	});
+	let { transaction: selectedTransaction, token: selectedToken } = $derived(
+		mapTransactionModalData<SolTransactionUi>({
+			$modalOpen: $modalSolTransaction,
+			$modalStore
+		})
+	);
 
 	let token = $derived($pageToken ?? DEFAULT_SOLANA_TOKEN);
 

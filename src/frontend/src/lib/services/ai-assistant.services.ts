@@ -1,4 +1,4 @@
-import type { chat_message_v1 } from '$declarations/llm/llm.did';
+import type { chat_message_v1 } from '$declarations/llm/declarations/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
@@ -25,8 +25,8 @@ import {
 	parseShowBalanceToolArguments,
 	parseShowFilteredContactsToolArguments
 } from '$lib/utils/ai-assistant.utils';
-import type { Identity } from '@dfinity/agent';
 import { fromNullable, nonNullish, toNullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 /**

@@ -6,8 +6,14 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 
-	export let dAppDescription: OisyDappDescription;
-	$: ({ name: dAppName, logo, oneLiner, tags } = dAppDescription);
+	interface Props {
+		dAppDescription: OisyDappDescription;
+		onClick: () => void;
+	}
+
+	let { dAppDescription, onClick }: Props = $props();
+
+	let { name: dAppName, logo, oneLiner, tags } = $derived(dAppDescription);
 </script>
 
 <button
@@ -15,7 +21,7 @@
 	aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 		$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 	})}
-	on:click
+	onclick={onClick}
 >
 	<span class="absolute -top-5 left-4">
 		<Logo

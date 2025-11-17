@@ -2,8 +2,8 @@ import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
-import { initPowProtectorWorker } from '$icp/services/worker.pow-protection.services';
-import type { PowProtectorWorkerInitResult } from '$icp/types/pow-protector-listener';
+import { PowProtectorWorker } from '$icp/services/worker.pow-protection.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import {
 	powProtectoreNextAllowanceStore,
 	powProtectoreProgressStore
@@ -36,13 +36,17 @@ vi.mock('$lib/workers/workers?worker', () => ({
 }));
 
 describe('worker.pow-protection.services', () => {
-	describe('initPowProtectorWorker', () => {
-		let worker: PowProtectorWorkerInitResult;
+	describe('PowProtectorWorker', () => {
+		let worker: PowProtectorWorker;
 
 		beforeEach(async () => {
 			vi.clearAllMocks();
 
-			worker = await initPowProtectorWorker();
+			worker = await PowProtectorWorker.init();
+		});
+
+		it('should initialize a worker instance', () => {
+			expect(worker).toBeInstanceOf(AppWorker);
 		});
 
 		it('should start the worker and send the correct start message', () => {
@@ -51,15 +55,6 @@ describe('worker.pow-protection.services', () => {
 			expect(postMessageSpy).toHaveBeenCalledOnce();
 			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
 				msg: 'startPowProtectionTimer'
-			});
-		});
-
-		it('should stop the worker and send the correct stop message', () => {
-			worker.stop();
-
-			expect(postMessageSpy).toHaveBeenCalledOnce();
-			expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-				msg: 'stopPowProtectionTimer'
 			});
 		});
 
@@ -91,8 +86,7 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowProgress).toHaveBeenCalledOnce();
-				expect(syncPowProgress).toHaveBeenCalledWith({
+				expect(syncPowProgress).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});
@@ -104,8 +98,7 @@ describe('worker.pow-protection.services', () => {
 				};
 				workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-				expect(syncPowNextAllowance).toHaveBeenCalledOnce();
-				expect(syncPowNextAllowance).toHaveBeenCalledWith({
+				expect(syncPowNextAllowance).toHaveBeenCalledExactlyOnceWith({
 					data: payload.data
 				});
 			});

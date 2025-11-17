@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/backend.did';
+import type { UserProfile } from '$declarations/backend/declarations/backend.did';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import * as api from '$lib/api/backend.api';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
@@ -8,8 +8,8 @@ import { i18n } from '$lib/stores/i18n.store';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockUserProfile, mockUserProfileVersion } from '$tests/mocks/user-profile.mock';
 import { toastsStore } from '@dfinity/gix-components';
-import { Ed25519KeyIdentity } from '@dfinity/identity';
-import { Principal } from '@dfinity/principal';
+import { Ed25519KeyIdentity } from '@icp-sdk/core/identity';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
@@ -65,8 +65,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {
@@ -90,8 +89,7 @@ describe('request-pouh-credential.services', () => {
 			const result = await requestPouhCredential({ identity });
 
 			expect(result.success).toBeTruthy();
-			expect(addUserCredentialMock).toHaveBeenCalledOnce();
-			expect(addUserCredentialMock).toHaveBeenCalledWith({
+			expect(addUserCredentialMock).toHaveBeenCalledExactlyOnceWith({
 				identity,
 				credentialJwt: successfulCredentialJWT,
 				credentialSpec: {

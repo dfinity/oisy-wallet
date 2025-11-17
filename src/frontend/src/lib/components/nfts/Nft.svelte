@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import NftDescription from '$lib/components/nfts/NftDescription.svelte';
+	import NftCollectionCard from '$lib/components/nfts/NftCollectionDescription.svelte';
 	import NftHero from '$lib/components/nfts/NftHero.svelte';
 	import { FALLBACK_TIMEOUT } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants';
@@ -38,4 +38,4 @@
 
 <NftHero {nft} {token} />
 
-<NftDescription {nft} />
+<NftCollectionCard collection={nft?.collection} />

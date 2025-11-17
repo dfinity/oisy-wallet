@@ -1,3 +1,4 @@
+import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { EVM_ERC20_TOKENS } from '$env/tokens/tokens-evm/tokens.erc20.env';
 import { SUPPORTED_EVM_TOKENS } from '$env/tokens/tokens-evm/tokens.evm.env';
 import { SUPPORTED_BITCOIN_TOKENS } from '$env/tokens/tokens.btc.env';
@@ -7,12 +8,20 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SUPPORTED_SOLANA_TOKENS } from '$env/tokens/tokens.sol.env';
 import { SPL_TOKENS } from '$env/tokens/tokens.spl.env';
 import { isGLDTToken, isVCHFToken, isVEURToken } from '$icp-eth/utils/token.utils';
+import type { Token } from '$lib/types/token';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 
 describe('token.utils', () => {
 	describe('isGLDTToken', () => {
 		it('should return true for token GLDT', () => {
-			expect(isGLDTToken({ ...mockValidIcToken, standard: 'icrc', symbol: 'GLDT' })).toBeTruthy();
+			expect(
+				isGLDTToken({
+					...mockValidIcToken,
+					standard: 'icrc',
+					symbol: 'GLDT',
+					ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
+				} as Token)
+			).toBeTruthy();
 		});
 
 		it('should return false for token GLDT that is not ICRC token', () => {

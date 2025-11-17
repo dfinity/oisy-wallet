@@ -59,6 +59,8 @@ DFX_NETWORK=ic ./scripts/build.xtc_ledger.sh
 DFX_NETWORK=ic ./scripts/build.sol_rpc.sh
 # .. downloads candid for the llm
 DFX_NETWORK=ic ./scripts/build.llm.sh
+# .. downloads candid for the gkdt_stake
+DFX_NETWORK=ic ./scripts/build.gldt_stake.sh
 # Download .did files listed in dfx.json
 install_did_files
 # Generate Rust bindings
@@ -68,6 +70,9 @@ mapfile -t canisters < <(ls src/declarations/)
 for canister in "${canisters[@]}"; do
   echo "Generating bindings for $canister"
   dfx generate "$canister"
+  # Copy the generated files to subdirectories in src/declarations/$canister/declarations to adapt to the use of icp-bindgen
+  mkdir -p "src/declarations/${canister}/declarations"
+  cp -f "src/declarations/${canister}/${canister}.did.d.ts" "src/declarations/${canister}/declarations/${canister}.did.d.ts"
 done
 # Clean up..
 node scripts/did.update.types.mjs

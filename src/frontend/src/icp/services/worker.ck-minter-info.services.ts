@@ -11,6 +11,7 @@ import {
 import type { SyncCkMinterInfoError, SyncCkMinterInfoSuccess } from '$icp/types/ck';
 import type { IcCkWorker, IcCkWorkerInitResult, IcCkWorkerParams } from '$icp/types/ck-listener';
 import type { IcCkMetadata } from '$icp/types/ic-token';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequestIcCk,
@@ -19,9 +20,18 @@ import type {
 	PostMessageSyncState
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
+import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
+
+interface CkMinterInfoWorkerCallbacks {
+	postMessageKey: 'CkBtc' | 'CkEth';
+	onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;
+	onSyncError: (params: SyncCkMinterInfoError) => void;
+	onSyncStatus: (state: SyncState) => void;
+}
 
 export const initCkBTCMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorkerInitResult> =>
-	initCkMinterInfoWorker({
+	CkMinterInfoWorker.init({
 		postMessageKey: 'CkBtc',
 		onSyncSuccess: syncCkBtcMinterInfo,
 		onSyncError: syncCkBtcMinterError,
@@ -30,7 +40,7 @@ export const initCkBTCMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorke
 	});
 
 export const initCkETHMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorkerInitResult> =>
-	initCkMinterInfoWorker({
+	CkMinterInfoWorker.init({
 		postMessageKey: 'CkEth',
 		onSyncSuccess: syncCkEthMinterInfo,
 		onSyncError: syncCkEthMinterError,
@@ -38,84 +48,96 @@ export const initCkETHMinterInfoWorker: IcCkWorker = (params): Promise<IcCkWorke
 		...params
 	});
 
-const initCkMinterInfoWorker = async ({
-	minterCanisterId,
-	token: { id: tokenId },
-	postMessageKey,
-	onSyncSuccess,
-	onSyncError,
-	onSyncStatus
-}: IcCkWorkerParams &
-	Partial<IcCkMetadata> & {
-		postMessageKey: 'CkBtc' | 'CkEth';
-		onSyncSuccess: (params: SyncCkMinterInfoSuccess) => void;
-		onSyncError: (params: SyncCkMinterInfoError) => void;
-		onSyncStatus: (state: SyncState) => void;
-	}): Promise<IcCkWorkerInitResult> => {
-	const CkMinterInfoWorker = await import('$lib/workers/workers?worker');
-	let worker: Worker | null = new CkMinterInfoWorker.default();
+export class CkMinterInfoWorker extends AppWorker {
+	private constructor(
+		worker: WorkerData,
+		private readonly tokenId: TokenId,
+		private readonly minterCanisterId: IcCkWorkerParams['minterCanisterId'],
+		private readonly postMessageKey: CkMinterInfoWorkerCallbacks['postMessageKey'],
+		onSyncSuccess: CkMinterInfoWorkerCallbacks['onSyncSuccess'],
+		onSyncError: CkMinterInfoWorkerCallbacks['onSyncError'],
+		onSyncStatus: CkMinterInfoWorkerCallbacks['onSyncStatus']
+	) {
+		super(worker);
 
-	worker.onmessage = ({
-		data: dataMsg
-	}: MessageEvent<
-		PostMessage<PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState>
-	>) => {
-		const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					PostMessageJsonDataResponse | PostMessageDataResponseError | PostMessageSyncState
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-		switch (msg) {
-			case 'syncCkMinterInfo':
-				onSyncSuccess({
-					tokenId,
-					data: data as PostMessageJsonDataResponse
-				});
-				return;
-			case 'syncCkMinterInfoError':
-				onSyncError({
-					tokenId,
-					error: data.error
-				});
-				return;
-			case 'syncCkMinterInfoStatus':
-				onSyncStatus((data as PostMessageSyncState).state);
-				return;
-		}
-	};
+				switch (msg) {
+					case 'syncCkMinterInfo':
+						onSyncSuccess({
+							tokenId,
+							data: data as PostMessageJsonDataResponse
+						});
+						return;
+					case 'syncCkMinterInfoError':
+						onSyncError({
+							tokenId,
+							error: data.error
+						});
+						return;
+					case 'syncCkMinterInfoStatus':
+						onSyncStatus((data as PostMessageSyncState).state);
+						return;
+				}
+			}
+		);
+	}
 
-	const stop = () => {
-		worker?.postMessage({
-			msg: `stop${postMessageKey}MinterInfoTimer`
+	static async init({
+		minterCanisterId,
+		token: { id: tokenId },
+		postMessageKey,
+		onSyncSuccess,
+		onSyncError,
+		onSyncStatus
+	}: IcCkWorkerParams &
+		Partial<IcCkMetadata> &
+		CkMinterInfoWorkerCallbacks): Promise<CkMinterInfoWorker> {
+		const worker = await AppWorker.getInstance();
+		return new CkMinterInfoWorker(
+			worker,
+			tokenId,
+			minterCanisterId,
+			postMessageKey,
+			onSyncSuccess,
+			onSyncError,
+			onSyncStatus
+		);
+	}
+
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: `stop${this.postMessageKey}MinterInfoTimer`
 		});
 	};
 
-	let isDestroying = false;
-
-	return {
-		start: () => {
-			worker?.postMessage({
-				msg: `start${postMessageKey}MinterInfoTimer`,
-				data: {
-					minterCanisterId
-				}
-			} as PostMessage<PostMessageDataRequestIcCk>);
-		},
-		stop,
-		trigger: () => {
-			worker?.postMessage({
-				msg: `trigger${postMessageKey}MinterInfoTimer`,
-				data: {
-					minterCanisterId
-				}
-			} as PostMessage<PostMessageDataRequestIcCk>);
-		},
-		destroy: () => {
-			if (isDestroying) {
-				return;
+	start = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
+			msg: `start${this.postMessageKey}MinterInfoTimer`,
+			data: {
+				minterCanisterId: this.minterCanisterId
 			}
-			isDestroying = true;
-			stop();
-			worker?.terminate();
-			worker = null;
-			isDestroying = false;
-		}
+		});
 	};
-};
+
+	stop = () => {
+		this.stopTimer();
+	};
+
+	trigger = () => {
+		this.postMessage<PostMessage<PostMessageDataRequestIcCk>>({
+			msg: `trigger${this.postMessageKey}MinterInfoTimer`,
+			data: {
+				minterCanisterId: this.minterCanisterId
+			}
+		});
+	};
+}

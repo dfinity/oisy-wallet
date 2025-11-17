@@ -1,4 +1,4 @@
-import type { chat_response_v1 } from '$declarations/llm/llm.did';
+import type { chat_response_v1 } from '$declarations/llm/declarations/llm.did';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { llmChat } from '$lib/api/llm.api';
 import { extendedAddressContacts } from '$lib/derived/contacts.derived';

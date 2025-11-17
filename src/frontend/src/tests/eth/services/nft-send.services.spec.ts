@@ -34,7 +34,7 @@ describe('nft-send.services', () => {
 	});
 
 	it('encodeErc721SafeTransfer encodes selector + args correctly', () => {
-		const tokenId = 47744;
+		const tokenId = '47744';
 		const { to, data } = encodeErc721SafeTransfer({
 			contractAddress: CONTRACT_721,
 			from: FROM,
@@ -52,7 +52,7 @@ describe('nft-send.services', () => {
 	});
 
 	it('encodeErc1155SafeTransfer encodes selector + args correctly (default bytes data)', () => {
-		const tokenId = 123;
+		const tokenId = '123';
 		const amount = 2n;
 		const { to, data } = encodeErc1155SafeTransfer({
 			contractAddress: CONTRACT_1155,
@@ -74,7 +74,7 @@ describe('nft-send.services', () => {
 	});
 
 	it('encodeErc1155SafeTransfer accepts explicit bytes data', () => {
-		const tokenId = 9;
+		const tokenId = '9';
 		const amount = 1n;
 		const extra = '0x1234';
 		const { data } = encodeErc1155SafeTransfer({
@@ -123,7 +123,7 @@ describe('transferErc721', () => {
 			sourceNetwork: BASE_NETWORK,
 			to: TO,
 			from: FROM,
-			tokenId: 47744,
+			tokenId: '47744',
 			contractAddress: CONTRACT_721,
 			gas,
 			maxFeePerGas,
@@ -183,7 +183,7 @@ describe('transferErc1155', () => {
 			sourceNetwork: BASE_NETWORK,
 			to: TO,
 			from: FROM,
-			id: 123,
+			id: '123',
 			amount: 2n,
 			contractAddress: CONTRACT_1155,
 			gas,

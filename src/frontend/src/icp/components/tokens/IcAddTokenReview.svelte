@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, onMount } from 'svelte';
+	import { onMount } from 'svelte';
 	import { blur, fade } from 'svelte/transition';
 	import { icrcTokens } from '$icp/derived/icrc.derived';
 	import {
@@ -21,15 +21,25 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
-	export let ledgerCanisterId: string | undefined;
-	export let indexCanisterId: string | undefined;
-	export let metadata: ValidateTokenData | undefined;
+	interface Props {
+		ledgerCanisterId?: string;
+		indexCanisterId?: string;
+		metadata?: ValidateTokenData;
+		onBack: () => void;
+		onSave: () => void;
+	}
 
-	let invalid = true;
-	$: invalid = isNullish(metadata);
+	let {
+		ledgerCanisterId,
+		indexCanisterId,
+		metadata = $bindable(),
+		onBack,
+		onSave
+	}: Props = $props();
 
-	const dispatch = createEventDispatcher();
-	const back = () => dispatch('icBack');
+	let invalid = $derived(isNullish(metadata));
+
+	const back = () => onBack();
 
 	onMount(async () => {
 		const { result, data } = await loadAndAssertAddCustomToken({
@@ -123,7 +133,7 @@
 			{#if nonNullish(metadata)}
 				<ButtonGroup>
 					<ButtonBack onclick={back} />
-					<Button disabled={invalid} onclick={() => dispatch('icSave')}>
+					<Button disabled={invalid} onclick={onSave}>
 						{$i18n.tokens.import.text.add_the_token}
 					</Button>
 				</ButtonGroup>

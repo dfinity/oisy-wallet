@@ -21,7 +21,7 @@ import {
 	SOLANA_MAINNET_NETWORK
 } from '$env/networks/networks.sol.env';
 import type { EthereumNetwork } from '$eth/types/network';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import type { Network } from '$lib/types/network';
 import type { UserNetworks } from '$lib/types/user-networks';
 import { defineEnabledNetworks, getContractExplorerUrl } from '$lib/utils/networks.utils';
@@ -64,7 +64,7 @@ describe('networks.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		describe('when testnets are disabled', () => {
@@ -96,7 +96,7 @@ describe('networks.utils', () => {
 			});
 
 			it('should ignore the local networks when they are enabled', () => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(false);
 
 				expect(defineEnabledNetworks(mockParams)).toEqual(mainnetNetworks);
 			});
@@ -145,7 +145,7 @@ describe('networks.utils', () => {
 
 			describe('when local networks are enabled', () => {
 				beforeEach(() => {
-					vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+					vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 				});
 
 				it('should return all networks', () => {

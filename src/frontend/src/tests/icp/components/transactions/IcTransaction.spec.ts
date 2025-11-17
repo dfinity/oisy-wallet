@@ -22,7 +22,7 @@ describe('IcTransaction', () => {
 			}
 		});
 
-		const amountElement = container.querySelector('div.leading-5>span.justify-end');
+		const amountElement = container.querySelector('span.text-right>span');
 
 		assertNonNullish(amountElement);
 
@@ -44,7 +44,7 @@ describe('IcTransaction', () => {
 			}
 		});
 
-		const amountElement = container.querySelector('div.leading-5>span.justify-end');
+		const amountElement = container.querySelector('span.text-right>span');
 
 		assertNonNullish(amountElement);
 
@@ -66,7 +66,7 @@ describe('IcTransaction', () => {
 			}
 		});
 
-		const amountElement = container.querySelector('div.leading-5>span.justify-end');
+		const amountElement = container.querySelector('span.text-right>span');
 
 		assertNonNullish(amountElement);
 
@@ -88,7 +88,7 @@ describe('IcTransaction', () => {
 			}
 		});
 
-		const labelElement = container.querySelector('div.leading-5>span.text-left');
+		const labelElement = container.querySelector('span.basis-0 span.truncate');
 
 		assertNonNullish(labelElement);
 
@@ -100,7 +100,7 @@ describe('IcTransaction', () => {
 					unitName: ICP_TOKEN.decimals,
 					showPlusSign: false
 				})
-			})} ${getTokenDisplaySymbol(ICP_TOKEN)} `
+			})} ${getTokenDisplaySymbol(ICP_TOKEN)}`
 		);
 	});
 });

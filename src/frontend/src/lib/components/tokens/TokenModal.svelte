@@ -37,7 +37,6 @@
 	import { ProgressStepsAddToken } from '$lib/enums/progress-steps';
 	import { TokenModalSteps } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
 	import { toastsError, toastsShow } from '$lib/stores/toasts.store';
@@ -147,7 +146,6 @@
 
 	const onTokenDelete = async (tokenToDelete: OptionToken) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -223,7 +221,6 @@
 
 	const onTokenEdit = async (tokenToEdit: OptionToken) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -327,67 +324,69 @@
 >
 	{#snippet title()}{currentStep?.title}{/snippet}
 
-	{#if currentStepName === TokenModalSteps.CONTENT}
-		<Responsive up="md">
-			<TokenModalContent
+	{#key currentStepName}
+		{#if currentStepName === TokenModalSteps.CONTENT}
+			<Responsive up="md">
+				<TokenModalContent
+					{token}
+					{...isDeletable && { onDeleteClick: () => gotoStep(TokenModalSteps.DELETE_CONFIRMATION) }}
+					{...isEditable && {
+						onEditClick: () => gotoStep(TokenModalSteps.EDIT)
+					}}
+				>
+					{@render children?.()}
+				</TokenModalContent>
+			</Responsive>
+			<Responsive down="sm">
+				<TokenModalContent
+					{token}
+					{...isDeletable && { onDeleteClick: () => (showBottomSheetDeleteConfirmation = true) }}
+					{...isEditable && {
+						onEditClick: () => gotoStep(TokenModalSteps.EDIT)
+					}}
+				>
+					{@render children?.()}
+				</TokenModalContent>
+			</Responsive>
+		{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
+			<TokenModalDeleteConfirmation
+				{loading}
+				onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
+				onConfirm={() => onTokenDelete(token)}
 				{token}
-				{...isDeletable && { onDeleteClick: () => gotoStep(TokenModalSteps.DELETE_CONFIRMATION) }}
-				{...isEditable && {
-					onEditClick: () => gotoStep(TokenModalSteps.EDIT)
-				}}
-			>
-				{@render children?.()}
-			</TokenModalContent>
-		</Responsive>
-		<Responsive down="sm">
-			<TokenModalContent
-				{token}
-				{...isDeletable && { onDeleteClick: () => (showBottomSheetDeleteConfirmation = true) }}
-				{...isEditable && {
-					onEditClick: () => gotoStep(TokenModalSteps.EDIT)
-				}}
-			>
-				{@render children?.()}
-			</TokenModalContent>
-		</Responsive>
-	{:else if currentStepName === TokenModalSteps.DELETE_CONFIRMATION}
-		<TokenModalDeleteConfirmation
-			{loading}
-			onCancel={() => gotoStep(TokenModalSteps.CONTENT)}
-			onConfirm={() => onTokenDelete(token)}
-			{token}
-		/>
-	{:else if currentStepName === TokenModalSteps.EDIT && nonNullish(token) && isTokenIcrc(token)}
-		<ContentWithToolbar>
-			<AddTokenByNetworkDropdown
-				availableNetworks={[token.network]}
-				disabled
-				networkName={token.network.name}
 			/>
+		{:else if currentStepName === TokenModalSteps.EDIT && nonNullish(token) && isTokenIcrc(token)}
+			<ContentWithToolbar>
+				<AddTokenByNetworkDropdown
+					availableNetworks={[token.network]}
+					disabled
+					networkName={token.network.name}
+				/>
 
-			<IcAddTokenForm
-				editMode
-				ledgerCanisterId={token.ledgerCanisterId}
-				bind:indexCanisterId={icrcTokenIndexCanisterId}
-			/>
+				<IcAddTokenForm
+					editMode
+					ledgerCanisterId={token.ledgerCanisterId}
+					bind:indexCanisterId={icrcTokenIndexCanisterId}
+				/>
 
-			{#snippet toolbar()}
-				<ButtonGroup>
-					<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
+				{#snippet toolbar()}
+					<ButtonGroup>
+						<ButtonBack onclick={() => gotoStep(TokenModalSteps.CONTENT)} />
 
-					<Button
-						disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
-						onclick={() => onTokenEdit(token)}
-						testId={TOKEN_MODAL_SAVE_BUTTON}
-					>
-						{$i18n.core.text.save}
-					</Button>
-				</ButtonGroup>
-			{/snippet}
-		</ContentWithToolbar>
-	{:else if currentStepName === TokenModalSteps.EDIT_PROGRESS}
-		<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
-	{/if}
+						<Button
+							disabled={icrcTokenIndexCanisterId === (token.indexCanisterId ?? '')}
+							onclick={() => onTokenEdit(token)}
+							testId={TOKEN_MODAL_SAVE_BUTTON}
+						>
+							{$i18n.core.text.save}
+						</Button>
+					</ButtonGroup>
+				{/snippet}
+			</ContentWithToolbar>
+		{:else if currentStepName === TokenModalSteps.EDIT_PROGRESS}
+			<InProgressWizard progressStep={saveProgressStep} steps={addTokenSteps($i18n)} />
+		{/if}
+	{/key}
 </WizardModal>
 
 {#if currentStepName === TokenModalSteps.CONTENT && showBottomSheetDeleteConfirmation}

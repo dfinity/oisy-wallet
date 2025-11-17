@@ -1,7 +1,7 @@
 import { ZERO } from '$lib/constants/app.constants';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import { ATA_SIZE } from '$sol/constants/ata.constants';
 import { solanaHttpRpc } from '$sol/providers/sol-rpc.providers';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolanaGetAccountInfoReturn } from '$sol/types/sol-rpc';
 import type {
@@ -98,7 +98,7 @@ export const getRpcTransaction = async ({
 }: {
 	signature: SolSignature;
 	network: SolanaNetworkType;
-}) => {
+}): Promise<SolRpcTransactionRaw | null> => {
 	const { getTransaction } = solanaHttpRpc(network);
 
 	return await getTransaction(signature, {
@@ -155,7 +155,7 @@ export const loadTokenAccount = async ({
 		{ encoding: 'jsonParsed' }
 	).send();
 
-	// In case of missing token account, we let the caller handle it.
+	// In case of a missing token account, we let the caller handle it.
 	if (response.value.length === 0) {
 		return undefined;
 	}
@@ -177,7 +177,7 @@ export const getSolCreateAccountFee = async (network: SolanaNetworkType): Promis
 };
 
 /**
- * Calculates the maximum among the most recent prioritization fees in microlamports.
+ * Calculates the maximum among the most recent prioritisation fees in microlamports.
  *
  * It is useful to have an estimate of how much a transaction could cost to be processed without expiring.
  */
@@ -218,7 +218,7 @@ export const getAccountInfo = async ({
 
 	const cachedInfo = addressMap.get(address);
 
-	if (nonNullish(cachedInfo)) {
+	if (nonNullish(cachedInfo?.value)) {
 		return cachedInfo;
 	}
 
@@ -229,6 +229,34 @@ export const getAccountInfo = async ({
 	addressMap.set(address, info);
 
 	return info;
+};
+
+// https://solana.com/docs/tokens/extensions
+interface Token2022ExtensionResult {
+	extension: string;
+	state: object;
+}
+
+// https://solana.com/docs/tokens/extensions/metadata
+const extractTokenMetadataExtension = (
+	extensions?: Token2022ExtensionResult[]
+): { symbol?: string; name?: string } => {
+	if (isNullish(extensions)) {
+		return {};
+	}
+
+	const tokenMetadataExtension = extensions.find(({ extension }) => extension === 'tokenMetadata');
+
+	if (isNullish(tokenMetadataExtension)) {
+		return {};
+	}
+
+	// TODO: Among the metadata there is the URI that could provide a logo too, basically replacing the method `getSplMetadata`
+	const {
+		state: { symbol, name }
+	} = tokenMetadataExtension as { state: { symbol?: string; name?: string } };
+
+	return { symbol, name };
 };
 
 export const getTokenInfo = async ({
@@ -242,6 +270,8 @@ export const getTokenInfo = async ({
 	decimals: number;
 	mintAuthority?: SplTokenAddress;
 	freezeAuthority?: SplTokenAddress;
+	symbol?: string;
+	name?: string;
 }> => {
 	const { value } = await getAccountInfo({ address, network });
 
@@ -257,13 +287,16 @@ export const getTokenInfo = async ({
 		return { owner, decimals: 0 };
 	}
 
-	const { decimals, mintAuthority, freezeAuthority } = parsed.info as {
+	const { decimals, mintAuthority, freezeAuthority, extensions } = parsed.info as {
 		decimals?: number;
 		mintAuthority?: SplTokenAddress;
 		freezeAuthority?: SplTokenAddress;
+		extensions?: { extension: string; state: object }[];
 	};
 
-	return { owner, decimals: decimals ?? 0, mintAuthority, freezeAuthority };
+	const { symbol, name } = extractTokenMetadataExtension(extensions);
+
+	return { owner, decimals: decimals ?? 0, mintAuthority, freezeAuthority, symbol, name };
 };
 
 export const getAccountOwner = async ({

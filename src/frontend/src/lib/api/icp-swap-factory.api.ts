@@ -1,10 +1,10 @@
-import type { PoolData } from '$declarations/icp_swap_factory/icp_swap_factory.did';
+import type { PoolData } from '$declarations/icp_swap_factory/declarations/icp_swap_factory.did';
 import { ICPSwapFactoryCanister } from '$lib/canisters/icp-swap-factory.canister';
 import { ICP_SWAP_FACTORY_CANISTER_ID } from '$lib/constants/app.constants';
 import type { ICPSwapGetPoolParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: ICPSwapFactoryCanister | undefined = undefined;
 

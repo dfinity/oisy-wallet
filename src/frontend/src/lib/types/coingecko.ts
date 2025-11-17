@@ -1,13 +1,12 @@
 // https://www.coingecko.com/api/documentation
 
-import type { Erc20ContractAddress } from '$eth/types/erc20';
+import type { EthAddress } from '$eth/types/address';
 import type { LedgerCanisterIdText } from '$icp/types/canister';
 import type { Currency } from '$lib/enums/currency';
 import type {
 	CoingeckoCoinsIdSchema,
 	CoingeckoPlatformIdSchema
 } from '$lib/schema/coingecko.schema';
-import type { EthAddress } from '$lib/types/address';
 import type * as z from 'zod';
 
 export type CoingeckoCoinsId = z.infer<typeof CoingeckoCoinsIdSchema>;
@@ -72,8 +71,3 @@ export type CoingeckoSimpleTokenPriceResponse = CoingeckoResponse<CoingeckoSimpl
 export type CoingeckoPriceResponse =
 	| CoingeckoSimplePriceResponse
 	| CoingeckoSimpleTokenPriceResponse;
-
-export interface CoingeckoErc20PriceParams {
-	coingeckoPlatformId: CoingeckoPlatformId;
-	contractAddresses: Erc20ContractAddress[];
-}

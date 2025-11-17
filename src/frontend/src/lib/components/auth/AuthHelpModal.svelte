@@ -55,11 +55,13 @@
 		<span class="text-xl">{titleString}</span>
 	{/snippet}
 
-	{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
-		<AuthHelpForm {onLostIdentity} {onOther} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
-		<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
-	{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
-		<AuthHelpOtherForm {onBack} onDone={close} />
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsAuthHelp.OVERVIEW}
+			<AuthHelpForm {onLostIdentity} {onOther} />
+		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_IDENTITY}
+			<AuthHelpIdentityForm hideBack={usesIdentityHelp} {onBack} onDone={close} />
+		{:else if currentStep?.name === WizardStepsAuthHelp.HELP_OTHER}
+			<AuthHelpOtherForm {onBack} onDone={close} />
+		{/if}
+	{/key}
 </WizardModal>

@@ -1,10 +1,13 @@
-import type { SwapAmountsReply, TokenReply } from '$declarations/kong_backend/kong_backend.did';
+import type {
+	SwapAmountsReply,
+	TokenReply
+} from '$declarations/kong_backend/declarations/kong_backend.did';
 import { KongBackendCanister } from '$lib/canisters/kong_backend.canister';
 import { KONG_BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type { KongSwapAmountsParams, KongSwapParams } from '$lib/types/api';
 import type { CanisterApiFunctionParams } from '$lib/types/canister';
-import { Principal } from '@dfinity/principal';
 import { assertNonNullish, isNullish } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 let canister: KongBackendCanister | undefined = undefined;
 

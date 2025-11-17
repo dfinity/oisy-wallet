@@ -139,15 +139,6 @@
 			"__bigint__": "10"
 		}
 	},
-	"ODINDOG": {
-		"ledgerCanisterId": "eazb6-tqaaa-aaaar-qan2a-cai",
-		"decimals": 8,
-		"name": "ODINDOG•ID•YTTL•ODIN",
-		"symbol": "ODINDOG•ID•YTTL•ODIN",
-		"fee": {
-			"__bigint__": "10"
-		}
-	},
 	"TICRC1": {
 		"ledgerCanisterId": "3jkp5-oyaaa-aaaaj-azwqa-cai",
 		"indexCanisterId": "qzre3-3iaaa-aaaai-aqmsa-cai",
@@ -158,14 +149,14 @@
 			"__bigint__": "10000"
 		}
 	},
-	"DYA": {
-		"ledgerCanisterId": "vrsv6-3qaaa-aaaau-abytq-cai",
-		"indexCanisterId": "u44rq-uyaaa-aaaau-abyua-cai",
+	"testOISY.P": {
+		"ledgerCanisterId": "ap6gq-taaaa-aaaae-acsaq-cai",
+		"indexCanisterId": "x3qir-tyaaa-aaaae-acr6a-cai",
 		"decimals": 8,
-		"name": "Dyah AI",
-		"symbol": "DYA",
+		"name": "Test OISY Points",
+		"symbol": "testOISY",
 		"fee": {
-			"__bigint__": "10000"
+			"__bigint__": "100000"
 		}
 	}
 }

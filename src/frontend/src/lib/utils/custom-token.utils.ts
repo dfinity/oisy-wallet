@@ -4,7 +4,7 @@ import type {
 	IcrcToken,
 	SplToken,
 	Token
-} from '$declarations/backend/backend.did';
+} from '$declarations/backend/declarations/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {
@@ -18,8 +18,8 @@ import { mapCustomTokenSection } from '$lib/utils/custom-token-section.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import type { SolanaChainId } from '$sol/types/network';
 import type { SplTokenAddress } from '$sol/types/spl';
-import { Principal } from '@dfinity/principal';
 import { assertNever, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 
 const toIcrcCustomToken = ({
 	ledgerCanisterId,

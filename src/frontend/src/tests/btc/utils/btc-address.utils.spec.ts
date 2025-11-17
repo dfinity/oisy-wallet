@@ -1,5 +1,5 @@
 import { getBtcAddressString, parseBtcAddress } from '$btc/utils/btc-address.utils';
-import type { BtcAddress } from '$declarations/backend/backend.did';
+import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
 import { assertNonNullish } from '@dfinity/utils';
 
 describe('btc-address.utils', () => {

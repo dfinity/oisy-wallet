@@ -1,11 +1,10 @@
 import { agreementsData } from '$env/agreements.env';
 import AgreementsGuard from '$lib/components/guard/AgreementsGuard.svelte';
-import { AGREEMENTS_MODAL, AGREEMENTS_WARNING_BANNER } from '$lib/constants/test-ids.constants';
+import { AGREEMENTS_WARNING_BANNER } from '$lib/constants/test-ids.constants';
 import { acceptAgreements } from '$lib/services/user-agreements.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { mockUserAgreements, mockUserProfile } from '$tests/mocks/user-profile.mock';
 import { fromNullable, toNullable } from '@dfinity/utils';
 import { render } from '@testing-library/svelte';
@@ -18,21 +17,12 @@ vi.mock('$lib/services/user-agreements.services', () => ({
 describe('AgreementsGuard', () => {
 	const certified = false;
 
-	const mockParams = { children: mockSnippet };
-
 	beforeEach(() => {
 		vi.clearAllMocks();
 
 		mockAuthStore();
 
 		userProfileStore.reset();
-	});
-
-	it('should render the children', () => {
-		const { getByTestId, queryByTestId } = render(AgreementsGuard, mockParams);
-
-		expect(getByTestId('mock-snippet')).toBeInTheDocument();
-		expect(queryByTestId(AGREEMENTS_MODAL)).not.toBeInTheDocument();
 	});
 
 	it('should not accept any agreement if they are all already accepted and up-to-date', async () => {
@@ -66,7 +56,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -76,7 +66,7 @@ describe('AgreementsGuard', () => {
 	it('should accept all the agreements if user profile is not set', async () => {
 		userProfileStore.reset();
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -99,7 +89,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -120,7 +110,7 @@ describe('AgreementsGuard', () => {
 			profile: mockUserProfile
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -157,7 +147,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -209,7 +199,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -259,7 +249,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -300,7 +290,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -345,7 +335,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -392,7 +382,7 @@ describe('AgreementsGuard', () => {
 			}
 		});
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		await tick();
 
@@ -410,7 +400,7 @@ describe('AgreementsGuard', () => {
 
 		userProfileStore.reset();
 
-		render(AgreementsGuard, mockParams);
+		render(AgreementsGuard);
 
 		// We mock quick changes of the user profile to test that the agreements are accepted only once
 		userProfileStore.set({
@@ -484,7 +474,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { queryByTestId } = render(AgreementsGuard, mockParams);
+			const { queryByTestId } = render(AgreementsGuard);
 
 			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
 		});
@@ -492,7 +482,7 @@ describe('AgreementsGuard', () => {
 		it('should not render when user profile is not set', () => {
 			userProfileStore.reset();
 
-			const { queryByTestId } = render(AgreementsGuard, mockParams);
+			const { queryByTestId } = render(AgreementsGuard);
 
 			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
 		});
@@ -506,7 +496,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { queryByTestId } = render(AgreementsGuard, mockParams);
+			const { queryByTestId } = render(AgreementsGuard);
 
 			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
 		});
@@ -517,7 +507,7 @@ describe('AgreementsGuard', () => {
 				profile: mockUserProfile
 			});
 
-			const { queryByTestId } = render(AgreementsGuard, mockParams);
+			const { queryByTestId } = render(AgreementsGuard);
 
 			expect(queryByTestId(AGREEMENTS_WARNING_BANNER)).not.toBeInTheDocument();
 		});
@@ -544,7 +534,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});
@@ -586,7 +576,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});
@@ -626,7 +616,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});
@@ -657,7 +647,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});
@@ -696,7 +686,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});
@@ -735,7 +725,7 @@ describe('AgreementsGuard', () => {
 				}
 			});
 
-			const { getByTestId } = render(AgreementsGuard, mockParams);
+			const { getByTestId } = render(AgreementsGuard);
 
 			expect(getByTestId(AGREEMENTS_WARNING_BANNER)).toBeInTheDocument();
 		});

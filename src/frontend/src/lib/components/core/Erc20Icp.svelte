@@ -5,7 +5,7 @@
 </script>
 
 <a
-	class="inline-flex items-center gap-2 pb-3 pt-6 text-center text-xs font-bold no-underline md:text-base"
+	class="inline-flex items-center gap-2 pt-6 pb-3 text-center text-xs font-bold no-underline md:text-base"
 	href={ERC20_ICP_REPO_URL}
 	rel="external noopener noreferrer"
 	target="_blank"

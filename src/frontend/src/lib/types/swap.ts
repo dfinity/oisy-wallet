@@ -1,15 +1,15 @@
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthereumNetwork } from '$eth/types/network';
 import type { ProgressStep } from '$eth/types/send';
 import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import type { ProgressStepsSwap } from '$lib/enums/progress-steps';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { Amount, OptionAmount } from '$lib/types/send';
 import type { Token } from '$lib/types/token';
 import type { RequiredTransactionFeeData } from '$lib/types/transaction';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import type {
 	BridgePrice,
 	DeltaPrice,
@@ -59,7 +59,7 @@ export interface FetchSwapAmountsParams {
 	amount: string | number;
 	tokens: Token[];
 	slippage: string | number;
-	isSourceTokenIcrc2: boolean;
+	isSourceTokenIcrc2?: boolean;
 	userEthAddress: OptionEthAddress;
 }
 
@@ -109,6 +109,7 @@ interface KongQuoteParams {
 interface IcpQuoteParams {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }
 
 interface SwapQuoteParams {
@@ -217,6 +218,7 @@ export interface SwapVeloraParams extends RequiredTransactionFeeData {
 	destinationNetwork: EthereumNetwork;
 	userAddress: EthAddress;
 	swapDetails: VeloraSwapDetails;
+	isGasless: boolean;
 }
 
 export interface CheckDeltaOrderStatusParams {
@@ -225,4 +227,9 @@ export interface CheckDeltaOrderStatusParams {
 	onExecuted?: () => void;
 	timeoutMs?: number;
 	intervalMs?: number;
+}
+
+export interface DeltaSwapResponse {
+	delta: DeltaPrice | BridgePrice;
+	deltaAddress: string;
 }

@@ -404,7 +404,7 @@ export class DerivationPath {
 		const joined = new Uint8Array(ckd_input.length + idx.length);
 		joined.set(ckd_input);
 		joined.set(idx, ckd_input.length);
-		let hmac_output = hmac(sha512, Buffer.from(chain_code.bytes), joined);
+		let hmac_output = hmac(sha512, chain_code.bytes, joined);
 
 		// const hmac_output = await browserHmacSha512(Buffer.from(chain_code.bytes), [ckd_input, idx]);
 

@@ -1,4 +1,4 @@
-import type { Contact, ContactImage } from '$declarations/backend/backend.did';
+import type { Contact, ContactImage } from '$declarations/backend/declarations/backend.did';
 import type { TokenAccountIdTypes } from '$lib/types/token-account-id';
 
 export interface ContactAddressUi {

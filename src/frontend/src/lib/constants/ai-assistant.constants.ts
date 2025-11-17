@@ -1,4 +1,4 @@
-import type { tool } from '$declarations/llm/llm.did';
+import type { tool } from '$declarations/llm/declarations/llm.did';
 import { toNullable } from '@dfinity/utils';
 
 export const AI_ASSISTANT_LLM_MODEL = 'qwen3:32b';

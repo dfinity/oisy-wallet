@@ -157,7 +157,6 @@ describe('etherscan.providers', () => {
 					action: 'txlist',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
@@ -174,7 +173,6 @@ describe('etherscan.providers', () => {
 					action: 'txlistinternal',
 					address,
 					startblock: 0,
-					endblock: 99999999,
 					sort: 'asc'
 				});
 			});
@@ -415,7 +413,7 @@ describe('etherscan.providers', () => {
 				}
 			];
 
-			const expectedTokenIds = [1, 2, 3];
+			const expectedTokenIds = ['1', '2', '3'];
 
 			beforeEach(() => {
 				vi.clearAllMocks();

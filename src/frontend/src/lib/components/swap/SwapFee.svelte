@@ -1,9 +1,13 @@
 <script lang="ts">
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 
-	export let fee: number | string;
-	export let symbol: string;
-	export let feeLabel: string;
+	interface Props {
+		fee: number | string;
+		symbol: string;
+		feeLabel: string;
+	}
+
+	let { fee, symbol, feeLabel }: Props = $props();
 </script>
 
 <ModalValue>

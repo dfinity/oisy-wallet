@@ -38,7 +38,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -168,13 +167,7 @@
 			metadata: sharedTrackingEventMetadata
 		});
 
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
-
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -226,6 +219,14 @@
 			return;
 		}
 
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			maxFeePerGas: maxFeePerGas.toString(),
+			maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+			gas: gas.toString()
+		};
+
 		try {
 			loading = true;
 
@@ -266,7 +267,7 @@
 </script>
 
 <CkEthLoader isSendFlow={true} nativeTokenId={nativeEthereumToken.id}>
-	<div class="mb-8 mt-2">
+	<div class="mt-2 mb-8">
 		<EthFeeContext
 			{amount}
 			{destination}

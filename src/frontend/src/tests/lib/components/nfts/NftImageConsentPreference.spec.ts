@@ -2,7 +2,6 @@ import { POLYGON_AMOY_NETWORK } from '$env/networks/networks-evm/networks.evm.po
 import NftImageConsentPreference from '$lib/components/nfts/NftImageConsentPreference.svelte';
 import { i18n } from '$lib/stores/i18n.store';
 import * as modalStoreMod from '$lib/stores/modal.store';
-import * as nftsUtils from '$lib/utils/nfts.utils';
 import { parseNftId } from '$lib/validation/nft.validation';
 import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
 import { mockValidErc721Nft } from '$tests/mocks/nfts.mock';
@@ -12,7 +11,7 @@ import { get } from 'svelte/store';
 
 const nftAzuki = {
 	...mockValidErc721Nft,
-	id: parseNftId(1),
+	id: parseNftId('1'),
 	collection: {
 		...mockValidErc721Nft.collection,
 		name: 'Azuki Elemental Beans',
@@ -22,7 +21,6 @@ const nftAzuki = {
 };
 
 describe('NftImageConsentPreference', () => {
-	const getAllowMediaSpy = vi.spyOn(nftsUtils, 'getAllowMediaForNft');
 	const openSpy = vi
 		.spyOn(modalStoreMod.modalStore, 'openNftImageConsent')
 		.mockImplementation(() => {});
@@ -32,30 +30,24 @@ describe('NftImageConsentPreference', () => {
 	});
 
 	it('renders media_enabled text when hasConsent=true', () => {
-		getAllowMediaSpy.mockReturnValue(true);
-
 		const { getByText } = render(NftImageConsentPreference, {
-			props: { collection: nftAzuki.collection }
+			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
 		});
 
 		expect(getByText(get(i18n).nfts.text.media_enabled)).toBeInTheDocument();
 	});
 
 	it('renders media_disabled text when hasConsent=false', () => {
-		getAllowMediaSpy.mockReturnValue(false);
-
 		const { getByText } = render(NftImageConsentPreference, {
-			props: { collection: nftAzuki.collection }
+			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: false } }
 		});
 
 		expect(getByText(get(i18n).nfts.text.media_disabled)).toBeInTheDocument();
 	});
 
 	it('opens the consent modal with the collection when clicking the button', async () => {
-		getAllowMediaSpy.mockReturnValue(true);
-
 		const { getByRole } = render(NftImageConsentPreference, {
-			props: { collection: nftAzuki.collection }
+			props: { collection: { ...nftAzuki.collection, allowExternalContentSource: true } }
 		});
 
 		const btn = getByRole('button', { name: get(i18n).nfts.alt.review_preference });

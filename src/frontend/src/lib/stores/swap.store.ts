@@ -1,9 +1,10 @@
+import { isTokenErc20 } from '$eth/utils/erc20.utils';
+import { isIcToken } from '$icp/validation/ic-token.validation';
 import { exchanges } from '$lib/derived/exchange.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import type { Balance } from '$lib/types/balance';
 import type { Token } from '$lib/types/token';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, writable, type Readable, type Writable } from 'svelte/store';
 
 export interface SwapError {
@@ -19,9 +20,13 @@ export interface SwapData {
 	destinationToken?: Token;
 }
 
+type IsTokensIcrc2Map = Record<string, boolean>;
+
 export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	const data = writable<SwapData>(swapData);
 	const { update } = data;
+	const isTokensIcrc2 = writable<IsTokensIcrc2Map | undefined>();
+	const isErc20PermitSupported = writable<IsTokensIcrc2Map | undefined>();
 
 	const sourceToken = derived([data], ([{ sourceToken }]) => sourceToken);
 	const destinationToken = derived([data], ([{ destinationToken }]) => destinationToken);
@@ -47,12 +52,27 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 	);
 
 	const isSourceTokenIcrc2 = derived(
-		[kongSwapTokensStore, sourceToken],
-		([$kongSwapTokensStore, $sourceToken]) =>
-			nonNullish($sourceToken) &&
-			nonNullish($kongSwapTokensStore) &&
-			nonNullish($kongSwapTokensStore[$sourceToken.symbol]) &&
-			$kongSwapTokensStore[$sourceToken.symbol].icrc2
+		[isTokensIcrc2, sourceToken],
+		([$isTokensIcrc2, $sourceToken]) => {
+			if (isNullish($sourceToken) || !isIcToken($sourceToken) || isNullish($isTokensIcrc2)) {
+				return;
+			}
+			return $isTokensIcrc2[$sourceToken.ledgerCanisterId];
+		}
+	);
+
+	const isSourceTokenPermitSupported = derived(
+		[isErc20PermitSupported, sourceToken],
+		([$isErc20PermitSupported, $sourceToken]) => {
+			if (
+				isNullish($sourceToken) ||
+				!isTokenErc20($sourceToken) ||
+				isNullish($isErc20PermitSupported)
+			) {
+				return;
+			}
+			return $isErc20PermitSupported[$sourceToken.address];
+		}
 	);
 
 	return {
@@ -63,6 +83,7 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 		sourceTokenExchangeRate,
 		destinationTokenExchangeRate,
 		isSourceTokenIcrc2,
+		isSourceTokenPermitSupported,
 		failedSwapError: writable<SwapError | undefined>(undefined),
 		setSourceToken: (token: Token) =>
 			update((state) => ({
@@ -78,6 +99,28 @@ export const initSwapContext = (swapData: SwapData = {}): SwapContext => {
 			update((state) => ({
 				sourceToken: state.destinationToken,
 				destinationToken: state.sourceToken
+			})),
+		setIsTokensIcrc2: ({
+			ledgerCanisterId,
+			isIcrc2Supported
+		}: {
+			ledgerCanisterId: string;
+			isIcrc2Supported: boolean;
+		}) =>
+			isTokensIcrc2.update((state) => ({
+				...state,
+				[ledgerCanisterId]: isIcrc2Supported
+			})),
+		setIsTokenPermitSupported: ({
+			address,
+			isPermitSupported
+		}: {
+			address: string;
+			isPermitSupported: boolean;
+		}) =>
+			isErc20PermitSupported.update((state) => ({
+				...state,
+				[address]: isPermitSupported
 			}))
 	};
 };
@@ -89,8 +132,17 @@ export interface SwapContext {
 	destinationTokenBalance: Readable<Balance | undefined>;
 	sourceTokenExchangeRate: Readable<number | undefined>;
 	destinationTokenExchangeRate: Readable<number | undefined>;
-	isSourceTokenIcrc2: Readable<boolean>;
+	isSourceTokenIcrc2: Readable<boolean | undefined>;
+	isSourceTokenPermitSupported: Readable<boolean | undefined>;
 	failedSwapError: Writable<SwapError | undefined>;
+	setIsTokensIcrc2: (args: { ledgerCanisterId: string; isIcrc2Supported: boolean }) => void;
+	setIsTokenPermitSupported: ({
+		address,
+		isPermitSupported
+	}: {
+		address: string;
+		isPermitSupported: boolean;
+	}) => void;
 	setSourceToken: (token: Token) => void;
 	setDestinationToken: (token: Token | undefined) => void;
 	switchTokens: () => void;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Html } from '@dfinity/gix-components';
-	import { getContext } from 'svelte';
+	import { getContext, type Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import { ETH_FEE_CONTEXT_KEY, type EthFeeContext } from '$eth/stores/eth-fee.store';
@@ -17,9 +17,21 @@
 	import type { OptionAmount } from '$lib/types/send';
 	import { invalidAmount, isNullishOrEmpty } from '$lib/utils/input.utils';
 
-	export let sendAmount: OptionAmount;
-	export let receiveAmount: number | undefined;
-	export let destination = '';
+	interface Props {
+		sendAmount: OptionAmount;
+		receiveAmount?: number;
+		destination?: string;
+		onNext: () => void;
+		cancel: Snippet;
+	}
+
+	let {
+		sendAmount = $bindable(),
+		receiveAmount = $bindable(),
+		destination = '',
+		onNext,
+		cancel
+	}: Props = $props();
 
 	const { sourceToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -28,24 +40,25 @@
 	const { insufficientFunds, insufficientFundsForFee } =
 		getContext<TokenActionValidationErrorsContext>(TOKEN_ACTION_VALIDATION_ERRORS_CONTEXT_KEY);
 
-	let invalid: boolean;
-	$: invalid =
+	let invalid = $derived(
 		$insufficientFunds ||
-		$insufficientFundsForFee ||
-		invalidAmount(sendAmount) ||
-		isNullishOrEmpty(destination);
+			$insufficientFundsForFee ||
+			invalidAmount(sendAmount) ||
+			isNullishOrEmpty(destination)
+	);
 </script>
 
 <ConvertForm
+	{cancel}
 	disabled={invalid}
 	minFee={$minGasFee}
+	{onNext}
 	testId={ETH_CONVERT_FORM_TEST_ID}
 	totalFee={$maxGasFee}
-	on:icNext
 	bind:sendAmount
 	bind:receiveAmount
 >
-	<svelte:fragment slot="message">
+	{#snippet message()}
 		{#if isTokenErc20($sourceToken) && $insufficientFundsForFee}
 			<div in:fade>
 				<MessageBox level="error"
@@ -53,13 +66,13 @@
 				>
 			</div>
 		{/if}
-	</svelte:fragment>
+	{/snippet}
 
-	<EthFeeDisplay slot="fee">
-		{#snippet label()}
-			<Html text={$i18n.fee.text.convert_fee} />
-		{/snippet}
-	</EthFeeDisplay>
-
-	<slot name="cancel" slot="cancel" />
+	{#snippet fee()}
+		<EthFeeDisplay>
+			{#snippet label()}
+				<Html text={$i18n.fee.text.convert_fee} />
+			{/snippet}
+		</EthFeeDisplay>
+	{/snippet}
 </ConvertForm>

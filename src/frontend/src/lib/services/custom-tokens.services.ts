@@ -1,11 +1,10 @@
-import type { CustomToken } from '$declarations/backend/backend.did';
+import type { CustomToken } from '$declarations/backend/declarations/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import type { OptionIdentity } from '$lib/types/identity';
-import { Principal } from '@dfinity/principal';
 import { fromNullable, isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 interface LoadCustomTokensFromBackendParams {
@@ -45,7 +44,6 @@ export const loadNetworkCustomTokens = async ({
 	useCache = false
 }: LoadCustomTokensParams): Promise<CustomToken[]> => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return [];
 	}
 

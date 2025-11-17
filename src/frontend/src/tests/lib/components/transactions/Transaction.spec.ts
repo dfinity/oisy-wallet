@@ -1,122 +1,108 @@
+import { BONK_TOKEN } from '$env/tokens/tokens-spl/tokens.bonk.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import Transaction from '$lib/components/transactions/Transaction.svelte';
-import type { Token as AppToken } from '$lib/types/token';
+import { contactsStore } from '$lib/stores/contacts.store';
+import { nftStore } from '$lib/stores/nft.store';
 import { shortenWithMiddleEllipsis } from '$lib/utils/format.utils';
+import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { setPrivacyMode } from '$lib/utils/privacy.utils';
-import { render, screen } from '@testing-library/svelte';
+import { getMockContactsUi } from '$tests/mocks/contacts.mock';
+import { AZUKI_ELEMENTAL_BEANS_TOKEN } from '$tests/mocks/erc721-tokens.mock';
+import en from '$tests/mocks/i18n.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
+import { render } from '@testing-library/svelte';
 
-export interface Token {
-	symbol: string;
-	name: string;
-	decimals: number;
-	logo?: string;
-}
-interface ContactMock {
-	name: string;
-	image?: string;
-	address: string;
-}
+describe('Transaction', () => {
+	const NFT_TEST_TOKEN = AZUKI_ELEMENTAL_BEANS_TOKEN;
 
-let mockIsErc721 = false;
-let mockIsNonFungible = false;
-
-vi.mock('$eth/utils/erc721.utils', () => ({
-	isTokenErc721: () => mockIsErc721
-}));
-
-vi.mock('$lib/utils/nft.utils', () => ({
-	isTokenNonFungible: () => mockIsNonFungible
-}));
-
-vi.mock('$lib/utils/nfts.utils', () => ({
-	findNft: () => ({ id: 'dummy-nft', name: 'Cool NFT' })
-}));
-
-vi.mock('$lib/validation/nft.validation', () => ({
-	parseNftId: (n: number) => n
-}));
-
-vi.mock('$lib/utils/token.utils', () => ({
-	getTokenDisplaySymbol: (token: { symbol?: string }) => token?.symbol ?? 'TKN'
-}));
-
-let testContact: ContactMock | undefined = undefined;
-let testAliasLabel: string | undefined = 'Work';
-
-vi.mock('$lib/utils/contact.utils', () => ({
-	getContactForAddress: ({ addressString }: { addressString: string }) =>
-		testContact?.address === addressString ? testContact : undefined,
-	filterAddressFromContact: () => (testAliasLabel ? { label: testAliasLabel } : undefined),
-	selectColorForName: () => '#000000'
-}));
-
-// Minimal NFT token for tests (will be cast to AppToken at call sites)
-const NFT_TEST_TOKEN: Token = { symbol: 'COOLNFT', name: 'Cool NFT', decimals: 0 };
-
-describe('Transaction (single)', () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+
 		setPrivacyMode({ enabled: false });
 
-		mockIsErc721 = false;
-		mockIsNonFungible = false;
-		testContact = undefined;
-		testAliasLabel = 'Work';
+		contactsStore.reset();
 	});
 
-	it('renders from when we RECEIVE address', async () => {
+	it('should render `from` when we RECEIVE address', () => {
 		const fromAddress = '0xfeedface';
-		testContact = undefined;
 
-		const { container } = render(Transaction, {
+		const { container, getByText } = render(Transaction, {
 			displayAmount: 42n,
 			type: 'receive',
 			status: 'confirmed',
 			timestamp: 1_690_000_000,
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			from: fromAddress
+			from: fromAddress,
+			children: mockSnippet
 		});
 
-		await expect(screen.findByText(/From/i)).resolves.toBeInTheDocument();
+		expect(getByText(/From/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: fromAddress }));
 	});
 
-	it('when no contact is found, shows "To" and a shortened address', () => {
+	it('should show "To" and a shortened address when no contact is found', () => {
 		const toAddress = '0xno-contact';
-		testContact = undefined;
 
-		const { container } = render(Transaction, {
+		const { container, getByText } = render(Transaction, {
 			type: 'send',
 			status: 'confirmed',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: toAddress
+			to: toAddress,
+			children: mockSnippet
 		});
 
-		expect(screen.getByText(/^to$/i)).toBeInTheDocument();
+		expect(getByText(/^to$/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: toAddress }));
 	});
 
-	it('when a contact is found, shows "To" and the contacts name', () => {
+	it('should show "To" and the contacts name when a contact is found', () => {
 		const toAddress = '0xJOHNNY';
-		testContact = { name: 'Johnny', address: toAddress };
+
+		const contact = getMockContactsUi({
+			n: 1,
+			name: 'Johnny',
+			addresses: [
+				{
+					addressType: 'Btc',
+					address: toAddress,
+					label: 'My Bitcoin Address'
+				}
+			]
+		});
+
+		contactsStore.set([...contact]);
 
 		const { getByText } = render(Transaction, {
 			type: 'send',
 			status: 'confirmed',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: toAddress
+			to: toAddress,
+			children: mockSnippet
 		});
 
 		expect(getByText(/^to$/i)).toBeInTheDocument();
 		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
 	});
 
-	it('when a contact is found, shows "For" and the spender accounts contact name for approve transactions', () => {
+	it('should show "For" and the spender accounts contact name for approve transactions when a contact is found', () => {
 		const forAddress = '0xJOHNNY';
-		testContact = { name: 'Johnny', address: forAddress };
+
+		const contact = getMockContactsUi({
+			n: 1,
+			name: 'Johnny',
+			addresses: [
+				{
+					addressType: 'Btc',
+					address: forAddress,
+					label: 'My Bitcoin Address'
+				}
+			]
+		});
+
+		contactsStore.set([...contact]);
 
 		const { getByText } = render(Transaction, {
 			type: 'approve',
@@ -124,88 +110,108 @@ describe('Transaction (single)', () => {
 			token: ICP_TOKEN,
 			iconType: 'transaction',
 			to: '0xSOMEADDRESS',
-			approveSpender: forAddress
+			approveSpender: forAddress,
+			children: mockSnippet
 		});
 
 		expect(getByText(/^for$/i)).toBeInTheDocument();
 		expect(getByText(/^Johnny$/i)).toBeInTheDocument();
 	});
 
-	it('hides amount in privacy mode (shows dots instead of amount)', () => {
+	it('should hide amount in privacy mode (shows dots instead of amount)', () => {
 		setPrivacyMode({ enabled: true });
 
-		const { container } = render(Transaction, {
+		const { container, queryByText } = render(Transaction, {
 			displayAmount: 10n,
 			type: 'send',
 			status: 'pending',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: '0xaddr'
+			to: '0xaddr',
+			children: mockSnippet
 		});
 
-		expect(screen.queryByText(/ICP/)).toBeNull();
+		expect(queryByText(/ICP/)).toBeNull();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
 	});
 
-	it('does not render amount for ERC-721 tokens', () => {
-		mockIsErc721 = true;
+	it('should render NFT logo in token icon mode when token is non-fungible and nft is found', () => {
+		const { container, getByLabelText, getByText, queryByText, getByAltText } = render(
+			Transaction,
+			{
+				type: 'receive',
+				status: 'unconfirmed',
+				token: NFT_TEST_TOKEN,
+				iconType: 'token',
+				from: '0xaddr',
+				tokenId: 1,
+				children: mockSnippet
+			}
+		);
 
-		render(Transaction, {
-			displayAmount: 999n,
-			type: 'send',
-			status: 'confirmed',
-			token: NFT_TEST_TOKEN as unknown as AppToken,
-			iconType: 'transaction',
-			to: '0xaddr'
-		});
-
-		expect(screen.queryByText(/COOLNFT/)).toBeNull();
-	});
-
-	it('renders NFT logo in token icon mode when token is non-fungible and nft is found', () => {
-		mockIsNonFungible = true;
-
-		const { container } = render(Transaction, {
-			type: 'receive',
-			status: 'unconfirmed',
-			token: NFT_TEST_TOKEN as unknown as AppToken,
-			iconType: 'token',
-			from: '0xaddr',
-			tokenId: 1
-		});
-
-		expect(screen.getByLabelText('receive')).toBeInTheDocument(); // badge
-		expect(screen.getByText(/^from$/i)).toBeInTheDocument();
+		expect(getByLabelText('receive')).toBeInTheDocument(); // badge
+		expect(getByText(/^from$/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
-		expect(screen.queryByText(/COOLNFT/)).toBeNull(); // no amount shown for NFT
+		expect(queryByText(/MBeans/)).toBeNull(); // no amount shown for NFT
+		expect(
+			getByAltText(replacePlaceholders(en.core.alt.logo, { $name: NFT_TEST_TOKEN.name }))
+		).toBeInTheDocument();
 	});
 
-	it('renders token logo in token icon mode for fungible tokens (amount visible)', async () => {
-		mockIsNonFungible = false;
+	it('should render NFT logo in token icon mode when token is non-fungible and nft is not found but has metadata', () => {
+		nftStore.resetAll();
 
-		render(Transaction, {
+		const { container, getByLabelText, getByText, queryByText, getByAltText } = render(
+			Transaction,
+			{
+				type: 'receive',
+				status: 'unconfirmed',
+				token: NFT_TEST_TOKEN,
+				iconType: 'token',
+				from: '0xaddr',
+				tokenId: 1,
+				children: mockSnippet
+			}
+		);
+
+		expect(getByLabelText('receive')).toBeInTheDocument(); // badge
+		expect(getByText(/^from$/i)).toBeInTheDocument();
+		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
+		expect(queryByText(/MBeans/)).toBeNull(); // no amount shown for NFT
+		expect(
+			getByAltText(replacePlaceholders(en.core.alt.logo, { $name: NFT_TEST_TOKEN.name }))
+		).toBeInTheDocument();
+	});
+
+	it('should render token logo in token icon mode for fungible tokens (amount visible)', () => {
+		const { getByText, getByAltText } = render(Transaction, {
 			type: 'receive',
 			status: 'confirmed',
-			token: ICP_TOKEN,
+			token: BONK_TOKEN,
 			iconType: 'token',
 			from: '0xaddr',
-			displayAmount: 1n
+			displayAmount: 1n,
+			children: mockSnippet
 		});
 
-		await expect(screen.findByText(/ICP/)).resolves.toBeInTheDocument();
+		expect(getByText(/BONK/)).toBeInTheDocument();
+		expect(
+			getByAltText(replacePlaceholders(en.core.alt.logo, { $name: BONK_TOKEN.name }))
+		).toBeInTheDocument();
 	});
 
-	it('renders description with shortened "to" address and pending status in transaction icon mode', () => {
-		const { container } = render(Transaction, {
+	it('should render description with shortened "to" address and pending status in transaction icon mode', () => {
+		const { container, getByText } = render(Transaction, {
 			type: 'send',
 			status: 'pending',
 			token: ICP_TOKEN,
 			iconType: 'transaction',
-			to: '0xaddr'
+			to: '0xaddr',
+			children: mockSnippet
 		});
 
-		expect(screen.getByText(/^to$/i)).toBeInTheDocument();
+		expect(getByText(/^to$/i)).toBeInTheDocument();
 		expect(container).toHaveTextContent(shortenWithMiddleEllipsis({ text: '0xaddr' }));
-		expect(screen.getByText(/Pending\.\.\./i)).toBeInTheDocument();
+		expect(getByText(/Pending\.\.\./i)).toBeInTheDocument();
 	});
 });

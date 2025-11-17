@@ -4,6 +4,7 @@ import { selectedEthereumNetwork } from '$eth/derived/network.derived';
 import { enabledEthereumNetworks } from '$eth/derived/networks.derived';
 import { nativeEthereumTokenId } from '$eth/derived/token.derived';
 import { enabledEthereumTokens } from '$eth/derived/tokens.derived';
+import type { OptionEthAddress } from '$eth/types/address';
 import type { EthereumNetwork } from '$eth/types/network';
 import { ckEthMinterInfoStore } from '$icp-eth/stores/cketh.store';
 import {
@@ -16,7 +17,6 @@ import { isTokenCkErc20Ledger, isTokenCkEthLedger } from '$icp/utils/ic-send.uti
 import { DEFAULT_ETHEREUM_TOKEN } from '$lib/constants/tokens.constants';
 import { tokenWithFallback } from '$lib/derived/token.derived';
 import { balancesStore } from '$lib/stores/balances.store';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { OptionBalance } from '$lib/types/balance';
 import type { Token, TokenId, TokenStandard } from '$lib/types/token';
 import { nonNullish } from '@dfinity/utils';

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { Html } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import EthFeeDisplay from '$eth/components/fee/EthFeeDisplay.svelte';
 	import type { EthereumNetwork } from '$eth/types/network';
 	import { decodeErc20AbiDataValue } from '$eth/utils/transactions.utils';
 	import NetworkWithLogo from '$lib/components/networks/NetworkWithLogo.svelte';
@@ -16,7 +14,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { Network } from '$lib/types/network';
-	import { formatToken } from '$lib/utils/format.utils';
 
 	interface Props {
 		amount: bigint;
@@ -53,7 +50,7 @@
 
 <ContentWithToolbar>
 	<SendData
-		amount={formatToken({ value: amountDisplay })}
+		amount={amountDisplay}
 		{application}
 		{balance}
 		{destination}
@@ -75,14 +72,6 @@
 					<NetworkWithLogo network={targetNetwork} />
 				</WalletConnectModalValue>
 			{/if}
-		{/snippet}
-
-		{#snippet fee()}
-			<EthFeeDisplay>
-				{#snippet label()}
-					<Html text={$i18n.fee.text.max_fee_eth} />
-				{/snippet}
-			</EthFeeDisplay>
 		{/snippet}
 
 		<WalletConnectData {data} label={$i18n.wallet_connect.text.hex_data} />

@@ -1,4 +1,5 @@
 import { ERC20_APPROVE_HASH } from '$eth/constants/erc20.constants';
+import type { EthAddress, OptionEthAddress } from '$eth/types/address';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { EthTransactionUi } from '$eth/types/eth-transaction';
 import type { OptionCertifiedMinterInfo } from '$icp-eth/types/cketh-minter';
@@ -7,7 +8,6 @@ import {
 	toCkEthHelperContractAddress,
 	toCkMinterAddress
 } from '$icp-eth/utils/cketh.utils';
-import type { EthAddress, OptionEthAddress } from '$lib/types/address';
 import type { NetworkId } from '$lib/types/network';
 import type { OptionString } from '$lib/types/string';
 import type { Transaction } from '$lib/types/transaction';

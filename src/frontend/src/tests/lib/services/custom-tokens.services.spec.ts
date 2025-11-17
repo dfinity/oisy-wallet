@@ -1,17 +1,12 @@
 import { listCustomTokens } from '$lib/api/backend.api';
 import * as idbTokensApi from '$lib/api/idb-tokens.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { loadNetworkCustomTokens } from '$lib/services/custom-tokens.services';
 import { mockCustomTokens } from '$tests/mocks/custom-tokens.mock';
 import en from '$tests/mocks/i18n.mock';
 import { mockIndexCanisterId, mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { Principal } from '@dfinity/principal';
 import { toNullable } from '@dfinity/utils';
-
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
+import { Principal } from '@icp-sdk/core/principal';
 
 vi.mock('$lib/api/backend.api', () => ({
 	listCustomTokens: vi.fn()
@@ -123,18 +118,6 @@ describe('custom-tokens.services', () => {
 			mockSetIdbTokens.mockRejectedValue(new Error('IDB error'));
 
 			await expect(loadNetworkCustomTokens(mockParams)).rejects.toThrow('IDB error');
-		});
-
-		it('should sign out if the identity is nullish', async () => {
-			await expect(loadNetworkCustomTokens({ ...mockParams, identity: null })).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
-
-			await expect(
-				loadNetworkCustomTokens({ ...mockParams, identity: undefined })
-			).resolves.toEqual([]);
-
-			expect(nullishSignOut).toHaveBeenCalledTimes(2);
 		});
 
 		it('should fetch the cached tokens if useCache is true and certified is false', async () => {

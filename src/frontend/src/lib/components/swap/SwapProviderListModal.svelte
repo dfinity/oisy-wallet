@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher, getContext } from 'svelte';
+	import { getContext } from 'svelte';
 	import { dAppDescriptions } from '$env/dapp-descriptions.env';
 	import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 	import SwapProviderListItem from '$lib/components/swap/SwapProviderListItem.svelte';
@@ -18,10 +18,12 @@
 	import type { SwapMappedResult } from '$lib/types/swap';
 	import { formatTokenBigintToNumber, formatCurrency } from '$lib/utils/format.utils';
 
-	const dispatch = createEventDispatcher<{
-		icSelectProvider: SwapMappedResult;
-		icCloseProviderList: void;
-	}>();
+	interface Props {
+		onSelectProvider: (swap: SwapMappedResult) => void;
+		onCloseProviderList: () => void;
+	}
+
+	let { onSelectProvider, onCloseProviderList }: Props = $props();
 
 	const { destinationToken, destinationTokenExchangeRate } =
 		getContext<SwapContext>(SWAP_CONTEXT_KEY);
@@ -70,12 +72,12 @@
 						dapp={dAppDescriptions.find(({ id }) => id === swap.provider.toLowerCase())}
 						destinationToken={$destinationToken as IcTokenToggleable}
 						isBestRate={swap.provider === $swapAmountsStore.swaps[0].provider}
+						onClick={() => onSelectProvider(swap)}
 						usdBalance={getUsdBalance({
 							amount: swap.receiveAmount,
 							token: $destinationToken as IcTokenToggleable,
 							exchangeRate: $destinationTokenExchangeRate
 						})}
-						on:click={() => dispatch('icSelectProvider', swap)}
 					/>
 				</li>
 			{/if}
@@ -84,5 +86,5 @@
 </div>
 
 <ButtonGroup>
-	<ButtonCancel fullWidth={true} onclick={() => dispatch('icCloseProviderList')} />
+	<ButtonCancel fullWidth={true} onclick={onCloseProviderList} />
 </ButtonGroup>

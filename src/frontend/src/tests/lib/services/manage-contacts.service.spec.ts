@@ -1,4 +1,4 @@
-import type { ContactImage } from '$declarations/backend/backend.did';
+import type { ContactImage } from '$declarations/backend/declarations/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { createContact, loadContacts, updateContact } from '$lib/services/manage-contacts.service';
 import { contactsStore } from '$lib/stores/contacts.store';

@@ -14,7 +14,8 @@ import { erc721CustomTokensStore } from '$eth/stores/erc721-custom-tokens.store'
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc20 } from '$eth/utils/erc20.utils';
 import { getIdbEthTransactions } from '$lib/api/idb-transactions.api';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
+import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { syncTransactionsFromCache } from '$lib/services/listener.services';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { createMockErc1155CustomTokens } from '$tests/mocks/erc1155-tokens.mock';
@@ -27,6 +28,14 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { tick } from 'svelte';
 
+vi.mock('@dfinity/utils', async () => {
+	const actual = await vi.importActual('@dfinity/utils');
+	return {
+		...actual,
+		debounce: (fn: () => void) => fn // Execute immediately instead of debouncing
+	};
+});
+
 vi.mock('$eth/services/eth-transactions.services', () => ({
 	loadEthereumTransactions: vi.fn()
 }));
@@ -35,8 +44,12 @@ vi.mock('$lib/services/listener.services', () => ({
 	syncTransactionsFromCache: vi.fn()
 }));
 
+vi.mock('$lib/utils/time.utils', () => ({
+	randomWait: vi.fn()
+}));
+
 describe('LoaderMultipleEthTransactions', () => {
-	const timeout = 60_000;
+	const timeout = WALLET_TIMER_INTERVAL_MILLIS;
 
 	const mockMainnetErc20CertifiedUserTokens = createMockErc20UserTokens({
 		n: 2,
@@ -112,7 +125,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		vi.useFakeTimers();
 
 		vi.stubGlobal(
-			'setInterval',
+			'setTimeout',
 			vi.fn(() => 123456789)
 		);
 
@@ -121,7 +134,7 @@ describe('LoaderMultipleEthTransactions', () => {
 		setupTestnetsStore('enabled');
 		setupUserNetworksStore('allEnabled');
 
-		vi.spyOn(appContants, 'LOCAL', 'get').mockImplementation(() => false);
+		vi.spyOn(appConstants, 'LOCAL', 'get').mockImplementation(() => false);
 
 		erc20UserTokensStore.resetAll();
 		erc20UserTokensStore.setAll(mockErc20CertifiedUserTokens);
@@ -131,6 +144,8 @@ describe('LoaderMultipleEthTransactions', () => {
 
 		erc1155CustomTokensStore.resetAll();
 		erc1155CustomTokensStore.setAll(mockErc1155CertifiedCustomTokens);
+
+		ethTransactionsStore.reinitialize();
 
 		vi.spyOn(nftEnv, 'NFTS_ENABLED', 'get').mockImplementation(() => true);
 	});

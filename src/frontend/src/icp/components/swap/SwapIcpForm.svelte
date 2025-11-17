@@ -18,6 +18,7 @@
 		sourceTokenFee?: bigint;
 		isSwapAmountsLoading: boolean;
 		onShowTokensList: (tokenSource: 'source' | 'destination') => void;
+		onShowProviderList: () => void;
 		onClose: () => void;
 		onNext: () => void;
 	}
@@ -29,6 +30,7 @@
 		sourceTokenFee,
 		isSwapAmountsLoading,
 		onShowTokensList,
+		onShowProviderList,
 		onClose,
 		onNext
 	}: Props = $props();
@@ -38,7 +40,11 @@
 
 	let errorType = $state<TokenActionErrorType | undefined>();
 
-	let totalFee = $derived((sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n));
+	let totalFee = $derived(
+		nonNullish($isSourceTokenIcrc2)
+			? (sourceTokenFee ?? ZERO) * ($isSourceTokenIcrc2 ? 2n : 1n)
+			: undefined
+	);
 
 	const customValidate = (userAmount: bigint): TokenActionErrorType =>
 		nonNullish($sourceToken)
@@ -69,7 +75,7 @@
 			<Hr spacing="md" />
 
 			<div class="flex flex-col gap-3">
-				<SwapProvider showSelectButton {slippageValue} on:icShowProviderList />
+				<SwapProvider {onShowProviderList} showSelectButton {slippageValue} />
 				<SwapFees />
 			</div>
 		{/if}

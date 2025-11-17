@@ -1,4 +1,4 @@
-import type { Contact, ContactAddressData } from '$declarations/backend/backend.did';
+import type { Contact, ContactAddressData } from '$declarations/backend/declarations/backend.did';
 import type { ContactAddressUi, ContactUi } from '$lib/types/contact';
 import { mockBtcAddress, mockBtcP2SHAddress } from '$tests/mocks/btc.mock';
 import { mockEthAddress, mockEthAddress3 } from '$tests/mocks/eth.mock';

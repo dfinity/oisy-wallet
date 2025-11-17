@@ -23,17 +23,17 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a>, ' +
-						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Terms of Use Link">Terms of Use <!----></a>, ' +
-						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
+						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a>, ' +
+						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Terms of Use Link">Terms of Use <!----></a>, ' +
+						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
 					[Languages.ITALIAN]:
-						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a>, ' +
-						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a> ' +
-						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
+						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a>, ' +
+						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a> ' +
+						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a>, ' +
-						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a> ' +
-						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
+						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a>, ' +
+						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a> ' +
+						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
 				}
 			},
 			{
@@ -43,14 +43,14 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a> ' +
-						'and our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Terms of Use Link">Terms of Use <!----></a>',
+						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a> ' +
+						'and our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Terms of Use Link">Terms of Use <!----></a>',
 					[Languages.ITALIAN]:
-						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a> ' +
-						'e i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a>',
+						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a> ' +
+						'e i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a> ' +
-						'und unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a>'
+						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a> ' +
+						'und unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a>'
 				}
 			},
 			{
@@ -60,14 +60,14 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a> ' +
-						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
+						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a> ' +
+						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
 					[Languages.ITALIAN]:
-						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a> ' +
-						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
+						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a> ' +
+						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a> ' +
-						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
+						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a> ' +
+						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
 				}
 			},
 			{
@@ -77,14 +77,14 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Terms of Use Link">Terms of Use <!----></a> ' +
-						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
+						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Terms of Use Link">Terms of Use <!----></a> ' +
+						'and our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
 					[Languages.ITALIAN]:
-						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a> ' +
-						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
+						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a> ' +
+						'e la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a> ' +
-						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
+						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a> ' +
+						'und unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
 				}
 			},
 			{
@@ -93,11 +93,11 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a>',
+						'our <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="The OISY Wallet License Agreement">License Agreement <!----></a>',
 					[Languages.ITALIAN]:
-						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a>',
+						'il nostro <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="L\'Accordo di Licenza di OISY Wallet">Accordo di Licenza <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a>'
+						'unsere <a href="/license-agreement" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Die Lizenzvereinbarung von OISY Wallet">Lizenzvereinbarung <!----></a>'
 				}
 			},
 			{
@@ -106,11 +106,11 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Terms of Use Link">Terms of Use <!----></a>',
+						'our <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Terms of Use Link">Terms of Use <!----></a>',
 					[Languages.ITALIAN]:
-						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a>',
+						'i nostri <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link ai termini di utilizzo">Termini di utilizzo <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a>'
+						'unsere <a href="/terms-of-use" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zu den Nutzungsbedingungen">Nutzungsbedingungen <!----></a>'
 				}
 			},
 			{
@@ -119,11 +119,11 @@ describe('agreements-formatter.utils', () => {
 				},
 				expected: {
 					[Languages.ENGLISH]:
-						'our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
+						'our <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Privacy Policy Link">Privacy Policy <!----></a>',
 					[Languages.ITALIAN]:
-						'la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
+						'la nostra <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link all\'informativa sulla privacy">Politica sulla riservatezza <!----></a>',
 					[Languages.GERMAN]:
-						'unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
+						'unsere <a href="/privacy-policy" target="_blank" class="inline-flex items-center gap-1 active:text-brand-secondary hover:text-brand-secondary text-brand-primary-alt" aria-label="Link zur Datenschutzrichtlinie">Datenschutzrichtlinie <!----></a>'
 				}
 			}
 		];
@@ -131,8 +131,8 @@ describe('agreements-formatter.utils', () => {
 		describe.each([Languages.ENGLISH, Languages.ITALIAN, Languages.GERMAN])(
 			'for language: %s',
 			(language) => {
-				beforeEach(() => {
-					i18n.switchLang(language);
+				beforeEach(async () => {
+					await i18n.switchLang(language);
 				});
 
 				it.each(testCases)(

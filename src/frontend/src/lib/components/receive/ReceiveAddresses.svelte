@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
+	import { page } from '$app/state';
+	import type { OptionBtcAddress } from '$btc/types/address';
 	import {
 		BTC_MAINNET_NETWORK,
 		BTC_REGTEST_NETWORK,
@@ -25,6 +26,7 @@
 		SOLANA_LOCAL_TOKEN,
 		SOLANA_TOKEN
 	} from '$env/tokens/tokens.sol.env';
+	import type { OptionEthAddress } from '$eth/types/address';
 	import { icpAccountIdentifierText, icrcAccountIdentifierText } from '$icp/derived/ic.derived';
 	import ReceiveAddress from '$lib/components/receive/ReceiveAddress.svelte';
 	import ButtonDone from '$lib/components/ui/ButtonDone.svelte';
@@ -67,15 +69,20 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionBtcAddress, OptionEthAddress } from '$lib/types/address';
 	import type { Network } from '$lib/types/network';
 	import type { ReceiveQRCode } from '$lib/types/receive';
 	import type { Token } from '$lib/types/token';
+	import { isRouteNfts } from '$lib/utils/nav.utils';
 
-	const dispatch = createEventDispatcher();
+	interface Props {
+		onQRCode: (details: ReceiveQRCode) => void;
+	}
 
-	const displayQRCode = (details: Omit<Required<ReceiveQRCode>, 'qrCodeAriaLabel'>) =>
-		dispatch('icQRCode', details);
+	let { onQRCode }: Props = $props();
+
+	const displayQRCode = (details: ReceiveQRCode) => onQRCode(details);
+
+	let isNftsPage = $derived(isRouteNfts(page));
 
 	interface ReceiveAddressProps {
 		labelRef: string;
@@ -89,18 +96,15 @@
 		qrCodeAriaLabel: string;
 		text?: string;
 		condition?: boolean;
-		on: {
-			click: () => void;
-		};
 		qrCodeAction: {
 			enabled: true;
 			testId: typeof RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON;
 			ariaLabel: string;
+			onClick: () => void;
 		};
 	}
 
-	let receiveAddressCoreList: Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[];
-	$: receiveAddressCoreList = [
+	let receiveAddressCoreList = $derived<Omit<ReceiveAddressProps, 'qrCodeAction' | 'on'>[]>([
 		{
 			labelRef: 'btcAddressMainnet',
 			address: $btcAddressMainnet,
@@ -213,63 +217,59 @@
 			qrCodeAriaLabel: $i18n.receive.solana.text.display_solana_address_qr,
 			condition: $networkSolanaLocalEnabled && $testnetsEnabled && LOCAL
 		}
-	];
+	]);
 
-	let receiveAddressList: Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[];
-	$: receiveAddressList = receiveAddressCoreList.map(
-		({
-			address,
-			token: addressToken,
-			qrCodeAriaLabel,
-			label: addressLabel,
-			copyAriaLabel,
-			labelRef,
-			network,
-			testId,
-			title,
-			text,
-			condition
-		}) => ({
-			labelRef,
-			address,
-			network,
-			testId,
-			copyAriaLabel,
-			title,
-			text,
-			condition,
-			qrCodeAction: {
-				enabled: true,
-				testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
-				ariaLabel: qrCodeAriaLabel
-			},
-			on: {
-				click: () =>
-					displayQRCode({
-						address: address ?? '',
-						addressLabel,
-						addressToken,
-						copyAriaLabel
-					})
-			}
-		})
+	let receiveAddressList = $derived<
+		Omit<ReceiveAddressProps, 'token' | 'qrCodeAriaLabel' | 'label'>[]
+	>(
+		receiveAddressCoreList.map(
+			({
+				address,
+				token: addressToken,
+				qrCodeAriaLabel,
+				label: addressLabel,
+				copyAriaLabel,
+				labelRef,
+				network,
+				testId,
+				title,
+				text,
+				condition
+			}) => ({
+				labelRef,
+				address,
+				network,
+				testId,
+				copyAriaLabel,
+				title,
+				text,
+				condition,
+				qrCodeAction: {
+					enabled: true,
+					testId: RECEIVE_TOKENS_MODAL_QR_CODE_BUTTON,
+					ariaLabel: qrCodeAriaLabel,
+					onClick: () =>
+						displayQRCode({
+							address: address ?? '',
+							addressLabel,
+							addressToken,
+							copyAriaLabel
+						})
+				}
+			})
+		)
 	);
 </script>
 
 <ContentWithToolbar>
 	<div class="flex flex-col gap-2">
-		{#each receiveAddressList as { title: _title, text: _text, condition, on, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
-			{#if condition !== false}
+		{#each receiveAddressList as { title: _title, text: _text, condition, labelRef, address, network, testId, copyAriaLabel, qrCodeAction } (labelRef)}
+			{@const showAddress =
+				condition !== false && (!isNftsPage || (isNftsPage && network.supportsNft))}
+
+			{#if showAddress}
 				{#if nonNullish(_text)}
-					<ReceiveAddress
-						{address}
-						{copyAriaLabel}
-						{labelRef}
-						{network}
-						{qrCodeAction}
-						{testId}
-						on:click={on.click}
-					>
+					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 						{#snippet title()}
 							{_title}
 						{/snippet}
@@ -278,15 +278,7 @@
 						{/snippet}
 					</ReceiveAddress>
 				{:else}
-					<ReceiveAddress
-						{address}
-						{copyAriaLabel}
-						{labelRef}
-						{network}
-						{qrCodeAction}
-						{testId}
-						on:click={on.click}
-					>
+					<ReceiveAddress {address} {copyAriaLabel} {labelRef} {network} {qrCodeAction} {testId}>
 						{#snippet title()}
 							{_title}
 						{/snippet}

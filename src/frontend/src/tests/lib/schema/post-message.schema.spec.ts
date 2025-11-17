@@ -1,4 +1,5 @@
-import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/signer.did';
+import type { BtcAddress } from '$btc/types/address';
+import type { BitcoinNetwork as SignerBitcoinNetwork } from '$declarations/signer/declarations/signer.did';
 import {
 	IC_CKBTC_INDEX_CANISTER_ID,
 	IC_CKBTC_LEDGER_CANISTER_ID,
@@ -34,7 +35,6 @@ import {
 	PostMessageWalletDataSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
-import type { BtcAddress } from '$lib/types/address';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
@@ -771,6 +771,7 @@ describe('post-message.schema', () => {
 		const [validRequestMsg] = PostMessageRequestSchema.options;
 		const [validResponseMsg] = PostMessageResponseSchema.options;
 		const validData = { additionalInfo: 'sample info' };
+		const validRef = 'unique-ref-123';
 
 		it('should validate with a valid request msg and data matching dataSchema', () => {
 			const validPayload = {
@@ -817,6 +818,16 @@ describe('post-message.schema', () => {
 			const validPayload = {
 				msg: validResponseMsg,
 				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid ref', () => {
+			const validPayload = {
+				msg: validRequestMsg,
+				data: validData,
+				ref: validRef
 			};
 
 			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);

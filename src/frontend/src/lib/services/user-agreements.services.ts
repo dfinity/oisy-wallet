@@ -2,7 +2,6 @@ import { agreementsData } from '$env/agreements.env';
 import type { EnvAgreements } from '$env/types/env-agreements';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { updateUserAgreements } from '$lib/api/backend.api';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
 import type { SaveUserAgreements } from '$lib/types/api';
@@ -23,7 +22,6 @@ export const acceptAgreements = async ({
 	currentUserVersion: CanisterApiFunctionParams<SaveUserAgreements>['currentUserVersion'];
 }) => {
 	if (isNullish(identity)) {
-		await nullishSignOut();
 		return;
 	}
 

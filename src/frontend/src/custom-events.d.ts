@@ -25,10 +25,6 @@ declare module 'svelte/elements' {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyRefreshContacts?: (event: CustomEvent<any>) => void;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyToggleShowHidden?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		onoisyToggleShowSpam?: (event: CustomEvent<any>) => void;
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		onoisyDisconnectWalletConnect?: (event: CustomEvent<any>) => void;
 	}
 }

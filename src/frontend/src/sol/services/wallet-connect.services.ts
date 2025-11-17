@@ -12,7 +12,6 @@ import {
 } from '$lib/services/wallet-connect.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { NetworkId } from '$lib/types/network';
 import type { Token } from '$lib/types/token';
@@ -29,20 +28,21 @@ import {
 	setLifetimeAndFeePayerToTransaction
 } from '$sol/services/sol-send.services';
 import { signTransaction as executeSign } from '$sol/services/sol-sign.services';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import { safeMapNetworkIdToNetwork } from '$sol/utils/safe-network.utils';
 import { createSigner, signTransaction, type CreateSignerParams } from '$sol/utils/sol-sign.utils';
 import {
 	decodeTransactionMessage,
 	mapSolTransactionMessage,
-	parseSolBase64TransactionMessage,
-	transactionMessageHasBlockhashLifetime
+	parseSolBase64TransactionMessage
 } from '$sol/utils/sol-transactions.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import {
 	getBase58Decoder,
 	getBase64Decoder,
 	getTransactionEncoder,
+	isTransactionMessageWithBlockhashLifetime,
 	address as solAddress,
 	type Base64EncodedWireTransaction
 } from '@solana/kit';
@@ -134,7 +134,7 @@ const getSignatureWithSending = async ({
 
 	// It should not happen, since we receive transaction with blockhash lifetime,
 	// but just to guarantee the correct type casting
-	if (!transactionMessageHasBlockhashLifetime(transactionMessageRaw)) {
+	if (!isTransactionMessageWithBlockhashLifetime(transactionMessageRaw)) {
 		console.warn(
 			'WalletConnect Solana transaction does not have blockhash lifetime, cannot be sent'
 		);

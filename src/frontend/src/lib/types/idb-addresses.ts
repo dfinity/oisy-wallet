@@ -1,5 +1,8 @@
-import type { Address, BtcAddress, EthAddress, SolAddress } from '$lib/types/address';
-import type { Principal } from '@dfinity/principal';
+import type { BtcAddress } from '$btc/types/address';
+import type { EthAddress } from '$eth/types/address';
+import type { Address } from '$lib/types/address';
+import type { SolAddress } from '$sol/types/address';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export interface IdbAddress<T extends Address> {
 	address: T;

@@ -41,6 +41,14 @@ jobs:
       - name: Test
         run: npm run test:coverage
 
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        if: always()
+        with:
+          name: vitest-coverage-threshold-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: coverage/
+          retention-days: 3
+
       # The coverage calculation is a bit flaky, so to avoid being stuck, we reduce it to have an acceptable margin
       - name: Give a margin to coverage thresholds
         run: |

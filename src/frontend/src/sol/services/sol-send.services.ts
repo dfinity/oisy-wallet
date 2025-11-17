@@ -1,6 +1,5 @@
 import { ZERO } from '$lib/constants/app.constants';
 import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
-import type { OptionSolAddress, SolAddress } from '$lib/types/address';
 import type { OptionIdentity } from '$lib/types/identity';
 import type { Token } from '$lib/types/token';
 import { loadTokenAccount } from '$sol/api/solana.api';
@@ -11,6 +10,7 @@ import {
 	calculateAssociatedTokenAddress,
 	createAtaInstruction
 } from '$sol/services/spl-accounts.services';
+import type { OptionSolAddress, SolAddress } from '$sol/types/address';
 import type { SolanaNetworkType } from '$sol/types/network';
 import type { SolTransactionMessage } from '$sol/types/sol-send';
 import type { SolSignedTransaction } from '$sol/types/sol-transaction';

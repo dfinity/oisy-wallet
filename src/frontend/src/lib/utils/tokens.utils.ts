@@ -1,3 +1,4 @@
+import { NFTS_ENABLED } from '$env/nft.env';
 import {
 	saveErc1155CustomTokens,
 	saveErc20CustomTokens,
@@ -11,11 +12,16 @@ import type { Erc20CustomToken, SaveErc20CustomToken } from '$eth/types/erc20-cu
 import type { Erc20UserToken } from '$eth/types/erc20-user-token';
 import type { Erc721CustomToken } from '$eth/types/erc721-custom-token';
 import { isTokenErc1155, isTokenErc1155CustomToken } from '$eth/utils/erc1155.utils';
-import { isTokenErc20UserToken } from '$eth/utils/erc20.utils';
+import { isTokenErc20, isTokenErc20UserToken } from '$eth/utils/erc20.utils';
 import { isTokenErc721, isTokenErc721CustomToken } from '$eth/utils/erc721.utils';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { icTokenIcrcCustomToken, isTokenDip20, isTokenIcrc } from '$icp/utils/icrc.utils';
+import {
+	icTokenIcrcCustomToken,
+	isTokenDip20,
+	isTokenIc,
+	isTokenIcrc
+} from '$icp/utils/icrc.utils';
 import { isIcCkToken, isIcToken } from '$icp/validation/ic-token.validation';
 import { LOCAL, ZERO } from '$lib/constants/app.constants';
 import type { ProgressStepsAddToken } from '$lib/enums/progress-steps';
@@ -30,12 +36,13 @@ import type { TokensTotalUsdBalancePerNetwork } from '$lib/types/token-balance';
 import type { TokenToggleable } from '$lib/types/token-toggleable';
 import type { TokenUi } from '$lib/types/token-ui';
 import type { UserNetworks } from '$lib/types/user-networks';
+import { areAddressesPartiallyEqual } from '$lib/utils/address.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
-import { calculateTokenUsdBalance, mapTokenUi } from '$lib/utils/token.utils';
+import { calculateTokenUsdBalance, filterEnabledToken, mapTokenUi } from '$lib/utils/token.utils';
 import { isUserNetworkEnabled } from '$lib/utils/user-networks.utils';
 import { saveSplCustomTokens } from '$sol/services/manage-tokens.services';
 import type { SplTokenToggleable } from '$sol/types/spl-token-toggleable';
-import { isTokenSplToggleable } from '$sol/utils/spl.utils';
+import { isTokenSpl, isTokenSplToggleable } from '$sol/utils/spl.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
 import { get } from 'svelte/store';
 
@@ -101,7 +108,7 @@ export const sortTokens = <T extends Token>({
  * In case of a tie, it sorts by token name and network name.
  *
  * @param $tokens - The list of tokens to sort.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns The sorted list of tokens.
  *
@@ -161,7 +168,7 @@ export const sumTokensUiUsdBalance = (tokens: TokenUi[]): number =>
  * Calculates total USD balance of mainnet tokens per network from the provided tokens list.
  *
  * @param $tokens - The list of tokens for filtering by network env and total USD balance calculation.
- * @param $balancesStore - The balances data for the tokens.
+ * @param $balancesStore - The balances' data for the tokens.
  * @param $exchanges - The exchange rates data for the tokens.
  * @returns A NetworkId-number dictionary with total USD balance of mainnet tokens per network.
  *
@@ -197,7 +204,7 @@ export const sumMainnetTokensUsdBalancesPerNetwork = ({
  * @returns The list of "enabled" tokens.
  */
 export const filterEnabledTokens = <T extends Token>([$tokens]: [$tokens: T[]]): T[] =>
-	$tokens.filter((token) => ('enabled' in token ? token.enabled : true));
+	$tokens.filter(filterEnabledToken);
 
 /** Pins enabled tokens at the top of the list, preserving the order of the parts.
  *
@@ -221,11 +228,44 @@ export const filterTokens = <T extends Token>({
 	tokens: T[];
 	filter: string;
 }): T[] => {
-	const matchingToken = (token: Token) =>
-		token.name.toLowerCase().includes(filter.toLowerCase()) ||
-		token.symbol.toLowerCase().includes(filter.toLowerCase()) ||
-		(icTokenIcrcCustomToken(token) &&
-			(token.alternativeName ?? '').toLowerCase().includes(filter.toLowerCase()));
+	const matchingToken = (token: Token): boolean => {
+		const { name, symbol } = token;
+
+		if (
+			name.toLowerCase().includes(filter.toLowerCase()) ||
+			symbol.toLowerCase().includes(filter.toLowerCase())
+		) {
+			return true;
+		}
+
+		if (
+			icTokenIcrcCustomToken(token) &&
+			nonNullish(token.alternativeName) &&
+			token.alternativeName.toLowerCase().includes(filter.toLowerCase())
+		) {
+			return true;
+		}
+
+		if (isTokenErc20(token) || isTokenSpl(token)) {
+			return areAddressesPartiallyEqual({
+				address1: token.address,
+				address2: filter,
+				networkId: token.network.id
+			});
+		}
+
+		if (isTokenIc(token)) {
+			const { ledgerCanisterId, indexCanisterId } = token;
+
+			return (
+				ledgerCanisterId.toLowerCase().includes(filter.toLowerCase()) ||
+				(nonNullish(indexCanisterId) &&
+					indexCanisterId.toLowerCase().includes(filter.toLowerCase()))
+			);
+		}
+
+		return false;
+	};
 
 	return isNullishOrEmpty(filter)
 		? tokens
@@ -272,7 +312,7 @@ export const defineEnabledTokens = <T extends Token>({
 	);
 
 export const groupTogglableTokens = (
-	tokens: Record<string, Token>
+	tokens: Token[]
 ): {
 	icrc: IcrcCustomToken[];
 	erc20: (Erc20UserToken | Erc20CustomToken)[];
@@ -280,7 +320,7 @@ export const groupTogglableTokens = (
 	erc1155: Erc1155CustomToken[];
 	spl: SplTokenToggleable[];
 } =>
-	Object.values(tokens ?? {}).reduce<{
+	tokens.reduce<{
 		icrc: IcrcCustomToken[];
 		erc20: Erc20UserToken[];
 		erc721: Erc721CustomToken[];
@@ -309,7 +349,7 @@ export const saveAllCustomTokens = async ({
 	$authIdentity,
 	$i18n
 }: {
-	tokens: Record<string, Token>;
+	tokens: Token[];
 	progress?: (step: ProgressStepsAddToken) => ProgressStepsAddToken;
 	modalNext?: () => void;
 	onSuccess?: () => void;
@@ -394,7 +434,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc721.length > 0
+		...(erc721.length > 0 && NFTS_ENABLED
 			? [
 					saveErc721CustomTokens({
 						...commonParams,
@@ -402,7 +442,7 @@ export const saveAllCustomTokens = async ({
 					})
 				]
 			: []),
-		...(erc1155.length > 0
+		...(erc1155.length > 0 && NFTS_ENABLED
 			? [
 					saveErc1155CustomTokens({
 						...commonParams,

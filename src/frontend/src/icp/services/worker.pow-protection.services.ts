@@ -2,10 +2,7 @@ import {
 	syncPowNextAllowance,
 	syncPowProgress
 } from '$icp/services/pow-protector-listener.services';
-import type {
-	PowProtectorWorker,
-	PowProtectorWorkerInitResult
-} from '$icp/types/pow-protector-listener';
+import { AppWorker } from '$lib/services/_worker.services';
 import type {
 	PostMessage,
 	PostMessageDataRequest,
@@ -13,70 +10,64 @@ import type {
 	PostMessageDataResponsePowProtectorNextAllowance,
 	PostMessageDataResponsePowProtectorProgress
 } from '$lib/types/post-message';
+import type { WorkerData } from '$lib/types/worker';
 
 // TODO: add tests for POW worker/scheduler
-export const initPowProtectorWorker: PowProtectorWorker =
-	async (): Promise<PowProtectorWorkerInitResult> => {
-		const PowWorker = await import('$lib/workers/workers?worker');
-		let worker: Worker | null = new PowWorker.default();
+export class PowProtectorWorker extends AppWorker {
+	private constructor(worker: WorkerData) {
+		super(worker);
 
-		worker.onmessage = ({
-			data: dataMsg
-		}: MessageEvent<
-			PostMessage<
-				| PostMessageDataResponsePowProtectorProgress
-				| PostMessageDataResponsePowProtectorNextAllowance
-				| PostMessageDataResponseError
-			>
-		>) => {
-			const { msg, data } = dataMsg;
+		this.setOnMessage(
+			({
+				data: dataMsg
+			}: MessageEvent<
+				PostMessage<
+					| PostMessageDataResponsePowProtectorProgress
+					| PostMessageDataResponsePowProtectorNextAllowance
+					| PostMessageDataResponseError
+				>
+			>) => {
+				const { msg, data } = dataMsg;
 
-			switch (msg) {
-				case 'syncPowProgress': {
-					syncPowProgress({
-						data: data as PostMessageDataResponsePowProtectorProgress
-					});
-					return;
-				}
-				case 'syncPowNextAllowance': {
-					// Check if data.data exists and has proper structure
-					syncPowNextAllowance({
-						data: data as PostMessageDataResponsePowProtectorNextAllowance
-					});
-					return;
+				switch (msg) {
+					case 'syncPowProgress': {
+						syncPowProgress({
+							data: data as PostMessageDataResponsePowProtectorProgress
+						});
+						return;
+					}
+					case 'syncPowNextAllowance': {
+						// Check if data.data exists and has proper structure
+						syncPowNextAllowance({
+							data: data as PostMessageDataResponsePowProtectorNextAllowance
+						});
+						return;
+					}
 				}
 			}
-		};
+		);
+	}
 
-		const stop = () => {
-			worker?.postMessage({
-				msg: 'stopPowProtectionTimer'
-			});
-		};
+	static async init(): Promise<PowProtectorWorker> {
+		const worker = await AppWorker.getInstance();
+		return new PowProtectorWorker(worker);
+	}
 
-		let isDestroying = false;
-
-		return {
-			start: () => {
-				worker?.postMessage({
-					msg: 'startPowProtectionTimer'
-				} as PostMessage<PostMessageDataRequest>);
-			},
-			stop,
-			trigger: () => {
-				worker?.postMessage({
-					msg: 'triggerPowProtectionTimer'
-				} as PostMessage<PostMessageDataRequest>);
-			},
-			destroy: () => {
-				if (isDestroying) {
-					return;
-				}
-				isDestroying = true;
-				stop();
-				worker?.terminate();
-				worker = null;
-				isDestroying = false;
-			}
-		};
+	protected override stopTimer = () => {
+		this.postMessage({
+			msg: 'stopPowProtectionTimer'
+		});
 	};
+
+	start = () => {
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
+			msg: 'startPowProtectionTimer'
+		});
+	};
+
+	trigger = () => {
+		this.postMessage<PostMessage<PostMessageDataRequest>>({
+			msg: 'triggerPowProtectionTimer'
+		});
+	};
+}

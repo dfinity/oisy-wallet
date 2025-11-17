@@ -31,7 +31,6 @@
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { balancesStore } from '$lib/stores/balances.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
@@ -159,7 +158,8 @@
 
 	const send = async () => {
 		const sharedTrackingEventMetadata = {
-			token: $sendTokenSymbol
+			token: $sendTokenSymbol,
+			network: `${$sendTokenNetworkId.description}`
 		};
 
 		trackEvent({
@@ -167,13 +167,7 @@
 			metadata: sharedTrackingEventMetadata
 		});
 
-		const sendTrackingEventMetadata = {
-			...sharedTrackingEventMetadata,
-			source: AI_ASSISTANT_SEND_TOKEN_SOURCE
-		};
-
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -207,6 +201,16 @@
 			});
 			return;
 		}
+
+		const sendTrackingEventMetadata = {
+			...sharedTrackingEventMetadata,
+			source: AI_ASSISTANT_SEND_TOKEN_SOURCE,
+			...(nonNullish($prioritizationFeeStore)
+				? { prioritizationFee: $prioritizationFeeStore.toString() }
+				: {}),
+			...(nonNullish($ataFeeStore) ? { ataFee: $ataFeeStore.toString() } : {}),
+			...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+		};
 
 		try {
 			loading = true;
@@ -247,7 +251,7 @@
 	};
 </script>
 
-<div class="mb-8 mt-2">
+<div class="mt-2 mb-8">
 	<SolFeeContext {destination} observe={!loading}>
 		<SolFeeDisplay />
 

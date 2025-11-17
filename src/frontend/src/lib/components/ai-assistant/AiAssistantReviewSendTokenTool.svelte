@@ -17,6 +17,7 @@
 	import Hr from '$lib/components/ui/Hr.svelte';
 	import { DEFAULT_ETHEREUM_NETWORK } from '$lib/constants/networks.constants';
 	import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
+	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import type { ReviewSendTokensToolResult } from '$lib/types/ai-assistant';
 	import {
@@ -56,10 +57,14 @@
 	token={$sendToken}
 	variant={sendCompleted ? 'success' : 'default'}
 >
+	{#snippet subtitle()}
+		{$i18n.send.text.send_review_subtitle}
+	{/snippet}
+
 	{#snippet content()}
 		<SendReviewDestination aiAssistantConsoleView={true} {destination} selectedContact={contact} />
 
-		<div class="mb-2 mt-4">
+		<div class="mt-4 mb-2">
 			<ReviewNetwork sourceNetwork={$sendToken.network} />
 		</div>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { isIOS } from '@dfinity/gix-components';
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconDots from '$lib/components/icons/IconDots.svelte';
@@ -37,7 +38,7 @@
 </script>
 
 <span class="flex flex-col items-center gap-1">
-	<output class="mt-7 inline-block break-all text-4xl font-bold md:text-5xl">
+	<output class="mt-7 inline-block text-4xl font-bold break-all md:text-5xl">
 		{#if $loaded && nonNullish(balance)}
 			{#if hideBalance}
 				<IconDots styleClass="my-4.25" times={6} variant="lg" />
@@ -45,7 +46,7 @@
 				{balance}
 			{/if}
 		{:else}
-			<span class="animate-pulse">
+			<span class:animate-pulse={!isIOS()}>
 				{#if hideBalance}
 					<IconDots styleClass="my-4.25" times={6} variant="lg" />
 				{:else}

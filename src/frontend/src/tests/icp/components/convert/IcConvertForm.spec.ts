@@ -22,6 +22,7 @@ import {
 } from '$lib/stores/token-action-validation-errors.store';
 import { mockValidIcCkToken } from '$tests/mocks/ic-tokens.mock';
 import { mockPage } from '$tests/mocks/page.store.mock';
+import { mockSnippet } from '$tests/mocks/snippet.mock';
 import { render } from '@testing-library/svelte';
 
 describe('IcConvertForm', () => {
@@ -45,7 +46,10 @@ describe('IcConvertForm', () => {
 	const props = {
 		sendAmount: 0.001,
 		receiveAmount: 0.001,
-		destination: 'address'
+		destination: 'address',
+		onNext: vi.fn(),
+		onDestination: vi.fn(),
+		cancel: mockSnippet
 	};
 
 	const buttonTestId = 'convert-form-button-next';

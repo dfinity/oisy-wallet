@@ -58,7 +58,7 @@
 		},
 		"warning": {
 			"do_not_close": "Don't close this tab until the transaction is done",
-			"standalone_mode": "Your $oisy_short Wallet is currently installed as standalone app on your mobile phone, which prevents it from connecting to other ICP dapps. You can delete $oisy_short from your homescreen, and do the installation again. This will install $oisy_short in a different way, which will then allow to connect to other dapps and sign transactions."
+			"standalone_mode": "We improved how $oisy_short operates when it's installed on a home&nbsp;screen, like you have. If you encounter issues connecting $oisy_short or signing transactions, please remove $oisy_short from the home&nbsp;screen and install it again. On iPhones, make sure to deselect “Open as Web App”.<br/><a class='no-underline blue-link' href=\"https://docs.oisy.com/using-oisy-wallet/how-tos/saving-oisy-web-app-to-your-device#having-issues-with-web-app\" target=\"_blank\">Read more</a>"
 		}
 	},
 	"navigation": {
@@ -122,7 +122,6 @@
 			"preview": "Preview of $oisy_name once signed in, both on desktop and mobile"
 		},
 		"message": {
-			"refreshed_authentication": "This page was refreshed to reflect the login done in another tab.",
 			"session_locked": "Your session was locked in another tab."
 		},
 		"warning": {
@@ -356,6 +355,32 @@
 					"text": "Hello, self-writing internet",
 					"call_to_action": "Learn more"
 				}
+			},
+			"beam": {
+				"name": "Beam",
+				"one_liner": "A sovereign L1 blockchain that builds, invests in, and accelerates frontier technologies—especially Web3 gaming—by funding and powering ecosystems on the Beam network.",
+				"call_to_action": "Get involved",
+				"description": "Beam is a sovereign Layer 1 blockchain designed to fund and accelerate high-impact technologies across gaming, Web3, and frontier innovation. Backed by an on-chain treasury and grant ecosystem, Beam invests directly into teams and infrastructure. The chain supports scalable decentralized applications with native tools and close founder collaboration."
+			},
+			"axie_infinity": {
+				"name": "Axie Infinity",
+				"one_liner": "A Pokémon‑style blockchain game where players collect, breed, battle NFT creatures (Axies), and earn tokens (AXS, SLP) in a player‑owned economy on the Ronin sidechain.",
+				"description": "Axie Infinity is a play-to-earn blockchain game where players collect, breed, and battle NFT creatures called Axies. Built on the Ronin sidechain, the game rewards players with $AXS and $SLP tokens, creating a circular economy of ownership and competition. Axie pioneered the P2E model and became one of Web3’s earliest mainstream gaming successes."
+			},
+			"mobox": {
+				"name": "Mobox",
+				"one_liner": "A GameFi platform on BNB Chain that merges Free‑to‑Play gaming, DeFi yield farming, and NFT mechanics—powered by play‑to‑earn and community governance.",
+				"description": "MOBOX is a GameFi platform on BNB Chain that merges DeFi yield farming, NFT ecosystems, and free-to-play gaming. Players earn MBOX tokens through gameplay, NFT staking, and yield farming, while participating in decentralized governance. With its MOMO NFTs and cross-game utility, MOBOX aims to create a fully gamified economy."
+			},
+			"cyql": {
+				"name": "cyql.io",
+				"one_liner": "THE Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer.",
+				"description": "cyql.io – Internet Computer Ecosystem Hub. Discover and track the latest Web3 projects on the Internet Computer. From gaming, AI agents, and metaverse worlds to social dApps, betting, and DeFi—cyql.io is your playground for exploring what’s next in decentralized technology."
+			},
+			"icpanda_message": {
+				"name": "dMsg.net",
+				"one_liner": "Decentralized alternative to Signal.",
+				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			}
 		}
 	},
@@ -1043,6 +1068,7 @@
 				"title": "Manage tokens",
 				"title_nft": "Manage NFT collections",
 				"manage_list": "Manage tokens",
+				"manage_list_nft": "Manage NFTs",
 				"list_settings": "List settings",
 				"import_token": "Import token",
 				"import_nft": "Import NFT collection",
@@ -1108,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "Your NFTs will appear here",
 			"description_empty": "It looks like you haven't received NFTs yet",
+			"title_not_supported": "NFTs are not yet supported on the selected network",
+			"description_not_supported": "Please do not send NTFs to your address",
 			"grouping": "Grouping",
 			"as_plain_list": "Show as plain list",
 			"by_collection": "Group by collection",
@@ -1128,28 +1156,40 @@
 			"collections": "Collections",
 			"all_assets": "All assets",
 			"address_copied": "Address $address copied",
+			"collection_name_copied": "Collection name copied",
+			"id_copied": "Token ID name copied",
 			"spam": "Spam",
 			"not_spam": "Not spam",
+			"spam_warning": "Move '$collection' to spam?",
+			"spam_warning_text": "This will move all NFTs in <b>$collection</b> to spam. They'll be hidden from your main view, but you can always find and restore them later.",
 			"hide": "Hide",
 			"unhide": "Unhide",
 			"hidden": "Hidden",
+			"hide_warning": "Hide '$collection'?",
+			"hide_warning_text": "This will hide <b>$collection</b> and all associated NFTs from your main view, but you can always find and restore them later.",
 			"open_explorer": "Open this contract in blockchain explorer",
 			"img_consent_disabled": "You disabled images from this collection",
 			"img_consent_none": "Image disabled for security reasons",
 			"review_button": "Review",
 			"collection_name": "Collection name",
 			"media_urls": "Media URLs",
+			"media_url": "Media URL",
+			"received_at": "Received At",
 			"display_preference": "Display preference",
 			"review_preference": "Review preference",
 			"media_enabled": "Media enabled",
 			"media_disabled": "Media disabled",
 			"enable_media": "Enable media",
 			"disable_media": "Disable media",
+			"keep_media_disabled": "Keep media disabled",
+			"keep_media_enabled": "Keep media enabled",
 			"open_in_new_tab": "Open in new tab",
 			"review_title": "Review media sources for \"$collectionName\"",
 			"review_description": "Heads up! These images are from an unverified source. Enabling them could share your IP address with a third party and poses a potential security risk.",
 			"learn_more": "Learn more",
-			"token_id": "Token ID"
+			"token_id": "Token ID",
+			"go_to_collection": "Go to collection",
+			"could_not_update_section": "Could not update collection section. Please try again"
 		},
 		"alt": {
 			"placeholder_image": "No NFTs yet",
@@ -1157,7 +1197,8 @@
 				"image": "Image of NFT with token ID: $tokenId"
 			},
 			"copy_address": "Copy this address to clipboard",
-			"review_preference": "Change display preference"
+			"review_preference": "Change display preference",
+			"go_to_collection": "Open the collection page"
 		}
 	},
 	"fee": {
@@ -1172,7 +1213,10 @@
 			"convert_btc_network_fee": "Bitcoin network fee",
 			"zero_fee": "Free",
 			"total_fee": "Total fee",
-			"ata_fee": "ATA fee"
+			"ata_fee": "ATA fee",
+			"transaction_fees": "Transaction fees",
+			"network_fee": "Network fee",
+			"approval_fee": "Approval fee"
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "Insufficient balance to cover the fees."
@@ -1347,7 +1391,6 @@
 			"token_needs_enabling": "The token needs to be enabled in order to view the transaction history."
 		},
 		"error": {
-			"loading_transactions": "Error while loading the transactions.",
 			"loading_transactions_symbol": "Error while loading the $symbol transactions.",
 			"uncertified_transactions_removed": "Several uncertified transactions were identified and subsequently removed from the displayed lists.",
 			"loading_pending_ck_ethereum_transactions": "Something went wrong while fetching the pending $network transactions.",
@@ -1610,14 +1653,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "Review Terms & Conditions",
-			"review_updated_title": "Review Updated Terms & Conditions",
-			"review_description": "Before you can use OISY Wallet, you must review and agree to our Terms of Service and Privacy Policy. These documents explain the rules of our service and how we protect your data.",
-			"review_updated_description": "To continue using OISY Wallet, please review and agree to our updated Terms of Service and Privacy Policy. These changes are important for keeping our service secure and compliant.",
-			"reject_warning": "You must accept the Terms and Conditions to proceed. Feel free to try again anytime.",
-			"i_have_accepted": "I have read and agree to the",
-			"i_have_accepted_updated": "I have read and agree to the updated",
-			"accept_and_continue": "Accept and continue",
 			"updated_agreements_warning": "We have updated $agreements. By using $oisy_short, you confirm that you have read and agree to the updates."
 		},
 		"error": {
@@ -1690,6 +1725,46 @@
 			"stablecoins_description": "Coming soon",
 			"sprinkles_title": "Sprinkles",
 			"sprinkles_description": "OISY Rewards"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake_page_title": "$provider Staking",
+			"gldt_stake_page_description": "Stake GLDT tokens to earn rewards backed by physical gold",
+			"stake": "Stake $token_symbol",
+			"stake_amount": "Stake $amount $token_symbol",
+			"not_enough_to_stake": "No $token_symbol to stake",
+			"unstake": "Unstake",
+			"unstaking": "Unstaking...",
+			"unstake_token": "Unstake $token_symbol",
+			"enable_token_text": "You need to enable $token_symbol",
+			"enable_token_button": "Enable $token_symbol",
+			"review": "Review transaction",
+			"executing_transaction": "Executing transaction...",
+			"unsupported_token_staking": "Staking for the selected token is not supported.",
+			"provider": "Staking terms provided by $provider",
+			"earning_potential": "Earning potential",
+			"active_earning": "Active earning",
+			"active_earning_per_year": "$amount/year",
+			"visit_provider": "Visit website",
+			"current_apy": "Current APY $apy%",
+			"current_apy_label": "Current APY",
+			"current_apy_info": "Based on the latest rewards. The effective APY depends on the amount of $token staked in total each day.",
+			"stake_review_subtitle": "You stake",
+			"unstake_review_subtitle": "You unstake",
+			"delayed_dissolve": "Receive with a delay",
+			"immediate_dissolve": "Receive immediately",
+			"included_token_fee": "Included network fee",
+			"included_dissolve_fee": "Included unlock fee",
+			"delayed_dissolve_terms": "When unlocking $token from staking, the tokens are locked for $delay days without receiving further rewards, before they can be withdrawn.",
+			"delayed_dissolve_info": "When you start unlocking your $token stake, you will no longer receive new rewards.",
+			"immediate_dissolve_terms": "You will receive your $token immediately but are charged a fee on the $token tokens you are unlocking.",
+			"amount_to_receive": "Amount to receive",
+			"unclaimed_rewards": "Unclaimed rewards",
+			"claim_reward": "Claim reward",
+			"claim_rewards": "Claim rewards",
+			"claim_now": "Claim now",
+			"claiming": "Claiming..."
 		}
 	},
 	"temporal": {

@@ -66,6 +66,7 @@ import {
 	isNetworkIdSolana,
 	isNetworkSolana,
 	isPseudoNetworkIdIcpTestnet,
+	mapCkBtcBitcoinNetworkToBackendBitcoinNetwork,
 	mapNetworkIdToBitcoinNetwork
 } from '$lib/utils/network.utils';
 import { mockIcrcCustomToken } from '$tests/mocks/icrc-custom-tokens.mock';
@@ -334,6 +335,27 @@ describe('network utils', () => {
 			expect(mapNetworkIdToBitcoinNetwork(ETHEREUM_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(SEPOLIA_NETWORK_ID)).toBeUndefined();
 			expect(mapNetworkIdToBitcoinNetwork(ICP_NETWORK_ID)).toBeUndefined();
+		});
+	});
+
+	describe('mapCkBtcBitcoinNetworkToBackendBitcoinNetwork', () => {
+		it('should map network to bitcoin network', () => {
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('mainnet')).toStrictEqual({
+				mainnet: null
+			});
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('testnet')).toStrictEqual({
+				testnet: null
+			});
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('regtest')).toStrictEqual({
+				regtest: null
+			});
+		});
+
+		it('should return `undefined` with non bitcoin network', () => {
+			// @ts-expect-error Testing invalid input types
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('ethereum')).toBeUndefined();
+			// @ts-expect-error Testing invalid input types
+			expect(mapCkBtcBitcoinNetworkToBackendBitcoinNetwork('any-other-network')).toBeUndefined();
 		});
 	});
 

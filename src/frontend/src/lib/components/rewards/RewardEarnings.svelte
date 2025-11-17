@@ -23,7 +23,6 @@
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { networkId } from '$lib/derived/network.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { getUserRewardsTokenAmounts } from '$lib/services/reward.services';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -89,7 +88,6 @@
 		loadingRewards = true;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -140,7 +138,7 @@
 {#if amountOfRewards > 0}
 	<div transition:fade={SLIDE_DURATION}>
 		<div
-			class="mb-5 mt-2 w-full text-center text-xl font-bold text-success-primary"
+			class="mt-2 mb-5 w-full text-center text-xl font-bold text-success-primary"
 			class:animate-pulse={loading}
 			class:duration-500={loading}
 			class:ease-in-out={loading}

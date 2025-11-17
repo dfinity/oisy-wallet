@@ -1,8 +1,7 @@
-import type { chat_response_v1 } from '$declarations/llm/llm.did';
+import type { chat_response_v1 } from '$declarations/llm/declarations/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 import { AI_ASSISTANT_SEND_MESSAGE_BUTTON } from '$lib/constants/test-ids.constants';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { aiAssistantStore } from '$lib/stores/ai-assistant.store';
 import type { ChatMessage } from '$lib/types/ai-assistant';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
@@ -28,7 +27,6 @@ describe('AiAssistantConsole', () => {
 	} as chat_response_v1;
 
 	vi.mocked(llmChat).mockResolvedValue(response);
-	vi.mocked(nullishSignOut).mockResolvedValue();
 
 	beforeEach(() => {
 		aiAssistantStore.reset();
@@ -48,21 +46,6 @@ describe('AiAssistantConsole', () => {
 		await waitFor(() => {
 			expect(() => getByText(en.ai_assistant.text.welcome_message)).toThrow();
 			expect(getByText(message.data.text ?? '')).toBeInTheDocument();
-		});
-	});
-
-	it('calls nullishSignOut if no identity available', async () => {
-		const { getByTestId, getByPlaceholderText } = render(AiAssistantConsole);
-
-		const input = getByPlaceholderText(en.ai_assistant.text.send_message_input_placeholder);
-		const button = getByTestId(AI_ASSISTANT_SEND_MESSAGE_BUTTON);
-
-		await fireEvent.input(input, { target: { value: newMessageContent } });
-
-		await waitFor(async () => {
-			await fireEvent.click(button);
-
-			expect(nullishSignOut).toHaveBeenCalledOnce();
 		});
 	});
 

@@ -1,25 +1,24 @@
 import { BTC_SEND_FEE_TOLERANCE_PERCENTAGE } from '$btc/constants/btc.constants';
 import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 import { getFeeRateFromPercentiles } from '$btc/services/btc-utxos.service';
+import type { BtcAddress } from '$btc/types/address';
 import { BtcSendValidationError, BtcValidationError, type UtxosFee } from '$btc/types/btc-send';
 import { convertNumberToSatoshis } from '$btc/utils/btc-send.utils';
 import { estimateTransactionSize, extractUtxoTxIds } from '$btc/utils/btc-utxos.utils';
-import type { SendBtcResponse } from '$declarations/signer/signer.did';
+import type { SendBtcResponse } from '$declarations/signer/declarations/signer.did';
 import { getPendingTransactionUtxoTxIds, txidStringToUint8Array } from '$icp/utils/btc.utils';
 import { addPendingBtcTransaction } from '$lib/api/backend.api';
 import { sendBtc as sendBtcApi } from '$lib/api/signer.api';
 import { ZERO } from '$lib/constants/app.constants';
-import { nullishSignOut } from '$lib/services/auth.services';
 import { i18n } from '$lib/stores/i18n.store';
 import { toastsError } from '$lib/stores/toasts.store';
-import type { BtcAddress } from '$lib/types/address';
 import type { Amount } from '$lib/types/send';
 import { invalidAmount } from '$lib/utils/input.utils';
 import { mapBitcoinNetworkToNetworkId, mapToSignerBitcoinNetwork } from '$lib/utils/network.utils';
 import { waitAndTriggerWallet } from '$lib/utils/wallet.utils';
-import type { Identity } from '@dfinity/agent';
 import type { BitcoinNetwork } from '@dfinity/ckbtc';
 import { isNullish, nonNullish, toNullable } from '@dfinity/utils';
+import type { Identity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 
 interface BtcSendServiceParams {
@@ -42,10 +41,9 @@ export type SendBtcParams = BtcSendServiceParams & {
  * @param $i18n I18n - The i18n store containing translation strings
  * @returns Promise<void> - Returns void if successful, may throw errors if validation fails
  */
-export const handleBtcValidationError = async ({ err }: { err: BtcValidationError }) => {
+export const handleBtcValidationError = ({ err }: { err: BtcValidationError }) => {
 	switch (err.type) {
 		case BtcSendValidationError.AuthenticationRequired:
-			await nullishSignOut();
 			return;
 		case BtcSendValidationError.NoNetworkId:
 			toastsError({

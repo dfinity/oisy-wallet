@@ -1,15 +1,14 @@
 import { ICP_LEDGER_CANISTER_ID, ICP_NETWORK } from '$env/networks/networks.icp.env';
 import { loadAndAssertAddCustomToken } from '$icp/services/ic-add-custom-tokens.service';
 import type { IcCanisters, IcToken } from '$icp/types/ic-token';
-import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { ZERO } from '$lib/constants/app.constants';
 import { i18n } from '$lib/stores/i18n.store';
 import * as toastsStore from '$lib/stores/toasts.store';
 import type { OptionIdentity } from '$lib/types/identity';
 import { parseTokenId } from '$lib/validation/token.validation';
-import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
+import { mockIcrcAccount, mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import { IcrcIndexNgCanister, IcrcLedgerCanister } from '@dfinity/ledger-icrc';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
@@ -387,7 +386,7 @@ describe('ic-add-custom-tokens.service', () => {
 					await loadAndAssertAddCustomToken(validParamsWithIndex);
 
 					expect(spyGetTransactions).toHaveBeenNthCalledWith(1, {
-						account: getIcrcAccount(mockIdentity.getPrincipal()),
+						account: mockIcrcAccount,
 						certified: true,
 						max_results: ZERO,
 						start: undefined

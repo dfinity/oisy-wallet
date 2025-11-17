@@ -122,7 +122,6 @@
 			"preview": "معاينة $oisy_name بمجرد تسجيل الدخول، على سطح المكتب والجوال"
 		},
 		"message": {
-			"refreshed_authentication": "",
 			"session_locked": ""
 		},
 		"warning": {
@@ -356,6 +355,32 @@
 					"text": "",
 					"call_to_action": ""
 				}
+			},
+			"beam": {
+				"name": "",
+				"one_liner": "",
+				"call_to_action": "",
+				"description": ""
+			},
+			"axie_infinity": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"mobox": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"cyql": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -1043,6 +1068,7 @@
 				"title": "إدارة التوكنات",
 				"title_nft": "",
 				"manage_list": "إدارة التوكنات",
+				"manage_list_nft": "",
 				"list_settings": "إعدادات القائمة",
 				"import_token": "استيراد توكن",
 				"import_nft": "",
@@ -1108,6 +1134,8 @@
 			"title": "NFTs",
 			"title_empty": "ستظهر NFTs الخاصة بك هنا",
 			"description_empty": "يبدو أنك لم تتلق بعد أي NFTs",
+			"title_not_supported": "",
+			"description_not_supported": "",
 			"grouping": "",
 			"as_plain_list": "",
 			"by_collection": "",
@@ -1128,28 +1156,40 @@
 			"collections": "",
 			"all_assets": "",
 			"address_copied": "",
+			"collection_name_copied": "",
+			"id_copied": "",
 			"spam": "",
 			"not_spam": "",
+			"spam_warning": "",
+			"spam_warning_text": "",
 			"hide": "",
 			"unhide": "",
 			"hidden": "",
+			"hide_warning": "",
+			"hide_warning_text": "",
 			"open_explorer": "",
 			"img_consent_disabled": "",
 			"img_consent_none": "",
 			"review_button": "",
 			"collection_name": "",
 			"media_urls": "",
+			"media_url": "",
+			"received_at": "",
 			"display_preference": "",
 			"review_preference": "",
 			"media_enabled": "",
 			"media_disabled": "",
 			"enable_media": "",
 			"disable_media": "",
+			"keep_media_disabled": "",
+			"keep_media_enabled": "",
 			"open_in_new_tab": "",
 			"review_title": "",
 			"review_description": "",
 			"learn_more": "",
-			"token_id": ""
+			"token_id": "",
+			"go_to_collection": "",
+			"could_not_update_section": ""
 		},
 		"alt": {
 			"placeholder_image": "لا توجد NFTs بعد",
@@ -1157,7 +1197,8 @@
 				"image": "صورة NFT مع معرف التوكن: $tokenId"
 			},
 			"copy_address": "",
-			"review_preference": ""
+			"review_preference": "",
+			"go_to_collection": ""
 		}
 	},
 	"fee": {
@@ -1172,7 +1213,10 @@
 			"convert_btc_network_fee": "رسوم شبكة البيتكوين",
 			"zero_fee": "مجاني",
 			"total_fee": "إجمالي الرسوم",
-			"ata_fee": "رسوم ATA"
+			"ata_fee": "رسوم ATA",
+			"transaction_fees": "",
+			"network_fee": "",
+			"approval_fee": ""
 		},
 		"assertion": {
 			"insufficient_funds_for_fee": "رصيد غير كافٍ لتغطية الرسوم."
@@ -1347,7 +1391,6 @@
 			"token_needs_enabling": "يجب تمكين التوكن لعرض سجل المعاملات."
 		},
 		"error": {
-			"loading_transactions": "خطأ أثناء تحميل المعاملات.",
 			"loading_transactions_symbol": "خطأ أثناء تحميل معاملات $symbol.",
 			"uncertified_transactions_removed": "تم تحديد العديد من المعاملات غير المصدقة وإزالتها لاحقًا من القوائم المعروضة.",
 			"loading_pending_ck_ethereum_transactions": "حدث خطأ ما أثناء جلب معاملات $network المعلقة.",
@@ -1610,14 +1653,6 @@
 	},
 	"agreements": {
 		"text": {
-			"review_title": "",
-			"review_updated_title": "",
-			"review_description": "",
-			"review_updated_description": "",
-			"reject_warning": "",
-			"i_have_accepted": "",
-			"i_have_accepted_updated": "",
-			"accept_and_continue": "",
 			"updated_agreements_warning": ""
 		},
 		"error": {
@@ -1690,6 +1725,46 @@
 			"stablecoins_description": "قريبًا",
 			"sprinkles_title": "رشات",
 			"sprinkles_description": "مكافآت OISY"
+		}
+	},
+	"stake": {
+		"text": {
+			"stake_page_title": "",
+			"gldt_stake_page_description": "",
+			"stake": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
+			"unstake": "",
+			"unstaking": "",
+			"unstake_token": "",
+			"enable_token_text": "",
+			"enable_token_button": "",
+			"review": "",
+			"executing_transaction": "",
+			"unsupported_token_staking": "",
+			"provider": "",
+			"earning_potential": "",
+			"active_earning": "",
+			"active_earning_per_year": "",
+			"visit_provider": "",
+			"current_apy": "",
+			"current_apy_label": "",
+			"current_apy_info": "",
+			"stake_review_subtitle": "",
+			"unstake_review_subtitle": "",
+			"delayed_dissolve": "",
+			"immediate_dissolve": "",
+			"included_token_fee": "",
+			"included_dissolve_fee": "",
+			"delayed_dissolve_terms": "",
+			"delayed_dissolve_info": "",
+			"immediate_dissolve_terms": "",
+			"amount_to_receive": "",
+			"unclaimed_rewards": "",
+			"claim_reward": "",
+			"claim_rewards": "",
+			"claim_now": "",
+			"claiming": ""
 		}
 	},
 	"temporal": {

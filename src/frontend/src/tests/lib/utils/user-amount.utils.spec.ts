@@ -12,7 +12,7 @@ import { validateUserAmount } from '$lib/utils/user-amount.utils';
 import { mockCkBtcMinterInfo as mockCkBtcMinterInfoData } from '$tests/mocks/ckbtc.mock';
 import { createMockErc20Tokens } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidToken } from '$tests/mocks/tokens.mock';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh/dist/candid/minter';
+import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
 import type { MockInstance } from 'vitest';
 
 describe('validateUserAmount', () => {
@@ -122,8 +122,7 @@ describe('validateUserAmount', () => {
 			minterInfo: mockCkEthMinterInfo
 		});
 
-		expect(assertCkEthAmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkEthAmountSpy).toHaveBeenCalledWith({
+		expect(assertCkEthAmountSpy).toHaveBeenCalledExactlyOnceWith({
 			userAmount,
 			balance,
 			fee,
@@ -143,8 +142,7 @@ describe('validateUserAmount', () => {
 			minterInfo: mockCkBtcMinterInfo
 		});
 
-		expect(assertCkBtcAmountSpy).toHaveBeenCalledOnce();
-		expect(assertCkBtcAmountSpy).toHaveBeenCalledWith({
+		expect(assertCkBtcAmountSpy).toHaveBeenCalledExactlyOnceWith({
 			userAmount,
 			balance,
 			fee,
@@ -160,8 +158,7 @@ describe('validateUserAmount', () => {
 			fee
 		});
 
-		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toHaveBeenCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledExactlyOnceWith({
 			userAmount,
 			balance,
 			fee
@@ -176,8 +173,7 @@ describe('validateUserAmount', () => {
 			fee
 		});
 
-		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toHaveBeenCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledExactlyOnceWith({
 			userAmount,
 			balance,
 			fee
@@ -196,8 +192,7 @@ describe('validateUserAmount', () => {
 			isSwapFlow: true
 		});
 
-		expect(assertAmountSpy).toHaveBeenCalledOnce();
-		expect(assertAmountSpy).toHaveBeenCalledWith({
+		expect(assertAmountSpy).toHaveBeenCalledExactlyOnceWith({
 			userAmount,
 			balance,
 			fee

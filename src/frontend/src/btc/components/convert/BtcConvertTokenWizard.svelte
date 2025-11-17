@@ -8,7 +8,10 @@
 	import UtxosFeeContext from '$btc/components/fee/UtxosFeeContext.svelte';
 	import { loadBtcPendingSentTransactions } from '$btc/services/btc-pending-sent-transactions.services';
 	import { sendBtc } from '$btc/services/btc-send.services';
-	import { UTXOS_FEE_CONTEXT_KEY } from '$btc/stores/utxos-fee.store';
+	import {
+		UTXOS_FEE_CONTEXT_KEY,
+		type UtxosFeeContext as UtxosFeeContextType
+	} from '$btc/stores/utxos-fee.store';
 	import { btcAddressStore } from '$icp/stores/btc.store';
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonCancel from '$lib/components/ui/ButtonCancel.svelte';
@@ -25,7 +28,6 @@
 	import { ProgressStepsConvert } from '$lib/enums/progress-steps';
 	import { WizardStepsConvert } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { CONVERT_CONTEXT_KEY, type ConvertContext } from '$lib/stores/convert.store';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -59,7 +61,7 @@
 		onNext
 	}: Props = $props();
 
-	const { store: utxosFeeStore } = getContext<UtxosFeeContext>(UTXOS_FEE_CONTEXT_KEY);
+	const { store: utxosFeeStore } = getContext<UtxosFeeContextType>(UTXOS_FEE_CONTEXT_KEY);
 
 	const { sourceToken, destinationToken } = getContext<ConvertContext>(CONVERT_CONTEXT_KEY);
 
@@ -93,7 +95,6 @@
 		const network = nonNullish(networkId) ? mapNetworkIdToBitcoinNetwork(networkId) : undefined;
 
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -156,28 +157,31 @@
 </script>
 
 <UtxosFeeContext amount={sendAmount} {amountError} {networkId} source={sourceAddress}>
-	{#if currentStep?.name === WizardStepsConvert.CONVERT}
-		<BtcConvertForm
-			source={sourceAddress}
-			on:icNext={onNext}
-			on:icClose={onClose}
-			bind:sendAmount
-			bind:receiveAmount
-			bind:amountError
-		>
-			<svelte:fragment slot="cancel">
-				{#if formCancelAction === 'back'}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsConvert.CONVERT}
+			<BtcConvertForm
+				{onNext}
+				source={sourceAddress}
+				bind:sendAmount
+				bind:receiveAmount
+				bind:amountError
+			>
+				{#snippet cancel()}
+					{#if formCancelAction === 'back'}
+						<ButtonBack onclick={back} />
+					{:else}
+						<ButtonCancel onclick={close} />
+					{/if}
+				{/snippet}
+			</BtcConvertForm>
+		{:else if currentStep?.name === WizardStepsConvert.REVIEW}
+			<BtcConvertReview onConvert={convert} {receiveAmount} {sendAmount}>
+				{#snippet cancel()}
 					<ButtonBack onclick={back} />
-				{:else}
-					<ButtonCancel onclick={close} />
-				{/if}
-			</svelte:fragment>
-		</BtcConvertForm>
-	{:else if currentStep?.name === WizardStepsConvert.REVIEW}
-		<BtcConvertReview {receiveAmount} {sendAmount} on:icConvert={convert} on:icBack={onBack}>
-			<ButtonBack slot="cancel" onclick={back} />
-		</BtcConvertReview>
-	{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
-		<BtcConvertProgress bind:convertProgressStep />
-	{/if}
+				{/snippet}
+			</BtcConvertReview>
+		{:else if currentStep?.name === WizardStepsConvert.CONVERTING}
+			<BtcConvertProgress {convertProgressStep} />
+		{/if}
+	{/key}
 </UtxosFeeContext>

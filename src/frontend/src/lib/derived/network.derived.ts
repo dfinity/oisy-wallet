@@ -1,8 +1,5 @@
-import { icrcAccountIdentifierText } from '$icp/derived/ic.derived';
-import { ethAddress } from '$lib/derived/address.derived';
 import { routeNetwork } from '$lib/derived/nav.derived';
 import { networks } from '$lib/derived/networks.derived';
-import type { OptionEthAddress } from '$lib/types/address';
 import type { Network, NetworkId } from '$lib/types/network';
 import {
 	isNetworkIdArbitrum,
@@ -77,8 +74,13 @@ export const pseudoNetworkChainFusion: Readable<boolean> = derived(
 	([$selectedNetwork]) => isNullish($selectedNetwork)
 );
 
-export const networkAddress: Readable<OptionEthAddress | string> = derived(
-	[ethAddress, icrcAccountIdentifierText, networkICP],
-	([$address, $icrcAccountIdentifierStore, $networkICP]) =>
-		$networkICP ? $icrcAccountIdentifierStore : $address
+export const selectedNetworkNftSupported: Readable<boolean> = derived(
+	[selectedNetwork],
+	([$selectedNetwork]) =>
+		isNullish($selectedNetwork) ? true : ($selectedNetwork.supportsNft ?? false)
+);
+
+export const selectedNetworkNftUnsupported: Readable<boolean> = derived(
+	[selectedNetworkNftSupported],
+	([$selectedNetworkNftSupported]) => !$selectedNetworkNftSupported
 );

@@ -6,7 +6,11 @@ import type {
 } from '$icp/types/ic-transaction';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
-import { encodeIcrcAccount, type IcrcTransactionWithId } from '@dfinity/ledger-icrc';
+import {
+	encodeIcrcAccount,
+	fromCandidAccount,
+	type IcrcTransactionWithId
+} from '@dfinity/ledger-icrc';
 import {
 	fromNullable,
 	fromNullishNullable,
@@ -33,14 +37,8 @@ export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransac
 	const { from, to } = transfer;
 
 	const isSelfTransaction =
-		encodeIcrcAccount({
-			owner: from.owner,
-			subaccount: fromNullable(from.subaccount)
-		}).toLowerCase() ===
-		encodeIcrcAccount({
-			owner: to.owner,
-			subaccount: fromNullable(to.subaccount)
-		}).toLowerCase();
+		encodeIcrcAccount(fromCandidAccount(from)).toLowerCase() ===
+		encodeIcrcAccount(fromCandidAccount(to)).toLowerCase();
 
 	return [
 		{
@@ -95,12 +93,7 @@ export const mapIcrcTransaction = ({
 
 	const source: Pick<IcTransactionUi, 'from' | 'incoming'> = {
 		...('from' in data
-			? mapFrom(
-					encodeIcrcAccount({
-						owner: data.from.owner,
-						subaccount: fromNullable(data.from.subaccount)
-					})
-				)
+			? mapFrom(encodeIcrcAccount(fromCandidAccount(data.from)))
 			: isMint
 				? { incoming: true }
 				: {})
@@ -124,10 +117,7 @@ export const mapIcrcTransaction = ({
 
 	const approveData = fromNullable(approve);
 	const approveSpender = nonNullish(approveData)
-		? encodeIcrcAccount({
-				owner: approveData.spender.owner,
-				subaccount: fromNullable(approveData.spender.subaccount)
-			})
+		? encodeIcrcAccount(fromCandidAccount(approveData.spender))
 		: undefined;
 
 	const approveExpiresAt = fromNullishNullable(approveData?.expires_at);
@@ -136,13 +126,7 @@ export const mapIcrcTransaction = ({
 		id: `${id.toString()}${transferToSelf === 'receive' ? '-self' : ''}`,
 		type,
 		...source,
-		to:
-			'to' in data
-				? encodeIcrcAccount({
-						owner: data.to.owner,
-						subaccount: fromNullable(data.to.subaccount)
-					})
-				: undefined,
+		to: 'to' in data ? encodeIcrcAccount(fromCandidAccount(data.to)) : undefined,
 		...(nonNullish(value) && { value }),
 		...(nonNullish(fee) && { fee }),
 		timestamp,

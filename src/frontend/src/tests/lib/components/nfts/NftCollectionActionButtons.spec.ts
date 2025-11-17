@@ -82,7 +82,7 @@ describe('NftCollectionActionButtons', () => {
 		});
 	});
 
-	it('should save the token on hide button click', async () => {
+	it('should set allowExternalContentSource to false on hide button click', async () => {
 		const { container } = render(NftCollectionActionButtons, {
 			token: mockToken
 		});
@@ -99,7 +99,8 @@ describe('NftCollectionActionButtons', () => {
 					{
 						...mockToken,
 						enabled: true,
-						section: CustomTokenSection.HIDDEN
+						section: CustomTokenSection.HIDDEN,
+						allowExternalContentSource: false
 					}
 				],
 				identity: mockIdentity

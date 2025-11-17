@@ -20,7 +20,7 @@
 	</Responsive>
 
 	<div
-		class="mx-auto max-w-xl overflow-hidden px-3 transition-all duration-500 ease-linear md:ml-64 md:box-content md:w-sm md:max-w-none md:px-4 xl:ml-auto"
+		class="mx-auto max-w-xl px-3 transition-all duration-500 ease-linear md:ml-64 md:box-content md:w-sm md:max-w-none md:px-4 xl:ml-auto"
 	>
 		{@render children()}
 	</div>

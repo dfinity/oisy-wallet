@@ -1,4 +1,4 @@
-import type { ReferrerInfo } from '$declarations/rewards/rewards.did';
+import type { ReferrerInfo } from '$declarations/rewards/declarations/rewards.did';
 import * as rewardApi from '$lib/api/reward.api';
 import ReferralCodeModal from '$lib/components/referral/ReferralCodeModal.svelte';
 import { OISY_REFERRAL_URL } from '$lib/constants/oisy.constants';

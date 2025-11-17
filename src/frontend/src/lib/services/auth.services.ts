@@ -34,7 +34,11 @@ import {
 	TRACK_SIGN_OUT_WITH_WARNING
 } from '$lib/constants/analytics.constants';
 import { trackEvent } from '$lib/services/analytics.services';
-import { authStore, type AuthSignInParams } from '$lib/stores/auth.store';
+import {
+	authLoggedInAnotherTabStore,
+	authStore,
+	type AuthSignInParams
+} from '$lib/stores/auth.store';
 import { busy } from '$lib/stores/busy.store';
 import { i18n } from '$lib/stores/i18n.store';
 import { AUTH_LOCK_KEY } from '$lib/stores/locked.store';
@@ -47,8 +51,8 @@ import { replaceHistory } from '$lib/utils/route.utils';
 import { get as getStorage } from '$lib/utils/storage.utils';
 import { randomWait } from '$lib/utils/time.utils';
 import type { ToastLevel } from '@dfinity/gix-components';
-import type { Principal } from '@dfinity/principal';
 import { isNullish } from '@dfinity/utils';
+import type { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
 export const signIn = async (
@@ -57,7 +61,11 @@ export const signIn = async (
 	busy.show();
 
 	try {
-		await authStore.signIn(params);
+		const fn = get(authLoggedInAnotherTabStore)
+			? () => authStore.forceSync()
+			: () => authStore.signIn(params);
+
+		await fn();
 
 		trackEvent({
 			name: TRACK_COUNT_SIGN_IN_SUCCESS
@@ -65,6 +73,8 @@ export const signIn = async (
 
 		// We clean previous messages in case the user was signed out automatically before signing-in again.
 		toastsClean();
+
+		authLoggedInAnotherTabStore.set(false);
 
 		return { success: 'ok' };
 	} catch (err: unknown) {
@@ -100,6 +110,8 @@ export const signIn = async (
 
 		return { success: 'error', err };
 	} finally {
+		await disconnectWalletConnect();
+
 		busy.stop();
 	}
 };

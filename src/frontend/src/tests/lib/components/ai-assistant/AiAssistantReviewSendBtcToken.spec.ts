@@ -22,10 +22,6 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { toNullable } from '@dfinity/utils';
 import { fireEvent, render, waitFor } from '@testing-library/svelte';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 describe('AiAssistantReviewSendBtcToken', () => {
 	const sendAmount = 0.0001;
 	const transactionId = 'txid';
@@ -101,7 +97,7 @@ describe('AiAssistantReviewSendBtcToken', () => {
 
 			await fireEvent.click(button);
 
-			expect(btcSendApiSpy).toHaveBeenCalledWith({
+			expect(btcSendApiSpy).toHaveBeenCalledExactlyOnceWith({
 				identity: mockIdentity,
 				network: mapToSignerBitcoinNetwork({ network: BTC_MAINNET_TOKEN.network.env }),
 				utxosToSpend: mockUtxosFee.utxos,
@@ -113,7 +109,6 @@ describe('AiAssistantReviewSendBtcToken', () => {
 					}
 				]
 			});
-			expect(btcSendApiSpy).toHaveBeenCalledOnce();
 		});
 	});
 

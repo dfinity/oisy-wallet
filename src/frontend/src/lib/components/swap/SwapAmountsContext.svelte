@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { debounce, isNullish, nonNullish } from '@dfinity/utils';
-	import { getContext, onDestroy, type Snippet } from 'svelte';
+	import { isNullish, nonNullish } from '@dfinity/utils';
+	import { getContext, onDestroy, untrack, type Snippet } from 'svelte';
+	import { isIcToken } from '$icp/validation/ic-token.validation';
 	import {
 		SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS,
 		SWAP_DEFAULT_SLIPPAGE_VALUE
@@ -8,7 +9,6 @@
 	import { ethAddress } from '$lib/derived/address.derived';
 	import { authIdentity } from '$lib/derived/auth.derived';
 	import { tokens } from '$lib/derived/tokens.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { fetchSwapAmounts } from '$lib/services/swap.services';
 	import {
 		SWAP_AMOUNTS_CONTEXT_KEY,
@@ -23,7 +23,7 @@
 		destinationToken?: Token;
 		slippageValue: OptionAmount;
 		children?: Snippet;
-		isSourceTokenIcrc2: boolean;
+		isSourceTokenIcrc2?: boolean;
 		isSwapAmountsLoading: boolean;
 		enableAmountUpdates?: boolean;
 		pauseAmountUpdates?: boolean;
@@ -44,8 +44,7 @@
 	const { store } = getContext<SwapAmountsContext>(SWAP_AMOUNTS_CONTEXT_KEY);
 
 	let timer: NodeJS.Timeout | undefined;
-
-	let isFetching = $state(false);
+	let debounceTimer = $state<NodeJS.Timeout | undefined>();
 
 	const clearTimer = () => {
 		if (nonNullish(timer)) {
@@ -64,13 +63,15 @@
 		}, SWAP_AMOUNTS_PERIODIC_FETCH_INTERVAL_MS);
 	};
 
+	const clearDebounceTimer = () => {
+		if (nonNullish(debounceTimer)) {
+			clearTimeout(debounceTimer);
+			debounceTimer = undefined;
+		}
+	};
+
 	const loadSwapAmounts = async (isPeriodicUpdate = false) => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
-			return;
-		}
-
-		if (isFetching) {
 			return;
 		}
 
@@ -81,12 +82,15 @@
 
 		const parsedAmount = Number(amount);
 
+		if (isNullish(isSourceTokenIcrc2) && isIcToken(sourceToken)) {
+			return;
+		}
+
 		if (!isPeriodicUpdate && nonNullish($store) && $store.amountForSwap === parsedAmount) {
 			return;
 		}
 
 		isSwapAmountsLoading = true;
-		isFetching = true;
 
 		try {
 			const swapAmounts = await fetchSwapAmounts({
@@ -115,7 +119,7 @@
 				selectedProvider: swapAmounts[0]
 			});
 		} catch (_err: unknown) {
-			// if kongSwapAmounts fails, it means no pool is currently available for the provided tokens
+			// if swapAmounts fails, it means no pool is currently available for the provided tokens
 			store.setSwaps({
 				swaps: [],
 				amountForSwap: parsedAmount,
@@ -123,11 +127,8 @@
 			});
 		} finally {
 			isSwapAmountsLoading = false;
-			isFetching = false;
 		}
 	};
-
-	const debounceLoadSwapAmounts = debounce(() => loadSwapAmounts(false));
 
 	$effect(() => {
 		if (pauseAmountUpdates || !enableAmountUpdates) {
@@ -138,13 +139,19 @@
 	});
 
 	$effect(() => {
-		[amount, sourceToken, destinationToken];
+		[amount, sourceToken, destinationToken, isSourceTokenIcrc2];
 
-		debounceLoadSwapAmounts();
+		untrack(() => {
+			clearDebounceTimer();
+			debounceTimer = setTimeout(() => {
+				loadSwapAmounts(false);
+			}, 300);
+		});
 	});
 
 	onDestroy(() => {
 		clearTimer();
+		clearDebounceTimer();
 	});
 </script>
 

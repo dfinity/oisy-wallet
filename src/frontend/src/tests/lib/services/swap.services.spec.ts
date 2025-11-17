@@ -1,7 +1,8 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
-import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+import type { SwapAmountsReply } from '$declarations/kong_backend/declarations/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
+import { createPermit } from '$eth/services/eip2612-permit.services';
 import type { Erc20Token } from '$eth/types/erc20';
 import * as ethUtils from '$eth/utils/eth.utils';
 import * as icrcLedgerApi from '$icp/api/icrc-ledger.api';
@@ -11,6 +12,7 @@ import { isIcrcTokenSupportIcrc2 } from '$icp/utils/icrc.utils';
 import * as icpSwapPool from '$lib/api/icp-swap-pool.api';
 import * as kongBackendApi from '$lib/api/kong_backend.api';
 import { ZERO } from '$lib/constants/app.constants';
+import { PLAUSIBLE_EVENTS, PLAUSIBLE_EVENT_CONTEXTS } from '$lib/enums/plausible';
 import { ProgressStepsSwap } from '$lib/enums/progress-steps';
 import { trackEvent } from '$lib/services/analytics.services';
 import * as icpSwapBackend from '$lib/services/icp-swap.services';
@@ -25,20 +27,12 @@ import {
 	withdrawICPSwapAfterFailedSwap,
 	withdrawUserUnusedBalance
 } from '$lib/services/swap.services';
+import { exchangeStore } from '$lib/stores/exchange.store';
 import { kongSwapTokensStore } from '$lib/stores/kong-swap-tokens.store';
 import { swappableIcrcTokensStore } from '$lib/stores/swap-icrc-tokens.store';
 import type { ICPSwapAmountReply } from '$lib/types/api';
-import {
-	SwapErrorCodes,
-	SwapProvider,
-	type SwapMappedResult,
-	type VeloraSwapDetails
-} from '$lib/types/swap';
-import {
-	geSwapEthTokenAddress,
-	mapVeloraMarketSwapResult,
-	mapVeloraSwapResult
-} from '$lib/utils/swap.utils';
+import { SwapErrorCodes, SwapProvider, type VeloraSwapDetails } from '$lib/types/swap';
+import { geSwapEthTokenAddress } from '$lib/utils/swap.utils';
 import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockValidIcToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
@@ -83,7 +77,7 @@ vi.mock('@velora-dex/sdk', () => ({
 	constructSimpleSDK: vi.fn()
 }));
 
-vi.mock('$eth/services/send.services', () => ({
+vi.mock('$eth/services/approve.services', () => ({
 	approve: vi.fn(),
 	erc20ContractAllowance: vi.fn()
 }));
@@ -110,1057 +104,1505 @@ vi.mock('$lib/utils/swap.utils', async (importOriginal) => {
 
 	return {
 		...(actual as Record<string, unknown>),
-		geSwapEthTokenAddress: vi.fn(),
-
-		mapVeloraSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'delta'
-			})
-		),
-
-		mapVeloraMarketSwapResult: vi.fn(
-			(): SwapMappedResult => ({
-				provider: SwapProvider.VELORA,
-				receiveAmount: 1n,
-				receiveOutMinimum: 2n,
-				swapDetails: {} as VeloraSwapDetails,
-				type: 'market'
-			})
-		)
+		geSwapEthTokenAddress: vi.fn()
 	};
 });
 
-describe('fetchSwapAmounts', () => {
-	const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
+vi.mock('$eth/services/eip2612-permit.services', () => ({
+	createPermit: vi.fn()
+}));
 
-	const [sourceToken] = mockTokens;
-	const [_, destinationToken] = mockTokens;
-	const amount = 1000;
-	const slippage = 0.5;
+describe('swap.services', () => {
+	describe('fetchSwapAmounts', () => {
+		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
 
-	it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
-		const kongSwapResponse = {
-			receive_amount: 950n,
-			slippage: 0.5
-		} as SwapAmountsReply;
-		const icpSwapResponse = {
-			receiveAmount: 975
-		} as unknown as ICPSwapAmountReply;
+		const [sourceToken] = mockTokens;
+		const [_, destinationToken] = mockTokens;
+		const amount = 1000;
+		const slippage = 0.5;
 
-		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
-		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
-
-		const result = await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken,
-			destinationToken,
-			amount,
-			tokens: mockTokens,
-			slippage,
-			isSourceTokenIcrc2: true,
-			userEthAddress: mockEthAddress
+		beforeEach(() => {
+			vi.clearAllMocks();
 		});
 
-		expect(result).toHaveLength(2);
+		it('should handle both KONG_SWAP and ICP_SWAP providers correctly', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 975n
+			} as unknown as ICPSwapAmountReply;
 
-		const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
-		const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
 
-		expect(kongSwapResult).toBeDefined();
-		expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
 
-		expect(icpSwapResult).toBeDefined();
-		expect(icpSwapResult?.receiveAmount).toBe(icpSwapResponse.receiveAmount);
-	});
+			expect(result).toHaveLength(2);
 
-	it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
-		const kongSwapResponse = { receive_amount: 950n, slippage: 0.5 } as SwapAmountsReply;
-		const icpSwapError = new Error('ICP Swap Error');
+			const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+			const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
 
-		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
-		vi.mocked(icpSwapBackend.icpSwapAmounts).mockRejectedValue(icpSwapError);
+			expect(kongSwapResult).toBeDefined();
+			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
 
-		const result = await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken,
-			destinationToken,
-			amount,
-			tokens: mockTokens,
-			slippage,
-			isSourceTokenIcrc2: true,
-			userEthAddress: mockEthAddress
+			expect(icpSwapResult).toBeDefined();
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
-	});
+		it('should make a call oly to icpSwap if icrc2 is false', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 975
+			} as unknown as ICPSwapAmountReply;
 
-	it('should filter out providers with receiveAmount = 0', async () => {
-		const kongSwapResponse = { receive_amount: ZERO, slippage: 0.5 } as SwapAmountsReply;
-		const icpSwapResponse = {
-			receiveAmount: 950n,
-			slippage: 0.5
-		} as unknown as ICPSwapAmountReply;
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
 
-		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
-		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
 
-		const result = await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken,
-			destinationToken,
-			amount,
-			tokens: mockTokens,
-			slippage,
-			isSourceTokenIcrc2: true,
-			userEthAddress: mockEthAddress
+			expect(result).toHaveLength(1);
+
+			const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+
+			expect(kongSwapResult).toBeDefined();
 		});
 
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
-	});
+		it('should not make a call to ledger to get icrc token supported standards', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 975n
+			} as unknown as ICPSwapAmountReply;
 
-	it('should sort results by receiveAmount in descending order', async () => {
-		const kongSwapResponse = { receive_amount: 800n, slippage: 0.5 } as SwapAmountsReply;
-		const icpSwapResponse = { receiveAmount: 950n, slippage: 0.5 } as unknown as ICPSwapAmountReply;
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
 
-		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
-		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
 
-		const result = await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken,
-			destinationToken,
-			amount,
-			tokens: mockTokens,
-			slippage,
-			isSourceTokenIcrc2: true,
-			userEthAddress: mockEthAddress
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledTimes(0);
+
+			expect(result).toHaveLength(2);
+
+			const kongSwapResult = result.find((r) => r.provider === SwapProvider.KONG_SWAP);
+			const icpSwapResult = result.find((r) => r.provider === SwapProvider.ICP_SWAP);
+
+			expect(kongSwapResult).toBeDefined();
+			expect(kongSwapResult?.receiveAmount).toBe(kongSwapResponse.receive_amount);
+
+			expect(icpSwapResult).toBeDefined();
+			expect(icpSwapResult?.receiveAmount).toBe(
+				icpSwapResponse.receiveAmount - destinationToken.fee
+			);
 		});
 
-		expect(result).toHaveLength(2);
-		expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
-		expect(result[1].provider).toBe(SwapProvider.KONG_SWAP);
-	});
+		it('should handle provider failures gracefully (e.g., rejected promises)', async () => {
+			const kongSwapResponse = { receive_amount: 950n, slippage: 0.5 } as SwapAmountsReply;
+			const icpSwapError = new Error('ICP Swap Error');
 
-	it('should skip icp swap if token is icrc1', async () => {
-		const kongSwapResponse = { receive_amount: 800n, slippage: 0.5 } as SwapAmountsReply;
-		const icpSwapResponse = { receiveAmount: 950n, slippage: 0.5 } as unknown as ICPSwapAmountReply;
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockRejectedValue(icpSwapError);
 
-		vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
-		vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
 
-		const result = await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken,
-			destinationToken,
-			amount,
-			tokens: mockTokens,
-			slippage,
-			isSourceTokenIcrc2: false,
-			userEthAddress: mockEthAddress
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
 		});
 
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
+		it('should filter out providers with receiveAmount = 0', async () => {
+			const kongSwapResponse = { receive_amount: ZERO, slippage: 0.5 } as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 950n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
+		});
+
+		it('should sort results by receiveAmount in descending order', async () => {
+			const kongSwapResponse = { receive_amount: 800n, slippage: 0.5 } as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 950n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(result).toHaveLength(2);
+			expect(result[0].provider).toBe(SwapProvider.ICP_SWAP);
+			expect(result[1].provider).toBe(SwapProvider.KONG_SWAP);
+		});
+
+		it('should skip icp swap if token is icrc1', async () => {
+			const kongSwapResponse = { receive_amount: 800n, slippage: 0.5 } as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 950n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			const result = await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.KONG_SWAP);
+		});
+
+		it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
+			const mockGetQuote = vi.fn();
+
+			vi.mocked(constructSimpleSDK).mockReturnValue({
+				quote: { getQuote: mockGetQuote }
+			} as unknown as ReturnType<typeof constructSimpleSDK>);
+
+			mockGetQuote.mockResolvedValue({});
+
+			const evmToken = {
+				...mockValidErc20Token,
+				network: {
+					id: Symbol('evm-network-id'),
+					env: 'mainnet',
+					name: 'EVM Network',
+					chainId: 1n
+				}
+			} as Erc20Token;
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken: evmToken,
+				destinationToken: mockValidErc20Token,
+				amount: 1000,
+				tokens: [evmToken, mockValidErc20Token],
+				slippage: 0.5,
+				isSourceTokenIcrc2: true,
+				userEthAddress: '0xUser'
+			});
+
+			expect(mockGetQuote).toHaveBeenCalled();
+		});
 	});
 
-	it('should call fetchSwapAmountsEVM when network.id !== ICP_NETWORK_ID', async () => {
+	describe('fetchSwapAmountsEVM', () => {
+		const sourceToken = {
+			symbol: 'SRC',
+			decimals: 18,
+			network: { chainId: '1' },
+			address: '0xSrcAddress'
+		} as unknown as Erc20Token;
+
+		const destinationToken = {
+			symbol: 'DST',
+			decimals: 6,
+			network: { chainId: '137' },
+			address: '0xDestAddress'
+		} as unknown as Erc20Token;
+
+		const amount = BigInt('1000000000000000000');
+		const userEthAddress = '0xUser';
+
 		const mockGetQuote = vi.fn();
 
-		vi.mocked(constructSimpleSDK).mockReturnValue({
-			quote: { getQuote: mockGetQuote }
-		} as unknown as ReturnType<typeof constructSimpleSDK>);
+		beforeEach(() => {
+			vi.clearAllMocks();
 
-		mockGetQuote.mockResolvedValue({});
+			vi.mocked(constructSimpleSDK).mockReturnValue({
+				quote: { getQuote: mockGetQuote }
+			} as unknown as ReturnType<typeof constructSimpleSDK>);
+		});
 
-		const evmToken = {
+		afterEach(() => {
+			mockGetQuote.mockReset();
+		});
+
+		it('returns [] when quote has neither delta nor market', async () => {
+			mockGetQuote.mockResolvedValue({});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(result).toEqual([]);
+		});
+
+		it('calls delta mapper when quote contains delta without bridge and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridge: { scalingFactor: 0 }
+				}
+			});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(123n);
+			expect(result[0].type).toBe('delta');
+		});
+
+		it('calls delta mapper when quote contains delta with bridge and returns correct receiveAmount', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridgeInfo: { destAmountAfterBridge: '949920' }
+				}
+			});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(949920n);
+			expect(result[0].type).toBe('delta');
+		});
+
+		it('calls market mapper when quote contains market and returns single-item array', async () => {
+			mockGetQuote.mockResolvedValue({
+				market: {
+					destAmount: '456'
+				}
+			});
+
+			const result = await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(result).toHaveLength(1);
+			expect(result[0].provider).toBe(SwapProvider.VELORA);
+			expect(result[0].receiveAmount).toBe(456n);
+			expect(result[0].type).toBe('market');
+		});
+	});
+
+	describe('fetchVeloraDeltaSwap', () => {
+		const mockSourceToken = {
 			...mockValidErc20Token,
-			network: {
-				id: Symbol('evm-network-id'),
-				env: 'mainnet',
-				name: 'EVM Network',
-				chainId: 1n
-			}
-		} as Erc20Token;
+			address: mockEthAddress,
+			decimals: 18
+		};
 
-		await fetchSwapAmounts({
-			identity: mockIdentity,
-			sourceToken: evmToken,
-			destinationToken: mockValidErc20Token,
-			amount: 1000,
-			tokens: [evmToken, mockValidErc20Token],
-			slippage: 0.5,
-			isSourceTokenIcrc2: true,
-			userEthAddress: '0xUser'
-		});
+		const mockDestinationToken = {
+			...mockValidErc20Token,
+			address: '0xDestinationToken',
+			decimals: 6
+		};
 
-		expect(mockGetQuote).toHaveBeenCalled();
-	});
-});
+		const mockSwapAmount = '1000000000000000000'; // 1 ETH
+		const mockReceiveAmount = 900000000n; // 0.9 DST
+		const mockSlippageValue = '0.5';
+		const mockSourceNetwork = ETHEREUM_NETWORK;
+		const mockDestinationNetwork = SEPOLIA_NETWORK;
+		const mockUserAddress = mockEthAddress;
+		const mockGas = '21000';
+		const mockMaxFeePerGas = '20000000000';
+		const mockMaxPriorityFeePerGas = '2000000000';
 
-describe('fetchSwapAmountsEVM', () => {
-	const sourceToken = {
-		symbol: 'SRC',
-		decimals: 18,
-		network: { chainId: '1' },
-		address: '0xSrcAddress'
-	} as unknown as Erc20Token;
-
-	const destinationToken = {
-		symbol: 'DST',
-		decimals: 6,
-		network: { chainId: '137' },
-		address: '0xDestAddress'
-	} as unknown as Erc20Token;
-
-	const amount = BigInt('1000000000000000000');
-	const userEthAddress = '0xUser';
-
-	const mockGetQuote = vi.fn();
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-
-		vi.mocked(constructSimpleSDK).mockReturnValue({
-			quote: { getQuote: mockGetQuote }
-		} as unknown as ReturnType<typeof constructSimpleSDK>);
-	});
-
-	afterEach(() => {
-		mockGetQuote.mockReset();
-	});
-
-	it('returns [] when quote has neither delta nor market', async () => {
-		mockGetQuote.mockResolvedValue({});
-
-		const result = await fetchSwapAmountsEVM({
-			sourceToken,
-			destinationToken,
-			amount,
-			userEthAddress
-		});
-
-		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
-		expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
-		expect(result).toEqual([]);
-	});
-
-	it('calls delta mapper when quote contains delta and returns single-item array', async () => {
-		mockGetQuote.mockResolvedValue({ delta: { receiveAmount: '123' } });
-
-		const result = await fetchSwapAmountsEVM({
-			sourceToken,
-			destinationToken,
-			amount,
-			userEthAddress
-		});
-
-		expect(geSwapEthTokenAddress).toHaveBeenCalledTimes(2);
-		expect(mapVeloraSwapResult).toHaveBeenCalledOnce();
-		expect(mapVeloraMarketSwapResult).not.toHaveBeenCalled();
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.VELORA);
-	});
-
-	it('calls market mapper when quote contains market and returns single-item array', async () => {
-		mockGetQuote.mockResolvedValue({ market: { receiveAmount: '456' } });
-
-		const result = await fetchSwapAmountsEVM({
-			sourceToken,
-			destinationToken,
-			amount,
-			userEthAddress
-		});
-
-		expect(mapVeloraMarketSwapResult).toHaveBeenCalledOnce();
-		expect(mapVeloraSwapResult).not.toHaveBeenCalled();
-		expect(result).toHaveLength(1);
-		expect(result[0].provider).toBe(SwapProvider.VELORA);
-	});
-});
-
-describe('fetchVeloraDeltaSwap', () => {
-	const mockSourceToken = {
-		...mockValidErc20Token,
-		address: mockEthAddress,
-		decimals: 18
-	};
-
-	const mockDestinationToken = {
-		...mockValidErc20Token,
-		address: '0xDestinationToken',
-		decimals: 6
-	};
-
-	const mockSwapAmount = '1000000000000000000'; // 1 ETH
-	const mockReceiveAmount = 900000000n; // 0.9 DST
-	const mockSlippageValue = '0.5';
-	const mockSourceNetwork = ETHEREUM_NETWORK;
-	const mockDestinationNetwork = SEPOLIA_NETWORK;
-	const mockUserAddress = mockEthAddress;
-	const mockGas = '21000';
-	const mockMaxFeePerGas = '20000000000';
-	const mockMaxPriorityFeePerGas = '2000000000';
-
-	const mockSwapDetails = {
-		srcToken: mockEthAddress,
-		destToken: '0xDestinationToken',
-		srcAmount: '1000000000000000000',
-		destAmount: '900000000',
-		destAmountBeforeFee: '920000000',
-		gasCost: '50000',
-		gasCostBeforeFee: '48000',
-		gasCostUSD: '15.5',
-		gasCostUSDBeforeFee: '14.8',
-		srcUSD: '1000.0',
-		destUSD: '895.5',
-		destUSDBeforeFee: '915.2',
-		partner: 'PartnerName',
-		partnerFee: 0.25,
-		hmac: 'abcd1234',
-		// BridgePrice properties
-		destAmountAfterBridge: '800000000',
-		destUSDAfterBridge: '795.0',
-		bridgeFee: '50',
-		bridgeFeeUSD: '50.0',
-		poolAddress: '0xpool123',
-		bridge: {
-			destinationChainId: 1,
-			outputToken: '0xoutput456',
-			protocolSelector: 'bridge_protocol',
-			scalingFactor: 1000000,
-			protocolData: '0xprotocol_data'
-		},
-		bridgeInfo: {
+		const mockSwapDetails = {
+			srcToken: mockEthAddress,
+			destToken: '0xDestinationToken',
+			srcAmount: '1000000000000000000',
+			destAmount: '900000000',
+			destAmountBeforeFee: '920000000',
+			gasCost: '50000',
+			gasCostBeforeFee: '48000',
+			gasCostUSD: '15.5',
+			gasCostUSDBeforeFee: '14.8',
+			srcUSD: '1000.0',
+			destUSD: '895.5',
+			destUSDBeforeFee: '915.2',
+			partner: 'PartnerName',
+			partnerFee: 0.25,
+			hmac: 'abcd1234',
+			// BridgePrice properties
 			destAmountAfterBridge: '800000000',
 			destUSDAfterBridge: '795.0',
 			bridgeFee: '50',
 			bridgeFeeUSD: '50.0',
 			poolAddress: '0xpool123',
-			protocolName: 'bridge_protocol',
-			fees: [
+			bridge: {
+				destinationChainId: 1,
+				outputToken: '0xoutput456',
+				protocolSelector: 'bridge_protocol',
+				scalingFactor: 1000000,
+				protocolData: '0xprotocol_data'
+			},
+			bridgeInfo: {
+				destAmountAfterBridge: '800000000',
+				destUSDAfterBridge: '795.0',
+				bridgeFee: '50',
+				bridgeFeeUSD: '50.0',
+				poolAddress: '0xpool123',
+				protocolName: 'bridge_protocol',
+				fees: [
+					{
+						name: 'bridge_fee',
+						amount: '50',
+						amountUSD: '50.0',
+						feeToken: '0xoutput456',
+						amountInSrcToken: '50',
+						amountInUSD: '50.0'
+					}
+				],
+				estimatedTimeMs: 300000
+			},
+			// OptimalRate properties
+			blockNumber: 12345,
+			networkFee: '1000000000000000000',
+			networkFeeUSD: '100.0',
+			network: 1,
+			srcDecimals: 18,
+			destDecimals: 6,
+			bestRoute: [
 				{
-					name: 'bridge_fee',
-					amount: '50',
-					amountUSD: '50.0',
-					feeToken: '0xoutput456',
-					amountInSrcToken: '50',
-					amountInUSD: '50.0'
+					percent: 100,
+					swaps: [
+						{
+							srcToken: mockEthAddress,
+							srcDecimals: 18,
+							destToken: '0xDestinationToken',
+							destDecimals: 6,
+							exchange: 'uniswap_v2',
+							percent: 100,
+							swapExchanges: [
+								{
+									exchange: 'uniswap_v2',
+									percent: 100,
+									srcAmount: '1000000000000000000',
+									destAmount: '900000000'
+								}
+							]
+						}
+					]
 				}
 			],
-			estimatedTimeMs: 300000
-		},
-		// OptimalRate properties
-		blockNumber: 12345,
-		networkFee: '1000000000000000000',
-		networkFeeUSD: '100.0',
-		network: 1,
-		srcDecimals: 18,
-		destDecimals: 6,
-		bestRoute: [
-			{
-				percent: 100,
-				swaps: [
-					{
-						srcToken: mockEthAddress,
-						srcDecimals: 18,
-						destToken: '0xDestinationToken',
-						destDecimals: 6,
-						exchange: 'uniswap_v2',
-						percent: 100,
-						swapExchanges: [
-							{
-								exchange: 'uniswap_v2',
-								percent: 100,
-								srcAmount: '1000000000000000000',
-								destAmount: '900000000'
-							}
-						]
-					}
-				]
-			}
-		],
-		side: 'SELL' as const,
-		version: '2',
-		contractMethod: 'swap',
-		tokenTransferProxy: '0xTokenTransferProxy',
-		contractAddress: '0xSwapContract'
-	};
+			side: 'SELL' as const,
+			version: '2',
+			contractMethod: 'swap',
+			tokenTransferProxy: '0xTokenTransferProxy',
+			contractAddress: '0xSwapContract'
+		};
 
-	const mockProgress = vi.fn();
+		const mockProgress = vi.fn();
 
-	let mockSdk: {
-		delta: {
+		let mockSdk: {
+			delta: {
+				getDeltaContract: ReturnType<typeof vi.fn>;
+				buildDeltaOrder: ReturnType<typeof vi.fn>;
+				postDeltaOrder: ReturnType<typeof vi.fn>;
+				getDeltaOrderById: ReturnType<typeof vi.fn>;
+			};
+		};
+		let mockDeltaContract: {
 			getDeltaContract: ReturnType<typeof vi.fn>;
 			buildDeltaOrder: ReturnType<typeof vi.fn>;
 			postDeltaOrder: ReturnType<typeof vi.fn>;
 			getDeltaOrderById: ReturnType<typeof vi.fn>;
 		};
-	};
-	let mockDeltaContract: {
-		getDeltaContract: ReturnType<typeof vi.fn>;
-		buildDeltaOrder: ReturnType<typeof vi.fn>;
-		postDeltaOrder: ReturnType<typeof vi.fn>;
-		getDeltaOrderById: ReturnType<typeof vi.fn>;
-	};
-	let mockDeltaContractGetDeltaContract: ReturnType<typeof vi.fn>;
-	let mockDeltaContractBuildDeltaOrder: ReturnType<typeof vi.fn>;
-	let mockDeltaContractPostDeltaOrder: ReturnType<typeof vi.fn>;
-	let mockDeltaContractGetDeltaOrderById: ReturnType<typeof vi.fn>;
+		let mockDeltaContractGetDeltaContract: ReturnType<typeof vi.fn>;
+		let mockDeltaContractBuildDeltaOrder: ReturnType<typeof vi.fn>;
+		let mockDeltaContractPostDeltaOrder: ReturnType<typeof vi.fn>;
+		let mockDeltaContractGetDeltaOrderById: ReturnType<typeof vi.fn>;
 
-	beforeEach(() => {
-		vi.clearAllMocks();
+		beforeEach(() => {
+			vi.clearAllMocks();
 
-		mockDeltaContractGetDeltaOrderById = vi.fn();
-		mockDeltaContractPostDeltaOrder = vi.fn();
-		mockDeltaContractBuildDeltaOrder = vi.fn();
-		mockDeltaContractGetDeltaContract = vi.fn();
+			mockDeltaContractGetDeltaOrderById = vi.fn();
+			mockDeltaContractPostDeltaOrder = vi.fn();
+			mockDeltaContractBuildDeltaOrder = vi.fn();
+			mockDeltaContractGetDeltaContract = vi.fn();
 
-		mockDeltaContract = {
-			getDeltaContract: mockDeltaContractGetDeltaContract,
-			buildDeltaOrder: mockDeltaContractBuildDeltaOrder,
-			postDeltaOrder: mockDeltaContractPostDeltaOrder,
-			getDeltaOrderById: mockDeltaContractGetDeltaOrderById
+			mockDeltaContract = {
+				getDeltaContract: mockDeltaContractGetDeltaContract,
+				buildDeltaOrder: mockDeltaContractBuildDeltaOrder,
+				postDeltaOrder: mockDeltaContractPostDeltaOrder,
+				getDeltaOrderById: mockDeltaContractGetDeltaOrderById
+			};
+
+			mockSdk = {
+				delta: mockDeltaContract
+			};
+
+			vi.mocked(constructSimpleSDK).mockReturnValue(
+				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
+			);
+			mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
+			mockDeltaContractBuildDeltaOrder.mockResolvedValue({
+				data: { order: 'mock-order-data' }
+			});
+			mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
+			mockDeltaContractGetDeltaOrderById.mockResolvedValue({
+				status: 'EXECUTED',
+				order: { bridge: { destinationChainId: 0 } }
+			});
+
+			vi.mocked(createPermit).mockResolvedValue({
+				nonce: '0',
+				deadline: 1234567890,
+				encodedPermit: '0xpermitdata'
+			});
+		});
+
+		it('should execute delta swap successfully when isGasless is false', async () => {
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails
+			});
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			expect(createPermit).not.toHaveBeenCalled();
+		});
+
+		it('should execute delta swap successfully when isGasless is true', async () => {
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: true,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails
+			});
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+			expect(createPermit).toHaveBeenCalled();
+		});
+
+		it('should handle delta contract not found', async () => {
+			mockDeltaContractGetDeltaContract.mockResolvedValue(null);
+
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails
+			});
+
+			expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
+			expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
+		});
+
+		it('should handle cross-chain bridge execution', async () => {
+			mockDeltaContractGetDeltaOrderById.mockResolvedValue({
+				status: 'EXECUTED',
+				order: { bridge: { destinationChainId: 1 } },
+				bridgeStatus: 'filled'
+			});
+
+			await fetchVeloraDeltaSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				receiveAmount: mockReceiveAmount,
+				slippageValue: mockSlippageValue,
+				destinationNetwork: mockDestinationNetwork,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				isGasless: false,
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails
+			});
+
+			expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
+		});
+	});
+
+	describe('fetchVeloraMarketSwap', () => {
+		const mockSourceToken = {
+			...mockValidErc20Token,
+			address: mockEthAddress,
+			decimals: 18
 		};
 
-		mockSdk = {
-			delta: mockDeltaContract
+		const mockDestinationToken = {
+			...mockValidErc20Token,
+			address: '0xDestinationToken',
+			decimals: 6
 		};
 
-		vi.mocked(constructSimpleSDK).mockReturnValue(
-			mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
-		);
-		mockDeltaContractGetDeltaContract.mockResolvedValue(mockDeltaContract);
-		mockDeltaContractBuildDeltaOrder.mockResolvedValue({
-			data: { order: 'mock-order-data' }
-		});
-		mockDeltaContractPostDeltaOrder.mockResolvedValue({ id: 'mock-auction-id' });
-		mockDeltaContractGetDeltaOrderById.mockResolvedValue({
-			status: 'EXECUTED',
-			order: { bridge: { destinationChainId: 0 } }
-		});
-	});
+		const mockSwapAmount = '1000000000000000000';
+		const mockSlippageValue = '0.5';
+		const mockSourceNetwork = ETHEREUM_NETWORK;
+		const mockUserAddress = mockEthAddress;
+		const mockGas = '21000';
+		const mockMaxFeePerGas = '20000000000';
+		const mockMaxPriorityFeePerGas = '2000000000';
 
-	it('should execute delta swap successfully', async () => {
-		await fetchVeloraDeltaSwap({
-			identity: mockIdentity,
-			progress: mockProgress,
-			sourceToken: mockSourceToken,
-			destinationToken: mockDestinationToken,
-			swapAmount: mockSwapAmount,
-			sourceNetwork: mockSourceNetwork,
-			receiveAmount: mockReceiveAmount,
-			slippageValue: mockSlippageValue,
-			destinationNetwork: mockDestinationNetwork,
-			userAddress: mockUserAddress,
-			gas: BigInt(mockGas),
-			maxFeePerGas: BigInt(mockMaxFeePerGas),
-			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-			swapDetails: mockSwapDetails as VeloraSwapDetails
-		});
+		const mockSwapDetails = {
+			srcToken: mockEthAddress,
+			destToken: '0xDestinationToken',
+			srcAmount: '1000000000000000000',
+			destAmount: '900000000',
+			destAmountBeforeFee: '920000000',
+			gasCost: '50000',
+			gasCostBeforeFee: '48000',
+			gasCostUSD: '15.5',
+			gasCostUSDBeforeFee: '14.8',
+			srcUSD: '1000.0',
+			destUSD: '895.5',
+			destUSDBeforeFee: '915.2',
+			partner: 'PartnerName',
+			partnerFee: 0.25,
+			hmac: 'abcd1234'
+		};
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-		expect(mockDeltaContractGetDeltaContract).toHaveBeenCalled();
-		expect(mockDeltaContractPostDeltaOrder).toHaveBeenCalledWith({
-			order: { order: 'mock-order-data' },
-			signature: 'mock-signature'
-		});
-	});
+		const mockProgress = vi.fn();
 
-	it('should handle delta contract not found', async () => {
-		mockDeltaContractGetDeltaContract.mockResolvedValue(null);
-
-		await fetchVeloraDeltaSwap({
-			identity: mockIdentity,
-			progress: mockProgress,
-			sourceToken: mockSourceToken,
-			destinationToken: mockDestinationToken,
-			swapAmount: mockSwapAmount,
-			sourceNetwork: mockSourceNetwork,
-			receiveAmount: mockReceiveAmount,
-			slippageValue: mockSlippageValue,
-			destinationNetwork: mockDestinationNetwork,
-			userAddress: mockUserAddress,
-			gas: BigInt(mockGas),
-			maxFeePerGas: BigInt(mockMaxFeePerGas),
-			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-			swapDetails: mockSwapDetails as VeloraSwapDetails
-		});
-
-		expect(mockProgress).not.toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockDeltaContractPostDeltaOrder).not.toHaveBeenCalled();
-	});
-
-	it('should handle cross-chain bridge execution', async () => {
-		mockDeltaContractGetDeltaOrderById.mockResolvedValue({
-			status: 'EXECUTED',
-			order: { bridge: { destinationChainId: 1 } },
-			bridgeStatus: 'filled'
-		});
-
-		await fetchVeloraDeltaSwap({
-			identity: mockIdentity,
-			progress: mockProgress,
-			sourceToken: mockSourceToken,
-			destinationToken: mockDestinationToken,
-			swapAmount: mockSwapAmount,
-			sourceNetwork: mockSourceNetwork,
-			receiveAmount: mockReceiveAmount,
-			slippageValue: mockSlippageValue,
-			destinationNetwork: mockDestinationNetwork,
-			userAddress: mockUserAddress,
-			gas: BigInt(mockGas),
-			maxFeePerGas: BigInt(mockMaxFeePerGas),
-			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-			swapDetails: mockSwapDetails as VeloraSwapDetails
-		});
-
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-	});
-});
-
-describe('fetchVeloraMarketSwap', () => {
-	const mockSourceToken = {
-		...mockValidErc20Token,
-		address: mockEthAddress,
-		decimals: 18
-	};
-
-	const mockDestinationToken = {
-		...mockValidErc20Token,
-		address: '0xDestinationToken',
-		decimals: 6
-	};
-
-	const mockSwapAmount = '1000000000000000000';
-	const mockSlippageValue = '0.5';
-	const mockSourceNetwork = ETHEREUM_NETWORK;
-	const mockUserAddress = mockEthAddress;
-	const mockGas = '21000';
-	const mockMaxFeePerGas = '20000000000';
-	const mockMaxPriorityFeePerGas = '2000000000';
-
-	const mockSwapDetails = {
-		srcToken: mockEthAddress,
-		destToken: '0xDestinationToken',
-		srcAmount: '1000000000000000000',
-		destAmount: '900000000',
-		destAmountBeforeFee: '920000000',
-		gasCost: '50000',
-		gasCostBeforeFee: '48000',
-		gasCostUSD: '15.5',
-		gasCostUSDBeforeFee: '14.8',
-		srcUSD: '1000.0',
-		destUSD: '895.5',
-		destUSDBeforeFee: '915.2',
-		partner: 'PartnerName',
-		partnerFee: 0.25,
-		hmac: 'abcd1234'
-	};
-
-	const mockProgress = vi.fn();
-
-	let mockSdk: {
-		swap: {
+		let mockSdk: {
+			swap: {
+				getSpender: ReturnType<typeof vi.fn>;
+				buildTx: ReturnType<typeof vi.fn>;
+			};
+		};
+		let mockSwap: {
 			getSpender: ReturnType<typeof vi.fn>;
 			buildTx: ReturnType<typeof vi.fn>;
 		};
-	};
-	let mockSwap: {
-		getSpender: ReturnType<typeof vi.fn>;
-		buildTx: ReturnType<typeof vi.fn>;
-	};
-	let mockSwapGetSpender: ReturnType<typeof vi.fn>;
-	let mockSwapBuildTx: ReturnType<typeof vi.fn>;
+		let mockSwapGetSpender: ReturnType<typeof vi.fn>;
+		let mockSwapBuildTx: ReturnType<typeof vi.fn>;
 
-	beforeEach(() => {
-		vi.clearAllMocks();
+		beforeEach(() => {
+			vi.clearAllMocks();
 
-		mockSwapGetSpender = vi.fn();
-		mockSwapBuildTx = vi.fn();
+			mockSwapGetSpender = vi.fn();
+			mockSwapBuildTx = vi.fn();
 
-		mockSwap = {
-			getSpender: mockSwapGetSpender,
-			buildTx: mockSwapBuildTx
-		};
+			mockSwap = {
+				getSpender: mockSwapGetSpender,
+				buildTx: mockSwapBuildTx
+			};
 
-		mockSdk = {
-			swap: mockSwap
-		};
+			mockSdk = {
+				swap: mockSwap
+			};
 
-		vi.mocked(constructSimpleSDK).mockReturnValue(
-			mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
-		);
-		mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
-		mockSwapBuildTx.mockResolvedValue({
-			to: '0xSwapContract',
-			data: '0xswapdata'
+			vi.mocked(constructSimpleSDK).mockReturnValue(
+				mockSdk as unknown as ReturnType<typeof constructSimpleSDK>
+			);
+			mockSwapGetSpender.mockResolvedValue('0xTokenTransferProxy');
+			mockSwapBuildTx.mockResolvedValue({
+				to: '0xSwapContract',
+				data: '0xswapdata'
+			});
+		});
+
+		it('should execute market swap successfully with non-default token', async () => {
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false,
+				destinationNetwork: SEPOLIA_NETWORK
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(2);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.UPDATE_UI);
+
+			expect(mockSwapGetSpender).toHaveBeenCalled();
+		});
+
+		it('should execute market swap successfully with default Ethereum token', async () => {
+			vi.mocked(ethUtils.isDefaultEthereumToken).mockReturnValue(true);
+
+			await fetchVeloraMarketSwap({
+				identity: mockIdentity,
+				progress: mockProgress,
+				sourceToken: mockSourceToken,
+				destinationToken: mockDestinationToken,
+				swapAmount: mockSwapAmount,
+				sourceNetwork: mockSourceNetwork,
+				slippageValue: mockSlippageValue,
+				userAddress: mockUserAddress,
+				gas: BigInt(mockGas),
+				maxFeePerGas: BigInt(mockMaxFeePerGas),
+				maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
+				swapDetails: mockSwapDetails as VeloraSwapDetails,
+				receiveAmount: BigInt(1000),
+				isGasless: false,
+				destinationNetwork: SEPOLIA_NETWORK
+			});
+
+			expect(mockProgress).toHaveBeenCalledTimes(2);
+			expect(mockProgress).toHaveBeenNthCalledWith(1, ProgressStepsSwap.SWAP);
+			expect(mockProgress).toHaveBeenNthCalledWith(2, ProgressStepsSwap.UPDATE_UI);
+
+			expect(mockSwapGetSpender).toHaveBeenCalled();
+			expect(mockSwapBuildTx).toHaveBeenCalled();
 		});
 	});
 
-	it('should execute market swap successfully with non-default token', async () => {
-		await fetchVeloraMarketSwap({
-			identity: mockIdentity,
-			progress: mockProgress,
-			sourceToken: mockSourceToken,
-			destinationToken: mockDestinationToken,
-			swapAmount: mockSwapAmount,
-			sourceNetwork: mockSourceNetwork,
-			slippageValue: mockSlippageValue,
-			userAddress: mockUserAddress,
-			gas: BigInt(mockGas),
-			maxFeePerGas: BigInt(mockMaxFeePerGas),
-			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-			swapDetails: mockSwapDetails as VeloraSwapDetails,
-			receiveAmount: BigInt(1000),
-			destinationNetwork: SEPOLIA_NETWORK
+	describe('loadKongSwapTokens', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-		expect(mockSwapGetSpender).toHaveBeenCalled();
-	});
+		it('properly updates kongSwapToken store with the fetched tokens', async () => {
+			vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue(mockKongBackendTokens);
 
-	it('should execute market swap successfully with default Ethereum token', async () => {
-		vi.mocked(ethUtils.isDefaultEthereumToken).mockReturnValue(true);
+			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
-		await fetchVeloraMarketSwap({
-			identity: mockIdentity,
-			progress: mockProgress,
-			sourceToken: mockSourceToken,
-			destinationToken: mockDestinationToken,
-			swapAmount: mockSwapAmount,
-			sourceNetwork: mockSourceNetwork,
-			slippageValue: mockSlippageValue,
-			userAddress: mockUserAddress,
-			gas: BigInt(mockGas),
-			maxFeePerGas: BigInt(mockMaxFeePerGas),
-			maxPriorityFeePerGas: BigInt(mockMaxPriorityFeePerGas),
-			swapDetails: mockSwapDetails as VeloraSwapDetails,
-			receiveAmount: BigInt(1000),
-			destinationNetwork: SEPOLIA_NETWORK
+			expect(get(kongSwapTokensStore)).toStrictEqual({
+				[kongIcToken.symbol]: kongIcToken
+			});
 		});
 
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.SWAP);
-		expect(mockProgress).toHaveBeenCalledWith(ProgressStepsSwap.UPDATE_UI);
-		expect(mockSwapGetSpender).toHaveBeenCalled();
-		expect(mockSwapBuildTx).toHaveBeenCalled();
-	});
-});
+		it('properly does not update store if no IC kongTokens available', async () => {
+			vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue([{ ...mockKongBackendTokens[1] }]);
 
-describe('loadKongSwapTokens', () => {
-	beforeEach(() => {
-		vi.resetAllMocks();
-	});
+			await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
 
-	it('properly updates kongSwapToken store with the fetched tokens', async () => {
-		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue(mockKongBackendTokens);
-
-		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
-
-		expect(get(kongSwapTokensStore)).toStrictEqual({
-			[kongIcToken.symbol]: kongIcToken
+			expect(get(kongSwapTokensStore)).toStrictEqual({});
 		});
 	});
 
-	it('properly does not update store if no IC kongTokens available', async () => {
-		vi.spyOn(kongBackendApi, 'kongTokens').mockResolvedValue([{ ...mockKongBackendTokens[1] }]);
-
-		await loadKongSwapTokens({ identity: mockIdentity, allIcrcTokens: [mockIcrcCustomToken] });
-
-		expect(get(kongSwapTokensStore)).toStrictEqual({});
-	});
-});
-
-describe('loadAllIcrcTokensWithSupportedStandards', () => {
-	beforeEach(() => {
-		vi.resetAllMocks();
-	});
-
-	it('properly updates swappableIcrcTokensStore store with the fetched tokens', async () => {
-		const params = {
-			identity: mockIdentity,
-			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
-		};
-
-		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
-			{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
-		]);
-
-		const result = await isIcrcTokenSupportIcrc2(params);
-
-		expect(result).toBeTruthy();
-		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity,
-			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+	describe('loadAllIcrcTokensWithSupportedStandards', () => {
+		beforeEach(() => {
+			vi.resetAllMocks();
 		});
 
-		await loadAllIcrcTokensWithSupportedStandards({
-			identity: mockIdentity,
-			allTokens: [ICP_TOKEN]
+		it('properly updates swappableIcrcTokensStore store with the fetched tokens', async () => {
+			const params = {
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+			};
+
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+				{ name: 'ICRC-2', url: 'https://github.com/dfinity/ICRC-2' }
+			]);
+
+			const result = await isIcrcTokenSupportIcrc2(params);
+
+			expect(result).toBeTruthy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+			});
+
+			await loadAllIcrcTokensWithSupportedStandards({
+				identity: mockIdentity,
+				allTokens: [ICP_TOKEN]
+			});
+
+			expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: true }]);
 		});
 
-		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: true }]);
-	});
+		it('properly updates swappableIcrcTokensStore store with the fetched tokens but with icrc1', async () => {
+			const params = {
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+			};
 
-	it('properly updates swappableIcrcTokensStore store with the fetched tokens but with icrc1', async () => {
-		const params = {
-			identity: mockIdentity,
-			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
-		};
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
+				{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' }
+			]);
 
-		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockResolvedValue([
-			{ name: 'ICRC-1', url: 'https://github.com/dfinity/ICRC-1' }
-		]);
+			const result = await isIcrcTokenSupportIcrc2(params);
 
-		const result = await isIcrcTokenSupportIcrc2(params);
+			expect(result).toBeFalsy();
+			expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
+				identity: mockIdentity,
+				ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+			});
 
-		expect(result).toBeFalsy();
-		expect(icrcLedgerApi.icrc1SupportedStandards).toHaveBeenCalledExactlyOnceWith({
-			identity: mockIdentity,
-			ledgerCanisterId: ICP_TOKEN.ledgerCanisterId
+			await loadAllIcrcTokensWithSupportedStandards({
+				identity: mockIdentity,
+				allTokens: [ICP_TOKEN]
+			});
+
+			expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: false }]);
 		});
 
-		await loadAllIcrcTokensWithSupportedStandards({
-			identity: mockIdentity,
-			allTokens: [ICP_TOKEN]
+		it('skip updating swappableIcrcTokensStore store if supportedIcrcStandardFailed', async () => {
+			vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockRejectedValue('Error');
+
+			await loadAllIcrcTokensWithSupportedStandards({
+				identity: mockIdentity,
+				allTokens: [ICP_TOKEN]
+			});
+
+			expect(get(swappableIcrcTokensStore)).toStrictEqual([]);
 		});
-
-		expect(get(swappableIcrcTokensStore)).toStrictEqual([{ ...ICP_TOKEN, isIcrc2: false }]);
 	});
 
-	it('skip updating swappableIcrcTokensStore store if supportedIcrcStandardFailed', async () => {
-		vi.mocked(icrcLedgerApi.icrc1SupportedStandards).mockRejectedValue('Error');
+	describe('withdrawICPSwapAfterFailedSwap', () => {
+		const identity = mockIdentity;
+		const canisterId = 'test-canister-id';
+		const tokenId = 'icp';
+		const amount = 1000n;
+		const fee = 10n;
+		const sourceToken = mockValidIcToken as IcTokenToggleable;
+		const destinationToken = mockValidIcrcToken as IcTokenToggleable;
 
-		await loadAllIcrcTokensWithSupportedStandards({
-			identity: mockIdentity,
-			allTokens: [ICP_TOKEN]
-		});
-
-		expect(get(swappableIcrcTokensStore)).toStrictEqual([]);
-	});
-});
-
-describe('withdrawICPSwapAfterFailedSwap', () => {
-	const identity = mockIdentity;
-	const canisterId = 'test-canister-id';
-	const tokenId = 'icp';
-	const amount = 1000n;
-	const fee = 10n;
-	const sourceToken = mockValidIcToken as IcTokenToggleable;
-	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
-
-	const baseParams = {
-		identity,
-		canisterId,
-		tokenId,
-		amount,
-		fee,
-		sourceToken,
-		destinationToken
-	};
-
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it('should succeed on first withdraw attempt', async () => {
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
-
-		const result = await withdrawICPSwapAfterFailedSwap(baseParams);
-
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
-		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
-	});
-
-	it('succeeds on second attempt via unused balance (real path)', async () => {
-		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
-
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 100n,
-			balance1: ZERO
-		});
-
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
-
-		const result = await withdrawICPSwapAfterFailedSwap({
-			...baseParams,
+		const baseParams = {
+			identity,
+			canisterId,
+			tokenId,
+			amount,
+			fee,
 			sourceToken,
 			destinationToken
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
-		expect(icpSwapPool.withdraw).toHaveBeenNthCalledWith(
-			2,
-			expect.objectContaining({
-				identity,
-				canisterId,
-				token: sourceToken.ledgerCanisterId,
-				amount: 100n,
-				fee: sourceToken.fee
-			})
-		);
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
-	});
+		it('should succeed on first withdraw attempt', async () => {
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
 
-	it('should return failed code if both attempts fail and call setFailedProgressStep (real path)', async () => {
-		const setFailedProgressStep = vi.fn();
+			const result = await withdrawICPSwapAfterFailedSwap(baseParams);
 
-		vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail1'));
-
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: ZERO,
-			balance1: ZERO
+			expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+			expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_SUCCESS);
 		});
 
-		const result = await withdrawICPSwapAfterFailedSwap({
-			...baseParams,
-			setFailedProgressStep,
-			sourceToken,
-			destinationToken
+		it('succeeds on second attempt via unused balance (real path)', async () => {
+			vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail'));
+
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: 100n,
+				balance1: ZERO
+			});
+
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(100n);
+
+			const result = await withdrawICPSwapAfterFailedSwap({
+				...baseParams,
+				sourceToken,
+				destinationToken
+			});
+
+			expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+			expect(icpSwapPool.withdraw).toHaveBeenNthCalledWith(
+				2,
+				expect.objectContaining({
+					identity,
+					canisterId,
+					token: sourceToken.ledgerCanisterId,
+					amount: 100n,
+					fee: sourceToken.fee
+				})
+			);
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_2ND_WITHDRAW_SUCCESS);
 		});
 
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
-		expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
-	});
-});
+		it('should return failed code if both attempts fail and call setFailedProgressStep (real path)', async () => {
+			const setFailedProgressStep = vi.fn();
 
-describe('performManualWithdraw', () => {
-	const identity = mockIdentity;
-	const canisterId = 'test-canister-id';
-	const sourceToken = mockValidIcToken as IcTokenToggleable;
-	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
+			vi.mocked(icpSwapPool.withdraw).mockRejectedValueOnce(new Error('fail1'));
 
-	const baseParams = {
-		withdrawDestinationTokens: true,
-		identity,
-		canisterId,
-		sourceToken,
-		destinationToken
-	};
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: ZERO,
+				balance1: ZERO
+			});
 
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
+			const result = await withdrawICPSwapAfterFailedSwap({
+				...baseParams,
+				setFailedProgressStep,
+				sourceToken,
+				destinationToken
+			});
 
-	it('should track success event and return success code', async () => {
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 1n,
-			balance1: ZERO
-		});
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
-
-		const result = await performManualWithdraw(baseParams);
-
-		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
-
-		expect(trackEvent).toHaveBeenCalledWith({
-			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-			metadata: {
-				token: destinationToken.symbol,
-				tokenDirection: 'receive',
-				dApp: SwapProvider.ICP_SWAP
-			}
-		});
-		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
-		expect(result.message).toBeDefined();
-	});
-
-	it('should track failed event, call setFailedProgressStep and return error code', async () => {
-		const setFailedProgressStep = vi.fn();
-
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: ZERO,
-			balance1: ZERO
-		});
-
-		const result = await performManualWithdraw({
-			...baseParams,
-			setFailedProgressStep
-		});
-
-		expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
-
-		expect(trackEvent).toHaveBeenCalledWith({
-			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
-			metadata: {
-				token: destinationToken.symbol,
-				tokenDirection: 'receive',
-				dApp: SwapProvider.ICP_SWAP
-			}
-		});
-		expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
-		expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED);
-		expect(result.variant).toBe('error');
-	});
-
-	it('should track tokenDirection correctly when withdrawDestinationTokens is false', async () => {
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: ZERO,
-			balance1: 1n
-		});
-		vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
-
-		await performManualWithdraw({
-			...baseParams,
-			withdrawDestinationTokens: false
-		});
-
-		expect(trackEvent).toHaveBeenCalledWith({
-			name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
-			metadata: {
-				token: sourceToken.symbol,
-				tokenDirection: 'pay',
-				dApp: SwapProvider.ICP_SWAP
-			}
+			expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
+			expect(result.code).toBe(SwapErrorCodes.SWAP_FAILED_WITHDRAW_FAILED);
 		});
 	});
-});
 
-describe('withdrawUserUnusedBalance', () => {
-	const identity = mockIdentity;
-	const canisterId = 'test-canister-id';
+	describe('performManualWithdraw', () => {
+		const identity = mockIdentity;
+		const canisterId = 'test-canister-id';
+		const sourceToken = mockValidIcToken as IcTokenToggleable;
+		const destinationToken = mockValidIcrcToken as IcTokenToggleable;
 
-	const sourceToken = mockValidIcToken as IcTokenToggleable;
-
-	const destinationToken = mockValidIcrcToken as IcTokenToggleable;
-
-	beforeEach(() => {
-		vi.resetAllMocks();
-	});
-
-	it('should withdraw both tokens if both balances are non-zero', async () => {
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 1000n,
-			balance1: 2000n
-		});
-
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-
-		await withdrawUserUnusedBalance({
+		const baseParams = {
+			withdrawDestinationTokens: true,
 			identity,
 			canisterId,
 			sourceToken,
 			destinationToken
+		};
+
+		beforeEach(() => {
+			vi.clearAllMocks();
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		it('should track success event and return success code', async () => {
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: 1n,
+				balance1: ZERO
+			});
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
+
+			const result = await performManualWithdraw(baseParams);
+
+			expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).toHaveBeenCalledOnce();
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+				metadata: {
+					token: destinationToken.symbol,
+					tokenDirection: 'receive',
+					dApp: SwapProvider.ICP_SWAP
+				}
+			});
+			expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS);
+			expect(result.message).toBeDefined();
+		});
+
+		it('should track failed event, call setFailedProgressStep and return error code', async () => {
+			const setFailedProgressStep = vi.fn();
+
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: ZERO,
+				balance1: ZERO
+			});
+
+			const result = await performManualWithdraw({
+				...baseParams,
+				setFailedProgressStep
+			});
+
+			expect(icpSwapPool.getPoolMetadata).toHaveBeenCalledOnce();
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED,
+				metadata: {
+					token: destinationToken.symbol,
+					tokenDirection: 'receive',
+					dApp: SwapProvider.ICP_SWAP
+				}
+			});
+			expect(setFailedProgressStep).toHaveBeenCalledWith(ProgressStepsSwap.WITHDRAW);
+			expect(result.code).toBe(SwapErrorCodes.ICP_SWAP_WITHDRAW_FAILED);
+			expect(result.variant).toBe('error');
+		});
+
+		it('should track tokenDirection correctly when withdrawDestinationTokens is false', async () => {
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: ZERO,
+				balance1: 1n
+			});
+			vi.mocked(icpSwapPool.withdraw).mockResolvedValueOnce(1n);
+
+			await performManualWithdraw({
+				...baseParams,
+				withdrawDestinationTokens: false
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: SwapErrorCodes.ICP_SWAP_WITHDRAW_SUCCESS,
+				metadata: {
+					token: sourceToken.symbol,
+					tokenDirection: 'pay',
+					dApp: SwapProvider.ICP_SWAP
+				}
+			});
+		});
 	});
 
-	it('should reject if both balances are zero', async () => {
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: ZERO,
-			balance1: ZERO
+	describe('withdrawUserUnusedBalance', () => {
+		const identity = mockIdentity;
+		const canisterId = 'test-canister-id';
+
+		const sourceToken = mockValidIcToken as IcTokenToggleable;
+
+		const destinationToken = mockValidIcrcToken as IcTokenToggleable;
+
+		beforeEach(() => {
+			vi.resetAllMocks();
 		});
 
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
+		it('should withdraw both tokens if both balances are non-zero', async () => {
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: 1000n,
+				balance1: 2000n
+			});
 
-		await expect(
-			withdrawUserUnusedBalance({
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+
+			await withdrawUserUnusedBalance({
 				identity,
 				canisterId,
 				sourceToken,
 				destinationToken
-			})
-		).rejects.toThrow('No unused balance to withdraw');
+			});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).toHaveBeenCalledTimes(2);
+		});
+
+		it('should reject if both balances are zero', async () => {
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: ZERO,
+				balance1: ZERO
+			});
+
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+
+			await expect(
+				withdrawUserUnusedBalance({
+					identity,
+					canisterId,
+					sourceToken,
+					destinationToken
+				})
+			).rejects.toThrow('No unused balance to withdraw');
+
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).not.toHaveBeenCalled();
+		});
+
+		it('should only withdraw destinationToken if only balance0 is non-zero', async () => {
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: 1500n,
+				balance1: ZERO
+			});
+
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			});
+
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+				identity,
+				canisterId,
+				token: destinationToken.ledgerCanisterId,
+				amount: 1500n,
+				fee: destinationToken.fee
+			});
+		});
+
+		it('should only withdraw sourceToken if only balance1 is non-zero', async () => {
+			vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
+				balance0: ZERO,
+				balance1: 1500n
+			});
+
+			vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
+				token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
+				token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
+			} as PoolMetadata);
+
+			await withdrawUserUnusedBalance({
+				identity,
+				canisterId,
+				sourceToken,
+				destinationToken
+			});
+
+			expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
+			expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
+				identity,
+				canisterId,
+				token: sourceToken.ledgerCanisterId,
+				amount: 1500n,
+				fee: sourceToken.fee
+			});
+		});
 	});
 
-	it('should only withdraw destinationToken if only balance0 is non-zero', async () => {
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: 1500n,
-			balance1: ZERO
+	describe('trackEvent for swap-offer for evm tokens', () => {
+		const sourceToken = {
+			symbol: 'SRC',
+			decimals: 18,
+			network: { chainId: '1' },
+			address: '0xSrcAddress',
+			id: 1
+		} as unknown as Erc20Token;
+
+		const destinationToken = {
+			symbol: 'DST',
+			decimals: 6,
+			network: { chainId: '137' },
+			address: '0xDestAddress',
+			id: 2
+		} as unknown as Erc20Token;
+
+		const amount = BigInt('1000000000000000000');
+		const userEthAddress = '0xUser';
+		const mockGetQuote = vi.fn();
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			vi.mocked(constructSimpleSDK).mockReturnValue({
+				quote: { getQuote: mockGetQuote }
+			} as unknown as ReturnType<typeof constructSimpleSDK>);
+
+			exchangeStore.set([
+				{ [sourceToken.address.toLowerCase()]: { usd: 1.5 } },
+				{ [destinationToken.address.toLowerCase()]: { usd: 2.0 } }
+			]);
 		});
 
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-
-		await withdrawUserUnusedBalance({
-			identity,
-			canisterId,
-			sourceToken,
-			destinationToken
+		afterEach(() => {
+			mockGetQuote.mockReset();
+			exchangeStore.reset();
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
-			identity,
-			canisterId,
-			token: destinationToken.ledgerCanisterId,
-			amount: 1500n,
-			fee: destinationToken.fee
+		it('should track SWAP_OFFER with delta event type on successful delta quote', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridge: { scalingFactor: 0 }
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'success',
+					event_type: 'delta',
+					token_symbol: sourceToken.symbol,
+					token2_symbol: destinationToken.symbol
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER with market event type on successful market quote', async () => {
+			mockGetQuote.mockResolvedValue({
+				market: {
+					destAmount: '456'
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'success',
+					event_type: 'market'
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER with error on failed Velora quote', async () => {
+			const error = new Error('Velora API Error');
+			mockGetQuote.mockRejectedValue(error);
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.VELORA,
+					result_status: 'error',
+					result_error: error.message
+				})
+			});
+		});
+
+		it('should track bridge info in delta swap', async () => {
+			mockGetQuote.mockResolvedValue({
+				delta: {
+					destAmount: '123',
+					bridgeInfo: { destAmountAfterBridge: '949920' }
+				}
+			});
+
+			await fetchSwapAmountsEVM({
+				sourceToken,
+				destinationToken,
+				amount,
+				userEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_type: 'delta',
+					result_status: 'success'
+				})
+			});
 		});
 	});
 
-	it('should only withdraw sourceToken if only balance1 is non-zero', async () => {
-		vi.mocked(icpSwapPool.getUserUnusedBalance).mockResolvedValueOnce({
-			balance0: ZERO,
-			balance1: 1500n
+	describe('trackEvent for swap_offer for icp tokens', () => {
+		const mockTokens = [mockValidIcToken as IcToken, mockValidIcrcToken as IcToken];
+		const [sourceToken, destinationToken] = mockTokens;
+		const amount = 1000;
+		const slippage = 0.5;
+
+		beforeEach(() => {
+			vi.clearAllMocks();
+			exchangeStore.set([
+				{ [sourceToken.id]: { usd: 1.5 } },
+				{ [destinationToken.id]: { usd: 2.0 } }
+			]);
 		});
 
-		vi.mocked(icpSwapPool.getPoolMetadata).mockResolvedValueOnce({
-			token0: { address: sourceToken.ledgerCanisterId, standard: 'icrc' },
-			token1: { address: destinationToken.ledgerCanisterId, standard: 'icrc' }
-		} as PoolMetadata);
-
-		await withdrawUserUnusedBalance({
-			identity,
-			canisterId,
-			sourceToken,
-			destinationToken
+		afterEach(() => {
+			exchangeStore.reset();
 		});
 
-		expect(icpSwapPool.getUserUnusedBalance).toHaveBeenCalledOnce();
-		expect(icpSwapPool.withdraw).toHaveBeenCalledWith({
-			identity,
-			canisterId,
-			token: sourceToken.ledgerCanisterId,
-			amount: 1500n,
-			fee: sourceToken.fee
+		it('should track SWAP_OFFER event with success status for KONG_SWAP', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.KONG_SWAP,
+					result_status: 'success',
+					token_symbol: sourceToken.symbol,
+					token_network: sourceToken.network.name,
+					token_address: sourceToken.ledgerCanisterId,
+					token_name: sourceToken.name,
+					token_id: String(sourceToken.id),
+					token_standard: sourceToken.standard,
+					token2_symbol: destinationToken.symbol,
+					token2_network: destinationToken.network.name,
+					token2_address: destinationToken.ledgerCanisterId,
+					token2_name: destinationToken.name,
+					token2_standard: destinationToken.standard,
+					token2_id: String(destinationToken.id)
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER event with error status for failed KONG_SWAP', async () => {
+			const error = new Error('Kong Swap Error');
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockRejectedValue(error);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: false,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith({
+				name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+				metadata: expect.objectContaining({
+					event_context: PLAUSIBLE_EVENT_CONTEXTS.TOKENS,
+					event_subcontext: SwapProvider.KONG_SWAP,
+					result_status: 'error',
+					result_error: error.message
+				})
+			});
+		});
+
+		it('should track SWAP_OFFER for ICP_SWAP when isSourceTokenIcrc2 is true', async () => {
+			const icpSwapResponse = {
+				receiveAmount: 975n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.ICP_SWAP,
+						result_status: 'success'
+					})
+				})
+			);
+		});
+
+		it('should track SWAP_OFFER event with error status for failed ICP_SWAP', async () => {
+			const error = new Error('ICP Swap Error');
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockRejectedValue(error);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.ICP_SWAP,
+						result_status: 'error',
+						result_error: error.message
+					})
+				})
+			);
+		});
+
+		it('should track both KONG_SWAP and ICP_SWAP events', async () => {
+			const kongSwapResponse = {
+				receive_amount: 950n,
+				slippage: 0.5
+			} as SwapAmountsReply;
+			const icpSwapResponse = {
+				receiveAmount: 975n,
+				slippage: 0.5
+			} as unknown as ICPSwapAmountReply;
+
+			vi.mocked(kongBackendApi.kongSwapAmounts).mockResolvedValue(kongSwapResponse);
+			vi.mocked(icpSwapBackend.icpSwapAmounts).mockResolvedValue(icpSwapResponse);
+
+			await fetchSwapAmounts({
+				identity: mockIdentity,
+				sourceToken,
+				destinationToken,
+				amount,
+				tokens: mockTokens,
+				slippage,
+				isSourceTokenIcrc2: true,
+				userEthAddress: mockEthAddress
+			});
+
+			expect(trackEvent).toHaveBeenCalledTimes(2);
+
+			expect(trackEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					name: PLAUSIBLE_EVENTS.SWAP_OFFER,
+					metadata: expect.objectContaining({
+						event_subcontext: SwapProvider.KONG_SWAP,
+						result_status: 'success'
+					})
+				})
+			);
 		});
 	});
 });

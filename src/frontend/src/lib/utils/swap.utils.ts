@@ -1,10 +1,11 @@
 import type {
 	SwapAmountsReply,
 	SwapAmountsTxReply
-} from '$declarations/kong_backend/kong_backend.did';
+} from '$declarations/kong_backend/declarations/kong_backend.did';
 import { dAppDescriptions } from '$env/dapp-descriptions.env';
 import type { Erc20Token } from '$eth/types/erc20';
 import { isDefaultEthereumToken } from '$eth/utils/eth.utils';
+import type { IcToken } from '$icp/types/ic-token';
 import type { IcTokenToggleable } from '$icp/types/ic-token-toggleable';
 import { isIcToken } from '$icp/validation/ic-token.validation';
 import { ZERO } from '$lib/constants/app.constants';
@@ -16,9 +17,11 @@ import {
 import { SwapError } from '$lib/services/swap-errors.services';
 import type { AmountString } from '$lib/types/amount';
 import type { OisyDappDescription } from '$lib/types/dapp-description';
+import type { OptionAmount } from '$lib/types/send';
 import {
 	SwapProvider,
 	VeloraSwapTypes,
+	type DeltaSwapResponse,
 	type FormatSlippageParams,
 	type GetWithdrawableTokenParams,
 	type ICPSwapResult,
@@ -33,7 +36,7 @@ import { formatToken } from '$lib/utils/format.utils';
 import { isNullishOrEmpty } from '$lib/utils/input.utils';
 import { findToken } from '$lib/utils/tokens.utils';
 import { isNullish, nonNullish } from '@dfinity/utils';
-import type { DeltaPrice, OptimalRate } from '@velora-dex/sdk';
+import type { OptimalRate } from '@velora-dex/sdk';
 
 export const getSwapRoute = (transactions: SwapAmountsTxReply[]): string[] =>
 	transactions.length === 0
@@ -83,16 +86,20 @@ export const getKongIcTokenIdentifier = (token: Token): string =>
 
 export const mapIcpSwapResult = ({
 	swap,
-	slippage
+	slippage,
+	destToken
 }: {
 	swap: ICPSwapResult;
 	slippage: Slippage;
+	destToken: IcToken;
 }): SwapMappedResult => {
 	const parsedSlippage = Number(slippage);
 	const slippagePercentage = parsedSlippage > 0 ? parsedSlippage : SWAP_DEFAULT_SLIPPAGE_VALUE;
+	const receiveAmountNet = swap.receiveAmount - destToken.fee;
+
 	return {
 		provider: SwapProvider.ICP_SWAP,
-		receiveAmount: swap.receiveAmount,
+		receiveAmount: receiveAmountNet > 0 ? receiveAmountNet : ZERO,
 		receiveOutMinimum: calculateSlippage({
 			quoteAmount: swap.receiveAmount,
 			slippagePercentage
@@ -170,10 +177,19 @@ export const formatReceiveOutMinimum = ({
 	});
 };
 
-export const mapVeloraSwapResult = (swap: DeltaPrice): SwapMappedResult => ({
+export const mapVeloraSwapResult = (swap: DeltaSwapResponse): SwapMappedResult => ({
 	provider: SwapProvider.VELORA,
-	receiveAmount: BigInt(swap.destAmount),
-	swapDetails: swap as VeloraSwapDetails,
+	receiveAmount:
+		// Velora does not always return the destination amount in the precision of the destination token (as we would expect).
+		// For example, if we request a swap from USDC-BSC (18 digits) to USDC-BASE (6 digits), the destination amount is returned as if it has 18 digits instead of 6.
+		// This causes issues in the normal formatting of our code, since we expect each amount to be strictly related to its reference token.
+		// To avoid this issue, we could use the `bridgeInfo` data that Velora adds for this specific cases: it specify the correct amount to look at when the bridge is treating tokens with scaling factor.
+		// This is not documented anywhere in Velora documentation, it was the result of a direct conversations with them.
+		// TODO: remove this disclaimer where Velora fixes this issue on their side.
+		'bridgeInfo' in swap.delta
+			? BigInt(swap.delta.bridgeInfo.destAmountAfterBridge)
+			: BigInt(swap.delta.destAmount),
+	swapDetails: swap.delta as VeloraSwapDetails,
 	type: VeloraSwapTypes.DELTA
 });
 
@@ -228,4 +244,36 @@ export const findSwapProvider = (
 			...swapProviderDetails
 		};
 	}
+};
+
+export const calculateValueDifference = ({
+	swapAmount,
+	receiveAmount,
+	sourceTokenExchangeRate,
+	destinationTokenExchangeRate
+}: {
+	swapAmount: OptionAmount;
+	receiveAmount?: number;
+	sourceTokenExchangeRate?: number;
+	destinationTokenExchangeRate?: number;
+}): number | undefined => {
+	const paidValue =
+		nonNullish(swapAmount) && nonNullish(sourceTokenExchangeRate)
+			? Number(swapAmount) * sourceTokenExchangeRate
+			: undefined;
+
+	if (isNullish(paidValue) || paidValue === 0) {
+		return;
+	}
+
+	const receivedValue =
+		nonNullish(receiveAmount) && nonNullish(destinationTokenExchangeRate)
+			? receiveAmount * destinationTokenExchangeRate
+			: undefined;
+
+	if (isNullish(receivedValue)) {
+		return;
+	}
+
+	return ((receivedValue - paidValue) / paidValue) * 100;
 };

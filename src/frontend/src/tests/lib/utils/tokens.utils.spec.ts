@@ -13,7 +13,7 @@ import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import { SOLANA_DEVNET_TOKEN, SOLANA_LOCAL_TOKEN, SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { saveErc20CustomTokens, saveErc20UserTokens } from '$eth/services/manage-tokens.services';
 import { saveIcrcCustomTokens } from '$icp/services/manage-tokens.services';
-import * as appContants from '$lib/constants/app.constants';
+import * as appConstants from '$lib/constants/app.constants';
 import { ZERO } from '$lib/constants/app.constants';
 import type { BalancesData } from '$lib/stores/balances.store';
 import type { CertifiedStoreData } from '$lib/stores/certified.store';
@@ -46,8 +46,13 @@ import { mockValidErc20Token } from '$tests/mocks/erc20-tokens.mock';
 import { mockValidErc721Token } from '$tests/mocks/erc721-tokens.mock';
 import { mockExchanges, mockOneUsd } from '$tests/mocks/exchanges.mock';
 import i18nMock from '$tests/mocks/i18n.mock';
-import { mockValidIcCkToken, mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
+import {
+	mockIndexCanisterId,
+	mockValidIcCkToken,
+	mockValidIcrcToken
+} from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { mockValidSplToken } from '$tests/mocks/spl-tokens.mock';
 import { mockTokens, mockValidToken } from '$tests/mocks/tokens.mock';
 
 vi.mock('$lib/utils/exchange.utils', () => ({
@@ -458,19 +463,23 @@ describe('tokens.utils', () => {
 	});
 
 	describe('filterTokens', () => {
+		const tokens = [
+			...mockTokens,
+			mockValidIcrcToken,
+			mockValidIcCkToken,
+			mockValidErc20Token,
+			mockValidSplToken
+		];
+
 		it('should filter tokens by symbol correctly when filter is provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'BTC' })).toStrictEqual([
-				BTC_MAINNET_TOKEN
-			]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'PEPE' })).toStrictEqual([]);
+			expect(filterTokens({ tokens, filter: 'ICP' })).toStrictEqual([ICP_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'BTC' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'PEPE' })).toStrictEqual([]);
 		});
 
 		it('should filter tokens by name correctly when filter is provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: 'Bit' })).toStrictEqual([
-				BTC_MAINNET_TOKEN
-			]);
-			expect(filterTokens({ tokens: mockTokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'Bit' })).toStrictEqual([BTC_MAINNET_TOKEN]);
+			expect(filterTokens({ tokens, filter: 'Eth' })).toStrictEqual([ETHEREUM_TOKEN]);
 		});
 
 		it('should filter tokens by twin token symbol correctly when filter is provided', () => {
@@ -480,7 +489,89 @@ describe('tokens.utils', () => {
 		});
 
 		it('should filter tokens correctly when filter is not provided', () => {
-			expect(filterTokens({ tokens: mockTokens, filter: '' })).toStrictEqual(mockTokens);
+			expect(filterTokens({ tokens, filter: '' })).toStrictEqual(tokens);
+		});
+
+		it('should filter by address for ERC tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidErc20Token.address })).toStrictEqual([
+				mockValidErc20Token
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.toLowerCase() })
+			).toStrictEqual([mockValidErc20Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.toUpperCase() })
+			).toStrictEqual([mockValidErc20Token]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidErc20Token.address.slice(0, 5) })
+			).toStrictEqual([mockValidErc20Token]);
+		});
+
+		it('should filter by address for SPL tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidSplToken.address })).toStrictEqual([
+				mockValidSplToken
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidSplToken.address.toLowerCase() })
+			).toStrictEqual([]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidSplToken.address.toUpperCase() })
+			).toStrictEqual([]);
+
+			expect(filterTokens({ tokens, filter: mockValidSplToken.address.slice(0, 5) })).toStrictEqual(
+				[mockValidSplToken]
+			);
+		});
+
+		it('should filter by canister IDs for IC tokens', () => {
+			expect(filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId })).toStrictEqual([
+				mockValidIcrcToken,
+				mockValidIcCkToken
+			]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toLowerCase() })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.toUpperCase() })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			expect(
+				filterTokens({ tokens, filter: mockValidIcrcToken.ledgerCanisterId.slice(0, 5) })
+			).toStrictEqual([mockValidIcrcToken, mockValidIcCkToken]);
+
+			const mockToken = { ...mockValidIcrcToken, indexCanisterId: mockIndexCanisterId };
+
+			expect(
+				filterTokens({ tokens: [...tokens, mockToken], filter: mockToken.indexCanisterId })
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.toLowerCase()
+				})
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.toUpperCase()
+				})
+			).toStrictEqual([mockToken]);
+
+			expect(
+				filterTokens({
+					tokens: [...tokens, mockToken],
+					filter: mockToken.indexCanisterId.slice(0, 5)
+				})
+			).toStrictEqual([mockToken]);
 		});
 
 		it('should not filter by network', () => {
@@ -544,7 +635,7 @@ describe('tokens.utils', () => {
 		};
 
 		beforeEach(() => {
-			vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValue(false);
+			vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValue(false);
 		});
 
 		describe('when testnets are disabled', () => {
@@ -576,7 +667,7 @@ describe('tokens.utils', () => {
 			});
 
 			it('should ignore the local tokens when they are enabled', () => {
-				vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(false);
+				vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(false);
 
 				expect(defineEnabledTokens(mockParams)).toEqual(mainnetTokens);
 			});
@@ -623,7 +714,7 @@ describe('tokens.utils', () => {
 
 			describe('when local networks are enabled', () => {
 				beforeEach(() => {
-					vi.spyOn(appContants, 'LOCAL', 'get').mockReturnValueOnce(true);
+					vi.spyOn(appConstants, 'LOCAL', 'get').mockReturnValueOnce(true);
 				});
 
 				it('should return all tokens', () => {
@@ -683,17 +774,9 @@ describe('tokens.utils', () => {
 
 	describe('groupTogglableTokens', () => {
 		it('should return empty arrays if no tokens passed', () => {
-			const result = groupTogglableTokens({});
+			const result = groupTogglableTokens([]);
 
 			expect(result).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
-		});
-
-		it('should return empty arrays if invalid data passed', () => {
-			const result1 = groupTogglableTokens({ invalidkey: ICP_TOKEN });
-			const result2 = groupTogglableTokens(null as unknown as Record<string, Token>);
-
-			expect(result1).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
-			expect(result2).toEqual({ icrc: [], erc20: [], erc721: [], erc1155: [], spl: [] });
 		});
 
 		it('should group the tokens correctly', () => {
@@ -704,14 +787,14 @@ describe('tokens.utils', () => {
 			const mockToggleableErc1155Token = { ...mockValidErc1155Token, enabled: true };
 			const mockToggleableSplToken = { ...BONK_TOKEN, enabled: true };
 
-			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens({
-				SOL: mockToggleableSplToken,
-				ETH: mockToggleableErc20Token,
-				erc721: mockToggleableErc721Token,
-				erc1155: mockToggleableErc1155Token,
-				'ICP-t1': mockToggleableIcToken1,
-				'ICP-t2': mockToggleableIcToken2
-			});
+			const { icrc, spl, erc20, erc721, erc1155 } = groupTogglableTokens([
+				mockToggleableSplToken,
+				mockToggleableErc20Token,
+				mockToggleableErc721Token,
+				mockToggleableErc1155Token,
+				mockToggleableIcToken1,
+				mockToggleableIcToken2
+			]);
 
 			expect(icrc).toEqual([mockToggleableIcToken1, mockToggleableIcToken2]);
 			expect(spl).toEqual([mockToggleableSplToken]);
@@ -753,7 +836,7 @@ describe('tokens.utils', () => {
 
 		it('should show info toast and return if no tokens to save', async () => {
 			await saveAllCustomTokens({
-				tokens: {},
+				tokens: [],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -772,7 +855,7 @@ describe('tokens.utils', () => {
 
 		it('should call saveIcrcCustomTokens when ICRC tokens are present', async () => {
 			await saveAllCustomTokens({
-				tokens: { icrc: mockValidIcrcToken },
+				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -791,7 +874,7 @@ describe('tokens.utils', () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { erc20: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -808,7 +891,7 @@ describe('tokens.utils', () => {
 			const token = { ...mockValidErc20Token, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { erc20: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -825,7 +908,7 @@ describe('tokens.utils', () => {
 			const token = { ...BONK_TOKEN, enabled: true } as unknown as TokenUi;
 
 			await saveAllCustomTokens({
-				tokens: { spl: token },
+				tokens: [token],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock
 			});
@@ -844,7 +927,7 @@ describe('tokens.utils', () => {
 			const modalNext = vi.fn();
 
 			await saveAllCustomTokens({
-				tokens: { icrcCustom: mockValidIcrcToken },
+				tokens: [mockValidIcrcToken],
 				$authIdentity: mockIdentity,
 				$i18n: i18nMock,
 				progress,

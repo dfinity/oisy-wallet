@@ -11,10 +11,6 @@ import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
 import { render } from '@testing-library/svelte';
 import { readable, writable } from 'svelte/store';
 
-vi.mock('$lib/services/auth.services', () => ({
-	nullishSignOut: vi.fn()
-}));
-
 vi.mock('$eth/services/eth-listener.services', () => ({
 	initMinedTransactionsListener: vi.fn(() => ({
 		disconnect: vi.fn()
@@ -28,6 +24,14 @@ vi.mock('$eth/providers/alchemy.providers', () => ({
 	initPendingTransactionsListener: vi.fn(() => ({
 		disconnect: vi.fn()
 	}))
+}));
+
+vi.mock('$icp/utils/icrc.utils', () => ({
+	isIcrcTokenSupportIcrc2: vi.fn()
+}));
+
+vi.mock('$icp/api/icrc-ledger.api', () => ({
+	icrc1SupportedStandards: vi.fn()
 }));
 
 describe('SwapTokenWizard', () => {

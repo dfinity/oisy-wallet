@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
-	import { createEventDispatcher } from 'svelte';
 	import type { RewardCampaignDescription } from '$env/types/env-reward';
 	import IconClose from '$lib/components/icons/lucide/IconClose.svelte';
 	import Img from '$lib/components/ui/Img.svelte';
@@ -15,15 +14,20 @@
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { resolveText } from '$lib/utils/i18n.utils.js';
 
-	export let dappsCarouselSlide: CarouselSlideOisyDappDescription;
-	export let airdrop: RewardCampaignDescription | undefined = undefined;
+	interface Props {
+		dappsCarouselSlide: CarouselSlideOisyDappDescription;
+		airdrop?: RewardCampaignDescription;
+		onCloseCarouselSlide: (dappId: CarouselSlideOisyDappDescription['id']) => void;
+	}
 
-	$: ({
+	let { dappsCarouselSlide, airdrop, onCloseCarouselSlide }: Props = $props();
+
+	let {
 		id: dappId,
 		carousel: { text, callToAction },
 		logo,
 		name: dAppName
-	} = dappsCarouselSlide);
+	} = $derived(dappsCarouselSlide);
 
 	const rewardModalId = Symbol();
 	const dappModalId = Symbol();
@@ -43,8 +47,6 @@
 		}
 	};
 
-	const dispatch = createEventDispatcher();
-
 	const close = () => {
 		trackEvent({
 			name: TRACK_COUNT_CAROUSEL_CLOSE,
@@ -53,7 +55,7 @@
 			}
 		});
 
-		dispatch('icCloseCarouselSlide', dappId);
+		onCloseCarouselSlide(dappId);
 	};
 </script>
 
@@ -76,13 +78,13 @@
 			aria-label={replacePlaceholders($i18n.dapps.alt.learn_more, {
 				$dAppName: resolveText({ i18n: $i18n, path: dAppName })
 			})}
-			on:click={open}
+			onclick={open}
 		>
 			{resolveText({ i18n: $i18n, path: callToAction })} →
 		</button>
 	</div>
 	<div class="h-full items-start">
-		<button class="p-1 text-tertiary" aria-label={$i18n.core.text.close} on:click={close}>
+		<button class="p-1 text-tertiary" aria-label={$i18n.core.text.close} onclick={close}>
 			<IconClose size="20" />
 		</button>
 	</div>

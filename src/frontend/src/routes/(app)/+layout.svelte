@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { isNullish, nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
-	import { fade } from 'svelte/transition';
 	import { onNavigate } from '$app/navigation';
 	import { page } from '$app/state';
 	import AiAssistantConsoleButton from '$lib/components/ai-assistant/AiAssistantConsoleButton.svelte';
@@ -18,6 +17,7 @@
 	import NavigationMenuMainItems from '$lib/components/navigation/NavigationMenuMainItems.svelte';
 	import Responsive from '$lib/components/ui/Responsive.svelte';
 	import SplitPane from '$lib/components/ui/SplitPane.svelte';
+	import { aiAssistantConsoleOpen } from '$lib/derived/ai-assistant.derived';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
 	import { isAuthLocked } from '$lib/derived/locked.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
@@ -64,9 +64,10 @@
 {:else}
 	<div class:h-dvh={$authNotSignedIn}>
 		<div
-			class="relative flex flex-col overflow-x-hidden pb-5 md:pb-0"
+			class="relative flex flex-col pb-5 md:pb-0"
 			class:h-full={$authSignedIn}
 			class:min-h-[100dvh]={$authNotSignedIn}
+			class:overflow-x-hidden={$authNotSignedIn}
 		>
 			<Header />
 
@@ -75,10 +76,8 @@
 					{#snippet menu()}
 						<NavigationMenu>
 							{#if tokensRoute || nftsRoute}
-								<Responsive up="xl">
-									<div class="hidden xl:block" transition:fade>
-										<DappsCarousel />
-									</div>
+								<Responsive up="1.5xl">
+									<DappsCarousel />
 								</Responsive>
 							{/if}
 						</NavigationMenu>
@@ -93,11 +92,11 @@
 					</Loaders>
 				</SplitPane>
 
-				<Responsive down="md">
-					<div class="z-2 fixed bottom-16 right-2 block md:hidden">
+				{#if !$aiAssistantConsoleOpen}
+					<div class="fixed right-4 bottom-16 z-2 block">
 						<AiAssistantConsoleButton styleClass="mb-2" />
 					</div>
-				</Responsive>
+				{/if}
 
 				<MobileNavigationMenu>
 					<NavigationMenuMainItems testIdPrefix="mobile" />

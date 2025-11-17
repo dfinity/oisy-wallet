@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { WizardStep } from '@dfinity/gix-components';
-	import { assertNonNullish, isNullish } from '@dfinity/utils';
+	import { assertNonNullish, isNullish, nonNullish } from '@dfinity/utils';
 	import { isSolanaError, SOLANA_ERROR__BLOCK_HEIGHT_EXCEEDED } from '@solana/kit';
 	import { getContext, setContext } from 'svelte';
 	import { writable } from 'svelte/store';
@@ -26,7 +26,6 @@
 	import { ProgressStepsSendSol } from '$lib/enums/progress-steps';
 	import { WizardStepsSend } from '$lib/enums/wizard-steps';
 	import { trackEvent } from '$lib/services/analytics.services';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { SEND_CONTEXT_KEY, type SendContext } from '$lib/stores/send.store';
 	import { toastsError } from '$lib/stores/toasts.store';
@@ -138,7 +137,6 @@
 
 	const send = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -175,6 +173,16 @@
 
 		onNext();
 
+		const sendTrackingEventMetadata = {
+			token: $sendToken.symbol,
+			network: `${$sendToken.network.id.description}`,
+			...(nonNullish($prioritizationFeeStore)
+				? { prioritizationFee: $prioritizationFeeStore.toString() }
+				: {}),
+			...(nonNullish($ataFeeStore) ? { ataFee: $ataFeeStore.toString() } : {}),
+			...(nonNullish($feeStore) ? { fee: $feeStore.toString() } : {})
+		};
+
 		try {
 			await sendSol({
 				identity: $authIdentity,
@@ -191,18 +199,14 @@
 
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_SUCCESS,
-				metadata: {
-					token: $sendToken.symbol
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			setTimeout(() => close(), 750);
 		} catch (err: unknown) {
 			trackEvent({
 				name: TRACK_COUNT_SOL_SEND_ERROR,
-				metadata: {
-					token: $sendToken.symbol
-				}
+				metadata: sendTrackingEventMetadata
 			});
 
 			if (sendProgressStep === ProgressStepsSendSol.CONFIRM) {
@@ -231,15 +235,17 @@
 </script>
 
 <SolFeeContext {destination} observe={currentStep?.name !== WizardStepsSend.SENDING}>
-	{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</SolSendForm>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<SolSendReview {amount} {destination} {network} {onBack} onSend={send} {selectedContact} />
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard progressStep={sendProgressStep} steps={sendSteps($i18n)} />
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<SolSendForm {onBack} {onNext} {onTokensList} {selectedContact} bind:destination bind:amount>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</SolSendForm>
+		{/if}
+	{/key}
 </SolFeeContext>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { nonNullish, isNullish } from '@dfinity/utils';
-	import type { ContactImage } from '$declarations/backend/backend.did';
+	import type { ContactImage } from '$declarations/backend/declarations/backend.did';
 	import emptyOisyLogo from '$lib/assets/oisy-logo-empty.svg';
 	import Img from '$lib/components/ui/Img.svelte';
 	import LoaderWithOverlay from '$lib/components/ui/LoaderWithOverlay.svelte';

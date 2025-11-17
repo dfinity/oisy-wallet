@@ -46,14 +46,14 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
-          key: ${{ runner.os }}-prettier-cache-format-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-prettier-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-format-
       - name: Restore ESLint Cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: .eslintcache
-          key: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-eslint-cache-format-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-eslint-cache-format-
       - name: Format
@@ -94,14 +94,14 @@ jobs:
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ./node_modules/.cache/prettier/.prettier-cache
-          key: ${{ runner.os }}-prettier-cache-lint-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-prettier-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-prettier-cache-lint-
       - name: Restore ESLint Cache
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: .eslintcache
-          key: ${{ runner.os }}-eslint-cache-lint-${{ github.event.pull_request.number }}
+          key: ${{ runner.os }}-eslint-cache-lint-${{ github.event.pull_request.number || github.event.merge_group.head_sha || github.run_id }}
           restore-keys: |
             ${{ runner.os }}-eslint-cache-lint-
       - name: Lint
@@ -144,10 +144,10 @@ jobs:
         # We disable the thresholds since we will check them in the next step, when all sharded reports are merged
         run: npm run test:coverage -- --reporter=blob --reporter=default --shard=${{ matrix.shardIndex }}/${{ matrix.shardTotal }} --coverage.thresholds.0 --coverage.thresholds.autoUpdate=false
       - name: Upload Blob Coverage Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
-          name: vitest-coverage-report-${{ matrix.shardIndex }}
+          name: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-${{ matrix.shardIndex }}
           path: .vitest-reports/*
           include-hidden-files: true
           retention-days: 1
@@ -166,18 +166,18 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download Blob Coverage Reports
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           path: .vitest-reports
-          pattern: vitest-coverage-report-*
+          pattern: vitest-coverage-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}-shard-*
           merge-multiple: true
       - name: Merge Coverage Reports
         run: npm run test:merge
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         if: always()
         with:
-          name: vitest-coverage-report
+          name: vitest-coverage-merged-${{ github.event_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: coverage/
           retention-days: 3
 
@@ -230,7 +230,7 @@ jobs:
         env:
           NETWORK: ${{ matrix.network }}
       - name: Upload Domain File
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
         with:
           name: ic-domains-${{ matrix.network }}
           path: ic-domain.${{ matrix.network }}.txt
@@ -250,7 +250,7 @@ jobs:
       - name: Prepare
         uses: ./.github/actions/prepare
       - name: Download All Domain Files
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
         with:
           path: ic-domains
           pattern: ic-domains-*

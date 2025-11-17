@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/backend.did';
+import type { UserProfile } from '$declarations/backend/declarations/backend.did';
 import * as backendApi from '$lib/api/backend.api';
 import { loadUserProfile } from '$lib/services/load-user-profile.services';
 import { userProfileStore } from '$lib/stores/user-profile.store';
@@ -75,12 +75,13 @@ describe('load-user-profile.services', () => {
 
 			expect(result).toEqual({ success: true });
 
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenCalledTimes(2);
+			expect(getUserProfileSpy).toHaveBeenNthCalledWith(1, {
 				identity: mockIdentity,
 				certified: false,
 				nullishIdentityErrorMessage
 			});
-			expect(getUserProfileSpy).toHaveBeenCalledWith({
+			expect(getUserProfileSpy).toHaveBeenNthCalledWith(2, {
 				identity: mockIdentity,
 				certified: true,
 				nullishIdentityErrorMessage

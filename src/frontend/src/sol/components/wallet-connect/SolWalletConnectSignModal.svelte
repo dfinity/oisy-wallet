@@ -21,7 +21,6 @@
 	import { reject as rejectServices } from '$lib/services/wallet-connect.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import type { OptionSolAddress } from '$lib/types/address';
 	import type { OptionWalletConnectListener } from '$lib/types/wallet-connect';
 	import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 	import SolWalletConnectSignReview from '$sol/components/wallet-connect/SolWalletConnectSignReview.svelte';
@@ -31,6 +30,7 @@
 		sign as signService,
 		decode as decodeService
 	} from '$sol/services/wallet-connect.services';
+	import type { OptionSolAddress } from '$sol/types/address';
 	import type { SolanaNetwork } from '$sol/types/network';
 
 	interface Props {
@@ -153,21 +153,23 @@
 		</WalletConnectModalTitle>
 	{/snippet}
 
-	{#if currentStep?.name === WizardStepsSign.SIGNING}
-		<InProgressWizard
-			progressStep={signProgressStep}
-			steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
-		/>
-	{:else if currentStep?.name === WizardStepsSign.REVIEW}
-		<SolWalletConnectSignReview
-			{amount}
-			{application}
-			{data}
-			destination={destination ?? ''}
-			onApprove={sign}
-			onReject={reject}
-			source={address ?? ''}
-			{token}
-		/>
-	{/if}
+	{#key currentStep?.name}
+		{#if currentStep?.name === WizardStepsSign.SIGNING}
+			<InProgressWizard
+				progressStep={signProgressStep}
+				steps={walletConnectSignSteps({ i18n: $i18n, signWithSending })}
+			/>
+		{:else if currentStep?.name === WizardStepsSign.REVIEW}
+			<SolWalletConnectSignReview
+				{amount}
+				{application}
+				{data}
+				destination={destination ?? ''}
+				onApprove={sign}
+				onReject={reject}
+				source={address ?? ''}
+				{token}
+			/>
+		{/if}
+	{/key}
 </WizardModal>

@@ -17,7 +17,7 @@ import { modalStore } from '$lib/stores/modal.store';
 import { replaceOisyPlaceholders } from '$lib/utils/i18n.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 import en from '$tests/mocks/i18n.mock';
-import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
+import { mockValidIcrcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import { render, waitFor } from '@testing-library/svelte';
 import { get } from 'svelte/store';
@@ -104,13 +104,15 @@ describe('VipRewardStateModal', () => {
 
 	describe('Handle token state', () => {
 		const mockIcrcDefaultToken: IcToken = {
-			...mockValidIcToken,
+			...mockValidIcrcToken,
+			symbol: 'GLDT',
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID
 		};
 
 		const mockIcrcCustomToken: IcrcCustomToken = {
-			...mockValidIcToken,
+			...mockValidIcrcToken,
 			ledgerCanisterId: GLDT_LEDGER_CANISTER_ID,
+			symbol: 'GLDT',
 			enabled: false
 		};
 

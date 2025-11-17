@@ -26,7 +26,6 @@
 	import { testnetsEnabled } from '$lib/derived/testnets.derived';
 	import { userNetworks } from '$lib/derived/user-networks.derived';
 	import { userProfileVersion } from '$lib/derived/user-profile.derived';
-	import { nullishSignOut } from '$lib/services/auth.services';
 	import { loadUserProfile } from '$lib/services/load-user-profile.services';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
@@ -35,11 +34,11 @@
 	import { emit } from '$lib/utils/events.utils';
 	import { isNetworkIdICP } from '$lib/utils/network.utils.js';
 
-	const enabledNetworks = { ...$userNetworks };
-	const enabledNetworksInitial = { ...enabledNetworks };
+	let enabledNetworks = $state({ ...$userNetworks });
+	const enabledNetworksInitial = { ...$userNetworks };
 
-	let enabledTestnet = $testnetsEnabled;
-	const enabledTestnetInitial = enabledTestnet;
+	let enabledTestnet = $state($testnetsEnabled);
+	const enabledTestnetInitial = $testnetsEnabled;
 
 	const checkModified = ({
 		enabledTestnet,
@@ -59,8 +58,8 @@
 
 		return testnetModified || networkModified;
 	};
-	let isModified: boolean;
-	$: isModified = checkModified({ enabledTestnet, enabledNetworks });
+
+	let isModified = $derived(checkModified({ enabledTestnet, enabledNetworks }));
 
 	const toggleTestnets = () => {
 		enabledTestnet = !enabledTestnet;
@@ -73,11 +72,10 @@
 		};
 	};
 
-	let saveLoading = false;
+	let saveLoading = $state(false);
 
 	const save = async () => {
 		if (isNullish($authIdentity)) {
-			await nullishSignOut();
 			return;
 		}
 
@@ -170,7 +168,6 @@
 				colorStyle="primary"
 				disabled={!isModified || saveLoading || $isBusy}
 				loading={saveLoading}
-				loadingAsSkeleton={false}
 				onclick={save}
 				testId={SETTINGS_NETWORKS_MODAL_SAVE_BUTTON}>{$i18n.core.text.save}</Button
 			>

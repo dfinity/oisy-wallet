@@ -1,4 +1,4 @@
-import type { NetworkSettingsFor } from '$declarations/backend/backend.did';
+import type { NetworkSettingsFor } from '$declarations/backend/declarations/backend.did';
 import {
 	ARBITRUM_MAINNET_NETWORK_ID,
 	ARBITRUM_SEPOLIA_NETWORK_ID

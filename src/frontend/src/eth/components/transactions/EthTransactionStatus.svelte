@@ -20,7 +20,7 @@
 
 	let listener = $state<WebSocketListener | undefined>();
 
-	let currentBlockNumber = $state<number | undefined>(undefined);
+	let currentBlockNumber = $state<number | undefined>();
 
 	const loadCurrentBlockNumber = async () => {
 		try {
@@ -101,7 +101,7 @@
 
 <label for="to">{$i18n.transaction.text.status}</label>
 
-<span id="to" class="break-all font-normal first-letter:capitalize">
+<span id="to" class="font-normal break-all first-letter:capitalize">
 	{#if nonNullish(status)}
 		<span in:fade>{$i18n.transaction.status[status]}</span>
 	{:else}
