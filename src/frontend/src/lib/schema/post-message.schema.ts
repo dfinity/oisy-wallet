@@ -236,11 +236,17 @@ const PostMessageCommonSchema = z.object({
 	ref: z.string().optional()
 });
 
-export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
+	dataSchema,
+	msgSchema
+}: {
+	dataSchema: T;
+	msgSchema: MsgSchema;
+}) =>
 	z.union([
 		z.object({
 			...PostMessageCommonSchema.shape,
-			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			msg: msgSchema,
 			data: z.strictObject(dataSchema).shape.optional()
 		}),
 		z.object({
@@ -248,3 +254,12 @@ export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
 			...PostMessageDataErrorSchema.shape
 		})
 	]);
+
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({
+		dataSchema,
+		msgSchema: z.union([PostMessageRequestSchema, PostMessageResponseSchema])
+	});
+
+export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({ dataSchema, msgSchema: PostMessageResponseSchema });
