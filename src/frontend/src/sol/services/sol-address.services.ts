@@ -45,7 +45,7 @@ const getSolanaPublicKey = async ({
 	derivationPath,
 	identity,
 	...rest
-}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<{ derivationPath: string[] }>): Promise<Uint8Array> => {
 	if (FRONTEND_DERIVATION_ENABLED && nonNullish(SIGNER_MASTER_PUB_KEY)) {
 		// We use the same logic of the canister method. The potential error will be handled in the consumer.
 		assertNonNullish(identity, get(i18n).auth.error.no_internet_identity);

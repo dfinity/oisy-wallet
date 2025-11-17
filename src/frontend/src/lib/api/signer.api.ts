@@ -94,7 +94,7 @@ export const sendBtc = async ({
 export const getSchnorrPublicKey = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<GetSchnorrPublicKeyParams>): Promise<Uint8Array> => {
 	const { getSchnorrPublicKey } = await signerCanister({ identity });
 
 	return await getSchnorrPublicKey(rest);
@@ -103,7 +103,7 @@ export const getSchnorrPublicKey = async ({
 export const signWithSchnorr = async ({
 	identity,
 	...rest
-}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array | number[]> => {
+}: CanisterApiFunctionParams<SignWithSchnorrParams>): Promise<Uint8Array> => {
 	const { signWithSchnorr } = await signerCanister({ identity });
 
 	return await signWithSchnorr(rest);
