@@ -170,13 +170,16 @@ export const approve = async ({
 	to,
 	minterInfo,
 	amount,
+	customNonce,
 	sourceNetwork,
 	// TODO: Refactor to accept an `onProgress(step)` callback instead of requiring manual `progress(progressSteps.step)` calls
 	progress,
 	shouldSwapWithApproval,
 	progressSteps = ProgressStepsSend,
 	...rest
-}: ApproveParams): Promise<{
+}: ApproveParams & {
+	customNonce?: number;
+}): Promise<{
 	transactionNeededApproval: boolean;
 	hash?: string;
 	nonce: number;
@@ -186,7 +189,7 @@ export const approve = async ({
 
 	const { id: networkId } = sourceNetwork;
 
-	const nonce = await getNonce({ from, networkId });
+	const nonce =customNonce ?? await getNonce({ from, networkId });
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
