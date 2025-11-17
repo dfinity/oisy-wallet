@@ -5,5 +5,5 @@ import type { NetworkId } from '$lib/types/network';
 export const getNonce = async ({ from, networkId }: { from: EthAddress; networkId: NetworkId }) => {
 	const { getTransactionCount } = infuraProviders(networkId);
 
-	return await getTransactionCount({ address: from, tag: 'pending' });
+	return getTransactionCount({ address: from, tag: 'pending' });
 };
