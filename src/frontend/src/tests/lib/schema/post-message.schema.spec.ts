@@ -33,6 +33,7 @@ import {
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
 	PostMessageWalletDataSchema,
+	inferPostMessageSchedulerSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
@@ -840,6 +841,102 @@ describe('post-message.schema', () => {
 		});
 
 		it('should throw an error if msg is not a valid value from PostMessageRequestSchema or PostMessageResponseSchema', () => {
+			const invalidPayload = {
+				msg: 'invalid_message',
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if data does not match dataSchema', () => {
+			const invalidPayload = {
+				msg: validRequestMsg,
+				data: { additionalInfo: 123 }
+			};
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+	});
+
+	describe('inferPostMessageSchedulerSchema', () => {
+		const CustomDataSchema = z.object({
+			additionalInfo: z.string()
+		});
+		const SchemaWithCustomData = inferPostMessageSchedulerSchema(CustomDataSchema);
+
+		const [validRequestMsg] = PostMessageRequestSchema.options;
+		const [validResponseMsg] = PostMessageResponseSchema.options;
+		const validData = { additionalInfo: 'sample info' };
+		const validRef = 'unique-ref-123';
+
+		it('should validate with a valid response msg and data matching dataSchema', () => {
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = { error: 'mock-error' };
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid error response msg and data matching an optional error', () => {
+			const [validResponseMsg] = PostMessageErrorResponseSchema.options;
+			const validData = {};
+
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should validate with a valid ref', () => {
+			const validPayload = {
+				msg: validResponseMsg,
+				data: validData,
+				ref: validRef
+			};
+
+			expect(SchemaWithCustomData.parse(validPayload)).toEqual(validPayload);
+		});
+
+		it('should throw with a request msg and no data (data is optional)', () => {
+			const validPayload = {
+				msg: validRequestMsg
+			};
+
+			expect(() => SchemaWithCustomData.parse(validPayload)).toThrow();
+		});
+
+		it('should throw with a request msg and data matching dataSchema', () => {
+			const validPayload = {
+				msg: validRequestMsg,
+				data: validData
+			};
+
+			expect(() => SchemaWithCustomData.parse(validPayload)).toThrow();
+		});
+
+		it('should throw an error if msg is missing', () => {
+			const invalidPayload = { data: validData };
+
+			expect(() => SchemaWithCustomData.parse(invalidPayload)).toThrow();
+		});
+
+		it('should throw an error if msg is not a valid value from PostMessageResponseSchema', () => {
 			const invalidPayload = {
 				msg: 'invalid_message',
 				data: validData

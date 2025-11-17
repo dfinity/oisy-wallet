@@ -25,6 +25,7 @@ import type {
 	PostMessageResponseSchema,
 	PostMessageResponseStatusSchema,
 	PostMessageSyncStateSchema,
+	inferPostMessageSchedulerSchema,
 	inferPostMessageSchema
 } from '$lib/schema/post-message.schema';
 import type * as z from 'zod';
@@ -97,6 +98,10 @@ export type PostMessageDataResponsePowProtectorNextAllowance = z.infer<
 
 export type PostMessage<T extends PostMessageDataRequest | PostMessageDataResponseLoose> = z.infer<
 	ReturnType<typeof inferPostMessageSchema<ZodType<T>>>
+>;
+
+export type PostMessageScheduler<T extends PostMessageDataResponseLoose> = z.infer<
+	ReturnType<typeof inferPostMessageSchedulerSchema<ZodType<T>>>
 >;
 
 export type PostMessageRequest = (typeof POST_MESSAGE_REQUESTS)[number];

@@ -1,8 +1,8 @@
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
 import type {
-	PostMessageDataError,
-	PostMessageResponse,
-	PostMessageResponseStatus
+	PostMessageDataResponseLoose,
+	PostMessageResponseStatus,
+	PostMessageScheduler
 } from '$lib/types/post-message';
 import type { SyncState } from '$lib/types/sync';
 import { isNullish, nonNullish, type QueryParams } from '@dfinity/utils';
@@ -124,7 +124,7 @@ export class SchedulerTimer {
 		this.setStatus('idle');
 	}
 
-	postMsg<T>(data: { msg: PostMessageResponse; data?: T } | PostMessageDataError) {
+	postMsg<T extends PostMessageDataResponseLoose>(data: PostMessageScheduler<T>) {
 		if (this.isIdle()) {
 			// The worker scheduler was stopped between the start of the execution and the actual completion of the job it runs.
 			return;

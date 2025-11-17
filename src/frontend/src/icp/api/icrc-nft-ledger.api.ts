@@ -11,7 +11,7 @@ import { Principal } from '@icp-sdk/core/principal';
  *
  * FIXME: This is a workaround because the NFT ledger canister class doesn't provide a method to get the ICRC10 standards yet.
  * 				So we need to call the ledger canister directly, instead of the NFT ledger canister class.
- * 				This should be fixed when the NFT ledger canister is crated based on a candid files that collects the ICRC-7 standard with all possible ICRC-7 extensions too (like ICRC-10 or ICRC-37.
+ * 				This should be fixed when the NFT ledger canister is created based on a candid files that collects the ICRC-7 standard with all possible ICRC-7 extensions too (like ICRC-10 or ICRC-37.
  * 				A similar file is what exists today in the ledger suite to represent an ICRC-1 ledger canister and its extensions.
  *
  * @param {Object} params - The parameters for fetching supported standards.
