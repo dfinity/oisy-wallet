@@ -67,6 +67,8 @@
 				<Html text={$i18n.fee.text.max_fee_eth} />
 			{/snippet}
 		</EthFeeDisplay>
+
+		<span>Custom Nonce</span>
 		<input min="0" placeholder="Custom Nonce" type="number" bind:value={customNonce} />
 	{/snippet}
 
