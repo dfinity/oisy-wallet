@@ -189,7 +189,7 @@ export const approve = async ({
 
 	const { id: networkId } = sourceNetwork;
 
-	const nonce =customNonce ?? await getNonce({ from, networkId });
+	const nonce = customNonce ?? (await getNonce({ from, networkId }));
 
 	const erc20HelperContractAddress = toCkErc20HelperContractAddress(minterInfo);
 
