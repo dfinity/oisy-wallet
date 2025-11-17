@@ -351,35 +351,35 @@
 	{sourceNetwork}
 >
 	{#key currentStep?.name}
-{#if currentStep?.name === WizardStepsSend.REVIEW}
-		<EthSendReview
-			{amount}
-			{destination}
-			{nft}
-			{onBack}
-			onSend={nonNullish(nft) ? nftSend : send}
-			{selectedContact}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SENDING}
-		<InProgressWizard
-			progressStep={sendProgressStep}
-			steps={sendSteps({ i18n: $i18n, sendWithApproval })}
-		/>
-	{:else if currentStep?.name === WizardStepsSend.SEND}
-		<EthSendForm
-			{nativeEthereumToken}
-			{onBack}
-			{onNext}
-			{onTokensList}
-			{selectedContact}
-			bind:destination
-			bind:amount
-			bind:customNonce
-		>
-			{#snippet cancel()}
-				<ButtonBack onclick={back} />
-			{/snippet}
-		</EthSendForm>
-	{/if}
+		{#if currentStep?.name === WizardStepsSend.REVIEW}
+			<EthSendReview
+				{amount}
+				{destination}
+				{nft}
+				{onBack}
+				onSend={nonNullish(nft) ? nftSend : send}
+				{selectedContact}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SENDING}
+			<InProgressWizard
+				progressStep={sendProgressStep}
+				steps={sendSteps({ i18n: $i18n, sendWithApproval })}
+			/>
+		{:else if currentStep?.name === WizardStepsSend.SEND}
+			<EthSendForm
+				{nativeEthereumToken}
+				{onBack}
+				{onNext}
+				{onTokensList}
+				{selectedContact}
+				bind:destination
+				bind:amount
+				bind:customNonce
+			>
+				{#snippet cancel()}
+					<ButtonBack onclick={back} />
+				{/snippet}
+			</EthSendForm>
+		{/if}
 	{/key}
 </EthFeeContext>

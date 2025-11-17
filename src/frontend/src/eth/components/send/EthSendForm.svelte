@@ -77,6 +77,4 @@
 			feeTokenId={$feeTokenIdStore}
 		/>
 	{/snippet}
-
-
 </SendForm>
