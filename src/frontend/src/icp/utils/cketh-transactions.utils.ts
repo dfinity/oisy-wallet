@@ -125,7 +125,7 @@ export const mapCkEthereumTransaction = ({
 };
 
 const mintMemoInfo = (
-	memo: Uint8Array | number[]
+	memo: Uint8Array
 ): { fromAddress: string | undefined; reimbursement: boolean } | undefined => {
 	try {
 		const [mintType, [fromAddress]] = decodeMintMemo(memo);
@@ -142,9 +142,7 @@ const mintMemoInfo = (
 	}
 };
 
-const burnMemoInfo = (
-	memo: Uint8Array | number[]
-): { toAddress: string | undefined } | undefined => {
+const burnMemoInfo = (memo: Uint8Array): { toAddress: string | undefined } | undefined => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return {

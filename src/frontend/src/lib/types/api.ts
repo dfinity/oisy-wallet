@@ -49,7 +49,7 @@ export interface BtcGetPendingTransactionParams {
 }
 
 export interface BtcAddPendingTransactionParams extends BtcGetPendingTransactionParams {
-	txId: Uint8Array | number[];
+	txId: Uint8Array;
 	utxos: Utxo[];
 }
 

@@ -178,7 +178,7 @@ const burnStatus = (
 	}
 
 	// Force compiler error on unhandled cases based on leftover types
-	const _: { Confirmed: { txid: Uint8Array | number[] } } | { Unknown: null } | undefined | never =
+	const _: { Confirmed: { txid: Uint8Array } } | { Unknown: null } | undefined | never =
 		retrieveBtcStatus;
 
 	return {
@@ -187,7 +187,7 @@ const burnStatus = (
 	};
 };
 
-const isMemoReimbursement = (memo: Uint8Array | number[]) => {
+const isMemoReimbursement = (memo: Uint8Array) => {
 	try {
 		const [mintType, _] = decodeMintMemo(memo);
 		return mintType === MINT_MEMO_KYT_FAIL;
@@ -197,7 +197,7 @@ const isMemoReimbursement = (memo: Uint8Array | number[]) => {
 	}
 };
 
-const burnMemoAddress = (memo: Uint8Array | number[]): OptionString => {
+const burnMemoAddress = (memo: Uint8Array): OptionString => {
 	try {
 		const [_, [toAddress]] = decodeBurnMemo(memo);
 		return toAddress;
