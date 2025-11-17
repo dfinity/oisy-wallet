@@ -175,9 +175,11 @@ export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
+	customNonce,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
-	SendParams &
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
+	customNonce?: number;
+} & SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
 
@@ -189,7 +191,7 @@ export const send = async ({
 	});
 
 	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
-	const nonceTransaction = transactionNeededApproval ? nonce + 1 : nonce;
+	const nonceTransaction = customNonce ?? (transactionNeededApproval ? nonce + 1 : nonce);
 
 	const transactionSent = await sendTransaction({
 		progress,
