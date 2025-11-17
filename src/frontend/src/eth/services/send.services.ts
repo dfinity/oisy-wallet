@@ -278,11 +278,8 @@ const sendTransaction = async ({
 		chainId
 	};
 
-	console.log('params', {
-		...rest,
-		...signParams,
-		to
-	});
+
+
 
 	const transaction = await (transferStandard === 'ethereum'
 		? // Case Ethereum or Sepolia
