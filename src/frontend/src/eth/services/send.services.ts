@@ -190,7 +190,7 @@ export const send = async ({
 	});
 
 	// If we approved a transaction - as, for example, in Erc20 -> ckErc20 flow - then we increment the nonce for the next transaction. Otherwise, we can use the nonce we got.
-	const nonceTransaction = customNonce ?? (transactionNeededApproval ? nonce + 1 : nonce);
+	const nonceTransaction = (transactionNeededApproval ? nonce + 1 : nonce);
 
 	const transactionSent = await sendTransaction({
 		progress,
