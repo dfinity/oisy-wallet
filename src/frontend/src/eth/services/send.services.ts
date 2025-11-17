@@ -175,7 +175,6 @@ export const send = async ({
 	lastProgressStep = ProgressStepsSend.DONE,
 	progress,
 	token,
-	customNonce,
 	...rest
 }: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
 	customNonce?: number;
