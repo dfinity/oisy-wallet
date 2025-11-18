@@ -92,14 +92,14 @@ describe('RewardsEarningOpportunityCard', () => {
 		const button = screen.getByRole('button', { name: 'mock.rewards.action' });
 		await button.click();
 
-		expect(navModule.goto).toHaveBeenCalledTimes(1);
-		expect(navModule.goto).toHaveBeenCalledWith(AppPath.EarningRewards);
+		expect(navModule.goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarningRewards);
 	});
 
 	it('renders nothing if no matching earning card is found for the current reward', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);
 
 		const { container } = render(RewardsEarningOpportunityCard, { context: mockContext });
+
 		expect(container.textContent?.trim()).toBe('');
 	});
 
@@ -208,5 +208,68 @@ describe('RewardsEarningOpportunityCard', () => {
 		});
 
 		expect(screen.getByText('mock.title')).toBeInTheDocument();
+	});
+
+	it('does not call getCampaignEligibility when no current reward exists', () => {
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue([]);
+
+		const getCampaignEligibility = vi.fn();
+
+		render(RewardsEarningOpportunityCard, {
+			context: new Map([[REWARD_ELIGIBILITY_CONTEXT_KEY, { getCampaignEligibility }]])
+		});
+
+		expect(getCampaignEligibility).not.toHaveBeenCalled();
+	});
+
+	it('uses fallback eligibility values when campaignEligibility is undefined', () => {
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue([
+			{
+				id: 'abc',
+				endDate: new Date(),
+				title: '',
+				description: ''
+			} as unknown as RewardCampaignDescription
+		]);
+
+		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([
+			{
+				id: 'abc',
+				title: 'mock.title',
+				description: 'mock.desc',
+				logo: 'x',
+				fields: [],
+				actionText: 'mock.action'
+			}
+		]);
+
+		const getCampaignEligibility = vi.fn().mockReturnValue(readable(undefined));
+
+		render(RewardsEarningOpportunityCard, {
+			context: new Map([[REWARD_ELIGIBILITY_CONTEXT_KEY, { getCampaignEligibility }]])
+		});
+
+		expect(screen.getByText('mock.title')).toBeInTheDocument();
+	});
+
+	it('renders nothing when no matching cardData exists', () => {
+		vi.spyOn(rewardCampaignsEnv, 'rewardCampaigns', 'get').mockReturnValue([
+			{
+				id: 'no-match',
+				endDate: new Date(),
+				title: '',
+				description: ''
+			} as unknown as RewardCampaignDescription
+		]);
+
+		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);
+
+		const getCampaignEligibility = vi.fn().mockReturnValue(readable(undefined));
+
+		const { container } = render(RewardsEarningOpportunityCard, {
+			context: new Map([[REWARD_ELIGIBILITY_CONTEXT_KEY, { getCampaignEligibility }]])
+		});
+
+		expect(container.textContent?.trim()).toBe('');
 	});
 });

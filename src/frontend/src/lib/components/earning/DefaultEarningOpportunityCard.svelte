@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { EarningCardFields, type EarningCards } from '$env/types/env.earning-cards';
 	import { nonNullish } from '@dfinity/utils';
-	import { i18n } from '$lib/stores/i18n.store';
-	import { resolveText } from '$lib/utils/i18n.utils';
+	import { EarningCardFields, type EarningCards } from '$env/types/env.earning-cards';
+	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import List from '$lib/components/common/List.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
+	import Logo from '$lib/components/ui/Logo.svelte';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { resolveText } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		cardData: EarningCards;
 		cardFields: { [key in EarningCardFields]?: string | number } & { action: () => Promise<void> };
 	}
 
-	const { cardData, cardFields, action }: Props = $props();
+	const { cardData, cardFields }: Props = $props();
 </script>
 
 <EarningOpportunityCard>
