@@ -158,24 +158,26 @@ const syncExchange = async ({
 			exchangeRatePOLToUsd()
 		]);
 
+		const data: PostMessageDataResponseExchange = {
+			currentExchangeRate: {
+				exchangeRateToUsd: currentExchangeRate ?? null,
+				currency: currentCurrency
+			},
+			currentEthPrice,
+			currentBtcPrice,
+			currentErc20Prices,
+			currentIcpPrice,
+			currentIcrcPrices,
+			currentSolPrice,
+			currentSplPrices,
+			currentBnbPrice,
+			currentPolPrice
+		};
+
 		postMessage({
 			msg: 'syncExchange',
-			data: {
-				currentExchangeRate: {
-					exchangeRateToUsd: currentExchangeRate,
-					currency: currentCurrency
-				},
-				currentEthPrice,
-				currentBtcPrice,
-				currentErc20Prices,
-				currentIcpPrice,
-				currentIcrcPrices,
-				currentSolPrice,
-				currentSplPrices,
-				currentBnbPrice,
-				currentPolPrice
-			}
-		} as PostMessage<PostMessageDataResponseExchange>);
+			data
+		});
 	} catch (err: unknown) {
 		console.error('Unexpected error while fetching symbol average price:', err);
 		stopTimer();
