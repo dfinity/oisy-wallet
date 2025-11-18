@@ -23,7 +23,7 @@
 		<div class="flex flex-col">
 			<StakeContentSection>
 				{#snippet title()}
-					<h4>Earning opportunities</h4>
+					<h4>{$i18n.earning.text.earning_opportunities}</h4>
 				{/snippet}
 				{#snippet content()}
 					<AllEarningOpportunityCardList />
