@@ -1,3 +1,4 @@
+import { SOLANA_TOKEN } from '$env/tokens/tokens.sol.env';
 import { SOL_WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import { retryWithDelay } from '$lib/services/rest.services';
@@ -53,7 +54,9 @@ export class SolWalletScheduler implements Scheduler<PostMessageDataRequestSol> 
 	}
 
 	protected setRef(data: PostMessageDataRequestSol | undefined) {
-		this.#ref = nonNullish(data) ? `${data.tokenAddress}-${data.solanaNetwork}` : undefined;
+		this.#ref = nonNullish(data)
+			? `${data.tokenAddress ?? SOLANA_TOKEN.symbol}-${data.solanaNetwork}`
+			: undefined;
 	}
 
 	async start(data: PostMessageDataRequestSol | undefined) {
