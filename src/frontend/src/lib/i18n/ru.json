@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Заработать"
+			"title": "Заработать",
+			"earning_opportunities": ""
 		},
 		"cards": {
 			"gold_title": "GLDT",

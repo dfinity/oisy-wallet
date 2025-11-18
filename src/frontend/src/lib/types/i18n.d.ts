@@ -1371,7 +1371,7 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string };
+	text: { title: string; earning_opportunities: string };
 	cards: {
 		gold_title: string;
 		gold_description: string;

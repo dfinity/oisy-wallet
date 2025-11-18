@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "कमाएँ"
+			"title": "कमाएँ",
+			"earning_opportunities": ""
 		},
 		"cards": {
 			"gold_title": "सोना",

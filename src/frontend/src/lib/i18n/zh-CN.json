@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "赚取"
+			"title": "赚取",
+			"earning_opportunities": ""
 		},
 		"cards": {
 			"gold_title": "黄金",

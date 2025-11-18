@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Vydělat"
+			"title": "Vydělat",
+			"earning_opportunities": ""
 		},
 		"cards": {
 			"gold_title": "Zlato",
