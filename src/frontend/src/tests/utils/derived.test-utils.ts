@@ -24,10 +24,12 @@ const isReadable = (value: unknown): value is Readable<unknown> =>
 
 const derivedList: Record<string, Readable<unknown>> = {};
 
-for (const [modulePath, module] of moduleGroups) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[`${modulePath}:${name}`] = exported;
+for (const [modulePath, modules] of moduleGroups) {
+	for (const module of Object.values(modules)) {
+		for (const [name, exported] of Object.entries(module)) {
+			if (isReadable(exported)) {
+				derivedList[`${modulePath}:${name}`] = exported;
+			}
 		}
 	}
 }
