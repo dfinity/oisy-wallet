@@ -1,14 +1,15 @@
 import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 import * as currencyDerived from '$lib/derived/currency.derived';
 import * as i18nDerived from '$lib/derived/i18n.derived';
-import { Currency as CurrencyEnum } from '$lib/enums/currency';
-import { Languages as LangEnum } from '$lib/enums/languages';
+import { Currency as CurrencyEnum, type Currency } from '$lib/enums/currency';
+import { Languages as LangEnum, type Languages } from '$lib/enums/languages';
 import type { CurrencyExchangeStore } from '$lib/stores/currency-exchange.store';
 import * as currencyExchange from '$lib/stores/currency-exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
+import type { CurrencyExchangeData } from '$lib/types/currency';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
 import { render, screen } from '@testing-library/svelte';
-import { get, writable } from 'svelte/store';
+import { get } from 'svelte/store';
 
 const getFormattedText = ($amount: string) =>
 	replacePlaceholders(get(i18n).stake.text.active_earning_per_year, { $amount });
@@ -17,16 +18,29 @@ describe('EarningYearlyAmount', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 
-		vi.spyOn(i18nDerived, 'currentLanguage', 'get').mockReturnValue(writable(LangEnum.ENGLISH));
+		const mockLanguage: Languages = LangEnum.ENGLISH;
+		vi.spyOn(i18nDerived, 'currentLanguage', 'get').mockReturnValue({
+			subscribe: (fn: (v: Languages) => void) => {
+				fn(mockLanguage);
+				return () => {};
+			}
+		});
 
-		vi.spyOn(currencyExchange, 'currencyExchangeStore', 'get').mockReturnValue(
-			writable({
-				currency: CurrencyEnum.USD,
-				exchangeRateToUsd: 1
-			}) as unknown as CurrencyExchangeStore
-		);
+		vi.spyOn(currencyExchange, 'currencyExchangeStore', 'get').mockReturnValue({
+			subscribe: (fn: (v: CurrencyExchangeData) => void) => {
+				fn({ currency: CurrencyEnum.USD, exchangeRateToUsd: 1 });
+				return () => {};
+			},
+			setExchangeRateCurrency: vi.fn(),
+			setExchangeRate: vi.fn()
+		} as CurrencyExchangeStore);
 
-		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue(writable(CurrencyEnum.USD));
+		vi.spyOn(currencyDerived, 'currentCurrency', 'get').mockReturnValue({
+			subscribe: (fn: (v: Currency) => void) => {
+				fn(CurrencyEnum.USD);
+				return () => {};
+			}
+		});
 	});
 
 	it('renders formatted yearly amount', () => {
