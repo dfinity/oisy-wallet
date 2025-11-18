@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Vydělat"
+			"title": "Vydělat",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "Zlato",
-			"gold_description": "Staking GLDT",
-			"stablecoins_title": "Stablecoiny",
-			"stablecoins_description": "Již brzy",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Odměny OISY",
 			"gldt": {
 				"title": "",
 				"description": "",

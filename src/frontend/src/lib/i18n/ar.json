@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "اكسب"
+			"title": "اكسب",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "الذهب",
-			"gold_description": "تخزين GLDT",
-			"stablecoins_title": "العملات المستقرة",
-			"stablecoins_description": "قريبًا",
-			"sprinkles_title": "رشات",
-			"sprinkles_description": "مكافآت OISY",
 			"gldt": {
 				"title": "",
 				"description": "",
