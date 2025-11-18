@@ -1,95 +1,88 @@
-import { tokenWithFallbackAsIcToken } from '$icp/derived/ic-token.derived';
-import {
-	btcAddressMainnet,
-	btcAddressTestnet,
-	ethAddress,
-	ethAddressNotLoaded
-} from '$lib/derived/address.derived';
-import { authIdentity, authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-import {
-	allBalancesZero,
-	anyBalanceNonZero,
-	balance,
-	balanceZero
-} from '$lib/derived/balances.derived';
-import { isBusy } from '$lib/derived/busy.derived';
-import { exchangeInitialized, exchanges } from '$lib/derived/exchange.derived';
-import { userHasPouhCredential } from '$lib/derived/has-pouh-credential.derived';
-import { routeNetwork, routeToken } from '$lib/derived/nav.derived';
-import { networkAddress } from '$lib/derived/network-address.derived';
-import {
-	combinedDerivedSortedFungibleNetworkTokens,
-	combinedDerivedSortedFungibleNetworkTokensUi
-} from '$lib/derived/network-tokens.derived';
-import {
-	networkBitcoin,
-	networkEthereum,
-	networkICP,
-	networkId,
-	pseudoNetworkChainFusion,
-	selectedNetwork
-} from '$lib/derived/network.derived';
-import { networks, networksMainnets, networksTestnets } from '$lib/derived/networks.derived';
-import { pageToken } from '$lib/derived/page-token.derived';
-import { hideZeroBalances, showZeroBalances } from '$lib/derived/settings.derived';
-import { testnetsEnabled } from '$lib/derived/testnets.derived';
-import { tokenId, tokenWithFallback } from '$lib/derived/token.derived';
-import {
-	enabledErc20Tokens,
-	enabledIcTokens,
-	enabledMainnetTokensUsdBalancesPerNetwork,
-	enabledTokens,
-	tokens,
-	tokensToPin
-} from '$lib/derived/tokens.derived';
 import { tick } from 'svelte';
 import type { Readable, Unsubscriber } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
-const derivedList: Record<string, Readable<unknown>> = {
-	allBalancesZero,
-	anyBalanceNonZero,
-	authIdentity,
-	authNotSignedIn,
-	authSignedIn,
-	balance,
-	balanceZero,
-	btcAddressMainnet,
-	btcAddressTestnet,
-	combinedDerivedSortedFungibleNetworkTokens,
-	combinedDerivedSortedFungibleNetworkTokensUi,
-	enabledErc20Tokens,
-	enabledIcTokens,
-	enabledMainnetTokensUsdBalancesPerNetwork,
-	enabledTokens,
-	exchangeInitialized,
-	exchanges,
-	ethAddress,
-	ethAddressNotLoaded,
-	hideZeroBalances,
-	isBusy,
-	networkAddress,
-	networkBitcoin,
-	networkEthereum,
-	networkICP,
-	networkId,
-	networks,
-	networksMainnets,
-	networksTestnets,
-	pageToken,
-	pseudoNetworkChainFusion,
-	routeNetwork,
-	routeToken,
-	selectedNetwork,
-	showZeroBalances,
-	testnetsEnabled,
-	tokenId,
-	tokenWithFallback,
-	tokenWithFallbackAsIcToken,
-	tokens,
-	tokensToPin,
-	userHasPouhCredential
-};
+type DerivedModule = Record<string, unknown>;
+
+const derivedModulesEth = import.meta.glob<DerivedModule>('$eth/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const derivedModulesEvm = import.meta.glob<DerivedModule>('$evm/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const derivedModulesIcp = import.meta.glob<DerivedModule>('$icp/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const derivedModulesIcpEth = import.meta.glob<DerivedModule>('$icp-eth/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const derivedModulesLib = import.meta.glob<DerivedModule>('$lib/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const derivedModulesSol = import.meta.glob<DerivedModule>('$sol/derived/**/*.derived.ts', {
+	eager: true
+});
+
+const isReadable = (value: unknown): value is Readable<unknown> =>
+	typeof value === 'object' &&
+	value !== null &&
+	'subscribe' in value &&
+	typeof (value as { subscribe: unknown }).subscribe === 'function';
+
+const derivedList: Record<string, Readable<unknown>> = {};
+
+for (const module of Object.values(derivedModulesEth)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
+
+for (const module of Object.values(derivedModulesEvm)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
+
+for (const module of Object.values(derivedModulesIcp)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
+
+for (const module of Object.values(derivedModulesIcpEth)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
+
+for (const module of Object.values(derivedModulesLib)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
+
+for (const module of Object.values(derivedModulesSol)) {
+	for (const [name, exported] of Object.entries(module)) {
+		if (isReadable(exported)) {
+			derivedList[name] = exported;
+		}
+	}
+}
 
 export const testDerivedUpdates = async (changeStore: () => void) => {
 	const { derivedMocks, unsubscribers } = Object.entries(derivedList).reduce<{
