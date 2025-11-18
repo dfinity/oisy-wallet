@@ -11,7 +11,7 @@
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
 		type GldtStakeContext as GldtStakeContextType,
-		gldtStakeStore as gldtStakeStoreImport
+		gldtStakeStore
 	} from '$icp/stores/gldt-stake.store';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import IconBackArrow from '$lib/components/icons/lucide/IconBackArrow.svelte';
@@ -28,8 +28,8 @@
 		fromRoute = from;
 	});
 
-	const { store: gldtStakeStore } = setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
-		store: gldtStakeStoreImport
+	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
+		store: gldtStakeStore
 	});
 
 	let gldtToken = $derived($enabledIcrcTokens.find(isGLDTToken));
