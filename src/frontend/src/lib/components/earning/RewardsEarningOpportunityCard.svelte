@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
-
-	const currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
-
 	import { getContext } from 'svelte';
 	import {
 		REWARD_ELIGIBILITY_CONTEXT_KEY,
@@ -22,6 +19,8 @@
 	import { AppPath } from '$lib/constants/routes.constants';
 	import { earningCards } from '$env/earning-cards.env';
 	import { i18n } from '$lib/stores/i18n.store';
+
+	const currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
 
 	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
 		REWARD_ELIGIBILITY_CONTEXT_KEY
