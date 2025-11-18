@@ -46,10 +46,6 @@ export class ExchangeWorker extends AppWorker {
 		});
 	};
 
-	protected override destroyCallback = () => {
-		errorMessages = [];
-	};
-
 	startExchangeTimer = (data: PostMessageDataRequestExchangeTimer) => {
 		this.postMessage({
 			msg: 'startExchangeTimer',
