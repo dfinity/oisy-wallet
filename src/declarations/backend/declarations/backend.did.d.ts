@@ -61,7 +61,7 @@ export type BtcAddPendingTransactionError = {
 	InternalError: { msg: string };
 };
 export interface BtcAddPendingTransactionRequest {
-	txid: Uint8Array;
+	txid: Uint8Array | number[];
 	network: BitcoinNetwork;
 	address: string;
 	utxos: Array<Utxo>;
@@ -103,12 +103,12 @@ export interface CanisterStatusResultV2 {
 	controller: Principal;
 	status: CanisterStatusType;
 	freezing_threshold: bigint;
-	balance: Array<[Uint8Array, bigint]>;
+	balance: Array<[Uint8Array | number[], bigint]>;
 	memory_size: bigint;
 	cycles: bigint;
 	settings: DefiniteCanisterSettingsArgs;
 	idle_cycles_burned_per_day: bigint;
-	module_hash: [] | [Uint8Array];
+	module_hash: [] | [Uint8Array | number[]];
 }
 export type CanisterStatusType = { stopped: null } | { stopping: null } | { running: null };
 export interface ChallengeCompletion {
@@ -129,7 +129,7 @@ export interface Config {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
-	ic_root_key_raw: [] | [Uint8Array];
+	ic_root_key_raw: [] | [Uint8Array | number[]];
 }
 export interface Contact {
 	id: bigint;
@@ -153,7 +153,7 @@ export type ContactError =
 	| { CanisterStatusError: null }
 	| { TooManyContactsWithImages: null };
 export interface ContactImage {
-	data: Uint8Array;
+	data: Uint8Array | number[];
 	mime_type: ImageMimeType;
 }
 export type CreateChallengeError =
@@ -229,11 +229,11 @@ export interface HasUserProfileResponse {
 export interface HttpRequest {
 	url: string;
 	method: string;
-	body: Uint8Array;
+	body: Uint8Array | number[];
 	headers: Array<[string, string]>;
 }
 export interface HttpResponse {
-	body: Uint8Array;
+	body: Uint8Array | number[];
 	headers: Array<[string, string]>;
 	status_code: number;
 }
@@ -242,11 +242,11 @@ export interface IcrcToken {
 	index_id: [] | [Principal];
 }
 export type Icrcv2AccountId =
-	| { Account: Uint8Array }
+	| { Account: Uint8Array | number[] }
 	| {
 			WithPrincipal: {
 				owner: Principal;
-				subaccount: [] | [Uint8Array];
+				subaccount: [] | [Uint8Array | number[]];
 			};
 	  };
 export type ImageMimeType =
@@ -260,7 +260,7 @@ export interface InitArg {
 	cfs_canister_id: [] | [Principal];
 	allowed_callers: Array<Principal>;
 	supported_credentials: [] | [Array<SupportedCredential>];
-	ic_root_key_der: [] | [Uint8Array];
+	ic_root_key_der: [] | [Uint8Array | number[]];
 }
 export interface NetworkSettings {
 	enabled: boolean;
@@ -289,11 +289,11 @@ export interface NetworksSettings {
 	testnets: TestnetsSettings;
 }
 export interface Outpoint {
-	txid: Uint8Array;
+	txid: Uint8Array | number[];
 	vout: number;
 }
 export interface PendingTransaction {
-	txid: Uint8Array;
+	txid: Uint8Array | number[];
 	utxos: Array<Utxo>;
 }
 export interface SaveNetworksSettingsRequest {
