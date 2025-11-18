@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Guadagna"
+			"title": "Guadagna",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "Oro",
-			"gold_description": "Staking di GLDT",
-			"stablecoins_title": "Stablecoin",
-			"stablecoins_description": "Prossimamente",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Ricompense OISY",
 			"gldt": {
 				"title": "",
 				"description": "",
