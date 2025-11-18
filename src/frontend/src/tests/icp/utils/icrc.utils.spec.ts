@@ -398,7 +398,7 @@ describe('icrc.utils', () => {
 		});
 	});
 
-	describe('isTokenSupportIcrc2', () => {
+	describe('isIcrcTokenSupportIcrc2', () => {
 		const params = {
 			identity: mockIdentity,
 			ledgerCanisterId: IC_CKBTC_LEDGER_CANISTER_ID
