@@ -37,7 +37,11 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { msg, ref, data } = dataMsg;
+
+				if (ref !== this.ledgerCanisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncIcrcWallet':

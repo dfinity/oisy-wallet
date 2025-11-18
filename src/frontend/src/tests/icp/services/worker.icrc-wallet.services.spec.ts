@@ -118,9 +118,31 @@ describe('worker.icrc-wallet.services', () => {
 			});
 
 			describe('onmessage', () => {
+				it('should return early if there is no reference', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
+				it('should return early if the reference does not match', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						ref: 'some-other-ref',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
 				it('should handle syncIcrcWallet message', () => {
 					const payload = {
 						msg: 'syncIcrcWallet',
+						ref: ledgerCanisterId,
 						data: { balance: 1000 }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -134,6 +156,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should handle syncIcrcWalletError message', () => {
 					const payload = {
 						msg: 'syncIcrcWalletError',
+						ref: ledgerCanisterId,
 						data: { error: 'error' }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -148,6 +171,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should handle syncIcrcWalletCleanUp message', () => {
 					const payload = {
 						msg: 'syncIcrcWalletCleanUp',
+						ref: ledgerCanisterId,
 						data: { transactionIds: ['id1', 'id2'] }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -162,6 +186,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should restart the worker with ledger only on error', () => {
 					const payload = {
 						msg: 'syncIcrcWalletError',
+						ref: ledgerCanisterId,
 						data: { error: 'error' }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -179,6 +204,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should restart the worker with ledger only on error but only once', () => {
 					const payload = {
 						msg: 'syncIcrcWalletError',
+						ref: ledgerCanisterId,
 						data: { error: 'error' }
 					};
 
@@ -248,9 +274,31 @@ describe('worker.icrc-wallet.services', () => {
 			});
 
 			describe('onmessage', () => {
+				it('should return early if there is no reference', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
+				it('should return early if the reference does not match', () => {
+					const payload = {
+						msg: 'syncIcrcWallet',
+						ref: 'some-other-ref',
+						data: { balance: 1000 }
+					};
+					workerInstance.onmessage?.({ data: payload } as MessageEvent);
+
+					expect(syncWallet).not.toHaveBeenCalled();
+				});
+
 				it('should handle syncIcrcWallet message', () => {
 					const payload = {
 						msg: 'syncIcrcWallet',
+						ref: ledgerCanisterId,
 						data: { balance: 1000 }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -264,6 +312,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should handle syncIcrcWalletError message', () => {
 					const payload = {
 						msg: 'syncIcrcWalletError',
+						ref: ledgerCanisterId,
 						data: { error: 'error' }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
@@ -278,6 +327,7 @@ describe('worker.icrc-wallet.services', () => {
 				it('should handle syncIcrcWalletCleanUp message', () => {
 					const payload = {
 						msg: 'syncIcrcWalletCleanUp',
+						ref: ledgerCanisterId,
 						data: { transactionIds: ['id1', 'id2'] }
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);

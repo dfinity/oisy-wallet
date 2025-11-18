@@ -34,7 +34,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { msg, ref, data } = dataMsg;
+
+				if (ref !== this.canisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncDip20Wallet':

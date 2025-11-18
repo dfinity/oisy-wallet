@@ -36,7 +36,11 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { msg, ref, data } = dataMsg;
+
+				if (ref !== this.indexCanisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncIcpWallet':
