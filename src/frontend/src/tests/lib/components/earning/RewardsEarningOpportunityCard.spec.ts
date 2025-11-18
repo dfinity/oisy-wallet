@@ -73,6 +73,7 @@ describe('RewardsEarningOpportunityCard', () => {
 
 	it('renders the formatted end date', () => {
 		render(RewardsEarningOpportunityCard, { context: mockContext });
+
 		expect(screen.getByText(/Dec 31, 2024/)).toBeInTheDocument();
 	});
 
@@ -80,6 +81,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		render(RewardsEarningOpportunityCard, { context: mockContext });
 
 		const button = screen.getByRole('button', { name: 'mock.rewards.action' });
+
 		expect(button).toBeInTheDocument();
 	});
 
@@ -94,7 +96,6 @@ describe('RewardsEarningOpportunityCard', () => {
 	});
 
 	it('renders nothing if no matching earning card is found for the current reward', () => {
-		// Make earningCards return an empty array
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);
 
 		const { container } = render(RewardsEarningOpportunityCard, { context: mockContext });
