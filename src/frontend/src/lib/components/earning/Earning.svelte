@@ -8,11 +8,11 @@
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
 		type GldtStakeContext as GldtStakeContextType,
-		initGldtStakeStore
+		gldtStakeStore
 	} from '$icp/stores/gldt-stake.store';
 
 	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
-		store: initGldtStakeStore()
+		store: gldtStakeStore
 	});
 </script>
 
