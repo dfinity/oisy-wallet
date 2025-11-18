@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "ステーブルコイン",
 			"stablecoins_description": "近日公開",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY 報酬"
+			"sprinkles_description": "OISY 報酬",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

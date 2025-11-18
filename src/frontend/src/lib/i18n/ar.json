@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "العملات المستقرة",
 			"stablecoins_description": "قريبًا",
 			"sprinkles_title": "رشات",
-			"sprinkles_description": "مكافآت OISY"
+			"sprinkles_description": "مكافآت OISY",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

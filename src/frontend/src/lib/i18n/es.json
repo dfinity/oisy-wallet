@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "",
 			"stablecoins_description": "",
 			"sprinkles_title": "",
-			"sprinkles_description": ""
+			"sprinkles_description": "",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
