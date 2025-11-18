@@ -250,6 +250,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
 		return {
 			setup: () => {
 				scheduler = initScheduler(startData);
@@ -275,6 +283,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(5);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
 						msg: `${msg}CleanUp`,
 						data: {
 							transactionIds: [`${mockRogueId}`]
@@ -295,13 +304,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
-						ref: isNullish(startData)
-							? undefined
-							: 'ledgerCanisterId' in startData
-								? startData.ledgerCanisterId
-								: 'indexCanisterId' in startData
-									? startData.indexCanisterId
-									: startData.canisterId,
+						ref,
 						msg: `${msg}Error`,
 						data: {
 							error: err
