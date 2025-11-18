@@ -36,6 +36,8 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 			>) => {
 				const { msg, ref, data } = dataMsg;
 
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
 				if (ref !== this.canisterId) {
 					return;
 				}
