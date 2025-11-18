@@ -1,24 +1,24 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { i18n } from '$lib/stores/i18n.store';
-	import {
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from '$lib/stores/reward.store';
-	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
 	import { NETWORK_BONUS_MULTIPLIER_DEFAULT } from '$lib/constants/app.constants';
-	import { formatToShortDateString } from '$lib/utils/format.utils';
-	import { resolveText } from '$lib/utils/i18n.utils';
+	import { AppPath } from '$lib/constants/routes.constants';
+	import { goto } from '$app/navigation';
 	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
+	import { formatToShortDateString } from '$lib/utils/format.utils';
+	import { resolveText } from '$lib/utils/i18n.utils';
+	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
 	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
 	import Logo from '$lib/components/ui/Logo.svelte';
 	import Button from '$lib/components/ui/Button.svelte';
 	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
 	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
-	import { goto } from '$app/navigation';
-	import { AppPath } from '$lib/constants/routes.constants';
+	import { i18n } from '$lib/stores/i18n.store';
+	import {
+		REWARD_ELIGIBILITY_CONTEXT_KEY,
+		type RewardEligibilityContext
+	} from '$lib/stores/reward.store';
 
 	const currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
 
