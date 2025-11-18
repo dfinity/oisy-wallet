@@ -1,14 +1,21 @@
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { SchedulerTimer, type Scheduler, type SchedulerJobData } from '$lib/schedulers/scheduler';
 import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrc,
 	PostMessageDataResponseError,
 	PostMessageDataResponseWallet
 } from '$lib/types/post-message';
 
 export type IcWalletMsg = 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
 
-export abstract class IcWalletScheduler<PostMessageDataRequest>
-	implements Scheduler<PostMessageDataRequest>
+export abstract class IcWalletScheduler<
+	PostMessageDataRequest extends
+		| PostMessageDataRequestIcrc
+		| PostMessageDataRequestIcp
+		| PostMessageDataRequestDip20
+> implements Scheduler<PostMessageDataRequest>
 {
 	protected timer = new SchedulerTimer('syncIcWalletStatus');
 
