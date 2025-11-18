@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { setContext } from 'svelte';
 	import GldtStakeContext from '$icp/components/stake/gldt/GldtStakeContext.svelte';
-	import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
-	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
-	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
-	import { i18n } from '$lib/stores/i18n.store.js';
 	import {
 		GLDT_STAKE_CONTEXT_KEY,
 		type GldtStakeContext as GldtStakeContextType,
 		initGldtStakeStore
 	} from '$icp/stores/gldt-stake.store';
+	import AllEarningOpportunityCardList from '$lib/components/earning/AllEarningOpportunityCardList.svelte';
+	import RewardsEligibilityContext from '$lib/components/rewards/RewardsEligibilityContext.svelte';
+	import StakeContentSection from '$lib/components/stake/StakeContentSection.svelte';
+	import { i18n } from '$lib/stores/i18n.store.js';
 
 	setContext<GldtStakeContextType>(GLDT_STAKE_CONTEXT_KEY, {
 		store: initGldtStakeStore()
