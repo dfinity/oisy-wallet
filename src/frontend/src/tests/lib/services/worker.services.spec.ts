@@ -23,7 +23,6 @@ describe('_worker.services', () => {
 	describe('AppWorker', () => {
 		const listenerSpy = vi.fn();
 		const stopTimerSpy = vi.fn();
-		const destroyCallbackSpy = vi.fn();
 
 		class TestWorker extends AppWorker {
 			constructor(worker: WorkerData) {
@@ -33,8 +32,6 @@ describe('_worker.services', () => {
 			protected stopTimer(): void {
 				stopTimerSpy();
 			}
-
-			protected override destroyCallback = destroyCallbackSpy;
 
 			setListener = this.setOnMessage;
 

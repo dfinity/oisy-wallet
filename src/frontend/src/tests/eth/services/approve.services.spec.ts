@@ -129,7 +129,10 @@ describe('approve.services', () => {
 
 			await expect(approve(mockParams)).rejects.toThrow(mockError);
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 		});
 
 		it('should return early if it should not swap with approval', async () => {
@@ -137,7 +140,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -147,7 +153,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -166,7 +175,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -187,7 +199,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).not.toHaveBeenCalled();
 		});
@@ -199,7 +214,10 @@ describe('approve.services', () => {
 
 			expect(result).toStrictEqual({ transactionNeededApproval: false, nonce: initialNonce });
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -227,7 +245,10 @@ describe('approve.services', () => {
 				nonce: initialNonce
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -273,7 +294,10 @@ describe('approve.services', () => {
 				nonce: initialNonce + 1
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
@@ -347,7 +371,10 @@ describe('approve.services', () => {
 				nonce: initialNonce
 			});
 
-			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith(mockEthAddress);
+			expect(getTransactionCountSpy).toHaveBeenCalledExactlyOnceWith({
+				address: mockEthAddress,
+				tag: 'pending'
+			});
 
 			expect(allowanceSpy).toHaveBeenCalledExactlyOnceWith({
 				contract: mockParams.token,
