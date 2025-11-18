@@ -1,24 +1,24 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import { ZERO } from '$lib/constants/app.constants';
-	import { i18n } from '$lib/stores/i18n.store.js';
+	import { goto } from '$app/navigation';
 	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import { EarningCardFields } from '$env/types/env.earning-cards';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
-	import { goto } from '$app/navigation';
-	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
-	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
-	import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
 	import DefaultEarningOpportunityCard from '$lib/components/earning/DefaultEarningOpportunityCard.svelte';
+	import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
+	import { ZERO } from '$lib/constants/app.constants';
 	import { AppPath } from '$lib/constants/routes.constants.js';
+	import { exchanges } from '$lib/derived/exchange.derived';
 	import {
 		enabledFungibleTokensUi,
 		enabledMainnetFungibleTokensUsdBalance
 	} from '$lib/derived/tokens.derived';
-	import { exchanges } from '$lib/derived/exchange.derived';
+	import { i18n } from '$lib/stores/i18n.store.js';
+	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
+	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
