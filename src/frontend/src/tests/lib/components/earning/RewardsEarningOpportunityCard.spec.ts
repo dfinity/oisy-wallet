@@ -92,8 +92,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		const button = screen.getByRole('button', { name: 'mock.rewards.action' });
 		await button.click();
 
-		expect(navModule.goto).toHaveBeenCalledOnce();
-		expect(navModule.goto).toHaveBeenCalledWith(AppPath.EarningRewards);
+		expect(navModule.goto).toHaveBeenCalledExactlyOnceWith(AppPath.EarningRewards);
 	});
 
 	it('renders nothing if no matching earning card is found for the current reward', () => {
