@@ -68,7 +68,7 @@
 		{/snippet}
 		{#snippet button()}
 			<Button
-				colorStyle={cardData.id === currentReward?.id ? 'primary' : 'success'}
+				colorStyle="primary"
 				fullWidth
 				onclick={() => goto(AppPath.EarningRewards)}
 				paddingSmall>{resolveText({ i18n: $i18n, path: cardData.actionText })}</Button
