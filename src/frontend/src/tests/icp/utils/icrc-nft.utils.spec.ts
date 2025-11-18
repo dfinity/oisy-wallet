@@ -19,7 +19,7 @@ describe('icrc-nft.utils', () => {
 			vi.clearAllMocks();
 		});
 
-		it('should true when ICRC-7 standard is supported', async () => {
+		it('should return true when ICRC-7 standard is supported', async () => {
 			const supportedStandards: IcrcStandardRecord[] = [
 				{ name: 'ICRC-7', url: 'https://github.com/dfinity/ICRC/tree/main/ICRCs/ICRC-7' },
 				{ name: 'ICRC-10', url: 'https://github.com/dfinity/ICRC/tree/main/ICRCs/ICRC-10' },
