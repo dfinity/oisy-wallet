@@ -92,7 +92,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		const button = screen.getByRole('button', { name: 'mock.rewards.action' });
 		await button.click();
 
-		expect(navModule.goto).toHaveBeenCalledTimes(1);
+		expect(navModule.goto).toHaveBeenCalledOnce();
 		expect(navModule.goto).toHaveBeenCalledWith(AppPath.EarningRewards);
 	});
 
@@ -100,6 +100,7 @@ describe('RewardsEarningOpportunityCard', () => {
 		vi.spyOn(earningCardsEnv, 'earningCards', 'get').mockReturnValue([]);
 
 		const { container } = render(RewardsEarningOpportunityCard, { context: mockContext });
+
 		expect(container.textContent?.trim()).toBe('');
 	});
 
