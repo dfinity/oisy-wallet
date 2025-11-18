@@ -59,10 +59,6 @@ export abstract class AppWorker {
 
 	protected abstract stopTimer(): void;
 
-	protected destroyCallback = (): void => {
-		// default: do nothing
-	};
-
 	// Used internally to control destruction state. Do not expose or override.
 	private isDestroying = false;
 
@@ -74,6 +70,5 @@ export abstract class AppWorker {
 		this.stopTimer();
 		this.terminate();
 		this.isDestroying = false;
-		this.destroyCallback();
 	};
 }
