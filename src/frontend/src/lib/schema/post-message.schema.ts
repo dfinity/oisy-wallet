@@ -232,7 +232,7 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 		nextAllowanceMs: z.custom<bigint>().optional()
 	});
 
-const PostMessageCommonSchema = z.object({
+export const PostMessageCommonSchema = z.object({
 	ref: z.string().optional()
 });
 

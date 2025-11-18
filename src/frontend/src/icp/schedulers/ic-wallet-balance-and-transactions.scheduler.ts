@@ -7,7 +7,7 @@ import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/sched
 import type {
 	PostMessageDataRequestDip20,
 	PostMessageDataRequestIcp,
-	PostMessageDataRequestIcrc,
+	PostMessageDataRequestIcrcStrict,
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
@@ -33,7 +33,7 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcTransaction | Transaction | Event,
 	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
 	PostMessageDataRequest extends
-		| PostMessageDataRequestIcrc
+		| PostMessageDataRequestIcrcStrict
 		| PostMessageDataRequestIcp
 		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
