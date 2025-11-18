@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": ""
+			"title": "",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "",
-			"gold_description": "",
-			"stablecoins_title": "",
-			"stablecoins_description": "",
-			"sprinkles_title": "",
-			"sprinkles_description": "",
 			"gldt": {
 				"title": "",
 				"description": "",

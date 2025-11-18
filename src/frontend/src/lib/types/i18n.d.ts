@@ -1371,14 +1371,8 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string };
+	text: { title: string; earning_opportunities: string };
 	cards: {
-		gold_title: string;
-		gold_description: string;
-		stablecoins_title: string;
-		stablecoins_description: string;
-		sprinkles_title: string;
-		sprinkles_description: string;
 		gldt: { title: string; description: string; action: string };
 		sprinkles: { title: string; description: string; action: string };
 	};
