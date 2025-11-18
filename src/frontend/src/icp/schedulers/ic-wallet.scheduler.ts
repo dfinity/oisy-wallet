@@ -78,7 +78,12 @@ export abstract class IcWalletScheduler<
 	}
 
 	protected postMessageWalletError({ error, msg }: { error: unknown; msg: IcWalletMsg }) {
+		if (isNullish(this.#ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseError>({
+			ref: this.#ref,
 			msg: `${msg}Error`,
 			data: {
 				error
