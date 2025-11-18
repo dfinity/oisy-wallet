@@ -136,7 +136,12 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		window.postMessage = originalPostMessage;
 	});
 
-	const initWithoutTransactions = <PostMessageDataRequest>({
+	const initWithoutTransactions = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		msg,
 		initScheduler,
 		startData = undefined
@@ -210,7 +215,12 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 		};
 	};
 
-	const initOtherScenarios = <PostMessageDataRequest>({
+	const initOtherScenarios = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		initScheduler,
 		startData = undefined,
 		initCleanupMock,
