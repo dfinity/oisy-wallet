@@ -27,7 +27,7 @@ import {
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
-import { arrayOfNumberToUint8Array, jsonReplacer, toNullable } from '@dfinity/utils';
+import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -95,13 +95,16 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 	const mockPostMessage = ({
 		msg,
+		ref,
 		...rest
 	}: {
 		transaction: IcTransactionUi;
 		certified: boolean;
 		msg: 'syncIcpWallet' | 'syncIcrcWallet' | 'syncDip20Wallet';
+		ref?: string;
 	}) => ({
 		msg,
+		ref,
 		data: mockPostMessageData(rest)
 	});
 
@@ -154,8 +157,17 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
 		const mockPostMessageNoTransactionsNotCertified = {
 			msg,
+			ref,
 			data: {
 				wallet: {
 					balance: {
@@ -170,6 +182,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 		const mockPostMessageNoTransactionsCertified = {
 			msg,
+			ref,
 			data: {
 				wallet: {
 					balance: {
@@ -334,8 +347,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestIcp>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.indexCanisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.indexCanisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
@@ -526,8 +549,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestIcrc>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.ledgerCanisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.ledgerCanisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
@@ -815,8 +848,18 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 
 			let scheduler: IcWalletScheduler<PostMessageDataRequestDip20>;
 
-			const mockPostMessageNotCertified = mockPostMessage({ msg, transaction, certified: false });
-			const mockPostMessageCertified = mockPostMessage({ msg, transaction, certified: true });
+			const mockPostMessageNotCertified = mockPostMessage({
+				msg,
+				ref: startData.canisterId,
+				transaction,
+				certified: false
+			});
+			const mockPostMessageCertified = mockPostMessage({
+				msg,
+				ref: startData.canisterId,
+				transaction,
+				certified: true
+			});
 
 			beforeEach(() => {
 				scheduler = initScheduler(startData);
