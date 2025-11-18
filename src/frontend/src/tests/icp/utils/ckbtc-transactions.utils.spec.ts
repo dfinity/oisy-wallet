@@ -72,12 +72,12 @@ describe('ckbtc-transactions.utils', () => {
 
 		type RetrieveBtcStatusV2 =
 			| { Signing: null }
-			| { Confirmed: { txid: Uint8Array | number[] } }
-			| { Sending: { txid: Uint8Array | number[] } }
+			| { Confirmed: { txid: Uint8Array } }
+			| { Sending: { txid: Uint8Array } }
 			| { AmountTooLow: null }
 			| { WillReimburse: ReimbursementRequest }
 			| { Unknown: null }
-			| { Submitted: { txid: Uint8Array | number[] } }
+			| { Submitted: { txid: Uint8Array } }
 			| { Reimbursed: ReimbursedDeposit }
 			| { Pending: null };
 

@@ -9,7 +9,7 @@ import { get } from 'svelte/store';
 
 describe('BTC Pending Sent Transactions Services', () => {
 	const mockPendingTransaction: PendingTransaction = {
-		txid: [],
+		txid: Uint8Array.from([]),
 		utxos: []
 	};
 	const address = 'test-address';

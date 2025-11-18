@@ -75,7 +75,7 @@ describe('backend.canister', () => {
 	};
 
 	const btcAddPendingTransactionParams = {
-		txId: [1, 2, 3],
+		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
 		address: mockBtcAddress,
 		utxos: [
@@ -83,7 +83,7 @@ describe('backend.canister', () => {
 				height: 1000,
 				value: 1n,
 				outpoint: {
-					txid: [1, 2, 3],
+					txid: Uint8Array.from([1, 2, 3]),
 					vout: 1
 				}
 			}
