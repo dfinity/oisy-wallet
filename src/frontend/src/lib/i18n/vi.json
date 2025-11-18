@@ -1716,7 +1716,8 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Kiếm tiền"
+			"title": "Kiếm tiền",
+			"earning_opportunities": ""
 		},
 		"cards": {
 			"gold_title": "Vàng",
