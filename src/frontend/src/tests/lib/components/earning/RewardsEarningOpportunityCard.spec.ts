@@ -1,17 +1,13 @@
-import { render, screen } from '@testing-library/svelte';
-import { readable, writable } from 'svelte/store';
-
-import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
-
 import * as navModule from '$app/navigation';
 import * as earningCardsEnv from '$env/earning-cards.env';
 import * as rewardCampaignsEnv from '$env/reward-campaigns.env';
-import * as formatUtils from '$lib/utils/format.utils';
-import * as i18nUtils from '$lib/utils/i18n.utils';
-
+import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
 import { AppPath } from '$lib/constants/routes.constants';
 import { REWARD_ELIGIBILITY_CONTEXT_KEY } from '$lib/stores/reward.store';
+import * as formatUtils from '$lib/utils/format.utils';
 import { mockRewardCampaigns } from '$tests/mocks/reward-campaigns.mock';
+import { render, screen } from '@testing-library/svelte';
+import { readable, writable } from 'svelte/store';
 
 const mockRewardEligibilityStore = writable({
 	campaignEligibilities: [
@@ -64,8 +60,6 @@ describe('RewardsEarningOpportunityCard', () => {
 		]);
 
 		vi.spyOn(formatUtils, 'formatToShortDateString').mockReturnValue('Dec 31, 2024');
-
-		vi.spyOn(i18nUtils, 'resolveText').mockImplementation(({ path }) => path);
 
 		vi.spyOn(navModule, 'goto').mockResolvedValue();
 	});
