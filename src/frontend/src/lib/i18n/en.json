@@ -1720,12 +1720,6 @@
             "earning_opportunities": "Earning opportunities"
 		},
 		"cards": {
-			"gold_title": "Gold",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Coming soon",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY Rewards",
 			"gldt": {
 				"title": "GLDT Staking",
 				"description": "Stake GLDT tokens to earn rewards backed by physical gold",
