@@ -19,7 +19,7 @@ export abstract class IcWalletScheduler<
 		| PostMessageDataRequestDip20
 > implements Scheduler<PostMessageDataRequest>
 {
-	#ref: PostMessageCommon['ref'];
+	#ref: PostMessageCommon['ref'] | undefined;
 
 	protected timer = new SchedulerTimer('syncIcWalletStatus');
 
