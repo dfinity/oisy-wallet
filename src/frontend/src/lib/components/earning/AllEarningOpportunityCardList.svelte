@@ -1,23 +1,9 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
-	import IconCalendarDays from '$lib/components/icons/lucide/IconCalendarDays.svelte';
-	import List from '$lib/components/common/List.svelte';
-	import ListItem from '$lib/components/common/ListItem.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Logo from '$lib/components/ui/Logo.svelte';
-	import EarningOpportunityCard from '$lib/components/earning/EarningOpportunityCard.svelte';
-	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
-	import RewardsRequirements from '$lib/components/rewards/RewardsRequirements.svelte';
 	import { AppPath } from '$lib/constants/routes.constants.js';
-	import { NETWORK_BONUS_MULTIPLIER_DEFAULT, ZERO } from '$lib/constants/app.constants';
-	import { normalizeNetworkMultiplier } from '$lib/utils/rewards.utils';
-	import { resolveText } from '$lib/utils/i18n.utils.js';
-	import {
-		formatStakeApyNumber,
-		formatToken,
-		formatToShortDateString
-	} from '$lib/utils/format.utils';
+	import { ZERO } from '$lib/constants/app.constants';
+	import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 	import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
 	import {
 		enabledFungibleTokensUi,
@@ -26,15 +12,13 @@
 	import { exchanges } from '$lib/derived/exchange.derived';
 	import { i18n } from '$lib/stores/i18n.store.js';
 	import { GLDT_STAKE_CONTEXT_KEY, type GldtStakeContext } from '$icp/stores/gldt-stake.store';
-	import {
-		REWARD_ELIGIBILITY_CONTEXT_KEY,
-		type RewardEligibilityContext
-	} from '$lib/stores/reward.store';
 	import { earningCards } from '$env/earning-cards.env';
 	import { rewardCampaigns } from '$env/reward-campaigns.env';
 	import { EarningCardFields } from '$env/types/env.earning-cards';
 	import { isGLDTToken } from '$icp-eth/utils/token.utils';
 	import { goto } from '$app/navigation';
+	import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
+	import DefaultEarningOpportunityCard from '$lib/components/earning/DefaultEarningOpportunityCard.svelte';
 
 	const { store: gldtStakeStore } = getContext<GldtStakeContext>(GLDT_STAKE_CONTEXT_KEY);
 
@@ -42,14 +26,10 @@
 
 	let gldtToken = $derived($enabledFungibleTokensUi.find(isGLDTToken));
 
-	// Prepare cards data
 	const cardsData: Record<
 		string,
 		{ [key in EarningCardFields]?: string | number } & { action: () => Promise<void> }
 	> = $derived({
-		[currentReward.id]: {
-			action: () => goto(AppPath.EarningRewards)
-		},
 		'gldt-staking': {
 			[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy)
 				? `${formatStakeApyNumber($gldtStakeStore.apy)}%`
@@ -74,99 +54,14 @@
 			action: () => goto(AppPath.EarningGold)
 		}
 	});
-
-	// load rewards data
-	const { getCampaignEligibility } = getContext<RewardEligibilityContext>(
-		REWARD_ELIGIBILITY_CONTEXT_KEY
-	);
-
-	const campaignEligibility = $derived(
-		currentReward ? getCampaignEligibility(currentReward.id) : undefined
-	);
-	const isEligible = $derived($campaignEligibility?.eligible ?? false);
-	const hasNetworkBonus = $derived($campaignEligibility?.probabilityMultiplierEnabled ?? false);
-	const networkBonusMultiplier = $derived(
-		normalizeNetworkMultiplier(
-			$campaignEligibility?.probabilityMultiplier ?? NETWORK_BONUS_MULTIPLIER_DEFAULT
-		)
-	);
-	const criteria = $derived($campaignEligibility?.criteria ?? []);
 </script>
 
 <div class="mt-5 flex grid grid-cols-2 gap-3 md:flex-row">
 	{#each earningCards as card, i (`${card.id}-${i}`)}
-		<EarningOpportunityCard>
-			{#snippet logo()}
-				<Logo size="lg" src={card.logo} />
-			{/snippet}
-			{#snippet badge()}
-				{#if nonNullish(currentReward) && card.id === currentReward.id}
-					<span class="mr-2"><IconCalendarDays size="14" /></span>
-					{$i18n.rewards.text.active_date}
-					{`${formatToShortDateString({ date: currentReward.endDate, i18n: $i18n })} ${currentReward.endDate.getDate()}`}
-				{:else}
-					{$i18n.stake.text.current_apy_label}
-					<span class="ml-1 font-bold text-success-primary">{cardsData[card.id].apy}</span>
-				{/if}
-			{/snippet}
-			{#snippet title()}
-				{resolveText({ i18n: $i18n, path: card.title })}
-			{/snippet}
-			{#snippet description()}
-				<p>{resolveText({ i18n: $i18n, path: card.description })}</p>
-
-				{#if nonNullish(currentReward) && card.id === currentReward.id}
-					<RewardsRequirements
-						{criteria}
-						{hasNetworkBonus}
-						{isEligible}
-						{networkBonusMultiplier}
-						reward={currentReward}
-						type="earnings-card"
-					/>
-				{:else}
-					<List condensed itemStyleClass="flex-col md:flex-row gap-2 whitespace-nowrap text-xs">
-						{#each card.fields as cardField, i (`${cardField}-${i}`)}
-							<ListItem>
-								<span class="text-tertiary"
-									>{resolveText({
-										i18n: $i18n,
-										path: `earning.card_fields.${cardField}`
-									})}</span
-								>
-								<span class="font-bold">
-									{#if cardField === EarningCardFields.CURRENT_EARNING || cardField === EarningCardFields.EARNING_POTENTIAL}
-										{#if nonNullish(cardsData[card.id][cardField])}
-											<EarningYearlyAmount
-												formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
-												showPlusSign
-												value={Number(cardsData[card.id][cardField])}
-											/>
-										{:else}
-											-
-										{/if}
-									{:else}
-										{nonNullish(cardsData[card.id][cardField])
-											? resolveText({
-													i18n: $i18n,
-													path: `${cardsData[card.id][cardField]}`
-												})
-											: '-'}
-									{/if}
-								</span>
-							</ListItem>
-						{/each}
-					</List>
-				{/if}
-			{/snippet}
-			{#snippet button()}
-				<Button
-					colorStyle={card.id === currentReward?.id ? 'primary' : 'success'}
-					fullWidth
-					onclick={cardsData[card.id].action}
-					paddingSmall>{resolveText({ i18n: $i18n, path: card.actionText })}</Button
-				>
-			{/snippet}
-		</EarningOpportunityCard>
+		{#if card.id === currentReward.id}
+			<RewardsEarningOpportunityCard />
+		{:else}
+			<DefaultEarningOpportunityCard cardData={card} cardFields={cardsData[card.id]} />
+		{/if}
 	{/each}
 </div>
