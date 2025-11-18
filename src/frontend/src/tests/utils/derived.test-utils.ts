@@ -4,29 +4,17 @@ import type { MockInstance } from 'vitest';
 
 type DerivedModule = Record<string, unknown>;
 
-const derivedModulesEth = import.meta.glob<DerivedModule>('$eth/derived/**/*.derived.ts', {
-	eager: true
-});
-
-const derivedModulesEvm = import.meta.glob<DerivedModule>('$evm/derived/**/*.derived.ts', {
-	eager: true
-});
-
-const derivedModulesIcp = import.meta.glob<DerivedModule>('$icp/derived/**/*.derived.ts', {
-	eager: true
-});
-
-const derivedModulesIcpEth = import.meta.glob<DerivedModule>('$icp-eth/derived/**/*.derived.ts', {
-	eager: true
-});
-
-const derivedModulesLib = import.meta.glob<DerivedModule>('$lib/derived/**/*.derived.ts', {
-	eager: true
-});
-
-const derivedModulesSol = import.meta.glob<DerivedModule>('$sol/derived/**/*.derived.ts', {
-	eager: true
-});
+const moduleGroups = [
+	['$eth', import.meta.glob<DerivedModule>('$eth/derived/**/*.derived.ts', { eager: true })],
+	['$evm', import.meta.glob<DerivedModule>('$evm/derived/**/*.derived.ts', { eager: true })],
+	['$icp', import.meta.glob<DerivedModule>('$icp/derived/**/*.derived.ts', { eager: true })],
+	[
+		'$icp-eth',
+		import.meta.glob<DerivedModule>('$icp-eth/derived/**/*.derived.ts', { eager: true })
+	],
+	['$lib', import.meta.glob<DerivedModule>('$lib/derived/**/*.derived.ts', { eager: true })],
+	['$sol', import.meta.glob<DerivedModule>('$sol/derived/**/*.derived.ts', { eager: true })]
+] as const;
 
 const isReadable = (value: unknown): value is Readable<unknown> =>
 	typeof value === 'object' &&
@@ -36,50 +24,10 @@ const isReadable = (value: unknown): value is Readable<unknown> =>
 
 const derivedList: Record<string, Readable<unknown>> = {};
 
-for (const module of Object.values(derivedModulesEth)) {
+for (const [modulePath, module] of moduleGroups) {
 	for (const [name, exported] of Object.entries(module)) {
 		if (isReadable(exported)) {
-			derivedList[name] = exported;
-		}
-	}
-}
-
-for (const module of Object.values(derivedModulesEvm)) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[name] = exported;
-		}
-	}
-}
-
-for (const module of Object.values(derivedModulesIcp)) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[name] = exported;
-		}
-	}
-}
-
-for (const module of Object.values(derivedModulesIcpEth)) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[name] = exported;
-		}
-	}
-}
-
-for (const module of Object.values(derivedModulesLib)) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[name] = exported;
-		}
-	}
-}
-
-for (const module of Object.values(derivedModulesSol)) {
-	for (const [name, exported] of Object.entries(module)) {
-		if (isReadable(exported)) {
-			derivedList[name] = exported;
+			derivedList[`${modulePath}:${name}`] = exported;
 		}
 	}
 }
@@ -100,7 +48,7 @@ export const testDerivedUpdates = async (changeStore: () => void) => {
 	);
 
 	try {
-		// Initialization call
+		// Initialisation call
 		derivedMocks.forEach((mockFn) => expect(mockFn).toHaveBeenCalledOnce());
 
 		changeStore();
