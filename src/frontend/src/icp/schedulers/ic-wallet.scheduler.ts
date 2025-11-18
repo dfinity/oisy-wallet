@@ -19,7 +19,7 @@ export abstract class IcWalletScheduler<
 		| PostMessageDataRequestDip20
 > implements Scheduler<PostMessageDataRequest>
 {
-	#ref: PostMessageCommon['ref'];
+	protected ref: PostMessageCommon['ref'];
 
 	protected timer = new SchedulerTimer('syncIcWalletStatus');
 
@@ -28,7 +28,7 @@ export abstract class IcWalletScheduler<
 	}
 
 	protected setRef(data: PostMessageDataRequest | undefined) {
-		this.#ref = isNullish(data)
+		this.ref = isNullish(data)
 			? undefined
 			: 'ledgerCanisterId' in data
 				? data.ledgerCanisterId
@@ -66,24 +66,24 @@ export abstract class IcWalletScheduler<
 		data: PostMessageDataResponseWallet;
 		msg: IcWalletMsg;
 	}) {
-		if (isNullish(this.#ref)) {
+		if (isNullish(this.ref)) {
 			return;
 		}
 
 		this.timer.postMsg<PostMessageDataResponseWallet>({
-			ref: this.#ref,
+			ref: this.ref,
 			msg,
 			data
 		});
 	}
 
 	protected postMessageWalletError({ error, msg }: { error: unknown; msg: IcWalletMsg }) {
-		if (isNullish(this.#ref)) {
+		if (isNullish(this.ref)) {
 			return;
 		}
 
 		this.timer.postMsg<PostMessageDataResponseError>({
-			ref: this.#ref,
+			ref: this.ref,
 			msg: `${msg}Error`,
 			data: {
 				error

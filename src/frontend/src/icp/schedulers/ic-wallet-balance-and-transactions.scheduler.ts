@@ -225,7 +225,12 @@ export class IcWalletBalanceAndTransactionsScheduler<
 	}
 
 	private postMessageWalletCleanUp(transactions: IndexedTransactions<T>) {
+		if (isNullish(this.ref)) {
+			return;
+		}
+
 		this.timer.postMsg<PostMessageDataResponseWalletCleanUp>({
+			ref: this.ref,
 			msg: `${this.msg}CleanUp`,
 			data: {
 				transactionIds: Object.keys(transactions)
