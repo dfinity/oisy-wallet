@@ -8,8 +8,6 @@ import type {
 } from '$lib/types/post-message';
 import type { WorkerData } from '$lib/types/worker';
 
-let errorMessages: { msg: string; timestamp: number }[] = [];
-
 export class ExchangeWorker extends AppWorker {
 	private constructor(worker: WorkerData) {
 		super(worker);
