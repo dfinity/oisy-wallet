@@ -269,6 +269,13 @@ describe('ic-wallet-balance.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref: isNullish(startData)
+							? undefined
+							: 'ledgerCanisterId' in startData
+								? startData.ledgerCanisterId
+								: 'indexCanisterId' in startData
+									? startData.indexCanisterId
+									: startData.canisterId,
 						msg: `${msg}Error`,
 						data: {
 							error: err
