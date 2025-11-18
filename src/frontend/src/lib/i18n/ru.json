@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Заработать"
+			"title": "Заработать",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "GLDT",
-			"gold_description": "Стейкинг GLDT",
-			"stablecoins_title": "Стейблкоины",
-			"stablecoins_description": "Скоро",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Награды OISY",
 			"gldt": {
 				"title": "",
 				"description": "",

@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "कमाएँ"
+			"title": "कमाएँ",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "सोना",
-			"gold_description": "GLDT स्टेकिंग",
-			"stablecoins_title": "स्थिर सिक्के",
-			"stablecoins_description": "जल्द आ रहा है",
-			"sprinkles_title": "स्प्रिंकल्स",
-			"sprinkles_description": "OISY पुरस्कार",
 			"gldt": {
 				"title": "",
 				"description": "",

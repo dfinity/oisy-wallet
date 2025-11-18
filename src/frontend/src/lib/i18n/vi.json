@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Kiếm tiền"
+			"title": "Kiếm tiền",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "Vàng",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Sắp ra mắt",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Phần thưởng OISY",
 			"gldt": {
 				"title": "",
 				"description": "",

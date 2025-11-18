@@ -1716,15 +1716,10 @@
 	},
 	"earning": {
 		"text": {
-			"title": "獲得"
+			"title": "獲得",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "ゴールド",
-			"gold_description": "GLDT ステーキング",
-			"stablecoins_title": "ステーブルコイン",
-			"stablecoins_description": "近日公開",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY 報酬",
 			"gldt": {
 				"title": "",
 				"description": "",
