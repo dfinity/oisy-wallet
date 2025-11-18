@@ -1716,8 +1716,7 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Verdienen",
-			"earning_opportunities": ""
+			"title": "Verdienen"
 		},
 		"cards": {
 			"gold_title": "Gold",

@@ -1716,8 +1716,7 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Gagner",
-			"earning_opportunities": ""
+			"title": "Gagner"
 		},
 		"cards": {
 			"gold_title": "Or",
