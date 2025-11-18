@@ -5,7 +5,7 @@ import {
 } from '$btc/services/btc-listener.services';
 import type { BtcPostMessageDataResponseWallet } from '$btc/types/btc-post-message';
 import { STAGING } from '$lib/constants/app.constants';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import {
 	btcAddressMainnetStore,
 	btcAddressRegtestStore,
@@ -15,6 +15,7 @@ import type { OptionCanisterIdText } from '$lib/types/canister';
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataRequestBtc } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import {
 	isNetworkIdBTCMainnet,
 	isNetworkIdBTCRegtest,
@@ -108,10 +109,10 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestBtc>>({
 			msg: 'startBtcWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestBtc>);
+		});
 	};
 
 	stop = () => {
@@ -119,9 +120,9 @@ export class BtcWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestBtc>>({
 			msg: 'triggerBtcWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestBtc>);
+		});
 	};
 }

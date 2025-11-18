@@ -37,6 +37,12 @@ vi.mock('$lib/workers/workers?worker', () => ({
 	})
 }));
 
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
+
 describe('worker.icrc-wallet.services', () => {
 	describe('IcrcWalletWorker', () => {
 		let worker: WalletWorker;
@@ -59,9 +65,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'startIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						indexCanisterId,
 						ledgerCanisterId,
@@ -73,18 +79,18 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 			});
 
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'triggerIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						indexCanisterId,
 						ledgerCanisterId,
@@ -96,9 +102,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should destroy the worker', () => {
 				worker.destroy();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 
 				expect(workerInstance.terminate).toHaveBeenCalledOnce();
@@ -160,9 +166,9 @@ describe('worker.icrc-wallet.services', () => {
 					};
 					workerInstance.onmessage?.({ data: payload } as MessageEvent);
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
-					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 						msg: 'startIcrcWalletTimer',
+						workerId: mockId,
 						data: {
 							ledgerCanisterId,
 							env
@@ -180,9 +186,9 @@ describe('worker.icrc-wallet.services', () => {
 						workerInstance.onmessage?.({ data: payload } as MessageEvent);
 					});
 
-					expect(postMessageSpy).toHaveBeenCalledOnce();
-					expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+					expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 						msg: 'startIcrcWalletTimer',
+						workerId: mockId,
 						data: {
 							ledgerCanisterId,
 							env
@@ -209,9 +215,9 @@ describe('worker.icrc-wallet.services', () => {
 			it('should start the worker and send the correct start message', () => {
 				worker.start();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'startIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						ledgerCanisterId,
 						env
@@ -222,18 +228,18 @@ describe('worker.icrc-wallet.services', () => {
 			it('should stop the worker and send the correct stop message', () => {
 				worker.stop();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
-					msg: 'stopIcrcWalletTimer'
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+					msg: 'stopIcrcWalletTimer',
+					workerId: mockId
 				});
 			});
 
 			it('should trigger the worker and send the correct trigger message', () => {
 				worker.trigger();
 
-				expect(postMessageSpy).toHaveBeenCalledOnce();
-				expect(postMessageSpy).toHaveBeenNthCalledWith(1, {
+				expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 					msg: 'triggerIcrcWalletTimer',
+					workerId: mockId,
 					data: {
 						ledgerCanisterId,
 						env

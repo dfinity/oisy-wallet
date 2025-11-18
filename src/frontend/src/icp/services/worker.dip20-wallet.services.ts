@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -14,6 +14,7 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 
 export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
@@ -78,12 +79,12 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'startDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 
 	stop = () => {
@@ -91,11 +92,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'triggerDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 }

@@ -4,7 +4,12 @@ import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { IcTransactionAddOnsInfo, IcTransactionUi } from '$icp/types/ic-transaction';
 import type { GetTransactions } from '$icp/types/ic.post-message';
 import type { SchedulerJobData, SchedulerJobParams } from '$lib/schedulers/scheduler';
-import type { PostMessageDataResponseWalletCleanUp } from '$lib/types/post-message';
+import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrcStrict,
+	PostMessageDataResponseWalletCleanUp
+} from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
 import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
 import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
@@ -27,7 +32,10 @@ export type GetBalanceAndTransactions<
 export class IcWalletBalanceAndTransactionsScheduler<
 	T extends IcrcTransaction | Transaction | Event,
 	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
-	PostMessageDataRequest
+	PostMessageDataRequest extends
+		| PostMessageDataRequestIcrcStrict
+		| PostMessageDataRequestIcp
+		| PostMessageDataRequestDip20
 > extends IcWalletScheduler<PostMessageDataRequest> {
 	private store: IcWalletStore<T> = {
 		balance: undefined,

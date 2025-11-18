@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "Stablecoins",
 			"stablecoins_description": "Bientôt disponible",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Récompenses OISY"
+			"sprinkles_description": "Récompenses OISY",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

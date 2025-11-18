@@ -1,18 +1,16 @@
 import { WorkerQueue } from '$lib/services/worker-queue.services';
 import type {
-	PostMessage,
-	PostMessageDataRequest,
-	PostMessageDataResponseLoose
-} from '$lib/types/post-message';
+	WithoutWorkerId,
+	WorkerData,
+	WorkerId,
+	WorkerListener,
+	WorkerPostMessageData
+} from '$lib/types/worker';
 import { isNullish } from '@dfinity/utils';
-
-export interface WorkerData {
-	worker: Worker;
-	isSingleton: boolean;
-}
 
 export abstract class AppWorker {
 	readonly #worker: Worker;
+	readonly #workerId: WorkerId;
 	readonly #queue: WorkerQueue;
 
 	static #singletonWorker?: Worker;
@@ -21,6 +19,7 @@ export abstract class AppWorker {
 		const { worker } = workerData;
 
 		this.#worker = worker;
+		this.#workerId = crypto.randomUUID();
 		this.#queue = new WorkerQueue(worker);
 	}
 
@@ -45,15 +44,13 @@ export abstract class AppWorker {
 		return { worker, isSingleton: asSingleton };
 	};
 
-	protected setOnMessage = <T extends PostMessageDataRequest | PostMessageDataResponseLoose>(
-		fn: (ev: MessageEvent<PostMessage<T>>) => void
-	) => {
-		this.#worker.onmessage = fn;
+	protected setOnMessage = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#worker.onmessage = listener;
 	};
 
-	protected postMessage = <T>(data: T) => {
+	protected postMessage = <T>(data: WithoutWorkerId<T>) => {
 		// Route via queue to enforce back-pressure
-		this.#queue.send(data);
+		this.#queue.send({ ...data, workerId: this.#workerId });
 	};
 
 	terminate = () => {

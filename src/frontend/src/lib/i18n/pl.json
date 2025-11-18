@@ -1724,7 +1724,27 @@
 			"stablecoins_title": "Stablecoiny",
 			"stablecoins_description": "Wkrótce",
 			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Nagrody OISY"
+			"sprinkles_description": "Nagrody OISY",
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
