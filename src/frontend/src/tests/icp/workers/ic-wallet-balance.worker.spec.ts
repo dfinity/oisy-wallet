@@ -2,6 +2,11 @@ import type { IcWalletScheduler } from '$icp/schedulers/ic-wallet.scheduler';
 import { initIcrcWalletScheduler } from '$icp/workers/icrc-wallet.worker';
 import { WALLET_TIMER_INTERVAL_MILLIS } from '$lib/constants/app.constants';
 import { AuthClientProvider } from '$lib/providers/auth-client.providers';
+import type {
+	PostMessageDataRequestDip20,
+	PostMessageDataRequestIcp,
+	PostMessageDataRequestIcrc
+} from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
@@ -89,7 +94,12 @@ describe('ic-wallet-balance.worker', () => {
 		window.postMessage = originalPostmessage;
 	});
 
-	const initWithBalance = <PostMessageDataRequest>({
+	const initWithBalance = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		initScheduler,
 		msg,
 		startData = undefined
@@ -204,7 +214,12 @@ describe('ic-wallet-balance.worker', () => {
 		};
 	};
 
-	const initOtherScenarios = <PostMessageDataRequest>({
+	const initOtherScenarios = <
+		PostMessageDataRequest extends
+			| PostMessageDataRequestIcrc
+			| PostMessageDataRequestIcp
+			| PostMessageDataRequestDip20
+	>({
 		initScheduler,
 		startData = undefined,
 		initErrorMock,
