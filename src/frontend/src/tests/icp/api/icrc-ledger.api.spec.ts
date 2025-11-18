@@ -570,7 +570,10 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const candidAccount = { owner: mockPrincipal, subaccount: toNullable(Uint8Array.from([1, 2, 3])) };
+		const candidAccount = {
+			owner: mockPrincipal,
+			subaccount: toNullable(Uint8Array.from([1, 2, 3]))
+		};
 		const expectedAccount = { owner: mockPrincipal, subaccount: Uint8Array.from([1, 2, 3]) };
 
 		beforeEach(() => {
