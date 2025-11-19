@@ -9,7 +9,7 @@ import type { OptionIdentity } from '$lib/types/identity';
 import {
 	encodeIcrcAccount,
 	fromCandidAccount,
-	type IcrcTransactionWithId
+	type IcrcIndexNgTransactionWithId
 } from '@dfinity/ledger-icrc';
 import {
 	fromNullable,
@@ -19,7 +19,7 @@ import {
 	nonNullish
 } from '@dfinity/utils';
 
-export const mapTransactionIcrcToSelf = (tx: IcrcTransactionWithId): IcrcTransaction[] => {
+export const mapTransactionIcrcToSelf = (tx: IcrcIndexNgTransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;
 	const { transfer: t } = transaction;
 
