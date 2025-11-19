@@ -19,12 +19,14 @@
 	const yearlyAmount = $derived(
 		nonNullish(value)
 			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-					$amount: `${formatCurrency({
-						value,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}`
+					$amount: `${
+						formatCurrency({
+							value,
+							currency: $currentCurrency,
+							exchangeRate: $currencyExchangeStore,
+							language: $currentLanguage
+						}) ?? 0
+					}`
 				})
 			: undefined
 	);
