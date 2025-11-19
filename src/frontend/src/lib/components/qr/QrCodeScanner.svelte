@@ -3,10 +3,11 @@
 	import { onMount } from 'svelte';
 	import { ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		onScan: ({ status, code }: { status: QrStatus; code?: string }) => void;
-		onBack: () => void;
+		onBack?: () => void;
 	}
 
 	let { onScan, onBack }: Props = $props();
@@ -28,7 +29,9 @@
 			onScan(result);
 		}
 
-		onBack();
+		if (nonNullish(onBack)) {
+			onBack();
+		}
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {

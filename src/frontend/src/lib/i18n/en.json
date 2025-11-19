@@ -8,6 +8,7 @@
 			"done": "Done",
 			"close": "Close",
 			"change": "Change",
+			"continue": "Continue",
 			"apply": "Apply",
 			"retry": "Retry",
 			"refresh": "Refresh",
@@ -895,7 +896,13 @@
 			"country": "Country",
 			"phone_number": "Phone number",
 			"email_address": "Email address",
-			"website": "Website"
+			"website": "Website",
+			"enter_manually": "Enter manually",
+			"url_or_code": "URL or the code",
+			"enter_or_paste_code": "Enter or paste code"
+		},
+		"error": {
+			"code_link_is_not_valid": "Code/link is not valid"
 		}
 	},
 	"convert": {
