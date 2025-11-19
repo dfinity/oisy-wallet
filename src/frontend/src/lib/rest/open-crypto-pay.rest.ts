@@ -1,4 +1,4 @@
-export const fetchOpenCryptoPay = async <T>(apiUrl: string): Promise<T | null> => {
+export const fetchOpenCryptoPay = async <T>(apiUrl: string): Promise<T> => {
 	const response = await fetch(apiUrl, {
 		method: 'GET',
 		headers: { 'Content-Type': 'application/json' }

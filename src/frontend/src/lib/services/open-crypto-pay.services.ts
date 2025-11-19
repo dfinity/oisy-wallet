@@ -1,3 +1,4 @@
+import { fetchOpenCryptoPay } from '$lib/rest/open-crypto-pay.rest';
 import type { OpenCryptoPayResponse } from '$lib/types/open-crypto-pay';
 import { decodeLNURL } from '$lib/utils/open-crypto-pay.utils';
 import { isEmptyString, isNullish } from '@dfinity/utils';
@@ -28,17 +29,7 @@ const parseOpenCryptoPayCode = (qrText: string): string => {
 	return decodeLightningParam(lightningParam);
 };
 
-const fetchPaymentDetails = async (apiUrl: string): Promise<OpenCryptoPayResponse> => {
-	const response = await fetch(apiUrl);
-
-	if (!response.ok) {
-		throw new Error(`API request failed: ${response.status}`);
-	}
-
-	return await response.json();
-};
-
 export const processOpenCryptoPayCode = async (code: string): Promise<OpenCryptoPayResponse> => {
 	const decodedApiUrl = parseOpenCryptoPayCode(code);
-	return await fetchPaymentDetails(decodedApiUrl);
+	return await fetchOpenCryptoPay<OpenCryptoPayResponse>(decodedApiUrl);
 };

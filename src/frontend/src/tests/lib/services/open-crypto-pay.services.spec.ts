@@ -1,15 +1,17 @@
 import { processOpenCryptoPayCode } from '$lib/services/open-crypto-pay.services';
 import type { OpenCryptoPayResponse } from '$lib/types/open-crypto-pay';
 
-global.fetch = vi.fn();
-
 vi.mock('$lib/utils/open-crypto-pay.utils', () => ({
 	decodeLNURL: vi.fn((lnurl: string) => {
 		if (lnurl === 'VALID_LNURL') {
 			return 'https://api.dfx.swiss/v1/lnurlp/pl_test123';
 		}
-		return undefined;
+		return;
 	})
+}));
+
+vi.mock('$lib/rest/open-crypto-pay.rest', () => ({
+	fetchOpenCryptoPay: vi.fn()
 }));
 
 describe('open-crypto-pay.service', () => {
@@ -25,7 +27,7 @@ describe('open-crypto-pay.service', () => {
 		callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
 		minSendable: 1000,
 		maxSendable: 10000,
-		metadata: '[[\"text/plain\", \"Test\"]]',
+		metadata: '[["text/plain", "Test"]]',
 		displayName: 'Test Shop',
 		standard: 'OpenCryptoPay',
 		possibleStandards: ['OpenCryptoPay'],
@@ -63,20 +65,16 @@ describe('open-crypto-pay.service', () => {
 
 	describe('processOpenCryptoPayCode', () => {
 		it('should process valid OpenCryptoPay code correctly', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => mockApiResponse
-			} as unknown as Response);
+			const { fetchOpenCryptoPay } = await import('$lib/rest/open-crypto-pay.rest');
 
-			const mockFetch = vi.mocked(fetch);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(mockApiResponse);
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 			const result = await processOpenCryptoPayCode(validCode);
 
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
+			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
+				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
+			);
 			expect(result).toEqual(mockApiResponse);
 		});
 
@@ -108,106 +106,57 @@ describe('open-crypto-pay.service', () => {
 			);
 		});
 
-		it('should throw error when API request fails with 404', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: false,
-				status: 404
-			} as unknown as Response);
+		it('should throw error when API request fails', async () => {
+			const { fetchOpenCryptoPay } = await import('$lib/rest/open-crypto-pay.rest');
 
-			const mockFetch = vi.mocked(fetch);
+			vi.mocked(fetchOpenCryptoPay).mockRejectedValueOnce(new Error('API request failed: 404'));
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
 			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('API request failed: 404');
 
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
-		});
-
-		it('should throw error when API request fails with 500', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: false,
-				status: 500
-			} as unknown as Response);
-
-			const mockFetch = vi.mocked(fetch);
-
-			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
-
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('API request failed: 500');
-
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
+			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
+				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
+			);
 		});
 
 		it('should throw error when network request fails', async () => {
-			vi.mocked(fetch).mockRejectedValueOnce(new Error('Network error'));
+			const { fetchOpenCryptoPay } = await import('$lib/rest/open-crypto-pay.rest');
+
+			vi.mocked(fetchOpenCryptoPay).mockRejectedValueOnce(new Error('Network error'));
 
 			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
 
 			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('Network error');
-			expect(fetch).toHaveBeenCalledOnce();
-		});
-
-		it('should throw error when JSON parsing fails', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => {
-					throw new Error('Invalid JSON');
-				}
-			} as unknown as Response);
-
-			const mockFetch = vi.mocked(fetch);
-
-			const validCode = 'https://app.dfx.swiss/pl/?lightning=VALID_LNURL';
-
-			await expect(processOpenCryptoPayCode(validCode)).rejects.toThrow('Invalid JSON');
-
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
+			expect(fetchOpenCryptoPay).toHaveBeenCalledOnce();
 		});
 
 		it('should trim whitespace from code correctly', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => mockApiResponse
-			} as unknown as Response);
+			const { fetchOpenCryptoPay } = await import('$lib/rest/open-crypto-pay.rest');
 
-			const mockFetch = vi.mocked(fetch);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(mockApiResponse);
 
 			const codeWithWhitespace = '  https://app.dfx.swiss/pl/?lightning=VALID_LNURL  ';
 			const result = await processOpenCryptoPayCode(codeWithWhitespace);
 
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
+			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
+				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
+			);
 			expect(result).toEqual(mockApiResponse);
 		});
 
 		it('should handle URL with additional query parameters', async () => {
-			vi.mocked(fetch).mockResolvedValueOnce({
-				ok: true,
-				json: () => mockApiResponse
-			} as unknown as Response);
+			const { fetchOpenCryptoPay } = await import('$lib/rest/open-crypto-pay.rest');
 
-			const mockFetch = vi.mocked(fetch);
+			vi.mocked(fetchOpenCryptoPay).mockResolvedValueOnce(mockApiResponse);
 
 			const codeWithExtraParams =
 				'https://app.dfx.swiss/pl/?lightning=VALID_LNURL&other=value&foo=bar';
 			const result = await processOpenCryptoPayCode(codeWithExtraParams);
 
-			const urlString = mockFetch.mock.calls[0][0].toString();
-
-			expect(fetch).toHaveBeenCalledOnce();
-			expect(urlString).toBe('https://api.dfx.swiss/v1/lnurlp/pl_test123');
+			expect(fetchOpenCryptoPay).toHaveBeenCalledExactlyOnceWith(
+				'https://api.dfx.swiss/v1/lnurlp/pl_test123'
+			);
 			expect(result).toEqual(mockApiResponse);
 		});
 	});
