@@ -8,8 +8,8 @@ import {
 import { assertNever, nonNullish } from '@dfinity/utils';
 import {
 	AccountIdentifier,
-	isIcpAccountIdentifier,
-	SubAccount
+	SubAccount,
+	isIcpAccountIdentifier
 } from '@icp-sdk/canisters/ledger/icp';
 import type { Principal } from '@icp-sdk/core/principal';
 
