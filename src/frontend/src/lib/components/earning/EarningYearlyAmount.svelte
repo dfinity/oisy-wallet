@@ -24,13 +24,13 @@
 
 	const formattedCurrency = $derived(
 		nonNullish(value)
-			? formatCurrency({
+			? (formatCurrency({
 					value,
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage
-				})
-			: fallback
+				}) ?? fallback)
+			: undefined
 	);
 
 	const yearlyAmount = $derived(
