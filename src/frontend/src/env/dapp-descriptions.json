@@ -412,7 +412,7 @@
 		"usesInternetIdentity": false,
 		"display": "Large",
 		"stats": "",
-		"logo": "/images/dapps/magic-eden-logo.webp",
+		"logo": "/images/dapps/magic-eden-logo.svg",
 		"screenshots": ["/images/dapps/magic-eden-screenshot.webp"]
 	}
 ]
