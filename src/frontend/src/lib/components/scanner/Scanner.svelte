@@ -1,15 +1,15 @@
 <script lang="ts">
-	import { fade } from 'svelte/transition';
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 
 	const modalId = Symbol();
 </script>
 
 <ButtonIcon
-	ariaLabel={$i18n.navigation.alt.menu}
+	ariaLabel={$i18n.scanner.text.scan_qr_code}
 	colorStyle="tertiary-alt"
 	link={false}
 	onclick={() => modalStore.openUniversalScanner(modalId)}
