@@ -415,7 +415,7 @@
 		"logo": "/images/dapps/pacifica-logo.svg",
 		"screenshots": ["/images/dapps/pacifica-screenshot.webp"]
 	},
-  {
+	{
 		"id": "magic-eden",
 		"name": "dapps.descriptions.magic_eden.name",
 		"oneLiner": "dapps.descriptions.magic_eden.one_liner",
