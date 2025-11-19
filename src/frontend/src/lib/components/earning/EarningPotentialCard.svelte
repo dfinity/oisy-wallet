@@ -33,7 +33,7 @@
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage
-				}) ?? '-'}
+				})}
 			</span>
 		</div>
 	{/snippet}

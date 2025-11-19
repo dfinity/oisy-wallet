@@ -12,9 +12,15 @@
 		value?: number;
 		showPlusSign?: boolean;
 		formatPositiveAmount?: boolean;
+		fallback?: string;
 	}
 
-	const { value, showPlusSign = false, formatPositiveAmount = false }: Props = $props();
+	const {
+		value,
+		showPlusSign = false,
+		formatPositiveAmount = false,
+		fallback = '0'
+	}: Props = $props();
 
 	const formattedCurrency = $derived(
 		nonNullish(value)
@@ -24,7 +30,7 @@
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage
 				})
-			: undefined
+			: fallback
 	);
 
 	const yearlyAmount = $derived(
@@ -36,15 +42,13 @@
 	);
 </script>
 
-{#if nonNullish(yearlyAmount) && nonNullish(value)}
+{#if nonNullish(yearlyAmount)}
 	<span
 		class:text-brand-primary={!formatPositiveAmount}
-		class:text-success-primary={formatPositiveAmount && value > 0}
+		class:text-success-primary={formatPositiveAmount && nonNullish(value) && value > 0}
 		class:text-tertiary={value === 0}
 		in:fade
 	>
 		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
 	</span>
-{:else}
-	-
 {/if}

@@ -50,6 +50,7 @@
 									formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
 									showPlusSign
 									value={Number(cardFields[cardField])}
+									fallback="-"
 								/>
 							{:else}
 								-
