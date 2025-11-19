@@ -1,7 +1,7 @@
 import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { icrc10SupportedStandards } from '$icp/api/icrc-nft-ledger.api';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 describe('icrc-nft-ledger.api', () => {

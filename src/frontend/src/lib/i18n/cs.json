@@ -68,7 +68,7 @@
 			"dapp_explorer": "Prozkoumat",
 			"activity": "Aktivita",
 			"airdrops": "Odměny",
-			"earning": "Vydělávat a odměny",
+			"earning": "Vydělávat",
 			"source_code_on_github": "Zdrojový kód na GitHubu",
 			"view_on_explorer": "Zobrazit v průzkumníku",
 			"source_code": "Zdrojový kód",
@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,26 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

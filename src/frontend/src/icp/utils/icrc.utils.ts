@@ -26,13 +26,13 @@ import type { TokenCategory, TokenMetadata } from '$lib/types/token';
 import { isTokenToggleable } from '$lib/utils/token.utils';
 import { parseTokenId } from '$lib/validation/token.validation';
 import { UrlSchema } from '$lib/validation/url.validation';
+import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
 import {
 	IcrcMetadataResponseEntries,
 	mapTokenMetadata,
 	type IcrcTokenMetadataResponse,
 	type IcrcValue
-} from '@dfinity/ledger-icrc';
-import { isNullish, nonNullish, notEmptyString } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 
 export type IcrcLoadData = Omit<IcInterface, 'explorerUrl'> & {
 	metadata: IcrcTokenMetadataResponse;

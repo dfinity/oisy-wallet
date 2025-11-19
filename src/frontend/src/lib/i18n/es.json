@@ -68,7 +68,7 @@
 			"dapp_explorer": "Explorar",
 			"activity": "Actividad",
 			"airdrops": "Recompensas",
-			"earning": "Ganar y Recompensas",
+			"earning": "Ganar",
 			"source_code_on_github": "Código fuente en GitHub",
 			"view_on_explorer": "Ver en el explorador",
 			"source_code": "Código fuente",
@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Juego",
 			"tools": "Herramientas",
-			"ai": "IA"
+			"ai": "IA",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,26 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

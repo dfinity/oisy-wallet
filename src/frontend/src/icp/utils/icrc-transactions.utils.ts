@@ -7,17 +7,17 @@ import type {
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import type { OptionIdentity } from '$lib/types/identity';
 import {
-	encodeIcrcAccount,
-	fromCandidAccount,
-	type IcrcIndexNgTransactionWithId
-} from '@dfinity/ledger-icrc';
-import {
 	fromNullable,
 	fromNullishNullable,
 	isNullish,
 	jsonReplacer,
 	nonNullish
 } from '@dfinity/utils';
+import {
+	encodeIcrcAccount,
+	fromCandidAccount,
+	type IcrcIndexNgTransactionWithId
+} from '@icp-sdk/canisters/ledger/icrc';
 
 export const mapTransactionIcrcToSelf = (tx: IcrcIndexNgTransactionWithId): IcrcTransaction[] => {
 	const { transaction, id } = tx;

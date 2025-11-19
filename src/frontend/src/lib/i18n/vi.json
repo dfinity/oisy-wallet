@@ -68,7 +68,7 @@
 			"dapp_explorer": "Khám phá",
 			"activity": "Hoạt động",
 			"airdrops": "Phần thưởng",
-			"earning": "Kiếm tiền & Phần thưởng",
+			"earning": "Kiếm tiền",
 			"source_code_on_github": "Mã nguồn trên GitHub",
 			"view_on_explorer": "Xem trên trình khám phá",
 			"source_code": "Mã nguồn",
@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Trò chơi",
 			"tools": "Công cụ",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,26 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

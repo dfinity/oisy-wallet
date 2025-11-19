@@ -68,7 +68,7 @@
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
 			"airdrops": "Награды",
-			"earning": "Награды и заработок",
+			"earning": "Зарабатывать",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
 			"tools": "Инструменты",
-			"ai": "ИИ"
+			"ai": "ИИ",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,26 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
