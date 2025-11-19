@@ -47,7 +47,7 @@ export const earningData: Readable<EarningData> = derived(
 							value: $gldtStakeStore?.position?.staked ?? ZERO,
 							unitName: gldtToken.decimals
 						})} ${gldtToken.symbol}`
-					: '-',
+					: undefined,
 				[EarningCardFields.EARNING_POTENTIAL]: nonNullish($gldtStakeStore?.apy)
 					? ($enabledMainnetFungibleTokensUsdBalance * $gldtStakeStore.apy) / 100
 					: undefined,
@@ -84,4 +84,23 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 			return apy > highestApy ? record : highest;
 		}, undefined);
 	}
+);
+
+export const allEarningPositionsUsd = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>((acc, record) => {
+		const currentEarning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
+		return isNaN(currentEarning) ? acc : acc + currentEarning;
+	}, 0)
+);
+
+export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce((acc, record) => {
+		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
+		const apy = Number(record[EarningCardFields.APY] ?? 0);
+
+		// Skip invalid values
+		if (Number.isNaN(earning) || Number.isNaN(apy)) return acc;
+
+		return acc + earning * (apy / 100);
+	}, 0)
 );
