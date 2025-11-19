@@ -58,7 +58,7 @@ describe('OpenCryptoPayStore', () => {
 
 		context.setData(mockPaymentData);
 
-		expect(get(context.data)).toEqual({ data: mockPaymentData });
+		expect(get(context.data)).toEqual(mockPaymentData);
 	});
 
 	it('should override previous payment data when setting new one', () => {
@@ -77,27 +77,8 @@ describe('OpenCryptoPayStore', () => {
 		context.setData(mockPaymentData);
 		context.setData(newPaymentData);
 
-		expect(get(context.data)).toEqual({ data: newPaymentData });
-		expect(get(context.data)).not.toEqual({ data: mockPaymentData });
-	});
-
-	it('should update specific fields while preserving others', () => {
-		const context = initPayContext();
-
-		context.setData(mockPaymentData);
-
-		const updatedData: OpenCryptoPayResponse = {
-			...mockPaymentData,
-			displayName: 'Updated Shop Name'
-		};
-
-		context.setData(updatedData);
-
-		const result = get(context.data) as unknown as { data: OpenCryptoPayResponse };
-
-		expect(result.data.displayName).toBe('Updated Shop Name');
-		expect(result.data.id).toBe(mockPaymentData.id);
-		expect(result.data.minSendable).toBe(mockPaymentData.minSendable);
+		expect(get(context.data)).toEqual(newPaymentData);
+		expect(get(context.data)).not.toEqual(mockPaymentData);
 	});
 
 	it('should handle multiple consecutive updates', () => {
@@ -122,8 +103,24 @@ describe('OpenCryptoPayStore', () => {
 		context.setData(secondUpdate);
 		context.setData(thirdUpdate);
 
-		const result = get(context.data) as unknown as { data: OpenCryptoPayResponse };
+		expect(get(context.data)).toEqual(thirdUpdate);
+	});
 
-		expect(result.data.displayName).toBe('Third');
+	it('should replace entire state with new data', () => {
+		const context = initPayContext();
+
+		context.setData(mockPaymentData);
+
+		const completelyNewData: OpenCryptoPayResponse = {
+			...mockPaymentData,
+			id: 'pl_different',
+			externalId: 'different-external',
+			minSendable: 5000,
+			maxSendable: 50000
+		};
+
+		context.setData(completelyNewData);
+
+		expect(get(context.data)).toEqual(completelyNewData);
 	});
 });

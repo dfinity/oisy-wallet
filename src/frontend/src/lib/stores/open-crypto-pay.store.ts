@@ -9,15 +9,11 @@ export interface PayContext {
 export const initPayContext = (): PayContext => {
 	const data = writable<OpenCryptoPayResponse>(undefined);
 
-	const { update } = data;
+	const { set: setData } = data;
 
 	return {
 		data,
-		setData: (data: OpenCryptoPayResponse) =>
-			update((state) => ({
-				...state,
-				data
-			}))
+		setData
 	};
 };
 
