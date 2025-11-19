@@ -75,7 +75,7 @@ vi.mock('$lib/services/analytics-wrapper', () => ({
 }));
 
 vi.mock('ethers/providers', () => {
-	const provider = vi.fn();
+	class MockProvider {}
 
 	const plugin = vi.fn();
 
@@ -83,9 +83,9 @@ vi.mock('ethers/providers', () => {
 	network.prototype.attachPlugin = vi.fn();
 
 	return {
-		EtherscanProvider: provider,
-		InfuraProvider: provider,
-		JsonRpcProvider: provider,
+		EtherscanProvider: MockProvider,
+		InfuraProvider: MockProvider,
+		JsonRpcProvider: MockProvider,
 		EtherscanPlugin: plugin,
 		Network: network
 	};
