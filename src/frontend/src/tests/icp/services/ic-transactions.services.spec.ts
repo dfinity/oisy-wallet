@@ -23,11 +23,11 @@ import { mockAuthStore } from '$tests/mocks/auth.mock';
 import { bn1Bi } from '$tests/mocks/balances.mock';
 import { createMockIcTransactionsUi } from '$tests/mocks/ic-transactions.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import type {
 	GetAccountIdentifierTransactionsResponse,
 	TransactionWithId
-} from '@dfinity/ledger-icp';
-import { toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icp';
 import { get } from 'svelte/store';
 import type { MockInstance } from 'vitest';
 
