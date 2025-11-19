@@ -470,9 +470,9 @@ mod contact_image {
 
         use super::*;
         use crate::{
+            types::custom_token::ExtV2Token,
             validate::{test_validate_on_deserialize, TestVector, Validate},
         };
-        use crate::types::custom_token::ExtV2Token;
 
         fn canister_id1() -> Principal {
             Principal::from_text("ckbgq-4yaaa-aaaak-qi2xq-cai").unwrap()

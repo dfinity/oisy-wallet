@@ -12,8 +12,8 @@ use crate::{
             Contact, ContactAddressData, ContactImage, CreateContactRequest, UpdateContactRequest,
         },
         custom_token::{
-            CustomToken, CustomTokenId, ErcToken, ErcTokenId, IcrcToken, SplToken, SplTokenId,
-            Token,
+            CustomToken, CustomTokenId, ErcToken, ErcTokenId, ExtV2Token, IcrcToken, SplToken,
+            SplTokenId, Token,
         },
         dapp::{AddDappSettingsError, DappCarouselSettings, DappSettings, MAX_DAPP_ID_LIST_LENGTH},
         experimental_feature::{
@@ -34,7 +34,6 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
-use crate::types::custom_token::ExtV2Token;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -560,7 +559,7 @@ impl Validate for CustomTokenId {
             }
             CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
             CustomTokenId::ExtV2(_) => Ok(()), /* This is a principal.  In principle, we could */
-            // check the exact type of principal.
+                                               /* check the exact type of principal. */
         }
     }
 }
@@ -636,9 +635,7 @@ impl Validate for ExtV2Token {
     /// - Checks that the ledger principal is the type of principal used for a canister.
     ///   - <https://wiki.internetcomputer.org/wiki/Principal>
     fn validate(&self) -> Result<(), candid::Error> {
-        let ExtV2Token {
-            ledger_id,
-        } = self;
+        let ExtV2Token { ledger_id } = self;
         // The ledger_id should be appropriate for a canister.
         if ledger_id.as_slice().last() != Some(&1) {
             return Err(candid::Error::msg("Ledger ID is not a canister"));
