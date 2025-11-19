@@ -39,7 +39,7 @@ import {
 import type { CoingeckoSimplePriceResponse } from '$lib/types/coingecko';
 import type { CertifiedData } from '$lib/types/store';
 import { mockBtcAddress } from '$tests/mocks/btc.mock';
-import type { BitcoinNetwork } from '@dfinity/ckbtc';
+import type { BitcoinNetwork } from '@icp-sdk/canisters/ckbtc';
 import * as z from 'zod';
 
 describe('post-message.schema', () => {

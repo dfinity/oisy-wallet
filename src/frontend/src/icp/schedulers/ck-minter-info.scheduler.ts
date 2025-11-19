@@ -6,9 +6,9 @@ import type {
 	PostMessageJsonDataResponse
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { MinterInfo as CkBTCMinterInfo } from '@dfinity/ckbtc';
 import type { MinterInfo as CkETHMinterInfo } from '@dfinity/cketh';
 import { assertNonNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
+import type { MinterInfo as CkBTCMinterInfo } from '@icp-sdk/canisters/ckbtc';
 
 export class CkMinterInfoScheduler<T extends CkBTCMinterInfo | CkETHMinterInfo>
 	implements Scheduler<PostMessageDataRequestIcCk>
