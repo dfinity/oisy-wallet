@@ -4,15 +4,15 @@
 	import EarningPositionCard from '$lib/components/earning/EarningPositionCard.svelte';
 </script>
 
-<StakeContentSection styleClass="text-center">
+<StakeContentSection>
 	{#snippet title()}
 		<h3 class="w-full text-center">Welcome to Earn!</h3>
 	{/snippet}
 	{#snippet content()}
-		<p
-			>Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various
-			earning strategies based on your risk tolerance.</p
-		>
+		<p class="w-full text-center">
+			Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various
+			earning strategies based on your risk tolerance.
+		</p>
 
 		<div class="flex w-full grid-cols-2 gap-3">
 			<EarningPotentialCard />
