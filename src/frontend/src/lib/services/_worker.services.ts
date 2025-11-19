@@ -13,7 +13,7 @@ export abstract class AppWorker {
 	readonly #workerId: WorkerId;
 	readonly #isSingleton: boolean;
 	readonly #queue: WorkerQueue;
-	// TODO: use generics directly in the calss so that we can use type WorkerListener
+	// TODO: use generics directly in the class so that we can use type WorkerListener
 	#listener: ((ev: MessageEvent) => void) | undefined;
 
 	static #singletonWorker?: Worker;
@@ -84,7 +84,7 @@ export abstract class AppWorker {
 	terminate = () => {
 		if (this.#isSingleton) {
 			// If it's a singleton, we could have several listeners on the same instance of the worker and we cannot terminate it.
-			// Ideally, we should have a way to terminate the worker if we find out that there is no more listener on it.
+			// Ideally, we should have a way to terminate the worker if we find out that there are no more listener on it.
 			// TODO: Terminate the worker when there are no more listeners even from other instances of `AppWorker`.
 			this.#removeListener();
 			return;
