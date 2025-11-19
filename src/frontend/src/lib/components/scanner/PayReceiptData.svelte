@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type { Recipient } from '$lib/types/open-crypto-pay';
 	import CollapsibleBottomSheet from '$lib/components/ui/CollapsibleBottomSheet.svelte';
 	import ModalValue from '$lib/components/ui/ModalValue.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
+	import type { Recipient } from '$lib/types/open-crypto-pay';
 	import { formatAddress } from '$lib/utils/open-crypto-pay.utils';
 
 	interface Props {
@@ -12,7 +12,7 @@
 	let { recipient }: Props = $props();
 </script>
 
-<CollapsibleBottomSheet buttonTestId={'collapsible-btn'}>
+<CollapsibleBottomSheet buttonTestId="collapsible-btn">
 	{#snippet contentHeader()}
 		<ModalValue>
 			{#snippet label()}{$i18n.scanner.text.receipt}{/snippet}

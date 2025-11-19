@@ -35,8 +35,8 @@
 			colorStyle="muted"
 			onclick={() => (expanded = true)}
 			styleClass="text-disabled mb-2 items-end"
-			width="w-8"
 			testId={buttonTestId}
+			width="w-8"
 		>
 			{#snippet icon()}
 				<IconInfo />
