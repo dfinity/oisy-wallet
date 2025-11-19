@@ -47,7 +47,9 @@
 	};
 
 	const handleScan = async ({ status, code }: { status: QrStatus; code?: string }) => {
-		if (status !== 'success' || !code) {return;}
+		if (status !== 'success' || !code) {
+			return;
+		}
 		await processCode(code);
 	};
 
