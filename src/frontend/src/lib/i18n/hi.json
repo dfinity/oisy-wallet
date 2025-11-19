@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": ""
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "रूपांतरण हो रहा है...",
