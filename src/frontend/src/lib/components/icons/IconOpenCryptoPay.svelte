@@ -1,6 +1,4 @@
-<svg fill="none" height="16" viewBox="0 0 59 16" width="59" xmlns="http://www.w3.org/2000/svg">
 <!-- source: OpenCryptoPay - please visit https://github.com/openCryptoPay/landingPage/blob/677eacc97af60eb02f99e12c85bba240efb5dfce/LICENSE#L1 -->
-
 <svg width="59" height="16" viewBox="0 0 59 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 	<g clip-path="url(#clip0_19620_52020)">
 		<path
