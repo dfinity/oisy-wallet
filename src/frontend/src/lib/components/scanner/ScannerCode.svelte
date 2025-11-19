@@ -24,7 +24,7 @@
 	let openBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
-	let invalid = $derived(!uri);
+	let invalid = $derived(isEmptyString(uri));
 
 	const { setData } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
