@@ -382,6 +382,11 @@
 				"name": "dMsg.net",
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
+			},
+			"pacifica": {
+				"name": "Pacifica",
+				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
+				"description": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage. It is designed to offer high performance and advanced features similar to centralized exchanges, including a variety of order types, sub-accounts for institutional traders, and API access for bots."
 			}
 		}
 	},

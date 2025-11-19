@@ -414,5 +414,20 @@
 		"stats": "",
 		"logo": "/images/dapps/magic-eden-logo.svg",
 		"screenshots": ["/images/dapps/magic-eden-screenshot.webp"]
+	},
+	{
+		"id": "pacifica",
+		"name": "dapps.descriptions.pacifica.name",
+		"oneLiner": "dapps.descriptions.pacifica.one_liner",
+		"website": "https://www.pacifica.fi/",
+		"twitter": "https://x.com/pacifica_fi",
+		"discord": "https://discord.gg/pacifica",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.pacifica.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/pacifica-logo.svg",
+		"screenshots": ["/images/dapps/pacifica-screenshot.webp"]
 	}
 ]
