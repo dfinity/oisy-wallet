@@ -429,5 +429,21 @@
 		"stats": "",
 		"logo": "/images/dapps/magic-eden-logo.svg",
 		"screenshots": ["/images/dapps/magic-eden-screenshot.webp"]
+	},
+	{
+		"id": "opensea",
+		"name": "dapps.descriptions.opensea.name",
+		"oneLiner": "dapps.descriptions.opensea.one_liner",
+		"website": "https://opensea.io/",
+		"twitter": "https://x.com/opensea",
+		"telegram": "https://t.me/officialopensea",
+		"discord": "https://discord.gg/opensea",
+		"tags": ["dapps.categories.nft", "dapps.categories.walletconnect"],
+		"description": "dapps.descriptions.opensea.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/opensea-logo.svg",
+		"screenshots": ["/images/dapps/opensea-screenshot.webp"]
 	}
 ]

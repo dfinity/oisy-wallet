@@ -383,6 +383,11 @@
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			},
+			"opensea": {
+				"name": "OpenSea",
+				"one_liner": "OpenSea, exchange everything — token trading and NFT marketplace. Welcome to the best place to discover, trade, and create onchain.",
+				"description": "OpenSea is the world's largest decentralized marketplace for non-fungible tokens (NFTs), where users can create, buy, sell, and trade unique digital assets like art, collectibles, and virtual items. Founded in 2017, it operates on multiple blockchains and allows users to connect a cryptocurrency wallet to manage their digital assets."
+			},
 			"pacifica": {
 				"name": "Pacifica",
 				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
