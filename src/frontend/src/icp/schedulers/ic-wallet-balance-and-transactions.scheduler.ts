@@ -11,9 +11,12 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
-import type { IcrcTransaction, IcrcTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
+import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
+import type {
+	IcrcIndexNgTransaction,
+	IcrcIndexNgTransactionWithId
+} from '@icp-sdk/canisters/ledger/icrc';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
@@ -26,12 +29,12 @@ interface IcWalletStore<T> {
 }
 
 export type GetBalanceAndTransactions<
-	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId
+	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId
 > = GetTransactions & { transactions: TWithId[] };
 
 export class IcWalletBalanceAndTransactionsScheduler<
-	T extends IcrcTransaction | Transaction | Event,
-	TWithId extends IcrcTransactionWithId | TransactionWithId | Dip20TransactionWithId,
+	T extends IcrcIndexNgTransaction | Transaction | Event,
+	TWithId extends IcrcIndexNgTransactionWithId | TransactionWithId | Dip20TransactionWithId,
 	PostMessageDataRequest extends
 		| PostMessageDataRequestIcrcStrict
 		| PostMessageDataRequestIcp

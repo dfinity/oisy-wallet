@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Gra",
 			"tools": "Narzędzia",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,16 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +872,11 @@
 			"solana_transaction_expired": "Twoja transakcja wysłania nie została przetworzona przez sieć Solana i wygasła, najprawdopodobniej dlatego, że podana opłata priorytetowa nie była wystarczająca. Zaktualizowaliśmy ją do najnowszej zalecanej kwoty, więc spróbuj wysłać ją ponownie.",
 			"solana_confirmation_failed": "Nie otrzymaliśmy potwierdzenia transakcji, którą właśnie utworzyłeś. Poczekaj kilka sekund, a następnie sprawdź listę transakcji swojego tokena, aby sprawdzić, czy transakcja została utworzona prawidłowo.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {

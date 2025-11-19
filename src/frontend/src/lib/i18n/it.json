@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Gioco",
 			"tools": "Strumenti",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,16 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +872,11 @@
 			"solana_transaction_expired": "La tua transazione di invio non è stata elaborata dalla rete Solana ed è scaduta, molto probabilmente perché la fee di priorità fornita non era sufficiente. L'abbiamo aggiornata all'ultimo importo consigliato, quindi prova a inviarla di nuovo.",
 			"solana_confirmation_failed": "Non abbiamo ricevuto una conferma per la transazione che hai appena creato. Aspetta qualche secondo e poi controlla le transazioni del tuo token per vedere se la tua transazione è stata creata correttamente.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {
