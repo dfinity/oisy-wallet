@@ -3,7 +3,7 @@
 
 	interface Props {
 		content: Snippet;
-		buttons: Snippet;
+		buttons?: Snippet;
 	}
 
 	let { content, buttons }: Props = $props();
@@ -17,6 +17,6 @@
 	</div>
 
 	<div class="w-full">
-		{@render buttons()}
+		{@render buttons?.()}
 	</div>
 </div>

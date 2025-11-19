@@ -5,12 +5,13 @@
 	interface Props {
 		title: Snippet;
 		content: Snippet;
+		styleClass?: string;
 	}
 
-	let { content, title }: Props = $props();
+	let { content, title, styleClass }: Props = $props();
 </script>
 
-<div class="rounded-xl bg-surface p-4" in:fade>
+<div class={`rounded-xl bg-surface p-4 ${styleClass}`} in:fade>
 	<div class="relative flex w-full items-start justify-between">
 		{@render title()}
 	</div>
