@@ -13,6 +13,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 
 	const highestApy = $derived(
 		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
@@ -28,18 +29,7 @@
 			class:text-success-primary={$allEarningYearlyAmountUsd > 0}
 			class:text-tertiary={$allEarningYearlyAmountUsd === 0}
 		>
-			{nonNullish($allEarningYearlyAmountUsd)
-				? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-						$amount: `${
-							formatCurrency({
-								value: $allEarningYearlyAmountUsd,
-								currency: $currentCurrency,
-								exchangeRate: $currencyExchangeStore,
-								language: $currentLanguage
-							}) ?? 0
-						}`
-					})
-				: 0}
+			<EarningYearlyAmount value={$allEarningYearlyAmountUsd} formatPositiveAmount />
 		</div>
 
 		<div class="flex justify-center gap-2 text-sm sm:text-base">

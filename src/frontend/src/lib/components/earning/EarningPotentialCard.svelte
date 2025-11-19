@@ -8,6 +8,7 @@
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { enabledMainnetFungibleTokensUsdBalance } from '$lib/derived/tokens.derived';
 	import { i18n } from '$lib/stores/i18n.store';
+	import EarningYearlyAmount from '$lib/components/earning/EarningYearlyAmount.svelte';
 
 	const highestApy = $derived(
 		!isNaN(Number($highestApyEarningData?.apy)) ? Number($highestApyEarningData?.apy) : 0
@@ -23,30 +24,21 @@
 			class:text-brand-primary-alt={$enabledMainnetFungibleTokensUsdBalance > 0}
 			class:text-tertiary={$enabledMainnetFungibleTokensUsdBalance === 0}
 		>
-			{`${$enabledMainnetFungibleTokensUsdBalance > 0 && highestApy > 0 ? '+' : ''}`}{replacePlaceholders(
-				$i18n.stake.text.active_earning_per_year,
-				{
-					$amount: `${formatCurrency({
-						value: ($enabledMainnetFungibleTokensUsdBalance * highestApy) / 100,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}`
-				}
-			)}
+			<EarningYearlyAmount
+				value={($enabledMainnetFungibleTokensUsdBalance * highestApy) / 100}
+				showPlusSign={$enabledMainnetFungibleTokensUsdBalance > 0 && highestApy > 0}
+			/>
 		</div>
 
 		<div class="flex justify-center gap-2 text-sm sm:text-base">
-			{#if $enabledMainnetFungibleTokensUsdBalance > 0}
-				<span class="font-bold">
-					{formatCurrency({
-						value: $enabledMainnetFungibleTokensUsdBalance,
-						currency: $currentCurrency,
-						exchangeRate: $currencyExchangeStore,
-						language: $currentLanguage
-					})}
-				</span>
-			{/if}
+			<span class="font-bold">
+				{formatCurrency({
+					value: $enabledMainnetFungibleTokensUsdBalance,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				}) ?? '-'}
+			</span>
 		</div>
 	{/snippet}
 </StakeContentCard>

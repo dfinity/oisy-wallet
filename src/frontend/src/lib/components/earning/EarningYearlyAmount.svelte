@@ -16,17 +16,21 @@
 
 	const { value, showPlusSign = false, formatPositiveAmount = false }: Props = $props();
 
-	const yearlyAmount = $derived(
+	const formattedCurrency = $derived(
 		nonNullish(value)
+			? formatCurrency({
+					value,
+					currency: $currentCurrency,
+					exchangeRate: $currencyExchangeStore,
+					language: $currentLanguage
+				})
+			: undefined
+	);
+
+	const yearlyAmount = $derived(
+		nonNullish(formattedCurrency)
 			? replacePlaceholders($i18n.stake.text.active_earning_per_year, {
-					$amount: `${
-						formatCurrency({
-							value,
-							currency: $currentCurrency,
-							exchangeRate: $currencyExchangeStore,
-							language: $currentLanguage
-						}) ?? 0
-					}`
+					$amount: `${formattedCurrency}`
 				})
 			: undefined
 	);
@@ -36,8 +40,11 @@
 	<span
 		class:text-brand-primary={!formatPositiveAmount}
 		class:text-success-primary={formatPositiveAmount && value > 0}
+		class:text-tertiary={value === 0}
 		in:fade
 	>
 		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
 	</span>
+{:else}
+	-
 {/if}
