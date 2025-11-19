@@ -68,7 +68,7 @@
 			"dapp_explorer": "DApp一覧",
 			"activity": "履歴",
 			"airdrops": "エアドロップ",
-			"earning": "獲得と報酬",
+			"earning": "収益",
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "ゲーム",
 			"tools": "ツール",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,21 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
