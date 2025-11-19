@@ -7,8 +7,8 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { NANO_SECONDS_IN_MINUTE } from '$lib/constants/app.constants';
 import { ProgressStepsSendIc } from '$lib/enums/progress-steps';
 import { i18n } from '$lib/stores/i18n.store';
-import type { IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
+import type { IcrcBlockIndex } from '@icp-sdk/canisters/ledger/icrc';
 import { Principal } from '@icp-sdk/core/principal';
 import { get } from 'svelte/store';
 
