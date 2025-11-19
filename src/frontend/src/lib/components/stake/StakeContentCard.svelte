@@ -4,19 +4,28 @@
 	interface Props {
 		content: Snippet;
 		buttons: Snippet;
+		primaryStyle?: boolean;
 	}
 
-	let { content, buttons }: Props = $props();
+	let { content, buttons, primaryStyle = false }: Props = $props();
 </script>
 
 <div
-	class="flex w-full flex-col items-center justify-between rounded-xl border border-solid border-disabled bg-secondary p-4 sm:w-1/2"
+	class="flex w-full flex-col items-center justify-between rounded-xl border-solid border-disabled p-4 sm:w-1/2"
+	class:bg-brand-subtle-10={primaryStyle}
+	class:bg-secondary={!primaryStyle}
+	class:border={!primaryStyle}
+	class:border-0={primaryStyle}
 >
-	<div class="mb-8 flex flex-col justify-center gap-2 text-center">
+	<div
+		class="mb-8 flex flex-col justify-center text-center"
+		class:gap-2={!primaryStyle}
+		class:gap-4={primaryStyle}
+	>
 		{@render content()}
 	</div>
 
-	<div class="w-full">
+	<div class="flex w-full flex-col gap-2">
 		{@render buttons()}
 	</div>
 </div>
