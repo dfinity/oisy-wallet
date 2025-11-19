@@ -62,7 +62,6 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 						});
-						return;
 				}
 			}
 		);

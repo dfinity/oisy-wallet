@@ -78,6 +78,5 @@ export const tryToParseIcrcAccountStringToAccountIdentifierText = (
 		}).toHex();
 	} catch (_: unknown) {
 		// if parsing failed, we just return undefined and let consumers handle it
-		return;
 	}
 };
