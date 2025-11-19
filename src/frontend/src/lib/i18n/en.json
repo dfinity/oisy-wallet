@@ -888,7 +888,14 @@
 		"text": {
 			"scan_qr_code": "Scan QR Code",
 			"pay_to": "Pay to $receipt",
-			"powered_by": "Powered by"
+			"powered_by": "Powered by",
+			"receipt": "Receipt",
+			"name": "Name",
+			"address": "Address",
+			"country": "Country",
+			"phone_number": "Phone number",
+			"email_address": "Email address",
+			"website": "Website"
 		}
 	},
 	"convert": {

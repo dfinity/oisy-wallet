@@ -888,7 +888,14 @@
 		"text": {
 			"scan_qr_code": "",
 			"pay_to": "",
-			"powered_by": ""
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": ""
 		}
 	},
 	"convert": {
