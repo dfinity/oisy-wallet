@@ -71,7 +71,6 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 							tokenId,
 							transactionIds: (data as PostMessageDataResponseWalletCleanUp).transactionIds
 						});
-						return;
 				}
 			}
 		);

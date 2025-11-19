@@ -96,8 +96,6 @@ const safeLoadMetadata = async ({
 			},
 			warning: `Error loading metadata for custom ERC1155 token ${address} on network ${networkId.description}. ${err}`
 		});
-
-		return;
 	}
 };
 
