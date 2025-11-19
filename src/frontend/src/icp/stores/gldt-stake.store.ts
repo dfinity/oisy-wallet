@@ -45,3 +45,5 @@ export interface GldtStakeContext {
 }
 
 export const GLDT_STAKE_CONTEXT_KEY = Symbol('gldt-stake');
+
+export const gldtStakeStore = initGldtStakeStore();

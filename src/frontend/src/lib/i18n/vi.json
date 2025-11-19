@@ -381,6 +381,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -861,6 +866,11 @@
 			"solana_transaction_expired": "Giao dịch gửi của bạn không được mạng Solana xử lý và đã hết hạn, rất có thể do phí ưu tiên không được cung cấp đủ. Chúng tôi đã cập nhật nó lên số tiền khuyến nghị mới nhất, vì vậy vui lòng thử gửi lại.",
 			"solana_confirmation_failed": "Chúng tôi đã không nhận được xác nhận cho giao dịch bạn vừa tạo. Vui lòng đợi vài giây và sau đó kiểm tra danh sách giao dịch của token để xem giao dịch của bạn đã được tạo đúng cách chưa.",
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1726,30 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Kiếm tiền"
+			"title": "Kiếm tiền",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "Vàng",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Sắp ra mắt",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "Phần thưởng OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
@@ -1732,6 +1757,8 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
 			"unstaking": "",
 			"unstake_token": "",

@@ -232,11 +232,34 @@ export const PostMessageDataResponsePowProtectorNextAllowanceSchema =
 		nextAllowanceMs: z.custom<bigint>().optional()
 	});
 
-export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+export const PostMessageCommonSchema = z.object({
+	ref: z.string().optional()
+});
+
+const buildPostMessageSchema = <T extends z.ZodTypeAny, MsgSchema extends z.ZodTypeAny>({
+	dataSchema,
+	msgSchema
+}: {
+	dataSchema: T;
+	msgSchema: MsgSchema;
+}) =>
 	z.union([
 		z.object({
-			msg: z.union([PostMessageRequestSchema, PostMessageResponseSchema]),
+			...PostMessageCommonSchema.shape,
+			msg: msgSchema,
 			data: z.strictObject(dataSchema).shape.optional()
 		}),
-		PostMessageDataErrorSchema
+		z.object({
+			...PostMessageCommonSchema.shape,
+			...PostMessageDataErrorSchema.shape
+		})
 	]);
+
+export const inferPostMessageSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({
+		dataSchema,
+		msgSchema: z.union([PostMessageRequestSchema, PostMessageResponseSchema])
+	});
+
+export const inferPostMessageSchedulerSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
+	buildPostMessageSchema({ dataSchema, msgSchema: PostMessageResponseSchema });

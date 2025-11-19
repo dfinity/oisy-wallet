@@ -381,6 +381,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -861,6 +866,11 @@
 			"solana_transaction_expired": "Deine Send-Transaktion wurde vom Solana-Netzwerk nicht verarbeitet und ist abgelaufen, wahrscheinlich weil die angegebene Prioritätsgebühr nicht ausreichte. Wir haben sie auf den zuletzt empfohlenen Betrag aktualisiert, bitte versuche es erneut.",
 			"solana_confirmation_failed": "Wir konnten keine gültige Bestätigung der soeben getätigten Transaktion erhalten. Bitte warte ein paar Sekunden und überprüfe in der Transaktionsliste des Tokens, ob die Transaktion korrekt getätigt wurde.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1726,30 @@
 	},
 	"earning": {
 		"text": {
-			"title": "Verdienen"
+			"title": "Verdienen",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "Gold",
-			"gold_description": "GLDT Staking",
-			"stablecoins_title": "Stablecoins",
-			"stablecoins_description": "Kommt bald",
-			"sprinkles_title": "Sprinkles",
-			"sprinkles_description": "OISY Rewards"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {
@@ -1732,6 +1757,8 @@
 			"stake_page_title": "",
 			"gldt_stake_page_description": "",
 			"stake": "",
+			"stake_amount": "",
+			"not_enough_to_stake": "",
 			"unstake": "",
 			"unstaking": "",
 			"unstake_token": "",

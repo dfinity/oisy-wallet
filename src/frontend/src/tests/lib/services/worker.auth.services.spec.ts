@@ -36,6 +36,12 @@ vi.mock('$lib/workers/workers?worker', () => {
 	};
 });
 
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
+
 describe('worker.auth.services', () => {
 	describe('AuthWorker', () => {
 		let worker: AuthWorker;
@@ -58,20 +64,27 @@ describe('worker.auth.services', () => {
 			worker.syncAuthIdle(mockData);
 
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
-				msg: 'startIdleTimer'
+				msg: 'startIdleTimer',
+				workerId: mockId
 			});
 		});
 
 		it('should stop the worker and send the correct stop message if the identity is nullish', () => {
 			worker.syncAuthIdle({ ...mockData, auth: { identity: null } });
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopIdleTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopIdleTimer',
+				workerId: mockId
+			});
 		});
 
 		it('should stop the worker and send the correct stop message if it is in locked state', () => {
 			worker.syncAuthIdle({ ...mockData, locked: true });
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopIdleTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopIdleTimer',
+				workerId: mockId
+			});
 		});
 
 		describe('onmessage', () => {

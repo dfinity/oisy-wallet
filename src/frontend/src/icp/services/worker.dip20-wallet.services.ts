@@ -4,7 +4,7 @@ import {
 	onTransactionsCleanUp
 } from '$icp/services/ic-transactions.services';
 import type { IcToken } from '$icp/types/ic-token';
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import type { WalletWorker } from '$lib/types/listener';
 import type {
 	PostMessage,
@@ -14,6 +14,7 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 
 export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	private constructor(
@@ -33,7 +34,13 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 					| PostMessageDataResponseWalletCleanUp
 				>
 			>) => {
-				const { msg, data } = dataMsg;
+				const { ref, msg, data } = dataMsg;
+
+				// This is an additional guard because it may happen that the worker is initialised as a singleton.
+				// In this case, we need to check if we should treat the message or if the message was intended for another worker.
+				if (ref !== this.canisterId) {
+					return;
+				}
 
 				switch (msg) {
 					case 'syncDip20Wallet':
@@ -78,12 +85,12 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'startDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 
 	stop = () => {
@@ -91,11 +98,11 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestDip20>>({
 			msg: 'triggerDip20WalletTimer',
 			data: {
 				canisterId: this.canisterId
 			}
-		} as PostMessage<PostMessageDataRequestDip20>);
+		});
 	};
 }

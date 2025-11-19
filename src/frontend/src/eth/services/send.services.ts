@@ -176,8 +176,9 @@ export const send = async ({
 	progress,
 	token,
 	...rest
-}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> &
-	SendParams &
+}: Omit<TransferParams, 'maxPriorityFeePerGas' | 'maxFeePerGas'> & {
+	customNonce?: number;
+} & SendParams &
 	RequiredTransactionFeeData): Promise<{ hash: string }> => {
 	progress?.(ProgressStepsSend.INITIALIZATION);
 

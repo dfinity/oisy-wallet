@@ -1,4 +1,4 @@
-import { AppWorker, type WorkerData } from '$lib/services/_worker.services';
+import { AppWorker } from '$lib/services/_worker.services';
 import {
 	solAddressDevnetStore,
 	solAddressLocalnetStore,
@@ -7,6 +7,7 @@ import {
 import type { WalletWorker } from '$lib/types/listener';
 import type { PostMessage, PostMessageDataRequestSol } from '$lib/types/post-message';
 import type { Token, TokenId } from '$lib/types/token';
+import type { WorkerData } from '$lib/types/worker';
 import { isNetworkIdSOLDevnet, isNetworkIdSOLLocal } from '$lib/utils/network.utils';
 import {
 	syncWallet,
@@ -99,10 +100,10 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	start = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'startSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 
 	stop = () => {
@@ -110,9 +111,9 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 	};
 
 	trigger = () => {
-		this.postMessage({
+		this.postMessage<PostMessage<PostMessageDataRequestSol>>({
 			msg: 'triggerSolWalletTimer',
 			data: this.data
-		} as PostMessage<PostMessageDataRequestSol>);
+		});
 	};
 }

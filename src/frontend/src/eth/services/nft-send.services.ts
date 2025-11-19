@@ -2,6 +2,7 @@ import type { EthSignTransactionRequest } from '$declarations/signer/declaration
 import { ERC1155_ABI } from '$eth/constants/erc1155.constants';
 import { ERC721_ABI } from '$eth/constants/erc721.constants';
 import { infuraProviders } from '$eth/providers/infura.providers';
+import { getNonce } from '$eth/services/nonce.services';
 import type { EthAddress } from '$eth/types/address';
 import type {
 	PreparedContractCall,
@@ -119,7 +120,7 @@ export const transferErc721 = async ({
 }: TransferErc721Params): Promise<TransactionResponse> => {
 	const call = encodeErc721SafeTransfer({ contractAddress, from, to, tokenId });
 	const { id: networkId, chainId } = sourceNetwork;
-	const nonce = await infuraProviders(networkId).getTransactionCount(from);
+	const nonce = await getNonce({ from, networkId });
 
 	const tx = buildSignRequest({
 		call,
@@ -163,7 +164,7 @@ export const transferErc1155 = async ({
 		data
 	});
 	const { id: networkId, chainId } = sourceNetwork;
-	const nonce = await infuraProviders(networkId).getTransactionCount(from);
+	const nonce = await getNonce({ from, networkId });
 
 	const tx = buildSignRequest({
 		call,

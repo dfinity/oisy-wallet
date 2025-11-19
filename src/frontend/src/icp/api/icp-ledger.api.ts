@@ -3,8 +3,8 @@ import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
 import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
-import { toCandidAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
+import { toCandidAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 

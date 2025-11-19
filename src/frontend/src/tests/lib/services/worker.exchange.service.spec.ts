@@ -45,6 +45,12 @@ vi.mock('$lib/workers/workers?worker', () => {
 	};
 });
 
+const mockId = 'abcdefgh';
+
+vi.stubGlobal('crypto', {
+	randomUUID: vi.fn().mockReturnValue(mockId)
+});
+
 describe('worker.exchange.services', () => {
 	describe('ExchangeWorker', () => {
 		let worker: ExchangeWorker;
@@ -71,6 +77,7 @@ describe('worker.exchange.services', () => {
 
 			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
 				msg: 'startExchangeTimer',
+				workerId: mockId,
 				data: mockData
 			});
 		});
@@ -78,13 +85,19 @@ describe('worker.exchange.services', () => {
 		it('should stop the worker and send the correct stop message', () => {
 			worker.stopExchangeTimer();
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopExchangeTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopExchangeTimer',
+				workerId: mockId
+			});
 		});
 
 		it('should destroy the worker', () => {
 			worker.destroy();
 
-			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({ msg: 'stopExchangeTimer' });
+			expect(postMessageSpy).toHaveBeenCalledExactlyOnceWith({
+				msg: 'stopExchangeTimer',
+				workerId: mockId
+			});
 
 			expect(workerInstance.terminate).toHaveBeenCalledOnce();
 		});

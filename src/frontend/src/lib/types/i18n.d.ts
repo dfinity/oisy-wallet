@@ -271,6 +271,7 @@ interface I18nDapps {
 		mobox: { name: string; one_liner: string; description: string };
 		cyql: { name: string; one_liner: string; description: string };
 		icpanda_message: { name: string; one_liner: string; description: string };
+		pacifica: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -675,6 +676,10 @@ interface I18nSend {
 		solana_confirmation_failed: string;
 		fee_calc_unsupported_standard: string;
 	};
+}
+
+interface I18nScanner {
+	text: { scan_qr_code: string };
 }
 
 interface I18nConvert {
@@ -1371,15 +1376,19 @@ interface I18nActivity {
 }
 
 interface I18nEarning {
-	text: { title: string };
+	text: { title: string; earning_opportunities: string };
 	cards: {
-		gold_title: string;
-		gold_description: string;
-		stablecoins_title: string;
-		stablecoins_description: string;
-		sprinkles_title: string;
-		sprinkles_description: string;
+		gldt: { title: string; description: string; action: string };
+		sprinkles: { title: string; description: string; action: string };
 	};
+	card_fields: {
+		apy: string;
+		currentStaked: string;
+		currentEarning: string;
+		earningPotential: string;
+		terms: string;
+	};
+	terms: { flexible: string };
 }
 
 interface I18nStake {
@@ -1387,6 +1396,8 @@ interface I18nStake {
 		stake_page_title: string;
 		gldt_stake_page_description: string;
 		stake: string;
+		stake_amount: string;
+		not_enough_to_stake: string;
 		unstake: string;
 		unstaking: string;
 		unstake_token: string;
@@ -1485,6 +1496,7 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;
 	buy: I18nBuy;
