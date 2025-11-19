@@ -2,7 +2,7 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { OptionIdentity } from '$lib/types/identity';
-import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@dfinity/ledger-icp';
+import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import { toCandidAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
 import { assertNonNullish } from '@dfinity/utils';
 import type { Identity } from '@icp-sdk/core/agent';

@@ -1,4 +1,4 @@
-import type { GetAccountIdentifierTransactionsResponse } from '@dfinity/ledger-icp';
+import type { GetAccountIdentifierTransactionsResponse } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcIndexNgGetTransactions } from '@dfinity/ledger-icrc';
 
 export type GetTransactions =
