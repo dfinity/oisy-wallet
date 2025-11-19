@@ -454,7 +454,7 @@
 		"github": "https://github.com/solayer-labs",
 		"twitter": "https://x.com/solayer_labs",
 		"discord": "https://discord.gg/solayerlabs",
-		"tags": ["dapps.categories.nft", "dapps.categories.walletconnect"],
+		"tags": ["dapps.categories.defi", "dapps.categories.staking"],
 		"description": "dapps.descriptions.solayer.description",
 		"usesInternetIdentity": false,
 		"display": "Large",
