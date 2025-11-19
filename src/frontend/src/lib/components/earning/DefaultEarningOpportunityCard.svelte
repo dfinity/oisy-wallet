@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { nonNullish } from '@dfinity/utils';
+	import { isNullish, nonNullish } from '@dfinity/utils';
 	import { EarningCardFields, type EarningCards } from '$env/types/env.earning-cards';
 	import List from '$lib/components/common/List.svelte';
 	import ListItem from '$lib/components/common/ListItem.svelte';
@@ -24,7 +24,9 @@
 	{/snippet}
 	{#snippet badge()}
 		{$i18n.stake.text.current_apy_label}
-		<span class="ml-1 font-bold text-success-primary">{cardFields.apy}</span>
+		<span class="ml-1 font-bold text-success-primary"
+			>{nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-'}</span
+		>
 	{/snippet}
 	{#snippet title()}
 		{resolveText({ i18n: $i18n, path: cardData.title })}
@@ -52,6 +54,8 @@
 							{:else}
 								-
 							{/if}
+						{:else if cardField === EarningCardFields.APY}
+							{nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-'}
 						{:else}
 							{nonNullish(cardFields[cardField])
 								? resolveText({

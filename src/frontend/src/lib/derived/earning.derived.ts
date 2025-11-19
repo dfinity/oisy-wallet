@@ -40,8 +40,8 @@ export const earningData: Readable<EarningData> = derived(
 		return {
 			'gldt-staking': {
 				[EarningCardFields.APY]: nonNullish($gldtStakeStore?.apy)
-					? `${formatStakeApyNumber($gldtStakeStore.apy)}%`
-					: '-',
+					? formatStakeApyNumber($gldtStakeStore.apy)
+					: undefined,
 				[EarningCardFields.CURRENT_STAKED]: nonNullish(gldtToken)
 					? `${formatToken({
 							value: $gldtStakeStore?.position?.staked ?? ZERO,
