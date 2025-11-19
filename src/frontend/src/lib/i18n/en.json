@@ -876,7 +876,9 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "Scan QR Code"
+			"scan_qr_code": "Scan QR Code",
+			"pay_to": "Pay to $receipt",
+			"powered_by": "Powered by"
 		}
 	},
 	"convert": {

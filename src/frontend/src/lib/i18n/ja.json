@@ -876,7 +876,9 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": ""
 		}
 	},
 	"convert": {

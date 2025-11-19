@@ -681,7 +681,7 @@ interface I18nSend {
 }
 
 interface I18nScanner {
-	text: { scan_qr_code: string };
+	text: { scan_qr_code: string; pay_to: string; powered_by: string };
 }
 
 interface I18nConvert {
