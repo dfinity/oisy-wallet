@@ -7,8 +7,8 @@ import {
 	mockPrincipal2,
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
-import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import { toNullable } from '@dfinity/utils';
+import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount, IcrcBlockIndex } from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
