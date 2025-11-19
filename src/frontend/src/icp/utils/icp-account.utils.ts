@@ -2,8 +2,8 @@ import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend
 import { assertNever, nonNullish } from '@dfinity/utils';
 import {
 	AccountIdentifier,
-	isIcpAccountIdentifier,
-	SubAccount
+	SubAccount,
+	isIcpAccountIdentifier
 } from '@icp-sdk/canisters/ledger/icp';
 import {
 	decodeIcrcAccount,
