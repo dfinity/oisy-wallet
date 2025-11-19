@@ -21,7 +21,7 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
+import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@icp-sdk/canisters/ledger/icp';
 import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
 import {
 	IcrcIndexNgCanister,
