@@ -7,9 +7,9 @@ import {
 	mockPrincipal2,
 	mockPrincipalText2
 } from '$tests/mocks/identity.mock';
-import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcAccount, IcrcBlockIndex } from '@dfinity/ledger-icrc';
 import { toNullable } from '@dfinity/utils';
+import { AccountIdentifier, LedgerCanister, type BlockHeight } from '@icp-sdk/canisters/ledger/icp';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({

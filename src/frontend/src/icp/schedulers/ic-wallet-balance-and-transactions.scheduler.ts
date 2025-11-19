@@ -11,9 +11,9 @@ import type {
 	PostMessageDataResponseWalletCleanUp
 } from '$lib/types/post-message';
 import type { CertifiedData } from '$lib/types/store';
-import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
 import type { IcrcIndexNgTransaction, IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
 import { isNullish, jsonReplacer, queryAndUpdate } from '@dfinity/utils';
+import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
 
 type IndexedTransaction<T> = T & IcTransactionAddOnsInfo;
 
