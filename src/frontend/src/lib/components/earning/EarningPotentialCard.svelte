@@ -1,7 +1,6 @@
 <script lang="ts">
 	import StakeContentCard from '$lib/components/stake/StakeContentCard.svelte';
 	import { highestApyEarningData } from '$lib/derived/earning.derived';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
 	import { currencyExchangeStore } from '$lib/stores/currency-exchange.store';
@@ -26,9 +25,7 @@
 				showPlusSign={$enabledMainnetFungibleTokensUsdBalance > 0 && highestApy > 0}
 			>
 				{#snippet fallback()}
-					<div class="w-16">
-						<SkeletonText />
-					</div>
+					<SkeletonText />
 				{/snippet}
 			</EarningYearlyAmount>
 		</div>
