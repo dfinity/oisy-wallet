@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Conversion en cours...",

@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Convirtiendo...",

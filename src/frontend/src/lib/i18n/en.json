@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "Scan QR Code"
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Converting...",

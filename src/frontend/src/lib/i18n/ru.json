@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "Не удалось рассчитать комиссию, так как предоставленный стандарт токена не поддерживается."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Идет обмен...",

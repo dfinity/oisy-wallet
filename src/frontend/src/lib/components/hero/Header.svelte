@@ -12,9 +12,14 @@
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { modalAboutWhyOisy, modalWalletConnect } from '$lib/derived/modal.derived';
+	import {
+		modalAboutWhyOisy,
+		modalUniversalScannerOpen,
+		modalWalletConnect
+	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
+	import Scanner from '$lib/components/scanner/Scanner.svelte';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
@@ -32,8 +37,16 @@
 	class:1.5xl:z-10={$authSignedIn}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
-	class:z-3={!menuOpen && !networkSwitcherOpen && !helpMenuOpen && !$modalWalletConnect}
-	class:z-4={menuOpen || networkSwitcherOpen || helpMenuOpen || $modalWalletConnect}
+	class:z-3={!menuOpen &&
+		!networkSwitcherOpen &&
+		!helpMenuOpen &&
+		!$modalWalletConnect &&
+		!$modalUniversalScannerOpen}
+	class:z-4={menuOpen ||
+		networkSwitcherOpen ||
+		helpMenuOpen ||
+		$modalWalletConnect ||
+		$modalUniversalScannerOpen}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />
@@ -46,6 +59,7 @@
 
 		{#if $authSignedIn}
 			<WalletConnect />
+			<Scanner />
 		{/if}
 
 		{#if $authSignedIn}

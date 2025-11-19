@@ -677,6 +677,10 @@ interface I18nSend {
 	};
 }
 
+interface I18nScanner {
+	text: { scan_qr_code: string };
+}
+
 interface I18nConvert {
 	text: {
 		converting: string;
@@ -1491,6 +1495,7 @@ interface I18n {
 	networks: I18nNetworks;
 	receive: I18nReceive;
 	send: I18nSend;
+	scanner: I18nScanner;
 	convert: I18nConvert;
 	swap: I18nSwap;
 	buy: I18nBuy;
