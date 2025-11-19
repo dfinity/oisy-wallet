@@ -11,15 +11,19 @@ import { isNullish } from '@dfinity/utils';
 export abstract class AppWorker {
 	readonly #worker: Worker;
 	readonly #workerId: WorkerId;
+	readonly #isSingleton: boolean;
 	readonly #queue: WorkerQueue;
+	// TODO: use generics directly in the calss so that we can use type WorkerListener
+	#listener: ((ev: MessageEvent) => void) | undefined;
 
 	static #singletonWorker?: Worker;
 
 	protected constructor(workerData: WorkerData) {
-		const { worker } = workerData;
+		const { worker, isSingleton } = workerData;
 
 		this.#worker = worker;
 		this.#workerId = crypto.randomUUID();
+		this.#isSingleton = isSingleton;
 		this.#queue = new WorkerQueue(worker);
 	}
 
@@ -44,7 +48,31 @@ export abstract class AppWorker {
 		return { worker, isSingleton: asSingleton };
 	};
 
+	#addMessageListener = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#worker.addEventListener('message', listener);
+		this.#listener = listener;
+	};
+
+	#removeListener = () => {
+		if (isNullish(this.#listener)) {
+			return;
+		}
+
+		this.#worker.removeEventListener('message', this.#listener);
+
+		this.#listener = undefined;
+	};
+
+	#setOnMessageAsSingleton = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		this.#addMessageListener(listener);
+	};
+
 	protected setOnMessage = <T extends WorkerPostMessageData>(listener: WorkerListener<T>) => {
+		if (this.#isSingleton) {
+			this.#setOnMessageAsSingleton(listener);
+			return;
+		}
+
 		this.#worker.onmessage = listener;
 	};
 
@@ -54,7 +82,14 @@ export abstract class AppWorker {
 	};
 
 	terminate = () => {
+		if (this.#isSingleton) {
+			this.#removeListener();
+			return;
+		}
+
 		this.#worker.terminate();
+
+		this.#worker.onmessage = null;
 	};
 
 	protected abstract stopTimer(): void;
