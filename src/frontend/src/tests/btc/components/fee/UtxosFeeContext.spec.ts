@@ -40,6 +40,8 @@ describe('UtxosFeeContext', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		mockPage.reset();
 		store = initUtxosFeeStore();
 		store.reset();
