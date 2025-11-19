@@ -2,8 +2,11 @@ import type { Event } from '$declarations/xtc_ledger/declarations/xtc_ledger.did
 import type { Dip20TransactionWithId } from '$icp/types/api';
 import type { icpTransactionTypes } from '$lib/schema/transaction.schema';
 import type { TransactionId, TransactionType } from '$lib/types/transaction';
-import type { IcrcIndexNgTransaction, IcrcIndexNgTransactionWithId } from '@dfinity/ledger-icrc';
-import type { Transaction, TransactionWithId } from '@icp-sdk/canisters/ledger/icp';
+import type { Transaction, TransactionWithId } from '@dfinity/ledger-icp';
+import type {
+	IcrcIndexNgTransaction,
+	IcrcIndexNgTransactionWithId
+} from '@icp-sdk/canisters/ledger/icrc';
 
 export interface IcTransactionAddOnsInfo {
 	transferToSelf?: 'send' | 'receive';

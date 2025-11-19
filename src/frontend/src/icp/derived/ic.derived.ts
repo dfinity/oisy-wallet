@@ -1,9 +1,9 @@
 import { getAccountIdentifier } from '$icp/utils/icp-account.utils';
 import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { authStore } from '$lib/stores/auth.store';
-import { encodeIcrcAccount, type IcrcAccount } from '@dfinity/ledger-icrc';
+import type { AccountIdentifier } from '@dfinity/ledger-icp';
 import { nonNullish } from '@dfinity/utils';
-import type { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
+import { encodeIcrcAccount, type IcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { derived, type Readable } from 'svelte/store';
 
 export const icpAccountIdentifier: Readable<AccountIdentifier | undefined> = derived(

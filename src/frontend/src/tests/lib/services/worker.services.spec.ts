@@ -2,11 +2,15 @@ import { AppWorker } from '$lib/services/_worker.services';
 import type { WorkerData } from '$lib/types/worker';
 
 const postMessageSpy = vi.fn();
+const addEventListenerSpy = vi.fn();
+const removeEventListenerSpy = vi.fn();
 
 class MockWorker {
 	postMessage = postMessageSpy;
 	onmessage: ((event: MessageEvent) => void) | null = null;
 	terminate: () => void = vi.fn();
+	addEventListener = addEventListenerSpy;
+	removeEventListener = removeEventListenerSpy;
 }
 
 let workerInstance: Worker;
@@ -40,6 +44,15 @@ describe('_worker.services', () => {
 
 		const createTestWorker = async (): Promise<{ instance: TestWorker; worker: WorkerData }> => {
 			const worker = await AppWorker.getInstance();
+			const instance = new TestWorker(worker);
+			return { instance, worker };
+		};
+
+		const createTestWorkerSingleton = async (): Promise<{
+			instance: TestWorker;
+			worker: WorkerData;
+		}> => {
+			const worker = await AppWorker.getInstance({ asSingleton: true });
 			const instance = new TestWorker(worker);
 			return { instance, worker };
 		};
@@ -81,7 +94,9 @@ describe('_worker.services', () => {
 
 			instance.setListener(listenerSpy);
 
-			expect(worker.worker.onmessage).toBe(listenerSpy);
+			expect(worker.worker.onmessage).toStrictEqual(listenerSpy);
+
+			expect(addEventListenerSpy).not.toHaveBeenCalled();
 		});
 
 		it('should route postMessage through WorkerQueue with workerId attached', async () => {
@@ -104,6 +119,22 @@ describe('_worker.services', () => {
 			expect(worker.worker.terminate).toHaveBeenCalledExactlyOnceWith();
 		});
 
+		it('should terminate the underlying worker when destroy is called', async () => {
+			const { instance, worker } = await createTestWorker();
+
+			instance.setListener(listenerSpy);
+
+			instance.destroy();
+
+			expect(stopTimerSpy).toHaveBeenCalledExactlyOnceWith();
+
+			expect(worker.worker.terminate).toHaveBeenCalledExactlyOnceWith();
+
+			expect(worker.worker.removeEventListener).not.toHaveBeenCalled();
+
+			expect(worker.worker.onmessage).toBeNull();
+		});
+
 		describe('as singleton', () => {
 			const params = { asSingleton: true };
 
@@ -118,6 +149,52 @@ describe('_worker.services', () => {
 
 				expect(first.isSingleton).toBeTruthy();
 				expect(second.isSingleton).toBeTruthy();
+			});
+
+			it("should add a listener to the worker's message event", async () => {
+				const { instance, worker } = await createTestWorkerSingleton();
+
+				instance.setListener(listenerSpy);
+
+				expect(worker.worker.addEventListener).toHaveBeenCalledExactlyOnceWith(
+					'message',
+					listenerSpy
+				);
+
+				expect(worker.worker.onmessage).not.toStrictEqual(listenerSpy);
+				expect(worker.worker.onmessage).toBeNull();
+			});
+
+			it("should remove the listener from the worker's message event on destroy", async () => {
+				const { instance, worker } = await createTestWorkerSingleton();
+
+				instance.setListener(listenerSpy);
+
+				instance.destroy();
+
+				expect(stopTimerSpy).toHaveBeenCalledExactlyOnceWith();
+
+				expect(worker.worker.removeEventListener).toHaveBeenCalledExactlyOnceWith(
+					'message',
+					listenerSpy
+				);
+
+				expect(worker.worker.terminate).not.toHaveBeenCalled();
+			});
+
+			it('should not remove the listener twice on destroy', async () => {
+				const { instance, worker } = await createTestWorkerSingleton();
+
+				instance.setListener(listenerSpy);
+
+				instance.destroy();
+
+				instance.destroy();
+
+				expect(worker.worker.removeEventListener).toHaveBeenCalledExactlyOnceWith(
+					'message',
+					listenerSpy
+				);
 			});
 		});
 	});
