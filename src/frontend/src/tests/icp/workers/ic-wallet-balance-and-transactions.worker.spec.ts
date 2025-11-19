@@ -22,12 +22,12 @@ import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
 import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
+import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
 import {
 	IcrcIndexNgCanister,
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
-} from '@dfinity/ledger-icrc';
-import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
