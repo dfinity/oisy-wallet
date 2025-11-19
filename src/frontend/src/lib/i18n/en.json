@@ -397,6 +397,11 @@
 				"name": "Magic Eden",
 				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
 				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
+			},
+			"solayer": {
+				"name": "Solayer",
+				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
+				"description": "Solayer is a vertically integrated blockchain stack built on Solana, leveraging InfiniSVM for ultra-low latency and high throughput- scaling to over 1 million transactions per second. It integrates native staking (sSOL), a stablecoin (sUSD), and real-world payments via the Emerald Card. Solayer’s architecture combines DeFi, payments, and infrastructure under a single high-performance chain."
 			}
 		}
 	},
