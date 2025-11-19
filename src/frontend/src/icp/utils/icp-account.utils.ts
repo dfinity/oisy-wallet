@@ -1,12 +1,12 @@
 import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
 import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
+import { assertNever, nonNullish } from '@dfinity/utils';
 import {
 	decodeIcrcAccount,
 	encodeIcrcAccount,
 	fromCandidAccount,
 	toCandidAccount
-} from '@dfinity/ledger-icrc';
-import { assertNever, nonNullish } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { Principal } from '@icp-sdk/core/principal';
 
 export const getAccountIdentifier = (principal: Principal): AccountIdentifier =>
