@@ -21,7 +21,6 @@ export class AuthWorker extends AppWorker {
 						return;
 					case 'delegationRemainingTime':
 						authRemainingTimeStore.set(data?.authRemainingTime);
-						return;
 				}
 			}
 		);

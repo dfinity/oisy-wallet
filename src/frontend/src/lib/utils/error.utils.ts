@@ -179,7 +179,6 @@ export const parseIcErrorMessage = (err: unknown): Record<string, string> | unde
 		return rest;
 	} catch (_: unknown) {
 		// If parsing fails, we return undefined. We do not need to throw an error here.
-		return;
 	}
 };
 

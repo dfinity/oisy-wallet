@@ -268,7 +268,6 @@ const loadCustomTokensWithMetadata = async (
 					`Error loading metadata for custom ERC20 token ${address} on network ${networkId.description}`,
 					err
 				);
-				return;
 			}
 		};
 

@@ -269,7 +269,7 @@ const mapAssociatedTokenAccountInstruction = ({
 }): SolMappedTransaction | undefined => {
 	if (type === 'create' || type === 'createIdempotent') {
 		// We don't need to map the instruction since it is not relevant for the user
-		return;
+		return undefined;
 	}
 };
 
@@ -334,8 +334,6 @@ export const mapSolParsedInstruction = async ({
 		`Could not map Solana instruction of type ${type} for program ${programAddress}`,
 		instruction
 	);
-
-	return;
 };
 
 /**
