@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { notEmptyString } from '@dfinity/utils';
 	import { slide } from 'svelte/transition';
 	import InputText from '$lib/components/ui/InputText.svelte';
 	import { SLIDE_DURATION } from '$lib/constants/transition.constants';
-	import { notEmptyString } from '@dfinity/utils';
 
 	interface Props {
 		value: string;
