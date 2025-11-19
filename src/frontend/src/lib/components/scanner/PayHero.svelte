@@ -15,7 +15,7 @@
 </script>
 
 <div
-	class="bg-pos-0 mb-6 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-subtle-10 pt-6 text-center text-primary-inverted duration-500 ease-in-out md:rounded-[28px]"
+	class="bg-pos-0 mb-6 flex h-full w-full flex-col content-center items-center justify-center rounded-[24px] bg-brand-subtle-10 pt-6 text-center text-primary-inverted md:rounded-[28px]"
 >
 	{#if nonNullish(receipt)}
 		<p class="mb-3 font-bold text-secondary">
