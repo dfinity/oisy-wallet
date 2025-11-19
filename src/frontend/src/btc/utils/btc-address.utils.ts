@@ -28,7 +28,9 @@ export const parseBtcAddress = (address: string): BtcAddress | undefined => {
 	try {
 		const info = parseBtcAddressCkbtc({ address });
 		return createBtcAddressFromAddressInfo({ info });
-	} catch (_: unknown) {}
+	} catch (_: unknown) {
+		return undefined;
+	}
 };
 
 export const getBtcAddressString = (address: BtcAddress): string => {
