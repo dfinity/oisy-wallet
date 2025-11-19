@@ -24,11 +24,7 @@
 	{#snippet content()}
 		<div class="text-sm">{$i18n.stake.text.active_earning}</div>
 
-		<div
-			class="my-1 text-lg font-bold sm:text-xl"
-			class:text-success-primary={$allEarningYearlyAmountUsd > 0}
-			class:text-tertiary={$allEarningYearlyAmountUsd === 0}
-		>
+		<div class="my-1 text-lg font-bold sm:text-xl">
 			<EarningYearlyAmount value={$allEarningYearlyAmountUsd} formatPositiveAmount />
 		</div>
 
