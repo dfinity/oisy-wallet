@@ -9,7 +9,10 @@
 		<h3 class="w-full text-center">Welcome to Earn!</h3>
 	{/snippet}
 	{#snippet content()}
-		<p>Grow yur portfolio pbalbl slbsl</p>
+		<p
+			>Grow your crypto portfolio by staking your tokens and earning rewards. Choose from various
+			earning strategies based on your risk tolerance.</p
+		>
 
 		<div class="flex w-full grid-cols-2 gap-3">
 			<EarningPotentialCard />
