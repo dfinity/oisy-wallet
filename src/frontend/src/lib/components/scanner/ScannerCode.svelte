@@ -1,19 +1,19 @@
 <script lang="ts">
-	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
-	import { busy } from '$lib/stores/busy.store';
-	import type { QrStatus } from '$lib/types/qr-code';
-	import Responsive from '$lib/components/ui/Responsive.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import IconChain from '$lib/components/icons/IconChain.svelte';
-	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ScannerCodeInput from '$lib/components/scanner/ScannerCodeInput.svelte';
 	import { isEmptyString } from '@dfinity/utils';
-	import { processOpenCryptoPayCode } from '$lib/services/open-crypto-pay.services';
 	import { getContext } from 'svelte';
-	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import IconChain from '$lib/components/icons/IconChain.svelte';
+	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
+	import ScannerCodeInput from '$lib/components/scanner/ScannerCodeInput.svelte';
+	import BottomSheet from '$lib/components/ui/BottomSheet.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import Responsive from '$lib/components/ui/Responsive.svelte';
+	import { processOpenCryptoPayCode } from '$lib/services/open-crypto-pay.services';
+	import { busy } from '$lib/stores/busy.store';
 	import { i18n } from '$lib/stores/i18n.store';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
+	import type { QrStatus } from '$lib/types/qr-code';
 
 	interface Props {
 		onNext: () => void;
@@ -47,7 +47,7 @@
 	};
 
 	const handleScan = async ({ status, code }: { status: QrStatus; code?: string }) => {
-		if (status !== 'success' || !code) return;
+		if (status !== 'success' || !code) {return;}
 		await processCode(code);
 	};
 
@@ -67,30 +67,30 @@
 
 	<Responsive up="md">
 		<ScannerCodeInput
-			bind:value={uri}
+			name="uri"
 			{error}
 			label={$i18n.scanner.text.url_or_code}
 			placeholder={$i18n.scanner.text.enter_or_paste_code}
-			name="uri"
+			bind:value={uri}
 		/>
 	</Responsive>
 
 	<Responsive down="sm">
-		<BottomSheet bind:visible={openBottomSheet} contentClass="min-h-[10vh]">
+		<BottomSheet contentClass="min-h-[10vh]" bind:visible={openBottomSheet}>
 			{#snippet content()}
 				<div class="mb-4">
 					<ScannerCodeInput
-						bind:value={uri}
+						name="uri"
 						{error}
 						label={$i18n.scanner.text.url_or_code}
 						placeholder={$i18n.scanner.text.enter_or_paste_code}
-						name="uri"
+						bind:value={uri}
 					/>
 				</div>
 			{/snippet}
 
 			{#snippet footer()}
-				<Button onclick={handleManualConnect} disabled={invalid} fullWidth
+				<Button disabled={invalid} fullWidth onclick={handleManualConnect}
 					>{$i18n.core.text.continue}</Button
 				>
 			{/snippet}
