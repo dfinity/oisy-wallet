@@ -6,7 +6,7 @@
 	import { formatAddress } from '$lib/utils/open-crypto-pay.utils';
 
 	interface Props {
-		recipient: Recipient;
+		recipient?: Recipient;
 	}
 
 	let { recipient }: Props = $props();
