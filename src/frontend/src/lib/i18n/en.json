@@ -387,6 +387,11 @@
 				"name": "Pacifica",
 				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
 				"description": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage. It is designed to offer high performance and advanced features similar to centralized exchanges, including a variety of order types, sub-accounts for institutional traders, and API access for bots."
+			},
+			"magic_eden": {
+				"name": "Magic Eden",
+				"one_liner": "The largest NFT marketplace and Runes platform.",
+				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
 			}
 		}
 	},
