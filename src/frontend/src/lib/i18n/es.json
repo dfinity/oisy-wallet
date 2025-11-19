@@ -381,6 +381,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -861,6 +866,11 @@
 			"solana_transaction_expired": "Tu transacción de envío no fue procesada por la red de Solana y ha expirado, muy probablemente porque la comisión de prioridad proporcionada no fue suficiente. La hemos actualizado a la última cantidad recomendada, así que por favor intenta enviarla de nuevo.",
 			"solana_confirmation_failed": "No recibimos una confirmación para la transacción que acabas de crear. Por favor, espera unos segundos y luego revisa la lista de transacciones de tu token para ver si tu transacción se creó correctamente.",
 			"fee_calc_unsupported_standard": "No se pudo calcular la comisión ya que el estándar de token proporcionado no es compatible."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {

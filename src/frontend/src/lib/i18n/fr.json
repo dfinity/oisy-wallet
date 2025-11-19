@@ -381,6 +381,11 @@
 				"name": "",
 				"one_liner": "",
 				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
 			}
 		}
 	},
@@ -861,6 +866,11 @@
 			"solana_transaction_expired": "Votre transaction d'envoi n'a pas été traitée par le réseau Solana et a expiré, très probablement parce que les frais de priorité fournis n'étaient pas suffisants. Nous les avons mis à jour au dernier montant recommandé, veuillez donc réessayer de l'envoyer.",
 			"solana_confirmation_failed": "Nous n'avons pas reçu de confirmation pour la transaction que vous venez de créer. Veuillez patienter quelques secondes, puis vérifiez la liste des transactions de votre token pour voir si votre transaction a été créée correctement.",
 			"fee_calc_unsupported_standard": "Impossible de calculer les frais car le standard de token fourni n'est pas pris en charge."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
 		}
 	},
 	"convert": {

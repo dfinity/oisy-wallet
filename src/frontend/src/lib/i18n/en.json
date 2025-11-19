@@ -381,6 +381,11 @@
 				"name": "dMsg.net",
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
+			},
+			"pacifica": {
+				"name": "Pacifica",
+				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
+				"description": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage. It is designed to offer high performance and advanced features similar to centralized exchanges, including a variety of order types, sub-accounts for institutional traders, and API access for bots."
 			}
 		}
 	},
@@ -861,6 +866,11 @@
 			"solana_transaction_expired": "Your send transaction was not processed by the Solana network and expired, most likely because the provided priority fee was not sufficient. We updated it to the latest recommended amount, so please try sending it again.",
 			"solana_confirmation_failed": "We did not receive a confirmation for the transaction you just created. Please wait a few seconds and then check your token’s transaction list if your transaction was created correctly.",
 			"fee_calc_unsupported_standard": "Could not calculate the fee as the provided token standard is not supported."
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "Scan QR Code"
 		}
 	},
 	"convert": {
