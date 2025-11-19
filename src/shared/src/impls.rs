@@ -34,6 +34,7 @@ use crate::{
     },
     validate::{validate_on_deserialize, Validate},
 };
+use crate::types::custom_token::ExtV2Token;
 
 // Constants for validation limits
 const CONTACT_MAX_NAME_LENGTH: usize = 100;
@@ -106,6 +107,7 @@ impl From<&Token> for CustomTokenId {
                 chain_id,
                 ..
             }) => CustomTokenId::Ethereum(token_address.clone(), *chain_id),
+            Token::ExtV2(token) => CustomTokenId::ExtV2(token.ledger_id),
         }
     }
 }
@@ -557,6 +559,8 @@ impl Validate for CustomTokenId {
                 token_address.validate()
             }
             CustomTokenId::Ethereum(token_address, _) => token_address.validate(),
+            CustomTokenId::ExtV2(_) => Ok(()), /* This is a principal.  In principle, we could */
+            // check the exact type of principal.
         }
     }
 }
@@ -573,6 +577,7 @@ impl Validate for Token {
             Token::Icrc(token) => token.validate(),
             Token::SplMainnet(token) | Token::SplDevnet(token) => token.validate(),
             Token::Erc20(token) | Token::Erc721(token) | Token::Erc1155(token) => token.validate(),
+            Token::ExtV2(token) => token.validate(),
         }
     }
 }
@@ -620,6 +625,23 @@ impl Validate for IcrcToken {
             if index_id.as_slice().last() != Some(&1) {
                 return Err(candid::Error::msg("Index ID is not a canister"));
             }
+        }
+        Ok(())
+    }
+}
+
+impl Validate for ExtV2Token {
+    /// Verifies that an EXT v2 token is valid.
+    ///
+    /// - Checks that the ledger principal is the type of principal used for a canister.
+    ///   - <https://wiki.internetcomputer.org/wiki/Principal>
+    fn validate(&self) -> Result<(), candid::Error> {
+        let ExtV2Token {
+            ledger_id,
+        } = self;
+        // The ledger_id should be appropriate for a canister.
+        if ledger_id.as_slice().last() != Some(&1) {
+            return Err(candid::Error::msg("Ledger ID is not a canister"));
         }
         Ok(())
     }
@@ -732,6 +754,7 @@ validate_on_deserialize!(ContactImage);
 validate_on_deserialize!(CustomToken);
 validate_on_deserialize!(CustomTokenId);
 validate_on_deserialize!(IcrcToken);
+validate_on_deserialize!(ExtV2Token);
 validate_on_deserialize!(SplToken);
 validate_on_deserialize!(SplTokenId);
 validate_on_deserialize!(ErcToken);
