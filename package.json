@@ -109,7 +109,7 @@
 		"@testing-library/svelte": "^5.2.8",
 		"@types/dom-view-transitions": "^1.0.5",
 		"@types/node": "^22.13.4",
-		"@vitest/coverage-v8": "^4.0.8",
+		"@vitest/coverage-v8": "^4.0.10",
 		"dotenv": "^17.2.3",
 		"fake-indexeddb": "^6.2.4",
 		"jsdom": "^27.1.0",
@@ -129,7 +129,7 @@
 		"typescript": "^5.4.5",
 		"vite": "^7.1.12",
 		"vite-node": "^3.2.4",
-		"vitest": "^4.0.8",
+		"vitest": "^4.0.10",
 		"vitest-mock-extended": "^3.1.0"
 	},
 	"type": "module",
