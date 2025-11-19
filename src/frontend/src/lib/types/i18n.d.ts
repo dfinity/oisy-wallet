@@ -683,7 +683,18 @@ interface I18nSend {
 }
 
 interface I18nScanner {
-	text: { scan_qr_code: string; pay_to: string; powered_by: string };
+	text: {
+		scan_qr_code: string;
+		pay_to: string;
+		powered_by: string;
+		receipt: string;
+		name: string;
+		address: string;
+		country: string;
+		phone_number: string;
+		email_address: string;
+		website: string;
+	};
 }
 
 interface I18nConvert {
