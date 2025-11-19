@@ -23,7 +23,7 @@ EXT_V2_REPO_URL="https://raw.githubusercontent.com/Toniq-Labs/ext-v2-token/refs/
 # shellcheck disable=SC2034 # This variable is used - see ${!asset_url} below.
 CANDID_URL="${EXT_V2_REPO_URL}/ext_v2.did"
 
-CANDID_FILE="$(jq -r .canisters.xtc_ledger.candid dfx.json)"
+CANDID_FILE="$(jq -r .canisters.ext_v2_token.candid dfx.json)"
 
 download() {
   : 'Downloads a URL to a given file.'
