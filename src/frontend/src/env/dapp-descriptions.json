@@ -445,5 +445,21 @@
 		"stats": "",
 		"logo": "/images/dapps/opensea-logo.svg",
 		"screenshots": ["/images/dapps/opensea-screenshot.webp"]
+	},
+	{
+		"id": "solayer",
+		"name": "dapps.descriptions.solayer.name",
+		"oneLiner": "dapps.descriptions.solayer.one_liner",
+		"website": "https://solayer.org/",
+		"github": "https://github.com/solayer-labs",
+		"twitter": "https://x.com/solayer_labs",
+		"discord": "https://discord.gg/solayerlabs",
+		"tags": ["dapps.categories.defi", "dapps.categories.staking"],
+		"description": "dapps.descriptions.solayer.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/solayer-logo.svg",
+		"screenshots": ["/images/dapps/solayer-screenshot.webp"]
 	}
 ]
