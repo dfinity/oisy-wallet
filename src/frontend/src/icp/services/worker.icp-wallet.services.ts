@@ -80,14 +80,6 @@ export class IcpWalletWorker extends AppWorker implements WalletWorker {
 
 		await syncWalletFromCache({ tokenId, networkId });
 
-		console.log(
-			isIOS(),
-			'Initializing IcpWalletWorker for token:',
-			tokenId,
-			'canister:',
-			indexCanisterId
-		);
-
 		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcpWalletWorker(worker, tokenId, indexCanisterId);
 	}

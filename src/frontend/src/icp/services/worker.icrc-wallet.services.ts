@@ -85,14 +85,6 @@ export class IcrcWalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<IcrcWalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		console.log(
-			isIOS(),
-			'Initializing IcrcWalletWorker for token:',
-			tokenId,
-			'canister:',
-			ledgerCanisterId
-		);
-
 		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new IcrcWalletWorker(worker, tokenId, ledgerCanisterId, indexCanisterId, env);
 	}

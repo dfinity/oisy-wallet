@@ -75,14 +75,6 @@ export class Dip20WalletWorker extends AppWorker implements WalletWorker {
 	}: IcToken): Promise<Dip20WalletWorker> {
 		await syncWalletFromCache({ tokenId, networkId });
 
-		console.log(
-			isIOS(),
-			'Initializing Dip20WalletWorker for token:',
-			tokenId,
-			'canister:',
-			canisterId
-		);
-
 		const worker = await AppWorker.getInstance({ asSingleton: isIOS() });
 		return new Dip20WalletWorker(worker, tokenId, canisterId);
 	}
