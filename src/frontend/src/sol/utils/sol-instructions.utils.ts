@@ -269,6 +269,7 @@ const mapAssociatedTokenAccountInstruction = ({
 }): SolMappedTransaction | undefined => {
 	if (type === 'create' || type === 'createIdempotent') {
 		// We don't need to map the instruction since it is not relevant for the user
+		return undefined;
 	}
 };
 
