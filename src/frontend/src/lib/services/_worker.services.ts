@@ -83,6 +83,9 @@ export abstract class AppWorker {
 
 	terminate = () => {
 		if (this.#isSingleton) {
+			// If it's a singleton, we could have several listeners on the same instance of the worker and we cannot terminate it.
+			// Ideally, we should have a way to terminate the worker if we find out that there is no more listener on it.
+			// TODO: Terminate the worker when there are no more listeners even from other instances of `AppWorker`.
 			this.#removeListener();
 			return;
 		}
