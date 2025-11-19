@@ -68,12 +68,12 @@ export const earningData: Readable<EarningData> = derived(
 export const highestApyEarningData: Readable<EarningDataRecord | undefined> = derived(
 	[earningData],
 	([$earningData]) => {
-		const entries = Object.entries($earningData);
+		const entries = Object.values($earningData);
 
 		if (entries.length === 0) return undefined;
 
-		return entries.reduce<EarningDataRecord | undefined>((highest, [key, record]) => {
-			const apy = Number(record[EarningCardFields.APY]);
+		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
+			const apy = Number(record[EarningCardFields.APY] ?? 0);
 
 			if (isNullish(apy) || isNaN(apy)) return highest;
 
