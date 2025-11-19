@@ -382,11 +382,6 @@
 				"name": "dMsg.net",
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
-			},
-			"magic_eden": {
-				"name": "Magic Eden",
-				"one_liner": "The largest NFT marketplace and Runes platform.",
-				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
 			}
 		}
 	},
