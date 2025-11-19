@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Juego",
 			"tools": "Herramientas",
-			"ai": "IA"
+			"ai": "IA",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -388,6 +389,11 @@
 				"description": ""
 			},
 			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

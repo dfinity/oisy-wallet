@@ -415,6 +415,21 @@
 		"logo": "/images/dapps/pacifica-logo.svg",
 		"screenshots": ["/images/dapps/pacifica-screenshot.webp"]
 	},
+  {
+		"id": "magic-eden",
+		"name": "dapps.descriptions.magic_eden.name",
+		"oneLiner": "dapps.descriptions.magic_eden.one_liner",
+		"website": "https://magiceden.io/",
+		"twitter": "https://twitter.com/MagicEden",
+		"discord": "https://discord.gg/magiceden",
+		"tags": ["dapps.categories.nft", "dapps.categories.walletconnect"],
+		"description": "dapps.descriptions.magic_eden.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/magic-eden-logo.svg",
+		"screenshots": ["/images/dapps/magic-eden-screenshot.webp"]
+	},
 	{
 		"id": "opensea",
 		"name": "dapps.descriptions.opensea.name",

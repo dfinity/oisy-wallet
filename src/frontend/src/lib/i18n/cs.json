@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Hra",
 			"tools": "Nářadí",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -388,6 +389,11 @@
 				"description": ""
 			},
 			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""

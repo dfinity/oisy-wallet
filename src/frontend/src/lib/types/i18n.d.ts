@@ -208,6 +208,7 @@ interface I18nDapps {
 		game: string;
 		tools: string;
 		ai: string;
+		nft: string;
 	};
 	descriptions: {
 		kongswap: {
@@ -273,6 +274,7 @@ interface I18nDapps {
 		icpanda_message: { name: string; one_liner: string; description: string };
 		opensea: { name: string; one_liner: string; description: string };
 		pacifica: { name: string; one_liner: string; description: string };
+		magic_eden: { name: string; one_liner: string; description: string };
 	};
 }
 
