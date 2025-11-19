@@ -17,7 +17,7 @@ describe('OpenCryptoPay REST client', () => {
 			callback: 'https://api.dfx.swiss/v1/lnurlp/cb/pl_test123',
 			minSendable: 1000,
 			maxSendable: 10000,
-			metadata: '[[\"text/plain\", \"Test\"]]',
+			metadata: '[["text/plain", "Test"]]',
 			displayName: 'Test Shop',
 			standard: 'OpenCryptoPay',
 			possibleStandards: ['OpenCryptoPay'],
