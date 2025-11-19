@@ -13,9 +13,16 @@
 		contentHeader: Snippet<[{ isInBottomSheet: boolean }]>;
 		contentFooter?: Snippet<[closeFn: () => void]>;
 		showContentHeader?: boolean;
+		buttonTestId?: string;
 	}
 
-	let { content, contentHeader, contentFooter, showContentHeader = false }: Props = $props();
+	let {
+		content,
+		contentHeader,
+		contentFooter,
+		showContentHeader = false,
+		buttonTestId
+	}: Props = $props();
 
 	let expanded = $state(false);
 </script>
@@ -29,6 +36,7 @@
 			onclick={() => (expanded = true)}
 			styleClass="text-disabled mb-2 items-end"
 			width="w-8"
+			testId={buttonTestId}
 		>
 			{#snippet icon()}
 				<IconInfo />
