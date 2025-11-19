@@ -85,7 +85,6 @@ export class CkMinterInfoWorker extends AppWorker {
 						return;
 					case 'syncCkMinterInfoStatus':
 						onSyncStatus((data as PostMessageSyncState).state);
-						return;
 				}
 			}
 		);
