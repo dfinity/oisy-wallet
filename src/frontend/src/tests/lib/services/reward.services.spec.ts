@@ -476,6 +476,10 @@ describe('reward.services', () => {
 			sprinkles: []
 		} as unknown as UserData;
 
+		beforeEach(() => {
+			vi.clearAllMocks();
+		});
+
 		vi.spyOn(rewardApi, 'getUserInfo')
 			.mockResolvedValueOnce({
 				...baseMockUserData,
