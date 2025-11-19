@@ -1,9 +1,9 @@
 <script lang="ts">
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
+	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 
 	const modalId = Symbol();
 </script>
