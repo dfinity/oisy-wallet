@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/Button.svelte';
-	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
-	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
-	import { getContext } from 'svelte';
-	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
-	import PayHero from '$lib/components/scanner/PayHero.svelte';
 	import { nonNullish } from '@dfinity/utils';
+	import { getContext } from 'svelte';
+	import PayHero from '$lib/components/scanner/PayHero.svelte';
+	import ReceiptData from '$lib/components/scanner/PayReceiptData.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
+	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
+	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 
 	const { data } = getContext<PayContext>(PAY_CONTEXT_KEY);
 </script>
