@@ -11,13 +11,19 @@ class MockWorker {
 
 let workerInstance: Worker;
 
-vi.mock('$lib/workers/workers?worker', () => ({
-	default: vi.fn().mockImplementation(() => {
-		// @ts-expect-error testing this on purpose with a mock class
-		workerInstance = new Worker();
-		return workerInstance;
-	})
-}));
+vi.mock('$lib/workers/workers?worker', () => {
+	class MockWorkers {
+		constructor() {
+			// @ts-expect-error testing this on purpose with a mock class
+			workerInstance = new Worker();
+			return workerInstance;
+		}
+	}
+
+	return {
+		default: MockWorkers
+	};
+});
 
 describe('_worker.services', () => {
 	describe('AppWorker', () => {
