@@ -1,3 +1,5 @@
+import type { Address } from '$lib/types/open-crypto-pay';
+import { isNullish } from '@dfinity/utils';
 import { decode, fromWords } from 'bech32';
 
 /**
@@ -21,4 +23,24 @@ export const decodeLNURL = (lnurl: string): string => {
 	const url = new TextDecoder().decode(new Uint8Array(bytes));
 
 	return url;
+};
+
+export const formatAddress = (address?: Address): string => {
+	if (isNullish(address)) {
+		return '-';
+	}
+
+	const parts: string[] = [];
+
+	const streetParts = [address.street, address.houseNumber].filter(Boolean);
+	if (streetParts.length > 0) {
+		parts.push(streetParts.join(' '));
+	}
+
+	const cityParts = [address.zip, address.city].filter(Boolean);
+	if (cityParts.length > 0) {
+		parts.push(cityParts.join(' '));
+	}
+
+	return parts.length > 0 ? parts.join(', ') : '-';
 };
