@@ -60,6 +60,7 @@
 
 		{#if $authSignedIn}
 			<WalletConnect />
+
 			{#if UNIVERSAL_SCANNER_ENABLED}
 				<Scanner />
 			{/if}
