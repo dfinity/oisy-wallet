@@ -29,7 +29,7 @@ import { mockPage } from '$tests/mocks/page.store.mock';
 import { mockSolAddress, mockSolAddress2, mockSolAddress3 } from '$tests/mocks/sol.mock';
 import { setupTestnetsStore } from '$tests/utils/testnets.test-utils';
 import { setupUserNetworksStore } from '$tests/utils/user-networks.test-utils';
-import { encodeIcrcAccount } from '@dfinity/ledger-icrc';
+import { encodeIcrcAccount } from '@icp-sdk/canisters/ledger/icrc';
 import { get } from 'svelte/store';
 
 describe('network-address.derived', () => {

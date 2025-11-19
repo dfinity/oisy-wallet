@@ -307,3 +307,8 @@ export const modalNftFullscreenDisplayData: Readable<Nft | undefined> = derived(
 	($modalStore) =>
 		$modalStore?.type === 'nft-fullscreen-display' ? ($modalStore?.data as Nft) : undefined
 );
+
+export const modalUniversalScannerOpen: Readable<boolean> = derived(
+	modalStore,
+	($modalStore) => $modalStore?.type === 'universal-scanner'
+);

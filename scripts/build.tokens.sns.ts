@@ -5,7 +5,6 @@ import type { EnvIcrcTokenIcon, EnvIcrcTokenMetadataWithIcon } from '$env/types/
 import type { EnvSnsTokenWithIcon } from '$env/types/env-sns-token';
 import type { CanisterIdText } from '$lib/types/canister';
 import type { PartialSpecific } from '$lib/types/utils';
-import { IcrcMetadataResponseEntries } from '@dfinity/ledger-icrc';
 import {
 	candidNumberArrayToBigInt,
 	fromNullable,
@@ -14,6 +13,7 @@ import {
 	nonNullish
 } from '@dfinity/utils';
 import type { UrlSchema } from '@dfinity/zod-schemas';
+import { IcrcMetadataResponseEntries } from '@icp-sdk/canisters/ledger/icrc';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { z } from 'zod';
