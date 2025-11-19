@@ -7,8 +7,8 @@ import { toastsError } from '$lib/stores/toasts.store';
 import type { Network } from '$lib/types/network';
 import type { TokenId } from '$lib/types/token';
 import { isNetworkICP } from '$lib/utils/network.utils';
-import type { MinterInfo } from '@dfinity/cketh';
 import { isNullish, queryAndUpdate } from '@dfinity/utils';
+import type { MinterInfo } from '@icp-sdk/canisters/cketh';
 import { AnonymousIdentity } from '@icp-sdk/core/agent';
 import { get } from 'svelte/store';
 

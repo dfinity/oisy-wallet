@@ -68,7 +68,7 @@
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
 			"airdrops": "Награды",
-			"earning": "Награды и заработок",
+			"earning": "Зарабатывать",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -383,12 +383,22 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -876,7 +886,9 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": ""
 		}
 	},
 	"convert": {

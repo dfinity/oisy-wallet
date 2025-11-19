@@ -31,6 +31,8 @@ describe('GldtStakeContext', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		icTokenFeeStore.reset();
 	});
 
