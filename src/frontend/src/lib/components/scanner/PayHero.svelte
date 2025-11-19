@@ -2,8 +2,8 @@
 	import { nonNullish } from '@dfinity/utils';
 	import IconOpenCryptoPay from '$lib/components/icons/IconOpenCryptoPay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
-	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 	import type { Amount } from '$lib/types/send';
+	import { replacePlaceholders } from '$lib/utils/i18n.utils';
 
 	interface Props {
 		amount: Amount;
