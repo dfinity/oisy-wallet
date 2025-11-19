@@ -488,7 +488,7 @@ jobs:
           VITE_NFTS_ENABLED: ${{ steps.set-outputs.outputs.VITE_NFTS_ENABLED }}
           VITE_EARNING_ENABLED: ${{ steps.set-outputs.outputs.VITE_EARNING_ENABLED }}
           VITE_AI_ASSISTANT_CONSOLE_ENABLED: ${{ steps.set-outputs.outputs.VITE_AI_ASSISTANT_CONSOLE_ENABLED }}
-          VITE_UNIVERSAL_SCANNER_ENABLED_ENABLED: ${{ steps.set-outputs.outputs.VITE_UNIVERSAL_SCANNER_ENABLED_ENABLED }}
+          VITE_UNIVERSAL_SCANNER_ENABLED: ${{ steps.set-outputs.outputs.VITE_UNIVERSAL_SCANNER_ENABLED }}
           VITE_ONRAMPER_API_KEY_DEV: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_DEV }}
           VITE_ONRAMPER_API_KEY_PROD: ${{ steps.set-outputs.outputs.VITE_ONRAMPER_API_KEY_PROD }}
           VITE_AUTH_ALTERNATIVE_ORIGINS: ${{ steps.set-outputs.outputs.VITE_AUTH_ALTERNATIVE_ORIGINS }}
