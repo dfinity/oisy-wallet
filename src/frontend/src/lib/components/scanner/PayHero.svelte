@@ -1,8 +1,8 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import IconOpenCryptoPay from '$lib/components/icons/IconOpenCryptoPay.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import { nonNullish } from '@dfinity/utils';
 
 	interface Props {
 		amount: string | number;
@@ -23,7 +23,7 @@
 			})}
 		</p>
 	{/if}
-	
+
 	<div class="mb-6 flex flex-col gap-1 text-secondary">
 		<output
 			class="inline-flex w-full flex-row justify-center gap-3 text-4xl font-bold break-words md:text-5xl"

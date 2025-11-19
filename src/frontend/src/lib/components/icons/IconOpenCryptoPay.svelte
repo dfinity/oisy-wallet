@@ -1,3 +1,4 @@
+<svg fill="none" height="16" viewBox="0 0 59 16" width="59" xmlns="http://www.w3.org/2000/svg">
 <!-- source: OpenCryptoPay - please visit https://github.com/openCryptoPay/landingPage/blob/677eacc97af60eb02f99e12c85bba240efb5dfce/LICENSE#L1 -->
 
 <svg width="59" height="16" viewBox="0 0 59 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -65,7 +66,7 @@
 	</g>
 	<defs>
 		<clipPath id="clip0_19620_52020">
-			<rect width="58.6561" height="16" fill="white" />
+			<rect fill="white" height="16" width="58.6561" />
 		</clipPath>
 	</defs>
 </svg>
