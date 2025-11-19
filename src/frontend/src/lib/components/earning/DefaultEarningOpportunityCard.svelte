@@ -45,16 +45,17 @@
 					>
 					<span class="font-bold">
 						{#if cardField === EarningCardFields.CURRENT_EARNING || cardField === EarningCardFields.EARNING_POTENTIAL}
-							{#if nonNullish(cardFields[cardField])}
-								<EarningYearlyAmount
-									formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
-									showPlusSign
-									value={Number(cardFields[cardField])}
-									fallback="-"
-								/>
-							{:else}
-								-
-							{/if}
+							<EarningYearlyAmount
+								formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
+								showPlusSign
+								value={nonNullish(cardFields[cardField])
+									? Number(cardFields[cardField])
+									: undefined}
+							>
+								{#snippet fallback()}
+									-
+								{/snippet}
+							</EarningYearlyAmount>
 						{:else if cardField === EarningCardFields.APY}
 							{nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-'}
 						{:else}

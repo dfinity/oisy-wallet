@@ -7,29 +7,25 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
+	import type { Snippet } from 'svelte';
 
 	interface Props {
 		value?: number;
 		showPlusSign?: boolean;
 		formatPositiveAmount?: boolean;
-		fallback?: string;
+		fallback?: Snippet;
 	}
 
-	const {
-		value,
-		showPlusSign = false,
-		formatPositiveAmount = false,
-		fallback = '0'
-	}: Props = $props();
+	const { value, showPlusSign = false, formatPositiveAmount = false, fallback }: Props = $props();
 
 	const formattedCurrency = $derived(
 		nonNullish(value)
-			? (formatCurrency({
+			? formatCurrency({
 					value,
 					currency: $currentCurrency,
 					exchangeRate: $currencyExchangeStore,
 					language: $currentLanguage
-				}) ?? fallback)
+				})
 			: undefined
 	);
 
@@ -51,4 +47,6 @@
 	>
 		{`${showPlusSign ? '+' : ''}${yearlyAmount}`}
 	</span>
+{:else if nonNullish(fallback)}
+	{@render fallback()}
 {/if}
