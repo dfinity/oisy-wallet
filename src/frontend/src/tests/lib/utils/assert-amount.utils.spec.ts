@@ -7,7 +7,7 @@ import {
 } from '$lib/utils/assert-amount.utils';
 import { mockCkBtcMinterInfo } from '$tests/mocks/ckbtc.mock';
 import type { MinterInfo as CkBtcMinterInfo } from '@dfinity/ckbtc';
-import type { MinterInfo as CkEthMinterInfo } from '@dfinity/cketh';
+import type { MinterInfo as CkEthMinterInfo } from '@icp-sdk/canisters/cketh';
 
 describe('asserts-amount.utils', () => {
 	describe('assertAmount', () => {
