@@ -20,6 +20,7 @@
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 	import Scanner from '$lib/components/scanner/Scanner.svelte';
+	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
@@ -59,7 +60,9 @@
 
 		{#if $authSignedIn}
 			<WalletConnect />
-			<Scanner />
+			{#if UNIVERSAL_SCANNER_ENABLED}
+				<Scanner />
+			{/if}
 		{/if}
 
 		{#if $authSignedIn}
