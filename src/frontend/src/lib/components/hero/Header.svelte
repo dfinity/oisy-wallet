@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
+	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import HelpMenu from '$lib/components/core/HelpMenu.svelte';
@@ -8,6 +9,7 @@
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
@@ -19,8 +21,6 @@
 	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
-	import Scanner from '$lib/components/scanner/Scanner.svelte';
-	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 
 	// Used to set z-index dynamically (https://github.com/dfinity/oisy-wallet/pull/8340)
 	let networkSwitcherOpen = $state(false);
