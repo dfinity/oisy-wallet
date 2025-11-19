@@ -20,7 +20,7 @@ import {
 	IcrcMetadataResponseEntries,
 	type IcrcStandardRecord,
 	type IcrcTokenMetadataResponse
-} from '@dfinity/ledger-icrc';
+} from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-ledger.api', () => ({
 	icrc1SupportedStandards: vi.fn()

@@ -2,7 +2,7 @@ import { IC_CKBTC_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import * as icrcNftLedgerApi from '$icp/api/icrc-nft-ledger.api';
 import { isIcrcTokenSupportIcrc7 } from '$icp/utils/icrc-nft.utils';
 import { mockIdentity } from '$tests/mocks/identity.mock';
-import type { IcrcStandardRecord } from '@dfinity/ledger-icrc';
+import type { IcrcStandardRecord } from '@icp-sdk/canisters/ledger/icrc';
 
 vi.mock('$icp/api/icrc-nft-ledger.api', () => ({
 	icrc10SupportedStandards: vi.fn()

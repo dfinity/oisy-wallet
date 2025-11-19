@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
 	import { page } from '$app/state';
+	import { UNIVERSAL_SCANNER_ENABLED } from '$env/universal-scanner.env';
 	import AboutWhyOisy from '$lib/components/about/AboutWhyOisy.svelte';
 	import AboutWhyOisyModal from '$lib/components/about/AboutWhyOisyModal.svelte';
 	import HelpMenu from '$lib/components/core/HelpMenu.svelte';
@@ -8,11 +9,16 @@
 	import OisyWalletLogoLink from '$lib/components/core/OisyWalletLogoLink.svelte';
 	import DocumentationLink from '$lib/components/navigation/DocumentationLink.svelte';
 	import NetworksSwitcher from '$lib/components/networks/NetworksSwitcher.svelte';
+	import Scanner from '$lib/components/scanner/Scanner.svelte';
 	import ThemeSwitchButton from '$lib/components/ui/ThemeSwitchButton.svelte';
 	import WalletConnect from '$lib/components/wallet-connect/WalletConnect.svelte';
 	import { LANDING_PAGE_ROUTE } from '$lib/constants/analytics.constants';
 	import { authNotSignedIn, authSignedIn } from '$lib/derived/auth.derived';
-	import { modalAboutWhyOisy, modalWalletConnect } from '$lib/derived/modal.derived';
+	import {
+		modalAboutWhyOisy,
+		modalUniversalScannerOpen,
+		modalWalletConnect
+	} from '$lib/derived/modal.derived';
 	import { routeCollection } from '$lib/derived/nav.derived';
 	import { isRouteNfts, isRouteTransactions } from '$lib/utils/nav.utils';
 
@@ -32,8 +38,16 @@
 	class:1.5xl:z-10={$authSignedIn}
 	class:pb-10={$authNotSignedIn}
 	class:sm:pb-8={$authNotSignedIn}
-	class:z-3={!menuOpen && !networkSwitcherOpen && !helpMenuOpen && !$modalWalletConnect}
-	class:z-4={menuOpen || networkSwitcherOpen || helpMenuOpen || $modalWalletConnect}
+	class:z-3={!menuOpen &&
+		!networkSwitcherOpen &&
+		!helpMenuOpen &&
+		!$modalWalletConnect &&
+		!$modalUniversalScannerOpen}
+	class:z-4={menuOpen ||
+		networkSwitcherOpen ||
+		helpMenuOpen ||
+		$modalWalletConnect ||
+		$modalUniversalScannerOpen}
 >
 	<div class="pointer-events-auto">
 		<OisyWalletLogoLink />
@@ -46,6 +60,10 @@
 
 		{#if $authSignedIn}
 			<WalletConnect />
+
+			{#if UNIVERSAL_SCANNER_ENABLED}
+				<Scanner />
+			{/if}
 		{/if}
 
 		{#if $authSignedIn}

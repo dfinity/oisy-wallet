@@ -9,8 +9,8 @@ import type {
 } from '$lib/types/post-message';
 import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IcrcLedgerCanister } from '@dfinity/ledger-icrc';
 import { isNullish } from '@dfinity/utils';
+import { IcrcLedgerCanister } from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
