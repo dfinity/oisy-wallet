@@ -216,7 +216,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
 			"tools": "Инструменты",
-			"ai": "ИИ"
+			"ai": "ИИ",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +379,11 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
