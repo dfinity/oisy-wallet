@@ -149,7 +149,7 @@ describe('_worker.services', () => {
 				expect(second.isSingleton).toBeTruthy();
 			});
 
-			it("should add a listener to the worker's message event", async () => {});
+			it.todo("should add a listener to the worker's message event");
 
 			it("should remove the listener from the worker's message event on destroy", async () => {
 				const { instance, worker } = await createTestWorkerSingleton();
