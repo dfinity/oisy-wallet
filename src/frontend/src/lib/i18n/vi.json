@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "Không thể tính phí vì tiêu chuẩn token được cung cấp không được hỗ trợ."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Đang chuyển đổi...",

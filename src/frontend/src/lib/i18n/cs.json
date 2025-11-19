@@ -863,6 +863,11 @@
 			"fee_calc_unsupported_standard": "Nelze vypočítat poplatek, protože poskytnutý standard tokenu není podporován."
 		}
 	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": ""
+		}
+	},
 	"convert": {
 		"text": {
 			"converting": "Převádění...",
