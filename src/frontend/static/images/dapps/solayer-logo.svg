@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="380px" height="380px" viewBox="0 0 380 380" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Group</title>
+    <g id="Lock-and-Logout" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Group">
+            <circle id="Oval-2" fill="#084D3E" cx="190" cy="190" r="190"></circle>
+            <g transform="translate(64, 86)" fill="#D5F1CB" fill-rule="nonzero" id="Path">
+                <polygon points="94.057 0 230.217 0 207.822 41.456 71.663 41.456"></polygon>
+                <polygon points="70.767 165.827 185.427 165.827 163.033 207.283 48.372 207.283"></polygon>
+                <polygon points="49.872 82.912 230.218 82.912 208.116 124.368 27.77 124.368"></polygon>
+                <polygon points="22.395 41.457 71.663 41.456 49.268 82.913 0 82.913"></polygon>
+                <polygon points="207.822 124.369 251.715 124.369 229.321 165.826 185.427 165.827"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

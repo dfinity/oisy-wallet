@@ -7,13 +7,13 @@ import { eip1559TransactionPrice, withdrawErc20, withdrawEth } from '$icp/api/ck
 import { mockEthAddress } from '$tests/mocks/eth.mock';
 import { mockLedgerCanisterId } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import {
 	CkETHMinterCanister,
 	type Eip1559TransactionPrice,
 	type RetrieveErc20Request,
 	type RetrieveEthRequest
-} from '@dfinity/cketh';
-import { toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/cketh';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
 

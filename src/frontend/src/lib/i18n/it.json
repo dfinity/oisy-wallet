@@ -68,7 +68,7 @@
 			"dapp_explorer": "Esplora",
 			"activity": "Attività",
 			"airdrops": "Ricompense",
-			"earning": "Guadagna e Ricompense",
+			"earning": "Guadagna",
 			"source_code_on_github": "Codice sorgente su GitHub",
 			"view_on_explorer": "Visualizza sull'explorer",
 			"source_code": "Codice sorgente",
@@ -383,12 +383,22 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
 			},
 			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -876,7 +886,9 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": ""
 		}
 	},
 	"convert": {
