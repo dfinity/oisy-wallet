@@ -103,7 +103,7 @@ export const mapCkEthereumTransaction = ({
 	}
 
 	if (nonNullish(burn)) {
-		const memo = fromNullable(burn.memo) ?? [];
+		const memo = fromNullable(burn.memo) ?? new Uint8Array;
 
 		const burnMemo = burnMemoInfo(memo);
 
