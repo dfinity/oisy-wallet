@@ -1,4 +1,4 @@
-import type { PoolMetadata } from '$declarations/icp_swap_pool/declarations/icp_swap_pool.did';
+import type { PoolMetadata } from '$declarations/icp_swap_pool/icp_swap_pool.did';
 import type { SwapAmountsReply } from '$declarations/kong_backend/kong_backend.did';
 import { ETHEREUM_NETWORK, SEPOLIA_NETWORK } from '$env/networks/networks.eth.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';

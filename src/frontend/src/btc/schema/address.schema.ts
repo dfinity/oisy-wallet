@@ -1,5 +1,5 @@
 import { parseBtcAddress } from '$btc/utils/btc-address.utils';
-import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
+import type { BtcAddress } from '$declarations/backend/backend.did';
 import { AddressSchema } from '$lib/schema/address.schema';
 import { isBtcAddress } from '$lib/utils/address.utils';
 import { nonNullish } from '@dfinity/utils';
