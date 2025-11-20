@@ -36,9 +36,8 @@ describe('earning.derived', () => {
 			usdValue({ decimals: mockGldtToken.decimals, balance: amount, exchangeRate: 1 })
 		);
 
-		vi.mock('$lib/derived/tokens.derived', async (importOriginal) => {
-			const actual = await importOriginal<typeof import('$lib/derived/tokens.derived')>();
-
+		vi.mock(import('$lib/derived/tokens.derived'), async (importOriginal) => {
+			const actual = await importOriginal();
 			const staticStore = <T>(value: T) => ({
 				subscribe: (fn: (v: T) => void): (() => void) => {
 					fn(value);
