@@ -7,7 +7,6 @@ describe('ScannerWizardSteps', () => {
 	const expectedBaseConfig: WizardSteps<WizardStepsScanner> = [
 		{
 			name: WizardStepsScanner.SCAN,
-
 			title: en.scanner.text.scan_qr_code
 		},
 		{
