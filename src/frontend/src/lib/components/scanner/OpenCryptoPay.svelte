@@ -20,7 +20,9 @@
 				receipt={$data.displayName}
 			/>
 
-			<ReceiptData recipient={$data?.recipient} />
+			{#if nonNullish($data.recipient)}
+				<ReceiptData recipient={$data.recipient} />
+			{/if}
 		{/if}
 	</div>
 
