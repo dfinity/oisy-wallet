@@ -95,7 +95,8 @@ generate_declarations() {
     # That's why we have to post-process the results.
     mv "${generatedTsfile}" "${didfolder}"
     mv "${generatedJsfile}" "${didfolder}"
-    rm -r "${generatedFolder}"
+    # TODO: re-remove the generated folder once we adapt all imports to the new "old" location.
+    # rm -r "${generatedFolder}"å
   else
     echo "DID file skipped: $didfile"
   fi
