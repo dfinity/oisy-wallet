@@ -35,9 +35,8 @@
 			{asset}
 		</output>
 	</div>
-	<div class="w-full rounded-b-[24px] bg-brand-subtle-20">
-		<p class="m-2 flex items-center justify-center gap-2 p-1 text-xs font-normal text-secondary"
-			>{$i18n.scanner.text.powered_by} <IconOpenCryptoPay /></p
-		></div
+	<div class="flex w-full items-center justify-center rounded-b-[24px] bg-brand-subtle-20 p-1">
+		<p class="m-2 text-xs font-normal text-secondary">{$i18n.scanner.text.powered_by}</p
+		><IconOpenCryptoPay /></div
 	>
 </div>
