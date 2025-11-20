@@ -1,7 +1,6 @@
 import type { Transaction } from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import type { CanisterApiFunctionParamsWithCanisterId } from '$lib/types/canister';
-import type { OptionIdentity } from '$lib/types/identity';
 import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import { Principal } from '@icp-sdk/core/principal';
 
