@@ -313,3 +313,6 @@ export const STAKE_PROVIDER_EXTERNAL_URL = 'stake-provider-external-url';
 // PWA
 export const PWA_INFO_BANNER_TEST_ID = 'pwa-info-banner';
 export const PWA_INFO_BANNER_CLOSE_BUTTON_TEST_ID = 'pwa-info-banner-close-button';
+
+//OpenCryptoPay
+export const OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON = 'open-crypto-pay-enter-manually-button';

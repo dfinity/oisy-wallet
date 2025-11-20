@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { isEmptyString } from '@dfinity/utils';
+	import { isEmptyString, isNullish } from '@dfinity/utils';
 	import { getContext } from 'svelte';
 	import IconChain from '$lib/components/icons/IconChain.svelte';
 	import QrCodeScanner from '$lib/components/qr/QrCodeScanner.svelte';
@@ -14,6 +14,7 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { PAY_CONTEXT_KEY, type PayContext } from '$lib/stores/open-crypto-pay.store';
 	import type { QrStatus } from '$lib/types/qr-code';
+	import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 
 	interface Props {
 		onNext: () => void;
@@ -24,7 +25,7 @@
 	let openBottomSheet = $state(false);
 	let uri = $state('');
 	let error = $state('');
-	let invalid = $derived(isEmptyString(uri));
+	let isEmptyUri = $derived(isEmptyString(uri));
 
 	const { setData } = getContext<PayContext>(PAY_CONTEXT_KEY);
 
@@ -47,7 +48,7 @@
 	};
 
 	const handleScan = async ({ status, code }: { status: QrStatus; code?: string }) => {
-		if (status !== 'success' || !code) {
+		if (status !== 'success' || isNullish(code)) {
 			return;
 		}
 		await processCode(code);
@@ -58,7 +59,7 @@
 	};
 
 	$effect(() => {
-		if (isEmptyString(uri)) {
+		if (isEmptyUri) {
 			error = '';
 		}
 	});
@@ -92,7 +93,7 @@
 			{/snippet}
 
 			{#snippet footer()}
-				<Button disabled={invalid} fullWidth onclick={handleManualConnect}
+				<Button disabled={isEmptyUri} fullWidth onclick={handleManualConnect}
 					>{$i18n.core.text.continue}</Button
 				>
 			{/snippet}
@@ -102,7 +103,9 @@
 	{#snippet toolbar()}
 		<Responsive up="md">
 			<ButtonGroup>
-				<Button disabled={invalid} onclick={handleManualConnect}>{$i18n.core.text.continue}</Button>
+				<Button disabled={isEmptyUri} onclick={handleManualConnect}
+					>{$i18n.core.text.continue}</Button
+				>
 			</ButtonGroup>
 		</Responsive>
 
@@ -117,7 +120,7 @@
 						error = '';
 						openBottomSheet = true;
 					}}
-					testId="button-enter-manually"
+					testId={OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON}
 				>
 					{$i18n.scanner.text.enter_manually}
 					<IconChain />

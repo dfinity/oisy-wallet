@@ -1,4 +1,5 @@
 import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+import { OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON } from '$lib/constants/test-ids.constants';
 import en from '$lib/i18n/en.json';
 import * as openCryptoPayServices from '$lib/services/open-crypto-pay.services';
 import { PAY_CONTEXT_KEY } from '$lib/stores/open-crypto-pay.store';
@@ -67,7 +68,7 @@ describe('ScannerCode.svelte', () => {
 		});
 
 	const openManualEntry = async () => {
-		const enterManuallyButton = screen.getByTestId('button-enter-manually');
+		const enterManuallyButton = screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON);
 		await fireEvent.click(enterManuallyButton);
 	};
 
@@ -84,7 +85,7 @@ describe('ScannerCode.svelte', () => {
 	it('should render enter manually button', () => {
 		renderWithContext();
 
-		expect(screen.getByTestId('button-enter-manually')).toBeInTheDocument();
+		expect(screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).toBeInTheDocument();
 	});
 
 	it('should show input after clicking enter manually', async () => {
@@ -192,11 +193,35 @@ describe('ScannerCode.svelte', () => {
 
 		await fireEvent.input(input, { target: { value: 'some-value' } });
 
-		const enterManuallyButton = screen.getByTestId('button-enter-manually');
+		const enterManuallyButton = screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON);
 		await fireEvent.click(enterManuallyButton);
 
 		await waitFor(() => {
 			expect(input).toHaveValue('');
+		});
+	});
+
+	it('should not clear error when uri changes to non-empty value', async () => {
+		vi.mocked(openCryptoPayServices.processOpenCryptoPayCode).mockRejectedValue(new Error());
+
+		renderWithContext();
+
+		await openManualEntry();
+
+		const input = await screen.findByPlaceholderText(en.scanner.text.enter_or_paste_code);
+
+		await fireEvent.input(input, { target: { value: 'invalid' } });
+		const button = screen.getByRole('button', { name: en.core.text.continue });
+		await fireEvent.click(button);
+
+		await waitFor(() => {
+			expect(screen.getByText(en.scanner.error.code_link_is_not_valid)).toBeInTheDocument();
+		});
+
+		await fireEvent.input(input, { target: { value: 'different-invalid-code' } });
+
+		await waitFor(() => {
+			expect(screen.getByText(en.scanner.error.code_link_is_not_valid)).toBeInTheDocument();
 		});
 	});
 });
