@@ -5,7 +5,7 @@ import type {
 	CreateChallengeError,
 	GetAllowedCyclesError,
 	SelectedUtxosFeeError
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import { mapIcrc2ApproveError, type ApproveError } from '@icp-sdk/canisters/ledger/icp';
 

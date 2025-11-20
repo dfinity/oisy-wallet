@@ -7,7 +7,7 @@ import type {
 	GetUserProfileError,
 	UserProfile,
 	Utxo
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import type { TxId } from '$declarations/kong_backend/declarations/kong_backend.did';
 import type {
 	BtcTxOutput,
