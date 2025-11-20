@@ -17,8 +17,7 @@ import { Principal } from '@icp-sdk/core/principal';
  */
 export const transactions = async ({
 	identity,
-	certified,
-	canisterId,
+	certified,	canisterId,
 	...rest
 }: CanisterApiFunctionParamsWithCanisterId<QueryParams>): Promise<Transaction[]> => {
 	const { transactions } = await extV2TokenCanister({
