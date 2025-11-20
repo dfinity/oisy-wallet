@@ -1,4 +1,4 @@
-import type { chat_response_v1 } from '$declarations/llm/declarations/llm.did';
+import type { chat_response_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import AiAssistantConsole from '$lib/components/ai-assistant/AiAssistantConsole.svelte';
 import { AI_ASSISTANT_SEND_MESSAGE_BUTTON } from '$lib/constants/test-ids.constants';

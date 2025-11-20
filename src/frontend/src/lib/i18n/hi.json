@@ -8,6 +8,7 @@
 			"done": "हो गया",
 			"close": "बंद करें",
 			"change": "बदलें",
+			"continue": "",
 			"apply": "लागू करें",
 			"retry": "",
 			"refresh": "रीफ्रेश करें",
@@ -216,7 +217,8 @@
 			"walletconnect": "वॉलेटकनेक्ट",
 			"game": "गेम",
 			"tools": "टूल्स",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +380,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +888,28 @@
 			"solana_transaction_expired": "आपका लेनदेन सोलाना नेटवर्क द्वारा संसाधित नहीं किया गया था और समाप्त हो गया था, सबसे अधिक संभावना है क्योंकि प्रदान किया गया प्राथमिकता शुल्क पर्याप्त नहीं था। हमने इसे नवीनतम अनुशंसित राशि में अपडेट कर दिया है, इसलिए कृपया इसे फिर से भेजने का प्रयास करें।",
 			"solana_confirmation_failed": "हमें आपके द्वारा अभी बनाए गए लेनदेन के लिए कोई पुष्टि नहीं मिली। कृपया कुछ सेकंड प्रतीक्षा करें और फिर अपनी टोकन की लेनदेन सूची जांचें कि क्या आपका लेनदेन सही ढंग से बनाया गया था।",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1765,30 @@
 	},
 	"earning": {
 		"text": {
-			"title": "कमाएँ"
+			"title": "कमाएँ",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "सोना",
-			"gold_description": "GLDT स्टेकिंग",
-			"stablecoins_title": "स्थिर सिक्के",
-			"stablecoins_description": "जल्द आ रहा है",
-			"sprinkles_title": "स्प्रिंकल्स",
-			"sprinkles_description": "OISY पुरस्कार"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

@@ -4,7 +4,7 @@ import type {
 	IcrcToken,
 	SplToken,
 	Token
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import type { ContractAddress } from '$eth/types/address';
 import type { EthereumChainId } from '$eth/types/network';
 import type {

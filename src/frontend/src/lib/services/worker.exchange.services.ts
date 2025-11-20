@@ -29,7 +29,6 @@ export class ExchangeWorker extends AppWorker {
 							'An error occurred while attempting to retrieve the USD exchange rates.',
 							(data as PostMessageDataResponseExchangeError | undefined)?.err
 						);
-						return;
 				}
 			}
 		);

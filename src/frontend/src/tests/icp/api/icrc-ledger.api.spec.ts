@@ -14,6 +14,7 @@ import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import { getIcrcSubaccount } from '$icp/utils/icrc-account.utils';
 import { mockValidIcToken } from '$tests/mocks/ic-tokens.mock';
 import { mockIdentity, mockPrincipal, mockPrincipal2 } from '$tests/mocks/identity.mock';
+import { toNullable } from '@dfinity/utils';
 import {
 	IcrcLedgerCanister,
 	IcrcMetadataResponseEntries,
@@ -22,8 +23,7 @@ import {
 	type IcrcBlockIndex,
 	type IcrcGetBlocksResult,
 	type IcrcTokenMetadataResponse
-} from '@dfinity/ledger-icrc';
-import { toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import { mock } from 'vitest-mock-extended';
 
 vi.mock('$icp/utils/date.utils', () => ({
@@ -570,8 +570,11 @@ describe('icrc-ledger.api', () => {
 			identity: mockIdentity
 		};
 
-		const candidAccount = { owner: mockPrincipal, subaccount: toNullable([1, 2, 3]) };
-		const expectedAccount = { owner: mockPrincipal, subaccount: [1, 2, 3] };
+		const candidAccount = {
+			owner: mockPrincipal,
+			subaccount: toNullable(Uint8Array.from([1, 2, 3]))
+		};
+		const expectedAccount = { owner: mockPrincipal, subaccount: Uint8Array.from([1, 2, 3]) };
 
 		beforeEach(() => {
 			ledgerCanisterMock.getMintingAccount.mockResolvedValue(toNullable(candidAccount));

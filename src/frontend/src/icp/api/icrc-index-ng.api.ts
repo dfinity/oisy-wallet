@@ -3,12 +3,12 @@ import { getIcrcAccount } from '$icp/utils/icrc-account.utils';
 import { getAgent } from '$lib/actors/agents.ic';
 import { WALLET_PAGINATION } from '$lib/constants/app.constants';
 import type { OptionIdentity } from '$lib/types/identity';
+import { assertNonNullish, type QueryParams } from '@dfinity/utils';
 import {
 	IcrcIndexNgCanister,
 	type IcrcIndexNgGetTransactions,
 	type IcrcNgStatus
-} from '@dfinity/ledger-icrc';
-import { assertNonNullish, type QueryParams } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { Identity } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 

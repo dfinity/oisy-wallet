@@ -106,7 +106,6 @@
 				});
 
 				onBack();
-				return;
 			}
 		} catch (_: unknown) {
 			toastsError({ msg: { text: $i18n.tokens.import.error.loading_metadata } });

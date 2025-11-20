@@ -21,13 +21,16 @@ import type {
 import * as eventsUtils from '$lib/utils/events.utils';
 import { mockIdentity, mockPrincipal } from '$tests/mocks/identity.mock';
 import type { TestUtil } from '$tests/types/utils';
-import { IndexCanister, type TransactionWithId as TransactionWithIdIcp } from '@dfinity/ledger-icp';
+import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+import {
+	IndexCanister,
+	type TransactionWithId as TransactionWithIdIcp
+} from '@icp-sdk/canisters/ledger/icp';
 import {
 	IcrcIndexNgCanister,
 	IcrcLedgerCanister,
 	type IcrcIndexNgTransactionWithId
-} from '@dfinity/ledger-icrc';
-import { arrayOfNumberToUint8Array, isNullish, jsonReplacer, toNullable } from '@dfinity/utils';
+} from '@icp-sdk/canisters/ledger/icrc';
 import type { MockInstance } from 'vitest';
 import { mock } from 'vitest-mock-extended';
 
@@ -250,6 +253,14 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 	}): TestUtil => {
 		let scheduler: IcWalletScheduler<PostMessageDataRequest>;
 
+		const ref = isNullish(startData)
+			? undefined
+			: 'ledgerCanisterId' in startData
+				? startData.ledgerCanisterId
+				: 'indexCanisterId' in startData
+					? startData.indexCanisterId
+					: startData.canisterId;
+
 		return {
 			setup: () => {
 				scheduler = initScheduler(startData);
@@ -275,6 +286,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(5);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
 						msg: `${msg}CleanUp`,
 						data: {
 							transactionIds: [`${mockRogueId}`]
@@ -295,6 +307,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 					expect(postMessageMock).toHaveBeenCalledTimes(3);
 
 					expect(postMessageMock).toHaveBeenCalledWith({
+						ref,
 						msg: `${msg}Error`,
 						data: {
 							error: err
@@ -725,6 +738,7 @@ describe('ic-wallet-balance-and-transactions.worker', () => {
 				expect(postMessageMock).toHaveBeenCalledTimes(3);
 				expect(postMessageMock).toHaveBeenNthCalledWith(1, mockPostMessageStatusInProgress);
 				expect(postMessageMock).toHaveBeenNthCalledWith(2, {
+					ref: startData.ledgerCanisterId,
 					msg: `${msg}Error`,
 					data: {
 						error: new Error(
