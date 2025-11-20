@@ -7,8 +7,8 @@ set -exuo pipefail
 
 	Note: This does so WITHOUT deploying any canisters.  Typically "dfx generate"
 	requires all the canisters to be deployed locally, which seems absurdly heavyweight.
-	This code just downloads the candid files and puts them where they would normally
-	be found for a local deployment.  Much faster!
+	This code just downloads the candid files of the canisters not developed in the repository
+	and puts them where they would normally be found for a local deployment.  Much faster!
 
 	Dependencies:
 	- Please install jq before running this script.
@@ -69,14 +69,44 @@ install_did_files
 scripts/bind/rust.sh cycles_ledger
 # Generate javascript & typescript bindings for canisters with directories in `declarations`:
 mapfile -t canisters < <(ls src/declarations/)
-for canister in "${canisters[@]}"; do
+
+generate_declarations() {
+  local canister="$1"
+
   echo "Generating bindings for $canister"
-  dfx generate "$canister"
-  # Copy the generated files to subdirectories in src/declarations/$canister/declarations to adapt to the use of icp-bindgen
-  mkdir -p "src/declarations/${canister}/declarations"
-  cp -f "src/declarations/${canister}/${canister}.did.d.ts" "src/declarations/${canister}/declarations/${canister}.did.d.ts"
+
+  local didfile=".dfx/local/canisters/${canister}/${canister}.did"
+  local didfolder="src/declarations/${canister}"
+
+  local generatedFolder="${didfolder}/declarations"
+  local generatedTsfile="${generatedFolder}/${canister}.did.d.ts"
+  local generatedJsfile="${generatedFolder}/${canister}.did.js"
+
+  if [ -f "$didfile" ]; then
+    mkdir -p "$didfolder"
+
+    # --actor-disabled: skip generating actor files, since we handle those ourselves
+    # --force: overwrite files. Required; otherwise, icp-bindgen would delete files at preprocess,
+    # which causes issues when multiple .did files are located in the same folder.
+    npx icp-bindgen --did-file "${didfile}" --out-dir "${didfolder}" --actor-disabled --force
+
+    # icp-bindgen generates the files in a `declarations` subfolder
+    # using a different suffix for JavaScript as the one we used to use.
+    # That's why we have to post-process the results.
+    mv "${generatedTsfile}" "${didfolder}"
+    mv "${generatedJsfile}" "${didfolder}"
+    # TODO: re-remove the generated folder once we adapt all imports to the new "old" location.
+    # rm -r "${generatedFolder}"
+  else
+    echo "DID file skipped: $didfile"
+  fi
+}
+
+for canister in "${canisters[@]}"; do
+  generate_declarations "$canister"
 done
-# Clean up..
+# Rename factories and generate their certified counterparts.
 node scripts/did.update.types.mjs
+# Clean up..
 node scripts/did.delete.types.mjs
 npm run format
