@@ -29,9 +29,7 @@
 			onScan(result);
 		}
 
-		if (nonNullish(onBack)) {
-			onBack();
-		}
+			onBack?.();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {
