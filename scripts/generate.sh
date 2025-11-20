@@ -108,4 +108,3 @@ done
 node scripts/did.update.types.mjs
 # Clean up..
 node scripts/did.delete.types.mjs
-npm run format
