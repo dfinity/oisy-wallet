@@ -16,6 +16,8 @@
 	}
 
 	const { cardData, cardFields }: Props = $props();
+
+	const formattedApy = $derived(cardFields.apy ? `${cardFields.apy}%` : '-');
 </script>
 
 <EarningOpportunityCard>
@@ -24,9 +26,7 @@
 	{/snippet}
 	{#snippet badge()}
 		{$i18n.stake.text.current_apy_label}
-		<span class="ml-1 font-bold text-success-primary"
-			>{nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-'}</span
-		>
+		<span class="ml-1 font-bold text-success-primary">{formattedApy}</span>
 	{/snippet}
 	{#snippet title()}
 		{resolveText({ i18n: $i18n, path: cardData.title })}
@@ -44,9 +44,8 @@
 						})}</span
 					>
 					<span class="font-bold">
-						{#if cardField === EarningCardFields.CURRENT_EARNING || cardField === EarningCardFields.EARNING_POTENTIAL}
+						{#if cardField === EarningCardFields.EARNING_POTENTIAL}
 							<EarningYearlyAmount
-								formatPositiveAmount={cardField === EarningCardFields.CURRENT_EARNING}
 								showPlusSign
 								value={nonNullish(cardFields[cardField])
 									? Number(cardFields[cardField])
@@ -56,8 +55,22 @@
 									-
 								{/snippet}
 							</EarningYearlyAmount>
+						{:else if cardField === EarningCardFields.CURRENT_EARNING}
+							<EarningYearlyAmount
+								formatPositiveAmount
+								showPlusSign
+								value={nonNullish(cardFields[cardField]) &&
+								nonNullish(cardFields[EarningCardFields.APY])
+									? (Number(cardFields[cardField]) * Number(cardFields[EarningCardFields.APY])) /
+										100
+									: undefined}
+							>
+								{#snippet fallback()}
+									-
+								{/snippet}
+							</EarningYearlyAmount>
 						{:else if cardField === EarningCardFields.APY}
-							{nonNullish(cardFields.apy) ? `${cardFields.apy}%` : '-'}
+							{formattedApy}
 						{:else}
 							{nonNullish(cardFields[cardField])
 								? resolveText({
