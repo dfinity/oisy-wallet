@@ -12,7 +12,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 type EarningDataRecord = { [key in EarningCardFields]?: string | number } & {
@@ -82,7 +82,7 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 				return highest;
 			}
 
-			if (!highest) {
+			if (isNullish(highest)) {
 				return record;
 			}
 
