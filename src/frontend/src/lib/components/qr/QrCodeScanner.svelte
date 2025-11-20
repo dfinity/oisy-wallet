@@ -2,7 +2,7 @@
 	import { QRCodeReader } from '@dfinity/gix-components';
 	import { onMount } from 'svelte';
 	import { ADDRESS_BOOK_QR_CODE_SCAN } from '$lib/constants/test-ids.constants';
-	import type {QrStatus, QrSuccessStatus} from '$lib/types/qr-code';
+	import type { QrStatus, QrSuccessStatus } from '$lib/types/qr-code';
 
 	interface Props {
 		onScan: ({ status, code }: { status: QrSuccessStatus; code?: string }) => void;

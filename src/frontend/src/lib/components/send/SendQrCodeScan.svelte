@@ -6,7 +6,7 @@
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { toastsError } from '$lib/stores/toasts.store';
-	import type {QrResponse, QrStatus, QrSuccessStatus} from '$lib/types/qr-code';
+	import type { QrResponse, QrStatus, QrSuccessStatus } from '$lib/types/qr-code';
 	import type { OptionAmount } from '$lib/types/send';
 	import type { OptionToken } from '$lib/types/token';
 

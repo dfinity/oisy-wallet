@@ -4,11 +4,11 @@
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
 	import { ADDRESS_BOOK_CANCEL_BUTTON } from '$lib/constants/test-ids.constants';
-	import type {QrSuccessStatus} from "$lib/types/qr-code";
+	import type { QrSuccessStatus } from '$lib/types/qr-code';
 
 	interface Props {
 		onCancel: () => void;
-		onScan: ({ status, code }: { status:  QrSuccessStatus; code?: string }) => void;
+		onScan: ({ status, code }: { status: QrSuccessStatus; code?: string }) => void;
 	}
 
 	let { onCancel, onScan }: Props = $props();
