@@ -12,7 +12,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
-import { nonNullish } from '@dfinity/utils';
+import { isNullish, nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 type EarningDataRecord = { [key in EarningCardFields]?: string | number } & {
@@ -62,5 +62,26 @@ export const earningData: Readable<EarningData> = derived(
 				action: () => goto(AppPath.EarningGold)
 			}
 		};
+	}
+);
+
+export const highestApyEarningData: Readable<EarningDataRecord | undefined> = derived(
+	[earningData],
+	([$earningData]) => {
+		const entries = Object.values($earningData);
+
+		if (entries.length === 0) return undefined;
+
+		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
+			const apy = Number(record[EarningCardFields.APY]);
+
+			if (isNullish(apy) || isNaN(apy)) return highest;
+
+			if (isNullish(highest)) return record;
+
+			const highestApy = Number(highest[EarningCardFields.APY]);
+
+			return apy > highestApy ? record : highest;
+		}, undefined);
 	}
 );

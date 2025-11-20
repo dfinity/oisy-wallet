@@ -5,7 +5,7 @@ import { EarningCardFields } from '$env/types/env.earning-cards';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { earningData } from '$lib/derived/earning.derived';
+import { earningData, highestApyEarningData } from '$lib/derived/earning.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { usdValue } from '$lib/utils/exchange.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
@@ -89,6 +89,58 @@ describe('earning.derived', () => {
 
 			expect(rec[EarningCardFields.CURRENT_STAKED]).toBeUndefined();
 			expect(rec[EarningCardFields.CURRENT_EARNING]).toBeUndefined();
+		});
+	});
+
+	describe('highestApyEarningData', () => {
+		it('returns the record with the highest APY', () => {
+			gldtStakeStore.setApy(10);
+			gldtStakeStore.setPosition({ staked: 1000000000n } as unknown as StakePositionResponse);
+
+			const highest = get(highestApyEarningData);
+
+			expect(highest).toBeDefined();
+			expect(highest?.[EarningCardFields.APY]).toBe('10.0');
+		});
+
+		it('returns undefined if no earning records exist', () => {
+			icrcCustomTokensStore.resetAll();
+			gldtStakeStore.reset();
+
+			const highest = get(highestApyEarningData);
+			expect(highest).toBeUndefined();
+		});
+
+		it('ignores records with invalid APY values', () => {
+			gldtStakeStore.setApy(undefined as unknown as number);
+			gldtStakeStore.setPosition({ staked: 1000000000n } as unknown as StakePositionResponse);
+
+			const highest = get(highestApyEarningData);
+
+			expect(highest).toBeUndefined();
+		});
+
+		it('correctly compares numeric APY values across multiple records', () => {
+			const mockSecondRecord = {
+				[EarningCardFields.APY]: '25.0',
+				[EarningCardFields.CURRENT_STAKED]: '999 GLDT',
+				action: vi.fn()
+			};
+
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					'gldt-staking': {
+						[EarningCardFields.APY]: '10.0',
+						action: vi.fn()
+					},
+					'other-earning': mockSecondRecord
+				});
+				return () => {};
+			});
+
+			const highest = get(highestApyEarningData);
+
+			expect(highest).toEqual(mockSecondRecord);
 		});
 	});
 });
