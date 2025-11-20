@@ -12,7 +12,7 @@ import {
 import { i18n } from '$lib/stores/i18n.store';
 import { formatStakeApyNumber, formatToken } from '$lib/utils/format.utils';
 import { calculateTokenUsdAmount } from '$lib/utils/token.utils';
-import { isNullish, nonNullish } from '@dfinity/utils';
+import { nonNullish } from '@dfinity/utils';
 import { derived, type Readable } from 'svelte/store';
 
 type EarningDataRecord = { [key in EarningCardFields]?: string | number } & {
@@ -70,23 +70,19 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 	([$earningData]) => {
 		const entries = Object.values($earningData);
 
-		if (entries.length === 0) {return undefined;}
+		if (entries.length === 0) {
+			return undefined;
+		}
 
 		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
-			const rawCurrent = record[EarningCardFields.APY];
+			const apyRaw = record[EarningCardFields.APY];
+			const currentApy = Number(apyRaw);
 
-			if (isNullish(rawCurrent)) {return highest;}
+			if (!Number.isFinite(currentApy)) return highest;
 
-			const currentApy = typeof rawCurrent === 'number' ? rawCurrent : Number(rawCurrent);
+			if (!highest) return record;
 
-			if (!Number.isFinite(currentApy)) {return highest;}
-
-			if (isNullish(highest)) {
-				return record;
-			}
-
-			const rawHighest = highest[EarningCardFields.APY];
-			const highestApy = typeof rawHighest === 'number' ? rawHighest : Number(rawHighest);
+			const highestApy = Number(highest[EarningCardFields.APY]);
 
 			return currentApy > highestApy ? record : highest;
 		}, undefined);
