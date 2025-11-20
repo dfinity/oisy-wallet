@@ -461,5 +461,21 @@
 		"stats": "",
 		"logo": "/images/dapps/solayer-logo.svg",
 		"screenshots": ["/images/dapps/solayer-screenshot.webp"]
+	},
+	{
+		"id": "kamino",
+		"name": "dapps.descriptions.kamino.name",
+		"oneLiner": "dapps.descriptions.kamino.one_liner",
+		"website": "",
+		"github": "",
+		"twitter": "",
+		"discord": "",
+		"tags": ["dapps.categories.defi"],
+		"description": "dapps.descriptions.kamino.description",
+		"usesInternetIdentity": false,
+		"display": "Large",
+		"stats": "",
+		"logo": "/images/dapps/kamino-logo.svg",
+		"screenshots": ["/images/dapps/kamino-screenshot.webp"]
 	}
 ]
