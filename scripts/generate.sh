@@ -95,7 +95,7 @@ generate_declarations() {
     # That's why we have to post-process the results.
     mv "${generatedTsfile}" "${didfolder}"
     mv "${generatedJsfile}" "${didfolder}"
-     rm -r "${generatedFolder}"
+    rm -r "${generatedFolder}"
   else
     echo "DID file skipped: $didfile"
   fi
