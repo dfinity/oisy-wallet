@@ -1,4 +1,4 @@
-import type { UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { UserProfile } from '$declarations/backend/backend.did';
 import { nowInBigIntNanoSeconds } from '$icp/utils/date.utils';
 import * as api from '$lib/api/backend.api';
 import { POUH_ISSUER_CANISTER_ID } from '$lib/constants/app.constants';
