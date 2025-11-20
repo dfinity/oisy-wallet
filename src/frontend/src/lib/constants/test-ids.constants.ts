@@ -151,6 +151,8 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
+export const SWAP_MODAL_FILTER_NETWORKS_STEP = 'swap-modal-filter-networks-step';
+export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';
@@ -218,6 +220,7 @@ export const HOW_TO_CONVERT_ETHEREUM_INFO = 'how-to-convert-ethereum-info';
 export const HOW_TO_CONVERT_ETHEREUM_QR_CODE = 'how-to-convert-ethereum-qr-code';
 
 export const MODAL_TOKEN_LIST_DEFAULT_NO_RESULTS = 'modal-token-list-item-default-no-results';
+export const MODAL_TOKENS_LIST = 'modal-tokens-list';
 
 export const ADDRESS_BOOK_MODAL = 'address-book-modal';
 export const ADDRESS_BOOK_ADD_CONTACT_BUTTON = 'address-book-add-contact-button';
