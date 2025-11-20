@@ -1447,7 +1447,7 @@ describe('backend.canister', () => {
 		it('should return fee percentiles with success response', async () => {
 			const response = {
 				Ok: {
-					fee_percentiles: [5n, 10n, 15n, 20n, 30n]
+					fee_percentiles: BigUint64Array.from([5n, 10n, 15n, 20n, 30n])
 				}
 			};
 
