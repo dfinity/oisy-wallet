@@ -5,7 +5,11 @@ import { EarningCardFields } from '$env/types/env.earning-cards';
 import { gldtStakeStore } from '$icp/stores/gldt-stake.store';
 import { icrcCustomTokensStore } from '$icp/stores/icrc-custom-tokens.store';
 import type { IcrcCustomToken } from '$icp/types/icrc-custom-token';
-import { earningData, highestApyEarningData } from '$lib/derived/earning.derived';
+import {
+	allEarningPositionsUsd,
+	earningData,
+	highestApyEarningData
+} from '$lib/derived/earning.derived';
 import { i18n } from '$lib/stores/i18n.store';
 import { usdValue } from '$lib/utils/exchange.utils';
 import * as tokenUtils from '$lib/utils/token.utils';
@@ -141,6 +145,48 @@ describe('earning.derived', () => {
 			const highest = get(highestApyEarningData);
 
 			expect(highest).toEqual(mockSecondRecord);
+		});
+	});
+
+	describe('allEarningPositionsUsd', () => {
+		it('sums all valid CURRENT_EARNING values', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { [EarningCardFields.CURRENT_EARNING]: 10, action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 20, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(30);
+		});
+
+		it('ignores undefined CURRENT_EARNING', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 20, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(20);
+		});
+
+		it('ignores invalid numeric values', () => {
+			vi.spyOn(earningData, 'subscribe').mockImplementation((fn) => {
+				fn({
+					a: { [EarningCardFields.CURRENT_EARNING]: 'abc', action: async () => {} },
+					b: { [EarningCardFields.CURRENT_EARNING]: 10, action: async () => {} }
+				});
+				return () => {};
+			});
+
+			expect(get(allEarningPositionsUsd)).toBe(10);
+		});
+
+		it('returns 0 for empty earning data', () => {
+			expect(get(allEarningPositionsUsd)).toBe(0);
 		});
 	});
 });
