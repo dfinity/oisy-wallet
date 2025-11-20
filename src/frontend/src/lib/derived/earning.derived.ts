@@ -108,8 +108,6 @@ export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData])
 		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
 		const apy = Number(record[EarningCardFields.APY] ?? 0);
 
-		if (isNaN(earning) || isNaN(apy)) return acc;
-
-		return acc + earning * (apy / 100);
+		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
 	}, 0)
 );
