@@ -4,6 +4,7 @@
 	import DefaultEarningOpportunityCard from '$lib/components/earning/DefaultEarningOpportunityCard.svelte';
 	import RewardsEarningOpportunityCard from '$lib/components/earning/RewardsEarningOpportunityCard.svelte';
 	import { earningData } from '$lib/derived/earning.derived';
+
 	const currentReward = $derived(rewardCampaigns[rewardCampaigns.length - 1]);
 </script>
 
