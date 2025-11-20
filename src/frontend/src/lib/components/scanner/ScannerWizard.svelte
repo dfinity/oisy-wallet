@@ -32,9 +32,7 @@
 	{#key currentStep?.name}
 		{#if currentStep?.name === WizardStepsScanner.SCAN}
 			<ScannerCode onNext={() => modal?.next()} />
-		{/if}
-
-		{#if currentStep?.name === WizardStepsScanner.PAY}
+		{: else if currentStep?.name === WizardStepsScanner.PAY}
 			<OpenCryptoPay />
 		{/if}
 	{/key}
