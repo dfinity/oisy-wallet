@@ -1,17 +1,17 @@
 <script lang="ts">
-	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
-	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
 	import { WizardModal, type WizardStep, type WizardSteps } from '@dfinity/gix-components';
-	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
-	import { scannerWizardSteps } from '$lib/config/scanner.config';
-	import { i18n } from '$lib/stores/i18n.store';
 	import { setContext } from 'svelte';
+	import OpenCryptoPay from '$lib/components/scanner/OpenCryptoPay.svelte';
+	import ScannerCode from '$lib/components/scanner/ScannerCode.svelte';
+	import { scannerWizardSteps } from '$lib/config/scanner.config';
+	import { WizardStepsScanner } from '$lib/enums/wizard-steps';
+	import { i18n } from '$lib/stores/i18n.store';
+	import { modalStore } from '$lib/stores/modal.store';
 	import {
 		initPayContext,
 		PAY_CONTEXT_KEY,
 		type PayContext
 	} from '$lib/stores/open-crypto-pay.store';
-	import { modalStore } from '$lib/stores/modal.store';
 
 	let steps = $derived<WizardSteps<WizardStepsScanner>>(scannerWizardSteps({ i18n: $i18n }));
 
@@ -24,7 +24,7 @@
 	setContext<PayContext>(PAY_CONTEXT_KEY, initPayContext());
 </script>
 
-<WizardModal {onClose} {steps} bind:this={modal} bind:currentStep>
+<WizardModal bind:this={modal} {onClose} {steps} bind:currentStep>
 	{#snippet title()}
 		{currentStep?.title}
 	{/snippet}
