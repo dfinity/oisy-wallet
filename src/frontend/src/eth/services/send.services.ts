@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { ETH_BASE_FEE } from '$eth/constants/eth.constants';
 import { infuraCkErc20Providers } from '$eth/providers/infura-ckerc20.providers';
 import { infuraCkETHProviders } from '$eth/providers/infura-cketh.providers';

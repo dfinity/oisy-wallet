@@ -93,8 +93,9 @@ generate_declarations() {
     # icp-bindgen generates the files in a `declarations` subfolder
     # using a different suffix for JavaScript as the one we used to use.
     # That's why we have to post-process the results.
-    mv "${generatedTsfile}" "${didfolder}"
-    mv "${generatedJsfile}" "${didfolder}"
+    # TODO: change back `cp` to `mv` once we adapt all imports to the new "old" location.
+    cp "${generatedTsfile}" "${didfolder}"
+    cp "${generatedJsfile}" "${didfolder}"
     # TODO: re-remove the generated folder once we adapt all imports to the new "old" location.
     # rm -r "${generatedFolder}"
   else
