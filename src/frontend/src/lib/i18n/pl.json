@@ -8,6 +8,7 @@
 			"done": "Gotowe",
 			"close": "Zamknij",
 			"change": "Zmień",
+			"continue": "",
 			"apply": "Zastosuj",
 			"retry": "",
 			"refresh": "Odśwież",
@@ -900,7 +901,13 @@
 			"country": "",
 			"phone_number": "",
 			"email_address": "",
-			"website": ""
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {

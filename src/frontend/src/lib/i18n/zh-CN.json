@@ -8,6 +8,7 @@
 			"done": "完成",
 			"close": "关闭",
 			"change": "更改",
+			"continue": "",
 			"apply": "应用",
 			"retry": "重试",
 			"refresh": "刷新",
@@ -900,7 +901,13 @@
 			"country": "",
 			"phone_number": "",
 			"email_address": "",
-			"website": ""
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
