@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { nonNullish } from '@dfinity/utils';
+	import type { Snippet } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { currentCurrency } from '$lib/derived/currency.derived';
 	import { currentLanguage } from '$lib/derived/i18n.derived';
@@ -7,7 +8,6 @@
 	import { i18n } from '$lib/stores/i18n.store';
 	import { formatCurrency } from '$lib/utils/format.utils';
 	import { replacePlaceholders } from '$lib/utils/i18n.utils';
-	import type { Snippet } from 'svelte';
 
 	interface Props {
 		value?: number;
