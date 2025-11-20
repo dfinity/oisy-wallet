@@ -242,11 +242,11 @@ export interface IcrcToken {
 	index_id: [] | [Principal];
 }
 export type Icrcv2AccountId =
-	| { Account: Uint8Array | number[] }
+	| { Account: Uint8Array }
 	| {
 			WithPrincipal: {
 				owner: Principal;
-				subaccount: [] | [Uint8Array | number[]];
+				subaccount: [] | [Uint8Array];
 			};
 	  };
 export type ImageMimeType =
@@ -289,11 +289,11 @@ export interface NetworksSettings {
 	testnets: TestnetsSettings;
 }
 export interface Outpoint {
-	txid: Uint8Array | number[];
+	txid: Uint8Array;
 	vout: number;
 }
 export interface PendingTransaction {
-	txid: Uint8Array | number[];
+	txid: Uint8Array;
 	utxos: Array<Utxo>;
 }
 export interface SaveNetworksSettingsRequest {
