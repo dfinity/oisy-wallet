@@ -71,7 +71,7 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 		const entries = Object.values($earningData);
 
 		if (entries.length === 0) {
-			return undefined;
+			return;
 		}
 
 		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
