@@ -1,5 +1,3 @@
-import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
-import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import type {
 	AddUserCredentialResult,
 	AllowSigningResponse,
@@ -14,7 +12,9 @@ import type {
 	UserProfile,
 	UserToken,
 	UserTokenId
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
+import { idlFactory as idlCertifiedFactoryBackend } from '$declarations/backend/backend.factory.certified.did';
+import { idlFactory as idlFactoryBackend } from '$declarations/backend/backend.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
 import {
 	mapAllowSigningError,

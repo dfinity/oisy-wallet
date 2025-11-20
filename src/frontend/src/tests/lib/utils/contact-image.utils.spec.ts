@@ -1,4 +1,4 @@
-import type { ContactImage, ImageMimeType } from '$declarations/backend/declarations/backend.did';
+import type { ContactImage, ImageMimeType } from '$declarations/backend/backend.did';
 import { dataUrlToImage, imageToDataUrl } from '$lib/utils/contact-image.utils';
 import { mockAuthStore } from '$tests/mocks/auth.mock';
 

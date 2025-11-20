@@ -1,4 +1,4 @@
-import type { Token as BackendToken } from '$declarations/backend/declarations/backend.did';
+import type { Token as BackendToken } from '$declarations/backend/backend.did';
 import type { Erc20Token } from '$eth/types/erc20';
 import type { IcToken } from '$icp/types/ic-token';
 import type { CustomTokenSection } from '$lib/enums/custom-token-section';
