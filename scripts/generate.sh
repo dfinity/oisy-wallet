@@ -78,9 +78,6 @@ generate_declarations() {
   local didfile=".dfx/local/canisters/${canister}/${canister}.did"
   local didfolder="src/declarations/${canister}"
 
-  # The JavaScript factory file we are using in OISY.
-  local jsFactoryFile="${didfolder}/${canister}.factory.did.js"
-
   local generatedFolder="${didfolder}/declarations"
   local generatedTsfile="${generatedFolder}/${canister}.did.d.ts"
   local generatedJsfile="${generatedFolder}/${canister}.did.js"
@@ -97,7 +94,7 @@ generate_declarations() {
     # using a different suffix for JavaScript as the one we used to use.
     # That's why we have to post-process the results.
     mv "${generatedTsfile}" "${didfolder}"
-    mv "${generatedJsfile}" "${jsFactoryFile}"
+    mv "${generatedJsfile}" "${didfolder}"
     rm -r "${generatedFolder}"
   else
     echo "DID file skipped: $didfile"
@@ -107,7 +104,8 @@ generate_declarations() {
 for canister in "${canisters[@]}"; do
   generate_declarations "$canister"
 done
-# Clean up..
+# Rename factories and generate their certified counterparts.
 node scripts/did.update.types.mjs
+# Clean up..
 node scripts/did.delete.types.mjs
 npm run format
