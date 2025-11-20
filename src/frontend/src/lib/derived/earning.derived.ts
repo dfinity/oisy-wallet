@@ -78,9 +78,13 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 			const apyRaw = record[EarningCardFields.APY];
 			const currentApy = Number(apyRaw);
 
-			if (!Number.isFinite(currentApy)) return highest;
+			if (!Number.isFinite(currentApy)) {
+				return highest;
+			}
 
-			if (!highest) return record;
+			if (!highest) {
+				return record;
+			}
 
 			const highestApy = Number(highest[EarningCardFields.APY]);
 
