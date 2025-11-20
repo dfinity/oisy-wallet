@@ -11,7 +11,7 @@ import type {
 	UserProfile,
 	UserToken,
 	UserTokenId
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import { BACKEND_CANISTER_ID } from '$lib/constants/app.constants';
 import type {

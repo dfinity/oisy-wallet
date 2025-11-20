@@ -5,7 +5,7 @@ import type {
 	IcrcToken,
 	UserProfile,
 	UserToken
-} from '$declarations/backend/declarations/backend.did';
+} from '$declarations/backend/backend.did';
 
 import { BackendCanister } from '$lib/canisters/backend.canister';
 import {
@@ -75,7 +75,7 @@ describe('backend.canister', () => {
 	};
 
 	const btcAddPendingTransactionParams = {
-		txId: [1, 2, 3],
+		txId: Uint8Array.from([1, 2, 3]),
 		network: { testnet: null },
 		address: mockBtcAddress,
 		utxos: [
@@ -83,7 +83,7 @@ describe('backend.canister', () => {
 				height: 1000,
 				value: 1n,
 				outpoint: {
-					txid: [1, 2, 3],
+					txid: Uint8Array.from([1, 2, 3]),
 					vout: 1
 				}
 			}
@@ -1447,7 +1447,7 @@ describe('backend.canister', () => {
 		it('should return fee percentiles with success response', async () => {
 			const response = {
 				Ok: {
-					fee_percentiles: [5n, 10n, 15n, 20n, 30n]
+					fee_percentiles: BigUint64Array.from([5n, 10n, 15n, 20n, 30n])
 				}
 			};
 

@@ -1,4 +1,4 @@
-import type { Transaction } from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
+import type { Transaction } from '$declarations/ext_v2_token/ext_v2_token.did';
 import type { CanisterIdText } from '$lib/types/canister';
 import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
 import { mockAccountIdentifierText, mockAccountIdentifierText2 } from '$tests/mocks/identity.mock';

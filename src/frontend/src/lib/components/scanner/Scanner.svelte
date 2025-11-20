@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IconScanLine from '$lib/components/icons/IconScanLine.svelte';
+	import ScannerWizard from '$lib/components/scanner/ScannerWizard.svelte';
 	import ButtonIcon from '$lib/components/ui/ButtonIcon.svelte';
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
@@ -21,5 +22,5 @@
 </ButtonIcon>
 
 {#if $modalUniversalScannerOpen}
-	<!-- TODO: add ScannerWizard -->
+	<ScannerWizard />
 {/if}

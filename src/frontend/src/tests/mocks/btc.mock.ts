@@ -9,7 +9,7 @@ export const mockUtxo: Utxo = {
 	height: 1000,
 	value: 1n,
 	outpoint: {
-		txid: [1, 2, 3],
+		txid: Uint8Array.from([1, 2, 3]),
 		vout: 1
 	}
 };

@@ -1,4 +1,4 @@
-import type { chat_message_v1 } from '$declarations/llm/declarations/llm.did';
+import type { chat_message_v1 } from '$declarations/llm/llm.did';
 import { llmChat } from '$lib/api/llm.api';
 import {
 	AI_ASSISTANT_LLM_MODEL,
