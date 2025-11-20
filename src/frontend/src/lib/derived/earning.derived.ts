@@ -92,3 +92,22 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 		}, undefined);
 	}
 );
+
+export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CURRENT_EARNING]))
+				? acc
+				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
+		0
+	)
+);
+
+export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
+	Object.values($earningData).reduce((acc, record) => {
+		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
+		const apy = Number(record[EarningCardFields.APY] ?? 0);
+
+		return isNaN(earning) || isNaN(apy) ? acc : acc + earning * (apy / 100);
+	}, 0)
+);

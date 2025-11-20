@@ -57,7 +57,7 @@ describe('btc.utils', () => {
 		});
 
 		it('converts number[] transaction ID to hex with byte reversal', () => {
-			const tx = { txid: [15, 255, 1], utxos: [] };
+			const tx = { txid: Uint8Array.from([15, 255, 1]), utxos: [] };
 
 			expect(pendingTransactionTxidToString(tx)).toBe('01ff0f');
 		});
