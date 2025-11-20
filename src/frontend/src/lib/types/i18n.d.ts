@@ -699,6 +699,8 @@ interface I18nScanner {
 		enter_manually: string;
 		url_or_code: string;
 		enter_or_paste_code: string;
+		scan: string;
+		pay: string;
 	};
 	error: { code_link_is_not_valid: string };
 }
