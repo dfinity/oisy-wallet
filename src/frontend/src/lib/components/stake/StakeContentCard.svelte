@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 	import { nonNullish } from '@dfinity/utils';
 

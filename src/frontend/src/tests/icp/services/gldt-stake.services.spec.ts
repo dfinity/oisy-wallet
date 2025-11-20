@@ -1,4 +1,4 @@
-import type { TokenSymbol } from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { TokenSymbol } from '$declarations/gldt_stake/gldt_stake.did';
 import { GLDT_LEDGER_CANISTER_ID } from '$env/networks/networks.icrc.env';
 import { ICP_TOKEN } from '$env/tokens/tokens.icp.env';
 import * as gldtStakeApi from '$icp/api/gldt_stake.api';

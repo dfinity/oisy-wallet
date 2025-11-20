@@ -1,7 +1,7 @@
 import type {
 	_SERVICE as ExtV2TokenService,
 	Transaction
-} from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
+} from '$declarations/ext_v2_token/ext_v2_token.did';
 import { idlFactory as idlCertifiedFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.certified.did';
 import { idlFactory as idlFactoryExtV2Token } from '$declarations/ext_v2_token/ext_v2_token.factory.did';
 import { getAgent } from '$lib/actors/agents.ic';
