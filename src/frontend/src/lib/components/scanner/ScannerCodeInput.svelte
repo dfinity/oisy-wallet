@@ -14,7 +14,9 @@
 
 	let { value = $bindable(''), error, label, placeholder, name }: Props = $props();
 
-	let borderColor = $derived(error ? 'var(--color-border-error-solid)' : 'inherit');
+	let isError = $derived(notEmptyString(error));
+
+	let borderColor = $derived(isError ? 'var(--color-border-error-solid)' : 'inherit');
 </script>
 
 <div>
@@ -23,7 +25,7 @@
 	<div style={`--input-custom-border-color: ${borderColor}`}>
 		<InputText {name} {placeholder} bind:value />
 
-		{#if notEmptyString(error)}
+		{#if isError}
 			<p class="text-md mb-0 pt-2 text-error-primary" transition:slide={SLIDE_DURATION}>
 				{error}
 			</p>

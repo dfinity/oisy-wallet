@@ -24,10 +24,11 @@ describe('PayHero', () => {
 
 		expect(output?.textContent).toContain('100');
 		expect(output?.textContent).toContain('CHF');
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 
 	it('should render receipt name in header', () => {
-		const { getByText } = render(PayHero, {
+		const { getByText, container } = render(PayHero, {
 			amount: 50,
 			asset: 'EUR',
 			receipt: 'Coffee Shop'
@@ -38,6 +39,7 @@ describe('PayHero', () => {
 		});
 
 		expect(getByText(payTo)).toBeInTheDocument();
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 
 	it('should render with string amount', () => {
@@ -51,6 +53,7 @@ describe('PayHero', () => {
 
 		expect(amountElement).toBeInTheDocument();
 		expect(amountElement?.textContent?.trim()).toBe('99.99');
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 
 	it('should render with decimal amount', () => {
@@ -64,16 +67,18 @@ describe('PayHero', () => {
 
 		expect(output?.textContent).toContain('123.45');
 		expect(output?.textContent).toContain('BTC');
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 
 	it('should display "Powered by" text with OpenCryptoPay icon', () => {
-		const { getByText } = render(PayHero, {
+		const { getByText, container } = render(PayHero, {
 			amount: 10,
 			asset: 'CHF',
 			receipt: 'Test'
 		});
 
 		expect(getByText(en.scanner.text.powered_by)).toBeInTheDocument();
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 
 	it('should handle different asset types', () => {
@@ -89,6 +94,20 @@ describe('PayHero', () => {
 			const output = container.querySelector('output');
 
 			expect(output?.textContent).toContain(asset);
+			expect(container.querySelector('svg')).toBeInTheDocument();
 		});
+	});
+
+	it('should not render receipt header when receipt is not provided', () => {
+		const { container } = render(PayHero, {
+			amount: 100,
+			asset: 'CHF'
+		});
+
+		const header = container.querySelector('p.mb-3.font-bold.text-secondary');
+
+		expect(header).toBeNull();
+
+		expect(container.querySelector('svg')).toBeInTheDocument();
 	});
 });
