@@ -1,4 +1,4 @@
-import type { CustomToken, UserToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, UserToken } from '$declarations/backend/backend.did';
 import {
 	SUPPORTED_EVM_NETWORKS,
 	SUPPORTED_EVM_NETWORKS_CHAIN_IDS

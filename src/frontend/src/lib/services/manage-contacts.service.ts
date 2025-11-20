@@ -1,4 +1,4 @@
-import type { ContactImage } from '$declarations/backend/declarations/backend.did';
+import type { ContactImage } from '$declarations/backend/backend.did';
 import {
 	createContact as createContactApi,
 	deleteContact as deleteContactApi,

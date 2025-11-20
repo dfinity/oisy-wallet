@@ -1,6 +1,6 @@
 {
 	"name": "@dfinity/oisy-wallet",
-	"version": "1.8.4",
+	"version": "1.8.5",
 	"private": true,
 	"license": "Apache-2.0",
 	"repository": {
@@ -66,12 +66,12 @@
 	},
 	"dependencies": {
 		"@dfinity/gix-components": "^9.0.0-next-2025-11-07.2",
-		"@dfinity/oisy-wallet-signer": "^2.0.0",
+		"@dfinity/oisy-wallet-signer": "^3.0.0",
 		"@dfinity/utils": "^4.0.1",
 		"@dfinity/verifiable-credentials": "^1.2.0",
 		"@dfinity/zod-schemas": "^3.0.1",
 		"@icp-sdk/auth": "^4.2.0",
-		"@icp-sdk/canisters": "^1.1.1",
+		"@icp-sdk/canisters": "^2.0.1",
 		"@icp-sdk/core": "^4.2.1",
 		"@metamask/detect-provider": "^2.0.0",
 		"@noble/ed25519": "^2.3.0",
@@ -99,6 +99,7 @@
 	"devDependencies": {
 		"@dfinity/eslint-config-oisy-wallet": "^0.2.3",
 		"@dfinity/internet-identity-playwright": "^0.0.5",
+		"@icp-sdk/bindgen": "^0.2.0",
 		"@playwright/test": "^1.56.1",
 		"@rollup/plugin-inject": "^5.0.5",
 		"@sveltejs/adapter-static": "^3.0.10",

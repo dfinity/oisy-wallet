@@ -8,6 +8,7 @@
 			"done": "Done",
 			"close": "Close",
 			"change": "Change",
+			"continue": "Continue",
 			"apply": "Apply",
 			"retry": "Retry",
 			"refresh": "Refresh",
@@ -402,6 +403,11 @@
 				"name": "Solayer",
 				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
 				"description": "Solayer is a vertically integrated blockchain stack built on Solana, leveraging InfiniSVM for ultra-low latency and high throughput- scaling to over 1 million transactions per second. It integrates native staking (sSOL), a stablecoin (sUSD), and real-world payments via the Emerald Card. Solayer’s architecture combines DeFi, payments, and infrastructure under a single high-performance chain."
+			},
+			"kamino": {
+				"name": "Kamino",
+				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
+				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
 			}
 		}
 	},
@@ -895,7 +901,15 @@
 			"country": "Country",
 			"phone_number": "Phone number",
 			"email_address": "Email address",
-			"website": "Website"
+			"website": "Website",
+			"enter_manually": "Enter manually",
+			"url_or_code": "URL or the code",
+			"enter_or_paste_code": "Enter or paste code",
+			"scan": "Scan",
+			"pay": "Pay"
+		},
+		"error": {
+			"code_link_is_not_valid": "Code/link is not valid"
 		}
 	},
 	"convert": {

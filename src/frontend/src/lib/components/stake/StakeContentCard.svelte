@@ -1,9 +1,10 @@
 <script lang="ts">
+	import { nonNullish } from '@dfinity/utils';
 	import type { Snippet } from 'svelte';
 
 	interface Props {
 		content: Snippet;
-		buttons: Snippet;
+		buttons?: Snippet;
 		primaryStyle?: boolean;
 	}
 
@@ -18,14 +19,16 @@
 	class:border-0={primaryStyle}
 >
 	<div
-		class="mb-8 flex flex-col justify-center text-center"
+		class="flex flex-col justify-center text-center"
 		class:gap-2={!primaryStyle}
 		class:gap-4={primaryStyle}
 	>
 		{@render content()}
 	</div>
 
-	<div class="flex w-full flex-col gap-2">
-		{@render buttons()}
-	</div>
+	{#if nonNullish(buttons)}
+		<div class="mt-8 flex w-full flex-col gap-2">
+			{@render buttons()}
+		</div>
+	{/if}
 </div>

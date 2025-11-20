@@ -6,7 +6,7 @@
 
 	interface Props {
 		onScan: ({ status, code }: { status: QrSuccessStatus; code?: string }) => void;
-		onBack: () => void;
+		onBack?: () => void;
 	}
 
 	let { onScan, onBack }: Props = $props();
@@ -30,7 +30,7 @@
 			onScan({ status, code });
 		}
 
-		onBack();
+		onBack?.();
 	};
 
 	const onQRCode = ({ detail: code }: CustomEvent<string>) => {

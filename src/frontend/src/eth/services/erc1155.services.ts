@@ -1,4 +1,4 @@
-import type { CustomToken, ErcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, ErcToken } from '$declarations/backend/backend.did';
 import { SUPPORTED_EVM_NETWORKS } from '$env/networks/networks-evm/networks.evm.env';
 import { SUPPORTED_ETHEREUM_NETWORKS } from '$env/networks/networks.eth.env';
 import { alchemyProviders } from '$eth/providers/alchemy.providers';

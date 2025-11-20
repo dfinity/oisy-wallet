@@ -1,4 +1,4 @@
-import type { BtcAddress } from '$declarations/backend/declarations/backend.did';
+import type { BtcAddress } from '$declarations/backend/backend.did';
 import { assertNever } from '@dfinity/utils';
 import {
 	BtcAddressType,

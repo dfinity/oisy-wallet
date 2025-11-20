@@ -11,6 +11,7 @@ interface I18nCore {
 		done: string;
 		close: string;
 		change: string;
+		continue: string;
 		apply: string;
 		retry: string;
 		refresh: string;
@@ -276,6 +277,7 @@ interface I18nDapps {
 		pacifica: { name: string; one_liner: string; description: string };
 		magic_eden: { name: string; one_liner: string; description: string };
 		solayer: { name: string; one_liner: string; description: string };
+		kamino: { name: string; one_liner: string; description: string };
 	};
 }
 
@@ -694,7 +696,13 @@ interface I18nScanner {
 		phone_number: string;
 		email_address: string;
 		website: string;
+		enter_manually: string;
+		url_or_code: string;
+		enter_or_paste_code: string;
+		scan: string;
+		pay: string;
 	};
+	error: { code_link_is_not_valid: string };
 }
 
 interface I18nConvert {
