@@ -4,12 +4,8 @@ import type {
 } from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
-import { bn1Bi, bn2Bi } from '$tests/mocks/balances.mock';
-import {
-	mockAccountIdentifierText,
-	mockAccountIdentifierText2,
-	mockIdentity
-} from '$tests/mocks/identity.mock';
+import { mockExtV2Transactions } from '$tests/mocks/ext-v2-token.mock';
+import { mockIdentity } from '$tests/mocks/identity.mock';
 import type { ActorSubclass } from '@icp-sdk/core/agent';
 import { Principal } from '@icp-sdk/core/principal';
 import { mock } from 'vitest-mock-extended';
@@ -44,23 +40,7 @@ describe('ext-v2-token.canister', () => {
 		});
 
 		it('should correctly call the transactions method', async () => {
-			const mockTransactions: Transaction[] = [
-				{
-					token: 1,
-					time: 123_456n,
-					seller: mockAccountIdentifierText,
-					buyer: mockAccountIdentifierText2,
-					price: bn1Bi
-				},
-				{
-					token: 2,
-					time: 123_789n,
-					seller: mockAccountIdentifierText2,
-					buyer: mockAccountIdentifierText,
-					price: bn2Bi
-				}
-			];
-			service.transactions.mockResolvedValue(mockTransactions);
+			service.transactions.mockResolvedValue(mockExtV2Transactions);
 
 			const { transactions } = await createExtV2TokenCanister({
 				serviceOverride: service
@@ -68,7 +48,7 @@ describe('ext-v2-token.canister', () => {
 
 			const res = await transactions(mockParams);
 
-			expect(res).toEqual(mockTransactions);
+			expect(res).toEqual(mockExtV2Transactions);
 			expect(service.transactions).toHaveBeenCalledExactlyOnceWith();
 		});
 
