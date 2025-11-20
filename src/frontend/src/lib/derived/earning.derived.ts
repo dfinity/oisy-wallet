@@ -94,10 +94,13 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 );
 
 export const allEarningPositionsUsd: Readable<number> = derived([earningData], ([$earningData]) =>
-	Object.values($earningData).reduce<number>((acc, record) => {
-		const currentEarning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
-		return isNaN(currentEarning) ? acc : acc + currentEarning;
-	}, 0)
+	Object.values($earningData).reduce<number>(
+		(acc, record) =>
+			isNaN(Number(record[EarningCardFields.CURRENT_EARNING]))
+				? acc
+				: acc + Number(record[EarningCardFields.CURRENT_EARNING]),
+		0
+	)
 );
 
 export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData]) =>
@@ -105,8 +108,7 @@ export const allEarningYearlyAmountUsd = derived([earningData], ([$earningData])
 		const earning = Number(record[EarningCardFields.CURRENT_EARNING] ?? 0);
 		const apy = Number(record[EarningCardFields.APY] ?? 0);
 
-		// Skip invalid values
-		if (Number.isNaN(earning) || Number.isNaN(apy)) return acc;
+		if (isNaN(earning) || isNaN(apy)) return acc;
 
 		return acc + earning * (apy / 100);
 	}, 0)
