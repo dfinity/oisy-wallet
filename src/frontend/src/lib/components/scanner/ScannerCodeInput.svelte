@@ -14,7 +14,7 @@
 
 	let { value = $bindable(''), error, label, placeholder, name }: Props = $props();
 
-	let borderColor = $derived(error ? 'var(--color-border-error-solid)' : 'inherit');
+	let borderColor = $derived(notEmptyString(error) ? 'var(--color-border-error-solid)' : 'inherit');
 </script>
 
 <div>
