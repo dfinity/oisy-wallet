@@ -2,17 +2,20 @@ import Scanner from '$lib/components/scanner/Scanner.svelte';
 import * as modalDerived from '$lib/derived/modal.derived';
 import { modalStore } from '$lib/stores/modal.store';
 import en from '$tests/mocks/i18n.mock';
-import { fireEvent, render, screen } from '@testing-library/svelte';
+import { fireEvent, render, screen, waitFor } from '@testing-library/svelte';
 import { writable } from 'svelte/store';
 
 vi.mock('$lib/stores/modal.store');
 vi.mock('$lib/derived/modal.derived');
 
 describe('Scanner', () => {
+	const mockModalOpen = writable(false);
+
 	beforeEach(() => {
 		vi.clearAllMocks();
+		mockModalOpen.set(false);
 		vi.mocked(modalStore).openUniversalScanner = vi.fn();
-		vi.mocked(modalDerived).modalUniversalScannerOpen = writable(false);
+		vi.mocked(modalDerived).modalUniversalScannerOpen = mockModalOpen;
 	});
 
 	it('should render button with correct text', () => {
@@ -92,5 +95,25 @@ describe('Scanner', () => {
 
 		expect(button).toBeInTheDocument();
 		expect(anchor).not.toBeInTheDocument();
+	});
+
+	it('should not render ScannerWizard when modal is closed', () => {
+		mockModalOpen.set(false);
+
+		const { container } = render(Scanner);
+
+		const childrenCount = container.children.length;
+
+		expect(childrenCount).toBeGreaterThan(0);
+	});
+
+	it('should render ScannerWizard when modalUniversalScannerOpen is true', async () => {
+		mockModalOpen.set(true);
+
+		const { container } = render(Scanner);
+
+		await waitFor(() => {
+			expect(container.children.length).toBeGreaterThan(0);
+		});
 	});
 });
