@@ -3,6 +3,8 @@ import * as z from 'zod';
 
 export type QrStatus = 'success' | 'cancelled' | 'token_incompatible';
 
+export type QrSuccessStatus = Extract<QrStatus, 'success'>;
+
 export type QrResponse = {
 	status: QrStatus;
 	destination?: string;
