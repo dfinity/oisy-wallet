@@ -8,6 +8,7 @@ import * as currencyExchange from '$lib/stores/currency-exchange.store';
 import { i18n } from '$lib/stores/i18n.store';
 import type { CurrencyExchangeData } from '$lib/types/currency';
 import { replacePlaceholders } from '$lib/utils/i18n.utils';
+import { createMockSnippet } from '$tests/mocks/snippet.mock';
 import { render, screen } from '@testing-library/svelte';
 import { get } from 'svelte/store';
 
@@ -71,7 +72,15 @@ describe('EarningYearlyAmount', () => {
 		expect(span).toHaveClass('text-brand-primary');
 	});
 
-	it('renders nothing if value is null or undefined', () => {
+	it('applies text-tertiary when formatPositiveAmount is true but amount is 0', () => {
+		const { container } = render(EarningYearlyAmount, { value: 0, formatPositiveAmount: true });
+
+		const span = container.querySelector('span');
+
+		expect(span).toHaveClass('text-tertiary');
+	});
+
+	it('renders nothing if value is null or undefined and no fallback is provided', () => {
 		const { container, rerender } = render(EarningYearlyAmount, {
 			value: undefined
 		});
@@ -81,5 +90,14 @@ describe('EarningYearlyAmount', () => {
 		rerender({ value: null as unknown as number });
 
 		expect(container.textContent?.trim()).toBe('');
+	});
+
+	it('renders fallback if provided', () => {
+		const { queryByTestId } = render(EarningYearlyAmount, {
+			value: undefined,
+			fallback: createMockSnippet('fallback')
+		});
+
+		expect(queryByTestId('fallback')).toBeInTheDocument();
 	});
 });

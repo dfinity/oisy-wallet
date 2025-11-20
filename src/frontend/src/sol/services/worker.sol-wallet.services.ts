@@ -46,7 +46,6 @@ export class SolWalletWorker extends AppWorker implements WalletWorker {
 							error: data.error,
 							hideToast: true
 						});
-						return;
 				}
 			}
 		);

@@ -201,9 +201,11 @@ const updateCSP = (indexHtml) => {
 		'https://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-mainnet.quiknode.pro wss://burned-little-dinghy.solana-testnet.quiknode.pro wss://burned-little-dinghy.solana-devnet.quiknode.pro';
 	const solanaApiConnectSrc = `${solanaRpcApiConnectSrc} ${solanaAlchemyApiConnectSrc} ${solanaQuicknodeApiConnectSrc}`;
 
+	const dfxOpenCryptoPay = 'https://api.dfx.swiss';
+
 	const allConnectSrc =
 		'https://ic0.app https://icp0.io https://icp-api.io' +
-		` ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc}`;
+		` ${ethMainnetConnectSrc} ${ethSepoliaConnectSrc} ${evmConnectSrc} ${infuraConnectSrc} ${walletConnectSrc} ${onramperConnectFrameSrc} ${blockstreamApiConnectSrc} ${blockchainApiConnectSrc} ${coingeckoApiConnectSrc} ${solanaApiConnectSrc} ${plausibleApiConnectSrc} ${kongSwapApiConnectSrc} ${paraswapApiConnectSrc} ${dfxOpenCryptoPay}`;
 
 	// TODO: remove once the feature has been completed
 	const NFTS_ENABLED = process.env.VITE_NFTS_ENABLED;

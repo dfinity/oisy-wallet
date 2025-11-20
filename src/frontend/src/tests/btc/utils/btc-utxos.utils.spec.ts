@@ -8,7 +8,7 @@ import {
 } from '$btc/utils/btc-utxos.utils';
 import { utxoTxIdToString } from '$icp/utils/btc.utils';
 import { ZERO } from '$lib/constants/app.constants';
-import type { Utxo } from '@dfinity/ckbtc';
+import type { Utxo } from '@icp-sdk/canisters/ckbtc';
 
 describe('btc-utxos.utils', () => {
 	const createMockUtxo = ({
@@ -39,7 +39,7 @@ describe('btc-utxos.utils', () => {
 		});
 
 		it('should convert number array to hex string with byte reversal', () => {
-			const txid = [1, 2, 3, 4];
+			const txid = Uint8Array.from([1, 2, 3, 4]);
 			const result = utxoTxIdToString(txid);
 
 			expect(result).toBe('04030201');

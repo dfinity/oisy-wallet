@@ -27,6 +27,8 @@ describe('IcTokenFeeContext', () => {
 	};
 
 	beforeEach(() => {
+		vi.clearAllMocks();
+
 		icTokenFeeStore.reset();
 	});
 

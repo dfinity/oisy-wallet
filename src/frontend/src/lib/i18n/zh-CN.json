@@ -8,6 +8,7 @@
 			"done": "完成",
 			"close": "关闭",
 			"change": "更改",
+			"continue": "",
 			"apply": "应用",
 			"retry": "重试",
 			"refresh": "刷新",
@@ -68,7 +69,7 @@
 			"dapp_explorer": "探索",
 			"activity": "活动",
 			"airdrops": "奖励",
-			"earning": "赚取与奖励",
+			"earning": "赚取",
 			"source_code_on_github": "GitHub 上的源代码",
 			"view_on_explorer": "在浏览器中查看",
 			"source_code": "源代码",
@@ -216,7 +217,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "游戏",
 			"tools": "工具包",
-			"ai": "人工智能"
+			"ai": "人工智能",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -382,7 +384,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -870,7 +892,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {

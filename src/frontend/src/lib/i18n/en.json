@@ -8,6 +8,7 @@
 			"done": "Done",
 			"close": "Close",
 			"change": "Change",
+			"continue": "Continue",
 			"apply": "Apply",
 			"retry": "Retry",
 			"refresh": "Refresh",
@@ -68,7 +69,7 @@
 			"dapp_explorer": "Explore",
 			"activity": "Activity",
 			"airdrops": "Rewards",
-			"earning": "Earn & Rewards",
+			"earning": "Earn",
 			"source_code_on_github": "Source code on GitHub",
 			"view_on_explorer": "View on explorer",
 			"source_code": "Source code",
@@ -216,7 +217,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Game",
 			"tools": "Tools",
-			"ai": "AI"
+			"ai": "AI",
+			"nft": "NFT"
 		},
 		"descriptions": {
 			"kongswap": {
@@ -382,10 +384,30 @@
 				"one_liner": "Decentralized alternative to Signal.",
 				"description": "ICPanda Message (dMsg.net) is a decentralized end-to-end encrypted messaging application fully running on the Internet Computer blockchain."
 			},
+			"opensea": {
+				"name": "OpenSea",
+				"one_liner": "OpenSea, exchange everything — token trading and NFT marketplace. Welcome to the best place to discover, trade, and create onchain.",
+				"description": "OpenSea is the world's largest decentralized marketplace for non-fungible tokens (NFTs), where users can create, buy, sell, and trade unique digital assets like art, collectibles, and virtual items. Founded in 2017, it operates on multiple blockchains and allows users to connect a cryptocurrency wallet to manage their digital assets."
+			},
 			"pacifica": {
 				"name": "Pacifica",
 				"one_liner": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage.",
 				"description": "Pacifica is a decentralized perpetual exchange (DEX) built on the Solana network that allows users to trade perpetual crypto futures with leverage. It is designed to offer high performance and advanced features similar to centralized exchanges, including a variety of order types, sub-accounts for institutional traders, and API access for bots."
+			},
+			"magic_eden": {
+				"name": "Magic Eden",
+				"one_liner": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains.",
+				"description": "Magic Eden is a multi-chain NFT marketplace that allows users to create, buy, sell, and trade non-fungible tokens (NFTs) across different blockchains. It is known for its user-friendly interface, low transaction fees, and various tools for creators and collectors."
+			},
+			"solayer": {
+				"name": "Solayer",
+				"one_liner": "A high-speed DeFi platform on Solana offering native liquid staking (sSOL), a stablecoin (sUSD), and real-world spending with the Emerald Card.",
+				"description": "Solayer is a vertically integrated blockchain stack built on Solana, leveraging InfiniSVM for ultra-low latency and high throughput- scaling to over 1 million transactions per second. It integrates native staking (sSOL), a stablecoin (sUSD), and real-world payments via the Emerald Card. Solayer’s architecture combines DeFi, payments, and infrastructure under a single high-performance chain."
+			},
+			"kamino": {
+				"name": "Kamino",
+				"one_liner": "Kamino is the largest borrowing and lending protocol on Solana, powering a significant share of the network’s DeFi activity.",
+				"description": "Kamino is a decentralized finance (DeFi) platform on the Solana blockchain that integrates liquidity provision, lending, and leveraged trading into a single suite of products. It simplifies these DeFi strategies, especially through its automated liquidity vaults and Kamino Lend system, and uses concentrated liquidity management to increase capital efficiency for its users."
 			}
 		}
 	},
@@ -870,7 +892,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": "Scan QR Code"
+			"scan_qr_code": "Scan QR Code",
+			"pay_to": "Pay to $receipt",
+			"powered_by": "Powered by",
+			"receipt": "Receipt",
+			"name": "Name",
+			"address": "Address",
+			"country": "Country",
+			"phone_number": "Phone number",
+			"email_address": "Email address",
+			"website": "Website",
+			"enter_manually": "Enter manually",
+			"url_or_code": "URL or the code",
+			"enter_or_paste_code": "Enter or paste code",
+			"scan": "Scan",
+			"pay": "Pay"
+		},
+		"error": {
+			"code_link_is_not_valid": "Code/link is not valid"
 		}
 	},
 	"convert": {

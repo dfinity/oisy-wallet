@@ -1,6 +1,10 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
-import { AccountIdentifier, isIcpAccountIdentifier, SubAccount } from '@dfinity/ledger-icp';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import { assertNever, nonNullish } from '@dfinity/utils';
+import {
+	AccountIdentifier,
+	SubAccount,
+	isIcpAccountIdentifier
+} from '@icp-sdk/canisters/ledger/icp';
 import {
 	decodeIcrcAccount,
 	encodeIcrcAccount,
@@ -74,6 +78,5 @@ export const tryToParseIcrcAccountStringToAccountIdentifierText = (
 		}).toHex();
 	} catch (_: unknown) {
 		// if parsing failed, we just return undefined and let consumers handle it
-		return;
 	}
 };

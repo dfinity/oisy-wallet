@@ -8,6 +8,7 @@
 			"done": "Готово",
 			"close": "Закрыть",
 			"change": "Изменить",
+			"continue": "",
 			"apply": "Применить",
 			"retry": "Повторить попытку",
 			"refresh": "Обновить",
@@ -68,7 +69,7 @@
 			"dapp_explorer": "Приложения",
 			"activity": "Активность",
 			"airdrops": "Награды",
-			"earning": "Награды и заработок",
+			"earning": "Зарабатывать",
 			"source_code_on_github": "Исходный код на GitHub",
 			"view_on_explorer": "Посмотреть в проводнике",
 			"source_code": "Исходный код",
@@ -216,7 +217,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "Игра",
 			"tools": "Инструменты",
-			"ai": "ИИ"
+			"ai": "ИИ",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -382,7 +384,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -870,7 +892,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {

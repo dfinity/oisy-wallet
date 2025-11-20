@@ -8,6 +8,7 @@
 			"done": "完了",
 			"close": "閉じる",
 			"change": "変更",
+			"continue": "",
 			"apply": "適用",
 			"retry": "",
 			"refresh": "再度読み込み",
@@ -68,7 +69,7 @@
 			"dapp_explorer": "DApp一覧",
 			"activity": "履歴",
 			"airdrops": "エアドロップ",
-			"earning": "獲得と報酬",
+			"earning": "収益",
 			"source_code_on_github": "GitHub上のソースコード",
 			"view_on_explorer": "エクスプローラーで確認",
 			"source_code": "ソースコード",
@@ -216,7 +217,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "ゲーム",
 			"tools": "ツール",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -382,7 +384,27 @@
 				"one_liner": "",
 				"description": ""
 			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
 			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -870,7 +892,24 @@
 	},
 	"scanner": {
 		"text": {
-			"scan_qr_code": ""
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
