@@ -4,7 +4,7 @@ import type {
 	RpcError,
 	RpcSource,
 	_SERVICE as SolRpcService
-} from '$declarations/sol_rpc/declarations/sol_rpc.did';
+} from '$declarations/sol_rpc/sol_rpc.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { SolRpcCanister, networkToCluster } from '$sol/canisters/sol-rpc.canister';
