@@ -70,16 +70,22 @@ export const highestApyEarningData: Readable<EarningDataRecord | undefined> = de
 	([$earningData]) => {
 		const entries = Object.values($earningData);
 
-		if (entries.length === 0) {return undefined;}
+		if (entries.length === 0) {
+			return undefined;
+		}
 
 		return entries.reduce<EarningDataRecord | undefined>((highest, record) => {
 			const rawCurrent = record[EarningCardFields.APY];
 
-			if (isNullish(rawCurrent)) {return highest;}
+			if (isNullish(rawCurrent)) {
+				return highest;
+			}
 
 			const currentApy = typeof rawCurrent === 'number' ? rawCurrent : Number(rawCurrent);
 
-			if (!Number.isFinite(currentApy)) {return highest;}
+			if (!Number.isFinite(currentApy)) {
+				return highest;
+			}
 
 			if (isNullish(highest)) {
 				return record;
