@@ -108,6 +108,7 @@ describe('earning.derived', () => {
 			gldtStakeStore.reset();
 
 			const highest = get(highestApyEarningData);
+
 			expect(highest).toBeUndefined();
 		});
 
