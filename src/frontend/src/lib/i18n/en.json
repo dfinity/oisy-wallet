@@ -904,7 +904,9 @@
 			"website": "Website",
 			"enter_manually": "Enter manually",
 			"url_or_code": "URL or the code",
-			"enter_or_paste_code": "Enter or paste code"
+			"enter_or_paste_code": "Enter or paste code",
+			"scan": "Scan",
+			"pay": "Pay"
 		},
 		"error": {
 			"code_link_is_not_valid": "Code/link is not valid"
