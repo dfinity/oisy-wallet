@@ -4,7 +4,7 @@
 	import { modalUniversalScannerOpen } from '$lib/derived/modal.derived';
 	import { i18n } from '$lib/stores/i18n.store';
 	import { modalStore } from '$lib/stores/modal.store';
-	import ScannerWizard from './ScannerWizard.svelte';
+	import ScannerWizard from '$lib/components/scanner/ScannerWizard.svelte';
 
 	const modalId = Symbol();
 </script>

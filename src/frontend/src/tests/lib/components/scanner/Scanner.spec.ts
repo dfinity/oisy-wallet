@@ -7,6 +7,17 @@ import { writable } from 'svelte/store';
 
 vi.mock('$lib/stores/modal.store');
 vi.mock('$lib/derived/modal.derived');
+vi.mock('@dfinity/gix-components', async () => {
+	const actual = await vi.importActual('@dfinity/gix-components');
+	return {
+		...actual,
+		QRCodeReader: vi.fn().mockImplementation(() => ({
+			$$render: () => '<div data-tid="mock-qr-reader">Mocked QR Reader</div>',
+			$$slots: {},
+			$$scope: {}
+		}))
+	};
+});
 
 describe('Scanner', () => {
 	const mockModalOpen = writable(false);
