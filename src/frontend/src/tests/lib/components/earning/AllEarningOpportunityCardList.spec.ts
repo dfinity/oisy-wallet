@@ -166,7 +166,7 @@ describe('AllEarningOpportunityCardList', () => {
 		expect(navModule.goto).toHaveBeenCalledTimes(2);
 	});
 
-	it('renders reward date text for the active reward card', () => {
+	it('renders active campaign reward card', () => {
 		render(AllEarningOpportunityCardList, { context: mockContexts });
 
 		expect(screen.getByText(/Dec 31, 2024/)).toBeInTheDocument();
