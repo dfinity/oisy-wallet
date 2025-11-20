@@ -24,6 +24,7 @@ export const mockIdentity = {
 // This is not linked/related to the mock above.
 export const mockAccountIdentifierText =
 	'217966d936e84b04ac69615cd5cf8c526667daf5ae88deb3bc2cdc44238712d5';
-export const mockAccountIdentifierText2 = '2265390ecb68ef1db64c47528d678ffb469fd6b31b402424882aefcf7ef538b2';
+export const mockAccountIdentifierText2 =
+	'2265390ecb68ef1db64c47528d678ffb469fd6b31b402424882aefcf7ef538b2';
 
 export const mockIcrcAccount = getIcrcAccount(mockIdentity.getPrincipal());
