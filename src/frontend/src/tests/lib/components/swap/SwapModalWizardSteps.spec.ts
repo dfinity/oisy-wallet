@@ -1,8 +1,8 @@
 import { IC_TOKEN_FEE_CONTEXT_KEY, icTokenFeeStore } from '$icp/stores/ic-token-fee.store';
 import SwapModalWizardSteps from '$lib/components/swap/SwapModalWizardSteps.svelte';
 import {
+	MODAL_FILTER_NETWORKS,
 	MODAL_TOKENS_LIST,
-	SWAP_MODAL_FILTER_NETWORKS_STEP,
 	SWAP_MODAL_SELECT_PROVIDER_STEP,
 	SWAP_SWITCH_TOKENS_BUTTON
 } from '$lib/constants/test-ids.constants';
@@ -156,7 +156,7 @@ describe('SwapModalWizardSteps', () => {
 				title: 'title'
 			});
 
-			expect(getByTestId(SWAP_MODAL_FILTER_NETWORKS_STEP)).toBeInTheDocument();
+			expect(getByTestId(MODAL_FILTER_NETWORKS)).toBeInTheDocument();
 		});
 
 		it('should display SELECT_PROVIDER step', () => {

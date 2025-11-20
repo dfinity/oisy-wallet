@@ -151,8 +151,9 @@ export const TOKEN_INPUT_AMOUNT_EXCHANGE_UNAVAILABLE = 'swap-amount-exchange-una
 export const SWAP_SWITCH_TOKENS_BUTTON = 'swap-switch-tokens-button';
 export const SWAP_TOKENS_MODAL_OPEN_BUTTON = 'swap-tokens-modal-open-button';
 export const SWAP_TOKENS_MODAL = 'swap-tokens-modal';
-export const SWAP_MODAL_FILTER_NETWORKS_STEP = 'swap-modal-filter-networks-step';
 export const SWAP_MODAL_SELECT_PROVIDER_STEP = 'swap-modal-select-provider-step';
+
+export const MODAL_FILTER_NETWORKS = 'MODAL_FILTER_NETWORKS';
 
 export const MANAGE_TOKENS_MODAL = 'manage-tokens-modal';
 export const MANAGE_TOKENS_MODAL_BUTTON = 'manage-tokens-modal-button';

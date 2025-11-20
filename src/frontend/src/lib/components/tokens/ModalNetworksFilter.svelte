@@ -4,7 +4,7 @@
 	import ButtonBack from '$lib/components/ui/ButtonBack.svelte';
 	import ButtonGroup from '$lib/components/ui/ButtonGroup.svelte';
 	import ContentWithToolbar from '$lib/components/ui/ContentWithToolbar.svelte';
-	import { SWAP_MODAL_FILTER_NETWORKS_STEP } from '$lib/constants/test-ids.constants';
+	import { MODAL_FILTER_NETWORKS } from '$lib/constants/test-ids.constants';
 	import { networks } from '$lib/derived/networks.derived';
 	import {
 		MODAL_TOKENS_LIST_CONTEXT_KEY,
@@ -35,7 +35,7 @@
 	};
 </script>
 
-<ContentWithToolbar testId={SWAP_MODAL_FILTER_NETWORKS_STEP}>
+<ContentWithToolbar testId={MODAL_FILTER_NETWORKS}>
 	<NetworkSwitcherList
 		{allNetworksEnabled}
 		labelsSize="lg"
