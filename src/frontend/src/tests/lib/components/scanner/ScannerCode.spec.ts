@@ -82,12 +82,6 @@ describe('ScannerCode.svelte', () => {
 		expect(container.querySelector('[data-tid="address-book-qr-code-scan"]')).toBeInTheDocument();
 	});
 
-	it('should render enter manually button', () => {
-		renderWithContext();
-
-		expect(screen.getByTestId(OPEN_CRYPTO_PAY_ENTER_MANUALLY_BUTTON)).toBeInTheDocument();
-	});
-
 	it('should show input after clicking enter manually', async () => {
 		renderWithContext();
 
