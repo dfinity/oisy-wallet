@@ -1,4 +1,4 @@
-import type { CustomToken, IcrcToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken, IcrcToken } from '$declarations/backend/backend.did';
 import { ICRC_CK_TOKENS_LEDGER_CANISTER_IDS, ICRC_TOKENS } from '$env/networks/networks.icrc.env';
 import type { Erc20ContractAddress, Erc20Token } from '$eth/types/erc20';
 import { balance, allowance as icrcAllowance, metadata } from '$icp/api/icrc-ledger.api';
