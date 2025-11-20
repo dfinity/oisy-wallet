@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import { infuraErc20Providers } from '$eth/providers/infura-erc20.providers';
 import { infuraProviders } from '$eth/providers/infura.providers';
 import { getNonce } from '$eth/services/nonce.services';
