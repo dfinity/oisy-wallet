@@ -8,6 +8,7 @@
 			"done": "تم",
 			"close": "إغلاق",
 			"change": "تغيير",
+			"continue": "",
 			"apply": "تنفيذ",
 			"retry": "",
 			"refresh": "تحديث",
@@ -216,7 +217,8 @@
 			"walletconnect": "WalletConnect",
 			"game": "لعبة",
 			"tools": "أدوات",
-			"ai": ""
+			"ai": "",
+			"nft": ""
 		},
 		"descriptions": {
 			"kongswap": {
@@ -378,6 +380,31 @@
 				"description": ""
 			},
 			"icpanda_message": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"opensea": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"pacifica": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"magic_eden": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"solayer": {
+				"name": "",
+				"one_liner": "",
+				"description": ""
+			},
+			"kamino": {
 				"name": "",
 				"one_liner": "",
 				"description": ""
@@ -861,6 +888,28 @@
 			"solana_transaction_expired": "لم تتم معالجة معاملة الإرسال الخاصة بك بواسطة شبكة Solana وانتهت صلاحيتها، على الأرجح لأن رسوم الأولوية المقدمة لم تكن كافية. لقد قمنا بتحديثها إلى أحدث مبلغ موصى به، لذا يرجى محاولة إرسالها مرة أخرى.",
 			"solana_confirmation_failed": "لم نتلق تأكيدًا للمعاملة التي أنشأتها للتو. يرجى الانتظار بضع ثوانٍ ثم التحقق من قائمة معاملات التوكن الخاصة بك إذا تم إنشاء معاملتك بشكل صحيح.",
 			"fee_calc_unsupported_standard": ""
+		}
+	},
+	"scanner": {
+		"text": {
+			"scan_qr_code": "",
+			"pay_to": "",
+			"powered_by": "",
+			"receipt": "",
+			"name": "",
+			"address": "",
+			"country": "",
+			"phone_number": "",
+			"email_address": "",
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {
@@ -1716,15 +1765,30 @@
 	},
 	"earning": {
 		"text": {
-			"title": "اكسب"
+			"title": "اكسب",
+			"earning_opportunities": ""
 		},
 		"cards": {
-			"gold_title": "الذهب",
-			"gold_description": "تخزين GLDT",
-			"stablecoins_title": "العملات المستقرة",
-			"stablecoins_description": "قريبًا",
-			"sprinkles_title": "رشات",
-			"sprinkles_description": "مكافآت OISY"
+			"gldt": {
+				"title": "",
+				"description": "",
+				"action": ""
+			},
+			"sprinkles": {
+				"title": "",
+				"description": "",
+				"action": ""
+			}
+		},
+		"card_fields": {
+			"apy": "",
+			"currentStaked": "",
+			"currentEarning": "",
+			"earningPotential": "",
+			"terms": ""
+		},
+		"terms": {
+			"flexible": ""
 		}
 	},
 	"stake": {

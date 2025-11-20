@@ -1,6 +1,6 @@
 import { btcPendingSentTransactionsStore } from '$btc/stores/btc-pending-sent-transactions.store';
 import type { BtcTransactionUi, BtcWalletBalance } from '$btc/types/btc';
-import type { PendingTransaction } from '$declarations/backend/declarations/backend.did';
+import type { PendingTransaction } from '$declarations/backend/backend.did';
 import {
 	BTC_MAINNET_NETWORK_ID,
 	BTC_REGTEST_NETWORK_ID,

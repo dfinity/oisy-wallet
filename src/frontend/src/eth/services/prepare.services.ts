@@ -1,4 +1,4 @@
-import type { EthSignTransactionRequest } from '$declarations/signer/declarations/signer.did';
+import type { EthSignTransactionRequest } from '$declarations/signer/signer.did';
 import type { NetworkChainId } from '$eth/types/network';
 import { i18n } from '$lib/stores/i18n.store';
 import type { TransferParams } from '$lib/types/send';
