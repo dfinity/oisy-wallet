@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { listCustomTokens } from '$lib/api/backend.api';
 import { getIdbAllCustomTokens, setIdbAllCustomTokens } from '$lib/api/idb-tokens.api';
 import { i18n } from '$lib/stores/i18n.store';

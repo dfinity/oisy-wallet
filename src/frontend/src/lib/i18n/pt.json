@@ -8,6 +8,7 @@
 			"done": "Concluído",
 			"close": "Fechar",
 			"change": "Alterar",
+			"continue": "",
 			"apply": "Aplicar",
 			"retry": "",
 			"refresh": "Atualizar",
@@ -900,7 +901,15 @@
 			"country": "",
 			"phone_number": "",
 			"email_address": "",
-			"website": ""
+			"website": "",
+			"enter_manually": "",
+			"url_or_code": "",
+			"enter_or_paste_code": "",
+			"scan": "",
+			"pay": ""
+		},
+		"error": {
+			"code_link_is_not_valid": ""
 		}
 	},
 	"convert": {

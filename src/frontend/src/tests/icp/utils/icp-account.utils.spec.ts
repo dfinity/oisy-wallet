@@ -1,4 +1,4 @@
-import type { Icrcv2AccountId } from '$declarations/backend/declarations/backend.did';
+import type { Icrcv2AccountId } from '$declarations/backend/backend.did';
 import {
 	getIcrcv2AccountIdString,
 	parseIcrcv2AccountId,

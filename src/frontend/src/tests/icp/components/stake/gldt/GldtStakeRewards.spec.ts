@@ -1,7 +1,4 @@
-import type {
-	StakePositionResponse,
-	TokenSymbol
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { StakePositionResponse, TokenSymbol } from '$declarations/gldt_stake/gldt_stake.did';
 import GldtStakeRewards from '$icp/components/stake/gldt/GldtStakeRewards.svelte';
 import * as icrcServices from '$icp/services/icrc.services';
 import {

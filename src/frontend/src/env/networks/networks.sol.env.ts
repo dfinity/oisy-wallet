@@ -1,4 +1,4 @@
-import type { SchnorrKeyId } from '$declarations/signer/declarations/signer.did';
+import type { SchnorrKeyId } from '$declarations/signer/signer.did';
 import { SOL_DEVNET_EXPLORER_URL, SOL_MAINNET_EXPLORER_URL } from '$env/explorers.env';
 import { ALCHEMY_API_KEY } from '$env/rest/alchemy.env';
 import { QUICKNODE_API_KEY } from '$env/rest/quicknode.env';

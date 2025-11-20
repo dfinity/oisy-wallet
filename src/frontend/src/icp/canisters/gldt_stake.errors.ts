@@ -1,4 +1,4 @@
-import type { ManageStakePositionError } from '$declarations/gldt_stake/declarations/gldt_stake.did';
+import type { ManageStakePositionError } from '$declarations/gldt_stake/gldt_stake.did';
 import { CanisterInternalError } from '$lib/canisters/errors';
 
 export const mapGldtStakeCanisterError = (err: ManageStakePositionError): CanisterInternalError => {
