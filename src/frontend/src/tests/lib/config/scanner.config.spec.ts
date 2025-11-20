@@ -8,7 +8,7 @@ describe('ScannerWizardSteps', () => {
 		{
 			name: WizardStepsScanner.SCAN,
 
-			title: en.scanner.text.scan
+			title: en.scanner.text.scan_qr_code
 		},
 		{
 			name: WizardStepsScanner.PAY,

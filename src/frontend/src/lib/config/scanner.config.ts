@@ -7,8 +7,7 @@ export const scannerWizardSteps = ({
 }: WizardStepsParams): WizardSteps<WizardStepsScanner> => [
 	{
 		name: WizardStepsScanner.SCAN,
-
-		title: i18n.scanner.text.scan
+		title: i18n.scanner.text.scan_qr_code
 	},
 	{
 		name: WizardStepsScanner.PAY,
