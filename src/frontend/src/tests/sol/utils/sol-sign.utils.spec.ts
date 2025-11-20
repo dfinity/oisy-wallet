@@ -12,7 +12,7 @@ describe('sol-sign.utils', () => {
 	describe('createSigner', () => {
 		let spySignWithSchnorr: MockInstance;
 
-		const mockSignedBytes = [4, 5, 6];
+		const mockSignedBytes =Uint8Array.from( [4, 5, 6]);
 		const mockNetwork: SolanaNetworkType = 'mainnet';
 		const mockTransaction: Transaction & TransactionWithinSizeLimit & TransactionWithLifetime = {
 			messageBytes: new Uint8Array([1, 2, 3])
