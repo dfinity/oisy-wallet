@@ -1,4 +1,4 @@
-import type { Settings, UserProfile } from '$declarations/backend/declarations/backend.did';
+import type { Settings, UserProfile } from '$declarations/backend/backend.did';
 import * as dapps from '$env/dapp-descriptions.env';
 import * as rewards from '$env/reward-campaigns.env';
 import { FEATURED_REWARD_CAROUSEL_SLIDE_ID } from '$env/reward-campaigns.env';

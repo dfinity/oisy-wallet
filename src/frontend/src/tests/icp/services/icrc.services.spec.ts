@@ -1,4 +1,4 @@
-import type { CustomToken } from '$declarations/backend/declarations/backend.did';
+import type { CustomToken } from '$declarations/backend/backend.did';
 import { ICP_NETWORK } from '$env/networks/networks.icp.env';
 import {
 	hasSufficientIcrcAllowance,
