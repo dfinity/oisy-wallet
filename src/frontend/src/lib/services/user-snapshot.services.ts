@@ -7,7 +7,7 @@ import type {
 	AccountSnapshotFor as RcAccountSnapshotFor,
 	TransactionType as RcTransactionType,
 	Transaction_Any
-} from '$declarations/rewards/declarations/rewards.did';
+} from '$declarations/rewards/rewards.did';
 import { ETHEREUM_TOKEN_ID, SEPOLIA_TOKEN_ID } from '$env/tokens/tokens.eth.env';
 import { ethTransactionsStore } from '$eth/stores/eth-transactions.store';
 import { isTokenErc1155 } from '$eth/utils/erc1155.utils';

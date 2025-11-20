@@ -14,7 +14,7 @@ import type {
 	SchnorrKeyId,
 	BitcoinNetwork as SignerBitcoinNetwork,
 	Utxo as SignerUtxo
-} from '$declarations/signer/declarations/signer.did';
+} from '$declarations/signer/signer.did';
 import type { IcToken } from '$icp/types/ic-token';
 import type { Address } from '$lib/types/address';
 import type { Token } from '$lib/types/token';
