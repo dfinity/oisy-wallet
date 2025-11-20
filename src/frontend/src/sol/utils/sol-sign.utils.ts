@@ -33,7 +33,7 @@ export const signTransaction = async ({
 		identity,
 		derivationPath,
 		keyId: SOLANA_KEY_ID,
-		message: Array.from(transaction.messageBytes)
+		message: Uint8Array.from(transaction.messageBytes)
 	});
 
 	return { [address]: Uint8Array.from(signedBytes) } as SignatureDictionary;
