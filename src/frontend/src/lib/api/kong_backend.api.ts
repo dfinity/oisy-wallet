@@ -42,7 +42,7 @@ export const kongTokens = async ({
 	canisterId,
 	nullishIdentityErrorMessage,
 	tokenLedgerCanisterId
-}: CanisterApiFunctionParams): Promise<TokenReply[]> => {
+}: CanisterApiFunctionParams<{ tokenLedgerCanisterId?: string }>): Promise<TokenReply[]> => {
 	const { tokens } = await kongBackendCanister({
 		identity,
 		canisterId,
