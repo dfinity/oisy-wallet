@@ -4,7 +4,7 @@ import type {
 	_SERVICE as GldtStakeService,
 	ManageStakePositionArgs,
 	StakePositionResponse
-} from '$declarations/gldt_stake/declarations/gldt_stake.did';
+} from '$declarations/gldt_stake/gldt_stake.did';
 import { idlFactory as idlCertifiedFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.certified.did';
 import { idlFactory as idlFactoryGldtStake } from '$declarations/gldt_stake/gldt_stake.factory.did';
 import { mapGldtStakeCanisterError } from '$icp/canisters/gldt_stake.errors';

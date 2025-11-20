@@ -1,7 +1,7 @@
 import type {
 	_SERVICE as ExtV2TokenService,
 	Transaction
-} from '$declarations/ext_v2_token/declarations/ext_v2_token.did';
+} from '$declarations/ext_v2_token/ext_v2_token.did';
 import { ExtV2TokenCanister } from '$icp/canisters/ext-v2-token.canister';
 import type { CreateCanisterOptions } from '$lib/types/canister';
 import { mockExtV2TokenCanisterId, mockExtV2Transactions } from '$tests/mocks/ext-v2-token.mock';
